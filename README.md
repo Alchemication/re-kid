@@ -2,7 +2,7 @@
 
 Small, faithful games made from nostalgic childhood cartoons — starting with
 one Polish world, Reksio, and one short game for a parent and a young child.
-Background: [PROJECT_IDEA.md](PROJECT_IDEA.md).
+Background: [PROJECT_IDEA.md](PROJECT_IDEA.md). Plan and status: [PROJECT_PLAN.md](PROJECT_PLAN.md).
 
 ## Layout
 
