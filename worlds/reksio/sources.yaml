@@ -1,0 +1,117 @@
+sources:
+- id: sfr-about
+  title: O studiu — Studio Filmów Rysunkowych
+  url: https://www.sfr.pl/o-studiu
+  kind: studio
+  language: pl
+  publisher: Studio Filmów Rysunkowych, Bielsko-Biała
+  accessed: '2026-09-29'
+  notes: The studio's own history page. Primary for dates and Marszałek's role ("twórca formy literackiej i plastycznej Reksia", 23 years of production). Says nothing about current rights or distribution.
+- id: sfr-youtube
+  title: Studio Filmów Rysunkowych — official YouTube channel
+  url: https://www.youtube.com/channel/UCfXtDCs237pyDFCBIQR46yw
+  kind: studio
+  language: pl
+  publisher: Studio Filmów Rysunkowych, Bielsko-Biała
+  accessed: '2026-09-29'
+  notes: 'The studio''s own uploads, titled "REKSIO <TITLE> (<YEAR>) - SERIA: REKSIO". A channel search on 2026-09-29 found 31 episode uploads, mostly 1967–1980; the search may not list everything. Uploads are digitised 4:3 at native 480p (higher formats are AI-upscaled). Colour reflects the transfer/restoration, not necessarily the original prints. This is the material behind every claim observed by claude-frames.'
+- id: filmpolski-reksio
+  title: FilmPolski.pl — REKSIO (serial animowany, 1972–1982)
+  url: https://filmpolski.pl/fp/index.php?film=429672
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Authoritative Polish film database with full crew credits. Groups episodes differently from Wikipedia — this entry covers only the 1972–1982 TV serial (44 × ~9 min); the 1967–1971 films and later episodes have separate entries.
+- id: filmpolski-reksio-i-ptaki
+  title: FilmPolski.pl — REKSIO I PTAKI (serial animowany, 1987–1990)
+  url: https://www.filmpolski.pl/fp/index.php?film=1257671
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Lists 11 episodes (Reksio i gołąb … Reksio i pelikan/sowa), directed by Ryszard Lepióra (1–9) and Andrzej Flettner (10–11). Wikipedia counts 13 for this cycle by including Reksio i bocian and Reksio i papuga.
+- id: pl-wikipedia-reksio
+  title: Reksio (serial animowany) — Wikipedia, wolna encyklopedia
+  url: https://pl.wikipedia.org/wiki/Reksio_(serial_animowany)
+  kind: encyclopedia
+  language: pl
+  accessed: '2026-09-29'
+  notes: Fullest episode table (65 episodes, years, directors) and history section. Flagged since 2023-07 as needing more citations. Its history section cites the 2022 Filek-Marszałek/Kolska book; the episode table is uncited.
+- id: en-wikipedia-reksio
+  title: Reksio — Wikipedia
+  url: https://en.wikipedia.org/wiki/Reksio
+  kind: encyclopedia
+  language: en
+  accessed: '2026-09-29'
+  notes: Character profile is mostly sourced to episodes on YouTube (i.e. editors' own viewing). Some claims uncited, e.g. US airing on Disney Channel 1990–1997. Infobox gives first_aired 1972, meaning the TV serial, not the 1967 cinema short.
+- id: filek-marszalek-kolska-2022
+  title: 'Marszałek, ten od Reksia: o Lechosławie Marszałku, słynnym twórcy słynnego pieska, i życiu z bohaterami filmów rysunkowych opowiada Helena Filek-Marszałek'
+  kind: book
+  language: pl
+  publisher: Publicat, Poznań (ISBN 978-83-271-2634-4)
+  accessed: '2026-09-29'
+  notes: Memoir by Halina (Helena) Filek-Marszałek — Marszałek's widow, and a Reksio director, writer and background designer — with Katarzyna Kolska. Close to primary. NOT read directly — known only through pl-wikipedia citations (pp. 75, 113, 197, 203–205). Worth getting.
+- id: dzieje-pl-sfr
+  title: Studio Filmów Rysunkowych w Bielsku-Białej. To tu stworzono Bolka i Lolka i Reksia
+  url: https://dzieje.pl/kultura-i-sztuka/studio-filmow-rysunkowych-w-bielsku-bialej-tu-stworzono-bolka-i-lolka-i-reksia
+  kind: article
+  language: pl
+  publisher: dzieje.pl
+  accessed: '2026-09-29'
+  notes: Polish history portal article. Quotes Halina Filek-Marszałek on Trola; states Marszałek left Bolek i Lolek over children with weapons. Independent of Wikipedia wording.
+- id: bielsko-biala-tu-narodzil-sie-reksio
+  title: Tu narodził się Reksio
+  url: https://bielsko.biala.pl/2933,artykul
+  kind: article
+  language: pl
+  publisher: Urząd Miejski w Bielsku-Białej
+  accessed: '2026-09-29'
+  notes: City of Bielsko-Biała article. Studio history, 65 episodes, the Tehran prize, the 2009 statue.
+- id: babulewicz-2018
+  title: How to conjure up a "backyard atmosphere", or the music of Zenon Kowalowski to the Reksio animated series
+  url: https://www.ceeol.com/search/chapter-detail?id=909213
+  kind: book
+  language: pl
+  publisher: Wydawnictwo Uniwersytetu Śląskiego (in "Muzyka na Śląsku Cieszyńskim", 2018)
+  accessed: '2026-09-29'
+  notes: Peer-reviewed musicology chapter by Katarzyna Babulewicz. Only the English abstract was read. Grew out of her 2013 Jagiellonian University thesis, which includes an interview with the composer. The best route into how the music works; worth reading in full.
+- id: gad-records-reksio-2023
+  title: Zenon Kowalowski — Reksio (album)
+  url: https://gadrecords.bandcamp.com/album/reksio
+  kind: other
+  language: pl
+  publisher: GAD Records
+  accessed: '2026-09-29'
+  notes: 2023 release of the score, remastered from original tapes in the SFR sound archive. 15 tracks — the theme with and without sound effects, plus 13 episode scores. Label copy, not scholarship, but it confirms what survives in the archive. Listenable reference for the music.
+- id: encyklopedia-dziecinstwa-dobranocki
+  title: Dobranocki — Encyklopedia Dzieciństwa
+  url: https://encyklopediadziecinstwa.pl/index.php/Dobranocki
+  kind: encyclopedia
+  language: pl
+  accessed: '2026-09-29'
+  notes: Context on the Dobranocka slot (TVP1, just before the 19:30 news). Lists Reksio (1967–1990) among the studio's bedtime programmes but gives no broadcast dates for it.
+- id: zycieumyslowe-2016
+  title: Najsłynniejszy pies w Polsce
+  url: https://zycieumyslowe.wordpress.com/2016/12/08/najslynniejszy-pies-w-polsce/
+  kind: article
+  language: pl
+  publisher: Konrad Kruszewski, "życie umysłowe" (blog)
+  accessed: '2026-09-29'
+  notes: Blog post quoting Marszałek on Trola ("stworzenie najinteligentniejsze"). Quote source unnamed. Weak on its own; useful as colour alongside stronger sources.
+- id: lingopie-polish-cartoons
+  title: 6 Cartoons To Watch In Polish And Why You Should Watch Them
+  url: https://lingopie.com/blog/polish-cartoons/
+  kind: article
+  language: en
+  publisher: Lingopie (language-learning blog)
+  accessed: '2026-09-29'
+  notes: Says Reksio "has very little dialogue". Commercial blog, weak. Cited only because nothing stronger on dialogue has been read yet.
+- id: tvp-vod-reksio
+  title: Reksio — TVP VOD
+  url: https://vod.tvp.pl/dla-dzieci,24/reksio-odcinki,2129098
+  kind: other
+  language: pl
+  publisher: Telewizja Polska
+  accessed: '2026-09-29'
+  notes: Series page exists. Episode count and whether it is free could not be read from the fetched page.

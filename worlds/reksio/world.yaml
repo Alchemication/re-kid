@@ -1,0 +1,540 @@
+id: reksio
+title: Reksio
+title_en: Reksio
+country: PL
+summary: 'Reksio is a small white terrier with brown patches, the hero of 65 short Polish cartoons made between 1967 and 1990 at the Studio Filmów Rysunkowych in Bielsko-Biała, the studio that also made Bolek and Lolek. His creator, Lechosław Marszałek, based him on his own clever fox terrier, Trola. Each episode is about nine minutes long. Reksio lives in a doghouse beside his family''s home with a curly-haired blond boy, and his days are full of neighbourhood animals: hens, a rooster, a gander, other dogs, and birds. The stories are told almost entirely through pictures and Zenon Kowalowski''s music rather than words, so small children can follow them without reading or speaking Polish. Many episode titles name a role Reksio takes on for the day (fireman, astronaut, teacher, peacemaker), and he is usually the one who helps, rescues or calms things down. Generations of Polish children knew him from TV bedtime cartoons; a bronze Reksio stands in the middle of Bielsko-Biała.'
+production:
+  studio:
+    text: Studio Filmów Rysunkowych in Bielsko-Biała, a state animation studio founded in 1947 and independent from 1 January 1956. The same studio made Bolek i Lolek.
+    status: verified
+    sources:
+    - sfr-about
+    - bielsko-biala-tu-narodzil-sie-reksio
+    - filmpolski-reksio
+  credits:
+  - name: Lechosław Marszałek
+    role: creator, director, screenwriter, visual design
+    claim:
+      text: Lechosław Marszałek (1922–1991) created Reksio's "literary and visual form" (the studio's words), wrote most of the screenplays, directed all episodes up to 1971 and many later ones. By pl-wikipedia's count he directed 19 and co-directed 1. Before Reksio he made Koziołeczek (1953), which the studio calls the first international award in Polish animation history.
+      status: verified
+      sources:
+      - sfr-about
+      - filmpolski-reksio
+      - pl-wikipedia-reksio
+  - name: Halina Filek-Marszałek
+    role: director, screenwriter, background designer (scenografia)
+    claim:
+      text: Directed episodes including Reksio i nośna kura, Reksio i wrona and Reksio i świerszcz (1981–1982), co-wrote, and designed backgrounds — credited "Dekoracje" on Reksio remontuje (1980). Marszałek's wife; after his death she kept the work alive (mural design, foundation, 2022 memoir).
+      status: verified
+      sources:
+      - filmpolski-reksio
+      - pl-wikipedia-reksio
+      - sfr-youtube
+  - name: Józef Ćwiertnia
+    role: director
+    claim:
+      text: Directed more of the 1972–1982 serial than anyone else per FilmPolski (13 episodes), including Reksio strażak, Reksio ratownik and Reksio rozjemca. The studio calls him one of the best Reksio directors.
+      status: verified
+      sources:
+      - filmpolski-reksio
+      - sfr-about
+  - name: Edward Wątor, Marian Cholerek, Romuald Kłys
+    role: directors
+    claim:
+      text: Directed further episodes of the main series. Romuald Kłys also directed Reksio i sroka, Reksio i mrówki and Reksio i bocian (1985–1987).
+      status: verified
+      sources:
+      - filmpolski-reksio
+      - pl-wikipedia-reksio
+  - name: Ryszard Lepióra, Andrzej Flettner
+    role: directors (Reksio i ptaki)
+    claim:
+      text: Directed the late bird cycle (1987–1990). Marszałek wrote its screenplays.
+      status: verified
+      sources:
+      - filmpolski-reksio-i-ptaki
+      - pl-wikipedia-reksio
+  first_year: 1967
+  last_year: 1990
+  years:
+    text: The first film, Reksio poliglota, came out in 1967 as a cinema short, shown at children's matinées per en-wikipedia. Six films followed by 1971, all directed by Marszałek. A regular TV serial with a proper title sequence ran from 1972 to 1982. Occasional episodes followed in 1985–1987, then the Reksio i ptaki cycle in 1987–1990. The studio sums it up as 23 years.
+    status: verified
+    sources:
+    - sfr-about
+    - pl-wikipedia-reksio
+    - en-wikipedia-reksio
+    - filmpolski-reksio
+  episode_count:
+    text: 65 episodes in all — pl-wikipedia counts 52 in the main series plus 13 in Reksio i ptaki, and also mentions 3 special episodes without listing them. Sources split the episodes differently. FilmPolski's serial entry covers 1972–1982 with 44 episodes, and its Reksio i ptaki entry lists 11 because it leaves out Reksio i bocian and Reksio i papuga (1987). The total of 65 agrees across sources.
+    status: verified
+    sources:
+    - pl-wikipedia-reksio
+    - en-wikipedia-reksio
+    - bielsko-biala-tu-narodzil-sie-reksio
+    - filmpolski-reksio
+    - filmpolski-reksio-i-ptaki
+  episode_runtime:
+    text: About 9 minutes; the range is roughly 8–10 minutes. The longest is Reksio remontuje (1980) at about 11:50. The official uploads we sampled run 8:46 (Reksio wybawca), 9:57 (Reksio kosmonauta) and 11:49 (Reksio remontuje).
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+    - sfr-youtube
+  technique:
+    text: Hand-drawn 2D animation, the studio's "rysunkowy" tradition. Flat-coloured, black-outlined characters move over separately painted backgrounds, consistent with cel animation. Shot on film in 4:3; the sound was mono in the early years and stereo in some later ones. The cel method is inferred from frames and has not been confirmed from a source.
+    status: interpretation
+    sources:
+    - sfr-youtube
+    - pl-wikipedia-reksio
+  origins:
+    text: In 1967 Marszałek stopped working on Bolek i Lolek when his co-creators planned a Wild West series in which children play with guns; he opposed that. Instead he drew on his own dog, Trola, a female wire-haired fox terrier he described as the most intelligent and faithful creature. Reksio poliglota won a prize in Tehran (named in sources as Złoty Słowik / Grand Prix), and its success turned a single film into a series. Reksio is male, though Trola was female.
+    status: verified
+    sources:
+    - pl-wikipedia-reksio
+    - dzieje-pl-sfr
+    - bielsko-biala-tu-narodzil-sie-reksio
+    - filek-marszalek-kolska-2022
+    - zycieumyslowe-2016
+viewing_context:
+  text: Poles who grew up from the late 1960s to the 1980s met Reksio mostly as a bedtime cartoon on TVP — part of the Dobranocka tradition, the short children's programme on TVP1 just before the 19:30 evening news. It went on to repeat for decades on TVP and children's channels (MiniMax, MiniMini+, Polsat JimJam, Kino Polska). It also aired abroad, e.g. in East Germany, France, Greece and the USSR, where he is known as Reks. For many Polish parents it belongs to a ritual — cartoon, then bed — as much as to a story. We have not found broadcast schedules showing when and how often Reksio was actually in the Dobranocka slot.
+  status: sourced
+  sources:
+  - encyklopedia-dziecinstwa-dobranocki
+  - pl-wikipedia-reksio
+premise:
+  text: Reksio, a small, piebald terrier, lives in a doghouse outside his owners' home — a Polish family with a young blond boy — and shares a yard and neighbourhood with hens, a rooster, a gander, cats and other dogs. In each episode he gets caught up in something connected to a role he takes on, an animal he meets (mostly birds later on), a season, or an object. Sources disagree on the setting. FilmPolski calls it a village farmyard ("wiejskie podwórko"); en-wikipedia calls it a middle-class family's courtyard; the 1980 frames show a leafy suburban street with houses. It is probably best described as a small-town edge of the country.
+  status: verified
+  sources:
+  - pl-wikipedia-reksio
+  - en-wikipedia-reksio
+  - filmpolski-reksio
+  - sfr-youtube
+episode_formula:
+  text: |-
+    Titles follow a pattern: "Reksio + role" in the main series (strażak, kosmonauta, nauczyciel, rozjemca, wybawca…) and "Reksio i + bird" in the late cycle (bocian, sowa, kruk…).
+    In the three episodes sampled, each opens with Reksio at his doghouse and returns home at the end. A problem or temptation sets things going (a rocket, a leaky pipe, danger to the boy), Reksio acts, and a calm resolution follows before a "KONIEC" card on black.
+    en-wikipedia reads him mostly as saviour, helper, rescuer and peacemaker. Everything beyond the title pattern and the KONIEC card is based on 3 of 65 episodes and needs checking against more.
+  status: interpretation
+  sources:
+  - pl-wikipedia-reksio
+  - en-wikipedia-reksio
+  - sfr-youtube
+opening_sequence:
+  text: |-
+    No title sequence until 1972. Before that, credits were inserted into the start of each film. From Reksio strażak (1972) onward: hand-lettered white credits on a mustard-ochre card textured with pastel/crayon scribbles in pink, blue and green. Between credits Reksio performs small silent gags — stretching into a long sausage under the animators' names, eating from a bowl beside the director's credit, getting tangled in film. It closes on a red SFR logo and a red film strip of tiny Reksio frames.
+    The distributor line varies ("Centrala Wynajmu Filmów i Telewizja Polska" in 1972, "Zjednoczenie Rozpowszechniania Filmów" in 1977/1980). Zenon Kowalowski's opening theme is called one of the best-known pieces of Polish film music. Its sound is not described here; that needs a listener.
+    The intro takes about 40 seconds of Reksio kosmonauta. It will get its own breakdown.
+  status: observed
+  sources:
+  - sfr-youtube
+  - pl-wikipedia-reksio
+  - babulewicz-2018
+  observed_by: claude-frames
+tone_and_mood:
+  text: Warm, gentle, domestic. There is peril (gas in the kitchen, being lost, fantasy monsters in Reksio kosmonauta), but it resolves kindly and nobody is humiliated for long. Pace and mood are unhurried compared with American cartoons of the same era. Babulewicz's title — conjuring a "backyard atmosphere" — puts the feeling well. This summary is based on 3 sampled episodes plus secondary descriptions; watch more before relying on it.
+  status: interpretation
+  sources:
+  - babulewicz-2018
+  - en-wikipedia-reksio
+  - sfr-youtube
+humour:
+  text: Visual and gestural — pantomime, exaggerated poses, stretch-and-squash gags in the title sequence, silly misunderstandings between animals, and pictogram thought bubbles (bones, a hammer) instead of speech. Babulewicz singles out the music's "masterful creation of humorous situations", so a lot of the comedy lives in the score and its timing, which frames cannot show.
+  status: interpretation
+  sources:
+  - sfr-youtube
+  - babulewicz-2018
+themes_and_values:
+- text: Helping and rescuing others is Reksio's defining trait — en-wikipedia calls him saviour, helper, rescuer and peacemaker. Titles such as Reksio ratownik (rescuer), wybawca (saviour), rozjemca (peacemaker), pocieszyciel (comforter), pielęgniarz (nurse) and terapeuta point the same way.
+  status: verified
+  sources:
+  - en-wikipedia-reksio
+  - pl-wikipedia-reksio
+- text: Non-violence was there from the start. The series grew out of Marszałek's refusal to show children playing with guns in Bolek i Lolek's Wild West episodes.
+  status: verified
+  sources:
+  - pl-wikipedia-reksio
+  - dzieje-pl-sfr
+- text: Loyalty and home. In the episodes sampled, stories begin and end at the doghouse, with the boy. In the final episode, Reksio i sowa, the owl persuades Reksio not to leave the yard.
+  status: sourced
+  sources:
+  - en-wikipedia-reksio
+- text: Curiosity about the world beyond home — seasons (Reksiowa jesień, wiosna, zima), jobs, sport, travel, space. Many episodes read as gentle "what would it be like to be…" explorations. This reading rests mostly on episode titles.
+  status: interpretation
+  sources:
+  - pl-wikipedia-reksio
+characters:
+- id: reksio
+  name: Reksio
+  kind: dog (terrier)
+  role: protagonist
+  description:
+    text: A small, friendly and brave piebald terrier. Modelled on Marszałek's female wire-haired fox terrier Trola, but male on screen. Never speaks in words.
+    status: verified
+    sources:
+    - en-wikipedia-reksio
+    - pl-wikipedia-reksio
+    - dzieje-pl-sfr
+  personality:
+    text: Responsible, dutiful, loving and caring — and occasionally a little mischievous or short-tempered. Mostly he acts as helper, rescuer and peacemaker. en-wikipedia's profile is based on editors' viewing of episodes.
+    status: sourced
+    sources:
+    - en-wikipedia-reksio
+  visual_signature:
+    text: White body with a clean black outline, round head, black nose, and warm brown-orange patches on one ear, around one eye and on his back. One ear flops over. He often stands and gestures on his hind legs like a small person, and his face is very expressive (wide grin, frown, eyes squeezed shut). Early films show him with a collar, dropped from Reksio marzyciel (1969) onward.
+    status: observed
+    sources:
+    - sfr-youtube
+    - pl-wikipedia-reksio
+    observed_by: claude-frames
+  sound_signature:
+    text: Barks and yelps. The 2023 score release keeps the series' "characteristic barks" among its sound effects. What his bark actually sounds like — pitch, who performed it, whether it was a real dog — is unknown.
+    status: sourced
+    sources:
+    - gad-records-reksio-2023
+  relationships:
+  - to: boy
+    claim:
+      text: The boy is his young owner and closest human. Reksio is devoted to him and, in Reksio wybawca (1977), saves him from gas poisoning in the kitchen.
+      status: verified
+      sources:
+      - en-wikipedia-reksio
+      - sfr-youtube
+  - to: rooster
+    claim:
+      text: Occasional quarrels with the rooster in the main series.
+      status: sourced
+      sources:
+      - en-wikipedia-reksio
+  - to: gander
+    claim:
+      text: Occasional scuffles with the yard's gander in the Reksio i ptaki cycle (see Reksio i gąsior, 1987).
+      status: sourced
+      sources:
+      - en-wikipedia-reksio
+  - to: owl
+    claim:
+      text: A friend who shares calming music with him and, in the final episode, persuades him not to leave the yard.
+      status: sourced
+      sources:
+      - en-wikipedia-reksio
+  - to: red-eared-dog
+    claim:
+      text: A "special bond" with a female dog with red-haired ears. Reksio swat (1975, "matchmaker") may be relevant; not checked.
+      status: sourced
+      sources:
+      - en-wikipedia-reksio
+- id: boy
+  name: The boy (unnamed)
+  kind: human child
+  role: recurring
+  description:
+    text: Reksio's young owner. en-wikipedia calls him "a blonde Polish kid" and says he is almost always kind to Reksio. In the 1977 frames he has a big mop of curly blond hair, a white shirt and orange shorts, and is seen reading and doing homework. Whether he has a name on screen or in production notes is unknown.
+    status: observed
+    sources:
+    - en-wikipedia-reksio
+    - sfr-youtube
+    observed_by: claude-frames
+  personality:
+    text: Gentle and bookish in Reksio wybawca; otherwise unknown. Needs more episodes.
+    status: unknown
+    sources: []
+  visual_signature:
+    text: Oversized curly blond hair, round simple face, white shirt, orange/red shorts, dark shoes.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  relationships: []
+- id: rooster
+  name: Kogut (rooster)
+  kind: rooster
+  role: recurring
+  description:
+    text: A yard bird Reksio sometimes clashes with. The hens he guards from foxes share the yard.
+    status: sourced
+    sources:
+    - en-wikipedia-reksio
+  personality:
+    text: Unknown beyond "occasional quarrels" — likely proud and territorial, but not checked.
+    status: unknown
+    sources: []
+  visual_signature:
+    text: Not yet observed.
+    status: unknown
+    sources: []
+  relationships: []
+- id: gander
+  name: Gąsior (gander)
+  kind: gander
+  role: recurring (Reksio i ptaki)
+  description:
+    text: The yard's gander, with an episode of his own (Reksio i gąsior, 1987).
+    status: verified
+    sources:
+    - en-wikipedia-reksio
+    - filmpolski-reksio-i-ptaki
+  personality:
+    text: Quarrelsome with Reksio at times; otherwise unknown.
+    status: sourced
+    sources:
+    - en-wikipedia-reksio
+  visual_signature:
+    text: Not yet observed.
+    status: unknown
+    sources: []
+  relationships: []
+- id: owl
+  name: Sowa (owl)
+  kind: owl
+  role: episodic (final episode)
+  description:
+    text: Appears in the last episode, Reksio i sowa (1990). That episode uses a fragment of Zdzisława Sośnicka's song "Uspokój się" ("Calm down") — probably the calming music the owl shares.
+    status: sourced
+    sources:
+    - en-wikipedia-reksio
+    - pl-wikipedia-reksio
+  personality:
+    text: Wise, calming, friendly.
+    status: sourced
+    sources:
+    - en-wikipedia-reksio
+  visual_signature:
+    text: Not yet observed.
+    status: unknown
+    sources: []
+  relationships: []
+- id: red-eared-dog
+  name: Female dog with red ears (unnamed)
+  kind: dog
+  role: recurring
+  description:
+    text: A female dog with red-haired ears, close to Reksio. en-wikipedia cites Reksio domator (1971) and Reksio racjonalizator (1973).
+    status: sourced
+    sources:
+    - en-wikipedia-reksio
+  personality:
+    text: Not yet observed.
+    status: unknown
+    sources: []
+  visual_signature:
+    text: Not yet observed.
+    status: unknown
+    sources: []
+  relationships: []
+places:
+- id: doghouse
+  name: Buda (Reksio's doghouse)
+  description:
+    text: A small wooden doghouse with a round door and pitched roof, set against a stone or plastered wall of the family home. In all three sampled episodes it is where the story starts and where it comes home to; in the title sequence Reksio pops out of it after the credits.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+- id: yard
+  name: Podwórko (the yard)
+  description:
+    text: The shared space outside the house where Reksio, the hens, the rooster, the gander and neighbouring dogs meet. Described as a village farmyard (FilmPolski) or a courtyard (en-wikipedia).
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - en-wikipedia-reksio
+- id: family-home
+  name: The family home
+  description:
+    text: Plain 1970s Polish domestic interiors in Reksio wybawca — terracotta and salmon walls, a hallway with coat hooks, a round table, a green-tiled kitchen with a gas cooker.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+- id: neighbourhood
+  name: The neighbourhood street
+  description:
+    text: In Reksio remontuje (1980), a leafy street of detached houses with red roofs, fences and trees, painted in soft watercolour.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+aesthetics:
+  overview:
+    text: Flat, cleanly outlined characters in front of painted, textured backgrounds. The contrast is the signature — simple graphic figures, rich handmade settings. Observed in 3 episodes from 1972, 1977 and 1980 (one still every 15 s, plus the full title sequence at 2 s).
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  palette:
+    text: Earthy and warm — mustard-ochre, sand, sienna, sage and dusty teal dominate. Saturated red and orange appear as small accents (rocket stripes, the UFO, the SFR logo, a red jacket). Night and space scenes use deep navy with scattered stars. Reksio's white body stands out against all of it. Colours are from YouTube transfers and may have shifted from the original prints.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  palette_hex:
+  - '#a08414'
+  - '#ce8f23'
+  - '#c6a971'
+  - '#d2c59d'
+  - '#917046'
+  - '#734c30'
+  - '#7c8877'
+  - '#345a61'
+  - '#0a1018'
+  - '#fc4c37'
+  - '#ffffff'
+  line_and_shape:
+    text: A uniform black outline of even weight on characters and props. Rounded, simplified forms; big heads and small bodies on humans; large flat colour areas with little or no shading on characters. Props (rocket, UFO, doghouse) are drawn with the same flat graphic clarity as the characters.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  backgrounds:
+    text: |-
+      Painted separately and much more textured than the characters, but the style varies by episode and era:
+      - 1972 (Kosmonauta): expressive crayon/pastel and gouache textures — streaky skies, craggy fantasy caves in blue and ochre.
+      - 1977 (Wybawca): interiors in flat fields of colour with minimal detail; exteriors with stippled stone walls.
+      - 1980 (Remontuje): detailed, naturalistic watercolour street scenes; Halina Filek-Marszałek is credited for "Dekoracje".
+      A recurring motif is the stone or plastered wall behind the doghouse.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  character_animation:
+    text: 'Only poses can be judged from stills, not motion: strong readable silhouettes, very expressive faces, Reksio often upright and gesturing like a small person, and elastic squash-and-stretch in the title gags (Reksio stretched along a whole credit). How smoothly and how often things move (animating on ones or twos, holds, cycles) is unknown until someone watches for it.'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  pacing:
+    text: 'Automatic scene-cut detection (ffmpeg, threshold 0.3) gives average shot lengths of about 5.4 s (Kosmonauta, 1972), 2.4 s (Wybawca, 1977) and 4.9 s (Remontuje, 1980). Treat these as rough: gas-smoke and flash effects can register as cuts, which may inflate the 1977 count. The feeling of pace depends on music and holds as much as on cuts; that needs watching.'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  composition:
+    text: Mostly eye-level, side-on, stage-like staging. Characters line up along a wall or ground line, like actors on a stage, with wide establishing shots and cut-in close-ups for emotion (Reksio worried in a rocket porthole, grinning in a UFO dome). Communication is pictorial — thought bubbles with pictograms (bones, a hammer) instead of words. The only readable text on screen in the samples is a calendar and the KONIEC card.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+sound:
+  overview:
+    text: Music and sound effects carry the storytelling, with little or no speech. Kowalowski's scores are described as melodically rich, brilliantly orchestrated and closely fitted to what happens on screen, "tailored to each episode's content".
+    status: sourced
+    sources:
+    - babulewicz-2018
+  credits:
+  - name: Zenon Kowalowski
+    role: composer (theme and nearly all episodes)
+    claim:
+      text: Born 1939; composer and teacher tied to Cieszyn, with music for over 150 films. He scored almost every episode — sources say "sixty-four", pl-wikipedia lists a handful of exceptions — and wrote the theme.
+      status: verified
+      sources:
+      - babulewicz-2018
+      - filmpolski-reksio
+      - filmpolski-reksio-i-ptaki
+      - pl-wikipedia-reksio
+  - name: Tadeusz Kański, Adam Markiewicz, Bogumił Pasternak, Waldemar Kazanecki, Janusz Mentel
+    role: composers (individual early episodes)
+    claim:
+      text: pl-wikipedia credits Kański (episodes 1–2 and 30), Markiewicz (5–6), Pasternak (3), Kazanecki (4) and Mentel (30). FilmPolski credits Kański and Mentel on one episode of the 1972–1982 serial (its no. 21). Episode numbers depend on which numbering is used.
+      status: sourced
+      sources:
+      - pl-wikipedia-reksio
+      - filmpolski-reksio
+  - name: Otokar Balcy
+    role: sound (dźwięk)
+    claim:
+      text: Credited for sound on Reksio kosmonauta (1972) and Reksio wybawca (1977).
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  theme:
+    text: The opening theme is "one of the best-known fragments of Polish film music". In at least one episode it returns as a leitmotif for a mountain trek, perhaps Reksio taternik. What it sounds like — instruments, tempo, key, mood — has not yet been recorded here and needs listening. The 2023 album includes it with and without sound effects.
+    status: sourced
+    sources:
+    - babulewicz-2018
+    - gad-records-reksio-2023
+  music_role:
+    text: Music does the work that dialogue would. It sets the "backyard atmosphere", builds tension and times the gags. Style shifts with the story — a Baroque-concerto pastiche for museum scenes, electronic music for Reksio i UFO (1979). The final episode quotes a pop song, Sośnicka's "Uspokój się".
+    status: verified
+    sources:
+    - babulewicz-2018
+    - gad-records-reksio-2023
+    - pl-wikipedia-reksio
+  sound_effects:
+    text: Characteristic barks and "stamping" sounds are part of the series' sound identity — prominent enough that the 2023 album keeps them. The full vocabulary of effects has not been recorded.
+    status: sourced
+    sources:
+    - gad-records-reksio-2023
+  dialogue:
+    text: Essentially wordless. Characters communicate by barks, gesture, expression and pictogram bubbles; one language-learning blog says the show has "very little dialogue" with a few simple words. Whether any episode has spoken words or narration has not been checked by a listener. Frames show pictorial rather than written speech.
+    status: sourced
+    sources:
+    - lingopie-polish-cartoons
+    - sfr-youtube
+legacy:
+- text: Aidem Media (Gdańsk, later BoomBit) made a line of Reksio PC games from 2001 into the 2010s — educational titles (ABC z Reksiem, Liczę z Reksiem) and point-and-click adventures (Reksio i Skarb Piratów, Reksio i UFO, Reksio i Wehikuł Czasu, Reksio i Kapitan Nemo, Reksio i Czarodzieje, Reksio i Miasto Sekretów). They were exported to Central and Eastern Europe. These are prior art for a Reksio game, and evidence that game rights have been licensed before.
+  status: verified
+  sources:
+  - en-wikipedia-reksio
+  - pl-wikipedia-reksio
+- text: Bronze statue by Marek Barteczko (2009) on a square between ul. 11 Listopada and ul. Stojałowskiego in Bielsko-Biała; Reksio points in surprise at the neighbouring fountain. Another bronze Reksio stands in Radomsko (2020), and a mural designed by Halina Filek-Marszałek went up in Suwałki, Marszałek's home town (2017).
+  status: verified
+  sources:
+  - pl-wikipedia-reksio
+  - en-wikipedia-reksio
+  - bielsko-biala-tu-narodzil-sie-reksio
+- text: Poczta Polska stamps (2016); Bielsko-Biała's local token currency "białki" (2009); "Reksio symfonicznie" in Katowice (2016), with an orchestra playing live to the films; the Puchar Reksia children's ski race in Szczyrk (from 2010); and the Fundacja im. Heleny i Lechosława Marszałków Reksio (2014), set up to look after Marszałek's and the studio's work.
+  status: sourced
+  sources:
+  - pl-wikipedia-reksio
+- text: Six episodes were digitally restored for the 2013 DVD "Klasyka Polskiej Bajki — Reksio". In 2023 GAD Records released Kowalowski's score from the studio's original tapes.
+  status: sourced
+  sources:
+  - pl-wikipedia-reksio
+  - gad-records-reksio-2023
+- text: Reksio has cult status in Poland alongside Bolek and Lolek. Cross-references between the two series exist, for example Reksio watching Bolek and Lolek on TV.
+  status: sourced
+  sources:
+  - en-wikipedia-reksio
+availability:
+- text: The studio's official YouTube channel hosts many episodes for free. A search on 2026-09-29 found 31, mostly 1967–1980; Reksio i ptaki episodes were not among the results.
+  status: verified
+  sources:
+  - sfr-youtube
+- text: TVP VOD has a Reksio series page. Episode count and whether it is free are unconfirmed.
+  status: sourced
+  sources:
+  - tvp-vod-reksio
+rights:
+  text: Unknown. Likely candidates are Studio Filmów Rysunkowych (producer and archive holder, still operating and publishing the episodes) and possibly Marszałek's heirs or the Fundacja Reksio for the character. The Aidem Media games show the character has been licensed for games before. Must be resolved before any public release; parked for the private MVP.
+  status: unknown
+  sources: []
+design_notes:
+- text: Because the series is wordless, a game can be wordless too — reachable by a 3-year-old and by non-Polish families — and still be true to the original. Written words should be as rare as they are in the cartoon (a title, "KONIEC").
+  status: interpretation
+  sources: []
+- text: Pictogram thought bubbles are a native way to show what a character wants or needs without text. They could carry all in-game "dialogue" and hints.
+  status: interpretation
+  sources: []
+- text: The doghouse works as a home base, since every sampled episode starts and ends there. A finite game session could do the same — begin by calling Reksio out of the buda and end with him back home, followed by a KONIEC card.
+  status: interpretation
+  sources: []
+- text: Helping is the verb. The series' titles and character profile point to mechanics built around noticing a problem and helping or calming someone, not winning, collecting or scoring.
+  status: interpretation
+  sources: []
+- text: Keep the visual contrast — flat, outlined characters (feasible as SVG/vector) over textured, painted backgrounds (feasible as a few static painted plates). Restraint in motion and palette is more faithful than busy effects.
+  status: interpretation
+  sources: []
+- text: The title sequence is a ready-made model for a gentle game intro. Reksio's small gags around each credit show the character's playfulness in about 40 seconds with no words.
+  status: interpretation
+  sources: []
+open_questions:
+- What does the opening theme sound like — instruments, tempo, mood? Needs Adam's ears; the GAD Records album is a clean reference.
+- Is any episode genuinely spoken or narrated, or is it barks and music throughout? Needs a listener across several episodes.
+- Does the boy have a name? Is the family ever named?
+- Which recurring animals appear most (hens, rooster, cats, the red-eared dog)? Needs a pass over more episodes.
+- How much of the humour is timed to music, and how? Read Babulewicz 2018 in full.
+- When exactly did Reksio run in the Dobranocka slot, and how often was it repeated?
+- Where does the "Złoty Słowik"/Grand Prix Tehran prize for Reksio poliglota come from, and what year was it?
+- Who holds the rights to the character and the films today (SFR, Marszałek's heirs, Fundacja Reksio)?
+- Get the Filek-Marszałek/Kolska memoir (2022) — the closest thing to a primary account of how Reksio was made.
