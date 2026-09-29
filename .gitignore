@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Local-only reference material (frames, downloaded video/audio)
+worlds/*/frames/
+worlds/*/media/
+
+# Personal Claude Code settings
+.claude/settings.local.json
+
+# Tool caches
+.ruff_cache/
+.pytest_cache/
+.DS_Store
