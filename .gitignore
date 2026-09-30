@@ -20,3 +20,6 @@ worlds/*/media/
 .ruff_cache/
 .pytest_cache/
 .DS_Store
+
+# Generated audio analysis: WAVs, loop cuts, spectrograms (main.py audio)
+worlds/*/audio/

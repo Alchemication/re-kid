@@ -62,6 +62,42 @@ def minimal_dossier() -> dict:
     }
 
 
+def episode(number: int = 1, **extra: Any) -> dict:
+    """Return an episode dict that validates; id defaults to 'ep-<number>'."""
+    data: dict[str, Any] = {
+        "id": f"ep-{number}",
+        "number": number,
+        "title": f"Episode {number}",
+        "year": 1972,
+        "directors": ["Someone"],
+        "record": claim(),
+    }
+    data.update(extra)
+    return data
+
+
+def beat(beat_id: str = "b1", start_s: float = 0, end_s: float = 1) -> dict:
+    """Return a beat dict that validates, with sound left unknown."""
+    return {
+        "id": beat_id,
+        "start_s": start_s,
+        "end_s": end_s,
+        "action": claim("Reksio waves.", status="observed"),
+        "sound": claim("Not yet heard.", status="unknown"),
+    }
+
+
+def minimal_breakdown(reference: str = "ep-1") -> dict:
+    """Return the smallest breakdown dict that validates."""
+    return {
+        "id": "intro",
+        "title": "Intro",
+        "reference_episode": reference,
+        "overview": claim(),
+        "beats": [beat()],
+    }
+
+
 def minimal_sources() -> dict:
     """Return a registry with one database source, 'src-a'."""
     return {

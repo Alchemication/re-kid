@@ -20,7 +20,8 @@ resist building platform features ahead of that.
 Flow, one validated file per stage, under `worlds/<id>/`:
 
 1. `world.yaml` + `sources.yaml` — series-level dossier (`schema.world`).
-2. Episode catalogue → selection → breakdowns (schema not written yet).
+2. `episodes/index.yaml` (`schema.episode`) → selection → breakdowns:
+   `intro.yaml` and `episodes/<slug>.yaml` (`schema.breakdown`).
 3. Game brief → game → playtest logs (not written yet).
 
 Research files hold research only. Game ideas go in a game brief; the one bridge
@@ -38,7 +39,10 @@ Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`)
 - `sourced` — one credible source.
 - `observed` — seen/heard in the original material; set `observed_by`.
   Claude can read frames but cannot hear audio: music, rhythm, and sound claims
-  need the user's ears (`observed_by: adam`) or a source.
+  need the user's ears (`observed_by: adam`) or a source. `main.py audio`
+  measures (tempo, onsets, spectrograms); its numbers are leads for the
+  listener, never claims on their own. `main.py listen` is how the listener
+  records what they hear: notes become `observed` sound claims.
 - `interpretation` — our reading. Say so; don't dress it as fact.
 - `unknown` — an open question, stated plainly. Prefer this over a guess.
 

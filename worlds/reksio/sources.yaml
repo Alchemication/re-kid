@@ -22,7 +22,7 @@ sources:
   language: pl
   publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
   accessed: '2026-09-29'
-  notes: Authoritative Polish film database with full crew credits. Groups episodes differently from Wikipedia — this entry covers only the 1972–1982 TV serial (44 × ~9 min); the 1967–1971 films and later episodes have separate entries.
+  notes: Authoritative Polish film database with full crew credits. Groups episodes differently from Wikipedia — this entry covers only the 1972–1982 TV serial (44 × ~9 min); the 1967–1971 films and later episodes have separate entries. Its episode pages (index.php?film=429672&odcinki, five pages of ten) give each episode's year, film length in metres and minutes, and a one-to-three-sentence synopsis. Numbers episodes 1–44 in its own order, which differs from pl-wikipedia's within some years. Where the two disagree on directors, the on-screen credits checked so far (Reksio kompan, Reksio czyścioch) side with FilmPolski.
 - id: filmpolski-reksio-i-ptaki
   title: FilmPolski.pl — REKSIO I PTAKI (serial animowany, 1987–1990)
   url: https://www.filmpolski.pl/fp/index.php?film=1257671
@@ -30,7 +30,87 @@ sources:
   language: pl
   publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
   accessed: '2026-09-29'
-  notes: Lists 11 episodes (Reksio i gołąb … Reksio i pelikan/sowa), directed by Ryszard Lepióra (1–9) and Andrzej Flettner (10–11). Wikipedia counts 13 for this cycle by including Reksio i bocian and Reksio i papuga.
+  notes: Lists 11 episodes (Reksio i gołąb … Reksio i pelikan/sowa), directed by Ryszard Lepióra (1–9) and Andrzej Flettner (10–11). Wikipedia counts 13 for this cycle by including Reksio i bocian and Reksio i papuga. Per-episode year, length and synopsis on its episode pages. Dates Reksio i kruk 1989, where pl-wikipedia has 1988.
+- id: filmpolski-reksio-poliglota
+  title: FilmPolski.pl — REKSIO POLIGLOTA (film animowany, 1967)
+  url: https://filmpolski.pl/fp/index.php?film=425928
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length (283 m, 10 min), director, one-line synopsis.
+- id: filmpolski-reksio-marzyciel
+  title: FilmPolski.pl — REKSIO MARZYCIEL (film animowany, 1969)
+  url: https://filmpolski.pl/fp/index.php?film=429711
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length, director, short synopsis.
+- id: filmpolski-reksio-wychowawca
+  title: FilmPolski.pl — REKSIO WYCHOWAWCA (film animowany, 1969)
+  url: https://filmpolski.pl/fp/index.php?film=429712
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length, director, short synopsis.
+- id: filmpolski-reksio-obronca
+  title: FilmPolski.pl — REKSIO OBROŃCA (film animowany, 1970)
+  url: https://filmpolski.pl/fp/index.php?film=429956
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length, director, short synopsis.
+- id: filmpolski-reksio-dobroczynca
+  title: FilmPolski.pl — REKSIO DOBROCZYŃCA (film animowany, 1970)
+  url: https://filmpolski.pl/fp/index.php?film=429957
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length, director, short synopsis.
+- id: filmpolski-reksio-domator
+  title: FilmPolski.pl — REKSIO DOMATOR (film animowany, 1971)
+  url: https://filmpolski.pl/fp/index.php?film=429958
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length, director, short synopsis.
+- id: filmpolski-reksio-i-bocian
+  title: FilmPolski.pl — REKSIO I BOCIAN (film animowany, 1982)
+  url: https://filmpolski.pl/fp/index.php?film=423722
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry, dated 1982 and directed by Romuald Kłys. pl-wikipedia dates it 1987 and puts it in the Reksio i ptaki cycle.
+- id: filmpolski-reksio-i-sroka
+  title: FilmPolski.pl — REKSIO I SROKA (film animowany, 1985)
+  url: https://filmpolski.pl/fp/index.php?film=4212379
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length, director, short synopsis.
+- id: filmpolski-reksio-i-mrowki
+  title: FilmPolski.pl — REKSIO I MRÓWKI (film animowany, 1986)
+  url: https://filmpolski.pl/fp/index.php?film=423545
+  kind: database
+  language: pl
+  publisher: Państwowa Wyższa Szkoła Filmowa, Telewizyjna i Teatralna w Łodzi
+  accessed: '2026-09-29'
+  notes: Standalone film entry. Year, length, director, short synopsis.
+- id: filmweb-reksio-i-papuga
+  title: Reksio — sezon 2, odcinek 2, "Reksio i papuga" — Filmweb
+  url: https://www.filmweb.pl/serial/Reksio-1967-98032/episode/2/2
+  kind: database
+  language: pl
+  publisher: Filmweb
+  accessed: '2026-09-29'
+  notes: User-edited film site. Lists the episode under 1987 with no crew ("nikt nie przypisał obsady i twórców") and no synopsis. Probably not independent of Wikipedia. Cited only because it is the one other place found that lists Reksio i papuga; FilmPolski does not. An IMDb entry (tt7567832) turned up in search but returned HTTP 403 and was not read.
 - id: pl-wikipedia-reksio
   title: Reksio (serial animowany) — Wikipedia, wolna encyklopedia
   url: https://pl.wikipedia.org/wiki/Reksio_(serial_animowany)

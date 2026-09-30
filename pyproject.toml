@@ -5,6 +5,7 @@ description = "Small, faithful games from nostalgic childhood cartoons."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "librosa==1.0.0",
     "pydantic==2.13.5",
     "pyyaml==6.0.3",
     "rich==15.0.0",

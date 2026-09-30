@@ -15,7 +15,7 @@ production:
   - name: Lechosław Marszałek
     role: creator, director, screenwriter, visual design
     claim:
-      text: Lechosław Marszałek (1922–1991) created Reksio's "literary and visual form" (the studio's words), wrote most of the screenplays, directed all episodes up to 1971 and many later ones. By pl-wikipedia's count he directed 19 and co-directed 1. Before Reksio he made Koziołeczek (1953), which the studio calls the first international award in Polish animation history.
+      text: Lechosław Marszałek (1922–1991) created Reksio's "literary and visual form" (the studio's words), wrote most of the screenplays, directed all episodes up to 1971 and many later ones. By pl-wikipedia's count he directed 19 and co-directed 1, but that count includes Reksio kompan and Reksio i kruk, which FilmPolski credits to other directors (for Kompan the on-screen credits agree with FilmPolski). Before Reksio he made Koziołeczek (1953), which the studio calls the first international award in Polish animation history.
       status: verified
       sources:
       - sfr-about
@@ -33,7 +33,7 @@ production:
   - name: Józef Ćwiertnia
     role: director
     claim:
-      text: Directed more of the 1972–1982 serial than anyone else per FilmPolski (13 episodes), including Reksio strażak, Reksio ratownik and Reksio rozjemca. The studio calls him one of the best Reksio directors.
+      text: Directed more of the 1972–1982 serial than anyone else per FilmPolski (17 of its 44 episodes, one with Romuald Kłys as co-director), including Reksio strażak, Reksio ratownik and Reksio rozjemca. The studio calls him one of the best Reksio directors.
       status: verified
       sources:
       - filmpolski-reksio
@@ -122,8 +122,8 @@ episode_formula:
 opening_sequence:
   text: |-
     No title sequence until 1972. Before that, credits were inserted into the start of each film. From Reksio strażak (1972) onward: hand-lettered white credits on a mustard-ochre card textured with pastel/crayon scribbles in pink, blue and green. Between credits Reksio performs small silent gags — stretching into a long sausage under the animators' names, eating from a bowl beside the director's credit, getting tangled in film. It closes on a red SFR logo and a red film strip of tiny Reksio frames.
-    The distributor line varies ("Centrala Wynajmu Filmów i Telewizja Polska" in 1972, "Zjednoczenie Rozpowszechniania Filmów" in 1977/1980). Zenon Kowalowski's opening theme is called one of the best-known pieces of Polish film music. Its sound is not described here; that needs a listener.
-    The intro takes about 40 seconds of Reksio kosmonauta. It will get its own breakdown.
+    The distributor line varies ("Centrala Wynajmu Filmów i Telewizja Polska" in 1972 and 1974, "Zjednoczenie Rozpowszechniania Filmów" in 1976, 1977 and 1980). Zenon Kowalowski's opening theme is called one of the best-known pieces of Polish film music. Its sound is not described here; that needs a listener.
+    The intro runs about 43 seconds, with the same gags at the same times in the four uploads checked (1972–1980). Beat by beat in intro.yaml.
   status: observed
   sources:
   - sfr-youtube
@@ -325,7 +325,7 @@ places:
 - id: doghouse
   name: Buda (Reksio's doghouse)
   description:
-    text: A small wooden doghouse with a round door and pitched roof, set against a stone or plastered wall of the family home. In all three sampled episodes it is where the story starts and where it comes home to; in the title sequence Reksio pops out of it after the credits.
+    text: A small wooden doghouse with a round door and pitched roof, set against a stone or plastered wall of the family home. In the three episodes first sampled (Kosmonauta, Wybawca, Remontuje) the story comes home to it. Kosmonauta (1972), Czyścioch (1974) and Kompan (1976) open on it straight after the credits, with Reksio popping out; Remontuje (1980) opens on a street by a brick wall instead. The pop-out is part of each episode, not of the title sequence.
     status: observed
     sources:
     - sfr-youtube

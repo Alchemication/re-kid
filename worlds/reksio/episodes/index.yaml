@@ -1,0 +1,1231 @@
+notes:
+- text: 'How many episodes there are depends on who is counting. pl-wikipedia lists 65: 52 in the main series (1967–1987) and 13 in the Reksio i ptaki cycle (1987–1990). FilmPolski splits the same material into nine standalone films (the six of 1967–1971, plus Reksio i bocian, Reksio i sroka and Reksio i mrówki), the 1972–1982 TV serial of 44 episodes, and Reksio i ptaki with 11 episodes: 64 titles in all. The one title FilmPolski lacks is Reksio i papuga.'
+  status: verified
+  sources:
+  - pl-wikipedia-reksio
+  - filmpolski-reksio
+  - filmpolski-reksio-i-ptaki
+- text: Numbering follows pl-wikipedia's table, the only list found that covers all 65. FilmPolski numbers the 1972–1982 serial 1–44 and the bird cycle 1–11, in an order that differs within some years (e.g. Reksio swat is its no. 21 but pl-wikipedia's no. 30).
+  status: sourced
+  sources:
+  - pl-wikipedia-reksio
+  - filmpolski-reksio
+- text: pl-wikipedia's infobox gives the episode count as "65 (+3 specjalne)" — 65 plus three specials — but the article does not say what the specials are.
+  status: unknown
+  sources: []
+- text: 'Where FilmPolski and pl-wikipedia disagree, the year and director fields follow FilmPolski: it is a film-school database with full crew credits, while pl-wikipedia''s episode table cites nothing. In the two disagreements checked against on-screen credits (Reksio kompan and Reksio czyścioch), the credits matched FilmPolski. Five disagreements remain: the years of Reksio i bocian and Reksio i kruk, the directors of Reksio i kruk and Reksio i dzięcioł, and whether Reksio i papuga exists as a separate film.'
+  status: interpretation
+  sources: []
+- text: 'Synopses are English renderings of FilmPolski''s Polish descriptions, written for this catalogue. Runtimes are FilmPolski''s nominal lengths, rounded to whole minutes; the studio''s uploads run a little shorter or longer (e.g. Reksio remontuje: 12 min per FilmPolski, 11 min 49 s as uploaded).'
+  status: sourced
+  sources:
+  - filmpolski-reksio
+  - sfr-youtube
+- text: 'On 2026-09-29 the studio''s YouTube channel had 31 Reksio episodes public: Reksio poliglota (1967) and 30 episodes from 1972–1980. None of the 1969–1971 films or of the episodes from 1981 on were public. Its REKSIO playlist also holds two private videos. Episodes with a watch_url are those uploads.'
+  status: verified
+  sources:
+  - sfr-youtube
+episodes:
+- id: reksio-poliglota
+  number: 1
+  title: Reksio poliglota
+  year: 1967
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=-nnjsnRO8Ww
+  record:
+    text: Reksio poliglota (1967), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-poliglota
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio wants to talk to the yard animals, so he learns to cluck, honk and squeal.
+    status: sourced
+    sources:
+    - filmpolski-reksio-poliglota
+- id: reksio-marzyciel
+  number: 2
+  title: Reksio marzyciel
+  year: 1969
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  record:
+    text: Reksio marzyciel (1969), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-marzyciel
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio dreams of being a sportsman. He tries roller skates, a scooter and a motorbike, and ends up covered in bandages.
+    status: sourced
+    sources:
+    - filmpolski-reksio-marzyciel
+- id: reksio-wychowawca
+  number: 3
+  title: Reksio wychowawca
+  year: 1969
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  record:
+    text: Reksio wychowawca (1969), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-wychowawca
+    - pl-wikipedia-reksio
+  synopsis:
+    text: After a lioness dies at the zoo, Reksio looks after her cub. The cub grows into a big lion, who protects Reksio from boys who tease him.
+    status: sourced
+    sources:
+    - filmpolski-reksio-wychowawca
+- id: reksio-obronca
+  number: 4
+  title: Reksio obrońca
+  year: 1970
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 9
+  record:
+    text: Reksio obrońca (1970), directed by Lechosław Marszałek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-obronca
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio makes friends with a hare. When he later goes hunting with his master, he uses one trick after another to save his friend.
+    status: sourced
+    sources:
+    - filmpolski-reksio-obronca
+- id: reksio-dobroczynca
+  number: 5
+  title: Reksio dobroczyńca
+  year: 1970
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  record:
+    text: Reksio dobroczyńca (1970), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-dobroczynca
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio takes in a starving mongrel and teaches him to look after blind people. That is how the mongrel finds his own master, a blind man he is able to care for.
+    status: sourced
+    sources:
+    - filmpolski-reksio-dobroczynca
+- id: reksio-domator
+  number: 6
+  title: Reksio domator
+  year: 1971
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 9
+  record:
+    text: Reksio domator (1971), directed by Lechosław Marszałek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-domator
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Love comes into Reksio's life, and it changes his habits.
+    status: sourced
+    sources:
+    - filmpolski-reksio-domator
+- id: reksio-strazak
+  number: 7
+  title: Reksio strażak
+  year: 1972
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  record:
+    text: Reksio strażak (1972), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio helps put out a fire. He goes through firefighter training and bravely rescues a spaniel bitch in danger from the flames.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-sportowiec
+  number: 8
+  title: Reksio sportowiec
+  year: 1972
+  directors:
+  - Edward Wątor
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=3IZ_5iJkbM4
+  record:
+    text: Reksio sportowiec (1972), directed by Edward Wątor; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Seeing his master do gymnastics, Reksio takes up sport too.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-taternik
+  number: 9
+  title: Reksio taternik
+  year: 1972
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=BJeySZgB_lo
+  record:
+    text: Reksio taternik (1972), directed by Lechosław Marszałek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio and his master go climbing in the Tatras. Reksio pulls his master and a mountain rescuer out of a rock crevice, where a spiteful ram had pushed them.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-wedrowiec
+  number: 10
+  title: Reksio wędrowiec
+  year: 1972
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=zu2P2Z2XhWk
+  record:
+    text: Reksio wędrowiec (1972), directed by Józef Ćwiertnia; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio is carried far from home by mistake. He overcomes every obstacle and makes his way back to his master.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-aktor
+  number: 11
+  title: Reksio aktor
+  year: 1972
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=Wt9AptvgwDg
+  record:
+    text: Reksio aktor (1972), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio shows his stage talents by copying his master, an actor.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-telewidz
+  number: 12
+  title: Reksio telewidz
+  year: 1972
+  directors:
+  - Edward Wątor
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=hXro3egxU7U
+  record:
+    text: Reksio telewidz (1972), directed by Edward Wątor; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Fascinated by Bolek and Lolek's adventures on screen, Reksio becomes a keen TV watcher.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-kosmonauta
+  number: 13
+  title: Reksio kosmonauta
+  year: 1972
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=unuTG_vG0AI
+  record:
+    text: Reksio kosmonauta (1972), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: In a dream, Reksio has adventures on a planet from a dog's imagination.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-magik
+  number: 14
+  title: Reksio magik
+  year: 1973
+  directors:
+  - Edward Wątor
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=wckLjtsCHvk
+  record:
+    text: Reksio magik (1973), directed by Edward Wątor; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio watches a travelling magician and, in his daydreams, becomes a magician himself who can conjure up tasty bones.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-pielegniarz
+  number: 15
+  title: Reksio pielęgniarz
+  year: 1973
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=Wd1O6GZ32IY
+  record:
+    text: Reksio pielęgniarz (1973), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio nurses a little mongrel hurt by a car. His devoted care starts being taken advantage of.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-racjonalizator
+  number: 16
+  title: Reksio racjonalizator
+  year: 1973
+  directors:
+  - Edward Wątor
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=HoZEXr2p7eg
+  record:
+    text: Reksio racjonalizator (1973), directed by Edward Wątor; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio invents gadgets that help him meet his owners' demands.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-rozbitek
+  number: 17
+  title: Reksio rozbitek
+  year: 1973
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=eLIs6_gqoaE
+  record:
+    text: Reksio rozbitek (1973), directed by Lechosław Marszałek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: A flood carries Reksio away to a desert island.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-malarz
+  number: 18
+  title: Reksio malarz
+  year: 1973
+  directors:
+  - Marian Cholerek
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=1vd1-lJ09-Q
+  record:
+    text: Reksio malarz (1973), directed by Marian Cholerek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio decides to become a painter. The rain turns his realistic picture into an abstract one, and the new picture makes him famous.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-poszukiwacz
+  number: 19
+  title: Reksio poszukiwacz
+  year: 1973
+  directors:
+  - Edward Wątor
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=0yEHzswdK0U
+  record:
+    text: Reksio poszukiwacz (1973), directed by Edward Wątor; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio searches for bones he buried. Things get complicated when a museum's precious mastodon bones get caught up in the search.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-ratownik
+  number: 20
+  title: Reksio ratownik
+  year: 1974
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=RNUJ2Hp8SVk
+  record:
+    text: Reksio ratownik (1974), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio shows good sense and courage in rescuing some boys who are swimming.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-detektyw
+  number: 21
+  title: Reksio detektyw
+  year: 1974
+  directors:
+  - Marian Cholerek
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=JBZMGNBBeHw
+  record:
+    text: Reksio detektyw (1974), directed by Marian Cholerek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio tracks a practised thief, a fox who steals not hens but eggs, so he can fatten up the chicks that hatch and eat them. Reksio unmasks the fox.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-czyscioch
+  number: 22
+  title: Reksio czyścioch
+  year: 1974
+  directors:
+  - Józef Ćwiertnia
+  - Romuald Kłys
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=GP-5eolHYBE
+  record:
+    text: Reksio czyścioch (1974), directed by Józef Ćwiertnia with Romuald Kłys as co-director ("współpraca reżyserska"). FilmPolski and the on-screen credits of the studio's upload both name Kłys; pl-wikipedia lists Ćwiertnia only. About 9 minutes per FilmPolski.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+    - sfr-youtube
+  synopsis:
+    text: Reksio has fleas. He tries all sorts of ways to get rid of them and finally succeeds.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-pogromca
+  number: 23
+  title: Reksio pogromca
+  year: 1974
+  directors:
+  - Marian Cholerek
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=0KkZLWoQ6MA
+  record:
+    text: Reksio pogromca (1974), directed by Marian Cholerek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio tries various ways to get rid of a wild boar that is causing damage, but when the boar is in danger, Reksio saves its life.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-zeglarz
+  number: 24
+  title: Reksio żeglarz
+  year: 1974
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=s3iMc26UH7g
+  record:
+    text: Reksio żeglarz (1974), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: A little drake raised among chicks grows up, with Reksio's help, into a brave sailor.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-medalista
+  number: 25
+  title: Reksio medalista
+  year: 1974
+  directors:
+  - Marian Cholerek
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=zEjPlSapRcw
+  record:
+    text: Reksio medalista (1974), directed by Marian Cholerek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio does a heroic deed, rescuing a small toy terrier from dognappers. He also wins a dog beauty contest.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-rozjemca
+  number: 26
+  title: Reksio rozjemca
+  year: 1974
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=9lrz_SglSEE
+  record:
+    text: Reksio rozjemca (1974), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: A quarrel breaks out in the yard between a blackbird and a bullying cat who attacks it. Reksio helps the blackbird and makes peace between the two.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-robinson
+  number: 27
+  title: Reksio Robinson
+  year: 1975
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=nfvwOutGiNE
+  record:
+    text: Reksio Robinson (1975), directed by Józef Ćwiertnia; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio is sunbathing on an air mattress when a seagull punctures it with its beak. A wave washes him up on a desert island, where he sets himself up like Robinson Crusoe. A fishing boat rescues him.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-pocieszyciel
+  number: 28
+  title: Reksio pocieszyciel
+  year: 1975
+  directors:
+  - Romuald Kłys
+  - Edward Wątor
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=EqONVJqsMeM
+  record:
+    text: Reksio pocieszyciel (1975), directed by Romuald Kłys and Edward Wątor; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio's neighbour is an unlucky, gloomy dog who cries at the slightest thing. Reksio's attempts to cheer him up fail. Finally Reksio starts moaning himself; the gloomy dog tries to amuse him, and in the end they play together.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-spiewak
+  number: 29
+  title: Reksio śpiewak
+  year: 1975
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 9
+  record:
+    text: Reksio śpiewak (1975), directed by Lechosław Marszałek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Hearing a violin and a piano, Reksio tries to sing. He starts out very clumsily but eventually reaches a quite decent standard.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-swat
+  number: 30
+  title: Reksio swat
+  year: 1975
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  record:
+    text: Reksio swat (1975), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio makes peace between two fighting roosters by pairing each of them with a nice hen.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-dentysta
+  number: 31
+  title: Reksio dentysta
+  year: 1976
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  record:
+    text: Reksio dentysta (1976), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio tries to help the boy, who has toothache. Pulling the tooth out with a string fails. Luckily the boy meets a real dentist, who removes the bad tooth quickly.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-sadownik
+  number: 32
+  title: Reksio sadownik
+  year: 1976
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  record:
+    text: Reksio sadownik (1976), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'Reksio builds a birdhouse for the birds returning in spring. Its tenants turn out to be very useful: they keep pests off the blossoming fruit trees, and in time tasty cherries ripen.'
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-kompan
+  number: 33
+  title: Reksio kompan
+  year: 1976
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=YkU4w23-bPI
+  record:
+    text: Reksio kompan (1976), directed by Józef Ćwiertnia per FilmPolski and the on-screen credits of the studio's upload ("reżyseria Józef Ćwiertnia"). pl-wikipedia credits Lechosław Marszałek instead; on screen Marszałek is credited for screenplay, visual design and artistic consultation. About 9 minutes per FilmPolski.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+    - sfr-youtube
+  synopsis:
+    text: Reksio wakes the boy and they go mushroom picking in the woods. At first Reksio has no luck and looks enviously at the boy's full basket. In the end he finds a huge porcino too, and the two friends come home happy.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-nauczyciel
+  number: 34
+  title: Reksio nauczyciel
+  year: 1977
+  directors:
+  - Edward Wątor
+  runtime_min: 9
+  record:
+    text: Reksio nauczyciel (1977), directed by Edward Wątor; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: The rooster crows at random and is always late for meals. Reksio teaches him to tell the time, and from then on the rooster crows as punctually as a clock.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-wybawca
+  number: 35
+  title: Reksio wybawca
+  year: 1977
+  directors:
+  - Romuald Kłys
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=2E-4XH4ujf0
+  record:
+    text: Reksio wybawca (1977), directed by Romuald Kłys; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio comes into the house, but the boy won't play with him; he is absorbed in a book. Bored, Reksio falls asleep in a corner. The smell of gas wakes him, and he carries the unconscious boy out, saving his life.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-przewodnik
+  number: 36
+  title: Reksio przewodnik
+  year: 1977
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=tCM8K879GI4
+  record:
+    text: Reksio przewodnik (1977), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'Reksio meets a city poodle who behaves like a know-nothing. Reksio acts as his guide, showing and explaining interesting places to the astonished poodle: an open-air museum, a natural history museum and so on.'
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-gospodarz
+  number: 37
+  title: Reksio gospodarz
+  year: 1978
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=Pkto-S0im1E
+  record:
+    text: Reksio gospodarz (1978), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio keeps an eye on the farmyard like a proper farmer. The cat is bored and idle while mice run riot. Burek helps Reksio bring the lazy cat back into line.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-i-jamnik
+  number: 38
+  title: Reksio i jamnik
+  year: 1978
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 8
+  watch_url: https://www.youtube.com/watch?v=qyybyJ4Z1EI
+  record:
+    text: Reksio i jamnik (1978), directed by Lechosław Marszałek; about 8 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'A likeable, sensitive dachshund is mocked in the yard. Reksio stands up for him and tells off the mockers. Then something happens that changes everyone''s opinion: the resourceful dachshund chases off a fox that has attacked the hens.'
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksiowa-jesien
+  number: 39
+  title: Reksiowa jesień
+  year: 1979
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  record:
+    text: Reksiowa jesień (1979), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio shows how resourceful he is by getting ready for the coming winter.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-i-ufo
+  number: 40
+  title: Reksio i UFO
+  year: 1979
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=bxFa_wTUdUI
+  record:
+    text: Reksio i UFO (1979), directed by Lechosław Marszałek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio meets space dogs.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-terapeuta
+  number: 41
+  title: Reksio terapeuta
+  year: 1979
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=LqcB-Z_Uoe8
+  record:
+    text: Reksio terapeuta (1979), directed by Lechosław Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'Reksio helps a sick chick: he nurses it and teaches it exercises that help it get well quickly.'
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-kompozytor
+  number: 42
+  title: Reksio kompozytor
+  year: 1979
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 10
+  watch_url: https://www.youtube.com/watch?v=MJj3sRJeFsQ
+  record:
+    text: Reksio kompozytor (1979), directed by Józef Ćwiertnia; 10 min 16 s per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: For the birthday of Lawinia the mare, Reksio composes a piece performed by the yard orchestra.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-remontuje
+  number: 43
+  title: Reksio remontuje
+  year: 1980
+  directors:
+  - Lechosław Marszałek
+  runtime_min: 12
+  watch_url: https://www.youtube.com/watch?v=24Xi59t3S5U
+  record:
+    text: Reksio remontuje (1980), directed by Lechosław Marszałek; about 12 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'Reksio gives his home a complete makeover. When the workmen arrive, the trouble starts: each one undoes the previous one''s work. So Reksio decides to repair the doghouse, wrecked by the workmen, himself.'
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksiowa-wiosna
+  number: 44
+  title: Reksiowa wiosna
+  year: 1980
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  record:
+    text: Reksiowa wiosna (1980), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Spring arrives and nature wakes up. Reksio tidies up around his doghouse. A mischievous cupid with a bow hits him, and, smitten with a shaggy neighbour, he forgets his worries.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-i-nosna-kura
+  number: 45
+  title: Reksio i nośna kura
+  year: 1981
+  directors:
+  - Halina Filek-Marszałek
+  runtime_min: 8
+  record:
+    text: Reksio i nośna kura (1981), directed by Halina Filek-Marszałek; about 8 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio has trouble with a hen who lays her eggs all over the yard. He tries and fails to teach her to be tidy. Since she is the best layer on the farm, he gives up and collects her scattered eggs himself.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-lyzwiarz
+  number: 46
+  title: Reksio łyżwiarz
+  year: 1981
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  record:
+    text: Reksio łyżwiarz (1981), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Hard winter in the yard; Reksio keeps slipping on frozen puddles. The boy scatters ash on the ice, dresses Reksio in warm clothes and a scarf, and they take skates to the lake. Reksio skates first, wearing one boot, but the boy takes the skate back and starts skating. The ice breaks under him and he falls into the water. Reksio, forgetting the slight, rushes to help, brings a ladder and pulls the boy out. Next time they share the skates and make a good pair on the ice.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksiowa-zima
+  number: 47
+  title: Reksiowa zima
+  year: 1981
+  directors:
+  - Romuald Kłys
+  runtime_min: 8
+  record:
+    text: Reksiowa zima (1981), directed by Romuald Kłys; about 8 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: In a harsh winter, birds try to feed from Reksio's bowl. When snow falls, the bowl is hard to reach and the doghouse disappears under drifts. The boy quickly clears the snow, puts up a bird feeder, and brings Reksio a bowl of warm food, mittens and little boots.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-i-wrona
+  number: 48
+  title: Reksio i wrona
+  year: 1981
+  directors:
+  - Halina Filek-Marszałek
+  runtime_min: 9
+  record:
+    text: Reksio i wrona (1981), directed by Halina Filek-Marszałek; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'Reksio finds an uninvited guest at his bowl: a crow. He tries to chase it off but can''t manage it, and its loud cawing drives him mad. The next day he stays by the bowl, but the crow fishes out tasty bits with a fishing rod. Reksio pounces on the bowl, the line tangles round the crow, and it breaks a wing as it falls. Reksio reluctantly nurses the crow, tying its beak shut to stop the cawing. The crow appreciates his care, and when it recovers they give a concert together; their early dislike turns into friendship.'
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-i-koguty
+  number: 49
+  title: Reksio i koguty
+  year: 1981
+  directors:
+  - Józef Ćwiertnia
+  runtime_min: 9
+  record:
+    text: Reksio i koguty (1981), directed by Józef Ćwiertnia; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio decides to stand up to a pugnacious rooster who rules the yard and makes everyone's life a misery. A big rooster brought in from next door beats the local one, but becomes an even worse tyrant. Reksio manages to drive the intruder away and bring peace to everyone in the yard.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-i-swierszcz
+  number: 50
+  title: Reksio i świerszcz
+  year: 1982
+  directors:
+  - Halina Filek-Marszałek
+  runtime_min: 10
+  record:
+    text: Reksio i świerszcz (1982), directed by Halina Filek-Marszałek; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio
+    - pl-wikipedia-reksio
+  synopsis:
+    text: A lyrical story of a friendship born out of conflict. Reksio wakes to find something disturbing his peace. He calls the poultry to help, and together they search for the intruder. Winter comes; Reksio insulates his doghouse and settles into his little bed. Then the mysterious voice is heard again, but this time it sounds pleasant. A cricket comes out of a crack to warm itself by the lamp, and Reksio makes it a comfortable bed in a matchbox.
+    status: sourced
+    sources:
+    - filmpolski-reksio
+- id: reksio-i-sroka
+  number: 51
+  title: Reksio i sroka
+  year: 1985
+  directors:
+  - Romuald Kłys
+  runtime_min: 9
+  record:
+    text: Reksio i sroka (1985), directed by Romuald Kłys; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-sroka
+    - pl-wikipedia-reksio
+  synopsis:
+    text: A magpie steals Reksio's medals. He gets them back with difficulty, and the adventure teaches him to be careful.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-sroka
+- id: reksio-i-mrowki
+  number: 52
+  title: Reksio i mrówki
+  year: 1986
+  directors:
+  - Romuald Kłys
+  runtime_min: 8
+  record:
+    text: Reksio i mrówki (1986), directed by Romuald Kłys; about 8 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-mrowki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio fights a losing battle with pharaoh ants, and finds there is no way to deal with them except to like them.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-mrowki
+- id: reksio-i-bocian
+  number: 53
+  title: Reksio i bocian
+  year: 1982
+  directors:
+  - Romuald Kłys
+  runtime_min: 9
+  record:
+    text: 'Reksio i bocian, directed by Romuald Kłys; about 9 minutes. The year is disputed: FilmPolski lists it as a standalone film from 1982, while pl-wikipedia dates it 1987 and counts it as the first episode of the Reksio i ptaki cycle. The year here follows FilmPolski; the position in the list follows pl-wikipedia. Not uploaded by the studio, so the on-screen credits have not been checked.'
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-bocian
+    - pl-wikipedia-reksio
+  synopsis:
+    text: On an autumn meadow Reksio finds a stork with a broken wing, feeds it and invites it to the yard. He makes a sling from a scarf and offers it a home in his doghouse; now he has a friend to slide on the ice with. By spring the wing has healed and the boy builds a nest on the roof of the house. The grateful stork takes Reksio on flights through the sky. Soon a mate moves into the nest, and Reksio waits impatiently for a brood of baby storks.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-bocian
+- id: reksio-i-papuga
+  number: 54
+  title: Reksio i papuga
+  year: 1987
+  directors:
+  - Ryszard Lepióra
+  record:
+    text: Reksio i papuga (1987), directed by Ryszard Lepióra per pl-wikipedia. FilmPolski has no entry for it, either in its Reksio i ptaki listing or as a standalone film. Filmweb lists the title under 1987 but with no credits; Filmweb is user-edited and may have taken the entry from Wikipedia. Runtime unknown.
+    status: sourced
+    sources:
+    - pl-wikipedia-reksio
+    - filmweb-reksio-i-papuga
+  synopsis:
+    text: No synopsis found. Filmweb has no description; FilmPolski has no entry.
+    status: unknown
+    sources: []
+- id: reksio-i-golab
+  number: 55
+  title: Reksio i gołąb
+  year: 1987
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 8
+  record:
+    text: Reksio i gołąb (1987), directed by Ryszard Lepióra; about 8 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: A female pigeon tries to build a nest on Reksio's doghouse. He watches her efforts and hears her cry in despair over a broken egg. He brings her a little box from the house, where she lays her next eggs. The chicks hatch and Reksio watches over them. One day Reksio falls into a deep pit. The pigeons hear his whimpering, carry the dog's tag to the boy, and the boy gets his friend out of the pit.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-szpaki
+  number: 56
+  title: Reksio i szpaki
+  year: 1987
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 8
+  record:
+    text: Reksio i szpaki (1987), directed by Ryszard Lepióra; about 8 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio sows hollyhocks by his doghouse, but earthworms ruin the seedlings. The hens he calls to help wreck the bed. Then he notices that starlings love worms; asked nicely, they eat the pests and the hollyhocks bloom. In summer Reksio rests under a tree and the starlings, feasting in the branches, pelt him with fruit stones. He shakes his fist at them, but they remind him of the worms. Ashamed, Reksio lets them eat the cherries, and hangs little baskets that the starlings fill with fruit.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-gasior
+  number: 57
+  title: Reksio i gąsior
+  year: 1987
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 9
+  record:
+    text: Reksio i gąsior (1987), directed by Ryszard Lepióra; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio invites the gander over and keeps him on a short rope, but the bird frees himself and the trouble begins. The gander tips over the geese's water, pulls feathers from the turkey's tail, nips the boy and bullies Reksio. When he finally attacks the farmer's wife, the farmer decides to use his gun. Reksio manages to catch the unruly gander again and put him on a leash.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-drozd
+  number: 58
+  title: Reksio i drozd
+  year: 1988
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 9
+  record:
+    text: Reksio i drozd (1988), directed by Ryszard Lepióra; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'A row in the yard wakes Reksio: the hens are quarrelling and the gander joins in. Suddenly a thrush flies in and quiets them with its song. Its melodies make the yard friendly again. Grateful, Reksio sends the bird a bunch of flowers, and it sings even more beautifully.'
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-dzieciol
+  number: 59
+  title: Reksio i dzięcioł
+  year: 1988
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 9
+  record:
+    text: Reksio i dzięcioł (1988), directed by Ryszard Lepióra per FilmPolski, which credits the screenplay to Lechosław Marszałek and Lepióra. pl-wikipedia lists Lepióra and Marszałek as co-directors. About 9 minutes per FilmPolski.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio's adventures with a woodpecker who fights woodworm.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-kruk
+  number: 60
+  title: Reksio i kruk
+  year: 1989
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 9
+  record:
+    text: 'Reksio i kruk, about 9 minutes. The sources disagree on both year and director: FilmPolski gives 1989 and Ryszard Lepióra (with a screenplay by Lechosław Marszałek); pl-wikipedia gives 1988 and Lechosław Marszałek. The fields here follow FilmPolski.'
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio finds a picture of a raven in his atlas. He would love to meet such an interesting bird, but nobody in the yard knows one, so he sets off for the forest. At last he meets an old white raven among the trees and takes its photograph. Very proud, he shows the photo to everyone in the yard.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-kawki
+  number: 61
+  title: Reksio i kawki
+  year: 1989
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 10
+  record:
+    text: Reksio i kawki (1989), directed by Ryszard Lepióra; 9 min 32 s per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio's adventures with jackdaws, whose chicks he saves from a cat.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-kukulka
+  number: 62
+  title: Reksio i kukułka
+  year: 1990
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 10
+  record:
+    text: Reksio i kukułka (1990), directed by Ryszard Lepióra; about 10 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: 'Spring: birds build nests and sit on their eggs, except the cuckoo, who slips her egg into a woodpecker''s nest. Reksio gets various birds to look after the abandoned cuckoo egg patiently, and at last a little cuckoo hatches safely.'
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-paw
+  number: 63
+  title: Reksio i paw
+  year: 1990
+  directors:
+  - Ryszard Lepióra
+  runtime_min: 9
+  record:
+    text: Reksio i paw (1990), directed by Ryszard Lepióra; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: A female dog Reksio is especially fond of starts ignoring him after meeting a peacock. Reksio tries to be as dignified and stately as his rival, without success. But when the peacock turns out to be a pompous egoist, her feelings change completely and she warms to nice Reksio again.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-pelikan
+  number: 64
+  title: Reksio i pelikan
+  year: 1990
+  directors:
+  - Andrzej Flettner
+  runtime_min: 9
+  record:
+    text: Reksio i pelikan (1990), directed by Andrzej Flettner; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Reksio finds a pelican tangled in a fishing net and brings it to the yard. The bird is so clumsy that everyone laughs, and the yard animals keep away from the mocked stranger. Reksio helps the pelican recover, and when it can fly off it shows what remarkable skills it has.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki
+- id: reksio-i-sowa
+  number: 65
+  title: Reksio i sowa
+  year: 1990
+  directors:
+  - Andrzej Flettner
+  runtime_min: 9
+  record:
+    text: Reksio i sowa (1990), directed by Andrzej Flettner; about 9 minutes per FilmPolski. FilmPolski and pl-wikipedia agree.
+    status: verified
+    sources:
+    - filmpolski-reksio-i-ptaki
+    - pl-wikipedia-reksio
+  synopsis:
+    text: Bored and discouraged, Reksio decides to leave the yard for good. He meets a wise old owl, who convinces him that the children need him very much, and he gives up the plan.
+    status: sourced
+    sources:
+    - filmpolski-reksio-i-ptaki

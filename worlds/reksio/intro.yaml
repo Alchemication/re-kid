@@ -1,0 +1,213 @@
+id: intro
+title: Title sequence (czołówka)
+reference_episode: reksio-kosmonauta
+overview:
+  text: About 43 seconds of credit cards, from the fade-in to the fade to black. White hand-lettered credits sit on a mustard-ochre card scribbled with pink, blue and green pastel. On almost every card Reksio does one short silent gag next to the names, then the card crossfades to the next. It ends on the studio card and a fade to black; the episode itself starts after that. Times below refer to the studio's upload of Reksio kosmonauta and are read from frames every 0.5 s, so they are good to about half a second.
+  status: observed
+  sources:
+  - sfr-youtube
+  observed_by: claude-frames
+variation:
+  text: |-
+    Checked in four uploads: Reksio kosmonauta (1972), Reksio czyścioch (1974), Reksio kompan (1976) and Reksio remontuje (1980). In all four the gags are the same, come in the same order and land within about a second of the same times; at every sampled point Reksio's poses match. What changes from episode to episode is the lettering:
+    - the episode title;
+    - the credited names, and some extra credit lines (e.g. "współpraca reżyserska" in 1974, "dekoracje" and "kierownictwo grupy produkcyjnej" in 1980);
+    - the distributor line, "Centrala Wynajmu Filmów i Telewizja Polska" in 1972 and 1974, "Zjednoczenie Rozpowszechniania Filmów i Telewizja Polska" in 1976 and 1980;
+    - the animation card, which spells ANIMACJA vertically in 1972 and as a heading "ANIMACJA:" in 1974, 1976 and 1980.
+    What follows the fade to black also differs: Kosmonauta, Czyścioch and Kompan open on the doghouse; Remontuje opens on a street by a brick wall. Popping out of the doghouse belongs to the episode, not to the intro. Earlier films (1967–1971) have no title sequence at all, per pl-wikipedia; the 1967 upload was not checked for this.
+  status: observed
+  sources:
+  - sfr-youtube
+  observed_by: claude-frames
+beats:
+- id: distributor-card
+  start_s: 0.5
+  end_s: 4.5
+  action:
+    text: The card fades in from black over about a second. At about 2.5 s Reksio trots in from the left, nose to the ground, sniffing his way across the card.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  on_screen_text:
+    text: '"Centrala Wynajmu Filmów i Telewizja Polska przedstawiają film z serii „Reksio" p.t." — the distributor and Polish Television "present a film from the series Reksio, titled". A small "© Film Polski" mark sits in the bottom right corner.'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Does the theme start with the fade-in or before it? Is there a sniffing sound effect?
+    status: unknown
+- id: title
+  start_s: 4.5
+  end_s: 8.0
+  action:
+    text: The episode title appears beside Reksio. He points at it, then shades his eyes with one paw as if looking far away, and holds that pose until the crossfade.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  on_screen_text:
+    text: '"REKSIO" in white, the second word of the title ("KOSMONAUTA") in yellow underneath.'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is there an accent in the music when the title appears?
+    status: unknown
+  notes:
+  - text: The looking-far-away pose may be chosen to suit Kosmonauta, but Remontuje (1980) uses the same pose, so it is part of the fixed intro rather than a per-episode gag.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+- id: script-and-music
+  start_s: 7.5
+  end_s: 14.5
+  action:
+    text: Reksio stands reading a sheet of paper held up in front of him. Around 11 s he opens his mouth wide, as if reading aloud or singing, then turns the sheet round to face the viewer. It has a musical note drawn on it, and he holds it up like a singer with a score.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  on_screen_text:
+    text: '"scenariusz, opracowanie plastyczne — Lechosław Marszałek" (screenplay and visual design) and "muzyka — Zenon Kowalowski" (music).'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is there a vocal or bark when his mouth opens? Does the tune change when he shows the note?
+    status: unknown
+  notes:
+  - text: The gag acts out both credits on the card — a script to read, then a score to sing.
+    status: interpretation
+- id: camera
+  start_s: 14.5
+  end_s: 17.0
+  action:
+    text: A film camera on a tripod stands at the left edge. Reksio poses in front of it with one paw raised, then turns black all over, like a photographic negative, for about a second.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  on_screen_text:
+    text: A shared card for three credits. "zdjęcia — Mieczysław Poznański" (camera) at the top left, "dźwięk — Otokar Balcy" (sound) at the right, "montaż — Alojzy Mol" (editing) at the bottom. The next two beats happen on this same card.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is there a camera click or whirr when he turns into a negative?
+    status: unknown
+  notes:
+  - text: Turning into a negative is a joke about photography — the camera "takes" him.
+    status: interpretation
+- id: cymbals
+  start_s: 17.0
+  end_s: 19.0
+  action:
+    text: Reksio appears by the sound credit, legs apart, holding a big brass cymbal in each front paw. He crashes them together and shakes, drawn with vibration lines.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is the crash a real cymbal hit, and is it on the beat of the theme?
+    status: unknown
+  notes:
+  - text: The cymbals stand for the sound credit.
+    status: interpretation
+- id: film-tangle
+  start_s: 19.0
+  end_s: 22.5
+  action:
+    text: A heap of tangled dark film appears by the editing credit. Reksio pops up out of it holding a pair of scissors and looks around, half buried in the film, until the crossfade.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is there a snip or rustle?
+    status: unknown
+  notes:
+  - text: Scissors and a pile of film stand for the editing credit — editors cut film by hand.
+    status: interpretation
+- id: stretch
+  start_s: 22.5
+  end_s: 28.5
+  action:
+    text: Reksio walks in from the left (about 24 s). His body stretches longer and longer, like a dachshund, until it spans most of the card (about 26.5 s), ripples like a wave, then gathers up at the right and hops out of view (about 28 s).
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  on_screen_text:
+    text: '"animacja — Zofia Malicka, Marian Wantoła, Marian Cholerek, Krystyna Lasoń, Halina Filek" (animation), with ANIMACJA spelled vertically down the left edge.'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Does the music stretch with him (a slide or long note), and is there a boing when he snaps back?
+    status: unknown
+  notes:
+  - text: Stretching the body is the animators' gag — the one thing only drawing can do.
+    status: interpretation
+- id: bowl
+  start_s: 29.0
+  end_s: 36.5
+  action:
+    text: A pink bowl sits on the ground (from about 29.5 s). Reksio comes in (about 31 s) and eats from it eagerly, bits of food flying (about 33 s). He lifts his head, licks his lips and laughs with his mouth wide open (about 35–36 s).
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  on_screen_text:
+    text: '"reżyseria — Lechosław Marszałek" (director) and "kierownik filmu — Nina Kowalik" (production manager).'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Are there eating or slurping sounds, and a laugh or bark at the end?
+    status: unknown
+  notes:
+  - text: Unlike the other gags, eating doesn't obviously act out the director's job. It may be a joke on the director and production manager getting their reward, or simply Reksio being a dog.
+    status: interpretation
+- id: studio-card
+  start_s: 36.5
+  end_s: 42.5
+  action:
+    text: A red film strip with tiny Reksio frames runs along the bottom of the card, rippling as it moves. Reksio sits at the right, raises a small red object and brings it down again and again on the strip. At 480p the object is not clear; it could be a rubber stamp or a small box.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  on_screen_text:
+    text: '"produkcja — Studio Filmów Rysunkowych w Bielsku-Białej" (production), with the studio''s red logo at the top left.'
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is there a thump each time he brings the object down? Does the theme end here?
+    status: unknown
+- id: fade-out
+  start_s: 42.5
+  end_s: 44.0
+  action:
+    text: The studio card fades to black. The episode starts at about 44 s.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Does the theme finish with the picture, or run on into the episode?
+    status: unknown
+open_questions:
+- Where do the theme's phrases and accents fall against these beats? The game would loop one phrase per gag, so the phrase boundaries matter more than anything else here. Needs Adam's ears; the GAD Records album has the theme with and without effects.
+- Is the theme the same recording in 1972 and 1980?
+- What is the red object Reksio brings down on the film strip in the studio-card beat? A sharper frame or a better copy might tell.
+- Is the intro the same in Reksio strażak (1972), the first episode to have it? That episode is not uploaded.
