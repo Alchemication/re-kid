@@ -166,16 +166,28 @@ wake Reksio at home.
 
 1. **Adam: the intro listening pass (about 15 min). This is the critical
    path.** In a terminal, run `uv run python main.py listen reksio`. It
-   remembers the clip, so the path is only needed on a first run. It shows
-   one screen per beat: what Reksio does, the sound question, and an ASCII
-   loudness graph with the beat grid, the loop `[ ]` and the strongest hit `▲`.
-   - Space plays the loop 4 times; `w` plays the whole original stretch.
-   - `[` `]` and `-` `=` move the loop start or end by one beat and replay it.
+   remembers the clip, so the path is only needed on a first run. On screen,
+   the intro's segments (the breakdown's beats, e.g. `cymbals`) are called
+   *moments*; "beat" means only a musical beat. There is one screen per
+   moment: what Reksio does, the sound question, and an ASCII loudness graph.
+   The graph shows the musical beats `|`, the loop `[ ]`, the strongest hit
+   `▲`, the moment `═`, and a `▼` playhead that moves while sound plays. The
+   view widens when the loop reaches past the moment. A strip at the top
+   shows every moment's progress (`✓` loop approved, `✎` note saved).
+
+   The moments are fixed; only the loop is adjusted. The loop is the music
+   the game repeats while it waits for the child's action, so judge it by
+   whether it flows when repeated, not by the description.
+   - Space plays the loop 4 times; `w` plays the whole moment.
+   - `[` `]` move the loop start one musical beat earlier or later, and `-`
+     `=` move its end. It can extend on both sides, past the moment, and
+     replays after each move.
    - `a` approves a loop that repeats cleanly.
    - `n` types what you hear. It is saved at once as an `observed_by: adam`
      sound claim in `intro.yaml`. Rough notes are fine; Claude tidies the
-     wording afterwards.
-   - The arrow keys move between beats; `q` quits. Everything saves as you go.
+     wording afterwards. If a moment's edges look wrong, say so in a note.
+   - The arrow keys move between moments; `q` quits. Everything saves as you
+     go.
 
    Loop choices go to `worlds/reksio/games/intro/loops.yaml`, which is
    tracked. The loops start as a naive guess: the first detected beat of each

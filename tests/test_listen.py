@@ -10,7 +10,19 @@ from pydantic import ValidationError
 
 from audio import AudioAnalysis, LoopProposal
 from config import GRAPH_ROWS
-from listen import initial_loops, nudge, render_graph, with_note
+from listen import (
+    Player,
+    Playing,
+    Session,
+    graph_view,
+    initial_loops,
+    now_playing,
+    nudge,
+    playhead,
+    progress_strip,
+    render_graph,
+    with_note,
+)
 from schema.breakdown import Breakdown
 from schema.common import Status
 from schema.loops import LoopChoice, LoopSet
@@ -36,18 +48,18 @@ def _analysis(loud: dict[float, float] | None = None) -> AudioAnalysis:
 class TestRenderGraph:
     def test_shape(self) -> None:
         rows = render_graph(_analysis(), 0, 10, None, None, width=50)
-        assert len(rows) == GRAPH_ROWS + 2  # levels, markers, axis
+        assert len(rows) == GRAPH_ROWS + 4  # playhead, levels, markers, moment, axis
         assert all(len(r) == 50 for r in rows)
 
     def test_loud_moment_is_tallest_column(self) -> None:
         rows = render_graph(_analysis({5.0: -5.0}), 0, 10, None, None, width=100)
-        top = rows[0]
+        top = rows[1]
         assert top[50] == "█"
         assert top[10] == " "
 
     def test_markers(self) -> None:
         rows = render_graph(_analysis(), 0, 10, (2.0, 6.0), 4.5, width=100)
-        marks = rows[GRAPH_ROWS]
+        marks = rows[GRAPH_ROWS + 1]
         assert marks[20] == "[" and marks[60] == "]"
         assert marks[45] == "▲"
         assert marks[30] == "|"  # beat inside the loop
@@ -63,12 +75,32 @@ class TestRenderGraph:
         # 20 frames over 2 s drawn 90 wide: every column still gets a value.
         loud = {round(i * 0.1, 1): -20.0 - (i % 3) for i in range(100)}
         rows = render_graph(_analysis(loud), 3, 5, None, None, width=90)
-        assert " " not in rows[GRAPH_ROWS - 1]
+        assert " " not in rows[GRAPH_ROWS]
+
+    def test_playhead_row(self) -> None:
+        rows = render_graph(_analysis(), 0, 10, None, None, width=100, playhead=7.0)
+        assert rows[0].index("▼") == 70
+        assert rows[0].count("▼") == 1
+
+    def test_playhead_outside_window_or_none_is_blank(self) -> None:
+        for head in (None, 12.0):
+            rows = render_graph(_analysis(), 0, 10, None, None, width=40, playhead=head)
+            assert set(rows[0]) == {" "}
+
+    def test_moment_row_marks_segment(self) -> None:
+        rows = render_graph(_analysis(), 0, 10, None, None, width=100, segment=(2, 6))
+        moment = rows[GRAPH_ROWS + 2]
+        assert moment[25] == "═" and moment[55] == "═"
+        assert moment[10] == " " and moment[70] == " "
+
+    def test_no_segment_leaves_moment_row_blank(self) -> None:
+        rows = render_graph(_analysis(), 0, 10, None, None, width=40)
+        assert set(rows[GRAPH_ROWS + 2]) == {" "}
 
     def test_silence_draws_nothing(self) -> None:
         silent = _analysis({t: -90.0 for t in [round(i * 0.1, 1) for i in range(100)]})
         rows = render_graph(silent, 0, 10, None, None, width=40)
-        assert all(set(r) == {" "} for r in rows[:GRAPH_ROWS])
+        assert all(set(r) == {" "} for r in rows[: GRAPH_ROWS + 1])
 
 
 class TestNudge:
@@ -194,4 +226,61 @@ class TestKeyHelp:
     def test_enter_listed_once(self) -> None:
         from listen import key_help
 
-        assert {label: keys for keys, label in key_help()}["next beat"] == "→ ↓ enter"
+        assert {label: keys for keys, label in key_help()}["next moment"] == "→ ↓ enter"
+
+
+class TestPlayhead:
+    loop = Playing("loop ×4", 2.0, 4.0, 4)
+
+    def test_moves_through_loop_and_wraps(self) -> None:
+        assert playhead(self.loop, 0.5) == (2.5, 1)
+        assert playhead(self.loop, 2.5) == (2.5, 2)
+        t, n = playhead(self.loop, 7.9)
+        assert (round(t, 1), n) == (3.9, 4)
+
+    def test_none_when_finished_or_before_start(self) -> None:
+        assert playhead(self.loop, 8.0) is None
+        assert playhead(self.loop, -0.1) is None
+
+    def test_idle_player_says_how_to_start(self) -> None:
+        assert now_playing(Player()).startswith("■ Nothing playing")
+
+
+class TestProgressStrip:
+    def test_marks_current_approved_and_noted(self, tmp_path: Path) -> None:
+        beats = [beat("a", 0, 1), beat("b", 1, 2), beat("c", 2, 3)]
+        breakdown = Breakdown.model_validate(minimal_breakdown() | {"beats": beats})
+        breakdown = with_note(breakdown, "c", "Strings.", "adam")
+        loops = LoopSet(
+            breakdown="intro",
+            source="x",
+            loops=[
+                LoopChoice(beat_id="a", start_s=0, end_s=1, beats=2, approved=True),
+                LoopChoice(beat_id="b", start_s=1, end_s=2, beats=2),
+            ],
+        )
+        session = Session(
+            breakdown=breakdown,
+            breakdown_path=tmp_path / "intro.yaml",
+            loops=loops,
+            loops_path=tmp_path / "loops.yaml",
+            analysis=_analysis(),
+            proposals=[],
+            media=tmp_path / "clip.mp4",
+            out=tmp_path,
+            observer="adam",
+        )
+        assert progress_strip(session, 1) == " 1✓  ▸2·   3·✎"
+
+
+class TestGraphView:
+    def test_moment_only_without_loop(self) -> None:
+        assert graph_view(17.0, 19.0, None) == (17.0, 19.0)
+
+    def test_widens_to_fit_loop_on_both_sides(self) -> None:
+        loop = LoopChoice(beat_id="b", start_s=16.2, end_s=19.8, beats=8)
+        assert graph_view(17.0, 19.0, loop) == (16.2, 19.8)
+
+    def test_loop_inside_moment_keeps_moment(self) -> None:
+        loop = LoopChoice(beat_id="b", start_s=17.2, end_s=18.6, beats=4)
+        assert graph_view(17.0, 19.0, loop) == (17.0, 19.0)

@@ -303,7 +303,7 @@ def cmd_listen(args: argparse.Namespace) -> int:
     heard = sum(b.sound.status == Status.OBSERVED for b in session.breakdown.beats)
     print(
         f"{approved}/{len(session.loops.loops)} loops approved, "
-        f"{heard}/{len(session.breakdown.beats)} beats with notes. "
+        f"{heard}/{len(session.breakdown.beats)} moments with notes. "
         f"Saved to {INTRO_LOOPS_FILE} and {INTRO_FILE}."
     )
     return 0

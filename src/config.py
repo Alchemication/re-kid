@@ -96,3 +96,8 @@ GRAPH_RANGE_DB = 30.0
 """Loudness span of the graph, down from the beat's loudest moment. The intro's
 music moves within about 8 dB; a fixed -50 dB floor drew it as a solid block.
 30 dB shows accents and dips while keeping a loud hit the tallest column."""
+
+LISTEN_REFRESH_S = 0.08
+"""Screen redraw interval in ``main.py listen`` while waiting for a key: about
+12 frames a second, smooth enough for the playhead (one graph column is
+15–50 ms) without keeping the CPU busy."""

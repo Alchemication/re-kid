@@ -40,8 +40,9 @@ Examples:
         Measurements only — a person still has to listen.
 
     uv run python main.py listen reksio worlds/reksio/media/intro/1972-kosmonauta.mp4
-        Interactive, one screen per intro beat: ASCII loudness graph, loop
-        playback (afplay/ffplay), single-key loop nudging and approval. Notes
+        Interactive, one screen per intro moment: ASCII loudness graph with a
+        moving playhead, loop playback (afplay/ffplay), a progress strip,
+        single-key loop nudging and approval. Notes
         you type become observed sound claims in intro.yaml; loop choices go
         to games/intro/loops.yaml. Later runs can drop the clip path.
 

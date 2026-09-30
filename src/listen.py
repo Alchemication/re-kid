@@ -1,6 +1,10 @@
-"""Interactive listening pass: one screen per breakdown beat, with sound.
+"""Interactive listening pass: one screen per breakdown moment, with sound.
 
-For each beat it shows what happens on screen, the open sound question, and an
+On screen, a breakdown's beats are called "moments", and "beat" always means a
+musical beat (the pulse the loop snaps to). The two used to share a name, which
+made the screen hard to read.
+
+For each moment it shows what happens on screen, the open sound question, and an
 ASCII loudness graph with the beat grid, the proposed loop and the strongest
 hit. Single keys play the loop or the original stretch, nudge the loop by one
 detected beat, approve it, or record what the listener heard.
@@ -21,6 +25,7 @@ from __future__ import annotations
 import shutil
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -31,6 +36,8 @@ from config import (
     GRAPH_MAX_WIDTH,
     GRAPH_RANGE_DB,
     GRAPH_ROWS,
+    LISTEN_REFRESH_S,
+    LOOP_PREVIEW_REPEATS,
     PLAYERS,
 )
 from schema.breakdown import Breakdown
@@ -39,6 +46,7 @@ from schema.loops import LoopChoice, LoopSet
 from worlds import dump_model
 
 if TYPE_CHECKING:
+    from rich.console import Group
     from rich.table import Table
 
 BLOCKS = " ▁▂▃▄▅▆▇█"
@@ -52,11 +60,15 @@ def render_graph(
     loop: tuple[float, float] | None,
     peak: float | None,
     width: int = GRAPH_MAX_WIDTH,
+    playhead: float | None = None,
+    segment: tuple[float, float] | None = None,
 ) -> list[str]:
-    """Draw loudness over [lo, hi] as text rows, then a marker row and an axis.
+    """Draw [lo, hi] as text rows: playhead, loudness, markers, time axis.
 
-    Marker row: ``|`` detected beat, ``▲`` strongest hit, ``[`` ``]`` loop ends,
-    ``─`` inside the loop.
+    The playhead row holds a ``▼`` above the moment now playing (blank when
+    nothing plays, so the layout never jumps). Marker row: ``|`` detected beat,
+    ``▲`` strongest hit, ``[`` ``]`` loop ends, ``─`` inside the loop. Below
+    it, ``═`` marks ``segment`` (the moment), useful when the view is wider.
     """
     span = hi - lo
     cols = max(width, 10)
@@ -81,12 +93,16 @@ def render_graph(
         0 if db <= floor else round((db - floor) / (top - floor) * GRAPH_ROWS * 8)
         for db in values
     ]
-    rows = []
-    for r in range(GRAPH_ROWS - 1, -1, -1):
-        rows.append("".join(BLOCKS[max(0, min(8, level - r * 8))] for level in levels))
 
     def col(t: float) -> int | None:
         return min(int((t - lo) / span * cols), cols - 1) if lo <= t <= hi else None
+
+    head = [" "] * cols
+    if playhead is not None and (c := col(playhead)) is not None:
+        head[c] = "▼"
+    rows = ["".join(head)]
+    for r in range(GRAPH_ROWS - 1, -1, -1):
+        rows.append("".join(BLOCKS[max(0, min(8, level - r * 8))] for level in levels))
 
     marks = [" "] * cols
     if loop is not None:
@@ -105,6 +121,14 @@ def render_graph(
             if (c := col(t)) is not None:
                 marks[c] = ch
     rows.append("".join(marks))
+
+    moment = [" "] * cols
+    if segment is not None:
+        for c in range(cols):
+            t = lo + (c + 0.5) * span / cols
+            if segment[0] <= t <= segment[1]:
+                moment[c] = "═"
+    rows.append("".join(moment))
 
     left, mid, right = f"{lo:.1f}s", f"{(lo + hi) / 2:.1f}s", f"{hi:.1f}s"
     axis = [" "] * cols
@@ -177,16 +201,41 @@ def with_note(
     return Breakdown.model_validate(data)
 
 
+@dataclass
+class Playing:
+    """What is playing: a stretch of the clip, possibly repeated."""
+
+    label: str
+    start_s: float
+    end_s: float
+    repeats: int
+
+
+def playhead(playing: Playing, elapsed_s: float) -> tuple[float, int] | None:
+    """Clip time now playing and which pass (from 1), or None once finished."""
+    length = playing.end_s - playing.start_s
+    if length <= 0 or elapsed_s < 0 or elapsed_s >= length * playing.repeats:
+        return None
+    return playing.start_s + elapsed_s % length, int(elapsed_s // length) + 1
+
+
 class Player:
-    """Plays one file at a time in the background; a new play stops the last."""
+    """Plays one file at a time in the background; a new play stops the last.
+
+    Remembers what it is playing and when it started, so the screen can draw a
+    playhead. The position is computed from the clock, not read from the
+    player, so it can drift by the player's start-up delay (tens of ms).
+    """
 
     def __init__(self) -> None:
         self.command = next(
             (list(cmd) for cmd in PLAYERS if shutil.which(cmd[0])), None
         )
         self.proc: subprocess.Popen[bytes] | None = None
+        self.playing: Playing | None = None
+        self.started = 0.0
 
-    def play(self, path: Path) -> None:
+    def play(self, path: Path, playing: Playing) -> None:
         """Start playing ``path``, stopping whatever was playing."""
         self.stop()
         if self.command is None:
@@ -196,32 +245,39 @@ class Player:
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
+        self.playing = playing
+        self.started = time.monotonic()
+
+    def position(self) -> tuple[float, int] | None:
+        """(clip time, pass) now playing, or None if stopped or finished."""
+        if self.playing is None or self.proc is None or self.proc.poll() is not None:
+            return None
+        return playhead(self.playing, time.monotonic() - self.started)
 
     def stop(self) -> None:
         """Stop playback, if any."""
         if self.proc is not None and self.proc.poll() is None:
             self.proc.terminate()
         self.proc = None
+        self.playing = None
 
 
-def read_key() -> str:
-    """Read one keypress without Enter. Arrow keys come back as 'left'/'right'."""
-    import termios
-    import tty
+ARROWS = {"[C": "right", "[D": "left", "[A": "up", "[B": "down"}
+"""Escape sequences (after ESC) of the arrow keys."""
 
-    fd = sys.stdin.fileno()
-    old = termios.tcgetattr(fd)
-    try:
-        tty.setcbreak(fd)
-        ch = sys.stdin.read(1)
-        if ch == "\x1b":
-            seq = sys.stdin.read(2)
-            return {"[C": "right", "[D": "left", "[A": "up", "[B": "down"}.get(
-                seq, "esc"
-            )
-        return ch
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old)
+
+def read_key(timeout_s: float) -> str | None:
+    """Read one keypress, or None after ``timeout_s``. The terminal must already
+    be in cbreak mode (see ``run``). Arrow keys come back as 'left'/'right'/..."""
+    import select
+
+    ready, _, _ = select.select([sys.stdin], [], [], timeout_s)
+    if not ready:
+        return None
+    ch = sys.stdin.read(1)
+    if ch == "\x1b":
+        return ARROWS.get(sys.stdin.read(2), "esc")
+    return ch
 
 
 @dataclass
@@ -249,8 +305,8 @@ KEYS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     ("end-later", "loop end 1 beat later", ("=",)),
     ("approve", "approve loop", ("a",)),
     ("note", "note what you hear", ("n",)),
-    ("prev", "previous beat", ("left", "up")),
-    ("next", "next beat", ("right", "down", "\r", "\n")),
+    ("prev", "previous moment", ("left", "up")),
+    ("next", "next moment", ("right", "down", "\r", "\n")),
     ("quit", "quit (all saved)", ("q",)),
 )
 """(action, label, keys) — the one list both the key handling and the on-screen
@@ -273,7 +329,7 @@ KEY_NAMES = {
 NEEDS_LOOP = frozenset(
     {"play", "start-earlier", "start-later", "end-earlier", "end-later", "approve"}
 )
-"""Actions that do nothing on a beat without a loop."""
+"""Actions that do nothing on a moment without a loop."""
 
 
 def key_help() -> list[tuple[str, str]]:
@@ -301,74 +357,169 @@ def _help_table(columns: int = 3) -> Table:
     return grid
 
 
+LEGEND = "▼ playing now   | musical beat   [ ] loop   ▲ loudest hit   ═ this moment"
+"""Key to the graph's symbols, shown under it."""
+
+
+def progress_strip(session: Session, current: int) -> str:
+    """One cell per moment: ▸ here, number, ✓ loop approved, ✎ note saved."""
+    approved = {x.beat_id for x in session.loops.loops if x.approved}
+    cells = []
+    for n, beat in enumerate(session.breakdown.beats):
+        here = "▸" if n == current else " "
+        tick = "✓" if beat.id in approved else "·"
+        note = "✎" if beat.sound.status == Status.OBSERVED else " "
+        cells.append(f"{here}{n + 1}{tick}{note}")
+    return " ".join(cells)
+
+
+def now_playing(player: Player) -> str:
+    """One line saying what is playing and where, or how to start."""
+    position = player.position()
+    if player.playing is None or position is None:
+        return "■ Nothing playing — space plays the loop, w the whole stretch."
+    t, n = position
+    passes = (
+        f" · pass {n}/{player.playing.repeats}" if player.playing.repeats > 1 else ""
+    )
+    return f"▶ {player.playing.label}{passes} · {t:.2f} s"
+
+
+def _screen(
+    session: Session, i: int, player: Player, message: str, width: int
+) -> Group:
+    """Everything shown for moment ``i``, as one rich renderable."""
+    from rich.console import Group
+    from rich.text import Text
+
+    beat = session.breakdown.beats[i]
+    loop = _loop_for(session, beat.id)
+    peak = next(
+        (p.peak_onset_s for p in session.proposals if p.beat_id == beat.id), None
+    )
+    position = player.position()
+    heard = beat.sound.status == Status.OBSERVED
+    parts: list[object] = [
+        Text.assemble(
+            (f"Moment {i + 1}/{len(session.breakdown.beats)}  {beat.id}", "bold"),
+            (f"  {beat.start_s:.1f}–{beat.end_s:.1f} s of the clip", "dim"),
+        ),
+        Text(
+            progress_strip(session, i) + "    ✓ loop approved  ✎ note saved",
+            style="dim",
+        ),
+        Text(""),
+        Text.assemble(("On screen  ", "bold"), beat.action.text),
+    ]
+    if beat.on_screen_text is not None:
+        parts.append(Text(beat.on_screen_text.text, style="dim"))
+    parts += [
+        Text(""),
+        Text.assemble(
+            (
+                "You heard  " if heard else "Listen for  ",
+                "bold green" if heard else "bold",
+            ),
+            beat.sound.text,
+        ),
+        Text(""),
+    ]
+    view_lo, view_hi = graph_view(beat.start_s, beat.end_s, loop)
+    rows = render_graph(
+        session.analysis,
+        view_lo,
+        view_hi,
+        (loop.start_s, loop.end_s) if loop else None,
+        peak,
+        width,
+        playhead=position[0] if position else None,
+        segment=(beat.start_s, beat.end_s),
+    )
+    parts.append(Text(rows[0], style="bold yellow"))
+    parts += [Text(r) for r in rows[1:]]
+    parts.append(Text(LEGEND, style="dim"))
+    parts.append(Text(""))
+    parts.append(Text(now_playing(player), style="bold yellow" if position else "dim"))
+    if loop is None:
+        parts.append(Text("This moment has no loop.", style="yellow"))
+    else:
+        state = ("approved ✓", "green") if loop.approved else ("not approved yet", "")
+        parts.append(
+            Text.assemble(
+                f"Loop {loop.start_s:.2f}–{loop.end_s:.2f} s · {loop.beats} beats · "
+                f"{loop.end_s - loop.start_s:.2f} s · ",
+                state,
+            )
+        )
+    parts += [Text(""), _help_table()]
+    if message:
+        parts += [Text(""), Text(message, style="cyan")]
+    return Group(*parts)
+
+
+def graph_view(
+    start_s: float, end_s: float, loop: LoopChoice | None
+) -> tuple[float, float]:
+    """Time span to draw: the moment, widened to show the whole loop."""
+    if loop is None:
+        return start_s, end_s
+    return min(start_s, loop.start_s), max(end_s, loop.end_s)
+
+
+def _loop_for(session: Session, beat_id: str) -> LoopChoice | None:
+    return next((x for x in session.loops.loops if x.beat_id == beat_id), None)
+
+
 def run(session: Session) -> None:
-    """The interactive loop. Needs a real terminal."""
+    """The interactive loop. Needs a real terminal.
+
+    The terminal stays in cbreak mode (keys arrive without Enter) except while
+    a note is typed. The screen redraws every ``LISTEN_REFRESH_S`` so the
+    playhead moves; ``rich.live`` redraws in place, without flicker.
+    """
+    import termios
+    import tty
+
     from rich.console import Console
-    from rich.markup import escape
+    from rich.live import Live
 
     console = Console()
     player = Player()
     beats = session.breakdown.beats
-    peaks = {p.beat_id: p.peak_onset_s for p in session.proposals}
+    fd = sys.stdin.fileno()
+    cooked = termios.tcgetattr(fd)
     i = 0
     message = ""
+    tty.setcbreak(fd)
+    live = Live(console=console, screen=True, auto_refresh=False)
+    live.start()
     try:
         while True:
-            beat = session.breakdown.beats[i]
-            loop = next((x for x in session.loops.loops if x.beat_id == beat.id), None)
-            console.clear()
-            console.print(
-                f"[bold]{i + 1}/{len(beats)}  {beat.id}[/bold]  "
-                f"[dim]{beat.start_s:.1f}–{beat.end_s:.1f} s[/dim]"
-            )
-            console.print(f"\n[bold]On screen[/bold]  {escape(beat.action.text)}")
-            if beat.on_screen_text is not None:
-                console.print(f"[dim]{escape(beat.on_screen_text.text)}[/dim]")
-            heading = (
-                "You heard" if beat.sound.status == Status.OBSERVED else "Listen for"
-            )
-            console.print(f"\n[bold]{heading}[/bold]  {escape(beat.sound.text)}\n")
-            loop_span = (loop.start_s, loop.end_s) if loop else None
             width = min(GRAPH_MAX_WIDTH, console.width - 2)
-            for row in render_graph(
-                session.analysis,
-                beat.start_s,
-                beat.end_s,
-                loop_span,
-                peaks.get(beat.id),
-                width,
-            ):
-                console.print(escape(row), highlight=False)
-            if loop is None:
-                console.print("\n[yellow]No loop fits this beat.[/yellow]")
-            else:
-                state = "[green]approved[/green]" if loop.approved else "not approved"
-                console.print(
-                    f"\nLoop {loop.start_s:.2f}–{loop.end_s:.2f} s, "
-                    f"{loop.beats} beats, {loop.end_s - loop.start_s:.2f} s — {state}"
-                )
-            console.print()
-            console.print(_help_table())
-            if message:
-                console.print(f"\n[cyan]{escape(message)}[/cyan]")
+            live.update(_screen(session, i, player, message, width), refresh=True)
+            key = read_key(LISTEN_REFRESH_S)
+            if key is None:
+                continue
             message = ""
-
-            key = read_key()
+            beat = beats[i]
+            loop = _loop_for(session, beat.id)
             action = KEYMAP.get(key)
             if action is None:
-                message = "Not a shortcut — the keys are listed below the graph."
+                message = "That key does nothing — the shortcuts are listed above."
             elif action in NEEDS_LOOP and loop is None:
-                message = "This beat has no loop."
+                message = "This moment has no loop."
             elif action == "quit":
                 return
-            elif action == "next":
-                i = min(i + 1, len(beats) - 1)
-            elif action == "prev":
-                i = max(i - 1, 0)
+            elif action in ("next", "prev"):
+                player.stop()
+                i = min(i + 1, len(beats) - 1) if action == "next" else max(i - 1, 0)
             elif action == "stop":
                 player.stop()
             elif action == "play":
-                player.play(loop_paths(session.out, beat.id)[1])
+                player.play(
+                    loop_paths(session.out, beat.id)[1],
+                    Playing("loop ×4", loop.start_s, loop.end_s, LOOP_PREVIEW_REPEATS),
+                )
             elif action == "window":
                 window = cut_clip(
                     session.media,
@@ -376,40 +527,68 @@ def run(session: Session) -> None:
                     beat.end_s,
                     session.out / "windows" / f"{beat.id}.wav",
                 )
-                player.play(window)
+                player.play(
+                    window, Playing("whole stretch", beat.start_s, beat.end_s, 1)
+                )
             elif action in ("start-earlier", "start-later", "end-earlier", "end-later"):
                 edge, direction = action.split("-")
-                step = -1 if direction == "earlier" else 1
-                moved = nudge(loop, session.analysis.beat_times, edge, step)
+                moved = nudge(
+                    loop,
+                    session.analysis.beat_times,
+                    edge,
+                    -1 if direction == "earlier" else 1,
+                )
                 if moved == loop:
-                    message = "Can't move that way."
+                    message = "Can't move that way — the loop needs at least one beat."
                 else:
                     _replace_loop(session, moved)
                     preview = render_loop(
-                        session.media,
-                        moved.start_s,
-                        moved.end_s,
-                        session.out,
-                        beat.id,
+                        session.media, moved.start_s, moved.end_s, session.out, beat.id
                     )
-                    player.play(preview)
+                    player.play(
+                        preview,
+                        Playing(
+                            "loop ×4", moved.start_s, moved.end_s, LOOP_PREVIEW_REPEATS
+                        ),
+                    )
+                    message = (
+                        f"Loop {edge} moved 1 beat {direction}; playing the new loop. "
+                        "Press a when it sounds right."
+                    )
             elif action == "approve":
                 _replace_loop(session, loop.model_copy(update={"approved": True}))
-                message = "Loop approved."
+                message = f"Loop approved and saved to {session.loops_path.name}."
             elif action == "note":
                 player.stop()
-                console.print(
-                    "\n[bold]What do you hear?[/bold] (Enter to save, empty to cancel)"
-                )
-                note = input("> ").strip()
+                live.stop()
+                termios.tcsetattr(fd, termios.TCSADRAIN, cooked)
+                try:
+                    console.print(
+                        f"\n[bold]Moment {i + 1}: {beat.id}.[/bold] What do you hear? "
+                        "Type, then Enter to save. Empty cancels."
+                    )
+                    if heard := beat.sound.status == Status.OBSERVED:
+                        console.print(
+                            f"[dim]Replaces your earlier note: {beat.sound.text}[/dim]"
+                        )
+                    note = input("> ").strip()
+                finally:
+                    tty.setcbreak(fd)
+                    live.start()
                 if note:
                     session.breakdown = with_note(
                         session.breakdown, beat.id, note, session.observer
                     )
                     dump_model(session.breakdown, session.breakdown_path)
-                    message = f"Saved to {session.breakdown_path.name}."
+                    message = f"Note saved to {session.breakdown_path.name}."
+                else:
+                    message = "No note saved." + (
+                        " Your earlier note is kept." if heard else ""
+                    )
     finally:
         player.stop()
+        live.stop()
+        termios.tcsetattr(fd, termios.TCSADRAIN, cooked)
 
 
 def _replace_loop(session: Session, loop: LoopChoice) -> None:
