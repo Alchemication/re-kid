@@ -3,8 +3,8 @@
 Pydantic validates each file on its own; ``validate_world`` adds the checks that
 need more than one file — every cited source exists, VERIFIED claims meet the
 "two sources or one primary" bar, no source sits unused, catalogued episodes
-fall inside the dossier's production years, the intro breakdown is timed
-against an episode the catalogue knows, and intro loops name real intro beats.
+fall inside the dossier's production years, and the intro breakdown is timed
+against an episode the catalogue knows.
 
 Example:
     report = validate_world("reksio")
@@ -26,7 +26,6 @@ from pydantic import BaseModel, ValidationError
 from config import (
     EPISODES_FILE,
     INTRO_FILE,
-    INTRO_LOOPS_FILE,
     SOURCES_FILE,
     WORLD_FILE,
     WORLDS_DIR,
@@ -35,7 +34,6 @@ from config import (
 from schema.breakdown import Breakdown
 from schema.common import PRIMARY_SOURCE_KINDS, Claim, Status
 from schema.episode import EpisodeCatalogue
-from schema.loops import LoopSet
 from schema.world import SourceRegistry, WorldDossier
 
 
@@ -111,7 +109,6 @@ class WorldReport:
     registry: SourceRegistry | None = None
     catalogue: EpisodeCatalogue | None = None
     intro: Breakdown | None = None
-    intro_loops: LoopSet | None = None
 
     def iter_all_claims(self) -> Iterator[tuple[str, str, Claim]]:
         """Yield (file name, claim path, claim) across every loaded file.
@@ -147,7 +144,6 @@ def validate_world(world_id: str, root: Path = WORLDS_DIR) -> WorldReport:
         (SOURCES_FILE, SourceRegistry, "registry", True),
         (EPISODES_FILE, EpisodeCatalogue, "catalogue", False),
         (INTRO_FILE, Breakdown, "intro", False),
-        (INTRO_LOOPS_FILE, LoopSet, "intro_loops", False),
     ):
         path = base / file
         if not path.is_file():
@@ -187,13 +183,10 @@ def validate_world(world_id: str, root: Path = WORLDS_DIR) -> WorldReport:
         report.errors.extend(_check_episode_years(report.dossier, report.catalogue))
     if report.intro is not None:
         report.errors.extend(_check_reference_episode(report.intro, report.catalogue))
-    if report.intro_loops is not None:
-        report.errors.extend(_check_loops(report.intro_loops, report.intro))
 
     for file, attr in (
         (EPISODES_FILE, "catalogue"),
         (INTRO_FILE, "intro"),
-        (INTRO_LOOPS_FILE, "intro_loops"),
     ):
         if getattr(report, attr) is None and (base / file).is_file():
             # An optional file failed to load, so its citations are unknown;
@@ -239,27 +232,3 @@ def _check_reference_episode(
         )
         return [error]
     return []
-
-
-def _check_loops(loops: LoopSet, intro: Breakdown | None) -> list[str]:
-    """Loop choices must belong to the intro breakdown and name its beats."""
-    if intro is None:
-        error = (
-            f"{INTRO_LOOPS_FILE}: needs a valid {INTRO_FILE} — its loops refer to "
-            "the intro's beats"
-        )
-        return [error]
-    errors = []
-    if loops.breakdown != intro.id:
-        errors.append(
-            f"{INTRO_LOOPS_FILE}: breakdown {loops.breakdown!r} is not {intro.id!r} "
-            f"— set it to the id in {INTRO_FILE}"
-        )
-    beat_ids = {b.id for b in intro.beats}
-    for loop in loops.loops:
-        if loop.beat_id not in beat_ids:
-            errors.append(
-                f"{INTRO_LOOPS_FILE}: loop for unknown beat {loop.beat_id!r} "
-                f"— rename it to a beat id in {INTRO_FILE} or delete it"
-            )
-    return errors

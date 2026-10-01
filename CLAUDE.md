@@ -39,10 +39,10 @@ Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`)
 - `sourced` — one credible source.
 - `observed` — seen/heard in the original material; set `observed_by`.
   Claude can read frames but cannot hear audio: music, rhythm, and sound claims
-  need the user's ears (`observed_by: adam`) or a source. `main.py audio`
+  need the user's ears (`observed_by: adam`) or a source. `src/audio.py`
   measures (tempo, onsets, spectrograms); its numbers are leads for the
-  listener, never claims on their own. `main.py listen` is how the listener
-  records what they hear: notes become `observed` sound claims.
+  listener, never claims on their own. Model "listening" was tested blind and
+  failed (see PROJECT_PLAN.md); don't use it.
 - `interpretation` — our reading. Say so; don't dress it as fact.
 - `unknown` — an open question, stated plainly. Prefer this over a guess.
 

@@ -1,4 +1,4 @@
-"""Audio measurements: loop proposals, and a real run on a synthetic click track."""
+"""Audio measurements, run for real on a synthetic click track."""
 
 from __future__ import annotations
 
@@ -8,75 +8,13 @@ from pathlib import Path
 
 import pytest
 
-from audio import (
-    AudioAnalysis,
-    analyse,
-    cut_clip,
-    extract_wav,
-    propose_loops,
-    repeat_clip,
-)
+from audio import analyse, cut_clip, extract_wav, measure, read_analysis
 from schema.breakdown import Breakdown
 from tests.conftest import beat, minimal_breakdown
 
 needs_ffmpeg = pytest.mark.skipif(
     shutil.which("ffmpeg") is None, reason="ffmpeg not installed"
 )
-
-
-def _analysis(
-    beat_times: list[float], onsets: list[tuple[float, float]]
-) -> AudioAnalysis:
-    return AudioAnalysis(
-        duration_s=20,
-        tempo_bpm=120,
-        beat_times=beat_times,
-        onset_times=[t for t, _ in onsets],
-        onset_strengths=[s for _, s in onsets],
-        frame_times=[0.0, 1.0, 2.0],
-        loudness_db=[-20.0, -10.0, -30.0],
-    )
-
-
-def _breakdown(*windows: tuple[float, float]) -> Breakdown:
-    beats = [beat(f"b{i}", lo, hi) for i, (lo, hi) in enumerate(windows)]
-    return Breakdown.model_validate(minimal_breakdown() | {"beats": beats})
-
-
-class TestProposeLoops:
-    grid: tuple[float, ...] = tuple(round(0.5 * i, 2) for i in range(40))  # 120 BPM
-
-    def test_longest_group_that_fits(self) -> None:
-        (loop,) = propose_loops(_breakdown((0.0, 5.0)), _analysis(list(self.grid), []))
-        assert (loop.loop_start_s, loop.loop_end_s, loop.loop_beats) == (0.0, 4.0, 8)
-
-    def test_falls_back_to_shorter_group(self) -> None:
-        (loop,) = propose_loops(_breakdown((0.0, 2.2)), _analysis(list(self.grid), []))
-        assert (loop.loop_start_s, loop.loop_end_s, loop.loop_beats) == (0.0, 2.0, 4)
-
-    def test_loop_needs_closing_beat(self) -> None:
-        # Exactly 2 grid points is one beat: too short for the smallest group.
-        (loop,) = propose_loops(_breakdown((0.0, 0.7)), _analysis(list(self.grid), []))
-        assert loop.loop_start_s is None and loop.loop_beats == 0
-
-    def test_loop_stays_inside_window(self) -> None:
-        (loop,) = propose_loops(_breakdown((1.2, 4.9)), _analysis(list(self.grid), []))
-        assert loop.loop_start_s == 1.5
-        assert loop.loop_end_s is not None and loop.loop_end_s <= 4.9
-
-    def test_peak_onset_is_strongest_in_window(self) -> None:
-        onsets = [(0.4, 9.0), (1.1, 2.0), (1.6, 5.0), (3.0, 99.0)]
-        (loop,) = propose_loops(
-            _breakdown((1.0, 2.0)), _analysis(list(self.grid), onsets)
-        )
-        assert loop.peak_onset_s == 1.6
-
-    def test_no_onsets_or_frames_in_window(self) -> None:
-        (loop,) = propose_loops(
-            _breakdown((10.0, 10.2)), _analysis(list(self.grid), [])
-        )
-        assert loop.peak_onset_s is None
-        assert loop.mean_loudness_db is None
 
 
 @needs_ffmpeg
@@ -110,15 +48,21 @@ class TestOnRealAudio:
         assert analysis.tempo_bpm == pytest.approx(120, rel=0.05)
         assert len(analysis.onset_times) >= 28
 
-    def test_cut_and_repeat(self, clicks: Path, tmp_path: Path) -> None:
-        clip = cut_clip(clicks, 1.0, 3.0, tmp_path / "loop.wav")
-        preview = repeat_clip(clip, tmp_path / "loop-x4.wav")
+    def test_cut(self, clicks: Path, tmp_path: Path) -> None:
+        clip = cut_clip(clicks, 1.0, 3.0, tmp_path / "piece.wav")
         with wave.open(str(clip)) as w:
-            clip_s = w.getnframes() / w.getframerate()
-        with wave.open(str(preview)) as w:
-            preview_s = w.getnframes() / w.getframerate()
-        assert clip_s == pytest.approx(2.0, abs=0.05)
-        assert preview_s == pytest.approx(8.0, abs=0.1)
+            assert w.getnframes() / w.getframerate() == pytest.approx(2.0, abs=0.05)
+
+    def test_measure_writes_analysis_and_spectrograms(
+        self, clicks: Path, tmp_path: Path
+    ) -> None:
+        beats = [beat("first", 0, 4), beat("second", 4, 8)]
+        breakdown = Breakdown.model_validate(minimal_breakdown() | {"beats": beats})
+        analysis = measure(clicks, breakdown, tmp_path / "out")
+        media, loaded = read_analysis(tmp_path / "out" / "analysis.json")
+        assert (media, loaded) == (clicks, analysis)
+        assert (tmp_path / "out" / "spectrograms" / "first.png").is_file()
+        assert (tmp_path / "out" / "spectrograms" / "second.png").is_file()
 
     def test_missing_media_says_what_to_do(self, tmp_path: Path) -> None:
         from audio import AudioError

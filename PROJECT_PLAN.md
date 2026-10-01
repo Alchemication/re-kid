@@ -34,14 +34,29 @@ Update the **Status** and **Next steps** sections as work lands.
   from yt-dlp and ffmpeg), not through API calls from `main.py`. A Claude skill
   for world research may come later. `main.py` is only for structured work:
   validating, inspecting and scaffolding.
-- **Sound: the computer measures, Adam listens.** No model we can call can hear
-  a recording: `codex exec` (v0.159) takes images only, and its voice mode is a
-  live microphone. So `main.py audio` measures locally with librosa and ffmpeg
-  (tempo, beats, hits, loudness, spectrograms) and cuts candidate loops.
-  `main.py listen` lets Adam hear, adjust and approve them and type what he
-  hears; only his notes become claims. The original
-  theme, cut into loops, is used for the private test; original "inspired by"
-  music is a later decision, after families have played.
+- **Sound: the computer measures, Adam listens.** No model we can call hears a
+  recording reliably. `codex exec` (v0.159) takes images only, and its voice
+  mode is a live microphone. Antigravity's `agy -p` (1.2.14, on the Google
+  subscription) was given a blind test on 2026-09-30: three synthetic sounds
+  with known answers plus the real cymbals moment, all with neutral names.
+  - WAV files: both models said they could not hear them.
+  - MP3 files, Gemini 3.8 Flash: invented details, e.g. three rising chimes
+    for a single steady tone, and a crash at 0.15 s that is really at 2.5 s.
+  - MP3 files, Gemini 3.1 Pro: got the rough shape of the synthetic sounds,
+    but judged every file (2–6 s) to last 1 s, so all its times were wrong.
+  - On the real theme, the two models disagreed completely ("brass fanfare"
+    vs "8-bit synth melody"), and neither noticed the cymbal crash.
+
+  So model listening is not used, not even as a lead: a confident wrong
+  description would prime the listener.
+
+  Instead, `src/audio.py` measures locally with librosa and ffmpeg (tempo,
+  beats, hits, loudness, spectrograms). Adam selects and names the sounds that
+  matter by ear, and only his marks become claims. Per-moment loops guessed
+  from the beat grid were dropped: the game brief decides which sounds and
+  melodies are needed, from what Adam marks. The original theme, cut into loops, is
+  used for the private test; original "inspired by" music is a later
+  decision, after families have played.
 - **Every statement about the original is a claim with provenance**
   (`verified` / `sourced` / `observed` / `interpretation` / `unknown`), so facts
   and our own ideas never blur. Rules are in `CLAUDE.md`.
@@ -164,42 +179,30 @@ wake Reksio at home.
 
 ## Next steps
 
-1. **Adam: the intro listening pass (about 15 min). This is the critical
-   path.** In a terminal, run `uv run python main.py listen reksio`. It
-   remembers the clip, so the path is only needed on a first run. On screen,
-   the intro's segments (the breakdown's beats, e.g. `cymbals`) are called
-   *moments*; "beat" means only a musical beat. There is one screen per
-   moment: what Reksio does, the sound question, and an ASCII loudness graph.
-   The graph shows the musical beats `|`, the loop `[ ]`, the strongest hit
-   `▲`, the moment `═`, and a `▼` playhead that moves while sound plays. The
-   view widens when the loop reaches past the moment. A strip at the top
-   shows every moment's progress (`✓` loop approved, `✎` note saved).
-
-   The moments are fixed; only the loop is adjusted. The loop is the music
-   the game repeats while it waits for the child's action, so judge it by
-   whether it flows when repeated, not by the description.
-   - Space plays the loop 4 times; `w` plays the whole moment.
-   - `[` `]` move the loop start one musical beat earlier or later, and `-`
-     `=` move its end. It can extend on both sides, past the moment, and
-     replays after each move.
-   - `a` approves a loop that repeats cleanly.
-   - `n` types what you hear. It is saved at once as an `observed_by: adam`
-     sound claim in `intro.yaml`. Rough notes are fine; Claude tidies the
-     wording afterwards. If a moment's edges look wrong, say so in a note.
-   - The arrow keys move between moments; `q` quits. Everything saves as you
-     go.
-
-   Loop choices go to `worlds/reksio/games/intro/loops.yaml`, which is
-   tracked. The loops start as a naive guess: the first detected beat of each
-   card, then the longest group of 8, 4 or 2 beats that fits. Measured so far,
+1. **Claude: build `main.py mark`, a local browser tool for marking sounds.**
+   It is built for Reksio: the intro video plays next to its waveform, and the
+   10 moments (the breakdown's segments, e.g. `cymbals`) show as labelled
+   bands. Musical beats appear as faint lines a selection can snap to. Adam
+   drags across the waveform to select a sound or melody, adjusts its edges,
+   plays it once or looped, names it and notes what he hears. Marks are saved
+   to `intro.yaml` as his timed observations, and each one gets its own clip.
+   It runs only on this machine.
+2. **Adam: mark the sounds and melodies that matter.** Pick what is striking
+   or worth reusing, such as the cymbal crash, a gulp or the theme's hook,
+   and name each one. There is no need to cover everything. Measured so far,
    not heard: a pulse of about 143 BPM; a near-silence around 4–6 s under the
    title; a cymbal-shaped burst at 18.2 s, where Reksio crashes his cymbals;
-   and a run of strong, even hits at 37–42 s on the studio card. If you buy
-   the [GAD Records album](https://gadrecords.bandcamp.com/album/reksio), the
-   theme without effects is cleaner raw material for loops.
-2. **Game brief** for the intro game (`games/intro/brief.yaml`, schema written
-   from this first brief), then build, then playtest.
-
+   and a run of strong, even hits at 37–42 s on the studio card.
+3. **Game brief** for the intro game (`games/intro/brief.yaml`, schema written
+   from this first brief). It decides which marked sounds the child triggers
+   and what music plays under each moment.
+4. **Only for the sounds the brief needs:** cut them from the mix, or try
+   isolating them. The [GAD Records album](https://gadrecords.bandcamp.com/album/reksio)
+   has the theme with and without effects; if the two line up, subtracting
+   one from the other may leave the effects alone. Demucs can split music into
+   parts. Spotify's Basic Pitch can turn melodies (not effects) into MIDI if
+   we compose "inspired by" music.
+5. Build, then playtest.
 ## MVP game — working concept (not decided)
 
 For the intro game. Settle these in the brief, once the sound is known.

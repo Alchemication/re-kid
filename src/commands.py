@@ -10,15 +10,13 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-from pathlib import Path
 
-from config import AUDIO_DIR, EPISODES_FILE, INTRO_FILE, INTRO_LOOPS_FILE, REPO_ROOT
+from config import EPISODES_FILE
 from schema.breakdown import Breakdown
 from schema.common import Claim, Status
 from schema.episode import EpisodeCatalogue
-from schema.loops import LoopSet
 from schema.world import SourceRegistry, WorldDossier
-from worlds import WorldReport, dump_model, list_worlds, validate_world, world_dir
+from worlds import WorldReport, list_worlds, validate_world
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +33,6 @@ _SCHEMAS = {
     "sources": SourceRegistry,
     "episodes": EpisodeCatalogue,
     "intro": Breakdown,
-    "loops": LoopSet,
 }
 
 
@@ -157,155 +154,6 @@ def cmd_episodes(args: argparse.Namespace) -> int:
             e.watch_url or "",
         )
     Console().print(table)
-    return 0
-
-
-def cmd_audio(args: argparse.Namespace) -> int:
-    """Measure a clip against the intro breakdown and cut one loop per beat."""
-    from rich.console import Console
-    from rich.table import Table
-
-    from audio import AudioError, prepare
-
-    report = validate_world(args.world)
-    if report.intro is None:
-        for error in report.errors:
-            logger.error(error)
-        logger.error(
-            "No valid %s for %s. Write the intro breakdown first.",
-            INTRO_FILE,
-            args.world,
-        )
-        return 1
-
-    media = Path(args.media)
-    out = world_dir(args.world) / AUDIO_DIR / "intro"
-    try:
-        analysis, loops = prepare(media, report.intro, out)
-    except AudioError as exc:
-        logger.error("%s", exc)
-        return 1
-
-    def fmt(value: float | None) -> str:
-        return "—" if value is None else f"{value:.2f}"
-
-    table = Table()
-    table.add_column("beat", no_wrap=True)
-    for header in ("window s", "loop s", "beats", "loop len s", "peak hit s", "dB"):
-        table.add_column(header)
-    for loop in loops:
-        length = (
-            loop.loop_end_s - loop.loop_start_s
-            if loop.loop_start_s is not None and loop.loop_end_s is not None
-            else None
-        )
-        table.add_row(
-            loop.beat_id,
-            f"{loop.window_start_s:.1f}–{loop.window_end_s:.1f}",
-            f"{fmt(loop.loop_start_s)}–{fmt(loop.loop_end_s)}",
-            str(loop.loop_beats or "—"),
-            fmt(length),
-            fmt(loop.peak_onset_s),
-            fmt(loop.mean_loudness_db),
-        )
-    console = Console()
-    console.print(
-        f"Measured, not heard: tempo ≈ {analysis.tempo_bpm} BPM, "
-        f"{len(analysis.beat_times)} beats, {len(analysis.onset_times)} onsets."
-    )
-    console.print(table)
-    print(f"Loops, 4x previews, spectrograms and analysis.json in {out}")
-    print("Play each previews/*-x4.wav: does it repeat cleanly, and what do you hear?")
-    return 0
-
-
-def cmd_listen(args: argparse.Namespace) -> int:
-    """Walk the intro beat by beat: hear loops, nudge them, note what you hear."""
-    import sys
-
-    from audio import AudioError, prepare, read_report, render_loop
-    from listen import Session, initial_loops, run
-
-    if not sys.stdin.isatty():
-        logger.error("`listen` is interactive — run it in a terminal.")
-        return 1
-    report = validate_world(args.world)
-    if report.intro is None:
-        for error in report.errors:
-            logger.error(error)
-        logger.error("No valid %s for %s.", INTRO_FILE, args.world)
-        return 1
-
-    base = world_dir(args.world)
-    out = base / AUDIO_DIR / "intro"
-    existing = report.intro_loops
-    if args.media:
-        media = Path(args.media).resolve()
-    elif existing is not None:
-        media = REPO_ROOT / existing.source
-    else:
-        logger.error(
-            "Pass the intro clip the first time, e.g. `main.py listen %s "
-            "worlds/%s/media/intro/1972-kosmonauta.mp4`.",
-            args.world,
-            args.world,
-        )
-        return 1
-    source = (
-        str(media.relative_to(REPO_ROOT))
-        if media.is_relative_to(REPO_ROOT)
-        else str(media)
-    )
-    if existing is not None and existing.source != source:
-        logger.error(
-            "%s was made from %s, not %s. Loop times only fit their own clip: "
-            "pass that clip, or delete the loops file to start again.",
-            INTRO_LOOPS_FILE,
-            existing.source,
-            source,
-        )
-        return 1
-
-    try:
-        analysis_path = out / "analysis.json"
-        measured = None
-        if analysis_path.is_file():
-            try:
-                measured_media, analysis, proposals = read_report(analysis_path)
-                measured = measured_media.resolve()
-            except (KeyError, TypeError, ValueError):
-                measured = None  # stale or damaged report: measure again
-        if measured != media:
-            print("Measuring the clip (first run takes a few seconds)…")
-            analysis, proposals = prepare(media, report.intro, out)
-        loops = existing or initial_loops(proposals, report.intro.id, source)
-        if existing is None:
-            dump_model(loops, base / INTRO_LOOPS_FILE)
-        for loop in loops.loops:  # previews always match the saved loop points
-            render_loop(media, loop.start_s, loop.end_s, out, loop.beat_id)
-        session = Session(
-            breakdown=report.intro,
-            breakdown_path=base / INTRO_FILE,
-            loops=loops,
-            loops_path=base / INTRO_LOOPS_FILE,
-            analysis=analysis,
-            proposals=proposals,
-            media=media,
-            out=out,
-            observer=args.by,
-        )
-        run(session)
-    except AudioError as exc:
-        logger.error("%s", exc)
-        return 1
-
-    approved = sum(loop.approved for loop in session.loops.loops)
-    heard = sum(b.sound.status == Status.OBSERVED for b in session.breakdown.beats)
-    print(
-        f"{approved}/{len(session.loops.loops)} loops approved, "
-        f"{heard}/{len(session.breakdown.beats)} moments with notes. "
-        f"Saved to {INTRO_LOOPS_FILE} and {INTRO_FILE}."
-    )
     return 0
 
 

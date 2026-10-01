@@ -5,8 +5,6 @@ Subcommands:
     validate  Check world files against the schema and each other.
     show      Print a world's claims with provenance.
     episodes  Print a world's episode catalogue as a table.
-    audio     Measure an intro clip and cut one candidate loop per beat.
-    listen    Walk the intro beat by beat: hear loops, nudge them, take notes.
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -34,20 +32,8 @@ Examples:
     uv run python main.py episodes reksio --online
         Episodes the studio has uploaded: year, directors, length, link.
 
-    uv run python main.py audio reksio worlds/reksio/media/intro/1972-kosmonauta.mp4
-        Tempo, beats and hits of the intro, lined up with intro.yaml; writes
-        loops, spectrograms and analysis.json to worlds/reksio/audio/intro/.
-        Measurements only — a person still has to listen.
-
-    uv run python main.py listen reksio worlds/reksio/media/intro/1972-kosmonauta.mp4
-        Interactive, one screen per intro moment: ASCII loudness graph with a
-        moving playhead, loop playback (afplay/ffplay), a progress strip,
-        single-key loop nudging and approval. Notes
-        you type become observed sound claims in intro.yaml; loop choices go
-        to games/intro/loops.yaml. Later runs can drop the clip path.
-
     uv run python main.py schema world
-        JSON Schema for world.yaml (also: sources, episodes, intro, loops).
+        JSON Schema for world.yaml (also: sources, episodes, intro).
 """
 
 from __future__ import annotations
@@ -60,15 +46,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 from commands import (
-    cmd_audio,
     cmd_episodes,
     cmd_list,
-    cmd_listen,
     cmd_schema,
     cmd_show,
     cmd_validate,
 )
-from config import OBSERVER
 from schema.common import Status
 
 
@@ -106,30 +89,8 @@ def main() -> int:
         "--online", action="store_true", help="Only episodes with an official upload"
     )
 
-    p_audio = sub.add_parser("audio", help="Measure an intro clip, cut loops")
-    p_audio.add_argument("world", metavar="WORLD")
-    p_audio.add_argument(
-        "media",
-        metavar="MEDIA",
-        help="Intro clip (video or audio) timed like intro.yaml's reference episode",
-    )
-
-    p_listen = sub.add_parser("listen", help="Interactive listening pass")
-    p_listen.add_argument("world", metavar="WORLD")
-    p_listen.add_argument(
-        "media",
-        metavar="MEDIA",
-        nargs="?",
-        help="Intro clip; needed on the first run only",
-    )
-    p_listen.add_argument(
-        "--by", default=OBSERVER, help=f"Who is listening (default: {OBSERVER})"
-    )
-
     p_schema = sub.add_parser("schema", help="Print JSON Schema")
-    p_schema.add_argument(
-        "kind", choices=["world", "sources", "episodes", "intro", "loops"]
-    )
+    p_schema.add_argument("kind", choices=["world", "sources", "episodes", "intro"])
 
     args = parser.parse_args()
     dispatch = {
@@ -137,8 +98,6 @@ def main() -> int:
         "validate": cmd_validate,
         "show": cmd_show,
         "episodes": cmd_episodes,
-        "audio": cmd_audio,
-        "listen": cmd_listen,
         "schema": cmd_schema,
     }
     return dispatch[args.cmd](args)
