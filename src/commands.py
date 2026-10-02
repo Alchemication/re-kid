@@ -222,7 +222,8 @@ def cmd_mark(args: argparse.Namespace) -> int:
 
     session = Session(
         world=args.world,
-        title=f"{report.dossier.title} — {intro.title}",
+        world_title=report.dossier.title,
+        title=intro.title,
         breakdown=intro,
         breakdown_path=world_dir(args.world) / INTRO_FILE,
         analysis=analysis,

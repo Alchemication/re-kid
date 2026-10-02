@@ -183,7 +183,9 @@ wake Reksio at home.
    `uv run python main.py mark reksio`. A page opens with the intro video, its
    waveform and spectrogram, the 10 moments and the beat grid. Drag across the
    waveform (or press `M` at a sound's start and end) to mark it, name it, pick
-   sound effect / melody / other, and note what you hear. Speed 75% / 50% helps
+   sound effect / melody / other, and note what you hear. Each moment's
+   "Listen for" question has an answer box too, for things that can't be
+   marked ("no sniffing sound"). Speed 75% / 50% helps
    with exact edges; `?` lists every key. Marks save to `intro.yaml` as you go;
    Ctrl+C in the terminal stops the tool and cuts each mark to
    `audio/intro/marks/<id>.wav`. Pick what is striking or worth reusing, such

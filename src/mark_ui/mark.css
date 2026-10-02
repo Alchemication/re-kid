@@ -30,12 +30,24 @@
 
 html, body { margin: 0; }
 
+/* One screen, no page scroll: header, a top row that takes what is left, and
+   the timeline (the main workspace), always fully visible. */
 body {
   background: var(--cream);
   color: var(--ink);
   font: 15px/1.45 var(--body);
-  min-width: 960px;
+  min-width: 1100px;
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto minmax(220px, 1fr) auto;
+  /* minmax(0, 1fr): without it a zoomed waveform (tens of thousands of px
+     wide) stretches the whole page instead of scrolling inside its frame. */
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
 }
+@media (max-height: 640px) { body { height: auto; overflow: auto; } }
+
+.small { font-size: 13px; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 
@@ -64,7 +76,7 @@ kbd {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 24px;
+  padding: 8px 20px;
   color: var(--cream);
   background:
     linear-gradient(100deg, transparent 0 55%, rgba(234, 168, 163, 0.35) 56% 64%, transparent 65%),
@@ -77,7 +89,7 @@ kbd {
 .brand { display: flex; align-items: baseline; gap: 14px; }
 
 .logo {
-  font: 34px/1 var(--display);
+  font: 30px/1 var(--display);
   letter-spacing: 1px;
   text-shadow: 2px 2px 0 var(--mustard-deep);
 }
@@ -104,27 +116,53 @@ button.ghost {
 
 main {
   display: grid;
-  grid-template-columns: minmax(420px, 520px) 1fr;
-  gap: 16px;
-  padding: 16px 24px 0;
+  grid-template-columns: auto minmax(260px, 340px) minmax(380px, 1fr);
+  gap: 14px;
+  padding: 12px 20px 0;
+  min-height: 0;
 }
 
-.stage { display: flex; flex-direction: column; gap: 12px; }
-
 .video-card {
+  position: relative;
+  height: 100%;
+  aspect-ratio: 4 / 3;
   background: black;
   border-radius: var(--radius);
   overflow: hidden;
-  aspect-ratio: 4 / 3;
   box-shadow: var(--shadow);
 }
 
 video { width: 100%; height: 100%; display: block; }
 
-.now { padding: 12px 14px; }
-.now p { margin: 6px 0 0; }
-.now-head { display: flex; justify-content: space-between; align-items: center; }
+.video-hint {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  color: var(--cream); font-weight: 600; pointer-events: none;
+  background: rgba(0, 0, 0, 0.45); padding: 8px 14px; border-radius: 10px;
+}
+.video-hint[hidden] { display: none; }
+.video-hint kbd { color: var(--ink); }
+
+.now { padding: 10px 14px; overflow: auto; display: flex; flex-direction: column; gap: 4px; }
+.now p { margin: 2px 0 0; }
+.now-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.now-chip { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%; }
+.onscreen { margin-top: 8px !important; }
 .now-time { font: 13px var(--mono); color: var(--ink-soft); }
+.question { margin-top: 6px !important; }
+.question[hidden] { display: none; }
+
+.answer { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; font-weight: 600; font-size: 13px; }
+.answer textarea {
+  min-height: 52px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 6px 8px;
+  background: white;
+  font-weight: normal;
+}
+.answer.heard textarea { border-color: #7aa36a; background: #f6fbf2; }
+.answer .dim { font-weight: normal; }
 
 .chip {
   display: inline-block;
@@ -138,21 +176,21 @@ video { width: 100%; height: 100%; display: block; }
 
 /* ---- marks list ---------------------------------------------------- */
 
-.marks { padding: 14px 16px; display: flex; flex-direction: column; min-height: 0; max-height: 560px; }
+.marks { padding: 10px 14px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 
 .marks-head { display: flex; align-items: baseline; justify-content: space-between; }
-.marks-head h2, .modal-head h2 { font: 22px var(--display); letter-spacing: 0.5px; margin: 0; color: var(--mustard-deep); }
+.marks-head h2, .modal-head h2 { font: 20px var(--display); letter-spacing: 0.5px; margin: 0; color: var(--mustard-deep); }
 
 .empty {
-  margin-top: 14px;
-  padding: 18px;
+  margin-top: 10px;
+  padding: 12px 14px;
   border: 2px dashed var(--mustard-soft);
   border-radius: var(--radius);
   text-align: center;
 }
 .empty p { margin: 6px 0; }
 
-.marks-list { list-style: none; margin: 12px 0 0; padding: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+.marks-list { list-style: none; margin: 10px 0 0; min-height: 0; padding: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
 
 .mark {
   border: 1px solid var(--line);
@@ -209,7 +247,7 @@ video { width: 100%; height: 100%; display: block; }
 
 /* ---- timeline ------------------------------------------------------ */
 
-.timeline-area { margin: 16px 24px 24px; padding: 12px 16px 14px; }
+.timeline-area { margin: 12px 20px 12px; padding: 10px 14px 10px; min-width: 0; }
 
 .transport { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 
@@ -235,7 +273,7 @@ button.primary {
 .snap { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .snap input { accent-color: var(--blue); }
 
-.moments { display: flex; gap: 6px; margin: 12px 0 8px; flex-wrap: wrap; }
+.moments { display: flex; gap: 5px; margin: 8px 0 6px; flex-wrap: wrap; }
 .moments button {
   border: 1px solid var(--line);
   background: var(--paper);
@@ -249,13 +287,14 @@ button.primary {
 .moments button.current b { color: var(--cream); }
 
 .wave {
+  width: 100%;
   background: var(--wave-bg);
   border-radius: 10px;
   overflow: hidden;
   position: relative;
 }
 
-.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; margin-top: 8px; align-items: center; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; margin-top: 6px; align-items: center; }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 .sw { display: inline-block; width: 14px; height: 10px; border-radius: 3px; font-style: normal; }
 .sw-effect { background: var(--red-soft); border: 1px solid var(--red); }
@@ -264,7 +303,7 @@ button.primary {
 .sw-beat { width: 0; height: 12px; border-left: 1px dashed var(--ink-soft); border-radius: 0; }
 .sw-hit { width: auto; height: auto; color: #e0703f; font-size: 10px; }
 
-.keys { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.keys { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
 .keys span { white-space: nowrap; }
 
 /* ---- modal, toast -------------------------------------------------- */

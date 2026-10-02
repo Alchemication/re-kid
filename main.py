@@ -36,7 +36,8 @@ Examples:
     uv run python main.py mark reksio
         Opens a page in the browser: the intro video with its waveform,
         spectrogram, moments and beat grid. Drag to select a sound, name it,
-        note what you hear. Marks save to intro.yaml as you go; Ctrl+C stops
+        note what you hear, answer each moment's sound question. Everything
+        saves to intro.yaml as you go; Ctrl+C stops
         the tool and cuts each mark to audio/intro/marks/<id>.wav.
 
     uv run python main.py schema world

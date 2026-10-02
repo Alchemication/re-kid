@@ -3,7 +3,6 @@
 
 import WaveSurfer from '/ui/vendor/wavesurfer/wavesurfer.esm.js'
 import RegionsPlugin from '/ui/vendor/wavesurfer/plugins/regions.esm.js'
-import TimelinePlugin from '/ui/vendor/wavesurfer/plugins/timeline.esm.js'
 import ZoomPlugin from '/ui/vendor/wavesurfer/plugins/zoom.esm.js'
 import SpectrogramPlugin from '/ui/vendor/wavesurfer/plugins/spectrogram.esm.js'
 
@@ -39,7 +38,7 @@ const KIND_COLOR = {
 // wavesurfer renders inside a shadow DOM, which page styles can't reach, so
 // the overlay (moment bands, beat lines, hits) and mark labels are styled here.
 const SHADOW_CSS = `
-.ovl { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.ovl { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 .ovl .band { position: absolute; top: 0; bottom: 0; border-left: 1px solid rgba(251, 246, 232, 0.45); }
 .ovl .band.alt { background: rgba(251, 246, 232, 0.05); }
 .ovl .band.current { background: rgba(181, 147, 47, 0.16); }
@@ -48,9 +47,20 @@ const SHADOW_CSS = `
   font: 12px/1 var(--display); letter-spacing: 0.4px;
   color: var(--cream); background: rgba(46, 39, 23, 0.7);
   padding: 3px 5px 2px; border-radius: 5px; white-space: nowrap;
+  max-width: calc(100% - 10px); overflow: hidden; text-overflow: ellipsis; box-sizing: border-box;
 }
-.ovl .beat { position: absolute; top: 22px; height: 100px; border-left: 1px dashed rgba(251, 246, 232, 0.22); }
-.ovl .hit { position: absolute; top: 112px; transform: translateX(-50%); color: #f08a5d; font-size: 10px; line-height: 1; }
+.ovl .beat { position: absolute; top: 20px; height: 80px; border-left: 1px dashed rgba(251, 246, 232, 0.22); }
+.ovl .hit { position: absolute; top: 90px; transform: translateX(-50%); color: #f08a5d; font-size: 10px; line-height: 1; }
+.ovl .tick { position: absolute; bottom: 0; height: 6px; border-left: 1px solid rgba(251, 246, 232, 0.55); }
+.ovl .tick.major { height: 10px; }
+.ovl .tick span {
+  position: absolute; bottom: 9px; left: 3px;
+  font: 10px/1 ui-monospace, Menlo, monospace; color: var(--cream);
+  background: rgba(46, 39, 23, 0.65); padding: 1px 3px; border-radius: 3px;
+}
+.ovl[data-density="coarse"] .tick:not(.every5) { display: none; }
+.ovl[data-density="coarse"] .tick.every5 span { display: inline; }
+.ovl[data-density="mid"] .tick:not(.major) { display: none; }
 .ovl .mark-in { position: absolute; top: 0; bottom: 0; border-left: 2px solid #ffd54a; }
 
 .region-label {
@@ -71,6 +81,7 @@ const state = {
   snap: false,
   deleted: [],
   moment: -1,
+  answerFor: -1, // index of the moment the answer box currently shows
 }
 const programmatic = new Set()
 let pointerDown = false
@@ -179,8 +190,41 @@ async function flushSave() {
   }
 }
 
+let answerTimer = null
+
+function scheduleAnswer() {
+  const i = state.answerFor
+  const note = $('#answer').value.trim()
+  clearTimeout(answerTimer)
+  if (i < 0 || !note) { answerTimer = null; return }
+  setSaveState('busy', 'Saving…')
+  answerTimer = setTimeout(() => saveAnswer(i, note), SAVE_DELAY_MS)
+}
+
+async function saveAnswer(i, note) {
+  answerTimer = null
+  const moment = state.session.moments[i]
+  try {
+    const res = await fetch(`/api/moments/${encodeURIComponent(moment.id)}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ note }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || res.statusText)
+    moment.heard = true
+    moment.sound = note
+    if (state.answerFor === i) $('.answer').classList.add('heard')
+    if (document.activeElement !== $('#answer')) showAnswer()
+    setSaveState('idle', 'All saved')
+  } catch (err) {
+    setSaveState('error', 'Not saved')
+    toast(String(err.message || err))
+  }
+}
+
 window.addEventListener('beforeunload', (e) => {
-  if (saveTimer || saving) { e.preventDefault(); e.returnValue = '' }
+  if (saveTimer || saving || answerTimer) { e.preventDefault(); e.returnValue = '' }
 })
 
 // ---------------------------------------------------------------- marks
@@ -324,6 +368,9 @@ function renderRow(mark) {
     mark.region.setContent(regionLabel(mark.name))
     scheduleSave()
   })
+  name.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); li.querySelector('textarea').focus() }
+  })
 
   const kinds = el('span', { class: 'kind', role: 'group', 'aria-label': 'Kind' })
   for (const kind of Object.keys(KIND_LABEL)) {
@@ -423,8 +470,21 @@ function drawOverlay() {
   for (const [t, s] of state.session.onsets) {
     if (s >= cut) overlay.append(el('div', { class: 'hit', style: `left:${pct(t)}` }, '▲'))
   }
+  // Time ruler: a tick every 0.5 s, labelled seconds; how many show depends on zoom.
+  for (let k = 0; k * 0.5 <= d; k++) {
+    const t = k * 0.5
+    const whole = k % 2 === 0
+    const cls = ['tick', whole ? 'major' : '', whole && (t % 5 === 0) ? 'every5' : ''].join(' ')
+    overlay.append(el('div', { class: cls, style: `left:${pct(t)}` }, el('span', {}, whole ? `${t}s` : `${t.toFixed(1)}`)))
+  }
   overlay.append(el('div', { class: 'mark-in', hidden: '' }))
   wrap.append(overlay)
+  setDensity(ws.options.minPxPerSec)
+}
+
+function setDensity(pxPerSec) {
+  if (!overlay) return
+  overlay.dataset.density = pxPerSec < 60 ? 'coarse' : pxPerSec < 220 ? 'mid' : 'fine'
 }
 
 function showMarkIn(t) {
@@ -438,24 +498,32 @@ function showMarkIn(t) {
 function updateNow(t) {
   $('#clock').textContent = fmt(t)
   $('#now-time').textContent = fmt(t)
-  const i = momentAt(t)
-  if (i === state.moment) return
-  state.moment = i
+  const found = momentAt(t)
+  const i = Math.max(0, found)
   const m = state.session.moments[i]
+  $('#now-start').textContent = found < 0 ? `starts at ${m.start.toFixed(1)} s ·` : ''
+  if (i === state.moment) return
+  $('#now-moment').textContent = `${i + 1}/${state.session.moments.length} · ${m.id}`
+  $('#now-moment').title = `Moment ${i + 1}: ${m.id}, ${m.start.toFixed(1)}–${m.end.toFixed(1)} s`
+  state.moment = i
   document.querySelectorAll('.moments button').forEach((b, j) => b.classList.toggle('current', j === i))
   overlay?.querySelectorAll('.band').forEach((b, j) => b.classList.toggle('current', j === i))
-  if (!m) {
-    $('#now-moment').textContent = 'Before the first moment'
-    $('#now-action').textContent = ''
-    $('#now-text').textContent = ''
-    $('#now-sound').textContent = ''
-    return
-  }
-  $('#now-moment').textContent = `Moment ${i + 1}/${state.session.moments.length} · ${m.id}`
   $('#now-action').textContent = m.action
   $('#now-text').textContent = m.text
-  $('#now-sound-label').textContent = m.heard ? 'You heard' : 'Listen for'
-  $('#now-sound').textContent = m.sound
+  showAnswer()
+}
+
+function showAnswer() {
+  const answer = $('#answer')
+  if (document.activeElement === answer) return // don't swap text under the cursor
+  const i = state.moment
+  const m = state.session.moments[i]
+  state.answerFor = i
+  $('.question').hidden = m.heard
+  $('#now-sound').textContent = m.heard ? '' : m.sound
+  $('.answer').classList.toggle('heard', m.heard)
+  $('#answer-label').textContent = m.heard ? `You heard in ${m.id} (edit to change)` : `Your answer for ${m.id}`
+  answer.value = m.heard ? m.sound : ''
 }
 
 function goMoment(delta) {
@@ -553,7 +621,9 @@ async function start() {
   const res = await fetch('/api/session')
   state.session = await res.json()
   const s = state.session
+  $('#logo').textContent = s.world_title
   $('#title').textContent = s.title
+  document.title = `${s.world_title} · Mark sounds`
   $('#duration').textContent = fmt(s.duration, false)
   $('#tempo').textContent = `pulse ≈ ${s.tempo} BPM (measured)`
   $('#moments').replaceChildren(...s.moments.map((m, i) => el('button', {
@@ -569,7 +639,7 @@ async function start() {
     container: '#wave',
     media: video,
     url: '/media',
-    height: 120,
+    height: 100,
     waveColor: '#d9c48c',
     progressColor: '#f6e7b8',
     cursorColor: '#ff5a3c',
@@ -581,8 +651,7 @@ async function start() {
     dragToSeek: false,
     plugins: [
       regions,
-      SpectrogramPlugin.create({ labels: true, height: 130, scale: 'mel', frequencyMax: 11025, useWebWorker: false, colorMap: 'roseus' }),
-      TimelinePlugin.create({ height: 20, style: 'color:#e7d7a4;font-size:11px' }),
+      SpectrogramPlugin.create({ labels: true, height: 100, scale: 'mel', frequencyMax: 11025, useWebWorker: false, colorMap: 'roseus' }),
       ZoomPlugin.create({ scale: 0.25, maxZoom: MAX_PX_PER_SEC, exponentialZooming: true }),
     ],
   })
@@ -601,7 +670,7 @@ async function start() {
     updateNow(0)
   })
   ws.on('redrawcomplete', drawOverlay)
-  ws.on('zoom', setZoomSlider)
+  ws.on('zoom', (px) => { setZoomSlider(px); setDensity(px) })
   ws.on('timeupdate', (t) => {
     updateNow(t)
     const loop = state.loop
@@ -610,7 +679,7 @@ async function start() {
       else if (t >= loop.end - 0.01) ws.setTime(loop.start)
     }
   })
-  ws.on('play', () => ($('#play').textContent = '❚❚ Pause'))
+  ws.on('play', () => { $('#play').textContent = '❚❚ Pause'; $('#video-hint').hidden = true })
   ws.on('pause', () => ($('#play').textContent = '▶ Play'))
   ws.on('error', (err) => toast(`Audio problem: ${err.message || err}`))
 
@@ -643,6 +712,8 @@ async function start() {
     ws.zoom(fit * Math.pow(MAX_PX_PER_SEC / fit, Number(e.target.value) / 100))
   })
   $('#snap').addEventListener('change', (e) => setSnap(e.target.checked))
+  $('#answer').addEventListener('input', scheduleAnswer)
+  $('#answer').addEventListener('blur', () => { if (!answerTimer) showAnswer() })
   $('#help-open').addEventListener('click', () => ($('#help').hidden = false))
   $('#help-close').addEventListener('click', () => ($('#help').hidden = true))
   $('#help').addEventListener('click', (e) => { if (e.target.id === 'help') $('#help').hidden = true })

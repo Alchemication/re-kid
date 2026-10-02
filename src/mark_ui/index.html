@@ -11,8 +11,8 @@
 <body>
   <header class="top">
     <div class="brand">
-      <span class="logo">Reksio</span>
-      <span class="subtitle" id="title">Title sequence</span>
+      <span class="logo" id="logo">Reksio</span>
+      <span class="subtitle"><span id="title">Title sequence</span> · mark the sounds worth keeping</span>
     </div>
     <div class="status">
       <span id="mark-count">0 marks</span>
@@ -22,30 +22,35 @@
   </header>
 
   <main>
-    <section class="stage">
-      <div class="video-card">
-        <video id="video" playsinline preload="auto"></video>
+    <div class="video-card">
+      <video id="video" playsinline preload="auto"></video>
+      <div class="video-hint" id="video-hint"><kbd>Space</kbd> to play</div>
+    </div>
+
+    <section class="now card" aria-live="polite">
+      <div class="now-head">
+        <span class="chip now-chip" id="now-moment">1/10</span>
+        <span class="now-time"><span id="now-start" class="dim small"></span> <span id="now-time">0:00.000</span></span>
       </div>
-      <div class="now card" aria-live="polite">
-        <div class="now-head">
-          <span class="chip now-chip" id="now-moment">—</span>
-          <span class="now-time" id="now-time">0:00.000</span>
-        </div>
-        <p><b>On screen</b> <span id="now-action"></span></p>
-        <p class="dim" id="now-text"></p>
-        <p><b id="now-sound-label">Listen for</b> <span id="now-sound"></span></p>
-      </div>
+      <p class="question"><b id="now-sound-label">Listen for</b> <span id="now-sound"></span></p>
+      <label class="answer">
+        <span id="answer-label">Your answer</span>
+        <textarea id="answer" placeholder="What do you hear in this moment? e.g. no sniffing sound, just strings" aria-describedby="answer-help"></textarea>
+        <span class="dim small" id="answer-help">Saved as what you heard in this moment.</span>
+      </label>
+      <p class="onscreen"><b>On screen</b> <span id="now-action"></span></p>
+      <p class="dim small" id="now-text"></p>
     </section>
 
     <section class="marks card">
       <div class="marks-head">
         <h2>Your marks</h2>
-        <span class="dim">Saved to intro.yaml as you go</span>
+        <span class="dim small">Saved to intro.yaml as you go</span>
       </div>
       <div id="marks-empty" class="empty">
-        <p><b>Drag across the waveform</b> below to mark a sound or a melody.</p>
+        <p><b>Drag across the waveform</b> below to mark a sound or melody worth keeping.</p>
         <p>Or press <kbd>M</kbd> where it starts and again where it ends while it plays.</p>
-        <p class="dim">Mark only what's worth keeping: a crash, a gulp, the tune's hook.</p>
+        <p class="dim">A crash, a gulp, the tune's hook. No need to mark everything.</p>
       </div>
       <ol id="marks-list" class="marks-list"></ol>
     </section>

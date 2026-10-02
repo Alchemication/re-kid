@@ -42,7 +42,8 @@ def session(tmp_path: Path) -> Session:
     media.write_bytes(bytes(range(256)) * 4)  # 1024 bytes of known content
     return Session(
         world="demo",
-        title="Demo — Intro",
+        world_title="Demo",
+        title="Intro",
         breakdown=breakdown,
         breakdown_path=path,
         analysis=_analysis(),
@@ -214,3 +215,38 @@ class TestServer:
         assert _get(server + "/ui/mark.js")[0] == 200
         assert _get(server + "/ui/../mark.py")[0] == 404
         assert _get(server + "/ui/%2e%2e/mark.py")[0] == 404
+
+
+class TestAnswers:
+    def test_answer_becomes_moments_observed_sound(self, session: Session) -> None:
+        session.answer("cymbals", "  A real cymbal, on the beat.  ")
+        saved = load_model(session.breakdown_path, Breakdown)
+        sound = {b.id: b.sound for b in saved.beats}["cymbals"]
+        assert (sound.text, sound.status, sound.observed_by) == (
+            "A real cymbal, on the beat.",
+            Status.OBSERVED,
+            "adam",
+        )
+
+    def test_other_moments_untouched(self, session: Session) -> None:
+        session.answer("cymbals", "Crash.")
+        saved = load_model(session.breakdown_path, Breakdown)
+        assert {b.id: b.sound for b in saved.beats}["title"].status == Status.UNKNOWN
+
+    def test_empty_or_unknown_rejected(self, session: Session) -> None:
+        with pytest.raises(ValueError, match="empty"):
+            session.answer("cymbals", "   ")
+        with pytest.raises(ValueError, match="no moment called 'nope'"):
+            session.answer("nope", "Crash.")
+
+    def test_put_answer(self, server: str, session: Session) -> None:
+        req = urllib.request.Request(
+            server + "/api/moments/title",
+            data=json.dumps({"note": "Brass fanfare."}).encode(),
+            method="PUT",
+            headers={"Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req) as res:
+            assert res.status == 200
+        saved = load_model(session.breakdown_path, Breakdown)
+        assert saved.beats[0].sound.text == "Brass fanfare."

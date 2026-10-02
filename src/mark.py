@@ -104,6 +104,7 @@ class Session:
     """What the server serves and writes. Shared by request threads."""
 
     world: str
+    world_title: str
     title: str
     breakdown: Breakdown
     breakdown_path: Path
@@ -117,6 +118,7 @@ class Session:
         b = self.breakdown
         return {
             "world": self.world,
+            "world_title": self.world_title,
             "title": self.title,
             "observer": self.observer,
             "duration": self.analysis.duration_s,
@@ -174,6 +176,23 @@ class Session:
             self.breakdown = updated
         return marks
 
+    def answer(self, moment_id: str, note: str) -> None:
+        """Record what the listener heard in one moment as its sound claim."""
+        note = note.strip()
+        if not note:
+            raise ValueError("the answer is empty")
+        with self.lock:
+            data = self.breakdown.model_dump()
+            beats = {b["id"]: b for b in data["beats"]}
+            if moment_id not in beats:
+                raise ValueError(f"no moment called '{moment_id}'")
+            beats[moment_id]["sound"] = Claim(
+                text=note, status=Status.OBSERVED, observed_by=self.observer
+            ).model_dump()
+            updated = Breakdown.model_validate(data)
+            dump_model(updated, self.breakdown_path)
+            self.breakdown = updated
+
 
 class Handler(BaseHTTPRequestHandler):
     """Routes: ``/`` page, ``/ui/...`` static, ``/media`` video, ``/api/...``."""
@@ -205,15 +224,22 @@ class Handler(BaseHTTPRequestHandler):
             self._error(HTTPStatus.NOT_FOUND, "No such page.")
 
     def do_PUT(self) -> None:
-        """``/api/marks``: replace all marks with the posted list."""
-        if self.path != "/api/marks":
-            self._error(HTTPStatus.NOT_FOUND, "No such endpoint.")
-            return
+        """``/api/marks``: replace all marks. ``/api/moments/<id>``: answer the
+        moment's sound question."""
         try:
             length = int(self.headers.get("Content-Length", "0"))
             body = json.loads(self.rfile.read(length) or b"{}")
-            inputs = [MarkInput.model_validate(m) for m in body.get("marks", [])]
-            marks = self.session.save(inputs)
+            if self.path == "/api/marks":
+                inputs = [MarkInput.model_validate(m) for m in body.get("marks", [])]
+                marks = self.session.save(inputs)
+                result = {"saved": len(marks), "ids": [m.id for m in marks]}
+            elif self.path.startswith("/api/moments/"):
+                moment_id = self.path.removeprefix("/api/moments/")
+                self.session.answer(moment_id, str(body.get("note", "")))
+                result = {"saved": moment_id}
+            else:
+                self._error(HTTPStatus.NOT_FOUND, "No such endpoint.")
+                return
         except (ValueError, ValidationError) as exc:
             message = (
                 "; ".join(e["msg"] for e in exc.errors())
@@ -226,10 +252,7 @@ class Handler(BaseHTTPRequestHandler):
             logger.error("Could not write %s: %s", self.session.breakdown_path, exc)
             self._error(HTTPStatus.INTERNAL_SERVER_ERROR, f"Not saved: {exc}")
             return
-        self._json(
-            HTTPStatus.OK,
-            {"saved": len(marks), "ids": [m.id for m in marks]},
-        )
+        self._json(HTTPStatus.OK, result)
 
     def _file(self, path: Path) -> None:
         data = path.read_bytes()
