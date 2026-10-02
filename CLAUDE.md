@@ -14,15 +14,17 @@ Work on `main`. Commit only when asked, and only with lint and tests green.
 
 Small, faithful games made from nostalgic childhood cartoons. Background and
 goals: `PROJECT_IDEA.md`. Decisions, status and next steps: `PROJECT_PLAN.md` —
-read it at the start of a session and update it as work lands. Current scope is one world (Reksio) and one MVP game —
-resist building platform features ahead of that.
+read it at the start of a session and update it as work lands. Current scope is
+one world (Reksio) and one MVP game; resist building platform features ahead of
+that.
 
 Flow, one validated file per stage, under `worlds/<id>/`:
 
 1. `world.yaml` + `sources.yaml` — series-level dossier (`schema.world`).
-2. `episodes/index.yaml` (`schema.episode`) → selection → breakdowns:
-   `intro.yaml` and `episodes/<slug>.yaml` (`schema.breakdown`).
-3. Game brief → game → playtest logs (not written yet).
+2. `episodes/index.yaml` — episode catalogue (`schema.episode`).
+3. `intro.yaml`, `episodes/<slug>.yaml` — beat-by-beat breakdowns
+   (`schema.breakdown`), plus the sounds a listener marked in them.
+4. Game brief → game → playtest logs (not written yet).
 
 Research files hold research only. Game ideas go in a game brief; the one bridge
 is `design_notes`, which must be `interpretation` claims.
@@ -38,13 +40,15 @@ Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`)
 - `verified` — two independent credible sources, or one primary (`studio`, `archive`).
 - `sourced` — one credible source.
 - `observed` — seen/heard in the original material; set `observed_by`.
-  Claude can read frames but cannot hear audio: music, rhythm, and sound claims
-  need the user's ears (`observed_by: adam`) or a source. `src/audio.py`
-  measures (tempo, onsets, spectrograms); its numbers are leads for the
-  listener, never claims on their own. Model "listening" was tested blind and
-  failed (see PROJECT_PLAN.md); don't use it.
 - `interpretation` — our reading. Say so; don't dress it as fact.
 - `unknown` — an open question, stated plainly. Prefer this over a guess.
+
+Sound needs a person's ears. Claude can read frames and spectrograms but cannot
+hear, and no model reachable from here hears reliably (`PROJECT_PLAN.md` has the
+test). So music, rhythm and sound claims come from the listener
+(`observed_by: adam`) or a source. Adam marks sounds in `main.py mark`; each
+mark's note is saved as his observation. `src/audio.py` measurements (tempo,
+onsets, loudness) are leads for him, never claims on their own.
 
 Never state from memory what you haven't checked. If recall and a source
 disagree, record the conflict in the claim text. Wikipedia is a lead, not a
@@ -86,6 +90,10 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   the claim that carries their provenance.
 - **File size:** keep source files under ~1000 lines.
 - **No backward-compat shims:** when moving code, update all callers.
+- **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build
+  step. Libraries are vendored at a pinned version under `vendor/`, never loaded
+  from a CDN. wavesurfer draws inside a shadow DOM, so styles for anything
+  placed in its wrapper go in `SHADOW_CSS` in `mark.js`, not in `mark.css`.
 
 ## Output Rules
 
@@ -99,5 +107,12 @@ file layout update `README.md` and the `main.py` docstring in the same change.
 `uv run pytest`. Shared fixtures and minimal valid data in `tests/conftest.py`.
 
 **Must have tests:** schema validators, cross-file checks in `worlds.py`, YAML
-round-trips. Group in classes; use `tmp_path`; cover the edge cases that would
-let bad data pass silently.
+round-trips, the marking server's API. Group in classes; use `tmp_path`; cover
+the edge cases that would let bad data pass silently.
+
+**Browser UI:** after changing `src/mark_ui/`, drive it in the installed Chrome
+with Playwright (`uv run --no-project --with playwright`, `channel="chrome"` —
+the bundled Chromium can't decode the H.264/AAC media). Check for console
+errors and take a screenshot. Test against a scratch copy of the data or
+restore `intro.yaml` from git afterwards, and restart the server between runs:
+it keeps marks in memory.

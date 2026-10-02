@@ -179,30 +179,30 @@ wake Reksio at home.
 
 ## Next steps
 
-1. **Claude: build `main.py mark`, a local browser tool for marking sounds.**
-   It is built for Reksio: the intro video plays next to its waveform, and the
-   10 moments (the breakdown's segments, e.g. `cymbals`) show as labelled
-   bands. Musical beats appear as faint lines a selection can snap to. Adam
-   drags across the waveform to select a sound or melody, adjusts its edges,
-   plays it once or looped, names it and notes what he hears. Marks are saved
-   to `intro.yaml` as his timed observations, and each one gets its own clip.
-   It runs only on this machine.
-2. **Adam: mark the sounds and melodies that matter.** Pick what is striking
-   or worth reusing, such as the cymbal crash, a gulp or the theme's hook,
-   and name each one. There is no need to cover everything. Measured so far,
-   not heard: a pulse of about 143 BPM; a near-silence around 4–6 s under the
-   title; a cymbal-shaped burst at 18.2 s, where Reksio crashes his cymbals;
-   and a run of strong, even hits at 37–42 s on the studio card.
-3. **Game brief** for the intro game (`games/intro/brief.yaml`, schema written
+1. **Adam: mark the sounds and melodies that matter.** Run
+   `uv run python main.py mark reksio`. A page opens with the intro video, its
+   waveform and spectrogram, the 10 moments and the beat grid. Drag across the
+   waveform (or press `M` at a sound's start and end) to mark it, name it, pick
+   sound effect / melody / other, and note what you hear. Speed 75% / 50% helps
+   with exact edges; `?` lists every key. Marks save to `intro.yaml` as you go;
+   Ctrl+C in the terminal stops the tool and cuts each mark to
+   `audio/intro/marks/<id>.wav`. Pick what is striking or worth reusing, such
+   as the cymbal crash, a gulp or the theme's hook. There is no need to cover
+   everything. Measured so far, not heard: a pulse of about 143 BPM; a
+   near-silence around 4–6 s under the title; a cymbal-shaped burst at 18.2 s,
+   where Reksio crashes his cymbals; and a run of strong, even hits at 37–42 s
+   on the studio card.
+2. **Game brief** for the intro game (`games/intro/brief.yaml`, schema written
    from this first brief). It decides which marked sounds the child triggers
    and what music plays under each moment.
-4. **Only for the sounds the brief needs:** cut them from the mix, or try
+3. **Only for the sounds the brief needs:** cut them from the mix, or try
    isolating them. The [GAD Records album](https://gadrecords.bandcamp.com/album/reksio)
    has the theme with and without effects; if the two line up, subtracting
    one from the other may leave the effects alone. Demucs can split music into
    parts. Spotify's Basic Pitch can turn melodies (not effects) into MIDI if
    we compose "inspired by" music.
-5. Build, then playtest.
+4. Build, then playtest.
+
 ## MVP game — working concept (not decided)
 
 For the intro game. Settle these in the brief, once the sound is known.

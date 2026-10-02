@@ -55,3 +55,29 @@ catches a hung process."""
 SPECTROGRAM_SIZE = "800x300"
 """Width x height of each breakdown beat's spectrogram PNG: wide enough to show
 half-second detail over a 3–8 s window, small enough to read several at once."""
+
+INTRO_MEDIA_DIR = "media/intro"
+"""Intro clips inside a world directory (gitignored). ``main.py mark`` picks the
+one whose name contains the intro's reference episode, e.g. ``kosmonauta``."""
+
+MARK_UI_DIR = REPO_ROOT / "src" / "mark_ui"
+"""The marking tool's page and its vendored libraries, served as static files."""
+
+MARK_HOST = "127.0.0.1"
+"""Loopback only: the marking tool serves copyrighted media and writes research
+files, so it must never be reachable from other machines."""
+
+MARK_PORT = 8765
+"""First port ``main.py mark`` tries; it moves up if the port is busy. Any free
+high port would do; this one is easy to remember."""
+
+MARK_PORT_TRIES = 20
+"""How many ports above ``MARK_PORT`` to try before giving up."""
+
+OBSERVER = "adam"
+"""Default ``observed_by`` for marks saved in ``main.py mark``. The project has
+one listener; pass ``--by`` to record someone else."""
+
+MARK_CLIPS_DIR = "marks"
+"""Folder under the intro's audio output where each mark's clip is cut when the
+marking tool stops: ``audio/intro/marks/<mark id>.wav``."""

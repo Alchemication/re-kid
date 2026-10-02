@@ -38,6 +38,8 @@ beats:
   sound:
     text: Not yet heard. Does the theme start with the fade-in or before it? Is there a sniffing sound effect?
     status: unknown
+    sources: []
+  notes: []
 - id: title
   start_s: 4.5
   end_s: 8.0
@@ -56,6 +58,7 @@ beats:
   sound:
     text: Not yet heard. Is there an accent in the music when the title appears?
     status: unknown
+    sources: []
   notes:
   - text: The looking-far-away pose may be chosen to suit Kosmonauta, but Remontuje (1980) uses the same pose, so it is part of the fixed intro rather than a per-episode gag.
     status: observed
@@ -80,9 +83,11 @@ beats:
   sound:
     text: Not yet heard. Is there a vocal or bark when his mouth opens? Does the tune change when he shows the note?
     status: unknown
+    sources: []
   notes:
   - text: The gag acts out both credits on the card — a script to read, then a score to sing.
     status: interpretation
+    sources: []
 - id: camera
   start_s: 14.5
   end_s: 17.0
@@ -101,9 +106,11 @@ beats:
   sound:
     text: Not yet heard. Is there a camera click or whirr when he turns into a negative?
     status: unknown
+    sources: []
   notes:
   - text: Turning into a negative is a joke about photography — the camera "takes" him.
     status: interpretation
+    sources: []
 - id: cymbals
   start_s: 17.0
   end_s: 19.0
@@ -116,9 +123,11 @@ beats:
   sound:
     text: Not yet heard. Is the crash a real cymbal hit, and is it on the beat of the theme?
     status: unknown
+    sources: []
   notes:
   - text: The cymbals stand for the sound credit.
     status: interpretation
+    sources: []
 - id: film-tangle
   start_s: 19.0
   end_s: 22.5
@@ -131,9 +140,11 @@ beats:
   sound:
     text: Not yet heard. Is there a snip or rustle?
     status: unknown
+    sources: []
   notes:
   - text: Scissors and a pile of film stand for the editing credit — editors cut film by hand.
     status: interpretation
+    sources: []
 - id: stretch
   start_s: 22.5
   end_s: 28.5
@@ -152,9 +163,11 @@ beats:
   sound:
     text: Not yet heard. Does the music stretch with him (a slide or long note), and is there a boing when he snaps back?
     status: unknown
+    sources: []
   notes:
   - text: Stretching the body is the animators' gag — the one thing only drawing can do.
     status: interpretation
+    sources: []
 - id: bowl
   start_s: 29.0
   end_s: 36.5
@@ -173,9 +186,11 @@ beats:
   sound:
     text: Not yet heard. Are there eating or slurping sounds, and a laugh or bark at the end?
     status: unknown
+    sources: []
   notes:
   - text: Unlike the other gags, eating doesn't obviously act out the director's job. It may be a joke on the director and production manager getting their reward, or simply Reksio being a dog.
     status: interpretation
+    sources: []
 - id: studio-card
   start_s: 36.5
   end_s: 42.5
@@ -194,6 +209,8 @@ beats:
   sound:
     text: Not yet heard. Is there a thump each time he brings the object down? Does the theme end here?
     status: unknown
+    sources: []
+  notes: []
 - id: fade-out
   start_s: 42.5
   end_s: 44.0
@@ -206,6 +223,9 @@ beats:
   sound:
     text: Not yet heard. Does the theme finish with the picture, or run on into the episode?
     status: unknown
+    sources: []
+  notes: []
+marks: []
 open_questions:
 - Where do the theme's phrases and accents fall against these beats? The game would loop one phrase per gag, so the phrase boundaries matter more than anything else here. Needs Adam's ears; the GAD Records album has the theme with and without effects.
 - Is the theme the same recording in 1972 and 1980?

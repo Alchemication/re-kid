@@ -5,6 +5,7 @@ Subcommands:
     validate  Check world files against the schema and each other.
     show      Print a world's claims with provenance.
     episodes  Print a world's episode catalogue as a table.
+    mark      Open the local tool for marking sounds in the intro.
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -32,6 +33,12 @@ Examples:
     uv run python main.py episodes reksio --online
         Episodes the studio has uploaded: year, directors, length, link.
 
+    uv run python main.py mark reksio
+        Opens a page in the browser: the intro video with its waveform,
+        spectrogram, moments and beat grid. Drag to select a sound, name it,
+        note what you hear. Marks save to intro.yaml as you go; Ctrl+C stops
+        the tool and cuts each mark to audio/intro/marks/<id>.wav.
+
     uv run python main.py schema world
         JSON Schema for world.yaml (also: sources, episodes, intro).
 """
@@ -48,10 +55,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 from commands import (
     cmd_episodes,
     cmd_list,
+    cmd_mark,
     cmd_schema,
     cmd_show,
     cmd_validate,
 )
+from config import OBSERVER
 from schema.common import Status
 
 
@@ -89,6 +98,19 @@ def main() -> int:
         "--online", action="store_true", help="Only episodes with an official upload"
     )
 
+    p_mark = sub.add_parser("mark", help="Mark sounds in the intro (browser)")
+    p_mark.add_argument("world", metavar="WORLD")
+    p_mark.add_argument(
+        "media",
+        metavar="MEDIA",
+        nargs="?",
+        help="Intro clip; found automatically under media/intro/ if omitted",
+    )
+    p_mark.add_argument(
+        "--by", default=OBSERVER, help=f"Who is listening (default: {OBSERVER})"
+    )
+    p_mark.add_argument("--no-open", action="store_true", help="Don't open the browser")
+
     p_schema = sub.add_parser("schema", help="Print JSON Schema")
     p_schema.add_argument("kind", choices=["world", "sources", "episodes", "intro"])
 
@@ -98,6 +120,7 @@ def main() -> int:
         "validate": cmd_validate,
         "show": cmd_show,
         "episodes": cmd_episodes,
+        "mark": cmd_mark,
         "schema": cmd_schema,
     }
     return dispatch[args.cmd](args)

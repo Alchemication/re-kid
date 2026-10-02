@@ -10,13 +10,23 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+from pathlib import Path
 
-from config import EPISODES_FILE
+from config import (
+    AUDIO_DIR,
+    EPISODES_FILE,
+    INTRO_FILE,
+    INTRO_MEDIA_DIR,
+    MARK_CLIPS_DIR,
+    MARK_HOST,
+    MARK_PORT,
+    MARK_PORT_TRIES,
+)
 from schema.breakdown import Breakdown
 from schema.common import Claim, Status
 from schema.episode import EpisodeCatalogue
 from schema.world import SourceRegistry, WorldDossier
-from worlds import WorldReport, list_worlds, validate_world
+from worlds import WorldReport, list_worlds, validate_world, world_dir
 
 logger = logging.getLogger(__name__)
 
@@ -154,6 +164,110 @@ def cmd_episodes(args: argparse.Namespace) -> int:
             e.watch_url or "",
         )
     Console().print(table)
+    return 0
+
+
+def _intro_media(world_id: str, reference: str) -> Path | None:
+    """The one intro clip whose name contains the reference episode's short
+    name (``reksio-kosmonauta`` → ``*kosmonauta*``), or None."""
+    short = reference.removeprefix(f"{world_id}-")
+    found = sorted((world_dir(world_id) / INTRO_MEDIA_DIR).glob(f"*{short}*.mp4"))
+    return found[0] if len(found) == 1 else None
+
+
+def cmd_mark(args: argparse.Namespace) -> int:
+    """Open the local marking tool for the world's intro, until Ctrl+C."""
+    import webbrowser
+
+    from audio import AudioError, cut_clip, measure, read_analysis
+    from mark import Session, make_server
+
+    report = validate_world(args.world)
+    if report.intro is None or report.dossier is None:
+        for error in report.errors:
+            logger.error(error)
+        logger.error(
+            "Fix %s first (see `main.py validate %s`).", INTRO_FILE, args.world
+        )
+        return 1
+    intro = report.intro
+    media = Path(args.media).resolve() if args.media else None
+    media = media or _intro_media(args.world, intro.reference_episode)
+    if media is None or not media.is_file():
+        logger.error(
+            "No intro clip found. Pass one, e.g. `main.py mark %s "
+            "worlds/%s/%s/1972-kosmonauta.mp4` (see PROJECT_PLAN.md to download it).",
+            args.world,
+            args.world,
+            INTRO_MEDIA_DIR,
+        )
+        return 1
+
+    out = world_dir(args.world) / AUDIO_DIR / "intro"
+    try:
+        analysis = None
+        if (out / "analysis.json").is_file():
+            try:
+                measured, analysis = read_analysis(out / "analysis.json")
+                if measured.resolve() != media:
+                    analysis = None
+            except (KeyError, TypeError, ValueError):
+                analysis = None  # stale or damaged: measure again
+        if analysis is None:
+            print("Measuring the clip (first run only, a few seconds)…")
+            analysis = measure(media, intro, out)
+    except AudioError as exc:
+        logger.error("%s", exc)
+        return 1
+
+    session = Session(
+        world=args.world,
+        title=f"{report.dossier.title} — {intro.title}",
+        breakdown=intro,
+        breakdown_path=world_dir(args.world) / INTRO_FILE,
+        analysis=analysis,
+        media=media,
+        observer=args.by,
+    )
+    server = None
+    for port in range(MARK_PORT, MARK_PORT + MARK_PORT_TRIES):
+        try:
+            server = make_server(session, MARK_HOST, port)
+            break
+        except OSError:
+            continue
+    if server is None:
+        logger.error(
+            "Ports %d–%d are all busy. Close other copies of `main.py mark`.",
+            MARK_PORT,
+            MARK_PORT + MARK_PORT_TRIES - 1,
+        )
+        return 1
+
+    url = f"http://{MARK_HOST}:{server.server_address[1]}/"
+    print(f"Marking tool: {url}")
+    print(f"Saving to {session.breakdown_path}. Press Ctrl+C here to stop.")
+    if not args.no_open:
+        webbrowser.open(url)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        server.server_close()
+
+    marks = session.breakdown.marks
+    clips = out / MARK_CLIPS_DIR
+    if clips.is_dir():
+        for stale in clips.glob("*.wav"):
+            stale.unlink()
+    try:
+        for mark in marks:
+            cut_clip(media, mark.start_s, mark.end_s, clips / f"{mark.id}.wav")
+    except AudioError as exc:
+        logger.error("Marks are saved, but cutting their clips failed: %s", exc)
+        return 1
+    print(f"\n{len(marks)} marks saved in {INTRO_FILE}; clips in {clips}.")
     return 0
 
 

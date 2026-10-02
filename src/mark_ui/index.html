@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reksio · Mark sounds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap">
+  <link rel="stylesheet" href="/ui/mark.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo">Reksio</span>
+      <span class="subtitle" id="title">Title sequence</span>
+    </div>
+    <div class="status">
+      <span id="mark-count">0 marks</span>
+      <span id="save-state" class="save idle">All saved</span>
+      <button id="help-open" class="ghost" title="All keyboard shortcuts (?)">Keys&nbsp;?</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <div class="video-card">
+        <video id="video" playsinline preload="auto"></video>
+      </div>
+      <div class="now card" aria-live="polite">
+        <div class="now-head">
+          <span class="chip now-chip" id="now-moment">—</span>
+          <span class="now-time" id="now-time">0:00.000</span>
+        </div>
+        <p><b>On screen</b> <span id="now-action"></span></p>
+        <p class="dim" id="now-text"></p>
+        <p><b id="now-sound-label">Listen for</b> <span id="now-sound"></span></p>
+      </div>
+    </section>
+
+    <section class="marks card">
+      <div class="marks-head">
+        <h2>Your marks</h2>
+        <span class="dim">Saved to intro.yaml as you go</span>
+      </div>
+      <div id="marks-empty" class="empty">
+        <p><b>Drag across the waveform</b> below to mark a sound or a melody.</p>
+        <p>Or press <kbd>M</kbd> where it starts and again where it ends while it plays.</p>
+        <p class="dim">Mark only what's worth keeping: a crash, a gulp, the tune's hook.</p>
+      </div>
+      <ol id="marks-list" class="marks-list"></ol>
+    </section>
+  </main>
+
+  <section class="timeline-area card">
+    <div class="transport">
+      <button id="play" class="primary" title="Play / pause (space)">▶ Play</button>
+      <span class="clock"><span id="clock">0:00.000</span> <span class="dim">/ <span id="duration">0:00</span></span></span>
+      <div class="seg" role="group" aria-label="Speed">
+        <span class="dim">Speed</span>
+        <button data-rate="1" class="on" title="Normal speed (1)">100%</button>
+        <button data-rate="0.75" title="Slower (2)">75%</button>
+        <button data-rate="0.5" title="Half speed (3)">50%</button>
+      </div>
+      <label class="zoom"><span class="dim">Zoom</span>
+        <input id="zoom" type="range" min="0" max="100" value="0" title="Zoom (scroll on the waveform, F to fit)">
+      </label>
+      <label class="snap" title="Snap mark edges to musical beats (good for melodies). Toggle with S.">
+        <input id="snap" type="checkbox"> Snap to beats
+      </label>
+      <span class="tempo dim" id="tempo"></span>
+    </div>
+
+    <nav class="moments" id="moments" aria-label="Moments"></nav>
+
+    <div id="wave" class="wave"></div>
+
+    <div class="legend dim">
+      <span><i class="sw sw-effect"></i>sound effect</span>
+      <span><i class="sw sw-melody"></i>melody</span>
+      <span><i class="sw sw-other"></i>other</span>
+      <span><i class="sw sw-beat"></i>musical beat</span>
+      <span><i class="sw sw-hit">▲</i>strong hit (measured)</span>
+      <span>Lower band: spectrogram — bright = loud at that pitch</span>
+    </div>
+
+    <div class="keys" id="keys-bar"></div>
+  </section>
+
+  <div id="help" class="modal" hidden>
+    <div class="modal-card card">
+      <div class="modal-head">
+        <h2>Keyboard shortcuts</h2>
+        <button id="help-close" class="ghost" title="Close (Esc)">✕</button>
+      </div>
+      <table id="help-table" class="help-table"></table>
+      <p class="dim">Shortcuts are off while you type in a name or note. Esc leaves the text box.</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script type="module" src="/ui/mark.js"></script>
+</body>
+</html>
