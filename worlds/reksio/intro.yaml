@@ -56,9 +56,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Is there an accent in the music when the title appears?
-    status: unknown
+    text: There is a bit of melody and reksio barks, there is also a loud instrument (cymbal) heard in the background. Once solid hit
+    status: observed
     sources: []
+    observed_by: adam
   notes:
   - text: The looking-far-away pose may be chosen to suit Kosmonauta, but Remontuje (1980) uses the same pose, so it is part of the fixed intro rather than a per-episode gag.
     status: observed
@@ -81,9 +82,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Is there a vocal or bark when his mouth opens? Does the tune change when he shows the note?
-    status: unknown
+    text: There is the main music heard and dog howling when reksio sings.
+    status: observed
     sources: []
+    observed_by: adam
   notes:
   - text: The gag acts out both credits on the card — a script to read, then a score to sing.
     status: interpretation
@@ -104,9 +106,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Is there a camera click or whirr when he turns into a negative?
-    status: unknown
+    text: Nothing really, just a subtle camera click.
+    status: observed
     sources: []
+    observed_by: adam
   notes:
   - text: Turning into a negative is a joke about photography — the camera "takes" him.
     status: interpretation
@@ -121,9 +124,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Is the crash a real cymbal hit, and is it on the beat of the theme?
-    status: unknown
+    text: Yeah, it's super lound, but there is also the main theme in the background heard.
+    status: observed
     sources: []
+    observed_by: adam
   notes:
   - text: The cymbals stand for the sound credit.
     status: interpretation
@@ -138,9 +142,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Is there a snip or rustle?
-    status: unknown
+    text: Snipping sounds of scissors.
+    status: observed
     sources: []
+    observed_by: adam
   notes:
   - text: Scissors and a pile of film stand for the editing credit — editors cut film by hand.
     status: interpretation
@@ -161,9 +166,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Does the music stretch with him (a slide or long note), and is there a boing when he snaps back?
-    status: unknown
+    text: there is a trumpet sound before preparring for a stretch, and then stretch and unstretch have their own interesting sounds
+    status: observed
     sources: []
+    observed_by: adam
   notes:
   - text: Stretching the body is the animators' gag — the one thing only drawing can do.
     status: interpretation
@@ -184,9 +190,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Are there eating or slurping sounds, and a laugh or bark at the end?
-    status: unknown
+    text: Surping big time, but music in the background.
+    status: observed
     sources: []
+    observed_by: adam
   notes:
   - text: Unlike the other gags, eating doesn't obviously act out the director's job. It may be a joke on the director and production manager getting their reward, or simply Reksio being a dog.
     status: interpretation
@@ -207,9 +214,10 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Is there a thump each time he brings the object down? Does the theme end here?
-    status: unknown
+    text: Thump thump thump, and then high pitch pee-pee sound.
+    status: observed
     sources: []
+    observed_by: adam
   notes: []
 - id: fade-out
   start_s: 42.5
@@ -221,18 +229,59 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Not yet heard. Does the theme finish with the picture, or run on into the episode?
-    status: unknown
+    text: nothing really. the nice calming music starts when we see reksios house.
+    status: observed
     sources: []
+    observed_by: adam
   notes: []
 marks:
 - id: bark
   name: bark
   kind: effect
-  start_s: 3.8
-  end_s: 4.5
+  start_s: 3.78
+  end_s: 4.48
   claim:
-    text: just the quick into bark
+    text: just the quick into barks
+    status: observed
+    sources: []
+    observed_by: adam
+- id: stretching-melody
+  name: stretching-melody
+  kind: melody
+  start_s: 25.52
+  end_s: 28.25
+  claim:
+    text: reksio stretches it's body gag
+    status: observed
+    sources: []
+    observed_by: adam
+- id: main-melody-part-1
+  name: main-melody-part-1
+  kind: effect
+  start_s: 28.561
+  end_s: 31.594
+  claim:
+    text: First part of main melody before reksio drinks from his bawl
+    status: observed
+    sources: []
+    observed_by: adam
+- id: stamping-sound-1-longer
+  name: stamping-sound-1-longer
+  kind: effect
+  start_s: 39.35
+  end_s: 41.83
+  claim:
+    text: reksio stamps the film - part 1
+    status: observed
+    sources: []
+    observed_by: adam
+- id: stamping-sound-2-short
+  name: stamping-sound-2-short
+  kind: effect
+  start_s: 42.1
+  end_s: 42.4
+  claim:
+    text: reksio stamps the film - part 1 - higher pitch funny sound (still hear part 1 in background - should it be removed?)
     status: observed
     sources: []
     observed_by: adam
