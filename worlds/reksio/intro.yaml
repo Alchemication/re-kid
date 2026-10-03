@@ -56,7 +56,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: There is a bit of melody and reksio barks, there is also a loud instrument (cymbal) heard in the background. Once solid hit
+    text: 'A bit of melody and Reksio barking, with a loud cymbal-like instrument in the background: one solid hit.'
     status: observed
     sources: []
     observed_by: adam
@@ -82,7 +82,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: There is the main music heard and dog howling when reksio sings.
+    text: The main theme plays, and a dog howls when Reksio sings.
     status: observed
     sources: []
     observed_by: adam
@@ -106,7 +106,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Nothing really, just a subtle camera click.
+    text: Nothing much, just a subtle camera click.
     status: observed
     sources: []
     observed_by: adam
@@ -124,7 +124,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Yeah, it's super lound, but there is also the main theme in the background heard.
+    text: Very loud, with the main theme still audible in the background.
     status: observed
     sources: []
     observed_by: adam
@@ -142,7 +142,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Snipping sounds of scissors.
+    text: Scissors snipping.
     status: observed
     sources: []
     observed_by: adam
@@ -166,7 +166,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: there is a trumpet sound before preparring for a stretch, and then stretch and unstretch have their own interesting sounds
+    text: A trumpet sound as Reksio gets ready to stretch; the stretch and the un-stretch each have their own distinctive sound.
     status: observed
     sources: []
     observed_by: adam
@@ -190,7 +190,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Surping big time, but music in the background.
+    text: Loud slurping, with music in the background.
     status: observed
     sources: []
     observed_by: adam
@@ -214,7 +214,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: Thump thump thump, and then high pitch pee-pee sound.
+    text: Thump, thump, thump, then a high-pitched "pee-pee" sound.
     status: observed
     sources: []
     observed_by: adam
@@ -229,7 +229,7 @@ beats:
     - sfr-youtube
     observed_by: claude-frames
   sound:
-    text: nothing really. the nice calming music starts when we see reksios house.
+    text: Nothing much. Calm music starts when Reksio's doghouse appears.
     status: observed
     sources: []
     observed_by: adam
@@ -241,7 +241,7 @@ marks:
   start_s: 3.78
   end_s: 4.48
   claim:
-    text: just the quick into barks
+    text: Just the quick barks at the start of the intro.
     status: observed
     sources: []
     observed_by: adam
@@ -251,17 +251,17 @@ marks:
   start_s: 25.52
   end_s: 28.25
   claim:
-    text: reksio stretches it's body gag
+    text: The melody under Reksio's body-stretching gag.
     status: observed
     sources: []
     observed_by: adam
 - id: main-melody-part-1
   name: main-melody-part-1
-  kind: effect
+  kind: melody
   start_s: 28.561
   end_s: 31.594
   claim:
-    text: First part of main melody before reksio drinks from his bawl
+    text: The first part of the main melody, just before Reksio drinks from his bowl.
     status: observed
     sources: []
     observed_by: adam
@@ -271,7 +271,7 @@ marks:
   start_s: 39.35
   end_s: 41.83
   claim:
-    text: reksio stamps the film - part 1
+    text: Reksio stamps the film, part 1.
     status: observed
     sources: []
     observed_by: adam
@@ -281,7 +281,7 @@ marks:
   start_s: 42.1
   end_s: 42.4
   claim:
-    text: reksio stamps the film - part 1 - higher pitch funny sound (still hear part 1 in background - should it be removed?)
+    text: 'Reksio stamps the film, part 2: a funny, higher-pitched sound. Part 1 can still be heard underneath it.'
     status: observed
     sources: []
     observed_by: adam
