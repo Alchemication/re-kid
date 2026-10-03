@@ -222,7 +222,8 @@ video { width: 100%; height: 100%; display: block; }
 
 .times { font: 13px var(--mono); display: inline-flex; align-items: center; gap: 4px; }
 .times input { width: 74px; font: 13px var(--mono); border: 1px solid var(--line); border-radius: 6px; padding: 2px 4px; }
-.len, .where { font-size: 13px; color: var(--ink-soft); }
+.len, .where, .clip { font-size: 13px; color: var(--ink-soft); }
+.clip { font-family: var(--mono); font-size: 12px; }
 
 .actions { margin-left: auto; display: inline-flex; gap: 4px; }
 .actions button {

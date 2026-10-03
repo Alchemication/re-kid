@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import json
+import shutil
 import threading
 import urllib.error
 import urllib.request
+import wave
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -250,3 +252,83 @@ class TestAnswers:
             assert res.status == 200
         saved = load_model(session.breakdown_path, Breakdown)
         assert saved.beats[0].sound.text == "Brass fanfare."
+
+
+needs_ffmpeg = pytest.mark.skipif(
+    shutil.which("ffmpeg") is None, reason="ffmpeg not installed"
+)
+
+
+@needs_ffmpeg
+class TestClips:
+    """Clips follow the marks on every save, using real (generated) audio."""
+
+    @pytest.fixture
+    def live(self, session: Session, tmp_path: Path) -> Session:
+        media = tmp_path / "tone.wav"
+        frames = 22_050 * 10
+        with wave.open(str(media), "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(22_050)
+            w.writeframes(b"\x00\x10" * frames)
+        session.media = media
+        session.clips_dir = tmp_path / "clips"
+        return session
+
+    def _seconds(self, path: Path) -> float:
+        with wave.open(str(path)) as w:
+            return w.getnframes() / w.getframerate()
+
+    def test_save_cuts_clip(self, live: Session) -> None:
+        _, problems = live.save([MarkInput(**_mark())])
+        clip = live.clips_dir / "cymbal-crash.wav"
+        assert problems == [] and clip.is_file()
+        assert self._seconds(clip) == pytest.approx(0.8, abs=0.03)
+
+    def test_unchanged_mark_is_not_recut(self, live: Session) -> None:
+        live.save([MarkInput(**_mark())])
+        clip = live.clips_dir / "cymbal-crash.wav"
+        before = clip.stat().st_mtime_ns
+        live.save([MarkInput(**_mark(note="Now with a note."))])
+        assert clip.stat().st_mtime_ns == before
+
+    def test_moved_mark_is_recut(self, live: Session) -> None:
+        live.save([MarkInput(**_mark())])
+        live.save([MarkInput(**_mark(start_s=4.2, end_s=6.2))])
+        clip = live.clips_dir / "cymbal-crash.wav"
+        assert self._seconds(clip) == pytest.approx(2.0, abs=0.03)
+
+    def test_rename_and_delete_clean_up(self, live: Session) -> None:
+        live.save([MarkInput(**_mark()), MarkInput(**_mark(name="Gulp"))])
+        live.save([MarkInput(**_mark(name="Big crash"))])
+        names = sorted(p.name for p in live.clips_dir.glob("*.wav"))
+        assert names == ["big-crash.wav"]
+
+    def test_sync_on_start_cuts_missing_and_removes_leftovers(
+        self, live: Session
+    ) -> None:
+        live.save([MarkInput(**_mark())])
+        (live.clips_dir / "cymbal-crash.wav").unlink()
+        (live.clips_dir / "old-mark.wav").write_bytes(b"")
+        restarted = Session(
+            world=live.world,
+            world_title=live.world_title,
+            title=live.title,
+            breakdown=load_model(live.breakdown_path, Breakdown),
+            breakdown_path=live.breakdown_path,
+            analysis=live.analysis,
+            media=live.media,
+            observer=live.observer,
+            clips_dir=live.clips_dir,
+        )
+        assert restarted.sync_clips() == []
+        names = sorted(p.name for p in live.clips_dir.glob("*.wav"))
+        assert names == ["cymbal-crash.wav"]
+
+    def test_failed_cut_keeps_the_mark(self, live: Session) -> None:
+        live.media = live.media.with_name("missing.wav")
+        marks, problems = live.save([MarkInput(**_mark())])
+        assert [m.id for m in marks] == ["cymbal-crash"]
+        assert problems and problems[0].startswith("cymbal-crash:")
+        assert load_model(live.breakdown_path, Breakdown).marks[0].id == "cymbal-crash"

@@ -179,7 +179,7 @@ def cmd_mark(args: argparse.Namespace) -> int:
     """Open the local marking tool for the world's intro, until Ctrl+C."""
     import webbrowser
 
-    from audio import AudioError, cut_clip, measure, read_analysis
+    from audio import AudioError, measure, read_analysis
     from mark import Session, make_server
 
     report = validate_world(args.world)
@@ -229,7 +229,10 @@ def cmd_mark(args: argparse.Namespace) -> int:
         analysis=analysis,
         media=media,
         observer=args.by,
+        clips_dir=out / MARK_CLIPS_DIR,
     )
+    for problem in session.sync_clips():
+        logger.error("Clip not cut: %s", problem)
     server = None
     for port in range(MARK_PORT, MARK_PORT + MARK_PORT_TRIES):
         try:
@@ -247,7 +250,8 @@ def cmd_mark(args: argparse.Namespace) -> int:
 
     url = f"http://{MARK_HOST}:{server.server_address[1]}/"
     print(f"Marking tool: {url}")
-    print(f"Saving to {session.breakdown_path}. Press Ctrl+C here to stop.")
+    print(f"Saving to {session.breakdown_path}; clips to {session.clips_dir}.")
+    print("Press Ctrl+C here to stop.")
     if not args.no_open:
         webbrowser.open(url)
     try:
@@ -257,18 +261,10 @@ def cmd_mark(args: argparse.Namespace) -> int:
     finally:
         server.server_close()
 
-    marks = session.breakdown.marks
-    clips = out / MARK_CLIPS_DIR
-    if clips.is_dir():
-        for stale in clips.glob("*.wav"):
-            stale.unlink()
-    try:
-        for mark in marks:
-            cut_clip(media, mark.start_s, mark.end_s, clips / f"{mark.id}.wav")
-    except AudioError as exc:
-        logger.error("Marks are saved, but cutting their clips failed: %s", exc)
-        return 1
-    print(f"\n{len(marks)} marks saved in {INTRO_FILE}; clips in {clips}.")
+    print(
+        f"\n{len(session.breakdown.marks)} marks in {INTRO_FILE}; "
+        f"clips in {session.clips_dir}."
+    )
     return 0
 
 

@@ -180,6 +180,8 @@ async function flushSave() {
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || res.statusText)
     data.ids.forEach((id, i) => { sent[i].id = id })
+    sent.forEach(showClip)
+    if (data.warning) toast(data.warning)
     setSaveState('idle', 'All saved')
   } catch (err) {
     setSaveState('error', 'Not saved')
@@ -353,6 +355,11 @@ function rowTimes(mark, li) {
   li.querySelector('.where').textContent = where.length ? `in: ${where.join(', ')}` : ''
 }
 
+function showClip(mark) {
+  const span = document.querySelector(`.mark[data-uid="${mark.uid}"] .clip`)
+  if (span) span.textContent = mark.id ? `clip: ${mark.id}.wav` : 'clip: saving…'
+}
+
 function renderList() {
   const list = $('#marks-list')
   const sorted = [...state.marks].sort((a, b) => a.start - b.start)
@@ -407,6 +414,7 @@ function renderRow(mark) {
       el('span', { class: 'times' }, start, '→', end, 's'),
       el('span', { class: 'len' }),
       el('span', { class: 'where' }),
+      el('span', { class: 'clip', title: 'Cut to audio/intro/marks/ on every save' }),
       el('span', { class: 'actions' },
         btn('play', '▶', 'Play once (Enter)', () => { select(mark); playMark(mark) }),
         btn(`loop${state.loop === mark ? ' on' : ''}`, '⟳', 'Loop on / off (L)', () => { select(mark); setLoop(state.loop === mark ? null : mark) }),
@@ -419,6 +427,7 @@ function renderRow(mark) {
   li.addEventListener('click', (e) => { if (!e.target.closest('input, textarea, button')) select(mark, { seek: true }) })
   li.addEventListener('focusin', () => { if (state.selected !== mark) select(mark) })
   rowTimes(mark, li)
+  li.querySelector('.clip').textContent = mark.id ? `clip: ${mark.id}.wav` : 'clip: saving…'
   return li
 }
 

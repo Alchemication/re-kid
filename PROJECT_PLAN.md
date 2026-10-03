@@ -186,9 +186,9 @@ wake Reksio at home.
    sound effect / melody / other, and note what you hear. Each moment's
    "Listen for" question has an answer box too, for things that can't be
    marked ("no sniffing sound"). Speed 75% / 50% helps
-   with exact edges; `?` lists every key. Marks save to `intro.yaml` as you go;
-   Ctrl+C in the terminal stops the tool and cuts each mark to
-   `audio/intro/marks/<id>.wav`. Pick what is striking or worth reusing, such
+   with exact edges; `?` lists every key. Marks save to `intro.yaml` as you go,
+   and each mark's clip is cut to `audio/intro/marks/<id>.wav` on every save.
+   Pick what is striking or worth reusing, such
    as the cymbal crash, a gulp or the theme's hook. There is no need to cover
    everything. Measured so far, not heard: a pulse of about 143 BPM; a
    near-silence around 4–6 s under the title; a cymbal-shaped burst at 18.2 s,
@@ -247,25 +247,27 @@ For the intro game. Settle these in the brief, once the sound is known.
 
 ## Local reference media (not in git)
 
-Episodes and frame stills are gitignored (`worlds/*/media/`,
-`worlds/*/frames/`). Recreate them on a new machine (needs `yt-dlp` and
-`ffmpeg`):
+Media, frames and generated audio are gitignored (`worlds/*/media/`,
+`worlds/*/frames/`, `worlds/*/audio/`). What is kept locally:
 
-Layout: whole episodes in `media/`, intro clips (first 46–60 s) in
-`media/intro/`, and contact sheets in `frames/<episode>/` and `frames/intro/`.
-Sheet names give the year, the episode, the time range and the step, e.g.
-`frames/intro/1972-kosmonauta-0000-0022-halfsec.jpg`.
+- `media/1972-kosmonauta.mp4`: the full episode, for when Kosmonauta comes
+  back.
+- `media/intro/1972-kosmonauta.mp4`: its first 46 s, the clip `main.py mark`
+  plays.
+- `frames/intro/`, `frames/kosmonauta/`: contact sheets behind `intro.yaml` and
+  the Kosmonauta frame pass. Names give the year, episode, time range and step,
+  e.g. `1972-kosmonauta-0000-0022-halfsec.jpg`.
+- `audio/intro/`: measurements and spectrograms (made on the first `mark` run)
+  and each mark's clip (kept in step with the marks on every save).
+
+Recreate on a new machine (`brew install yt-dlp ffmpeg`):
 
 ```sh
 mkdir -p worlds/reksio/media/intro worlds/reksio/frames/intro
 # Native 480p. Avoid the "-sr" AI-upscaled formats: they distort line and texture.
 yt-dlp -f "135+140/best[height<=480]" --merge-output-format mp4 \
   -o "worlds/reksio/media/1972-kosmonauta.%(ext)s" https://www.youtube.com/watch?v=unuTG_vG0AI
-yt-dlp -f "135+140/best[height<=480]" --merge-output-format mp4 \
-  -o "worlds/reksio/media/1977-wybawca.%(ext)s" https://www.youtube.com/watch?v=2E-4XH4ujf0
-yt-dlp -f "135+140/best[height<=480]" --merge-output-format mp4 \
-  -o "worlds/reksio/media/1980-remontuje.%(ext)s" https://www.youtube.com/watch?v=24Xi59t3S5U
-# Intro clips: the first 46 s of any episode from 1972 on
+# Intro clip: the first 46 s (the intro is the same in every episode from 1972 on)
 ffmpeg -i worlds/reksio/media/1972-kosmonauta.mp4 -t 46 -c copy \
   worlds/reksio/media/intro/1972-kosmonauta.mp4
 # Contact sheets: every 0.5 s for the intro, every 4 s for a whole episode.
@@ -275,6 +277,6 @@ ffmpeg -i worlds/reksio/media/intro/1972-kosmonauta.mp4 -t 22 \
   worlds/reksio/frames/intro/1972-kosmonauta-0000-0022-halfsec.jpg
 ```
 
-YouTube returns "This video is not available" from yt-dlp builds without a
-JavaScript runtime (e.g. `uvx yt-dlp`); the Homebrew build (2026.08.19) works.
-Install both tools with `brew install yt-dlp ffmpeg`.
+Other episodes' upload links are in `episodes/index.yaml` (`watch_url`).
+yt-dlp builds without a JavaScript runtime (e.g. `uvx yt-dlp`) get "This video
+is not available" from YouTube; the Homebrew build works.

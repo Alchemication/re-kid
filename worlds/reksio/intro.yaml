@@ -225,7 +225,17 @@ beats:
     status: unknown
     sources: []
   notes: []
-marks: []
+marks:
+- id: bark
+  name: bark
+  kind: effect
+  start_s: 3.8
+  end_s: 4.5
+  claim:
+    text: just the quick into bark
+    status: observed
+    sources: []
+    observed_by: adam
 open_questions:
 - Where do the theme's phrases and accents fall against these beats? The game would loop one phrase per gag, so the phrase boundaries matter more than anything else here. Needs Adam's ears; the GAD Records album has the theme with and without effects.
 - Is the theme the same recording in 1972 and 1980?

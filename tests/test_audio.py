@@ -63,6 +63,7 @@ class TestOnRealAudio:
         assert (media, loaded) == (clicks, analysis)
         assert (tmp_path / "out" / "spectrograms" / "first.png").is_file()
         assert (tmp_path / "out" / "spectrograms" / "second.png").is_file()
+        assert not (tmp_path / "out" / "clip.wav").exists()
 
     def test_missing_media_says_what_to_do(self, tmp_path: Path) -> None:
         from audio import AudioError

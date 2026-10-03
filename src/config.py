@@ -38,8 +38,8 @@ INTRO_FILE = "intro.yaml"
 ``episodes/``, because the same intro opens many episodes."""
 
 AUDIO_DIR = "audio"
-"""Generated audio analysis inside a world directory: WAVs, cut clips,
-spectrograms, measurements. Gitignored — it holds cuts of copyrighted
+"""Generated audio files inside a world directory: measurements,
+spectrograms, and each mark's cut clip. Gitignored — it holds cuts of copyrighted
 recordings and is rebuilt from the media by ``audio.measure``."""
 
 AUDIO_SAMPLE_RATE = 22_050
@@ -79,5 +79,5 @@ OBSERVER = "adam"
 one listener; pass ``--by`` to record someone else."""
 
 MARK_CLIPS_DIR = "marks"
-"""Folder under the intro's audio output where each mark's clip is cut when the
-marking tool stops: ``audio/intro/marks/<mark id>.wav``."""
+"""Folder under the intro's audio output holding one clip per mark,
+``audio/intro/marks/<mark id>.wav``, kept in step with the marks on every save."""

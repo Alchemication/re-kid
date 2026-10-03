@@ -145,9 +145,14 @@ def read_analysis(path: Path) -> tuple[Path, AudioAnalysis]:
 
 
 def measure(media: Path, breakdown: Breakdown, out: Path) -> AudioAnalysis:
-    """Measure the clip and write ``clip.wav``, ``analysis.json`` and one
-    spectrogram per breakdown beat (``spectrograms/<beat id>.png``) under out."""
-    analysis = analyse(extract_wav(media, out / "clip.wav"))
+    """Measure the clip and write ``analysis.json`` and one spectrogram per
+    breakdown beat (``spectrograms/<beat id>.png``) under out. The WAV extracted
+    for measuring is deleted afterwards."""
+    wav = extract_wav(media, out / "clip.wav")
+    try:
+        analysis = analyse(wav)
+    finally:
+        wav.unlink(missing_ok=True)
     for beat in breakdown.beats:
         spectrogram(
             media, beat.start_s, beat.end_s, out / "spectrograms" / f"{beat.id}.png"

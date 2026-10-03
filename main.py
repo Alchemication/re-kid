@@ -37,8 +37,8 @@ Examples:
         Opens a page in the browser: the intro video with its waveform,
         spectrogram, moments and beat grid. Drag to select a sound, name it,
         note what you hear, answer each moment's sound question. Everything
-        saves to intro.yaml as you go; Ctrl+C stops
-        the tool and cuts each mark to audio/intro/marks/<id>.wav.
+        saves to intro.yaml as you go, and each mark's clip is kept up to
+        date in audio/intro/marks/<id>.wav. Ctrl+C stops the tool.
 
     uv run python main.py schema world
         JSON Schema for world.yaml (also: sources, episodes, intro).

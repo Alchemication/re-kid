@@ -34,8 +34,8 @@ sources behind it. `validate` enforces the evidence each status needs.
 its waveform and spectrogram, with the breakdown's moments and the measured beat
 grid. Drag to select a sound or melody, name it, note what you hear, and answer
 each moment's "Listen for" question; marks and answers are saved to
-`intro.yaml` as the listener's observations. Ctrl+C stops it and cuts
-each mark to its own clip. The measurements (`audio.py`) are leads for the
+`intro.yaml` as the listener's observations, and each mark's audio is kept cut
+in `audio/intro/marks/<id>.wav`, updated on every save. The measurements (`audio.py`) are leads for the
 listener, never claims on their own.
 
 ## Commands

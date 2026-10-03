@@ -7,7 +7,8 @@ drags across the waveform to select a sound, names it and notes what they hear.
 
 Every save replaces the breakdown's ``marks`` and rewrites ``intro.yaml``; the
 page is the source of truth while it is open, and git is the undo. Each mark's
-note becomes an ``observed`` claim by the listener.
+note becomes an ``observed`` claim by the listener. Each mark's audio is kept
+cut as ``<clips_dir>/<mark id>.wav``, updated on every save.
 
 The server only reads files it was given (the page, its vendored libraries and
 one media file) and only writes the breakdown.
@@ -32,7 +33,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
 
-from audio import AudioAnalysis
+from audio import AudioAnalysis, AudioError, cut_clip
 from config import MARK_UI_DIR
 from schema.breakdown import Breakdown, Mark, MarkKind
 from schema.common import Claim, Status
@@ -111,7 +112,38 @@ class Session:
     analysis: AudioAnalysis
     media: Path
     observer: str
+    clips_dir: Path | None = None
+    """Where each mark's clip is kept (``<mark id>.wav``); None means no clips."""
     lock: Lock = field(default_factory=Lock)
+    _cut: dict[str, tuple[float, float]] = field(default_factory=dict)
+    """Span each clip was last cut from, so unchanged marks aren't recut."""
+
+    def sync_clips(self) -> list[str]:
+        """Make ``clips_dir`` hold exactly one clip per mark.
+
+        Cuts clips for new or moved marks, deletes clips of marks that are
+        gone (or renamed), and leaves the rest alone. Returns problems, one per
+        clip that could not be cut; the marks themselves are unaffected.
+        """
+        if self.clips_dir is None:
+            return []
+        wanted = {m.id: (m.start_s, m.end_s) for m in self.breakdown.marks}
+        self.clips_dir.mkdir(parents=True, exist_ok=True)
+        for clip in self.clips_dir.glob("*.wav"):
+            if clip.stem not in wanted:
+                clip.unlink()
+                self._cut.pop(clip.stem, None)
+        problems = []
+        for mark_id, span in wanted.items():
+            path = self.clips_dir / f"{mark_id}.wav"
+            if self._cut.get(mark_id) == span and path.is_file():
+                continue
+            try:
+                cut_clip(self.media, span[0], span[1], path)
+                self._cut[mark_id] = span
+            except AudioError as exc:
+                problems.append(f"{mark_id}: {exc}")
+        return problems
 
     def payload(self) -> dict[str, Any]:
         """Everything the page needs to draw itself."""
@@ -157,8 +189,9 @@ class Session:
             ],
         }
 
-    def save(self, inputs: list[MarkInput]) -> list[Mark]:
-        """Validate, then replace the breakdown's marks and rewrite the file."""
+    def save(self, inputs: list[MarkInput]) -> tuple[list[Mark], list[str]]:
+        """Validate, replace the breakdown's marks, rewrite the file, then bring
+        the clips up to date. Returns the marks and any clip problems."""
         for item in inputs:
             if item.end_s <= item.start_s:
                 raise ValueError(f"'{item.name}': the end must be after the start")
@@ -174,7 +207,8 @@ class Session:
             )
             dump_model(updated, self.breakdown_path)
             self.breakdown = updated
-        return marks
+            problems = self.sync_clips()
+        return marks, problems
 
     def answer(self, moment_id: str, note: str) -> None:
         """Record what the listener heard in one moment as its sound claim."""
@@ -231,8 +265,13 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or b"{}")
             if self.path == "/api/marks":
                 inputs = [MarkInput.model_validate(m) for m in body.get("marks", [])]
-                marks = self.session.save(inputs)
+                marks, problems = self.session.save(inputs)
                 result = {"saved": len(marks), "ids": [m.id for m in marks]}
+                if problems:
+                    logger.error("Clips not cut: %s", "; ".join(problems))
+                    result["warning"] = (
+                        "Saved, but some clips could not be cut: " + "; ".join(problems)
+                    )
             elif self.path.startswith("/api/moments/"):
                 moment_id = self.path.removeprefix("/api/moments/")
                 self.session.answer(moment_id, str(body.get("note", "")))
