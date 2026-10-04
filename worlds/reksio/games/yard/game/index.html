@@ -22,6 +22,16 @@
         </g>
       </defs>
 
+      <!-- The sun, far away: it sinks a step with each main thing done and sets
+           behind the wall (clipped at the wall's top). -->
+      <clipPath id="sky-clip"><rect x="0" y="0" width="1600" height="334" /></clipPath>
+      <g clip-path="url(#sky-clip)">
+        <g id="sun" style="transform: translateY(0)">
+          <circle class="sun-glow" cx="1240" cy="120" r="74" />
+          <circle class="sun" cx="1240" cy="120" r="46" />
+        </g>
+      </g>
+
       <g id="cam">
         <g id="things">
 
@@ -209,6 +219,43 @@
               </g>
             </g>
           </g>
+          <!-- A thought bubble (the series' own device): a picture of something
+               he still wants to do. Outside rk-flip, so pictures never mirror. -->
+          <g id="wish" opacity="0">
+            <g id="wish-pop" style="transform-origin: 30px -168px">
+              <circle class="bubble" cx="18" cy="-176" r="6" />
+              <circle class="bubble" cx="30" cy="-196" r="10" />
+              <ellipse class="bubble" cx="56" cy="-252" rx="62" ry="48" />
+              <!-- the bowl -->
+              <g class="wish-icon" data-wish="bowl" opacity="0">
+                <path class="food" d="M30 -258 Q36 -270 46 -263 Q52 -274 60 -264 Q68 -274 76 -263 Q82 -268 84 -258 Z" />
+                <path class="bowl" d="M22 -258 H90 L80 -236 H32 Z" />
+              </g>
+              <!-- water: a drop -->
+              <g class="wish-icon" data-wish="tap" opacity="0">
+                <path class="drop-icon" d="M56 -288 Q36 -258 40 -246 Q44 -230 56 -230 Q68 -230 72 -246 Q76 -258 56 -288 Z" />
+              </g>
+              <!-- the bone -->
+              <g class="wish-icon" data-wish="dig" opacity="0">
+                <path class="bone" d="M36 -252 H76 M32 -258 a6 6 0 1 0 0 12 M80 -258 a6 6 0 1 1 0 12" />
+                <path class="bone-white" d="M36 -252 H76 M32 -258 a6 6 0 1 0 0 12 M80 -258 a6 6 0 1 1 0 12" />
+              </g>
+              <!-- the bird -->
+              <g class="wish-icon" data-wish="bird" opacity="0">
+                <ellipse class="bird" cx="50" cy="-248" rx="18" ry="13" />
+                <circle class="bird" cx="66" cy="-262" r="9" />
+                <path class="beak" d="M74 -264 L86 -260 L74 -257 Z" />
+                <circle class="bird-eye" cx="68" cy="-264" r="2.2" />
+                <path class="bird" d="M34 -246 L20 -254 L24 -242 Z" />
+              </g>
+              <!-- sleep in the doghouse -->
+              <g class="wish-icon" data-wish="doghouse" opacity="0">
+                <rect class="plank" x="34" y="-262" width="44" height="28" />
+                <ellipse class="door" cx="56" cy="-246" rx="9" ry="11" />
+                <path class="roof-icon" d="M28 -260 L56 -284 L84 -260" />
+              </g>
+            </g>
+          </g>
         </g>
 
         <!-- particles and hint twinkles are added here by the script -->
@@ -216,6 +263,7 @@
       </g>
     </svg>
 
+    <div id="sunset" class="sunset" aria-hidden="true"></div>
     <div id="evening" class="evening" aria-hidden="true"></div>
     <div id="iris" class="iris" aria-hidden="true"></div>
     <button id="fullscreen" class="corner" type="button" title="Full screen (for the grown-up)" aria-label="Full screen">⤢</button>

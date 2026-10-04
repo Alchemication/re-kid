@@ -187,9 +187,10 @@ wake Reksio at home.
    ground and he walks there; tap a thing and he uses it: naps and snores in
    the doghouse doorway, laps from his bowl, drinks at the tap and shakes
    himself dry, sniffs the flowers and sneezes, barks at the house window,
-   pokes at the gate, barks the bird off its perch, digs up a bone. After the
-   five main things, evening falls and the picture closes in a circle on the
-   doghouse. No text. A twinkle above an untried thing is the hint; arrows
+   pokes at the gate, barks the bird off its perch, digs up a bone. Each of
+   the five main things lowers the sun a step and warms the sky; after the
+   fifth, evening falls and the picture closes in a circle on the doghouse. No text. When left alone, Reksio shows a thought bubble with a
+   picture of the nearest main thing he still wants, and it twinkles; arrows
    and space work too. All sounds are new, made in the browser; the bone find
    plays Adam's bark clip as an easter egg if it exists locally.
 2. **Iterate on what Eliot does with it**: which things he goes for, whether

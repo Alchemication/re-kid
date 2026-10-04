@@ -161,12 +161,23 @@ const Reksio = (() => {
   }
 
   /** Shrink into (or grow out of) the doghouse door. */
+  let ducked = null // the "inside" animation, held while he is in the doghouse
+
   async function duck(into) {
     const out = { transform: `scale(${SCALE})`, opacity: 1 }
     const inside = { transform: `translate(0, -70px) scale(${SCALE * 0.55})`, opacity: 0 }
-    const anim = scaler.animate(into ? [out, inside] : [inside, out], { duration: 420, easing: 'ease-in-out', fill: 'forwards' })
-    await anim.finished
-    if (!into) anim.cancel()
+    if (into) {
+      ducked = scaler.animate([out, inside], { duration: 420, easing: 'ease-in-out', fill: 'forwards' })
+      await ducked.finished
+      return
+    }
+    const back = scaler.animate([inside, out], { duration: 420, easing: 'ease-in-out', fill: 'forwards' })
+    await back.finished
+    // Cancel both: if the held "inside" animation outlived this one, he
+    // would stay invisible while still walking around.
+    back.cancel()
+    if (ducked) ducked.cancel()
+    ducked = null
   }
 
   function holdBone(on) {

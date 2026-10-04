@@ -17,12 +17,15 @@ principles:
   origin: invented
 - text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs.
   origin: invented
-- text: Finite. Evening comes once Reksio has done everything, and the game ends with him asleep.
+- text: Finite, and you can see the end coming. The sun sinks a step and the sky warms with each of the five main things done; after the fifth, evening falls and the game ends with him asleep. No counter, no text.
   origin: inspired
   refs: ['world:places[doghouse].description']
 - text: The yard is built to grow. Later it becomes the game's home screen, and new things in it lead into episode games — say, a toy rocket by the doghouse that starts Kosmonauta.
   origin: invented
 
+- text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird or his doghouse, the nearest one he hasn't done — and that thing twinkles. Only the five main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
+  origin: inspired
+  refs: [world:humour]
 controls:
   text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, he barks. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, or barks.'
   origin: invented
@@ -34,7 +37,7 @@ look:
 - text: Sponge-painted, mottled backgrounds like the series' — an orange sky, a grey-green stone wall, a speckled sandy ground — with flat, outlined things in front of them.
   origin: inspired
   refs: [world:aesthetics.backgrounds, world:aesthetics.overview]
-- text: Solid things stay still. Only what would really move does — flowers and grass in a light breeze, the bird, the curtain, the gate when it is touched. A small twinkle above an untried thing is the only hint.
+- text: Solid things stay still. Only what would really move does — flowers and grass in a light breeze, the bird, the curtain, the gate when it is touched.
   origin: invented
 
 sound:

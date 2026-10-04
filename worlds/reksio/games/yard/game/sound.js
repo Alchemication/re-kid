@@ -146,6 +146,8 @@ const Sound = (() => {
     },
     rattle() { for (let i = 0; i < 4; i++) tone('triangle', 260 + i * 14, 240, i * 0.08, 0.12, 0.003, 0.06) },
     curtain() { hiss(0, 0.06, 0.08, 0.3, 'bandpass', 2400, 0.6) },
+    /** A soft pop, for a thought bubble appearing. */
+    blip() { tone('sine', 660, 990, 0, 0.1, 0.01, 0.12) },
     squeak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },
     water(seconds) {
       const c = ensure()

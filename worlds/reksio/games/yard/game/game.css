@@ -105,12 +105,33 @@ body { display: grid; place-items: center; }
 .sway:nth-of-type(2n) { animation-duration: 4.1s; animation-delay: -1.3s; }
 .sway:nth-of-type(3n) { animation-duration: 3.7s; animation-delay: -2.2s; }
 
+/* the thought bubble */
+.bubble { fill: #fffdf6; stroke: var(--ink); stroke-width: 4; }
+.drop-icon { fill: #7fb8e6; stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; }
+.roof-icon { fill: none; stroke: #6d4a2b; stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+
 /* particles and hints */
 .crumb { fill: #8a5a2e; }
 .clod { fill: #7a5530; }
 .drop { fill: #8cc3ec; }
 .petal { fill: #d8432b; }
 .twinkle { fill: #fff3b8; stroke: #c9962a; stroke-width: 2; }
+
+/* ---- the setting sun and the evening ---- */
+.sun { fill: #fbe08a; stroke: #e7a23a; stroke-width: 4; transition: fill 3s ease, stroke 3s ease; }
+.sun-glow { fill: #fbe9b0; opacity: 0.35; transition: fill 3s ease; }
+#sun { transition: transform 3s ease-in-out; }
+
+/* The sky warms a step at a time as the sun goes down. */
+.sunset {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(#c8402e 0%, #d9653a 30%, rgba(217, 101, 58, 0) 55%);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 3s ease;
+}
 
 /* ---- evening and the closing circle ---- */
 .evening {

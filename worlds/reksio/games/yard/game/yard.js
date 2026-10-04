@@ -6,7 +6,9 @@
 
 /* global Painting, Sound, Reksio */
 (() => {
-  const HINT_EVERY_MS = 6000 // twinkle above something untried if nobody has tapped
+  const WISH_AFTER_IDLE_MS = 3500 // Reksio shows a wish once left alone this long
+  const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
+  const WISH_GAP_MS = 6500 // at least this long between bubbles
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -315,6 +317,7 @@
       busy = false
     }
     done.add(name)
+    sunset()
     if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
       evening()
       return
@@ -326,10 +329,26 @@
     }
   }
 
+  // ------------------------------------------------------------ the sunset
+
+  // Sun colour per step (0 to 5 main things done): yellow, through orange, to red.
+  const SUN_COLORS = ['#fbe08a', '#fbd06a', '#f8b14e', '#f2913f', '#e86f35', '#d9542e']
+  const SUN_STEP = 52 // how far the sun sinks per step, scene units
+
+  /** Lower the sun and warm the sky to match how much is done. */
+  function sunset() {
+    const step = EVENING_NEEDS.filter((n) => done.has(n)).length
+    $('sun').style.transform = `translateY(${step * SUN_STEP}px)`
+    document.querySelector('#sun .sun').style.fill = SUN_COLORS[step]
+    document.querySelector('#sun .sun-glow').style.fill = SUN_COLORS[step]
+    $('sunset').style.opacity = String(step * 0.11)
+  }
+
   // ------------------------------------------------------------ the end
 
   async function evening() {
     ended = true
+    await wait(1800) // let the last step of the sunset be seen
     $('evening').classList.add('on')
     Sound.lullaby()
     await wait(1600)
@@ -423,24 +442,63 @@
 
   // ------------------------------------------------------------ life
 
-  function hint() {
-    if (!ended && !busy && !Reksio.walking && performance.now() - lastTap > HINT_EVERY_MS) {
-      const visible = EVENING_NEEDS.filter((n) => {
-        if (done.has(n)) return false
-        const x = n === 'bird' ? PERCHES[perch].x : THINGS[n].at() + 100
-        return x > camX + 60 && x < camX + Painting.VIEW_W - 60
-      })
-      const name = visible[Math.floor(Math.random() * visible.length)]
-      if (name === 'bird') {
-        twinkle(PERCHES[perch].x, PERCHES[perch].y - 80)
-      } else if (name) {
-        const el = document.querySelector(`[data-thing="${name}"]`)
-        const box = el.querySelector('.hit').getBBox()
-        twinkle(box.x + box.width / 2, Number(el.dataset.hintY) || box.y)
+  // A thought bubble above Reksio, with a picture of the nearest main thing
+  // he hasn't done yet; that thing twinkles too if it's on screen. Only the
+  // five main things ever appear, so it's clear which ones count.
+  const wishEl = $('wish')
+  let wishing = null
+  let wishShownAt = 0
+  let lastWishAt = -Infinity
+
+  function thingCenter(name) {
+    if (name === 'bird') return { x: PERCHES[perch].x, y: PERCHES[perch].y - 80 }
+    const el = document.querySelector(`[data-thing="${name}"]`)
+    const box = el.querySelector('.hit').getBBox()
+    return { x: box.x + box.width / 2, y: Number(el.dataset.hintY) || box.y }
+  }
+
+  function placeWish() {
+    // the bubble sits over his head, which is ahead of his middle
+    wishEl.style.transform = `translateX(${Reksio.facing > 0 ? 0 : -112}px)`
+  }
+
+  function showWish(name) {
+    wishing = name
+    wishShownAt = performance.now()
+    lastWishAt = wishShownAt
+    document.querySelectorAll('.wish-icon').forEach((icon) => {
+      icon.style.opacity = icon.dataset.wish === name ? '1' : '0'
+    })
+    placeWish()
+    wishEl.style.opacity = '1'
+    $('wish-pop').animate(
+      [{ transform: 'scale(0)' }, { transform: 'scale(1.12)', offset: 0.7 }, { transform: 'scale(1)' }],
+      { duration: 320, easing: 'ease-out' },
+    )
+    Sound.blip()
+    const c = thingCenter(name)
+    if (c.x > camX + 60 && c.x < camX + Painting.VIEW_W - 60) twinkle(c.x, c.y)
+  }
+
+  function hideWish() {
+    wishing = null
+    wishEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250 })
+    wishEl.style.opacity = '0'
+  }
+
+  function wishes() {
+    const now = performance.now()
+    if (wishing) {
+      placeWish()
+      if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
+    } else if (!ended && !busy && !Reksio.walking && now - lastTap > WISH_AFTER_IDLE_MS && now - lastWishAt > WISH_GAP_MS) {
+      const left = EVENING_NEEDS.filter((n) => !done.has(n))
+      if (left.length) {
+        const dist = (n) => Math.abs((n === 'bird' ? PERCHES[perch].x : THINGS[n].at()) - Reksio.x)
+        showWish(left.sort((a, b) => dist(a) - dist(b))[0])
       }
-      lastTap = performance.now() - HINT_EVERY_MS + 3500
     }
-    setTimeout(hint, 1000)
+    setTimeout(wishes, 250)
   }
 
   let last = performance.now()
@@ -469,7 +527,8 @@
   birdAt(PERCHES[0])
   requestAnimationFrame(frame)
   setTimeout(birdIdle, 3000)
-  setTimeout(hint, 1000)
+  lastTap = performance.now() - WISH_AFTER_IDLE_MS + 2000 // first wish soon after start
+  setTimeout(wishes, 250)
 
   window.yardGame = { goAndDo, done, state: () => ({ busy, ended, done: [...done], camX }) } // for testing
 })()
