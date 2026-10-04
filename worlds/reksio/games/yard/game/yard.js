@@ -1,7 +1,8 @@
 // Reksio's yard: tap the ground and he walks there; tap a thing and he goes
 // over and does something with it. The yard is wider than the screen and the
 // view follows him, from the house wall on the left to the fence on the right.
-// When he has done the five main things, evening comes and he goes to sleep.
+// Pressing and holding on Reksio stretches him like a dachshund. When he has
+// done the five main things, evening comes and he goes to sleep.
 // No text, no score; every tap gets an answer.
 
 /* global Painting, Sound, Reksio */
@@ -9,6 +10,8 @@
   const WISH_AFTER_IDLE_MS = 3500 // Reksio shows a wish once left alone this long
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 6500 // at least this long between bubbles
+  const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
+  const IDLE_ACT_MS = [5000, 9000] // when left alone, a small dog move every 5–9 s
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -316,17 +319,57 @@
     } finally {
       busy = false
     }
+    const firstTime = EVENING_NEEDS.includes(name) && !done.has(name)
     done.add(name)
     sunset()
     if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
       evening()
       return
     }
+    if (firstTime && !pending) await Reksio.hop() // a hop of joy
+    runPending()
+  }
+
+  function runPending() {
     if (pending) {
       const next = pending
       pending = null
       next()
     }
+  }
+
+  // ------------------------------------------------------------ the stretch
+
+  // A press on Reksio: let go quickly and he barks; hold and he stretches,
+  // then snaps back when let go.
+  let hold = null
+
+  function holdStart() {
+    if (ended || busy || hold) return command(() => Reksio.bark())
+    lastTap = performance.now()
+    hold = { stretching: false, stopSound: null }
+    const mine = hold
+    mine.timer = setTimeout(() => {
+      if (hold !== mine) return
+      mine.stretching = true
+      busy = true
+      Reksio.beginStretch()
+      mine.stopSound = Sound.stretch()
+    }, HOLD_MS)
+  }
+
+  async function holdEnd() {
+    if (!hold) return
+    const h = hold
+    hold = null
+    clearTimeout(h.timer)
+    if (!h.stretching) return command(() => Reksio.bark())
+    lastTap = performance.now()
+    h.stopSound()
+    Sound.boing()
+    await Reksio.endStretch()
+    busy = false
+    runPending()
   }
 
   // ------------------------------------------------------------ the sunset
@@ -399,7 +442,7 @@
     Sound.ensure()
     const thing = e.target.closest('[data-thing]')
     if (thing) return command(() => goAndDo(thing.dataset.thing))
-    if (e.target.closest('#reksio')) return command(() => Reksio.bark())
+    if (e.target.closest('#reksio')) return holdStart()
     const x = yardX(e)
     command(() => Reksio.walkTo(x))
   })
@@ -427,12 +470,23 @@
       const name = nearest()
       return command(() => (name ? goAndDo(name) : Reksio.bark()))
     }
-    command(() => Reksio.bark())
+    // any other key: tap to bark, hold to stretch
+    holdKey = e.key
+    holdStart()
   })
 
+  let holdKey = null
   document.addEventListener('keyup', (e) => {
     if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !busy) Reksio.stopWalking()
+    if (e.key === holdKey) {
+      holdKey = null
+      holdEnd()
+    }
   })
+
+  window.addEventListener('pointerup', () => holdEnd())
+  window.addEventListener('pointercancel', () => holdEnd())
+  window.addEventListener('blur', () => holdEnd())
 
   document.addEventListener('contextmenu', (e) => e.preventDefault())
 
@@ -501,6 +555,17 @@
     setTimeout(wishes, 250)
   }
 
+  // When left alone, now and then a small dog move: sniff, look around,
+  // scratch, hop. Never while busy, walking, stretching or at the end.
+  async function idleAct() {
+    const quiet = !ended && !busy && !hold && !Reksio.walking && !Reksio.stretching && !wishing
+    if (quiet && performance.now() - lastTap > IDLE_ACT_MS[0]) {
+      const acts = [Reksio.sniff, Reksio.lookAround, Reksio.scratch, Reksio.hop]
+      await acts[Math.floor(Math.random() * acts.length)]()
+    }
+    setTimeout(idleAct, IDLE_ACT_MS[0] + Math.random() * (IDLE_ACT_MS[1] - IDLE_ACT_MS[0]))
+  }
+
   let last = performance.now()
   let shownCam = -1
   function frame(t) {
@@ -529,6 +594,7 @@
   setTimeout(birdIdle, 3000)
   lastTap = performance.now() - WISH_AFTER_IDLE_MS + 2000 // first wish soon after start
   setTimeout(wishes, 250)
+  setTimeout(idleAct, IDLE_ACT_MS[1])
 
   window.yardGame = { goAndDo, done, state: () => ({ busy, ended, done: [...done], camX }) } // for testing
 })()

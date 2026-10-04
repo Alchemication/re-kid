@@ -146,6 +146,61 @@ const Sound = (() => {
     },
     rattle() { for (let i = 0; i < 4; i++) tone('triangle', 260 + i * 14, 240, i * 0.08, 0.12, 0.003, 0.06) },
     curtain() { hiss(0, 0.06, 0.08, 0.3, 'bandpass', 2400, 0.6) },
+    /** A rising, rubbery tone while he stretches. Returns a function that stops it. */
+    stretch() {
+      const c = ensure()
+      const t = c.currentTime
+      const o = c.createOscillator()
+      o.type = 'triangle'
+      o.frequency.setValueAtTime(170, t)
+      o.frequency.exponentialRampToValueAtTime(620, t + 2.2)
+      const wob = c.createOscillator()
+      wob.frequency.value = 7
+      const wobGain = c.createGain()
+      wobGain.gain.value = 9
+      wob.connect(wobGain).connect(o.frequency)
+      const g = c.createGain()
+      g.gain.setValueAtTime(0.0001, t)
+      g.gain.exponentialRampToValueAtTime(0.11, t + 0.12)
+      o.connect(g).connect(master)
+      o.start(t)
+      wob.start(t)
+      return () => {
+        const now = c.currentTime
+        g.gain.cancelScheduledValues(now)
+        g.gain.setValueAtTime(g.gain.value, now)
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.08)
+        o.stop(now + 0.1)
+        wob.stop(now + 0.1)
+      }
+    },
+    /** A cartoon boing as he snaps back. */
+    boing() {
+      const c = ensure()
+      const t = c.currentTime
+      const o = c.createOscillator()
+      o.type = 'sine'
+      o.frequency.setValueAtTime(140, t)
+      o.frequency.exponentialRampToValueAtTime(520, t + 0.07)
+      o.frequency.exponentialRampToValueAtTime(260, t + 0.5)
+      const wob = c.createOscillator()
+      wob.frequency.setValueAtTime(18, t)
+      wob.frequency.linearRampToValueAtTime(8, t + 0.5)
+      const wobGain = c.createGain()
+      wobGain.gain.setValueAtTime(60, t)
+      wobGain.gain.linearRampToValueAtTime(5, t + 0.5)
+      wob.connect(wobGain).connect(o.frequency)
+      const g = c.createGain()
+      env(g, t, 0.3, 0.01, 0.55)
+      o.connect(g).connect(master)
+      o.start(t)
+      wob.start(t)
+      o.stop(t + 0.6)
+      wob.stop(t + 0.6)
+    },
+    hop() { tone('sine', 300, 620, 0.1, 0.08, 0.02, 0.18) },
+    sniff() { hiss(0, 0.07, 0.015, 0.06, 'bandpass', 2600, 1.5) },
+    scratch() { for (let i = 0; i < 6; i++) hiss(i * 0.16, 0.09, 0.004, 0.06, 'highpass', 2500) },
     /** A soft pop, for a thought bubble appearing. */
     blip() { tone('sine', 660, 990, 0, 0.1, 0.01, 0.12) },
     squeak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },

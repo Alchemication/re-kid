@@ -26,8 +26,10 @@ principles:
 - text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird or his doghouse, the nearest one he hasn't done — and that thing twinkles. Only the five main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
   origin: inspired
   refs: [world:humour]
+- text: He moves like a dog. Short trips are a walk, long ones a bounding run, easing in and out of speed; he hops for joy after each main thing; and when left alone he now and then sniffs the ground, looks around, scratches behind his ear or hops.
+  origin: invented
 controls:
-  text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, he barks. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, or barks.'
+  text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, a quick tap barks and pressing and holding stretches him. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, any other key barks (hold it to stretch).'
   origin: invented
 
 look:
@@ -72,6 +74,17 @@ scenes:
     origin: inspired
     refs: ['world:places[yard].description']
   sound: {text: 'A squeaky tap, running water, a shake.', origin: invented}
+- id: stretch
+  moment: stretch
+  action: {text: Press and hold on Reksio., origin: invented}
+  result:
+    text: Reksio stretches longer and longer like a dachshund, his front half walking forward while his back stays put, for as long as the press lasts; let go and he snaps back with a springy wobble.
+    origin: inspired
+    refs: [intro:stretch, mark:stretching-melody]
+  sound:
+    text: A rising, rubbery stretching sound while held, and a cartoon boing on release.
+    origin: inspired
+    refs: [intro:stretch]
 - id: flowers
   action: {text: Tap the flowers., origin: invented}
   result:

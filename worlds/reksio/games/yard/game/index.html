@@ -176,31 +176,31 @@
         <g id="reksio" style="transform: translate(1000px, 812px)">
           <g id="rk-scale" style="transform: scale(1.3)">
             <g id="rk-flip">
-              <g id="rk-bob">
+              <g id="rk-bob" style="transform-origin: 0px -40px">
                 <!-- far legs, behind the body -->
                 <g class="leg" id="leg-1" style="transform-origin: -30px -40px">
                   <path class="leg-ink" d="M-30 -40 L-34 -3" /><path class="leg-white" d="M-30 -40 L-34 -3" />
                 </g>
-                <g class="leg" id="leg-2" style="transform-origin: 12px -42px">
+                <g class="front-part"><g class="leg" id="leg-2" style="transform-origin: 12px -42px">
                   <path class="leg-ink" d="M12 -42 L14 -3" /><path class="leg-white" d="M12 -42 L14 -3" />
-                </g>
+                </g></g>
                 <!-- tail stub -->
                 <g id="tail" style="transform-origin: -46px -60px">
                   <path class="leg-ink" d="M-46 -60 L-58 -84" /><path class="leg-white" d="M-46 -60 L-58 -84" />
                 </g>
                 <!-- body: low at the rear, rising to a deep chest and thick neck -->
-                <path class="ink" d="M-50 -58 Q-24 -66 2 -76 L18 -94 L30 -90 L28 -52 Q24 -34 4 -34 L-40 -34 Q-56 -36 -54 -50 Z" />
-                <path class="white" d="M-50 -58 Q-24 -66 2 -76 L18 -94 L30 -90 L28 -52 Q24 -34 4 -34 L-40 -34 Q-56 -36 -54 -50 Z" />
+                <path id="rk-body-ink" class="ink" d="M-50 -58 Q-24 -66 2 -76 L18 -94 L30 -90 L28 -52 Q24 -34 4 -34 L-40 -34 Q-56 -36 -54 -50 Z" />
+                <path id="rk-body-white" class="white" d="M-50 -58 Q-24 -66 2 -76 L18 -94 L30 -90 L28 -52 Q24 -34 4 -34 L-40 -34 Q-56 -36 -54 -50 Z" />
                 <ellipse class="ochre" cx="-26" cy="-50" rx="16" ry="11" />
                 <!-- near legs, in front of the body -->
                 <g class="leg" id="leg-3" style="transform-origin: -22px -40px">
                   <path class="leg-ink" d="M-22 -40 L-25 -3" /><path class="leg-white" d="M-22 -40 L-25 -3" />
                 </g>
-                <g class="leg" id="leg-4" style="transform-origin: 22px -42px">
+                <g class="front-part"><g class="leg" id="leg-4" style="transform-origin: 22px -42px">
                   <path class="leg-ink" d="M22 -42 L24 -3" /><path class="leg-white" d="M22 -42 L24 -3" />
-                </g>
+                </g></g>
                 <!-- head: a big rounded skull flowing into a long, drooping muzzle -->
-                <g id="rk-head" style="transform-origin: 20px -92px">
+                <g class="front-part"><g id="rk-head" style="transform-origin: 20px -92px">
                   <path id="rk-mouth" class="mouth" d="M44 -78 L88 -78 Q82 -60 62 -62 Q48 -64 44 -78 Z" opacity="0" />
                   <path id="rk-tongue" class="tongue" d="M80 -78 Q92 -76 94 -58 Q86 -56 80 -68 Z" opacity="0" />
                   <path class="ink" d="M2 -104 C0 -128 20 -138 40 -132 C58 -126 80 -114 92 -100 C100 -90 96 -78 86 -76 L44 -76 C26 -76 10 -84 2 -104 Z" />
@@ -215,7 +215,7 @@
                     <path class="bone" d="M66 -76 H106 M62 -81 a5 5 0 1 0 0 10 M110 -81 a5 5 0 1 1 0 10" />
                     <path class="bone-white" d="M66 -76 H106 M62 -81 a5 5 0 1 0 0 10 M110 -81 a5 5 0 1 1 0 10" />
                   </g>
-                </g>
+                </g></g>
               </g>
             </g>
           </g>
