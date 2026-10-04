@@ -5,7 +5,7 @@ audience: Eliot, about 3, playing with a parent who remembers Reksio.
 length: As long as he likes, usually a few minutes; it ends with evening.
 
 pitch:
-  text: The child is Reksio in his own yard. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — pokes his head out of the doghouse, drinks from the tap, eats from his bowl, barks at a bird, digs up a bone. When he has tried everything, evening comes and he goes to sleep in his doghouse.
+  text: The child is Reksio in his own yard, which is wider than the screen; the view follows him from the house wall at one end to the fence and gate at the other. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — naps and snores in his doghouse, laps from his bowl, drinks from the tap, sniffs the flowers and sneezes, barks at the bird, digs up a bone. Once he has done the five main things, evening comes and he goes to sleep in his doghouse.
   origin: inspired
   refs: ['world:places[yard].description', 'world:places[doghouse].description', world:premise]
 
@@ -28,17 +28,17 @@ controls:
   origin: invented
 
 look:
-- text: Reksio is small in the yard, about a fifth of the screen high, seen from the side, with the long terrier muzzle, ochre ear and ochre patch on his back. Drawn in code, never traced.
+- text: Reksio is small in the yard, about a fifth of the screen high, seen from the side — a big rounded head flowing into a long, deep muzzle, a small eye high up, an ochre ear folded forward, a deep chest, a short body with an ochre patch near the rear, a stub tail and column legs. Drawn in code, never traced.
   origin: inspired
   refs: ['world:characters[reksio].visual_signature']
 - text: Sponge-painted, mottled backgrounds like the series' — an orange sky, a grey-green stone wall, a speckled sandy ground — with flat, outlined things in front of them.
   origin: inspired
   refs: [world:aesthetics.backgrounds, world:aesthetics.overview]
-- text: Every outline wobbles slightly a few times a second, like hand-inked animation ("boiling" lines).
+- text: Solid things stay still. Only what would really move does — flowers and grass in a light breeze, the bird, the curtain, the gate when it is touched. A small twinkle above an untried thing is the only hint.
   origin: invented
 
 sound:
-- text: "Every action has its own new, gentle sound, made in the browser: a bark, pattering steps, munching, a running tap, a bird's chirp, digging."
+- text: "Every action has its own new, gentle sound, made in the browser: a bark, pattering steps, lapping, snoring, a running tap, a sneeze, a bird's chirp, digging."
   origin: invented
 - text: A short, calm lullaby when evening comes. To be composed properly; a simple placeholder for now.
   origin: invented
@@ -47,19 +47,19 @@ scenes:
 - id: doghouse
   action: {text: Tap the doghouse., origin: invented}
   result:
-    text: Reksio trots in through the round door; a moment later his head pops out of it and looks around, then he comes back out.
+    text: Reksio trots in through the round door and falls asleep in the doorway, head resting on his front paws, eyes shut, little Zs rising; after a few snores he yawns and comes back out.
     origin: inspired
     refs: ['world:places[doghouse].description']
-  sound: {text: A soft wooden knock and a happy little bark from inside., origin: invented}
+  sound: {text: 'A soft wooden knock, slow snoring, a yawn.', origin: invented}
 - id: bowl
   moment: bowl
   action: {text: Tap the bowl., origin: invented}
   result:
-    text: Reksio eats from his bowl, bits flying, then licks his lips.
+    text: Reksio laps from his bowl like a real dog — quick little dips with his tongue, bits flying — then licks his lips.
     origin: inspired
     refs: [intro:bowl]
   sound:
-    text: Munching and a big slurp.
+    text: A rhythm of wet laps and a big slurp.
     origin: inspired
     refs: [intro:bowl]
 - id: tap
@@ -69,6 +69,25 @@ scenes:
     origin: inspired
     refs: ['world:places[yard].description']
   sound: {text: 'A squeaky tap, running water, a shake.', origin: invented}
+- id: flowers
+  action: {text: Tap the flowers., origin: invented}
+  result:
+    text: Reksio sniffs the flowers, then sneezes, and petals fly.
+    origin: invented
+  sound: {text: 'Sniffs, then a sneeze.', origin: invented}
+- id: house
+  action: {text: Tap the house window., origin: invented}
+  result:
+    text: At the left end of the yard, Reksio barks up at the window and the curtain stirs.
+    origin: inspired
+    refs: ['world:places[family-home].description']
+  sound: {text: 'A bark, a rustle of curtain.', origin: invented}
+- id: gate
+  action: {text: Tap the gate., origin: invented}
+  result:
+    text: At the right end of the yard, Reksio pokes his nose at the gate and barks; the gate rattles. Later, the gate is where episodes open from.
+    origin: invented
+  sound: {text: 'A rattle and a bark.', origin: invented}
 - id: bird
   action: {text: Tap the bird on the wall., origin: invented}
   result:
@@ -87,7 +106,7 @@ scenes:
     refs: [mark:bark]
 
 ending:
-  text: Once Reksio has done all five things, the sky turns to evening, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.
+  text: Once Reksio has done the five main things (doghouse, bowl, tap, bird, bone), the sky turns to evening, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.
   origin: inspired
   refs: ['world:places[doghouse].description', intro:fade-out]
 

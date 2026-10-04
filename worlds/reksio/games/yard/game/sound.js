@@ -101,6 +101,51 @@ const Sound = (() => {
       src.start(t)
       src.stop(t + 0.45)
     },
+    /** One lap of the tongue: a short, wet "slp" that rises in pitch. */
+    lap() {
+      const c = ensure()
+      const t = c.currentTime
+      const src = c.createBufferSource()
+      src.buffer = noise
+      const f = c.createBiquadFilter()
+      f.type = 'bandpass'
+      f.Q.value = 9
+      f.frequency.setValueAtTime(700, t)
+      f.frequency.exponentialRampToValueAtTime(2600, t + 0.07)
+      const g = c.createGain()
+      env(g, t, 0.45, 0.006, 0.07)
+      src.connect(f).connect(g).connect(master)
+      src.start(t, Math.random())
+      src.stop(t + 0.1)
+    },
+    /** One sleepy breath: a soft intake, then a low rumbling snore out. */
+    snore() {
+      const c = ensure()
+      const t = c.currentTime
+      hiss(0, 0.05, 0.5, 0.25, 'bandpass', 900, 0.7)
+      const o = c.createOscillator()
+      o.type = 'sawtooth'
+      o.frequency.setValueAtTime(70, t + 0.75)
+      o.frequency.linearRampToValueAtTime(58, t + 1.55)
+      const lp = c.createBiquadFilter()
+      lp.type = 'lowpass'
+      lp.frequency.value = 420
+      const g = c.createGain()
+      g.gain.setValueAtTime(0.0001, t + 0.75)
+      g.gain.exponentialRampToValueAtTime(0.32, t + 0.95)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6)
+      o.connect(lp).connect(g).connect(master)
+      o.start(t + 0.75)
+      o.stop(t + 1.65)
+    },
+    yawn() { tone('sawtooth', 300, 170, 0, 0.08, 0.15, 0.5) },
+    sneeze() {
+      hiss(0, 0.06, 0.25, 0.05, 'bandpass', 1800, 1)
+      hiss(0.32, 0.4, 0.004, 0.12, 'highpass', 1500)
+      tone('square', 520, 300, 0.32, 0.06, 0.004, 0.1)
+    },
+    rattle() { for (let i = 0; i < 4; i++) tone('triangle', 260 + i * 14, 240, i * 0.08, 0.12, 0.003, 0.06) },
+    curtain() { hiss(0, 0.06, 0.08, 0.3, 'bandpass', 2400, 0.6) },
     squeak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },
     water(seconds) {
       const c = ensure()

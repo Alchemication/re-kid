@@ -5,10 +5,10 @@
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
-  const SCALE = 1.7
+  const SCALE = 1.3
   const SPEED = 300 // scene units per second
-  const MIN_X = 90
-  const MAX_X = 1510
+  const MIN_X = 380 // the house wall is the yard's left end
+  const MAX_X = 2690 // the fence is its right end
 
   const $ = (id) => document.getElementById(id)
   const root = $('reksio')
@@ -23,7 +23,7 @@ const Reksio = (() => {
   const smile = $('rk-smile')
   const bone = $('rk-bone')
 
-  let x = 700
+  let x = 1000
   let facing = 1
   let target = null
   let arrive = null // resolves the current walk: true if he got there
@@ -127,6 +127,25 @@ const Reksio = (() => {
     show(smile, true)
   }
 
+  /** Lap from a bowl: quick little dips with the tongue out, n times. */
+  async function lap(n) {
+    await head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(22deg)' }], { duration: 220, easing: 'ease-out' }).finished
+    show(tongue, true)
+    show(smile, false)
+    const dip = head.animate(
+      [{ transform: 'rotate(22deg)' }, { transform: 'rotate(30deg)' }, { transform: 'rotate(22deg)' }],
+      { duration: 190, iterations: n, easing: 'ease-in-out' },
+    )
+    for (let i = 0; i < n; i++) {
+      Sound.lap()
+      await wait(190)
+    }
+    await dip.finished
+    show(tongue, false)
+    show(smile, true)
+    await head.animate([{ transform: 'rotate(22deg)' }, { transform: 'rotate(0)' }], { duration: 260, easing: 'ease-in-out' }).finished
+  }
+
   async function shake() {
     await bob.animate(
       [0, 9, -9, 8, -8, 6, -6, 0].map((d) => ({ transform: `rotate(${d}deg)` })),
@@ -161,7 +180,8 @@ const Reksio = (() => {
     get facing() { return facing },
     get walking() { return target !== null },
     /** Mouth position in scene units, for effects. */
-    mouth() { return { x: x + facing * 143, y: GROUND - 110 } },
-    walkTo, stopWalking, face, tick, bark, nod, lick, shake, paddle, duck, holdBone,
+    mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
+    walkTo, stopWalking, face, tick, bark, nod, lick, lap, shake, paddle, duck, holdBone,
+    MIN_X, MAX_X,
   }
 })()

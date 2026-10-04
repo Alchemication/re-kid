@@ -180,15 +180,18 @@ wake Reksio at home.
 ## Next steps
 
 1. **Adam: try the yard** (`uv run python main.py play reksio`), alone and
-   then with Eliot. Reksio is small, seen from the side, drawn in code with
-   "boiling" ink lines, on a sponge-painted yard (orange sky, stone wall,
-   sandy ground). Tap the ground and he walks there; tap a thing and he uses
-   it: pokes his head out of the doghouse, eats from his bowl, drinks at the
-   tap and shakes himself dry, barks the bird off the wall, digs up a bone.
-   After all five, evening falls and the picture closes in a circle on the
-   doghouse. No text. Things wiggle now and then as a hint; arrows and space
-   work too. All sounds are new, made in the browser; the bone find plays
-   Adam's bark clip as an easter egg if it exists locally.
+   then with Eliot. The yard is wider than the screen and the view follows
+   Reksio, from the house wall (left end) to the fence and gate (right end).
+   Reksio is small, seen from the side, drawn in code on a sponge-painted
+   yard; solid things stay still, only plants sway and the bird hops. Tap the
+   ground and he walks there; tap a thing and he uses it: naps and snores in
+   the doghouse doorway, laps from his bowl, drinks at the tap and shakes
+   himself dry, sniffs the flowers and sneezes, barks at the house window,
+   pokes at the gate, barks the bird off its perch, digs up a bone. After the
+   five main things, evening falls and the picture closes in a circle on the
+   doghouse. No text. A twinkle above an untried thing is the hint; arrows
+   and space work too. All sounds are new, made in the browser; the bone find
+   plays Adam's bark clip as an easter egg if it exists locally.
 2. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
 3. **Later:** the yard becomes the home screen, and new things in it lead

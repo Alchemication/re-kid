@@ -36,28 +36,37 @@ body { display: grid; place-items: center; }
 
 #paint, #world { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-/* ---- shared ink style ---- */
-.ink { fill: var(--ink); stroke: var(--ink); stroke-width: 8; stroke-linejoin: round; }
+/* ---- Reksio ---- */
+.ink { fill: var(--ink); stroke: var(--ink); stroke-width: 7; stroke-linejoin: round; }
 .white { fill: var(--white); }
 .ochre { fill: var(--ochre); }
 .eye { fill: var(--ink); }
-.lid { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.lid { fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; }
 .mouth { fill: var(--red); stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
-.tongue { fill: #ee8b7c; stroke: var(--ink); stroke-width: 1.5; }
-.ear-ochre { fill: var(--ochre); stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; }
-.limb-ink { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
-.limb { fill: none; stroke: var(--white); stroke-width: 5.5; stroke-linecap: round; }
-.foot { fill: var(--white); stroke: var(--ink); stroke-width: 3; }
+.tongue { fill: #ee8b7c; stroke: var(--ink); stroke-width: 1.8; stroke-linejoin: round; }
+.ear-ochre { fill: var(--ochre); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ear-white { fill: var(--white); stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.leg-ink { fill: none; stroke: var(--ink); stroke-width: 15; stroke-linecap: round; }
+.leg-white { fill: none; stroke: var(--white); stroke-width: 9; stroke-linecap: round; }
+.paw { fill: var(--white); stroke: var(--ink); stroke-width: 4; }
 .bone { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
 .bone-white { fill: none; stroke: var(--white); stroke-width: 5; stroke-linecap: round; }
+.zzz use { fill: none; stroke: var(--white); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
 
-/* ---- things in the yard ---- */
+/* ---- things in the yard (solid things never move) ---- */
 .hit { fill: transparent; }
+.plaster { fill: #ddd2b6; stroke: var(--ink); stroke-width: 6; }
+.plaster-edge { stroke: #b9ad8f; stroke-width: 12; }
+.window { fill: #9cc4dc; stroke: var(--ink); stroke-width: 7; }
+.window-bars { stroke: var(--ink); stroke-width: 6; }
+.curtain { fill: #e9e2cf; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.step { fill: #b8ab8f; stroke: var(--ink); stroke-width: 5; }
 .plank { fill: #e3c27c; stroke: var(--ink); stroke-width: 6; }
 .plank-line { fill: none; stroke: #a9844a; stroke-width: 3; }
 .door { fill: #3b2a1a; stroke: var(--ink); stroke-width: 6; }
 .roof { fill: none; stroke: var(--ink); stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; }
 .roof-edge { fill: none; stroke: #6d4a2b; stroke-width: 20; stroke-linecap: round; stroke-linejoin: round; }
+.plate { fill: #8d8f86; stroke: var(--ink); stroke-width: 4; }
 .pipe { fill: none; stroke: var(--ink); stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
 .pipe-inner { fill: none; stroke: #9aa3a6; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
 .spout { fill: none; stroke: var(--ink); stroke-width: 14; stroke-linecap: round; }
@@ -69,8 +78,17 @@ body { display: grid; place-items: center; }
 .food { fill: #8a5a2e; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
 .bowl { fill: #e8998a; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; }
 .bowl-rim { stroke: var(--ink); stroke-width: 6; stroke-linecap: round; }
+.stem { fill: none; stroke: #4f6e33; stroke-width: 5; stroke-linecap: round; }
+.leaf { fill: #6f9445; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.petal-red { fill: #d8432b; stroke: var(--ink); stroke-width: 3; }
+.petal-yellow { fill: #f2c94c; stroke: var(--ink); stroke-width: 3; }
+.flower-eye { fill: #3b2a1a; }
 .earth { fill: #8b6238; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; }
 .earth-dots { stroke: #5d3f22; stroke-width: 5; stroke-linecap: round; }
+.rail { stroke: #8f6a3a; stroke-width: 16; }
+.picket { fill: #c79a5c; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.gate-brace { stroke: #8f6a3a; stroke-width: 12; stroke-linecap: round; }
+.latch { fill: #6b6a62; stroke: var(--ink); stroke-width: 3; }
 .bird { fill: #262422; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
 .wing { fill: #3a3733; stroke: var(--ink); stroke-width: 2.5; }
 .beak { fill: #f0a52a; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
@@ -78,10 +96,21 @@ body { display: grid; place-items: center; }
 .legs-thin { stroke: #c97f22; stroke-width: 3; stroke-linecap: round; }
 .grass { fill: none; stroke: #5f7a3c; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
 
-/* particles */
+/* A gentle breeze: only plants sway, each a little out of step. */
+@keyframes sway {
+  0%, 100% { transform: rotate(-2.5deg); }
+  50% { transform: rotate(2.5deg); }
+}
+.sway { animation: sway 3.4s ease-in-out infinite; }
+.sway:nth-of-type(2n) { animation-duration: 4.1s; animation-delay: -1.3s; }
+.sway:nth-of-type(3n) { animation-duration: 3.7s; animation-delay: -2.2s; }
+
+/* particles and hints */
 .crumb { fill: #8a5a2e; }
 .clod { fill: #7a5530; }
 .drop { fill: #8cc3ec; }
+.petal { fill: #d8432b; }
+.twinkle { fill: #fff3b8; stroke: #c9962a; stroke-width: 2; }
 
 /* ---- evening and the closing circle ---- */
 .evening {
