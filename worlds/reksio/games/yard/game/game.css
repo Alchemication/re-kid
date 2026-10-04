@@ -132,6 +132,11 @@ body { display: grid; place-items: center; }
 .thread, .strand { fill: none; stroke: rgba(250, 248, 240, 0.85); stroke-width: 1.2; }
 @keyframes buzz { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
 
+/* action spots on the ground: stand in one (or tap it) to use the thing */
+.spot { fill: rgba(255, 250, 232, 0.16); stroke: rgba(255, 252, 240, 0.65); stroke-width: 3; stroke-dasharray: 10 8; transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.4s ease; cursor: pointer; }
+.spot.extra { fill: rgba(255, 250, 232, 0.07); stroke: rgba(255, 252, 240, 0.35); }
+.spot.on { fill: rgba(255, 226, 140, 0.55); stroke: #e9a93a; stroke-dasharray: none; }
+
 /* paw markers above things you can tap */
 .marker { pointer-events: none; }
 .marker .marker-bob { animation: bob 1.6s ease-in-out infinite; }

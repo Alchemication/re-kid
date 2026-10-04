@@ -6,11 +6,12 @@
 // the sky (which moves at half speed, for depth) and the wall with the ground.
 // Each frame copies the visible part of each onto the visible canvas.
 
+/* global Layout */
 /* exported Painting */
 const Painting = (() => {
   const VIEW_W = 1600 // the view, in scene units
   const H = 900
-  const WORLD_W = 3000 // the whole yard
+  const WORLD_W = Layout.WORLD_W // the whole yard (layout.js)
   const SKY_SPEED = 0.5 // the sky scrolls this much slower than the ground
   const SKY_W = VIEW_W + (WORLD_W - VIEW_W) * SKY_SPEED
   const WALL_TOP = 330

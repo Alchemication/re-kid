@@ -3,7 +3,7 @@
 // dachshund stretch, and his small moves (bark, nod, shake, hop, sniff,
 // scratch, ducking into the doghouse). Drawn in index.html.
 
-/* global Sound, Music, Creatures */
+/* global Sound, Music, Creatures, Layout */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
@@ -17,8 +17,8 @@ const Reksio = (() => {
   const ACCEL = 1500 // how quickly he speeds up and slows down (units/s²)
   const MAX_STRETCH = 230 // longest dachshund stretch, in his own units
   const STRETCH_RATE = 210 // how fast he stretches while held (units/s)
-  const MIN_X = 380 // the house wall is the yard's left end
-  const MAX_X = 2690 // the fence is its right end
+  const MIN_X = Layout.MIN_X // the house wall is the yard's left end
+  const MAX_X = Layout.MAX_X // the fence is its right end
 
   const $ = (id) => document.getElementById(id)
   const root = $('reksio')

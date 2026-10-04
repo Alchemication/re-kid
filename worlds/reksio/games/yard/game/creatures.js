@@ -11,7 +11,7 @@
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Sound, Reksio */
+/* global Sound, Reksio, Layout */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -124,11 +124,11 @@ const Creatures = (() => {
     pick() {
       const r = Math.random()
       const spots = [
-        { x: 880, y: 760, name: 'bowl' }, // the bowl rim
         { x: 480, y: 612, name: 'roof' }, // the doghouse roof
         { x: 1321, y: 556, name: 'tap' }, // the tap's spout
-        { x: 1648, y: 646, name: 'flower' },
       ]
+      if (!Layout.hidden.includes('bowl')) spots.push({ x: 880 + Layout.x('bowl'), y: 760, name: 'bowl' })
+      if (Layout.flowers) spots.push({ x: 1648 + Layout.x('flowers'), y: 646, name: 'flower' })
       if (r < 0.25) {
         this.target = { ...spots[Math.floor(Math.random() * spots.length)], land: true }
       } else if (r < 0.35 && web.built && !spider.busy) {
@@ -246,7 +246,7 @@ const Creatures = (() => {
     flower: 0,
     state: 'fly', // fly | hover | huff
     stateUntil: 0,
-    FLOWERS: [{ x: 1604, y: 668 }, { x: 1648, y: 640 }, { x: 1706, y: 680 }],
+    FLOWERS: [{ x: 1604, y: 668 }, { x: 1648, y: 640 }, { x: 1706, y: 680 }].map((f) => ({ x: f.x + Layout.x('flowers'), y: f.y })),
     g: null,
     make() {
       this.g = el('g', { class: 'critter bee', 'data-critter': 'bee' })
@@ -452,15 +452,21 @@ const Creatures = (() => {
 
   // ------------------------------------------------------------ public
 
-  const all = [fly, bee, spider]
+  const BY_NAME = { fly, bee, spider }
+  let all = []
 
-  function init() {
-    web.make()
-    fly.make()
-    bee.make()
-    spider.make()
-    spider.build()
+  /** Bring in this play's creatures (see layout.js). */
+  function init(names = Layout.creatures) {
+    all = names.map((n) => BY_NAME[n])
+    if (names.includes('spider')) {
+      web.make()
+      spider.make()
+      spider.build()
+    }
+    if (names.includes('fly')) fly.make()
+    if (names.includes('bee')) bee.make()
   }
+  const active = (c) => all.includes(c)
 
   function tick(dt) {
     world.t += dt
@@ -468,10 +474,10 @@ const Creatures = (() => {
     world.reksio.nose = Reksio.mouth()
     for (const e of world.events) {
       if (e.type === 'bark') {
-        if (dist(e.x, GROUND - 120, WEB.hub.x, WEB.hub.y) < 500) spider.hide()
-        if (dist(e.x, e.y, fly.x, fly.y) < 260) fly.dodge(e.x, e.y)
+        if (active(spider) && dist(e.x, GROUND - 120, WEB.hub.x, WEB.hub.y) < 500) spider.hide()
+        if (active(fly) && dist(e.x, e.y, fly.x, fly.y) < 260) fly.dodge(e.x, e.y)
       }
-      if (e.type === 'snap' && dist(e.x, e.y, fly.x, fly.y) < 120) fly.dodge(e.x, e.y)
+      if (e.type === 'snap' && active(fly) && dist(e.x, e.y, fly.x, fly.y) < 120) fly.dodge(e.x, e.y)
     }
     world.events.length = 0
     for (const c of all) c.update(dt)
@@ -483,10 +489,10 @@ const Creatures = (() => {
     /** Tell the creatures what Reksio just did: 'bark' or 'snap', where. */
     notice(type, x, y) { world.events.push({ type, x, y }) },
     /** Where the bee is. */
-    get bee() { return { x: bee.x, y: bee.y } },
+    get bee() { return active(bee) ? { x: bee.x, y: bee.y } : null },
     /** Where the fly is, if it's about and free. */
     get fly() {
-      return fly.state === 'fly' || fly.state === 'land' ? { x: fly.x, y: fly.y } : null
+      return active(fly) && (fly.state === 'fly' || fly.state === 'land') ? { x: fly.x, y: fly.y } : null
     },
     /** Where Reksio should stand under the web, facing left, nose below it. */
     webSpot: () => ({ x: WEB.hub.x + 125, hub: WEB.hub }),

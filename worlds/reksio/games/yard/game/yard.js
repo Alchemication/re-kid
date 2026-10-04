@@ -1,11 +1,13 @@
 // Reksio's yard: tap the ground and he walks there; tap a thing and he goes
 // over and does something with it. The yard is wider than the screen and the
 // view follows him, from the house wall on the left to the fence on the right.
-// Pressing and holding on Reksio stretches him like a dachshund. When he has
-// done the five main things, evening comes and he goes to sleep.
+// Pressing and holding on Reksio stretches him like a dachshund. Each play
+// counts four main things (layout.js picks them); when they're done, evening
+// comes and he goes to sleep. Every usable thing has an action spot on the
+// ground: stand in it and space uses the thing; tap it and Reksio goes there.
 // No text, no score; every tap gets an answer.
 
-/* global Painting, Sound, Music, Reksio, Creatures */
+/* global Layout, Painting, Sound, Music, Reksio, Creatures */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -15,8 +17,10 @@
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
-  const EVENING_NEEDS = ['doghouse', 'bowl', 'tap', 'bird', 'dig', 'film']
-  const FRAMES = [2290, 2360, 2430, 2500, 2570] // film frame centres, scene units
+  const EVENING_NEEDS = Layout.mains // this play's main things
+  const X = Layout.x // per-play offset of a movable thing, scene units
+  const FRAMES_DRAWN = [2290, 2360, 2430, 2500, 2570] // film frame centres as drawn
+  const FRAMES = FRAMES_DRAWN.map((f) => f + X('film')) // …and where they are this play
   const PAW_REACH = 31 // from Reksio's middle to where his front paws land
 
   const $ = (id) => document.getElementById(id)
@@ -92,7 +96,7 @@
     { x: 1480, y: 330 }, // on the wall
     { x: 560, y: 552 }, // on the doghouse roof
     { x: 2350, y: 330 }, // further along the wall
-    { x: 2880, y: 602 }, // on the fence rail
+    { x: 2880 + X('gate'), y: 602 }, // on the fence rail
   ]
   let perch = 0
   let flying = false
@@ -186,7 +190,7 @@
       },
     },
     bowl: {
-      at: () => 764,
+      at: () => 764 + X('bowl'),
       face: 1,
       async run() {
         if (foodLeft <= 0.2) {
@@ -197,7 +201,7 @@
         const lapping = Reksio.lap(10)
         for (let i = 0; i < 5; i++) {
           await wait(380)
-          burst(880, 760, 3, 'crumb', { height: 34, reach: 36, size: 3 })
+          burst(880 + X('bowl'), 760, 3, 'crumb', { height: 34, reach: 36, size: 3 })
           foodLeft -= 0.16
           food.style.transform = `scaleY(${Math.max(foodLeft, 0.15)})`
         }
@@ -234,7 +238,7 @@
       },
     },
     flowers: {
-      at: () => 1483,
+      at: () => 1483 + X('flowers'),
       face: 1,
       async run() {
         for (let i = 0; i < 3; i++) {
@@ -246,7 +250,7 @@
         Music.react.sneeze()
         await wait(320)
         Reksio.nod(-24, 380)
-        burst(1640, 680, 12, 'petal', { height: 70, reach: 110, size: 5 })
+        burst(1640 + X('flowers'), 680, 12, 'petal', { height: 70, reach: 110, size: 5 })
         await wait(500)
       },
     },
@@ -296,7 +300,7 @@
             Music.react.stamp()
             const print = prints[i]
             print.setAttribute('opacity', '1')
-            print.style.transformOrigin = `${FRAMES[i]}px 791px`
+            print.style.transformOrigin = `${FRAMES_DRAWN[i]}px 791px` // inside the moved strip
             print.animate([{ transform: 'scale(1.6)', opacity: 0.2 }, { transform: 'scale(1)', opacity: 1 }], { duration: 220, easing: 'ease-out' })
             burst(FRAMES[i], 812, 5, 'dust', { height: 22, reach: 40, size: 3.5 })
           })
@@ -315,7 +319,7 @@
       },
     },
     bird: {
-      at: () => PERCHES[perch].x - 110,
+      at: () => PERCHES[perch].x - 70,
       face: 1,
       async run() {
         if (flying) return
@@ -325,14 +329,14 @@
       },
     },
     dig: {
-      at: () => 2000,
+      at: () => 2000 + X('dig'),
       face: 1,
       async run() {
         Reksio.holdBone(false)
         const digging = Reksio.paddle(1300)
         Sound.dig()
         for (let i = 0; i < 6; i++) {
-          burst(2040, 790, 3, 'clod', { dir: -1, height: 80, reach: 120, size: 4.5 })
+          burst(2040 + X('dig'), 790, 3, 'clod', { dir: -1, height: 80, reach: 120, size: 4.5 })
           await wait(200)
         }
         await digging
@@ -437,7 +441,8 @@
 
   /** Lower the sun and warm the sky to match how much is done. */
   function sunset() {
-    const step = EVENING_NEEDS.filter((n) => done.has(n)).length
+    // the same six-step sunset, whatever the number of main things this play
+    const step = Math.round((EVENING_NEEDS.filter((n) => done.has(n)).length / EVENING_NEEDS.length) * 6)
     $('sun').style.transform = `translateY(${step * SUN_STEP}px)`
     document.querySelector('#sun .sun').style.fill = SUN_COLORS[step]
     document.querySelector('#sun .sun-glow').style.fill = SUN_COLORS[step]
@@ -460,7 +465,7 @@
     },
     async bee() {
       const b = Creatures.bee
-      if (await Reksio.walkTo(b.x - 120)) {
+      if (b && (await Reksio.walkTo(b.x - 120))) {
         Reksio.face(1)
         await Reksio.sniff(2)
         await Reksio.startle()
@@ -553,11 +558,54 @@
     command(() => Reksio.walkTo(x))
   })
 
+  // ------------------------------------------------------------ action spots
+
+  // Where Reksio must stand to use each thing: a wide oval on the ground,
+  // drawn faintly and lit up when he is in it. Generous on purpose.
+  // x = centre, r = half-width, both scene units.
+  const SPOTS = {
+    house: () => ({ x: 410, r: 70 }),
+    doghouse: () => ({ x: 560, r: 130 }),
+    bowl: () => ({ x: 830 + X('bowl'), r: 120 }),
+    tap: () => ({ x: 1260, r: 120 }),
+    flowers: () => ({ x: 1570 + X('flowers'), r: 130 }),
+    dig: () => ({ x: 2060 + X('dig'), r: 130 }),
+    film: () => ({ x: 2430 + X('film'), r: 220 }),
+    gate: () => ({ x: Reksio.MAX_X + 20, r: 90 }),
+    bird: () => ({ x: PERCHES[perch].x - 30, r: 170 }), // on the ground, under the bird
+  }
+  const spotEls = {}
+
+  function makeSpots() {
+    for (const name of Object.keys(SPOTS)) {
+      if (Layout.hidden.includes(name)) continue
+      const e = document.createElementNS(SVG_NS, 'ellipse')
+      e.setAttribute('class', `spot ${EVENING_NEEDS.includes(name) ? 'main' : 'extra'}`)
+      e.setAttribute('data-thing', name)
+      e.setAttribute('cy', '826')
+      e.setAttribute('ry', '30')
+      $('spots').appendChild(e)
+      spotEls[name] = e
+    }
+    placeSpots()
+  }
+
+  function placeSpots() {
+    for (const [name, e] of Object.entries(spotEls)) {
+      const { x, r } = SPOTS[name]()
+      e.setAttribute('cx', x)
+      e.setAttribute('rx', r)
+    }
+  }
+
+  /** The thing whose spot Reksio is standing in (nearest centre wins). */
   function nearest() {
     let best = null
-    for (const [name, thing] of Object.entries(THINGS)) {
-      const d = Math.abs(thing.at() - Reksio.x)
-      if (d < 160 && (!best || d < best.d)) best = { name, d }
+    for (const name of Object.keys(spotEls)) {
+      if (name === 'bird' && flying) continue
+      const { x, r } = SPOTS[name]()
+      const d = Math.abs(Reksio.x - x)
+      if (d <= r && (!best || d < best.d)) best = { name, d }
     }
     return best && best.name
   }
@@ -623,9 +671,9 @@
 
   function thingCenter(name) {
     if (name === 'bird') return { x: PERCHES[perch].x, y: PERCHES[perch].y - 80 }
-    const el = document.querySelector(`[data-thing="${name}"]`)
+    const el = document.querySelector(`#things [data-thing="${name}"]`)
     const box = el.querySelector('.hit').getBBox()
-    return { x: box.x + box.width / 2, y: Number(el.dataset.hintY) || box.y }
+    return { x: box.x + box.width / 2 + X(name), y: Number(el.dataset.hintY) || box.y }
   }
 
   function placeWish() {
@@ -672,11 +720,12 @@
     }
     const el = document.querySelector(`#things [data-thing="${name}"]`)
     const box = el.querySelector('.hit').getBBox()
-    return { x: box.x + box.width / 2, y: (Number(el.dataset.hintY) || box.y) - 50 }
+    return { x: box.x + box.width / 2 + X(name), y: (Number(el.dataset.hintY) || box.y) - 50 }
   }
 
   function makeMarkers() {
     for (const name of Object.keys(THINGS)) {
+      if (Layout.hidden.includes(name)) continue
       const g = document.createElementNS(SVG_NS, 'g')
       g.setAttribute('class', `marker ${EVENING_NEEDS.includes(name) ? 'main' : 'extra'}`)
       g.innerHTML = '<g class="marker-bob"><g class="marker-scale"><circle r="24" /><use href="#paw" /></g></g>'
@@ -703,6 +752,11 @@
   function showNear() {
     const name = !busy && !ended ? nearest() : null
     for (const [n, g] of Object.entries(markers)) g.classList.toggle('near', n === name)
+    for (const [n, e] of Object.entries(spotEls)) {
+      e.classList.toggle('on', n === name)
+      e.classList.toggle('main', EVENING_NEEDS.includes(n) && !done.has(n))
+      e.classList.toggle('extra', !EVENING_NEEDS.includes(n) || done.has(n))
+    }
   }
 
   function makeTray() {
@@ -839,6 +893,10 @@
       const p = markerAt('bird')
       markers.bird.setAttribute('transform', `translate(${p.x} ${p.y})`)
     }
+    if (spotEls.bird) {
+      spotEls.bird.setAttribute('cx', SPOTS.bird().x)
+      spotEls.bird.style.opacity = flying ? '0' : ''
+    }
     const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
     if (Math.abs(camX - shownCam) > 0.05) {
@@ -856,7 +914,16 @@
   new ResizeObserver(paint).observe($('paint'))
   paint()
 
+  // this play's layout: move the movable things, hide what isn't in play
+  const GROUPS = { bowl: 'bowl', flowers: 'flowers', dig: 'mound', film: 'film', gate: 'fence' }
+  for (const [name, id] of Object.entries(GROUPS)) {
+    const g = $(id)
+    if (Layout.hidden.includes(name)) g.style.display = 'none'
+    else if (X(name)) g.setAttribute('transform', `translate(${X(name)} 0)`)
+  }
+
   birdAt(PERCHES[0])
+  makeSpots()
   makeMarkers()
   makeTray()
   Creatures.init()

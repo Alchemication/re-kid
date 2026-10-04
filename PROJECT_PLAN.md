@@ -215,6 +215,14 @@ wake Reksio at home.
    gestures: biting his tail, sitting, howling, watching and pouncing on the
    fly, getting startled.
 
+   **Variety and reach:** each play counts the doghouse plus three of the
+   other five main things and brings two of the three creatures; the flowers
+   only sometimes. Movable things land in a different place each time, in a
+   yard now 3400 wide (`layout.js`; the last play is remembered in the
+   browser so the next prefers what wasn't seen). Every usable thing has a
+   wide action spot on the ground that glows when Reksio stands in it and
+   can be tapped; the bird's is under its perch.
+
    **Wave 2 ideas for a living yard** (pick and order with Adam; each should
    teach a small cause and effect a toddler can see):
    - *Weather:* clouds roll in, rain falls, puddles form; Reksio splashes and
