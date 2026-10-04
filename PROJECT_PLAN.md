@@ -208,6 +208,13 @@ wake Reksio at home.
    ear whether it sounds like the theme**, and say what is too busy, too sad
    or annoying. A recognisable melody is still Kowalowski's composition, so
    it blocks a public release like the recording does.
+   A quiet background wind varies like real wind (breeze, the odd gust,
+   stronger under clouds) and sets how far the plants sway; the rain is
+   quieter.
+   Three themes take turns (A A B B A A C C): the hook, a new skipping
+   flute tune, and a new tiptoeing one in G minor; **Adam to judge** whether
+   B and C are catchy and still Reksio. Creatures make quiet, real sounds
+   that fade with distance; the silent ones only make small action noises.
    **Clarity and life:** a tray of pictures that fill in as main things are
    done, and a first wave of creatures (`creatures.js`): a fly, a bumblebee
    and a spider with its web, which notice Reksio and each other. New
@@ -256,7 +263,7 @@ wake Reksio at home.
      and it slinks off; the hens (if added) flutter.
    - *Ants:* a line marching to crumbs the lapping dropped by the bowl,
      carrying them home; a raindrop scatters them.
-   - *Leaves and wind:* a gust blows leaves across; Reksio chases one.
+   - *Leaves:* a gust (the wind is already there) blows leaves across; Reksio chases one.
 2. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
 3. **Later:** the yard becomes the home screen, and new things in it lead

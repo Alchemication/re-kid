@@ -1,6 +1,7 @@
 // The yard's music: a light pizzicato "oom-pah" in B-flat, in the spirit of
 // the Reksio theme (its key, its bouncing bass and a hook echoing the main
-// melody Adam marked), that follows the game.
+// melody Adam marked), that follows the game. Three tunes take turns over it:
+// the hook, a skipping flute tune, and a tiptoeing one in G minor.
 //
 // - Energy (0-3) sets how full it is: just the bass when nobody has tapped for
 //   a while, the full oom-pah, then the tune on top, then woodblock ticks.
@@ -28,14 +29,54 @@ const Music = (() => {
     Bb: { bass: [Bb1, F2], pah: [62, 65, 70] }, // D4 F4 Bb4
     Eb: { bass: [39, 46], pah: [63, 67, 70] }, // Eb4 G4 Bb4
     F7: { bass: [F2, 36], pah: [63, 69, 72] }, // Eb4 A4 C5
+    Gm: { bass: [31, 38], pah: [62, 67, 70] }, // D4 G4 Bb4
+    Cm: { bass: [36, 43], pah: [63, 67, 72] }, // Eb4 G4 C5
   }
-  const PROGRESSION = ['Bb', 'Bb', 'Bb', 'F7', 'F7', 'F7', 'Bb', 'Bb'] // one chord per bar
 
   // The hook, from the Basic Pitch sketch of the marked main melody
   // (B-flat, B-flat, B-flat C B-flat C, D F, F), one entry per eighth note,
-  // null = rest. Phrase B answers it, an octave lower on the bassoon.
+  // null = rest. Its second half answers it.
   const HOOK = [70, null, 70, null, 70, 72, 70, 72, 74, null, 77, null, 77, null, null, null]
   const ANSWER = [65, null, 67, null, 69, null, 70, null, 72, null, 70, null, 65, null, null, null]
+
+  // Three tunes over the same oom-pah, one chord per bar. A is the hook; B and
+  // C are new, in the same bouncy, cheeky spirit, so the music doesn't wear
+  // thin. voice(i, pass) picks the instrument (and octave shift) for eighth
+  // note i, alternating between passes.
+  const THEMES = {
+    A: {
+      bars: ['Bb', 'Bb', 'Bb', 'F7', 'F7', 'F7', 'Bb', 'Bb'],
+      tune: [...HOOK, ...ANSWER],
+      voice: (i, pass) => ((i < 16) !== (pass % 2 === 1) ? ['clarinet', 0] : ['bassoon', i < 16 ? -12 : 0]),
+    },
+    // B: a skipping flute tune that leans on a cheeky chromatic neighbour
+    // (G, F-sharp, G), stepping down a chord each time; xylophone on repeat.
+    B: {
+      bars: ['Eb', 'Eb', 'Bb', 'Bb', 'F7', 'F7', 'Bb', 'Bb'],
+      tune: [
+        79, null, 75, null, 79, 78, 79, null,
+        77, null, 74, null, 77, 76, 77, null,
+        75, null, 72, null, 75, 74, 72, 69,
+        70, null, 74, null, 70, null, null, null,
+      ],
+      voice: (i, pass) => [pass % 2 ? 'xylo' : 'flute', 0],
+    },
+    // C: tiptoeing in G minor on the bassoon, the clarinet climbing out of it
+    // back home to B-flat, then a bar's rest before the hook returns.
+    C: {
+      bars: ['Gm', 'Gm', 'Cm', 'Cm', 'F7', 'F7', 'Bb', 'Bb'],
+      tune: [
+        67, null, 70, 67, 74, null, 67, null,
+        72, null, 75, 72, 79, null, 72, null,
+        65, 69, 72, 75, 77, null, 75, null,
+        74, 72, 70, null, null, null, null, null,
+      ],
+      voice: (i, pass) => ((i < 16) !== (pass % 2 === 1) ? ['bassoon', -12] : ['clarinet', 0]),
+    },
+  }
+  // the order they come round in: the hook most, the others between
+  const FORM = ['A', 'A', 'B', 'B', 'A', 'A', 'C', 'C']
+  const theme = () => THEMES[FORM[loopCount % FORM.length]]
 
   let bus = null
   let out = null
@@ -97,7 +138,8 @@ const Music = (() => {
   function scheduleStep(i, t) {
     const bar = Math.floor(i / 4)
     const beat = i % 4 // 0: oom, 2: pah, 1/3: the "ands"
-    const chord = CHORDS[PROGRESSION[bar]]
+    const th = theme()
+    const chord = CHORDS[th.bars[bar]]
     const e = Math.min(energy, dusk >= 4 || raining ? 1 : 3)
 
     if (beat === 0 && (e >= 1 || bar % 2 === 0)) {
@@ -108,15 +150,11 @@ const Music = (() => {
     }
     if (beat === 3 && e >= 2 && bar % 2 === 1) play('pizz', chord.pah[2], t, 0.22)
     if (e >= 2) {
-      // the tune: the hook in the first half, the answer in the second;
-      // clarinet and bassoon swap every other time round
-      const half = i < 16
-      const line = half ? HOOK : ANSWER
-      const note = line[i % 16]
-      const swap = loopCount % 2 === 1
+      // the tune; each theme comes round twice, voiced differently the second time
+      const note = th.tune[i]
       if (note != null) {
-        const inst = half !== swap ? 'clarinet' : 'bassoon'
-        play(inst, inst === 'bassoon' && half ? note - 12 : note, t, 0.5)
+        const [inst, shift] = th.voice(i, loopCount % 2)
+        play(inst, note + shift, t, 0.5)
       }
     }
     if (e >= 3 && (beat === 1 || beat === 3)) play('woodblock', null, t, 0.22)
@@ -139,7 +177,7 @@ const Music = (() => {
 
   /** The chord sounding now, so reactions stay in key. */
   function chordNow() {
-    return CHORDS[PROGRESSION[Math.floor(step / 4)]]
+    return CHORDS[theme().bars[Math.floor(step / 4)]]
   }
 
   // ------------------------------------------------------------ public
@@ -258,19 +296,19 @@ const Music = (() => {
   }
 
   /** One part on its own, for listening to it next to the original:
-   * 'hook' (the clarinet tune), 'groove' (one turn of the loop with the
-   * tune), 'stretch' (the climb while held, then the snap back). bpm
-   * replaces the tempo for 'hook' and 'groove'. */
+   * 'hook' (the clarinet tune), 'A', 'B' or 'C' (one turn of the groove
+   * with that theme), 'stretch' (the climb while held, then the snap back).
+   * bpm replaces the tempo for 'hook' and the themes. */
   async function audition(part, bpm = BPM) {
     await prepare()
     const t0 = bus.ctx.currentTime + 0.1
     const e = 60 / bpm / 2
     if (part === 'hook') {
       HOOK.forEach((n, k) => n != null && play('clarinet', n, t0 + k * e, 0.6))
-    } else if (part === 'groove') {
+    } else if (THEMES[part]) {
       const saved = [energy, loopCount]
       energy = 2
-      loopCount = 0
+      loopCount = FORM.indexOf(part)
       for (let i = 0; i < STEPS; i++) scheduleStep(i, t0 + i * e)
       ;[energy, loopCount] = saved
     } else if (part === 'stretch') {

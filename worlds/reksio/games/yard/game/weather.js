@@ -7,6 +7,10 @@
 //
 // Other parts listen: creatures (the snail and worms come out after rain),
 // Reksio (looks up, catches drops, jumps in puddles), the music (softer).
+//
+// Wind blows in every play, quietly: mostly a light breeze that comes and
+// goes, now and then a gust, stronger when the clouds come. You hear it and
+// see it, since the grass and flowers lean further in a gust.
 
 /* global Layout, Sound, Music */
 /* exported Weather */
@@ -20,6 +24,12 @@ const Weather = (() => {
   const CLOUD_IN_S = 4 // clouds take this long to cover the sky
   const DRY_S = 70 // puddles take this long to dry up after the rain
   const DROPS = 220 // raindrops on screen at full rain
+  const BREEZE = [0.08, 0.38] // wind level most of the time (0 still, 1 a gust)
+  const GUST = [0.6, 1] // …and in a gust
+  const GUST_CHANCE = 0.2 // of each change of wind, this many are gusts
+  const WIND_CHANGE_S = [3, 10] // the wind changes this often
+  const STORMY = 0.25 // extra wind while the clouds are in
+  const SWAY_DEG = [1, 6] // plants' sway at still and at a full gust
 
   const $ = (id) => document.getElementById(id)
   const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
@@ -202,6 +212,28 @@ const Weather = (() => {
     for (const fn of listeners) fn(p)
   }
 
+  // ------------------------------------------------------------ wind
+
+  let wind = 0.2
+  let windTarget = 0.2
+  let windChangeAt = 0
+  let windSound = null
+  let calm = false // evening: the wind drops
+
+  function blow(dt, cover) {
+    if (t >= windChangeAt) {
+      const gust = !calm && Math.random() < GUST_CHANCE
+      windTarget = calm ? BREEZE[0] : rnd(...(gust ? GUST : BREEZE))
+      windChangeAt = t + (gust ? rnd(2, 4) : rnd(...WIND_CHANGE_S)) // gusts pass quickly
+    }
+    const target = Math.min(1, windTarget + cover * STORMY)
+    wind += (target - wind) * Math.min(1, dt * 0.7)
+    if (!windSound && Sound.running) windSound = Sound.wind()
+    if (windSound) windSound(wind)
+    const sway = SWAY_DEG[0] + (SWAY_DEG[1] - SWAY_DEG[0]) * wind
+    document.documentElement.style.setProperty('--sway', `${sway.toFixed(2)}deg`)
+  }
+
   function tick(dt, camX) {
     t += dt
     const since = t - phaseAt
@@ -243,6 +275,7 @@ const Weather = (() => {
       c.g.setAttribute('transform', `translate(${c.x} ${c.y})`)
     }
     $('overcast').style.opacity = String(cover * 0.42)
+    blow(dt, cover)
     const sun = document.querySelector('#sun')
     if (sun) sun.style.opacity = String(1 - cover * 0.85)
 
@@ -266,6 +299,8 @@ const Weather = (() => {
     on(fn) { listeners.push(fn) },
     get phase() { return phase },
     get raining() { return phase === 'raining' },
+    /** How windy it is now: 0 still, 1 a gust. */
+    get wind() { return wind },
     /** Seconds since the rain stopped, or null if it hasn't rained yet. */
     get sinceRain() { return afterRainAt == null ? null : t - afterRainAt },
     puddleAt,
@@ -274,6 +309,8 @@ const Weather = (() => {
     get puddles() { return wet > 0.25 ? puddles.map((p) => ({ x: p.x, rx: p.rx * Math.min(1, wet) })) : [] },
     /** End any shower now (evening). */
     stop() {
+      calm = true
+      windChangeAt = t
       if (phase === 'clouding' || phase === 'raining' || phase === 'waiting') setPhase(phase === 'waiting' ? 'dry' : 'clearing')
     },
   }

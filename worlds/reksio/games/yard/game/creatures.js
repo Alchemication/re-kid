@@ -45,6 +45,14 @@ const Creatures = (() => {
     down: { x: 316, y: 512 },
     along: { x: 512, y: 336 },
   }
+  /** Make a creature's sound as Reksio would hear it from where it is: quiet,
+   * and fading with distance. Only creatures that really make a sound get
+   * one (flies and bees buzz); the silent ones only make small cartoon
+   * noises when they do something. */
+  const hear = (x, play) => Sound.from(Math.abs(x - world.reksio.x), play)
+  const WHINE_EVERY_S = 9 // on average, a passing fly whines this often
+  const HUM_EVERY_S = 7 // …and a bee hums between flowers this often
+
   /** Is a point inside the web's triangle (where things get stuck)? */
   function inWeb(x, y) {
     if (!web.built) return false
@@ -150,7 +158,7 @@ const Creatures = (() => {
       this.state = 'fly'
       this.landedOn = null
       this.target = { x: clamp(this.x + Math.cos(a) * 400, 200, Layout.MAX_X), y: clamp(this.y - 150, 360, 760) }
-      Sound.zip()
+      hear(this.x, () => Sound.zip())
     },
     update(dt) {
       const now = world.t
@@ -186,7 +194,8 @@ const Creatures = (() => {
         this.place()
         return
       }
-      // flying: steer towards the target with a little zig-zag
+      // flying: steer towards the target with a little zig-zag, now and then whining
+      if (Math.random() < dt / WHINE_EVERY_S) hear(this.x, () => Sound.whine())
       const tx = this.target.x + Math.sin(now * 7) * 30
       const ty = this.target.y + Math.cos(now * 9) * 22
       const dx = tx - this.x
@@ -215,7 +224,7 @@ const Creatures = (() => {
       if (inWeb(this.x, this.y) && !spider.busy && Math.random() < 0.15) {
         this.state = 'stuck'
         web.shiver()
-        Sound.buzz(0.4)
+        hear(this.x, () => Sound.buzz(0.4))
         spider.prey(this)
       }
       this.body.setAttribute('transform', this.vx < 0 ? 'scale(-1 1)' : '')
@@ -267,7 +276,7 @@ const Creatures = (() => {
         // a huffy loop up and away, with a buzz
         this.state = 'huff'
         this.stateUntil = now + rnd(4, 7)
-        Sound.buzz(0.8)
+        hear(this.x, () => Sound.buzz(0.8))
       }
       let tx = f.x
       let ty = f.y - 26
@@ -290,6 +299,7 @@ const Creatures = (() => {
       this.vy += ((dy / d) * Math.min(speed, d * 3) - this.vy) * Math.min(1, dt * 2.5)
       this.x += this.vx * dt
       this.y += this.vy * dt + Math.sin(now * 4) * 0.4 // a heavy, bumbling flight
+      if (this.state === 'fly' && Math.random() < dt / HUM_EVERY_S) hear(this.x, () => Sound.buzz(0.6))
       if (this.state === 'fly' && d < 8) {
         this.state = 'hover'
         this.stateUntil = now + rnd(2, 4)
@@ -361,6 +371,7 @@ const Creatures = (() => {
     async drop(to, ms) {
       const token = ++this.dropToken
       const from = this.hang
+      if (to - from > 30) hear(this.x, () => Sound.plink())
       const start = performance.now()
       await new Promise((resolve) => {
         const step = (t) => {
@@ -391,7 +402,7 @@ const Creatures = (() => {
       this.mode = 'prey'
       await this.drop(0, 300)
       await this.crawl(f.x, f.y, 200)
-      Sound.buzz(0.3)
+      hear(f.x, () => Sound.buzz(0.3))
       for (let i = 0; i < 6; i++) {
         this.legs.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(40deg)' }, { transform: 'rotate(0)' }], { duration: 160 })
         await new Promise((r) => setTimeout(r, 160))
@@ -490,7 +501,10 @@ const Creatures = (() => {
         on ? [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }] : [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
         { duration: on ? 250 : 1600, easing: 'ease-out', fill: 'forwards' },
       )
-      if (on) this.peekAt = world.t + rnd(3, 6)
+      if (on) {
+        this.peekAt = world.t + rnd(3, 6)
+        hear(this.x, () => Sound.schlup())
+      }
     },
     update(dt) {
       if (!this.out) {
@@ -539,6 +553,10 @@ const Creatures = (() => {
         w.age += dt
         const going = w.age > w.life
         w.h = Math.max(0, Math.min(22, going ? w.h - dt * 10 : w.h + dt * 10))
+        if (!w.popped && w.h > 4) {
+          w.popped = true
+          hear(w.x, () => Sound.pop())
+        }
         const pts = []
         for (let k = 0; k <= 5; k++) {
           const y = -(w.h * k) / 5

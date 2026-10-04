@@ -3,10 +3,13 @@
 /* exported Sound */
 const Sound = (() => {
   const VOLUME = 0.5
+  const CRITTER_VOLUME = 0.55 // the yard's creatures, even right by Reksio: quiet
+  const HEARING = 900 // creatures further from Reksio than this are not heard
   let ctx = null
   let master = null
   let noise = null
   let original = null // easter-egg clips, if present (see play())
+  let scale = 1 // loudness of what is being played now (see from())
 
   /** Create the audio context on the first tap (browsers require a gesture). */
   function ensure() {
@@ -25,7 +28,7 @@ const Sound = (() => {
 
   function env(gain, t, peak, attack, decay) {
     gain.gain.setValueAtTime(0.0001, t)
-    gain.gain.exponentialRampToValueAtTime(peak, t + attack)
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak * scale), t + attack)
     gain.gain.exponentialRampToValueAtTime(0.0001, t + attack + decay)
   }
 
@@ -106,8 +109,23 @@ const Sound = (() => {
     hiss(at, 0.12, 0.005, 0.08, 'bandpass', 1500, 0.8)
   }
 
+  /** Play a creature's sound as heard by Reksio, `distance` away: quiet up
+   * close, fading out with distance, nothing beyond HEARING. */
+  function from(distance, play) {
+    if (distance > HEARING) return
+    scale = CRITTER_VOLUME * (1 - distance / HEARING) ** 2
+    try {
+      play()
+    } finally {
+      scale = 1
+    }
+  }
+
   return {
     ensure,
+    from,
+    /** Sound is on (after the first tap). */
+    get running() { return !!ctx && ctx.state === 'running' },
     /** The shared audio context and output, for the music engine. */
     bus() { ensure(); return { ctx, master } },
     bark() { woof(0); woof(0.2) },
@@ -199,12 +217,39 @@ const Sound = (() => {
       lp.frequency.value = 700
       const g = c.createGain()
       g.gain.setValueAtTime(0.0001, t)
-      g.gain.exponentialRampToValueAtTime(0.05, t + 0.08)
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, 0.05 * scale), t + 0.08)
       g.gain.exponentialRampToValueAtTime(0.0001, t + seconds)
       o.connect(lp).connect(g).connect(master)
       o.start(t); lfo.start(t)
       o.stop(t + seconds + 0.05); lfo.stop(t + seconds + 0.05)
     },
+    /** A fly's thin whine, passing by. */
+    whine(seconds = 0.7) {
+      const c = ensure()
+      const t = c.currentTime
+      const o = c.createOscillator()
+      o.type = 'sawtooth'
+      o.frequency.setValueAtTime(230, t)
+      o.frequency.linearRampToValueAtTime(260, t + seconds / 2)
+      o.frequency.linearRampToValueAtTime(215, t + seconds)
+      const bp = c.createBiquadFilter()
+      bp.type = 'bandpass'
+      bp.frequency.value = 1300
+      bp.Q.value = 1.5
+      const g = c.createGain()
+      g.gain.setValueAtTime(0.0001, t)
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, 0.03 * scale), t + seconds * 0.4)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + seconds)
+      o.connect(bp).connect(g).connect(master)
+      o.start(t)
+      o.stop(t + seconds + 0.05)
+    },
+    /** The spider dropping on its thread: a tiny plucked note. */
+    plink() { tone('sine', 1180, 980, 0, 0.1, 0.002, 0.12) },
+    /** The snail pulling into its shell: a soft wet "schlup". */
+    schlup() { tone('sine', 420, 160, 0, 0.12, 0.01, 0.12); hiss(0, 0.04, 0.01, 0.08, 'lowpass', 700) },
+    /** A worm popping up out of the earth. */
+    pop() { tone('sine', 380, 820, 0, 0.12, 0.004, 0.05) },
     /** A startled little yelp. */
     yelp() { tone('triangle', 700, 1300, 0, 0.14, 0.01, 0.12); tone('triangle', 1250, 900, 0.1, 0.1, 0.01, 0.12) },
     /** A small dog's howl at the sky. */
@@ -250,7 +295,7 @@ const Sound = (() => {
       lp.frequency.value = 5200
       const g = c.createGain()
       g.gain.setValueAtTime(0.0001, t)
-      g.gain.exponentialRampToValueAtTime(0.09, t + 3)
+      g.gain.exponentialRampToValueAtTime(0.045, t + 3) // a hush, under everything
       src.connect(hp).connect(lp).connect(g).connect(master)
       src.start(t)
       return () => {
@@ -259,6 +304,26 @@ const Sound = (() => {
         g.gain.setValueAtTime(g.gain.value, now)
         g.gain.exponentialRampToValueAtTime(0.0001, now + 3)
         src.stop(now + 3.1)
+      }
+    },
+    /** Wind in the background, always on and very quiet. Returns set(level),
+     * level 0 (still) to 1 (a gust): louder, and a little higher. */
+    wind() {
+      const c = ensure()
+      const src = c.createBufferSource()
+      src.buffer = noise
+      src.loop = true
+      const bp = c.createBiquadFilter()
+      bp.type = 'bandpass'
+      bp.Q.value = 0.7
+      const g = c.createGain()
+      g.gain.value = 0.0001
+      src.connect(bp).connect(g).connect(master)
+      src.start()
+      return (level) => {
+        const now = c.currentTime
+        g.gain.setTargetAtTime(0.004 + level * 0.03, now, 0.4)
+        bp.frequency.setTargetAtTime(320 + level * 520, now, 0.4)
       }
     },
     /** Paws in a puddle. */

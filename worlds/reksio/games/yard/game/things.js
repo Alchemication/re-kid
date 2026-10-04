@@ -162,7 +162,7 @@ const Things = (() => {
         [{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }],
         { duration: 300 },
       )
-      if (Math.random() < 0.6) Sound.chirp()
+      if (Math.random() < 0.6) Sound.from(Math.abs(PERCHES[perch].x - Reksio.x), Sound.chirp)
     }
     setTimeout(birdIdle, 4000 + Math.random() * 4000)
   }
@@ -217,9 +217,11 @@ const Things = (() => {
     }
   }
 
-  async function squeak(n = 1) {
+  /** Squeak n times; from afar (while she waits) it's heard as from where she is. */
+  async function squeak(n = 1, afar = false) {
     for (let i = 0; i < n; i++) {
-      Sound.mouse()
+      if (afar) Sound.from(Math.abs(mousePos.x + X('trap') - Reksio.x), Sound.mouse)
+      else Sound.mouse()
       await $('mouse-head').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-14deg)' }, { transform: 'rotate(0)' }], { duration: 220 }).finished
     }
   }
@@ -246,13 +248,13 @@ const Things = (() => {
       // reaching for the cheese… and the trap: no!
       await $('mouse-head').animate([{ transform: 'rotate(0)' }, { transform: 'translateX(5px) rotate(10deg)' }], { duration: 400, fill: 'forwards' }).finished
       $('mouse-head').getAnimations().forEach((a) => a.cancel())
-      Sound.mouse()
+      Sound.from(Math.abs(mousePos.x + X('trap') - Reksio.x), Sound.mouse)
       if (mouse !== 'wanting') return
       await scurry(MOUSE_WAITS + rnd(0, 30))
       if (mouse !== 'wanting') return
       // turn to Reksio, a squeak: help?
       mouseAt(mousePos.x, mousePos.y, Reksio.x < mousePos.x + X('trap') ? -1 : 1)
-      await squeak(2)
+      await squeak(2, true)
       await wait(rnd(2500, 5000))
       if (mouse !== 'wanting') return
       mouseAt(mousePos.x, mousePos.y, -1)
