@@ -7,7 +7,7 @@
 // ground: stand in it and space uses the thing; tap it and Reksio goes there.
 // No text, no score; every tap gets an answer.
 
-/* global Layout, Painting, Sound, Music, Reksio, Creatures */
+/* global Layout, Painting, Sound, Music, Reksio, Creatures, Weather */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -105,19 +105,13 @@
     bird.style.transform = `translate(${p.x}px, ${p.y}px)`
   }
 
-  async function flyAway() {
-    flying = true
-    const from = PERCHES[perch]
-    // fly to the perch furthest from Reksio, so the chase can go on
-    const choices = PERCHES.map((p, i) => i).filter((i) => i !== perch)
-    perch = choices.sort((a, b) => Math.abs(PERCHES[b].x - Reksio.x) - Math.abs(PERCHES[a].x - Reksio.x))[Math.floor(Math.random() * 2)]
-    const to = PERCHES[perch]
+  /** Fly from one point to another in an arc, wings flapping. */
+  async function flyBetween(from, to) {
     const flap = wing.animate(
       [{ transform: 'rotate(0)' }, { transform: 'rotate(-55deg)' }, { transform: 'rotate(0)' }],
       { duration: 160, iterations: Infinity },
     )
     Sound.flutter()
-    Music.react.bird()
     const top = Math.min(from.y, to.y) - 180
     const mid = { x: (from.x + to.x) / 2, y: top }
     const facing = to.x < from.x ? -1 : 1
@@ -130,9 +124,36 @@
       { duration: 1200 + Math.abs(to.x - from.x) * 0.5, easing: 'ease-in-out' },
     ).finished
     flap.cancel()
+    return facing
+  }
+
+  /** Off to the perch furthest from Reksio, so the chase can go on. */
+  async function flyAway(from = PERCHES[perch]) {
+    flying = true
+    const choices = PERCHES.map((p, i) => i).filter((i) => i !== perch)
+    perch = choices.sort((a, b) => Math.abs(PERCHES[b].x - Reksio.x) - Math.abs(PERCHES[a].x - Reksio.x))[Math.floor(Math.random() * 2)]
+    const to = PERCHES[perch]
+    Music.react.bird()
+    await flyBetween(from, to)
     birdAt(to)
     Sound.chirp()
     flying = false
+  }
+
+  /** After rain: down to a worm, a few pecks, and back up to a perch. */
+  async function birdHunt(worm) {
+    if (flying) return
+    flying = true
+    const land = { x: worm.x + 30, y: worm.y + 6 }
+    await flyBetween(PERCHES[perch], land)
+    bird.style.transform = `translate(${land.x}px, ${land.y}px) scaleX(-1)`
+    for (let i = 0; i < 3; i++) {
+      await $('bird-body').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-30deg)' }, { transform: 'rotate(0)' }], { duration: 260 }).finished
+    }
+    worm.eat()
+    Sound.chirp()
+    await wait(500)
+    await flyAway(land)
   }
 
   function birdIdle() {
@@ -454,6 +475,18 @@
 
   // Tapping a creature: Reksio goes after it, in his own way.
   const CRITTERS = {
+    async snail() {
+      const sn = Creatures.snail
+      if (sn && (await Reksio.walkTo(sn.x - 150 * Math.sign(sn.x - Reksio.x || 1)))) {
+        Reksio.face(sn.x > Reksio.x ? 1 : -1)
+        await Reksio.sniff(3)
+        await Reksio.lookAround(700)
+      }
+    },
+    async worm() {
+      const w = Creatures.worm
+      if (w && (await Reksio.walkTo(w.x - 130 * Math.sign(w.x - Reksio.x || 1)))) await Reksio.sniff(2)
+    },
     async fly() {
       const f = Creatures.fly
       if (!f) return
@@ -499,6 +532,7 @@
 
   async function evening() {
     ended = true
+    Weather.stop()
     await wait(1800) // let the last step of the sunset be seen
     $('evening').classList.add('on')
     Music.evening()
@@ -828,6 +862,28 @@
     hop: { weight: 2, run: () => Reksio.hop() },
     bow: { weight: 2, run: () => Reksio.playBow() },
     tail: { weight: 1, run: () => Reksio.chaseTail() },
+    drops: { weight: 6, ok: () => Weather.raining, run: () => Reksio.catchDrops() },
+    shakeOff: { weight: 3, ok: () => Weather.raining, run: () => { Sound.shake(); burst(Reksio.x, 730, 12, 'drop', { height: 60, reach: 80, size: 3 }); return Reksio.shake() } },
+    puddle: {
+      // a puddle nearby: jump in it
+      weight: 6,
+      ok: () => Weather.puddles.some((p) => Math.abs(p.x - Reksio.x) < 700),
+      async run() {
+        const p = Weather.puddles.reduce((a, b) => (Math.abs(a.x - Reksio.x) < Math.abs(b.x - Reksio.x) ? a : b))
+        if (await Reksio.walkTo(p.x - Math.sign(p.x - Reksio.x || 1) * 90)) {
+          await Reksio.pounce(p.x)
+          await Reksio.hop(30, 2)
+          Sound.shake()
+          burst(Reksio.x, 730, 10, 'drop', { height: 60, reach: 80, size: 3 })
+          await Reksio.shake()
+        }
+      },
+    },
+    snail: {
+      weight: 3,
+      ok: () => Creatures.snail && Math.abs(Creatures.snail.x - Reksio.x) < 700,
+      run: () => CRITTERS.snail(),
+    },
     biteTail: { weight: 1, run: () => Reksio.biteTail() },
     sit: { weight: 2, run: () => Reksio.sit() },
     howl: { weight: 1, ok: () => done.size >= 1, run: () => Reksio.howl() },
@@ -864,6 +920,8 @@
     const now = performance.now()
     Music.setEnergy(musicEnergy(now))
     showNear()
+    const worm = Creatures.worm
+    if (worm && !flying && !ended && Math.random() < 0.02) birdHunt(worm)
     if (wishing) {
       placeWish()
       if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
@@ -883,12 +941,19 @@
   }
 
   let last = performance.now()
+  let lastSplash = 0
   let shownCam = -1
   function frame(t) {
     const dt = Math.min(0.05, (t - last) / 1000)
     last = t
     Reksio.tick(dt)
     Creatures.tick(dt)
+    Weather.tick(dt, camX)
+    if (Reksio.walking && t - lastSplash > 280 && Weather.splash(Reksio.x)) {
+      lastSplash = t
+      Sound.splash()
+      burst(Reksio.x, 830, 4, 'drop', { height: 34, reach: 50, size: 3 })
+    }
     if (markers.bird) {
       const p = markerAt('bird')
       markers.bird.setAttribute('transform', `translate(${p.x} ${p.y})`)
@@ -927,6 +992,13 @@
   makeMarkers()
   makeTray()
   Creatures.init()
+  Weather.init()
+  Weather.on((phase) => {
+    // Reksio notices the weather turn (unless he's in the middle of something)
+    if (busy || ended || Reksio.walking) return
+    if (phase === 'clouding') Reksio.lookUp(1600)
+    if (phase === 'after') Reksio.hop(40, 2)
+  })
   requestAnimationFrame(frame)
   setTimeout(birdIdle, 3000)
   lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start

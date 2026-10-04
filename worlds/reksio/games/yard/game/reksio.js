@@ -452,6 +452,22 @@ const Reksio = (() => {
     ).finished
   }
 
+  /** Head up, tongue out: catching raindrops. */
+  async function catchDrops(n = rndInt(3, 6)) {
+    await head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-34deg)' }], { duration: 300, fill: 'forwards' }).finished
+    show(tongue, true)
+    show(smile, false)
+    for (let i = 0; i < n; i++) {
+      await wait(rnd(250, 500))
+      Sound.lap()
+      head.animate([{ transform: 'rotate(-34deg)' }, { transform: 'rotate(-28deg)' }, { transform: 'rotate(-34deg)' }], { duration: 160 })
+    }
+    show(tongue, false)
+    show(smile, true)
+    await head.animate([{ transform: 'rotate(-34deg)' }, { transform: 'rotate(0)' }], { duration: 300 }).finished
+    head.getAnimations().forEach((a) => a.cancel())
+  }
+
   /** A big yawn. */
   async function yawn() {
     Sound.yawn()
@@ -514,7 +530,7 @@ const Reksio = (() => {
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
     walkTo, stopWalking, face, tick, bark, nod, lick, lap, shake, paddle, duck, holdBone,
     beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
-    stamp, snap, watch, pounce, biteTail, howl, sit, startle,
+    stamp, snap, watch, pounce, biteTail, howl, sit, startle, catchDrops,
     MIN_X, MAX_X,
   }
 })()

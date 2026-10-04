@@ -208,6 +208,37 @@ const Sound = (() => {
       o.start(t); vib.start(t)
       o.stop(t + 1.55); vib.stop(t + 1.55)
     },
+    /** Steady, soft rain. Returns a function that lets it fade away. */
+    rain() {
+      const c = ensure()
+      const t = c.currentTime
+      const src = c.createBufferSource()
+      src.buffer = noise
+      src.loop = true
+      const hp = c.createBiquadFilter()
+      hp.type = 'highpass'
+      hp.frequency.value = 900
+      const lp = c.createBiquadFilter()
+      lp.type = 'lowpass'
+      lp.frequency.value = 5200
+      const g = c.createGain()
+      g.gain.setValueAtTime(0.0001, t)
+      g.gain.exponentialRampToValueAtTime(0.09, t + 3)
+      src.connect(hp).connect(lp).connect(g).connect(master)
+      src.start(t)
+      return () => {
+        const now = c.currentTime
+        g.gain.cancelScheduledValues(now)
+        g.gain.setValueAtTime(g.gain.value, now)
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 3)
+        src.stop(now + 3.1)
+      }
+    },
+    /** Paws in a puddle. */
+    splash() {
+      hiss(0, 0.16, 0.004, 0.12, 'bandpass', 1300, 1.2)
+      hiss(0.05, 0.08, 0.004, 0.1, 'bandpass', 2600, 1.5)
+    },
     /** A rubber-stamp thump. */
     thump() {
       tone('sine', 120, 55, 0, 0.5, 0.004, 0.16)

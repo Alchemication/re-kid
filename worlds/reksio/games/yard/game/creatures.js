@@ -11,7 +11,7 @@
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Sound, Reksio, Layout */
+/* global Sound, Reksio, Layout, Weather */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -450,6 +450,112 @@ const Creatures = (() => {
     },
   }
 
+  // ------------------------------------------------------------ after the rain: the snail
+
+  const snail = {
+    x: 0, y: GROUND + 20, dir: 1,
+    out: false, // has it come out yet
+    tucked: false, // hiding in its shell
+    trail: [],
+    g: null,
+    make() {
+      this.trailPath = el('path', { class: 'snail-trail' })
+      this.g = el('g', { class: 'critter snail', 'data-critter': 'snail' })
+      el('circle', { r: 30, cy: -10, class: 'critter-hit' }, this.g)
+      this.flip = el('g', {}, this.g)
+      this.body = el('g', { class: 'snail-body' }, this.flip)
+      el('path', { d: 'M-16 0 Q-18 -8 -6 -8 L14 -8 Q22 -8 24 -2 Q26 2 20 2 L-14 2 Z', class: 'snail-foot' }, this.body)
+      this.stalks = el('g', { class: 'snail-stalks' }, this.body)
+      el('path', { d: 'M17 -8 L22 -22 M20 -7 L28 -19' }, this.stalks)
+      el('circle', { cx: 22, cy: -23, r: 2.4, class: 'fly-body' }, this.stalks)
+      el('circle', { cx: 28, cy: -20, r: 2.4, class: 'fly-body' }, this.stalks)
+      el('circle', { cx: 0, cy: -16, r: 13, class: 'snail-shell' }, this.flip)
+      el('path', { d: 'M0 -16 m-1 0 a2 2 0 1 1 3 1 a5 5 0 1 1 -8 -3 a8 8 0 1 1 11 10', class: 'snail-swirl' }, this.flip)
+      this.g.style.display = 'none'
+    },
+    comeOut() {
+      // from beside a puddle (or the flowers), heading across the yard
+      const ps = Weather.puddles
+      const near = ps.length ? ps[Math.floor(Math.random() * ps.length)].x : 1700 + Layout.x('flowers')
+      this.x = near + rnd(-120, 120)
+      this.dir = Math.random() < 0.5 ? -1 : 1
+      this.out = true
+      this.g.style.display = ''
+      this.body.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 1500, easing: 'ease-out' })
+    },
+    tuck(on) {
+      if (this.tucked === on) return
+      this.tucked = on
+      this.body.animate(
+        on ? [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }] : [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
+        { duration: on ? 250 : 1600, easing: 'ease-out', fill: 'forwards' },
+      )
+      if (on) this.peekAt = world.t + rnd(3, 6)
+    },
+    update(dt) {
+      if (!this.out) {
+        const since = Weather.sinceRain
+        if (since != null && since > 3) this.comeOut()
+        return
+      }
+      const nose = world.reksio.nose
+      if (dist(nose.x, nose.y, this.x, this.y - 10) < 120) this.tuck(true)
+      else if (this.tucked && world.t > this.peekAt) this.tuck(false)
+      if (!this.tucked) {
+        this.x += this.dir * 9 * dt // a snail's pace
+        if (this.x < 420 || this.x > Layout.MAX_X) this.dir *= -1
+        const last = this.trail[this.trail.length - 1]
+        if (!last || Math.abs(last - this.x) > 4) this.trail.push(this.x)
+        if (this.trail.length > 90) this.trail.shift()
+        this.stalks.setAttribute('transform', `rotate(${Math.sin(world.t * 1.5) * 6} 18 -8)`)
+      }
+      if (this.trail.length > 1) {
+        this.trailPath.setAttribute('d', `M${this.trail[0]} ${this.y + 2} ` + this.trail.map((x) => `L${x} ${this.y + 2}`).join(' '))
+      }
+      this.flip.setAttribute('transform', `scale(${this.dir} 1)`)
+      this.g.setAttribute('transform', `translate(${this.x} ${this.y})`)
+    },
+  }
+
+  // ------------------------------------------------------------ after the rain: worms
+
+  const worms = {
+    list: [],
+    made: false,
+    make() {},
+    comeUp() {
+      this.made = true
+      for (const p of Weather.puddles.slice(0, 2)) {
+        const x = p.x + (Math.random() < 0.5 ? -1 : 1) * (p.rx + rnd(20, 60))
+        const g = el('g', { class: 'critter worm', 'data-critter': 'worm', transform: `translate(${x} ${GROUND + 26})` })
+        const path = el('path', { class: 'worm-body' }, g)
+        this.list.push({ x, y: GROUND + 10, g, path, h: 0, age: 0, life: rnd(20, 30), eaten: false })
+      }
+    },
+    update(dt) {
+      if (!this.made && Weather.phase === 'after' && Weather.sinceRain > 1.5) this.comeUp()
+      for (const w of this.list) {
+        if (w.eaten) continue
+        w.age += dt
+        const going = w.age > w.life
+        w.h = Math.max(0, Math.min(22, going ? w.h - dt * 10 : w.h + dt * 10))
+        const pts = []
+        for (let k = 0; k <= 5; k++) {
+          const y = -(w.h * k) / 5
+          const x = Math.sin(world.t * 4 + k * 1.1) * (2 + k * 0.6)
+          pts.push(`${k ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`)
+        }
+        w.path.setAttribute('d', pts.join(' '))
+        if (going && w.h <= 0) {
+          w.eaten = true
+          w.g.remove()
+        }
+      }
+    },
+    /** A worm that's up, for the bird. */
+    get up() { return this.list.find((w) => !w.eaten && w.h > 12) || null },
+  }
+
   // ------------------------------------------------------------ public
 
   const BY_NAME = { fly, bee, spider }
@@ -458,6 +564,10 @@ const Creatures = (() => {
   /** Bring in this play's creatures (see layout.js). */
   function init(names = Layout.creatures) {
     all = names.map((n) => BY_NAME[n])
+    if (Layout.rain) {
+      snail.make()
+      all.push(snail, worms)
+    }
     if (names.includes('spider')) {
       web.make()
       spider.make()
@@ -488,6 +598,13 @@ const Creatures = (() => {
     tick,
     /** Tell the creatures what Reksio just did: 'bark' or 'snap', where. */
     notice(type, x, y) { world.events.push({ type, x, y }) },
+    /** Where the snail is, once it's out. */
+    get snail() { return snail.out ? { x: snail.x, y: snail.y } : null },
+    /** A worm that's up out of the ground (for the bird): {x, y, eat()}. */
+    get worm() {
+      const w = worms.up
+      return w && { x: w.x, y: w.y, eat() { w.eaten = true; w.g.remove() } }
+    },
     /** Where the bee is. */
     get bee() { return active(bee) ? { x: bee.x, y: bee.y } : null },
     /** Where the fly is, if it's about and free. */

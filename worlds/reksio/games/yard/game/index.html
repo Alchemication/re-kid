@@ -77,7 +77,13 @@
         </g>
       </g>
 
+      <!-- weather in the sky, fixed to the screen: a rainbow, clouds -->
+      <g id="rainbow" opacity="0"></g>
+      <g id="clouds"></g>
+
       <g id="cam">
+        <!-- puddles after rain, on the ground under everything (weather.js) -->
+        <g id="puddles"></g>
         <!-- action spots on the ground: stand in one (or tap it) to use the thing -->
         <g id="spots"></g>
 
@@ -330,6 +336,8 @@
       <g id="tray"></g>
     </svg>
 
+    <canvas id="rain" aria-hidden="true"></canvas>
+    <div id="overcast" class="overcast" aria-hidden="true"></div>
     <div id="sunset" class="sunset" aria-hidden="true"></div>
     <div id="evening" class="evening" aria-hidden="true"></div>
     <div id="iris" class="iris" aria-hidden="true"></div>
@@ -343,6 +351,7 @@
   <script src="music.js"></script>
   <script src="reksio.js"></script>
   <script src="creatures.js"></script>
+  <script src="weather.js"></script>
   <script src="yard.js"></script>
 </body>
 </html>

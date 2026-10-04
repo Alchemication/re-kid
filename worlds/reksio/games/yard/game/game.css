@@ -130,6 +130,13 @@ body { display: grid; place-items: center; }
 .spider-body { fill: #2a2622; }
 .spider-legs path { fill: none; stroke: #2a2622; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .thread, .strand { fill: none; stroke: rgba(250, 248, 240, 0.85); stroke-width: 1.2; }
+.snail-shell { fill: #c98a3c; stroke: var(--ink); stroke-width: 2.5; }
+.snail-swirl { fill: none; stroke: #6d4a2b; stroke-width: 2; stroke-linecap: round; }
+.snail-foot { fill: #a9b48f; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.snail-stalks path { fill: none; stroke: #8e9a74; stroke-width: 3; stroke-linecap: round; }
+.snail-body { transform-box: fill-box; transform-origin: left bottom; }
+.snail-trail { fill: none; stroke: rgba(240, 248, 255, 0.55); stroke-width: 3; stroke-linecap: round; }
+.worm-body { fill: none; stroke: #d9837d; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
 @keyframes buzz { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
 
 /* action spots on the ground: stand in one (or tap it) to use the thing */
@@ -172,6 +179,23 @@ body { display: grid; place-items: center; }
 .drop { fill: #8cc3ec; }
 .petal { fill: #d8432b; }
 .twinkle { fill: #fff3b8; stroke: #c9962a; stroke-width: 2; }
+
+/* ---- weather ---- */
+#rain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.overcast {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(#5d6a7a 0%, #7d8790 40%, #8a8f8c 100%);
+  mix-blend-mode: multiply;
+  opacity: 0;
+}
+.cloud-puff { fill: #e9ecef; stroke: none; }
+.cloud { filter: drop-shadow(0 3px 0 rgba(60, 70, 80, 0.35)); }
+.rainbow-band { fill: none; stroke-width: 14; opacity: 0.85; }
+.puddle-water { fill: #8fb3c9; stroke: #5d7e94; stroke-width: 3; opacity: 0.9; }
+.puddle-shine { fill: #e6f1f7; opacity: 0.7; }
+.ripple { fill: none; stroke: #e9f3f8; stroke-width: 1.6; }
 
 /* ---- the setting sun and the evening ---- */
 .sun { fill: #fbe08a; stroke: #e7a23a; stroke-width: 4; transition: fill 3s ease, stroke 3s ease; }

@@ -16,6 +16,7 @@ const Layout = (() => {
   const CREATURE_POOL = ['fly', 'bee', 'spider']
   const CREATURES_PER_PLAY = 2
   const MEMORY_KEY = 'reksio-yard-last-play'
+  const RAIN_CHANCE = 0.6 // most plays have a shower; after one, the next leans dry
   // Each movable thing is drawn at a base position; per play it moves by an
   // offset within these limits (scene units), drawn left to right.
   const SHIFTS = { bowl: [0, 140], flowers: [-60, 240], dig: [-10, 330], film: [140, 385] } // film stops clear of the gate
@@ -52,6 +53,11 @@ const Layout = (() => {
   mains.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b))
   const creatures = pick(CREATURE_POOL, CREATURES_PER_PLAY, last.creatures)
   const flowers = creatures.includes('bee') || Math.random() < 0.5
+  // ?rain=1 (or 0) and ?rain-at=SECONDS in the page address force the weather,
+  // for trying it out without waiting.
+  const params = new URLSearchParams(location.search)
+  const rain = params.has('rain') ? params.get('rain') !== '0' : Math.random() < (last.rain ? RAIN_CHANCE / 2 : RAIN_CHANCE)
+  const rainAt = Number(params.get('rain-at')) || null
 
   // positions: left to right, each clear of the one before
   const shift = { gate: GATE_SHIFT }
@@ -67,10 +73,10 @@ const Layout = (() => {
   if (!flowers) hidden.push('flowers')
 
   try {
-    localStorage.setItem(MEMORY_KEY, JSON.stringify({ mains, creatures }))
+    localStorage.setItem(MEMORY_KEY, JSON.stringify({ mains, creatures, rain }))
   } catch {
     // private window or storage blocked: the next play just won't remember
   }
 
-  return { WORLD_W, MIN_X, MAX_X, mains, creatures, flowers, shift, hidden, x: (name) => shift[name] || 0 }
+  return { WORLD_W, MIN_X, MAX_X, mains, creatures, flowers, rain, rainAt, shift, hidden, x: (name) => shift[name] || 0 }
 })()

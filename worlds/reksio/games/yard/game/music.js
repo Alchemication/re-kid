@@ -98,7 +98,7 @@ const Music = (() => {
     const bar = Math.floor(i / 4)
     const beat = i % 4 // 0: oom, 2: pah, 1/3: the "ands"
     const chord = CHORDS[PROGRESSION[bar]]
-    const e = Math.min(energy, dusk >= 4 ? 1 : 3)
+    const e = Math.min(energy, dusk >= 4 || raining ? 1 : 3)
 
     if (beat === 0 && (e >= 1 || bar % 2 === 0)) {
       play('bass', chord.bass[bar % 2], t, e === 0 ? 0.45 : 0.75)
@@ -165,7 +165,14 @@ const Music = (() => {
   /** Sunset step (0-6): a little slower and softer each step. */
   function setDusk(level) {
     dusk = level
-    if (out) out.gain.setTargetAtTime(VOLUME * (1 - level * 0.07), bus.ctx.currentTime, 1.5)
+    if (out) out.gain.setTargetAtTime(VOLUME * (1 - level * 0.07) * (raining ? 0.6 : 1), bus.ctx.currentTime, 1.5)
+  }
+
+  /** While it rains the music steps back: just the bass and soft pizzicato. */
+  let raining = false
+  function setRain(on) {
+    raining = on
+    if (out) out.gain.setTargetAtTime(VOLUME * (1 - dusk * 0.07) * (on ? 0.6 : 1), bus.ctx.currentTime, 1.5)
   }
 
   /** In-key reactions to what happens in the yard. */
@@ -241,5 +248,5 @@ const Music = (() => {
     out.gain.setTargetAtTime(0.0001, t0 + 9, 1.2)
   }
 
-  return { start, setEnergy, setDusk, react, evening, get ready() { return ready }, get buffers() { return buffers } }
+  return { start, setEnergy, setDusk, setRain, react, evening, get ready() { return ready }, get buffers() { return buffers } }
 })()

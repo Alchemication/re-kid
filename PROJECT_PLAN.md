@@ -223,13 +223,18 @@ wake Reksio at home.
    wide action spot on the ground that glows when Reksio stands in it and
    can be tapped; the bird's is under its perch.
 
-   **Wave 2 ideas for a living yard** (pick and order with Adam; each should
+   **Weather (`weather.js`):** most plays bring a shower (60%, halved after
+   a rainy play; `?rain=1`, `?rain=0` and `?rain-at=SECONDS` in the page
+   address force it). Clouds, rain, puddles that ring and splash, Reksio
+   catching drops and shaking off, then a rainbow, flowers growing, a snail
+   with a trail, worms by the puddles, and the bird hunting one.
+
+   **Next ideas for a living yard** (pick and order with Adam; each should
    teach a small cause and effect a toddler can see):
-   - *Weather:* clouds roll in, rain falls, puddles form; Reksio splashes and
-     shakes dry; the sun returns and the flowers grow a little and open; a
-     rainbow, briefly.
-   - *Snail:* comes out only after rain, slides slowly leaving a shiny trail,
-     pulls into its shell when Reksio sniffs it, peeps out again.
+   - *Tree:* a fruit tree in the yard; now and then an apple or a nut drops
+     (Reksio looks up, sniffs it). A squirrel comes down for nuts, eats one
+     and buries another; a snail eats a fallen apple slowly; wasps come to
+     the fruit. Wind shakes more down. Wondering at it is the point.
    - *Butterfly:* only in sunshine; flutters from flower to flower, sometimes
      lands on Reksio's nose (he goes cross-eyed, sneezes); hides from rain.
    - *Wasp:* hovers at the bowl when there is food; Reksio barks, it circles
@@ -238,7 +243,6 @@ wake Reksio at home.
      and it slinks off; the hens (if added) flutter.
    - *Ants:* a line marching to crumbs the lapping dropped by the bowl,
      carrying them home; a raindrop scatters them.
-   - *Worms:* surface after rain; the bird hops down to catch one.
    - *Leaves and wind:* a gust blows leaves across; Reksio chases one.
 2. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
