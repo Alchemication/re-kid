@@ -142,19 +142,8 @@ body { display: grid; place-items: center; }
 /* action spots on the ground: stand in one (or tap it) to use the thing */
 .spot { fill: rgba(255, 250, 232, 0.16); stroke: rgba(255, 252, 240, 0.65); stroke-width: 3; stroke-dasharray: 10 8; transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.4s ease; cursor: pointer; }
 .spot.extra { fill: rgba(255, 250, 232, 0.07); stroke: rgba(255, 252, 240, 0.35); }
-.spot.on { fill: rgba(255, 226, 140, 0.55); stroke: #e9a93a; stroke-dasharray: none; }
+.spot.on, .spot.hover { fill: rgba(255, 226, 140, 0.55); stroke: #e9a93a; stroke-dasharray: none; }
 
-/* paw markers above things you can tap */
-.marker { pointer-events: none; }
-.marker .marker-bob { animation: bob 1.6s ease-in-out infinite; }
-.marker circle { fill: #fffdf6; stroke: var(--ink); stroke-width: 3.5; }
-.marker use { fill: var(--ochre); stroke: var(--ink); stroke-width: 1.5; }
-.marker.extra { opacity: 0.55; }
-.marker.extra .marker-scale { transform: scale(0.7); }
-.marker .marker-scale { transition: transform 0.25s ease; }
-.marker.near .marker-scale, .marker.hover .marker-scale { transform: scale(1.35); }
-.marker.near circle, .marker.hover circle { fill: #ffe8a3; }
-.marker.near, .marker.hover { opacity: 1; }
 @keyframes bob {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }

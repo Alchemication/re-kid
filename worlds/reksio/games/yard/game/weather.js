@@ -19,7 +19,6 @@ const Weather = (() => {
   const RAIN_S = [22, 30] // and lasts this long
   const CLOUD_IN_S = 4 // clouds take this long to cover the sky
   const DRY_S = 70 // puddles take this long to dry up after the rain
-  const PUDDLES = [1040, 1880, 2860] // world x of the dips where puddles form
   const DROPS = 220 // raindrops on screen at full rain
 
   const $ = (id) => document.getElementById(id)
@@ -121,11 +120,11 @@ const Weather = (() => {
   // ------------------------------------------------------------ puddles
 
   const puddleLayer = $('puddles')
-  const puddles = PUDDLES.map((x) => {
+  const puddles = Layout.puddles.map(({ x, rx }) => {
     const g = el('g', { class: 'puddle', transform: `translate(${x} ${GROUND_Y + 22})` }, puddleLayer)
     const water = el('ellipse', { rx: 0, ry: 0, class: 'puddle-water' }, g)
     const shine = el('ellipse', { rx: 0, ry: 0, cx: -18, cy: -3, class: 'puddle-shine' }, g)
-    return { x, g, water, shine, rx: rnd(85, 120) }
+    return { x, g, water, shine, rx }
   })
 
   function drawPuddles() {

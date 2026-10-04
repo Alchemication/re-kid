@@ -93,9 +93,9 @@
   const bird = $('bird')
   const wing = $('bird-wing')
   const PERCHES = [
-    { x: 1480, y: 330 }, // on the wall
+    { x: Layout.perches[0], y: 330 }, // on the wall, over open ground (layout.js)
     { x: 560, y: 552 }, // on the doghouse roof
-    { x: 2350, y: 330 }, // further along the wall
+    { x: Layout.perches[1], y: 330 }, // further along the wall
     { x: 2880 + X('gate'), y: 602 }, // on the fence rail
   ]
   let perch = 0
@@ -232,7 +232,7 @@
       },
     },
     tap: {
-      at: () => 1201,
+      at: () => 1201 + X('tap'),
       face: 1,
       async run() {
         const handle = $('tap-handle')
@@ -245,7 +245,7 @@
         Sound.water(1.9)
         const drinking = Reksio.nod(-10, 1700)
         for (let i = 0; i < 5; i++) {
-          burst(1322, 790, 3, 'drop', { height: 30, reach: 30, size: 3 })
+          burst(1322 + X('tap'), 790, 3, 'drop', { height: 30, reach: 30, size: 3 })
           await wait(320)
         }
         await drinking
@@ -397,7 +397,6 @@
     }
     if (firstTime) {
       Music.react.done()
-      popMarker(name)
       fillSlot(name)
     }
     if (firstTime && !pending) await Reksio.hop() // a hop of joy
@@ -601,12 +600,12 @@
     house: () => ({ x: 410, r: 70 }),
     doghouse: () => ({ x: 560, r: 130 }),
     bowl: () => ({ x: 830 + X('bowl'), r: 120 }),
-    tap: () => ({ x: 1260, r: 120 }),
+    tap: () => ({ x: 1260 + X('tap'), r: 120 }),
     flowers: () => ({ x: 1570 + X('flowers'), r: 130 }),
     dig: () => ({ x: 2060 + X('dig'), r: 130 }),
     film: () => ({ x: 2430 + X('film'), r: 220 }),
     gate: () => ({ x: Reksio.MAX_X + 20, r: 90 }),
-    bird: () => ({ x: PERCHES[perch].x - 30, r: 170 }), // on the ground, under the bird
+    bird: () => ({ x: PERCHES[perch].x - 30, r: 130 }), // on the ground, under the bird
   }
   const spotEls = {}
 
@@ -677,14 +676,14 @@
   window.addEventListener('pointercancel', () => holdEnd())
   window.addEventListener('blur', () => holdEnd())
 
-  // the mouse over a thing lights up its marker
+  // the mouse over a thing lights up its spot
   $('stage').addEventListener('pointerover', (e) => {
     const thing = e.target.closest('#things [data-thing]')
-    if (thing && markers[thing.dataset.thing]) markers[thing.dataset.thing].classList.add('hover')
+    if (thing && spotEls[thing.dataset.thing]) spotEls[thing.dataset.thing].classList.add('hover')
   })
   $('stage').addEventListener('pointerout', (e) => {
     const thing = e.target.closest('#things [data-thing]')
-    if (thing && markers[thing.dataset.thing]) markers[thing.dataset.thing].classList.remove('hover')
+    if (thing && spotEls[thing.dataset.thing]) spotEls[thing.dataset.thing].classList.remove('hover')
   })
 
   document.addEventListener('contextmenu', (e) => e.preventDefault())
@@ -739,53 +738,14 @@
     wishEl.style.opacity = '0'
   }
 
-  // ------------------------------------------------------------ markers and tray
+  // ------------------------------------------------------------ spots and tray
 
-  // A paw-print marker bobs above everything Reksio can use: bright for the
-  // six main things, small and faint for the extras. The one in reach (what
-  // space would use) or under the mouse grows and warms. A main thing's
-  // marker pops away once done, and its picture fills in on the tray.
-  const markers = {}
-
-  function markerAt(name) {
-    if (name === 'bird') {
-      const m = new DOMMatrix(getComputedStyle(bird).transform)
-      return { x: m.e, y: m.f - 100 }
-    }
-    const el = document.querySelector(`#things [data-thing="${name}"]`)
-    const box = el.querySelector('.hit').getBBox()
-    return { x: box.x + box.width / 2 + X(name), y: (Number(el.dataset.hintY) || box.y) - 50 }
-  }
-
-  function makeMarkers() {
-    for (const name of Object.keys(THINGS)) {
-      if (Layout.hidden.includes(name)) continue
-      const g = document.createElementNS(SVG_NS, 'g')
-      g.setAttribute('class', `marker ${EVENING_NEEDS.includes(name) ? 'main' : 'extra'}`)
-      g.innerHTML = '<g class="marker-bob"><g class="marker-scale"><circle r="24" /><use href="#paw" /></g></g>'
-      $('markers').appendChild(g)
-      markers[name] = g
-    }
-    placeMarkers()
-  }
-
-  function placeMarkers() {
-    for (const [name, g] of Object.entries(markers)) {
-      const p = markerAt(name)
-      g.setAttribute('transform', `translate(${p.x} ${p.y})`)
-    }
-  }
-
-  function popMarker(name) {
-    const g = markers[name]
-    if (!g || g.dataset.gone) return
-    g.dataset.gone = '1'
-    g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: 'forwards' })
-  }
-
+  // What is left shows on the ground and on the tray: a main thing's spot is
+  // bright until it is done, then faint like the extras; the spot Reksio is
+  // standing in (or the mouse is over) glows. A done thing's picture fills in
+  // on the tray.
   function showNear() {
     const name = !busy && !ended ? nearest() : null
-    for (const [n, g] of Object.entries(markers)) g.classList.toggle('near', n === name)
     for (const [n, e] of Object.entries(spotEls)) {
       e.classList.toggle('on', n === name)
       e.classList.toggle('main', EVENING_NEEDS.includes(n) && !done.has(n))
@@ -954,10 +914,6 @@
       Sound.splash()
       burst(Reksio.x, 830, 4, 'drop', { height: 34, reach: 50, size: 3 })
     }
-    if (markers.bird) {
-      const p = markerAt('bird')
-      markers.bird.setAttribute('transform', `translate(${p.x} ${p.y})`)
-    }
     if (spotEls.bird) {
       spotEls.bird.setAttribute('cx', SPOTS.bird().x)
       spotEls.bird.style.opacity = flying ? '0' : ''
@@ -980,7 +936,7 @@
   paint()
 
   // this play's layout: move the movable things, hide what isn't in play
-  const GROUPS = { bowl: 'bowl', flowers: 'flowers', dig: 'mound', film: 'film', gate: 'fence' }
+  const GROUPS = { bowl: 'bowl', tap: 'tap', flowers: 'flowers', dig: 'mound', film: 'film', gate: 'fence' }
   for (const [name, id] of Object.entries(GROUPS)) {
     const g = $(id)
     if (Layout.hidden.includes(name)) g.style.display = 'none'
@@ -989,7 +945,6 @@
 
   birdAt(PERCHES[0])
   makeSpots()
-  makeMarkers()
   makeTray()
   Creatures.init()
   Weather.init()

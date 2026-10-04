@@ -125,7 +125,7 @@ const Creatures = (() => {
       const r = Math.random()
       const spots = [
         { x: 480, y: 612, name: 'roof' }, // the doghouse roof
-        { x: 1321, y: 556, name: 'tap' }, // the tap's spout
+        { x: 1321 + Layout.x('tap'), y: 556, name: 'tap' }, // the tap's spout
       ]
       if (!Layout.hidden.includes('bowl')) spots.push({ x: 880 + Layout.x('bowl'), y: 760, name: 'bowl' })
       if (Layout.flowers) spots.push({ x: 1648 + Layout.x('flowers'), y: 646, name: 'flower' })
@@ -137,7 +137,7 @@ const Creatures = (() => {
         const n = world.reksio.nose // …or comes to bother Reksio
         this.target = { x: n.x + rnd(-40, 40), y: n.y - rnd(20, 70) }
       } else {
-        const x = clamp(world.reksio.x + rnd(-700, 700), 200, 2900)
+        const x = clamp(world.reksio.x + rnd(-700, 700), 200, Layout.MAX_X)
         this.target = { x, y: rnd(380, 760) }
       }
     },
@@ -149,7 +149,7 @@ const Creatures = (() => {
       this.vy = Math.sin(a) * 900 - 200
       this.state = 'fly'
       this.landedOn = null
-      this.target = { x: clamp(this.x + Math.cos(a) * 400, 200, 2900), y: clamp(this.y - 150, 360, 760) }
+      this.target = { x: clamp(this.x + Math.cos(a) * 400, 200, Layout.MAX_X), y: clamp(this.y - 150, 360, 760) }
       Sound.zip()
     },
     update(dt) {

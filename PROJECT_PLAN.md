@@ -208,8 +208,7 @@ wake Reksio at home.
    ear whether it sounds like the theme**, and say what is too busy, too sad
    or annoying. A recognisable melody is still Kowalowski's composition, so
    it blocks a public release like the recording does.
-   **Clarity and life:** paw markers over everything tappable (the one in
-   reach grows), a tray of six pictures that fill in as main things are
+   **Clarity and life:** a tray of pictures that fill in as main things are
    done, and a first wave of creatures (`creatures.js`): a fly, a bumblebee
    and a spider with its web, which notice Reksio and each other. New
    gestures: biting his tail, sitting, howling, watching and pouncing on the
@@ -217,9 +216,11 @@ wake Reksio at home.
 
    **Variety and reach:** each play counts the doghouse plus three of the
    other five main things and brings two of the three creatures; the flowers
-   only sometimes. Movable things land in a different place each time, in a
-   yard now 3400 wide (`layout.js`; the last play is remembered in the
-   browser so the next prefers what wasn't seen). Every usable thing has a
+   only sometimes. The doghouse and gate are fixed anchors; the things
+   between (bowl, tap, flowers, mound, film) come in a shuffled order with
+   uneven gaps of at least a dog's length, in a yard 4000 wide; puddles and
+   the bird's wall perches go in the widest gaps (`layout.js`; the last play
+   is remembered in the browser so the next prefers what wasn't seen). Every usable thing has a
    wide action spot on the ground that glows when Reksio stands in it and
    can be tapped; the bird's is under its perch.
 
