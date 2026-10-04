@@ -7,6 +7,7 @@ Subcommands:
     episodes  Print a world's episode catalogue as a table.
     mark      Open the local tool for marking sounds in the intro.
     play      Open a game in the browser (default: the yard).
+    samples   Download and pack a game's instrument samples into samples.js.
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -44,6 +45,10 @@ Examples:
     uv run python main.py play reksio
         Opens the yard game (a static page, no server needed).
 
+    uv run python main.py samples reksio yard
+        Downloads the samples listed in games/yard/samples.yaml (CC0
+        libraries), measures their pitch and packs them into samples.js.
+
     uv run python main.py schema world
         JSON Schema for world.yaml (also: sources, episodes, intro, brief).
 """
@@ -62,6 +67,7 @@ from commands import (
     cmd_list,
     cmd_mark,
     cmd_play,
+    cmd_samples,
     cmd_schema,
     cmd_show,
     cmd_validate,
@@ -127,6 +133,16 @@ def main() -> int:
         help=f"Game folder under games/ (default: {DEFAULT_GAME})",
     )
 
+    p_samples = sub.add_parser("samples", help="Pack a game's instrument samples")
+    p_samples.add_argument("world", metavar="WORLD")
+    p_samples.add_argument(
+        "game",
+        metavar="GAME",
+        nargs="?",
+        default=DEFAULT_GAME,
+        help=f"Game folder under games/ (default: {DEFAULT_GAME})",
+    )
+
     p_schema = sub.add_parser("schema", help="Print JSON Schema")
     p_schema.add_argument(
         "kind", choices=["world", "sources", "episodes", "intro", "brief"]
@@ -140,6 +156,7 @@ def main() -> int:
         "episodes": cmd_episodes,
         "mark": cmd_mark,
         "play": cmd_play,
+        "samples": cmd_samples,
         "schema": cmd_schema,
     }
     return dispatch[args.cmd](args)

@@ -14,6 +14,7 @@ src/
   worlds.py             load/save YAML, cross-file validation
   commands.py           subcommand handlers
   audio.py              audio measurements, clips, spectrograms (ffmpeg, librosa)
+  samples.py            downloads, measures and packs a game's instrument samples
   mark.py               local server for the sound-marking tool
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
 worlds/<id>/
@@ -23,6 +24,7 @@ worlds/<id>/
   intro.yaml            title sequence, beat by beat (schema.breakdown.Breakdown)
   audio/intro/          measurements, spectrograms, mark clips (generated, gitignored)
   games/<game>/brief.yaml  game brief (schema.brief.GameBrief)
+  games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
   games/<game>/game/    the game: static HTML, CSS and plain scripts
   media/intro/          intro video clips (downloaded, gitignored)
 tests/
@@ -50,6 +52,7 @@ uv run python main.py show WORLD [--status unknown] [--section sound]
 uv run python main.py episodes WORLD [--online]
 uv run python main.py mark WORLD [MEDIA] [--by NAME] [--no-open]
 uv run python main.py play WORLD [GAME]       # opens a game (default: yard); no server
+uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
 uv run python main.py schema world|sources|episodes|intro|brief
 ```
 

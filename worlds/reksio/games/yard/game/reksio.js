@@ -3,7 +3,7 @@
 // dachshund stretch, and his small moves (bark, nod, shake, hop, sniff,
 // scratch, ducking into the doghouse). Drawn in index.html.
 
-/* global Sound */
+/* global Sound, Music, Creatures */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
@@ -212,6 +212,7 @@ const Reksio = (() => {
     show(mouth, true)
     show(smile, false)
     Sound.bark()
+    Creatures.notice('bark', x + facing * 121, GROUND - 114)
     await wait(450)
     show(mouth, false)
     show(smile, true)
@@ -260,6 +261,7 @@ const Reksio = (() => {
   async function hop(height = rnd(30, 56), times = Math.random() < 0.3 ? 2 : 1) {
     for (let i = 0; i < times; i++) {
       Sound.hop()
+      Music.react.hop()
       const h = i ? height * 0.6 : height
       await bob.animate(
         [
@@ -354,6 +356,102 @@ const Reksio = (() => {
     await bob.animate([{ transform: down }, { transform: 'rotate(0)' }], { duration: 170, easing: 'ease-out' }).finished
   }
 
+  /** Snap the jaws shut, quick, n times. */
+  async function snap(n = 1) {
+    for (let i = 0; i < n; i++) {
+      show(mouth, true)
+      show(smile, false)
+      await wait(90)
+      Sound.snap()
+      Creatures.notice('snap', x + facing * 121, GROUND - 114)
+      show(mouth, false)
+      await wait(110)
+    }
+    show(smile, true)
+  }
+
+  /** Watch something that moves: turn to it and follow it with the head for
+   * ms. where() returns its current {x, y} (or null once it's gone). */
+  async function watch(where, ms = rnd(1500, 3000)) {
+    const end = performance.now() + ms
+    while (performance.now() < end && target === null && !stretching) {
+      const p = where()
+      if (!p) break
+      const hx = x + facing * 26
+      const hy = GROUND - 120
+      if (Math.abs(p.x - x) > 40) face(p.x > x ? 1 : -1)
+      const angle = (Math.atan2(p.y - hy, Math.abs(p.x - hx)) * 180) / Math.PI
+      head.style.transform = `rotate(${Math.max(-40, Math.min(30, angle))}deg)`
+      await new Promise((r) => requestAnimationFrame(r))
+    }
+    head.style.transform = ''
+  }
+
+  /** Pounce towards x: a leap forward with snapping jaws. */
+  async function pounce(tx) {
+    face(tx > x ? 1 : -1)
+    const leap = Math.max(-160, Math.min(160, tx - x))
+    walkTo(x + leap)
+    const up = bob.animate(
+      [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-50px) rotate(-14deg)', offset: 0.45 }, { transform: 'translateY(0) rotate(4deg)', offset: 0.85 }, { transform: 'translateY(0) rotate(0)' }],
+      { duration: 620, easing: 'ease-out' },
+    )
+    await wait(200)
+    await snap(2)
+    await up.finished
+  }
+
+  /** Chase and bite his own tail: fast turns, snapping. */
+  async function biteTail(turns = rndInt(4, 7)) {
+    const was = facing
+    for (let i = 0; i < turns; i++) {
+      face(-facing)
+      if (i % 2) Sound.snap()
+      show(mouth, i % 2 === 1)
+      await bob.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-8deg) translateY(-6px)' }, { transform: 'rotate(0)' }], { duration: 150 }).finished
+    }
+    show(mouth, false)
+    show(smile, true)
+    if (target === null && !stretching) face(was)
+    await shake()
+  }
+
+  /** Howl at the sky. */
+  async function howl() {
+    Sound.howl()
+    show(mouth, true)
+    show(smile, false)
+    await head.animate(
+      [{ transform: 'rotate(0)' }, { transform: 'rotate(-38deg)', offset: 0.2 }, { transform: 'rotate(-42deg)', offset: 0.7 }, { transform: 'rotate(0)' }],
+      { duration: 1600, easing: 'ease-in-out' },
+    ).finished
+    show(mouth, false)
+    show(smile, true)
+  }
+
+  /** Sit for a while: rear down, front up, tail sweeping. */
+  async function sit(ms = rnd(1800, 3500)) {
+    const down = 'rotate(-14deg) translate(4px, 7px)'
+    await bob.animate([{ transform: 'rotate(0)' }, { transform: down }], { duration: 300, fill: 'forwards' }).finished
+    const rear = [legs[0], legs[2]].map((l) => l.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(55deg)' }], { duration: 300, fill: 'forwards' }))
+    await wait(ms)
+    rear.forEach((a) => a.cancel())
+    bob.getAnimations().forEach((a) => a.cancel())
+    await bob.animate([{ transform: down }, { transform: 'rotate(0)' }], { duration: 260 }).finished
+  }
+
+  /** Startled by something in front: a yelp and a hop backwards. */
+  async function startle() {
+    Sound.yelp()
+    const back = facing > 0 ? -60 : 60
+    walkTo(x + back)
+    face(back > 0 ? -1 : 1) // keep facing the thing that startled him
+    await bob.animate(
+      [{ transform: 'translateY(0)' }, { transform: 'translateY(-34px) rotate(10deg)', offset: 0.5 }, { transform: 'translateY(0)' }],
+      { duration: 420, easing: 'ease-out' },
+    ).finished
+  }
+
   /** A big yawn. */
   async function yawn() {
     Sound.yawn()
@@ -416,7 +514,7 @@ const Reksio = (() => {
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
     walkTo, stopWalking, face, tick, bark, nod, lick, lap, shake, paddle, duck, holdBone,
     beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
-    stamp,
+    stamp, snap, watch, pounce, biteTail, howl, sit, startle,
     MIN_X, MAX_X,
   }
 })()

@@ -81,6 +81,8 @@ const Sound = (() => {
 
   return {
     ensure,
+    /** The shared audio context and output, for the music engine. */
+    bus() { ensure(); return { ctx, master } },
     bark() { woof(0); woof(0.2) },
     step() { hiss(0, 0.05, 0.002, 0.04, 'bandpass', 2400, 2) },
     knock() { tone('sine', 220, 160, 0, 0.3, 0.003, 0.12); tone('sine', 220, 160, 0.14, 0.25, 0.003, 0.12) },
@@ -146,61 +148,66 @@ const Sound = (() => {
     },
     rattle() { for (let i = 0; i < 4; i++) tone('triangle', 260 + i * 14, 240, i * 0.08, 0.12, 0.003, 0.06) },
     curtain() { hiss(0, 0.06, 0.08, 0.3, 'bandpass', 2400, 0.6) },
-    /** A rising, rubbery tone while he stretches. Returns a function that stops it. */
-    stretch() {
-      const c = ensure()
-      const t = c.currentTime
-      const o = c.createOscillator()
-      o.type = 'triangle'
-      o.frequency.setValueAtTime(170, t)
-      o.frequency.exponentialRampToValueAtTime(620, t + 2.2)
-      const wob = c.createOscillator()
-      wob.frequency.value = 7
-      const wobGain = c.createGain()
-      wobGain.gain.value = 9
-      wob.connect(wobGain).connect(o.frequency)
-      const g = c.createGain()
-      g.gain.setValueAtTime(0.0001, t)
-      g.gain.exponentialRampToValueAtTime(0.11, t + 0.12)
-      o.connect(g).connect(master)
-      o.start(t)
-      wob.start(t)
-      return () => {
-        const now = c.currentTime
-        g.gain.cancelScheduledValues(now)
-        g.gain.setValueAtTime(g.gain.value, now)
-        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.08)
-        o.stop(now + 0.1)
-        wob.stop(now + 0.1)
-      }
-    },
-    /** A cartoon boing as he snaps back. */
-    boing() {
-      const c = ensure()
-      const t = c.currentTime
-      const o = c.createOscillator()
-      o.type = 'sine'
-      o.frequency.setValueAtTime(140, t)
-      o.frequency.exponentialRampToValueAtTime(520, t + 0.07)
-      o.frequency.exponentialRampToValueAtTime(260, t + 0.5)
-      const wob = c.createOscillator()
-      wob.frequency.setValueAtTime(18, t)
-      wob.frequency.linearRampToValueAtTime(8, t + 0.5)
-      const wobGain = c.createGain()
-      wobGain.gain.setValueAtTime(60, t)
-      wobGain.gain.linearRampToValueAtTime(5, t + 0.5)
-      wob.connect(wobGain).connect(o.frequency)
-      const g = c.createGain()
-      env(g, t, 0.3, 0.01, 0.55)
-      o.connect(g).connect(master)
-      o.start(t)
-      wob.start(t)
-      o.stop(t + 0.6)
-      wob.stop(t + 0.6)
-    },
     hop() { tone('sine', 300, 620, 0.1, 0.08, 0.02, 0.18) },
     sniff() { hiss(0, 0.07, 0.015, 0.06, 'bandpass', 2600, 1.5) },
     scratch() { for (let i = 0; i < 6; i++) hiss(i * 0.16, 0.09, 0.004, 0.06, 'highpass', 2500) },
+    /** Teeth snapping shut on nothing. */
+    snap() { tone('square', 1800, 900, 0, 0.12, 0.002, 0.03); hiss(0, 0.1, 0.002, 0.03, 'highpass', 3500) },
+    /** A fly zipping away. */
+    zip() { tone('sawtooth', 380, 900, 0, 0.035, 0.01, 0.22) },
+    /** A short, soft bumblebee buzz. */
+    buzz(seconds = 0.6) {
+      const c = ensure()
+      const t = c.currentTime
+      const o = c.createOscillator()
+      o.type = 'sawtooth'
+      o.frequency.value = 165
+      const lfo = c.createOscillator()
+      lfo.frequency.value = 9
+      const lfoGain = c.createGain()
+      lfoGain.gain.value = 12
+      lfo.connect(lfoGain).connect(o.frequency)
+      const lp = c.createBiquadFilter()
+      lp.type = 'lowpass'
+      lp.frequency.value = 700
+      const g = c.createGain()
+      g.gain.setValueAtTime(0.0001, t)
+      g.gain.exponentialRampToValueAtTime(0.05, t + 0.08)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + seconds)
+      o.connect(lp).connect(g).connect(master)
+      o.start(t); lfo.start(t)
+      o.stop(t + seconds + 0.05); lfo.stop(t + seconds + 0.05)
+    },
+    /** A startled little yelp. */
+    yelp() { tone('triangle', 700, 1300, 0, 0.14, 0.01, 0.12); tone('triangle', 1250, 900, 0.1, 0.1, 0.01, 0.12) },
+    /** A small dog's howl at the sky. */
+    howl() {
+      const c = ensure()
+      const t = c.currentTime
+      const o = c.createOscillator()
+      o.type = 'sawtooth'
+      o.frequency.setValueAtTime(380, t)
+      o.frequency.linearRampToValueAtTime(560, t + 0.35)
+      o.frequency.linearRampToValueAtTime(520, t + 1.0)
+      o.frequency.linearRampToValueAtTime(400, t + 1.4)
+      const vib = c.createOscillator()
+      vib.frequency.value = 5.5
+      const vibGain = c.createGain()
+      vibGain.gain.value = 9
+      vib.connect(vibGain).connect(o.frequency)
+      const formant = c.createBiquadFilter()
+      formant.type = 'bandpass'
+      formant.frequency.value = 1000
+      formant.Q.value = 1.6
+      const g = c.createGain()
+      g.gain.setValueAtTime(0.0001, t)
+      g.gain.exponentialRampToValueAtTime(0.16, t + 0.2)
+      g.gain.setValueAtTime(0.16, t + 1.0)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 1.5)
+      o.connect(formant).connect(g).connect(master)
+      o.start(t); vib.start(t)
+      o.stop(t + 1.55); vib.stop(t + 1.55)
+    },
     /** A rubber-stamp thump. */
     thump() {
       tone('sine', 120, 55, 0, 0.5, 0.004, 0.16)
@@ -208,8 +215,6 @@ const Sound = (() => {
     },
     /** The rattle of a film reel winding up. */
     reel() { for (let i = 0; i < 14; i++) tone('square', 1300, 1200, i * 0.06, 0.035, 0.002, 0.025) },
-    /** A soft pop, for a thought bubble appearing. */
-    blip() { tone('sine', 660, 990, 0, 0.1, 0.01, 0.12) },
     squeak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },
     water(seconds) {
       const c = ensure()
@@ -234,12 +239,6 @@ const Sound = (() => {
     chirp() { tone('sine', 2600, 3600, 0, 0.12, 0.01, 0.07); tone('sine', 2800, 3900, 0.11, 0.1, 0.01, 0.07) },
     flutter() { for (let i = 0; i < 6; i++) hiss(i * 0.05, 0.08, 0.004, 0.035, 'bandpass', 900, 1) },
     dig() { for (let i = 0; i < 6; i++) hiss(i * 0.11, 0.2, 0.004, 0.06, 'bandpass', 700 + Math.random() * 500, 1.2) },
-    ding() { tone('triangle', 1046, 1046, 0, 0.18, 0.005, 0.6); tone('triangle', 1568, 1568, 0.12, 0.14, 0.005, 0.8) },
-    lullaby() {
-      // A simple, original four-bar tune; a placeholder until real music exists.
-      const notes = [392, 330, 349, 294, 330, 262, 294, 196]
-      notes.forEach((f, i) => tone('triangle', f, f, i * 0.42, 0.12, 0.02, 0.5))
-    },
     /** Play an original clip (an easter egg), if the file is there; silent otherwise. */
     original(id) {
       ensure()

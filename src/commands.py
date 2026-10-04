@@ -23,6 +23,9 @@ from config import (
     MARK_HOST,
     MARK_PORT,
     MARK_PORT_TRIES,
+    SAMPLE_CACHE_DIR,
+    SAMPLES_JS,
+    SAMPLES_NAME,
 )
 from schema.breakdown import Breakdown
 from schema.brief import GameBrief
@@ -293,6 +296,48 @@ def cmd_play(args: argparse.Namespace) -> int:
         return 1
     print(f"Opening {page}")
     webbrowser.open(page.resolve().as_uri())
+    return 0
+
+
+def cmd_samples(args: argparse.Namespace) -> int:
+    """Download, measure and pack a game's instrument samples into samples.js."""
+    from pydantic import ValidationError
+
+    from samples import SampleError, build, note_name, problems, write_js
+    from schema.samples import SampleSet
+    from worlds import load_model
+
+    game = world_dir(args.world) / GAMES_DIR / args.game
+    path = game / SAMPLES_NAME
+    if not path.is_file():
+        logger.error(
+            "No %s in %s. List the game's samples there first.", SAMPLES_NAME, game
+        )
+        return 1
+    try:
+        sample_set = load_model(path, SampleSet)
+    except ValidationError as exc:
+        logger.error("%s is not valid: %s", path, exc)
+        return 1
+    print("Downloading, trimming and measuring samples…")
+    try:
+        packed = build(sample_set, world_dir(args.world) / SAMPLE_CACHE_DIR)
+    except SampleError as exc:
+        logger.error("%s", exc)
+        return 1
+    for p in packed:
+        pitch = (
+            f"{note_name(p.midi):>4} {p.off_cents:+4.0f}c"
+            if p.midi is not None
+            else "  one-shot "
+        )
+        print(
+            f"  {p.instrument:10} {pitch}  {len(p.data) // 1024:>3} KB  {Path(p.file).name}"
+        )
+    out = write_js(packed, sample_set.licence, game / SAMPLES_JS)
+    print(f"Wrote {out} ({out.stat().st_size // 1024} KB, {len(packed)} samples).")
+    for problem in problems(packed):
+        logger.warning("Pitch far from a semitone: %s", problem)
     return 0
 
 

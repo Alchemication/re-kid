@@ -24,6 +24,44 @@
           <circle class="eye" cx="-1" cy="-4" r="1.6" />
           <circle class="eye" cx="17" cy="1" r="2.2" />
         </g>
+        <!-- pictures of the six main things: thought bubbles and the tray use them -->
+        <g id="icon-bowl">
+                <path class="food" d="M30 -258 Q36 -270 46 -263 Q52 -274 60 -264 Q68 -274 76 -263 Q82 -268 84 -258 Z" />
+                <path class="bowl" d="M22 -258 H90 L80 -236 H32 Z" />
+        </g>
+        <g id="icon-tap">
+                <path class="drop-icon" d="M56 -288 Q36 -258 40 -246 Q44 -230 56 -230 Q68 -230 72 -246 Q76 -258 56 -288 Z" />
+        </g>
+        <g id="icon-dig">
+                <path class="bone" d="M36 -252 H76 M32 -258 a6 6 0 1 0 0 12 M80 -258 a6 6 0 1 1 0 12" />
+                <path class="bone-white" d="M36 -252 H76 M32 -258 a6 6 0 1 0 0 12 M80 -258 a6 6 0 1 1 0 12" />
+        </g>
+        <g id="icon-bird">
+                <ellipse class="bird" cx="50" cy="-248" rx="18" ry="13" />
+                <circle class="bird" cx="66" cy="-262" r="9" />
+                <path class="beak" d="M74 -264 L86 -260 L74 -257 Z" />
+                <circle class="bird-eye" cx="68" cy="-264" r="2.2" />
+                <path class="bird" d="M34 -246 L20 -254 L24 -242 Z" />
+        </g>
+        <g id="icon-film">
+                <rect class="strip" x="20" y="-268" width="72" height="34" rx="3" />
+                <rect class="frame" x="27" y="-261" width="17" height="20" />
+                <rect class="frame" x="48" y="-261" width="17" height="20" />
+                <rect class="frame" x="69" y="-261" width="17" height="20" />
+        </g>
+        <g id="icon-doghouse">
+                <rect class="plank" x="34" y="-262" width="44" height="28" />
+                <ellipse class="door" cx="56" cy="-246" rx="9" ry="11" />
+                <path class="roof-icon" d="M28 -260 L56 -284 L84 -260" />
+        </g>
+        <!-- a paw print: the marker above things you can tap -->
+        <g id="paw">
+          <ellipse cx="0" cy="5" rx="9" ry="7.5" />
+          <ellipse cx="-9" cy="-6" rx="3.6" ry="4.6" transform="rotate(-20 -9 -6)" />
+          <ellipse cx="-3" cy="-11" rx="3.6" ry="4.8" />
+          <ellipse cx="4" cy="-11" rx="3.6" ry="4.8" />
+          <ellipse cx="10" cy="-6" rx="3.6" ry="4.6" transform="rotate(20 10 -6)" />
+        </g>
         <g id="twinkle-shape">
           <path d="M0 -14 L3 -3 L14 0 L3 3 L0 14 L-3 3 L-14 0 L-3 -3 Z" />
         </g>
@@ -88,7 +126,7 @@
 
           <!-- ============ food bowl ============ -->
           <g id="bowl" class="thing" data-thing="bowl" data-hint-y="720">
-            <rect class="hit" x="810" y="700" width="140" height="110" />
+            <rect class="hit" x="790" y="620" width="180" height="210" />
             <g id="food" style="transform-origin: 880px 770px">
               <path class="food" d="M842 770 Q850 752 862 762 Q870 748 882 760 Q894 748 904 762 Q914 754 918 770 Z" />
             </g>
@@ -114,7 +152,7 @@
 
           <!-- ============ flowers (they sway in the breeze) ============ -->
           <g id="flowers" class="thing" data-thing="flowers" data-hint-y="630">
-            <rect class="hit" x="1560" y="640" width="190" height="170" />
+            <rect class="hit" x="1545" y="620" width="220" height="210" />
             <g class="sway" style="transform-origin: 1600px 800px">
               <path class="stem" d="M1600 800 Q1596 740 1604 690" />
               <path class="leaf" d="M1602 760 Q1580 748 1572 730 Q1594 734 1602 752 Z" />
@@ -134,7 +172,7 @@
 
           <!-- ============ mound of earth, with a bone inside ============ -->
           <g id="mound" class="thing" data-thing="dig" data-hint-y="720">
-            <rect class="hit" x="2010" y="700" width="180" height="110" />
+            <rect class="hit" x="1990" y="640" width="220" height="190" />
             <path class="earth" d="M2020 805 Q2040 760 2100 752 Q2160 760 2180 805 Z" />
             <path class="earth-dots" d="M2060 785 h2 M2090 772 h2 M2120 790 h2 M2150 782 h2 M2082 795 h2" />
             <g id="found-bone" opacity="0" style="transform-origin: 2100px 760px">
@@ -185,7 +223,7 @@
 
           <!-- ============ the bird ============ -->
           <g id="bird" class="thing" data-thing="bird" style="transform: translate(1480px, 330px)">
-            <rect class="hit" x="-55" y="-70" width="110" height="90" />
+            <rect class="hit" x="-80" y="-100" width="160" height="130" />
             <g id="bird-body">
               <ellipse class="bird" cx="0" cy="-16" rx="22" ry="16" />
               <circle class="bird" cx="18" cy="-32" r="11" />
@@ -262,47 +300,31 @@
               <circle class="bubble" cx="30" cy="-196" r="10" />
               <ellipse class="bubble" cx="56" cy="-252" rx="62" ry="48" />
               <!-- the bowl -->
-              <g class="wish-icon" data-wish="bowl" opacity="0">
-                <path class="food" d="M30 -258 Q36 -270 46 -263 Q52 -274 60 -264 Q68 -274 76 -263 Q82 -268 84 -258 Z" />
-                <path class="bowl" d="M22 -258 H90 L80 -236 H32 Z" />
-              </g>
+              <use class="wish-icon" data-wish="bowl" href="#icon-bowl" opacity="0" />
               <!-- water: a drop -->
-              <g class="wish-icon" data-wish="tap" opacity="0">
-                <path class="drop-icon" d="M56 -288 Q36 -258 40 -246 Q44 -230 56 -230 Q68 -230 72 -246 Q76 -258 56 -288 Z" />
-              </g>
+              <use class="wish-icon" data-wish="tap" href="#icon-tap" opacity="0" />
               <!-- the bone -->
-              <g class="wish-icon" data-wish="dig" opacity="0">
-                <path class="bone" d="M36 -252 H76 M32 -258 a6 6 0 1 0 0 12 M80 -258 a6 6 0 1 1 0 12" />
-                <path class="bone-white" d="M36 -252 H76 M32 -258 a6 6 0 1 0 0 12 M80 -258 a6 6 0 1 1 0 12" />
-              </g>
+              <use class="wish-icon" data-wish="dig" href="#icon-dig" opacity="0" />
               <!-- the bird -->
-              <g class="wish-icon" data-wish="bird" opacity="0">
-                <ellipse class="bird" cx="50" cy="-248" rx="18" ry="13" />
-                <circle class="bird" cx="66" cy="-262" r="9" />
-                <path class="beak" d="M74 -264 L86 -260 L74 -257 Z" />
-                <circle class="bird-eye" cx="68" cy="-264" r="2.2" />
-                <path class="bird" d="M34 -246 L20 -254 L24 -242 Z" />
-              </g>
+              <use class="wish-icon" data-wish="bird" href="#icon-bird" opacity="0" />
               <!-- the film strip -->
-              <g class="wish-icon" data-wish="film" opacity="0">
-                <rect class="strip" x="20" y="-268" width="72" height="34" rx="3" />
-                <rect class="frame" x="27" y="-261" width="17" height="20" />
-                <rect class="frame" x="48" y="-261" width="17" height="20" />
-                <rect class="frame" x="69" y="-261" width="17" height="20" />
-              </g>
+              <use class="wish-icon" data-wish="film" href="#icon-film" opacity="0" />
               <!-- sleep in the doghouse -->
-              <g class="wish-icon" data-wish="doghouse" opacity="0">
-                <rect class="plank" x="34" y="-262" width="44" height="28" />
-                <ellipse class="door" cx="56" cy="-246" rx="9" ry="11" />
-                <path class="roof-icon" d="M28 -260 L56 -284 L84 -260" />
-              </g>
+              <use class="wish-icon" data-wish="doghouse" href="#icon-doghouse" opacity="0" />
             </g>
           </g>
         </g>
 
+        <!-- the small life of the yard (creatures.js) -->
+        <g id="critters"></g>
+
         <!-- particles and hint twinkles are added here by the script -->
         <g id="fx"></g>
+        <g id="markers"></g>
       </g>
+
+      <!-- six pictures, filled in as each main thing is done: how many are left -->
+      <g id="tray"></g>
     </svg>
 
     <div id="sunset" class="sunset" aria-hidden="true"></div>
@@ -313,7 +335,10 @@
 
   <script src="painting.js"></script>
   <script src="sound.js"></script>
+  <script src="samples.js"></script>
+  <script src="music.js"></script>
   <script src="reksio.js"></script>
+  <script src="creatures.js"></script>
   <script src="yard.js"></script>
 </body>
 </html>

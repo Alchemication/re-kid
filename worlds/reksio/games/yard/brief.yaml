@@ -26,7 +26,13 @@ principles:
 - text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird, his doghouse or the film strip, the nearest one he hasn't done — and that thing twinkles. Only the six main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
   origin: inspired
   refs: [world:humour]
-- text: He moves like a dog. Short trips are a walk, long ones a bounding run, easing in and out of speed; he hops for joy after each main thing. Left alone, he keeps busy every few seconds with something picked at random and a little different each time — sniffing, wandering with his nose down, glancing around, looking up at the sky or the bird, scratching, hopping, a play-bow, chasing his tail, yawning — with a thought bubble now and then.
+- text: Tapping a creature sends Reksio after it in his own way — he stalks and pounces on the fly, sniffs the bee and jumps back, looks up at the web and gets a fright when the spider drops onto his nose.
+  origin: invented
+- text: He moves like a dog. Short trips are a walk, long ones a bounding run, easing in and out of speed; he hops for joy after each main thing. Left alone, he keeps busy every few seconds with something picked at random and a little different each time — sniffing, wandering with his nose down, glancing around, looking up at the sky or the bird, scratching, hopping, a play-bow, chasing or biting his tail, sitting, howling, yawning, watching the fly and pouncing on it — with a thought bubble now and then.
+  origin: invented
+- text: It is always clear what can be tapped and what is left. A paw-print marker bobs over everything Reksio can use (bright for the six main things, small and faint for extras); the one in reach grows and warms. A row of six pictures in the corner fills in as each main thing is done, and tapping a picture sends Reksio there.
+  origin: invented
+- text: The yard is quietly alive. Small creatures go about their own business and meet each other — a fly wanders, lands on the bowl and dodges Reksio's snaps; a bumblebee works the flowers and huffs off if he comes close; a spider builds a web in the corner by the house, dangles on its swinging thread, catches the fly and wraps it, and hides when Reksio barks. Cartoon physics (momentum, pendulums, startled darts), small and mostly quiet, never in the way.
   origin: invented
 controls:
   text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, a quick tap barks and pressing and holding stretches him. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, any other key barks (hold it to stretch).'
@@ -45,7 +51,13 @@ look:
 sound:
 - text: "Every action has its own new, gentle sound, made in the browser: a bark, pattering steps, lapping, snoring, a running tap, a sneeze, a bird's chirp, digging."
   origin: invented
-- text: A short, calm lullaby when evening comes. To be composed properly; a simple placeholder for now.
+- text: A light pizzicato "oom-pah" in B-flat runs under the yard, in the spirit of the Reksio theme — its key, its bouncing bass, and a clarinet hook echoing the main melody Adam marked (B-flat, B-flat, B-flat C B-flat C, D F, F, from a machine transcription he has not yet confirmed by ear). Played note by note from real instrument samples (CC0), so it can follow the game.
+  origin: inspired
+  refs: [mark:main-melody-part-1, world:sound.theme]
+- text: The music follows Reksio. It is fuller when the child is playing and thins to a bare bass line when left alone; actions play along in key and on the beat — a xylophone flourish for each main thing, glockenspiel for a thought bubble, a flute trill for the bird, timpani under each stamp, a rising bassoon as he stretches and a falling run (the shape of the marked stretching melody) as he snaps back.
+  origin: inspired
+  refs: [mark:stretching-melody, world:sound.music_role]
+- text: Each sunset step slows the music a little and makes it softer; at evening it gives way to a harp lullaby built on the same hook, slowed right down.
   origin: invented
 
 scenes:

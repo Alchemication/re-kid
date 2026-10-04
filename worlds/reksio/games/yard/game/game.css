@@ -117,6 +117,45 @@ body { display: grid; place-items: center; }
 .reel-hub { fill: #f3e7cf; stroke: var(--ink); stroke-width: 2; }
 .dust { fill: #d9c391; }
 
+/* the small life of the yard */
+.critter-hit { fill: transparent; }
+.fly-body { fill: #2a2622; }
+.fly-wing { fill: rgba(220, 235, 245, 0.75); stroke: rgba(40, 40, 40, 0.5); stroke-width: 0.8; animation: buzz 60ms linear infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
+.fly-eye { fill: #b23a26; }
+.cocoon { fill: #f4f1e8; stroke: #b9b2a1; stroke-width: 1.5; }
+.bee-body { fill: #f2c330; stroke: var(--ink); stroke-width: 2; }
+.bee-stripes { fill: none; stroke: var(--ink); stroke-width: 3.5; }
+.bee-sting { fill: var(--ink); }
+.bee-wing { fill: rgba(230, 242, 250, 0.8); stroke: rgba(40, 40, 40, 0.55); stroke-width: 1; animation: buzz 50ms linear infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
+.spider-body { fill: #2a2622; }
+.spider-legs path { fill: none; stroke: #2a2622; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.thread, .strand { fill: none; stroke: rgba(250, 248, 240, 0.85); stroke-width: 1.2; }
+@keyframes buzz { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
+
+/* paw markers above things you can tap */
+.marker { pointer-events: none; }
+.marker .marker-bob { animation: bob 1.6s ease-in-out infinite; }
+.marker circle { fill: #fffdf6; stroke: var(--ink); stroke-width: 3.5; }
+.marker use { fill: var(--ochre); stroke: var(--ink); stroke-width: 1.5; }
+.marker.extra { opacity: 0.55; }
+.marker.extra .marker-scale { transform: scale(0.7); }
+.marker .marker-scale { transition: transform 0.25s ease; }
+.marker.near .marker-scale, .marker.hover .marker-scale { transform: scale(1.35); }
+.marker.near circle, .marker.hover circle { fill: #ffe8a3; }
+.marker.near, .marker.hover { opacity: 1; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+/* the tray: six main things, faded until done */
+.slot { cursor: pointer; }
+.slot circle { fill: rgba(255, 253, 246, 0.82); stroke: var(--ink); stroke-width: 3.5; }
+.slot.pending .slot-icon { opacity: 0.32; filter: grayscale(1); }
+.slot.pending circle { fill: rgba(255, 253, 246, 0.45); stroke-dasharray: 6 5; }
+.slot .tick { fill: #5f9a45; stroke: var(--ink); stroke-width: 2.5; opacity: 0; }
+.slot.done .tick { opacity: 1; }
+
 /* the thought bubble */
 .bubble { fill: #fffdf6; stroke: var(--ink); stroke-width: 4; }
 .drop-icon { fill: #7fb8e6; stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; }

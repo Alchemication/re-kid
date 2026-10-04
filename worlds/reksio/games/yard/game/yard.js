@@ -5,7 +5,7 @@
 // done the five main things, evening comes and he goes to sleep.
 // No text, no score; every tap gets an answer.
 
-/* global Painting, Sound, Reksio */
+/* global Painting, Sound, Music, Reksio, Creatures */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -113,6 +113,7 @@
       { duration: 160, iterations: Infinity },
     )
     Sound.flutter()
+    Music.react.bird()
     const top = Math.min(from.y, to.y) - 180
     const mid = { x: (from.x + to.x) / 2, y: top }
     const facing = to.x < from.x ? -1 : 1
@@ -160,6 +161,7 @@
         const zs = ['z1', 'z2', 'z3'].map($)
         for (let i = 0; i < 3; i++) {
           Sound.snore()
+          Music.react.snore(i)
           head.animate(
             [{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.05) translateY(-2px)', offset: 0.45 }, { transform: 'scaleY(1)' }],
             { duration: 1700, easing: 'ease-in-out' },
@@ -241,6 +243,7 @@
         }
         await wait(150)
         Sound.sneeze()
+        Music.react.sneeze()
         await wait(320)
         Reksio.nod(-24, 380)
         burst(1640, 680, 12, 'petal', { height: 70, reach: 110, size: 5 })
@@ -290,6 +293,7 @@
           Reksio.face(1)
           await Reksio.stamp(() => {
             Sound.thump()
+            Music.react.stamp()
             const print = prints[i]
             print.setAttribute('opacity', '1')
             print.style.transformOrigin = `${FRAMES[i]}px 791px`
@@ -307,7 +311,6 @@
         reel.animate([{ transform: 'scale(0.2) rotate(0)' }, { transform: 'scale(1) rotate(900deg)' }], { duration: 900, easing: 'ease-out' })
         await strip.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 900, easing: 'ease-in', fill: 'forwards' }).finished
         strip.style.visibility = 'hidden'
-        Sound.ding()
         await Reksio.hop(50, 2)
       },
     },
@@ -339,7 +342,7 @@
           [{ transform: 'translateY(30px) scale(0.4)' }, { transform: 'translateY(-50px) scale(1.2)' }, { transform: 'translateY(-30px) scale(1)' }],
           { duration: 600, easing: 'ease-out', fill: 'forwards' },
         ).finished
-        Sound.ding()
+        Music.react.wish()
         await wait(500)
         bone.style.opacity = '0'
         Reksio.holdBone(true)
@@ -366,6 +369,11 @@
     if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
       evening()
       return
+    }
+    if (firstTime) {
+      Music.react.done()
+      popMarker(name)
+      fillSlot(name)
     }
     if (firstTime && !pending) await Reksio.hop() // a hop of joy
     runPending()
@@ -395,8 +403,16 @@
       mine.stretching = true
       busy = true
       Reksio.beginStretch()
-      mine.stopSound = Sound.stretch()
+      mine.stopSound = stretchMusic()
     }, HOLD_MS)
+  }
+
+  /** While he stretches, the bassoon climbs a note at a time. */
+  function stretchMusic() {
+    let n = 0
+    Music.react.stretchStep(n++)
+    const id = setInterval(() => Music.react.stretchStep(n++), 300)
+    return () => clearInterval(id)
   }
 
   async function holdEnd() {
@@ -407,7 +423,7 @@
     if (!h.stretching) return command(() => Reksio.bark())
     lastTap = performance.now()
     h.stopSound()
-    Sound.boing()
+    Music.react.snap()
     await Reksio.endStretch()
     busy = false
     runPending()
@@ -426,6 +442,52 @@
     document.querySelector('#sun .sun').style.fill = SUN_COLORS[step]
     document.querySelector('#sun .sun-glow').style.fill = SUN_COLORS[step]
     $('sunset').style.opacity = String(step * 0.095)
+    Music.setDusk(step)
+  }
+
+  // ------------------------------------------------------------ creatures
+
+  // Tapping a creature: Reksio goes after it, in his own way.
+  const CRITTERS = {
+    async fly() {
+      const f = Creatures.fly
+      if (!f) return
+      if (await Reksio.walkTo(f.x - 140 * Math.sign(f.x - Reksio.x || 1))) {
+        await Reksio.watch(() => Creatures.fly, 900)
+        const g = Creatures.fly
+        if (g) await Reksio.pounce(g.x)
+      }
+    },
+    async bee() {
+      const b = Creatures.bee
+      if (await Reksio.walkTo(b.x - 120)) {
+        Reksio.face(1)
+        await Reksio.sniff(2)
+        await Reksio.startle()
+      }
+    },
+    async spider() {
+      const spot = Creatures.webSpot()
+      if (await Reksio.walkTo(spot.x)) {
+        Reksio.face(-1)
+        await Reksio.lookUp(600)
+        const nose = Reksio.mouth()
+        const visiting = Creatures.spider.visit(nose.y - 8)
+        await wait(900)
+        await Reksio.startle()
+        await visiting
+      }
+    },
+  }
+
+  async function chase(name) {
+    busy = true
+    try {
+      await CRITTERS[name]()
+    } finally {
+      busy = false
+    }
+    runPending()
   }
 
   // ------------------------------------------------------------ the end
@@ -434,7 +496,7 @@
     ended = true
     await wait(1800) // let the last step of the sunset be seen
     $('evening').classList.add('on')
-    Sound.lullaby()
+    Music.evening()
     await wait(1600)
     if (await Reksio.walkTo(DOOR.x)) {
       Sound.knock()
@@ -481,6 +543,9 @@
     if (e.target.closest('#fullscreen')) return
     e.preventDefault()
     Sound.ensure()
+    Music.start()
+    const critter = e.target.closest('[data-critter]')
+    if (critter) return command(() => chase(critter.dataset.critter))
     const thing = e.target.closest('[data-thing]')
     if (thing) return command(() => goAndDo(thing.dataset.thing))
     if (e.target.closest('#reksio')) return holdStart()
@@ -502,6 +567,7 @@
     if (['Shift', 'Meta', 'Control', 'Alt', 'CapsLock', 'Tab', 'Escape'].includes(e.key)) return
     e.preventDefault()
     Sound.ensure()
+    Music.start()
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       if (!e.repeat) command(() => Reksio.walkTo(e.key === 'ArrowLeft' ? Reksio.MIN_X : Reksio.MAX_X))
       return
@@ -528,6 +594,16 @@
   window.addEventListener('pointerup', () => holdEnd())
   window.addEventListener('pointercancel', () => holdEnd())
   window.addEventListener('blur', () => holdEnd())
+
+  // the mouse over a thing lights up its marker
+  $('stage').addEventListener('pointerover', (e) => {
+    const thing = e.target.closest('#things [data-thing]')
+    if (thing && markers[thing.dataset.thing]) markers[thing.dataset.thing].classList.add('hover')
+  })
+  $('stage').addEventListener('pointerout', (e) => {
+    const thing = e.target.closest('#things [data-thing]')
+    if (thing && markers[thing.dataset.thing]) markers[thing.dataset.thing].classList.remove('hover')
+  })
 
   document.addEventListener('contextmenu', (e) => e.preventDefault())
 
@@ -570,7 +646,7 @@
       [{ transform: 'scale(0)' }, { transform: 'scale(1.12)', offset: 0.7 }, { transform: 'scale(1)' }],
       { duration: 320, easing: 'ease-out' },
     )
-    Sound.blip()
+    Music.react.wish()
     const c = thingCenter(name)
     if (c.x > camX + 60 && c.x < camX + Painting.VIEW_W - 60) twinkle(c.x, c.y)
   }
@@ -579,6 +655,79 @@
     wishing = null
     wishEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250 })
     wishEl.style.opacity = '0'
+  }
+
+  // ------------------------------------------------------------ markers and tray
+
+  // A paw-print marker bobs above everything Reksio can use: bright for the
+  // six main things, small and faint for the extras. The one in reach (what
+  // space would use) or under the mouse grows and warms. A main thing's
+  // marker pops away once done, and its picture fills in on the tray.
+  const markers = {}
+
+  function markerAt(name) {
+    if (name === 'bird') {
+      const m = new DOMMatrix(getComputedStyle(bird).transform)
+      return { x: m.e, y: m.f - 100 }
+    }
+    const el = document.querySelector(`#things [data-thing="${name}"]`)
+    const box = el.querySelector('.hit').getBBox()
+    return { x: box.x + box.width / 2, y: (Number(el.dataset.hintY) || box.y) - 50 }
+  }
+
+  function makeMarkers() {
+    for (const name of Object.keys(THINGS)) {
+      const g = document.createElementNS(SVG_NS, 'g')
+      g.setAttribute('class', `marker ${EVENING_NEEDS.includes(name) ? 'main' : 'extra'}`)
+      g.innerHTML = '<g class="marker-bob"><g class="marker-scale"><circle r="24" /><use href="#paw" /></g></g>'
+      $('markers').appendChild(g)
+      markers[name] = g
+    }
+    placeMarkers()
+  }
+
+  function placeMarkers() {
+    for (const [name, g] of Object.entries(markers)) {
+      const p = markerAt(name)
+      g.setAttribute('transform', `translate(${p.x} ${p.y})`)
+    }
+  }
+
+  function popMarker(name) {
+    const g = markers[name]
+    if (!g || g.dataset.gone) return
+    g.dataset.gone = '1'
+    g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, fill: 'forwards' })
+  }
+
+  function showNear() {
+    const name = !busy && !ended ? nearest() : null
+    for (const [n, g] of Object.entries(markers)) g.classList.toggle('near', n === name)
+  }
+
+  function makeTray() {
+    EVENING_NEEDS.forEach((name, i) => {
+      const g = document.createElementNS(SVG_NS, 'g')
+      g.setAttribute('class', 'slot pending')
+      g.setAttribute('data-thing', name)
+      g.setAttribute('transform', `translate(${58 + i * 74} 54)`)
+      g.innerHTML =
+        '<circle r="31" />' +
+        `<use class="slot-icon" href="#icon-${name}" transform="scale(0.62) translate(-56 252)" />` +
+        '<circle class="tick" cx="22" cy="-22" r="9" />'
+      $('tray').appendChild(g)
+    })
+  }
+
+  function fillSlot(name) {
+    const slot = document.querySelector(`#tray [data-thing="${name}"]`)
+    if (!slot) return
+    slot.classList.remove('pending')
+    slot.classList.add('done')
+    slot.animate(
+      [{ transform: `${slot.getAttribute('transform')} scale(1)` }, { transform: `${slot.getAttribute('transform')} scale(1.35)` }, { transform: `${slot.getAttribute('transform')} scale(1)` }],
+      { duration: 500, easing: 'ease-out' },
+    )
   }
 
   // ------------------------------------------------------------ left alone
@@ -625,6 +774,19 @@
     hop: { weight: 2, run: () => Reksio.hop() },
     bow: { weight: 2, run: () => Reksio.playBow() },
     tail: { weight: 1, run: () => Reksio.chaseTail() },
+    biteTail: { weight: 1, run: () => Reksio.biteTail() },
+    sit: { weight: 2, run: () => Reksio.sit() },
+    howl: { weight: 1, ok: () => done.size >= 1, run: () => Reksio.howl() },
+    fly: {
+      // the fly is close: watch it, and sometimes pounce
+      weight: 7,
+      ok: () => Creatures.fly && Math.abs(Creatures.fly.x - Reksio.x) < 800,
+      async run() {
+        await Reksio.watch(() => Creatures.fly)
+        const f = Creatures.fly
+        if (f && Math.random() < 0.6 && Math.abs(f.x - Reksio.x) < 380) await Reksio.pounce(f.x)
+      },
+    },
     yawn: { weight: 1, ok: () => done.size >= 2, run: () => Reksio.yawn() },
   }
 
@@ -636,8 +798,18 @@
     return names[0]
   }
 
+  /** How full the music is: busy or just tapped → fuller; left alone → sparser. */
+  function musicEnergy(now) {
+    if (busy || hold || Reksio.stretching) return 3
+    const since = now - lastTap
+    if (Reksio.walking || since < 4000) return 2
+    return since < 15000 ? 1 : 0
+  }
+
   function idleLoop() {
     const now = performance.now()
+    Music.setEnergy(musicEnergy(now))
+    showNear()
     if (wishing) {
       placeWish()
       if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
@@ -662,6 +834,11 @@
     const dt = Math.min(0.05, (t - last) / 1000)
     last = t
     Reksio.tick(dt)
+    Creatures.tick(dt)
+    if (markers.bird) {
+      const p = markerAt('bird')
+      markers.bird.setAttribute('transform', `translate(${p.x} ${p.y})`)
+    }
     const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
     if (Math.abs(camX - shownCam) > 0.05) {
@@ -680,10 +857,13 @@
   paint()
 
   birdAt(PERCHES[0])
+  makeMarkers()
+  makeTray()
+  Creatures.init()
   requestAnimationFrame(frame)
   setTimeout(birdIdle, 3000)
   lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
   setTimeout(idleLoop, 200)
 
-  window.yardGame = { goAndDo, done, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped }) } // for testing
+  window.yardGame = { goAndDo, done, pickAct, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped }) } // for testing
 })()

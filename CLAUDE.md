@@ -98,8 +98,10 @@ file layout update `README.md` and the `main.py` docstring in the same change.
 - **No backward-compat shims:** when moving code, update all callers.
 - **Game (`worlds/<id>/games/<game>/game/`):** plain HTML, CSS and classic
   scripts (not modules), so the page opens straight from disk with no server.
-  Characters are drawn in code (SVG), sounds made with Web Audio; original
-  audio only as easter eggs.
+  Characters are drawn in code (SVG). Sound effects are made with Web Audio;
+  music is played note by note from CC0 instrument samples listed in the
+  game's `samples.yaml` and packed into `samples.js` by `main.py samples`
+  (generated: don't edit it, rebuild it). Original audio only as easter eggs.
 - **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build
   step. Libraries are vendored at a pinned version under `vendor/`, never loaded
   from a CDN. wavesurfer draws inside a shadow DOM, so styles for anything

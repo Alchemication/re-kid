@@ -197,6 +197,41 @@ wake Reksio at home.
    picture of the nearest main thing he still wants, and it twinkles; arrows
    and space work too. All sounds are new, made in the browser; the bone find
    plays Adam's bark clip as an easter egg if it exists locally.
+
+   **Music:** a pizzicato "oom-pah" in B-flat with a clarinet hook, played
+   note by note from CC0 instrument samples (VSCO-2 CE and VCSL, packed by
+   `main.py samples reksio yard`), that follows the game: fuller while
+   playing, sparse when left alone, in-key flourishes for actions, slower
+   with each sunset step, a harp lullaby at evening. The hook and the
+   stretch run come from a Basic Pitch transcription of Adam's two melody
+   marks, which is a measurement, not an observation: **Adam to confirm by
+   ear whether it sounds like the theme**, and say what is too busy, too sad
+   or annoying. A recognisable melody is still Kowalowski's composition, so
+   it blocks a public release like the recording does.
+   **Clarity and life:** paw markers over everything tappable (the one in
+   reach grows), a tray of six pictures that fill in as main things are
+   done, and a first wave of creatures (`creatures.js`): a fly, a bumblebee
+   and a spider with its web, which notice Reksio and each other. New
+   gestures: biting his tail, sitting, howling, watching and pouncing on the
+   fly, getting startled.
+
+   **Wave 2 ideas for a living yard** (pick and order with Adam; each should
+   teach a small cause and effect a toddler can see):
+   - *Weather:* clouds roll in, rain falls, puddles form; Reksio splashes and
+     shakes dry; the sun returns and the flowers grow a little and open; a
+     rainbow, briefly.
+   - *Snail:* comes out only after rain, slides slowly leaving a shiny trail,
+     pulls into its shell when Reksio sniffs it, peeps out again.
+   - *Butterfly:* only in sunshine; flutters from flower to flower, sometimes
+     lands on Reksio's nose (he goes cross-eyed, sneezes); hides from rain.
+   - *Wasp:* hovers at the bowl when there is food; Reksio barks, it circles
+     back; he learns to leave it be (it goes when the food is gone).
+   - *Fox:* at dusk, eyes and a sniffing nose under the gate; Reksio barks
+     and it slinks off; the hens (if added) flutter.
+   - *Ants:* a line marching to crumbs the lapping dropped by the bowl,
+     carrying them home; a raindrop scatters them.
+   - *Worms:* surface after rain; the bird hops down to catch one.
+   - *Leaves and wind:* a gust blows leaves across; Reksio chases one.
 2. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
 3. **Later:** the yard becomes the home screen, and new things in it lead

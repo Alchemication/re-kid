@@ -95,3 +95,40 @@ straight from disk with no server."""
 
 DEFAULT_GAME = "yard"
 """The game ``main.py play`` opens when none is named: the one being built."""
+
+SAMPLE_LIBRARIES = {
+    "vsco2ce": "https://raw.githubusercontent.com/sgossner/VSCO-2-CE/master/",
+    "vcsl": "https://raw.githubusercontent.com/sgossner/VCSL/master/",
+}
+"""Where sample files are downloaded from. Both are Versilian Studios libraries
+released as CC0 (public domain): VSCO-2 Community Edition (a chamber orchestra)
+and the Versilian Community Sample Library (percussion and odd instruments).
+CC0 lets the game bundle them with no conditions."""
+
+SAMPLES_NAME = "samples.yaml"
+"""A game's sample list inside its folder (``schema.samples.SampleSet``)."""
+
+SAMPLES_JS = "game/samples.js"
+"""Where ``main.py samples`` writes the packed samples inside a game folder. A
+script rather than audio files, because browsers refuse to load audio data
+from ``file://`` pages but do run local scripts."""
+
+SAMPLE_CACHE_DIR = "audio/sample-cache"
+"""Downloaded originals inside a world directory (gitignored with the rest of
+``audio/``), so rebuilding doesn't download again."""
+
+SAMPLE_OUT_RATE = 32_000
+"""Sample rate of packed samples. Enough for the brightest instruments used
+(glockenspiel, xylophone: little above 12 kHz) at two-thirds the size of 48 kHz."""
+
+SAMPLE_BITRATE = "64k"
+"""MP3 bitrate of packed samples, mono. Short plucked and struck notes stay
+clean at this rate, and fifty of them pack into well under 1 MB."""
+
+PITCH_TOLERANCE_CENTS = 60
+"""How far a sample's measured pitch may sit from the nearest semitone before
+it is reported. Plucked and struck notes drift a little; more than this
+suggests a wrong file."""
+
+DOWNLOAD_TIMEOUT_S = 60
+"""Upper bound for downloading one sample file."""
