@@ -247,6 +247,18 @@ const Sound = (() => {
     /** The rattle of a film reel winding up. */
     reel() { for (let i = 0; i < 14; i++) tone('square', 1300, 1200, i * 0.06, 0.035, 0.002, 0.025) },
     squeak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },
+    /** A mouse: two tiny high peeps. */
+    mouse() { tone('sine', 2400, 3300, 0, 0.07, 0.008, 0.06); tone('sine', 2600, 3500, 0.09, 0.06, 0.008, 0.05) },
+    nibble() { hiss(0, 0.05, 0.002, 0.03, 'highpass', 4200) },
+    /** A mouse trap going off: a sharp crack and a twangy spring. */
+    trap() {
+      hiss(0, 0.3, 0.001, 0.05, 'highpass', 2500)
+      tone('square', 1400, 500, 0, 0.12, 0.001, 0.05)
+      tone('triangle', 330, 180, 0.03, 0.12, 0.005, 0.4)
+      tone('triangle', 345, 175, 0.05, 0.08, 0.005, 0.38)
+    },
+    /** A metal bowl nosed along the ground. */
+    scrape() { hiss(0, 0.08, 0.05, 0.3, 'bandpass', 1800, 3) },
     water(seconds) {
       const c = ensure()
       const t = c.currentTime

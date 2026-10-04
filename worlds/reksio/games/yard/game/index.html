@@ -10,7 +10,7 @@
   <div id="stage" class="stage">
     <canvas id="paint" aria-hidden="true"></canvas>
 
-    <!-- The view is 1600 x 900 scene units; the yard is 3000 wide and the
+    <!-- The view is 1600 x 900 scene units; the yard is 4000 wide and the
          camera (#cam) follows Reksio. Solid things never move; only things
          that would really move do (flowers and grass in the breeze, the bird,
          the curtain, the gate). -->
@@ -54,6 +54,18 @@
                 <ellipse class="door" cx="56" cy="-246" rx="9" ry="11" />
                 <path class="roof-icon" d="M28 -260 L56 -284 L84 -260" />
         </g>
+        <g id="icon-trap">
+                <path class="cheese" d="M62 -236 H94 V-262 Z" />
+                <circle class="cheese-hole" cx="86" cy="-245" r="3.2" />
+                <circle class="cheese-hole" cx="78" cy="-240" r="2.2" />
+                <ellipse class="mouse-fur" cx="30" cy="-246" rx="15" ry="10" />
+                <path class="mouse-fur" d="M38 -256 Q50 -258 58 -246 Q50 -240 38 -240 Z" />
+                <circle class="mouse-ear" cx="40" cy="-258" r="7" />
+                <circle class="mouse-ear-in" cx="40" cy="-258" r="3.5" />
+                <circle class="eye" cx="48" cy="-250" r="2" />
+                <circle class="mouse-nose" cx="58" cy="-246" r="2.6" />
+        </g>
+        <path id="heart-shape" d="M0 10 C-16 -2 -14 -16 -5 -16 C-2 -16 0 -13 0 -11 C0 -13 2 -16 5 -16 C14 -16 16 -2 0 10 Z" />
         <g id="twinkle-shape">
           <path d="M0 -14 L3 -3 L14 0 L3 3 L0 14 L-3 3 L-14 0 L-3 -3 Z" />
         </g>
@@ -117,6 +129,13 @@
               </g>
               <ellipse class="paw" cx="540" cy="779" rx="15" ry="9" />
               <ellipse class="paw" cx="581" cy="779" rx="15" ry="9" />
+              <!-- a dream: a bone, in a bubble -->
+              <g id="dream" style="opacity: 0">
+                <circle class="bubble" cx="522" cy="700" r="6" />
+                <circle class="bubble" cx="504" cy="674" r="9" />
+                <ellipse class="bubble" cx="470" cy="620" rx="50" ry="36" />
+                <use href="#icon-dig" transform="translate(436.4 771.2) scale(0.6)" />
+              </g>
               <g id="zzz" class="zzz">
                 <use id="z1" href="#zee" x="604" y="690" />
                 <use id="z2" href="#zee" x="628" y="660" />
@@ -128,11 +147,13 @@
           <!-- ============ food bowl ============ -->
           <g id="bowl" class="thing" data-thing="bowl" data-hint-y="720">
             <rect class="hit" x="790" y="620" width="180" height="210" />
-            <g id="food" style="transform-origin: 880px 770px">
-              <path class="food" d="M842 770 Q850 752 862 762 Q870 748 882 760 Q894 748 904 762 Q914 754 918 770 Z" />
+            <g id="bowl-body">
+              <g id="food" style="transform-origin: 880px 770px">
+                <path class="food" d="M842 770 Q850 752 862 762 Q870 748 882 760 Q894 748 904 762 Q914 754 918 770 Z" />
+              </g>
+              <path class="bowl" d="M830 768 H930 L916 800 H844 Z" />
+              <path class="bowl-rim" d="M830 768 H930" />
             </g>
-            <path class="bowl" d="M830 768 H930 L916 800 H844 Z" />
-            <path class="bowl-rim" d="M830 768 H930" />
           </g>
 
           <!-- ============ water tap on the wall, red hose below ============ -->
@@ -210,6 +231,22 @@
             </g>
           </g>
 
+          <!-- ============ a mouse trap with cheese, by a mouse hole in the wall ============ -->
+          <g id="trap" class="thing" data-thing="trap" data-hint-y="700">
+            <rect class="hit" x="960" y="660" width="240" height="170" />
+            <path class="mouse-hole" d="M1134 708 Q1134 682 1150 682 Q1166 682 1166 708 Z" />
+            <g id="trap-body" style="transform-origin: 1080px 812px">
+              <rect class="trap-wood" x="1036" y="798" width="92" height="14" rx="2" />
+              <rect class="trap-plate" x="1090" y="794" width="24" height="5" />
+              <path id="trap-bar" class="trap-bar" style="transform-origin: 1080px 796px" d="M1080 796 H1042 V790" />
+              <circle class="trap-spring" cx="1080" cy="796" r="5" />
+            </g>
+            <g id="cheese" style="transform-origin: 1103px 790px">
+              <path class="cheese" d="M1090 797 H1116 V780 Z" />
+              <circle class="cheese-hole" cx="1110" cy="790" r="2.4" />
+            </g>
+          </g>
+
           <!-- ============ the fence and gate: the right end of the yard ============ -->
           <g id="fence" class="thing" data-thing="gate" data-hint-y="520">
             <rect class="hit" x="2740" y="520" width="280" height="290" />
@@ -236,6 +273,35 @@
               </g>
               <path class="legs-thin" d="M-4 -2 V6 M6 -2 V6" />
             </g>
+          </g>
+
+          <!-- ============ the mouse (things.js moves her; drawn facing right, feet at 0) ============ -->
+          <g id="mouse" class="mouse" data-thing="trap" style="opacity: 0">
+              <path class="mouse-tail" d="M-18 -7 C-34 -5 -40 -16 -32 -21 C-26 -24 -22 -16 -30 -13" />
+              <path class="mouse-feet" d="M-10 0 h6 M6 0 h6" />
+              <ellipse class="mouse-fur" cx="-2" cy="-10" rx="18" ry="10" />
+              <g id="mouse-head" style="transform-origin: 8px -12px">
+                <path class="mouse-fur" d="M8 -20 Q20 -22 28 -12 Q20 -6 8 -6 Z" />
+                <circle class="mouse-ear" cx="10" cy="-21" r="7" />
+                <circle class="mouse-ear-in" cx="10" cy="-21" r="3.6" />
+                <circle class="eye" cx="18" cy="-15" r="1.8" />
+                <circle class="mouse-nose" cx="28" cy="-12" r="2.4" />
+                <path class="whisker" d="M25 -12 l9 -4 M25 -11 l10 1" />
+                <circle id="mouse-cheek" class="mouse-cheek" cx="17" cy="-9" r="0" />
+              </g>
+          </g>
+          <g id="mouse-baby" class="mouse" style="opacity: 0">
+              <path class="mouse-tail" d="M-18 -7 C-34 -5 -40 -16 -32 -21 C-26 -24 -22 -16 -30 -13" />
+              <path class="mouse-feet" d="M-10 0 h6 M6 0 h6" />
+              <ellipse class="mouse-fur" cx="-2" cy="-10" rx="18" ry="10" />
+              <g>
+                <path class="mouse-fur" d="M8 -20 Q20 -22 28 -12 Q20 -6 8 -6 Z" />
+                <circle class="mouse-ear" cx="10" cy="-21" r="7" />
+                <circle class="mouse-ear-in" cx="10" cy="-21" r="3.6" />
+                <circle class="eye" cx="18" cy="-15" r="1.8" />
+                <circle class="mouse-nose" cx="28" cy="-12" r="2.4" />
+                <path class="whisker" d="M25 -12 l9 -4 M25 -11 l10 1" />
+              </g>
           </g>
 
           <!-- grass tufts (they sway in the breeze) -->
@@ -310,6 +376,8 @@
               <use class="wish-icon" data-wish="bird" href="#icon-bird" opacity="0" />
               <!-- the film strip -->
               <use class="wish-icon" data-wish="film" href="#icon-film" opacity="0" />
+              <!-- the mouse who wants her cheese -->
+              <use class="wish-icon" data-wish="trap" href="#icon-trap" opacity="0" />
               <!-- sleep in the doghouse -->
               <use class="wish-icon" data-wish="doghouse" href="#icon-doghouse" opacity="0" />
             </g>
@@ -343,6 +411,7 @@
   <script src="reksio.js"></script>
   <script src="creatures.js"></script>
   <script src="weather.js"></script>
+  <script src="things.js"></script>
   <script src="yard.js"></script>
 </body>
 </html>

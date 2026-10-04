@@ -5,9 +5,10 @@
 // counts four main things (layout.js picks them); when they're done, evening
 // comes and he goes to sleep. Every usable thing has an action spot on the
 // ground: stand in it and space uses the thing; tap it and Reksio goes there.
-// No text, no score; every tap gets an answer.
+// No text, no score; every tap gets an answer. What each thing does, and its
+// variation on a repeat, is in things.js.
 
-/* global Layout, Painting, Sound, Music, Reksio, Creatures, Weather */
+/* global Layout, Painting, Sound, Music, Reksio, Creatures, Weather, Things */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -16,17 +17,12 @@
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
-  const DOOR = { x: 560, y: 726 } // doghouse door, scene units
   const EVENING_NEEDS = Layout.mains // this play's main things
   const X = Layout.x // per-play offset of a movable thing, scene units
-  const FRAMES_DRAWN = [2290, 2360, 2430, 2500, 2570] // film frame centres as drawn
-  const FRAMES = FRAMES_DRAWN.map((f) => f + X('film')) // …and where they are this play
-  const PAW_REACH = 31 // from Reksio's middle to where his front paws land
 
   const $ = (id) => document.getElementById(id)
   const svg = $('world')
   const cam = $('cam')
-  const fx = $('fx')
   const wait = (ms) => new Promise((r) => setTimeout(r, ms))
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
@@ -42,349 +38,23 @@
     return Math.max(0, Math.min(Painting.WORLD_W - Painting.VIEW_W, v))
   }
 
-  // ------------------------------------------------------------ effects
+  const { THINGS, DOOR, PERCHES, burst, twinkle } = Things
 
-  /** Little particles flung in arcs: crumbs, clods of earth, drops, petals. */
-  function burst(x, y, n, cls, { dir = 0, spread = 1, height = 60, reach = 70, size = 4 } = {}) {
-    for (let i = 0; i < n; i++) {
-      const c = document.createElementNS(SVG_NS, 'circle')
-      c.setAttribute('class', cls)
-      c.setAttribute('cx', x)
-      c.setAttribute('cy', y)
-      c.setAttribute('r', size * (0.6 + Math.random() * 0.8))
-      fx.appendChild(c)
-      const side = dir || (Math.random() < 0.5 ? -1 : 1)
-      const dx = side * reach * (0.3 + Math.random() * spread)
-      const up = height * (0.5 + Math.random())
-      c.animate(
-        [
-          { transform: 'translate(0, 0)', opacity: 1 },
-          { transform: `translate(${dx * 0.5}px, ${-up}px)`, opacity: 1, offset: 0.45 },
-          { transform: `translate(${dx}px, ${up * 0.4}px)`, opacity: 0 },
-        ],
-        { duration: 600 + Math.random() * 300, easing: 'ease-out' },
-      ).finished.then(() => c.remove())
-    }
-  }
+  // ------------------------------------------------------------ doing things
 
-  /** A small twinkle above a thing: "you can tap me". Nothing solid moves. */
-  function twinkle(x, y) {
-    const t = document.createElementNS(SVG_NS, 'use')
-    t.setAttribute('href', '#twinkle-shape')
-    t.setAttribute('class', 'twinkle')
-    t.setAttribute('x', x)
-    t.setAttribute('y', y)
-    t.style.transformOrigin = `${x}px ${y}px`
-    fx.appendChild(t)
-    t.animate(
-      [
-        { transform: 'scale(0) rotate(0)', opacity: 0 },
-        { transform: 'scale(1.2) rotate(45deg)', opacity: 1, offset: 0.25 },
-        { transform: 'scale(0.6) rotate(70deg)', opacity: 0.8, offset: 0.5 },
-        { transform: 'scale(1.1) rotate(110deg)', opacity: 1, offset: 0.75 },
-        { transform: 'scale(0) rotate(180deg)', opacity: 0 },
-      ],
-      { duration: 1400, easing: 'ease-in-out' },
-    ).finished.then(() => t.remove())
-  }
-
-  // ------------------------------------------------------------ the bird
-
-  const bird = $('bird')
-  const wing = $('bird-wing')
-  const PERCHES = [
-    { x: Layout.perches[0], y: 330 }, // on the wall, over open ground (layout.js)
-    { x: 560, y: 552 }, // on the doghouse roof
-    { x: Layout.perches[1], y: 330 }, // further along the wall
-    { x: 2880 + X('gate'), y: 602 }, // on the fence rail
-  ]
-  let perch = 0
-  let flying = false
-
-  function birdAt(p) {
-    bird.style.transform = `translate(${p.x}px, ${p.y}px)`
-  }
-
-  /** Fly from one point to another in an arc, wings flapping. */
-  async function flyBetween(from, to) {
-    const flap = wing.animate(
-      [{ transform: 'rotate(0)' }, { transform: 'rotate(-55deg)' }, { transform: 'rotate(0)' }],
-      { duration: 160, iterations: Infinity },
-    )
-    Sound.flutter()
-    const top = Math.min(from.y, to.y) - 180
-    const mid = { x: (from.x + to.x) / 2, y: top }
-    const facing = to.x < from.x ? -1 : 1
-    await bird.animate(
-      [
-        { transform: `translate(${from.x}px, ${from.y}px) scaleX(${facing})` },
-        { transform: `translate(${mid.x}px, ${mid.y}px) scaleX(${facing})` },
-        { transform: `translate(${to.x}px, ${to.y}px) scaleX(${facing})` },
-      ],
-      { duration: 1200 + Math.abs(to.x - from.x) * 0.5, easing: 'ease-in-out' },
-    ).finished
-    flap.cancel()
-    return facing
-  }
-
-  /** Off to the perch furthest from Reksio, so the chase can go on. */
-  async function flyAway(from = PERCHES[perch]) {
-    flying = true
-    const choices = PERCHES.map((p, i) => i).filter((i) => i !== perch)
-    perch = choices.sort((a, b) => Math.abs(PERCHES[b].x - Reksio.x) - Math.abs(PERCHES[a].x - Reksio.x))[Math.floor(Math.random() * 2)]
-    const to = PERCHES[perch]
-    Music.react.bird()
-    await flyBetween(from, to)
-    birdAt(to)
-    Sound.chirp()
-    flying = false
-  }
-
-  /** After rain: down to a worm, a few pecks, and back up to a perch. */
-  async function birdHunt(worm) {
-    if (flying) return
-    flying = true
-    const land = { x: worm.x + 30, y: worm.y + 6 }
-    await flyBetween(PERCHES[perch], land)
-    bird.style.transform = `translate(${land.x}px, ${land.y}px) scaleX(-1)`
-    for (let i = 0; i < 3; i++) {
-      await $('bird-body').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-30deg)' }, { transform: 'rotate(0)' }], { duration: 260 }).finished
-    }
-    worm.eat()
-    Sound.chirp()
-    await wait(500)
-    await flyAway(land)
-  }
-
-  function birdIdle() {
-    if (!flying && !ended) {
-      $('bird-body').animate(
-        [{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }],
-        { duration: 300 },
-      )
-      if (Math.random() < 0.6) Sound.chirp()
-    }
-    setTimeout(birdIdle, 4000 + Math.random() * 4000)
-  }
-
-  // ------------------------------------------------------------ things
-
-  const food = $('food')
-  let foodLeft = 1
-  let stamped = 0 // film frames stamped so far
-
-  const THINGS = {
-    doghouse: {
-      at: () => DOOR.x,
-      async run() {
-        Sound.knock()
-        await Reksio.duck(true)
-        const nap = $('nap')
-        const head = $('nap-head')
-        await nap.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, fill: 'forwards' }).finished
-        nap.style.opacity = '1'
-        const zs = ['z1', 'z2', 'z3'].map($)
-        for (let i = 0; i < 3; i++) {
-          Sound.snore()
-          Music.react.snore(i)
-          head.animate(
-            [{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.05) translateY(-2px)', offset: 0.45 }, { transform: 'scaleY(1)' }],
-            { duration: 1700, easing: 'ease-in-out' },
-          )
-          zs.forEach((z, k) =>
-            z.animate(
-              [
-                { opacity: 0, transform: 'translate(0, 0)' },
-                { opacity: 1, transform: 'translate(4px, -10px)', offset: 0.3 },
-                { opacity: 0, transform: 'translate(10px, -34px)' },
-              ],
-              { duration: 1200, delay: 650 + k * 180, easing: 'ease-out' },
-            ),
-          )
-          await wait(1750)
-        }
-        Sound.yawn()
-        await wait(500)
-        await nap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' }).finished
-        nap.style.opacity = '0'
-        await Reksio.duck(false)
-      },
-    },
-    bowl: {
-      at: () => 764 + X('bowl'),
-      face: 1,
-      async run() {
-        if (foodLeft <= 0.2) {
-          foodLeft = 1
-          food.style.transform = 'scaleY(1)'
-          await wait(200)
-        }
-        const lapping = Reksio.lap(10)
-        for (let i = 0; i < 5; i++) {
-          await wait(380)
-          burst(880 + X('bowl'), 760, 3, 'crumb', { height: 34, reach: 36, size: 3 })
-          foodLeft -= 0.16
-          food.style.transform = `scaleY(${Math.max(foodLeft, 0.15)})`
-        }
-        await lapping
-        Sound.slurp()
-        await Reksio.lick()
-      },
-    },
-    tap: {
-      at: () => 1201 + X('tap'),
-      face: 1,
-      async run() {
-        const handle = $('tap-handle')
-        const water = $('water')
-        Sound.squeak()
-        handle.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(90deg)' }], { duration: 300, fill: 'forwards' })
-        await wait(300)
-        water.style.opacity = '1'
-        const flow = water.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -80 }], { duration: 400, iterations: Infinity })
-        Sound.water(1.9)
-        const drinking = Reksio.nod(-10, 1700)
-        for (let i = 0; i < 5; i++) {
-          burst(1322 + X('tap'), 790, 3, 'drop', { height: 30, reach: 30, size: 3 })
-          await wait(320)
-        }
-        await drinking
-        flow.cancel()
-        water.style.opacity = '0'
-        handle.animate([{ transform: 'rotate(90deg)' }, { transform: 'rotate(0)' }], { duration: 300, fill: 'forwards' })
-        await wait(250)
-        Sound.shake()
-        burst(Reksio.x, 730, 14, 'drop', { height: 70, reach: 90, size: 3.5 })
-        await Reksio.shake()
-      },
-    },
-    flowers: {
-      at: () => 1483 + X('flowers'),
-      face: 1,
-      async run() {
-        for (let i = 0; i < 3; i++) {
-          Sound.step()
-          await Reksio.nod(8, 260)
-        }
-        await wait(150)
-        Sound.sneeze()
-        Music.react.sneeze()
-        await wait(320)
-        Reksio.nod(-24, 380)
-        burst(1640 + X('flowers'), 680, 12, 'petal', { height: 70, reach: 110, size: 5 })
-        await wait(500)
-      },
-    },
-    house: {
-      at: () => Reksio.MIN_X,
-      face: -1,
-      async run() {
-        await Reksio.nod(-20, 300)
-        await Reksio.bark()
-        Sound.curtain()
-        await $('curtain').animate(
-          [{ transform: 'skewX(0)' }, { transform: 'skewX(-8deg)' }, { transform: 'skewX(4deg)' }, { transform: 'skewX(0)' }],
-          { duration: 900, easing: 'ease-in-out' },
-        ).finished
-      },
-    },
-    gate: {
-      at: () => Reksio.MAX_X,
-      face: 1,
-      async run() {
-        Sound.rattle()
-        $('gate').animate(
-          [0, -1.5, 1.5, -1, 1, 0].map((d) => ({ transform: `rotate(${d}deg)` })),
-          { duration: 600 },
-        )
-        await Reksio.nod(10, 500)
-        await Reksio.bark()
-      },
-    },
-    film: {
-      at: () => FRAMES[Math.min(stamped, FRAMES.length - 1)] - PAW_REACH,
-      face: 1,
-      async run() {
-        if (stamped >= FRAMES.length) {
-          // already a reel: give it a spin
-          Sound.reel()
-          await $('reel').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(720deg)' }], { duration: 900, easing: 'ease-out' }).finished
-          await Reksio.bark()
-          return
-        }
-        const prints = document.querySelectorAll('#strip .print')
-        for (let i = stamped; i < FRAMES.length; i++) {
-          if (i > stamped) await Reksio.walkTo(FRAMES[i] - PAW_REACH)
-          Reksio.face(1)
-          await Reksio.stamp(() => {
-            Sound.thump()
-            Music.react.stamp()
-            const print = prints[i]
-            print.setAttribute('opacity', '1')
-            print.style.transformOrigin = `${FRAMES_DRAWN[i]}px 791px` // inside the moved strip
-            print.animate([{ transform: 'scale(1.6)', opacity: 0.2 }, { transform: 'scale(1)', opacity: 1 }], { duration: 220, easing: 'ease-out' })
-            burst(FRAMES[i], 812, 5, 'dust', { height: 22, reach: 40, size: 3.5 })
-          })
-          stamped = i + 1
-        }
-        await wait(350)
-        // the full strip rolls up into a reel
-        Sound.reel()
-        const strip = $('strip')
-        const reel = $('reel')
-        reel.setAttribute('opacity', '1')
-        reel.animate([{ transform: 'scale(0.2) rotate(0)' }, { transform: 'scale(1) rotate(900deg)' }], { duration: 900, easing: 'ease-out' })
-        await strip.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 900, easing: 'ease-in', fill: 'forwards' }).finished
-        strip.style.visibility = 'hidden'
-        await Reksio.hop(50, 2)
-      },
-    },
-    bird: {
-      at: () => PERCHES[perch].x - 70,
-      face: 1,
-      async run() {
-        if (flying) return
-        await Reksio.nod(-22, 300)
-        await Reksio.bark()
-        await flyAway()
-      },
-    },
-    dig: {
-      at: () => 2000 + X('dig'),
-      face: 1,
-      async run() {
-        Reksio.holdBone(false)
-        const digging = Reksio.paddle(1300)
-        Sound.dig()
-        for (let i = 0; i < 6; i++) {
-          burst(2040 + X('dig'), 790, 3, 'clod', { dir: -1, height: 80, reach: 120, size: 4.5 })
-          await wait(200)
-        }
-        await digging
-        const bone = $('found-bone')
-        bone.style.opacity = '1'
-        await bone.animate(
-          [{ transform: 'translateY(30px) scale(0.4)' }, { transform: 'translateY(-50px) scale(1.2)' }, { transform: 'translateY(-30px) scale(1)' }],
-          { duration: 600, easing: 'ease-out', fill: 'forwards' },
-        ).finished
-        Music.react.wish()
-        await wait(500)
-        bone.style.opacity = '0'
-        Reksio.holdBone(true)
-        Sound.original('bark') // easter egg: his original quick barks, if the clip exists
-        await Reksio.nod(-14, 700)
-      },
-    },
-  }
+  const uses = {} // how many times each thing has been used this play
 
   async function goAndDo(name) {
     const thing = THINGS[name]
     const arrived = await Reksio.walkTo(thing.at())
-    if (!arrived) return // tapped elsewhere on the way
+    if (!arrived || !Things.ready(name)) return // tapped elsewhere on the way, or nothing to do yet
     if (thing.face) Reksio.face(thing.face)
     busy = true
+    // a repeat keeps the same core; the first repeat and then every other
+    // one or so adds a variation on top
+    const n = (uses[name] = (uses[name] || 0) + 1)
     try {
-      await thing.run()
+      await thing.run({ extra: n === 2 || (n > 2 && Math.random() < 0.5) })
     } finally {
       busy = false
     }
@@ -605,7 +275,8 @@
     dig: () => ({ x: 2060 + X('dig'), r: 130 }),
     film: () => ({ x: 2430 + X('film'), r: 220 }),
     gate: () => ({ x: Reksio.MAX_X + 20, r: 90 }),
-    bird: () => ({ x: PERCHES[perch].x - 30, r: 130 }), // on the ground, under the bird
+    bird: () => ({ x: Things.perch.x - 30, r: 130 }), // on the ground, under the bird
+    trap: () => ({ x: (Things.mouse === 'fed' ? 960 : 1000) + X('trap'), r: 110 }),
   }
   const spotEls = {}
 
@@ -635,7 +306,7 @@
   function nearest() {
     let best = null
     for (const name of Object.keys(spotEls)) {
-      if (name === 'bird' && flying) continue
+      if ((name === 'bird' && Things.flying) || !Things.ready(name)) continue
       const { x, r } = SPOTS[name]()
       const d = Math.abs(Reksio.x - x)
       if (d <= r && (!best || d < best.d)) best = { name, d }
@@ -703,7 +374,7 @@
   let lastWishAt = -Infinity
 
   function thingCenter(name) {
-    if (name === 'bird') return { x: PERCHES[perch].x, y: PERCHES[perch].y - 80 }
+    if (name === 'bird') return { x: Things.perch.x, y: Things.perch.y - 80 }
     const el = document.querySelector(`#things [data-thing="${name}"]`)
     const box = el.querySelector('.hit').getBBox()
     return { x: box.x + box.width / 2 + X(name), y: Number(el.dataset.hintY) || box.y }
@@ -790,13 +461,13 @@
   let firstWish = true
 
   function wishFor() {
-    const left = EVENING_NEEDS.filter((n) => !done.has(n))
-    const dist = (n) => Math.abs((n === 'bird' ? PERCHES[perch].x : THINGS[n].at()) - Reksio.x)
+    const left = EVENING_NEEDS.filter((n) => !done.has(n) && Things.ready(n))
+    const dist = (n) => Math.abs((n === 'bird' ? Things.perch.x : THINGS[n].at()) - Reksio.x)
     return left.sort((a, b) => dist(a) - dist(b))[0]
   }
 
   function birdOnScreen() {
-    const x = PERCHES[perch].x
+    const x = Things.perch.x
     return x > camX && x < camX + Painting.VIEW_W
   }
 
@@ -814,7 +485,7 @@
     lookUp: {
       weight: 2,
       async run() {
-        if (birdOnScreen()) Reksio.face(PERCHES[perch].x > Reksio.x ? 1 : -1)
+        if (birdOnScreen()) Reksio.face(Things.perch.x > Reksio.x ? 1 : -1)
         await Reksio.lookUp()
       },
     },
@@ -881,7 +552,7 @@
     Music.setEnergy(musicEnergy(now))
     showNear()
     const worm = Creatures.worm
-    if (worm && !flying && !ended && Math.random() < 0.02) birdHunt(worm)
+    if (worm && !Things.flying && !ended && Math.random() < 0.02) Things.birdHunt(worm)
     if (wishing) {
       placeWish()
       if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
@@ -916,7 +587,11 @@
     }
     if (spotEls.bird) {
       spotEls.bird.setAttribute('cx', SPOTS.bird().x)
-      spotEls.bird.style.opacity = flying ? '0' : ''
+      spotEls.bird.style.opacity = Things.flying ? '0' : ''
+    }
+    if (spotEls.trap) {
+      spotEls.trap.setAttribute('cx', SPOTS.trap().x)
+      spotEls.trap.style.opacity = Things.ready('trap') ? '' : '0'
     }
     const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
@@ -936,14 +611,14 @@
   paint()
 
   // this play's layout: move the movable things, hide what isn't in play
-  const GROUPS = { bowl: 'bowl', tap: 'tap', flowers: 'flowers', dig: 'mound', film: 'film', gate: 'fence' }
+  const GROUPS = { bowl: 'bowl', tap: 'tap', flowers: 'flowers', dig: 'mound', film: 'film', trap: 'trap', gate: 'fence' }
   for (const [name, id] of Object.entries(GROUPS)) {
     const g = $(id)
     if (Layout.hidden.includes(name)) g.style.display = 'none'
     else if (X(name)) g.setAttribute('transform', `translate(${X(name)} 0)`)
   }
 
-  birdAt(PERCHES[0])
+  Things.init({ ended: () => ended })
   makeSpots()
   makeTray()
   Creatures.init()
@@ -955,9 +630,8 @@
     if (phase === 'after') Reksio.hop(40, 2)
   })
   requestAnimationFrame(frame)
-  setTimeout(birdIdle, 3000)
   lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
   setTimeout(idleLoop, 200)
 
-  window.yardGame = { goAndDo, done, pickAct, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped }) } // for testing
+  window.yardGame = { goAndDo, tap: (name) => command(() => goAndDo(name)), done, pickAct, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped: Things.stamped, mouse: Things.mouse, uses: { ...uses } }) } // for testing
 })()

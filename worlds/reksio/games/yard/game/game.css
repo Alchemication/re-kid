@@ -241,3 +241,23 @@ body { display: grid; place-items: center; }
 }
 .corner:hover { opacity: 1; }
 :fullscreen .corner { display: none; }
+
+/* ---- the mouse and her trap ---- */
+.mouse-hole { fill: #2b2119; stroke: var(--ink); stroke-width: 3; }
+.trap-wood { fill: #c98a4b; stroke: var(--ink); stroke-width: 3; }
+.trap-plate { fill: #9a9ea0; stroke: var(--ink); stroke-width: 2; }
+.trap-bar { fill: none; stroke: #5d6366; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.trap-spring { fill: #9a9ea0; stroke: var(--ink); stroke-width: 2.5; }
+.cheese { fill: #f4c84a; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.cheese-hole { fill: #d39b26; }
+.cheese-crumb { fill: #f4c84a; }
+.mouse-fur { fill: #a9a49b; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.mouse-ear { fill: #a9a49b; stroke: var(--ink); stroke-width: 2.5; }
+.mouse-ear-in, .mouse-nose { fill: #e79a94; }
+.mouse-cheek { fill: #b9b4ab; stroke: var(--ink); stroke-width: 1.5; }
+.mouse-tail { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
+.mouse-feet { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.whisker { stroke: var(--ink); stroke-width: 1; stroke-linecap: round; opacity: 0.7; }
+.heart { fill: #e0564a; stroke: var(--ink); stroke-width: 2.5; }
+/* the trap is just a trap until the mouse comes out */
+#trap.not-yet { pointer-events: none; }

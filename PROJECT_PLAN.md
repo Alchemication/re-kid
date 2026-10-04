@@ -192,8 +192,8 @@ wake Reksio at home.
    hold on Reksio and he stretches like a dachshund, snapping back on release.
    He walks short trips, runs long ones, hops for joy, and when left alone
    keeps busy with random dog moves (sniffing, wandering, scratching, a
-   play-bow, chasing his tail…) and the odd thought bubble. Each of the six
-   main things lowers the sun a step and warms the sky; after the sixth, evening falls and the picture closes in a circle on the doghouse. No text. When left alone, Reksio shows a thought bubble with a
+   play-bow, chasing his tail…) and the odd thought bubble. Each of this
+   play's main things lowers the sun a step and warms the sky; after the last, evening falls and the picture closes in a circle on the doghouse. No text. When left alone, Reksio shows a thought bubble with a
    picture of the nearest main thing he still wants, and it twinkles; arrows
    and space work too. All sounds are new, made in the browser; the bone find
    plays Adam's bark clip as an easter egg if it exists locally.
@@ -215,9 +215,9 @@ wake Reksio at home.
    fly, getting startled.
 
    **Variety and reach:** each play counts the doghouse plus three of the
-   other five main things and brings two of the three creatures; the flowers
+   other six main things and brings two of the three creatures; the flowers
    only sometimes. The doghouse and gate are fixed anchors; the things
-   between (bowl, tap, flowers, mound, film) come in a shuffled order with
+   between (bowl, tap, flowers, mound, film, mouse trap) come in a shuffled order with
    uneven gaps of at least a dog's length, in a yard 4000 wide; puddles and
    the bird's wall perches go in the widest gaps (`layout.js`; the last play
    is remembered in the browser so the next prefers what wasn't seen). Every usable thing has a
@@ -229,6 +229,18 @@ wake Reksio at home.
    address force it). Clouds, rain, puddles that ring and splash, Reksio
    catching drops and shaking off, then a rainbow, flowers growing, a snail
    with a trail, worms by the puddles, and the bird hunting one.
+
+   **Helping and repeats (`things.js`):** some plays bring a mouse trap
+   baited with cheese by a mouse hole. A mouse comes out (14–30 s in), can't
+   get the cheese past the trap, and squeaks at Reksio; he stamps beside it,
+   it snaps on nothing and flings her the cheese, and he noses it away.
+   Afterwards she comes out to touch noses. Every main thing done again
+   repeats its core, and the second time (then about every other time) adds
+   a small variation: a dream of a bone, the bowl nosed along, the tap
+   spraying him, a bigger sneeze, digging twice, the reel rolling off, a crumb
+   or a baby mouse. `?mains=trap,bowl` and `?mouse-at=SECONDS` force a play
+   for testing. **To watch with Eliot:** does a mouse that can't eat worry
+   him, or does he want to help?
 
    **Next ideas for a living yard** (pick and order with Adam; each should
    teach a small cause and effect a toddler can see):
