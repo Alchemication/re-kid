@@ -1,0 +1,172 @@
+id: intro
+title: Reksio's credits (working title)
+status: parked
+audience: Eliot, about 3, playing with a parent who remembers Reksio.
+length: 3–5 minutes, then it ends.
+
+pitch:
+  text: A slowed-down, playable version of the Reksio title sequence. The child does each of Reksio's credit gags — reading the script, crashing the cymbals, stretching like a dachshund, stamping the film — one press at a time, with a parent beside them. At the end the real intro plays, so the child can spot everything they just did.
+  origin: inspired
+  refs: [world:opening_sequence]
+
+principles:
+- text: The child is Reksio. Each press makes Reksio do his next credit gag, the way he does in the intro.
+  origin: inspired
+  refs: [world:opening_sequence]
+- text: Inspired, not copied. Drawings, sounds and music are new and made for the game, in the spirit of the original. Original sounds appear only now and then, as easter eggs a parent may recognise.
+  origin: invented
+- text: One action per scene. The child presses one big button and Reksio does the gag. Nothing to get wrong, no score, no timer, no losing.
+  origin: invented
+- text: Wordless, like the original. The credit names stay on the cards for the parent to read aloud, if they like.
+  origin: inspired
+  refs: [world:opening_sequence, world:sound.dialogue]
+- text: Finite. It ends at Reksio's doghouse and does not ask to be played again.
+  origin: inspired
+  refs: [intro:fade-out, 'world:places[doghouse].description']
+
+controls:
+  text: 'One big action: any key, the space bar, or a tap anywhere on the screen. Only the stretch scene asks for holding it down. Nothing else to learn.'
+  origin: invented
+
+look:
+- text: Each scene is a mustard-ochre credit card with pastel crayon scribbles and white hand-lettered names, like the original cards.
+  origin: inspired
+  refs: [world:opening_sequence, world:aesthetics.palette]
+- text: Reksio is drawn in code as a flat, outlined figure with his brown ear and patches — never traced from frames or made with an image model.
+  origin: inspired
+  refs: [world:aesthetics.line_and_shape, world:aesthetics.character_animation]
+
+sound:
+- text: A new, quiet, playful tune runs under the whole game, in the spirit of the main theme but not a copy of it. To be composed.
+  origin: inspired
+  refs: [mark:main-melody-part-1, mark:stretching-melody, world:sound.theme]
+- text: Every gag has its own new sound effect, made for the game and kept gentle in volume. The original cymbal crash, for one, is very loud.
+  origin: inspired
+  refs: [intro:cymbals]
+- text: 'Two original sounds return as easter eggs: Reksio''s quick barks when he first arrives, and the high "pee-pee" stamp at the very end.'
+  origin: original
+  refs: [mark:bark, mark:stamping-sound-2-short]
+
+scenes:
+- id: arrive
+  moment: distributor-card
+  action: {text: Press to bring Reksio in., origin: invented}
+  result:
+    text: Reksio trots onto the empty card, nose to the ground, sniffing his way across.
+    origin: inspired
+    refs: [intro:distributor-card]
+  sound: {text: A soft snuffling sniff., origin: invented}
+  easter_egg:
+    text: He stops and gives his original quick barks.
+    origin: original
+    refs: [mark:bark]
+- id: title
+  moment: title
+  action: {text: Press to show the title., origin: invented}
+  result:
+    text: '"REKSIO" pops up beside him; he points at it, then shades his eyes with a paw and holds the pose.'
+    origin: inspired
+    refs: [intro:title]
+  sound:
+    text: One bright, solid hit as the title appears.
+    origin: inspired
+    refs: [intro:title]
+- id: sing
+  moment: script-and-music
+  action: {text: Press to make Reksio sing., origin: invented}
+  result:
+    text: Reksio reads his sheet, turns it round to show a musical note, and sings.
+    origin: inspired
+    refs: [intro:script-and-music]
+  sound:
+    text: A short, happy doggy howl-song.
+    origin: inspired
+    refs: [intro:script-and-music]
+- id: photo
+  moment: camera
+  action: {text: Press to take his photo., origin: invented}
+  result:
+    text: The camera flashes and Reksio turns into a black photo negative for a moment, then back.
+    origin: inspired
+    refs: [intro:camera]
+  sound:
+    text: A soft camera click.
+    origin: inspired
+    refs: [intro:camera]
+- id: cymbals
+  moment: cymbals
+  action: {text: Press to crash the cymbals., origin: invented}
+  result:
+    text: Reksio crashes his cymbals and shakes all over.
+    origin: inspired
+    refs: [intro:cymbals]
+  sound:
+    text: A cymbal crash, gentle enough for small ears.
+    origin: inspired
+    refs: [intro:cymbals]
+- id: snip
+  moment: film-tangle
+  action: {text: Press to snip the film., origin: invented}
+  result:
+    text: Reksio pops up out of a tangle of film with scissors; each press is a snip.
+    origin: inspired
+    refs: [intro:film-tangle]
+  sound:
+    text: Snip-snip of scissors.
+    origin: inspired
+    refs: [intro:film-tangle]
+- id: stretch
+  moment: stretch
+  action: {text: Hold to stretch Reksio; let go to let him snap back., origin: invented}
+  result:
+    text: Reksio grows longer like a dachshund for as long as the button is held, ripples, and snaps back on release.
+    origin: inspired
+    refs: [intro:stretch]
+  sound:
+    text: 'A little trumpet call to get ready, a rising stretchy sound while held, and a boing when he snaps back.'
+    origin: inspired
+    refs: [intro:stretch]
+- id: bowl
+  moment: bowl
+  action: {text: Press to feed Reksio., origin: invented}
+  result:
+    text: Reksio eats from his bowl, bits flying, then licks his lips and laughs.
+    origin: inspired
+    refs: [intro:bowl]
+  sound:
+    text: Big, funny slurps, one per press.
+    origin: inspired
+    refs: [intro:bowl]
+- id: stamp
+  moment: studio-card
+  action: {text: Press to stamp the film strip; a few presses fill it., origin: invented}
+  result:
+    text: Reksio stamps the passing film strip of little Reksios.
+    origin: inspired
+    refs: [intro:studio-card]
+  sound:
+    text: A thump for each stamp.
+    origin: inspired
+    refs: [mark:stamping-sound-1-longer]
+  easter_egg:
+    text: The last stamp makes the original high "pee-pee" sound.
+    origin: original
+    refs: [mark:stamping-sound-2-short]
+
+ending:
+  text: 'The card fades to black, then Reksio''s doghouse appears with calm music and he goes inside. A last card says, without words, "now the real one": the original intro plays from the studio''s official upload, so child and parent can spot the gags they just did.'
+  origin: inspired
+  refs: [intro:fade-out, 'world:places[doghouse].description', 'world:availability[0]']
+
+parent_card:
+  text: 'Three or four sentences for the parent: what Reksio is, that this intro opened every episode from 1972 to 1980, who made it (the names on the cards), and a link to the official upload.'
+  origin: inspired
+  refs: [world:opening_sequence, 'world:availability[0]']
+
+open_questions:
+- 'Later ideas, left out of this proof of concept on purpose: input by voice or any sound (a call, a clap); Reksio meeting the child, with the child as the boy from the series; a photo-based avatar (expensive and doubtful at 3); Polish phrases for parent and child to call out; exploring the yard with Reksio (a different game, for after this one).'
+- Does the child need a hint of what to press, such as a glowing key, or is a waiting, looking-at-you Reksio enough?
+- Who composes the new tune, and how close to the original may it come? A recognisable melody is still the composer's work.
+- Is a parent role worth adding, for example a second key that makes Reksio bark?
+- Should the real intro at the end be the YouTube embed (needs internet) or a local copy (private test only)?
+- Does the game start with the distributor card, or straight at the title?

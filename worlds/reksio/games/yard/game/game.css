@@ -1,0 +1,124 @@
+/* Reksio's yard. Flat, outlined things over a sponge-painted background,
+   in the series' earthy palette with small red and ochre accents. */
+
+:root {
+  --ink: #1d1914;
+  --white: #f6f8f6;
+  --ochre: #e1a23a;
+  --red: #c8371f;
+  --letterbox: #17140f;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--letterbox);
+  overflow: hidden;
+  /* A toddler's taps should never select text or show a context menu. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+body { display: grid; place-items: center; }
+
+/* 16:9, as large as the window allows. */
+.stage {
+  position: relative;
+  width: min(100vw, calc(100vh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#paint, #world { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* ---- shared ink style ---- */
+.ink { fill: var(--ink); stroke: var(--ink); stroke-width: 8; stroke-linejoin: round; }
+.white { fill: var(--white); }
+.ochre { fill: var(--ochre); }
+.eye { fill: var(--ink); }
+.lid { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.mouth { fill: var(--red); stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.tongue { fill: #ee8b7c; stroke: var(--ink); stroke-width: 1.5; }
+.ear-ochre { fill: var(--ochre); stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; }
+.limb-ink { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
+.limb { fill: none; stroke: var(--white); stroke-width: 5.5; stroke-linecap: round; }
+.foot { fill: var(--white); stroke: var(--ink); stroke-width: 3; }
+.bone { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
+.bone-white { fill: none; stroke: var(--white); stroke-width: 5; stroke-linecap: round; }
+
+/* ---- things in the yard ---- */
+.hit { fill: transparent; }
+.plank { fill: #e3c27c; stroke: var(--ink); stroke-width: 6; }
+.plank-line { fill: none; stroke: #a9844a; stroke-width: 3; }
+.door { fill: #3b2a1a; stroke: var(--ink); stroke-width: 6; }
+.roof { fill: none; stroke: var(--ink); stroke-width: 30; stroke-linecap: round; stroke-linejoin: round; }
+.roof-edge { fill: none; stroke: #6d4a2b; stroke-width: 20; stroke-linecap: round; stroke-linejoin: round; }
+.pipe { fill: none; stroke: var(--ink); stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; }
+.pipe-inner { fill: none; stroke: #9aa3a6; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+.spout { fill: none; stroke: var(--ink); stroke-width: 14; stroke-linecap: round; }
+.handle { stroke: var(--ink); stroke-width: 9; stroke-linecap: round; }
+.handle-knob { fill: var(--red); stroke: var(--ink); stroke-width: 4; }
+.water { fill: none; stroke: #7fb8e6; stroke-width: 9; stroke-linecap: round; stroke-dasharray: 26 14; }
+.hose { fill: none; stroke: var(--ink); stroke-width: 13; stroke-linecap: round; }
+.hose-red { stroke: var(--red); stroke-width: 7; }
+.food { fill: #8a5a2e; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.bowl { fill: #e8998a; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; }
+.bowl-rim { stroke: var(--ink); stroke-width: 6; stroke-linecap: round; }
+.earth { fill: #8b6238; stroke: var(--ink); stroke-width: 6; stroke-linejoin: round; }
+.earth-dots { stroke: #5d3f22; stroke-width: 5; stroke-linecap: round; }
+.bird { fill: #262422; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.wing { fill: #3a3733; stroke: var(--ink); stroke-width: 2.5; }
+.beak { fill: #f0a52a; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.bird-eye { fill: var(--white); }
+.legs-thin { stroke: #c97f22; stroke-width: 3; stroke-linecap: round; }
+.grass { fill: none; stroke: #5f7a3c; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* particles */
+.crumb { fill: #8a5a2e; }
+.clod { fill: #7a5530; }
+.drop { fill: #8cc3ec; }
+
+/* ---- evening and the closing circle ---- */
+.evening {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(#2b2a5c 0%, #4a3d70 45%, #2a2440 100%);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  transition: opacity 3.5s ease;
+}
+.evening.on { opacity: 0.75; }
+
+.iris {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --r: 150%;
+  --x: 50%;
+  --y: 50%;
+  background: radial-gradient(circle at var(--x) var(--y), transparent var(--r), #0b0906 calc(var(--r) + 1px));
+}
+
+/* A small control for the grown-up, out of a toddler's way. */
+.corner {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.5;
+}
+.corner:hover { opacity: 1; }
+:fullscreen .corner { display: none; }

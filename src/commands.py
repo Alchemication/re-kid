@@ -15,6 +15,8 @@ from pathlib import Path
 from config import (
     AUDIO_DIR,
     EPISODES_FILE,
+    GAME_PAGE,
+    GAMES_DIR,
     INTRO_FILE,
     INTRO_MEDIA_DIR,
     MARK_CLIPS_DIR,
@@ -23,6 +25,7 @@ from config import (
     MARK_PORT_TRIES,
 )
 from schema.breakdown import Breakdown
+from schema.brief import GameBrief
 from schema.common import Claim, Status
 from schema.episode import EpisodeCatalogue
 from schema.world import SourceRegistry, WorldDossier
@@ -43,6 +46,7 @@ _SCHEMAS = {
     "sources": SourceRegistry,
     "episodes": EpisodeCatalogue,
     "intro": Breakdown,
+    "brief": GameBrief,
 }
 
 
@@ -265,6 +269,30 @@ def cmd_mark(args: argparse.Namespace) -> int:
         f"\n{len(session.breakdown.marks)} marks in {INTRO_FILE}; "
         f"clips in {session.clips_dir}."
     )
+    return 0
+
+
+def game_page(world_id: str, game: str) -> Path:
+    """A game's page in a world (it may not exist)."""
+    return world_dir(world_id) / GAMES_DIR / game / GAME_PAGE
+
+
+def cmd_play(args: argparse.Namespace) -> int:
+    """Open one of the world's games in the browser."""
+    import webbrowser
+
+    page = game_page(args.world, args.game)
+    if not page.is_file():
+        found = sorted(
+            p.parent.parent.name
+            for p in (world_dir(args.world) / GAMES_DIR).glob(f"*/{GAME_PAGE}")
+        )
+        logger.error(
+            "No game at %s. Games with a page: %s.", page, ", ".join(found) or "none"
+        )
+        return 1
+    print(f"Opening {page}")
+    webbrowser.open(page.resolve().as_uri())
     return 0
 
 

@@ -1,0 +1,102 @@
+id: yard
+title: Reksio's yard (working title)
+status: draft
+audience: Eliot, about 3, playing with a parent who remembers Reksio.
+length: As long as he likes, usually a few minutes; it ends with evening.
+
+pitch:
+  text: The child is Reksio in his own yard. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — pokes his head out of the doghouse, drinks from the tap, eats from his bowl, barks at a bird, digs up a bone. When he has tried everything, evening comes and he goes to sleep in his doghouse.
+  origin: inspired
+  refs: ['world:places[yard].description', 'world:places[doghouse].description', world:premise]
+
+principles:
+- text: No text anywhere. Everything is shown, never written, so a child who can't read misses nothing.
+  origin: inspired
+  refs: [world:sound.dialogue]
+- text: The child is Reksio, and every tap gets an answer. Nothing to get wrong, no score, no timer.
+  origin: invented
+- text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs.
+  origin: invented
+- text: Finite. Evening comes once Reksio has done everything, and the game ends with him asleep.
+  origin: inspired
+  refs: ['world:places[doghouse].description']
+- text: The yard is built to grow. Later it becomes the game's home screen, and new things in it lead into episode games — say, a toy rocket by the doghouse that starts Kosmonauta.
+  origin: invented
+
+controls:
+  text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, he barks. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, or barks.'
+  origin: invented
+
+look:
+- text: Reksio is small in the yard, about a fifth of the screen high, seen from the side, with the long terrier muzzle, ochre ear and ochre patch on his back. Drawn in code, never traced.
+  origin: inspired
+  refs: ['world:characters[reksio].visual_signature']
+- text: Sponge-painted, mottled backgrounds like the series' — an orange sky, a grey-green stone wall, a speckled sandy ground — with flat, outlined things in front of them.
+  origin: inspired
+  refs: [world:aesthetics.backgrounds, world:aesthetics.overview]
+- text: Every outline wobbles slightly a few times a second, like hand-inked animation ("boiling" lines).
+  origin: invented
+
+sound:
+- text: "Every action has its own new, gentle sound, made in the browser: a bark, pattering steps, munching, a running tap, a bird's chirp, digging."
+  origin: invented
+- text: A short, calm lullaby when evening comes. To be composed properly; a simple placeholder for now.
+  origin: invented
+
+scenes:
+- id: doghouse
+  action: {text: Tap the doghouse., origin: invented}
+  result:
+    text: Reksio trots in through the round door; a moment later his head pops out of it and looks around, then he comes back out.
+    origin: inspired
+    refs: ['world:places[doghouse].description']
+  sound: {text: A soft wooden knock and a happy little bark from inside., origin: invented}
+- id: bowl
+  moment: bowl
+  action: {text: Tap the bowl., origin: invented}
+  result:
+    text: Reksio eats from his bowl, bits flying, then licks his lips.
+    origin: inspired
+    refs: [intro:bowl]
+  sound:
+    text: Munching and a big slurp.
+    origin: inspired
+    refs: [intro:bowl]
+- id: tap
+  action: {text: Tap the water tap., origin: invented}
+  result:
+    text: Water runs from the tap on the wall; Reksio drinks, gets splashed, and shakes himself dry in a spray of drops.
+    origin: inspired
+    refs: ['world:places[yard].description']
+  sound: {text: 'A squeaky tap, running water, a shake.', origin: invented}
+- id: bird
+  action: {text: Tap the bird on the wall., origin: invented}
+  result:
+    text: Reksio barks at the bird; it flutters up, circles, and lands somewhere else in the yard.
+    origin: invented
+  sound: {text: 'A bark, a chirp and a flutter.', origin: invented}
+- id: dig
+  action: {text: Tap the mound of earth., origin: invented}
+  result:
+    text: Reksio digs, earth flying, and finds a bone, which he proudly holds up.
+    origin: invented
+  sound: {text: Scratchy digging and a bright "found it" ding., origin: invented}
+  easter_egg:
+    text: When he finds the bone he gives his original quick barks.
+    origin: original
+    refs: [mark:bark]
+
+ending:
+  text: Once Reksio has done all five things, the sky turns to evening, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.
+  origin: inspired
+  refs: ['world:places[doghouse].description', intro:fade-out]
+
+parent_card:
+  text: 'Not in this proof of concept. Later: a few sentences on who Reksio is and a link to the studio''s official episodes.'
+  origin: inspired
+  refs: ['world:availability[0]']
+
+open_questions:
+- Do the things need a gentle wiggle now and then to invite a tap, or does Eliot find them on his own?
+- Should the boy, the hens or the rooster appear in the yard? The dossier's notes on them come only from en-wikipedia so far.
+- How does a door into an episode look and feel, once there is an episode to enter?

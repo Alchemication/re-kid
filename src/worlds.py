@@ -24,7 +24,9 @@ import yaml
 from pydantic import BaseModel, ValidationError
 
 from config import (
+    BRIEF_NAME,
     EPISODES_FILE,
+    GAMES_DIR,
     INTRO_FILE,
     SOURCES_FILE,
     WORLD_FILE,
@@ -32,6 +34,7 @@ from config import (
     YAML_LINE_WIDTH,
 )
 from schema.breakdown import Breakdown
+from schema.brief import GameBrief
 from schema.common import PRIMARY_SOURCE_KINDS, Claim, Status
 from schema.episode import EpisodeCatalogue
 from schema.world import SourceRegistry, WorldDossier
@@ -109,6 +112,7 @@ class WorldReport:
     registry: SourceRegistry | None = None
     catalogue: EpisodeCatalogue | None = None
     intro: Breakdown | None = None
+    briefs: dict[str, GameBrief] = field(default_factory=dict)
 
     def iter_all_claims(self) -> Iterator[tuple[str, str, Claim]]:
         """Yield (file name, claim path, claim) across every loaded file.
@@ -157,6 +161,18 @@ def validate_world(world_id: str, root: Path = WORLDS_DIR) -> WorldReport:
         except yaml.YAMLError as exc:
             report.errors.append(f"{file}: not valid YAML: {exc}")
 
+    briefs_ok = True
+    for path in sorted((base / GAMES_DIR).glob(f"*/{BRIEF_NAME}")):
+        label = f"{GAMES_DIR}/{path.parent.name}/{BRIEF_NAME}"
+        try:
+            report.briefs[path.parent.name] = load_model(path, GameBrief)
+        except ValidationError as exc:
+            report.errors.extend(_format_validation_error(label, exc))
+            briefs_ok = False
+        except yaml.YAMLError as exc:
+            report.errors.append(f"{label}: not valid YAML: {exc}")
+            briefs_ok = False
+
     if report.dossier is None or report.registry is None:
         return report
 
@@ -183,6 +199,8 @@ def validate_world(world_id: str, root: Path = WORLDS_DIR) -> WorldReport:
         report.errors.extend(_check_episode_years(report.dossier, report.catalogue))
     if report.intro is not None:
         report.errors.extend(_check_reference_episode(report.intro, report.catalogue))
+    for name, brief in report.briefs.items():
+        report.errors.extend(_check_brief(name, brief, report.intro, report.dossier))
 
     for file, attr in (
         (EPISODES_FILE, "catalogue"),
@@ -192,6 +210,8 @@ def validate_world(world_id: str, root: Path = WORLDS_DIR) -> WorldReport:
             # An optional file failed to load, so its citations are unknown;
             # warning about "unused" sources now would only be noise.
             return report
+    if not briefs_ok:
+        return report
 
     for source_id in sorted(set(sources) - cited):
         report.warnings.append(f"{SOURCES_FILE}: {source_id!r} is never cited")
@@ -232,3 +252,36 @@ def _check_reference_episode(
         )
         return [error]
     return []
+
+
+def _check_brief(
+    name: str, brief: GameBrief, intro: Breakdown | None, dossier: WorldDossier
+) -> list[str]:
+    """The brief's id matches its folder, and every scene moment and every ref
+    points at something that exists."""
+    label = f"{GAMES_DIR}/{name}/{BRIEF_NAME}"
+    errors = []
+    if brief.id != name:
+        errors.append(
+            f"{label}: id {brief.id!r} differs from its folder {name!r} — make them match"
+        )
+    moments = {b.id for b in intro.beats} if intro else set()
+    marks = {m.id for m in intro.marks} if intro else set()
+    claims = {path for path, _ in iter_claims(dossier)}
+    known = {"intro": moments, "mark": marks, "world": claims}
+    where = {"intro": INTRO_FILE, "mark": INTRO_FILE, "world": WORLD_FILE}
+    for scene in brief.scenes:
+        if scene.moment is not None and scene.moment not in moments:
+            errors.append(
+                f"{label}: scenes[{scene.id}]: moment {scene.moment!r} "
+                f"is not a beat in {INTRO_FILE}"
+            )
+    for path, element in brief.elements():
+        for ref in element.refs:
+            kind, target = ref.split(":", 1)
+            if target not in known[kind]:
+                errors.append(
+                    f"{label}: {path}: {ref!r} not found in "
+                    f"{where[kind]} — check the id (main.py show lists claim paths)"
+                )
+    return errors

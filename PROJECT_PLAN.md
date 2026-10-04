@@ -13,18 +13,9 @@ Update the **Status** and **Next steps** sections as work lands.
   they don't know, and whether it feels authentic to people who grew up with
   it. Kot Filemon was the runner-up (curiosity/discovery mechanics), and
   Baltazar Gąbka is a better later world for older kids and adults.
-- **First game: the title sequence, slowed down.** The intro is about 43
-  seconds of credit cards. On almost every card Reksio does one gag that acts
-  out the credited job: reading the script, posing for the camera, crashing
-  cymbals for sound, snipping film for editing, stretching for animation. A
-  toddler can do each of these, and every parent has seen them, because the
-  same intro opens every episode from 1972 to 1980. It is small, has no story
-  to follow and no peril, and the theme is the most-remembered sound of the
-  series. It is built as a standalone game, not as a menu. When a second game
-  exists, the doghouse at the end becomes its door, and a menu grows out of
-  that.
-- **Second game: Reksio kosmonauta (1972, Marszałek), parked.** Adam's
-  favourite episode. The frame pass is recorded below under "Parked".
+- **Reksio kosmonauta (1972, Marszałek), parked.** Adam's favourite episode;
+  a likely first episode to enter from the yard. The frame pass is recorded
+  below under "Parked".
 - **One audience: a parent and a young child (about 3) playing together**,
   with the parent as the one who remembers the cartoon. Adult versions, age
   variants and the cross-cultural collection all wait until this works.
@@ -54,9 +45,18 @@ Update the **Status** and **Next steps** sections as work lands.
   beats, hits, loudness, spectrograms). Adam selects and names the sounds that
   matter by ear, and only his marks become claims. Per-moment loops guessed
   from the beat grid were dropped: the game brief decides which sounds and
-  melodies are needed, from what Adam marks. The original theme, cut into loops, is
-  used for the private test; original "inspired by" music is a later
-  decision, after families have played.
+  melodies are needed, from what Adam marks.
+- **The first game is Reksio's yard, not the intro.** A playable intro
+  (press to do each credit gag) was built and dropped: on its own a gag is
+  thin to play, and credit cards are text a toddler can't read. The yard has
+  no text, gives every tap an answer, and can later become the home screen
+  that leads into episode games. The intro brief is kept, parked.
+- **Inspire, don't copy (Adam's current thinking, open to change once the game
+  is visible).** The game's drawings, sounds and music are new and made for
+  it, in the spirit of the original. Original sounds and melodies appear only
+  as occasional easter eggs. Adam's marks are inspiration, not a parts list.
+  This replaces the earlier idea of looping the original theme, and makes a
+  public version far easier to license.
 - **Every statement about the original is a claim with provenance**
   (`verified` / `sourced` / `observed` / `interpretation` / `unknown`), so facts
   and our own ideas never blur. Rules are in `CLAUDE.md`.
@@ -76,8 +76,8 @@ One validated file per stage, under `worlds/<id>/`:
 | 2 | Episode catalogue | `episodes/index.yaml` | Done: 65 episodes, 31 online |
 | 3 | Selection | The intro first, Kosmonauta next (see Decisions) | Done |
 | 4 | Breakdowns | `intro.yaml`, `episodes/<slug>.yaml` (beat by beat) | Intro: frames done, sound pending |
-| 5 | Game brief | `games/<slug>/brief.yaml`, each element marked as from the original or invented | Not started |
-| 6 | Game | `games/<slug>/` (static web game) | Not started |
+| 5 | Game brief | `games/yard/brief.yaml` (`schema.brief`); `games/intro/` parked | Yard: first draft |
+| 6 | Game | `games/yard/game/` (static web game) | Yard proof of concept built |
 | 7 | Playtests | `playtests/<date>-<family>.yaml` | Not started |
 
 Check stage 1 with `uv run python main.py validate reksio` and
@@ -179,55 +179,21 @@ wake Reksio at home.
 
 ## Next steps
 
-1. **Adam: mark the sounds and melodies that matter.** Run
-   `uv run python main.py mark reksio`. A page opens with the intro video, its
-   waveform and spectrogram, the 10 moments and the beat grid. Drag across the
-   waveform (or press `M` at a sound's start and end) to mark it, name it, pick
-   sound effect / melody / other, and note what you hear. Each moment's
-   "Listen for" question has an answer box too, for things that can't be
-   marked ("no sniffing sound"). Speed 75% / 50% helps
-   with exact edges; `?` lists every key. Marks save to `intro.yaml` as you go,
-   and each mark's clip is cut to `audio/intro/marks/<id>.wav` on every save.
-   Pick what is striking or worth reusing, such
-   as the cymbal crash, a gulp or the theme's hook. There is no need to cover
-   everything. Measured so far, not heard: a pulse of about 143 BPM; a
-   near-silence around 4–6 s under the title; a cymbal-shaped burst at 18.2 s,
-   where Reksio crashes his cymbals; and a run of strong, even hits at 37–42 s
-   on the studio card.
-2. **Game brief** for the intro game (`games/intro/brief.yaml`, schema written
-   from this first brief). It decides which marked sounds the child triggers
-   and what music plays under each moment.
-3. **Only for the sounds the brief needs:** cut them from the mix, or try
-   isolating them. The [GAD Records album](https://gadrecords.bandcamp.com/album/reksio)
-   has the theme with and without effects; if the two line up, subtracting
-   one from the other may leave the effects alone. Demucs can split music into
-   parts. Spotify's Basic Pitch can turn melodies (not effects) into MIDI if
-   we compose "inspired by" music.
-4. Build, then playtest.
-
-## MVP game — working concept (not decided)
-
-For the intro game. Settle these in the brief, once the sound is known.
-
-- **The intro, one card at a time.** Each card's musical phrase loops, and the
-  card waits until the child does its gag: sniff in, point at the title, show
-  the note, pose for the camera, crash the cymbals, snip the film, stretch,
-  eat, stamp. The original bit of animation and sound then plays, and the next
-  card comes in. It ends with a fade to black and the doghouse. Finite: no
-  score, no streaks, no "play again?" nudge.
-- **Keep the credit names.** They honour the makers, and a parent can read them
-  aloud. That makes it a small "how a cartoon is made" moment.
-- **Controls: one big action for the child** (a key or a tap per gag). Whether
-  the parent gets a role, such as the bark key from the earlier concept or
-  reading the credits aloud, is open.
-- **Sound: the original theme, cut into phrases, for the private test only.**
-  A public version needs a licence or a re-recording.
-- **Wordless, like the original.**
-- **Flat, outlined characters over textured painted backgrounds**, in an
-  earthy palette with small red accents (see `aesthetics` in the dossier).
-  Restraint over effects.
-- **A parent card at the end:** 3–4 sentences of context plus a link to the
-  source episode on the official SFR channel.
+1. **Adam: try the yard** (`uv run python main.py play reksio`), alone and
+   then with Eliot. Reksio is small, seen from the side, drawn in code with
+   "boiling" ink lines, on a sponge-painted yard (orange sky, stone wall,
+   sandy ground). Tap the ground and he walks there; tap a thing and he uses
+   it: pokes his head out of the doghouse, eats from his bowl, drinks at the
+   tap and shakes himself dry, barks the bird off the wall, digs up a bone.
+   After all five, evening falls and the picture closes in a circle on the
+   doghouse. No text. Things wiggle now and then as a hint; arrows and space
+   work too. All sounds are new, made in the browser; the bone find plays
+   Adam's bark clip as an easter egg if it exists locally.
+2. **Iterate on what Eliot does with it**: which things he goes for, whether
+   he finds them unaided, whether the ending lands.
+3. **Later:** the yard becomes the home screen, and new things in it lead
+   into episode games (a toy rocket for Kosmonauta). Parked ideas are listed
+   in the yard brief's open questions and the intro brief.
 
 ## First experiment (after the game exists)
 
@@ -241,6 +207,8 @@ For the intro game. Settle these in the brief, once the sound is known.
   - Did the parent spontaneously tell a childhood story?
   - Did anyone open the episode link?
   - Did anyone ask for another episode without being prompted?
+  - For Eliot's first test: does he want to make Reksio do the next gag, and
+    does he enjoy what Reksio does?
 - **Don't measure** time played or replays.
 - **Also track Adam's build hours.** If one person can research and build a
   faithful episode in about two weekends, a collection is viable.

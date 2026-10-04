@@ -6,6 +6,7 @@ Subcommands:
     show      Print a world's claims with provenance.
     episodes  Print a world's episode catalogue as a table.
     mark      Open the local tool for marking sounds in the intro.
+    play      Open a game in the browser (default: the yard).
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -40,8 +41,11 @@ Examples:
         saves to intro.yaml as you go, and each mark's clip is kept up to
         date in audio/intro/marks/<id>.wav. Ctrl+C stops the tool.
 
+    uv run python main.py play reksio
+        Opens the yard game (a static page, no server needed).
+
     uv run python main.py schema world
-        JSON Schema for world.yaml (also: sources, episodes, intro).
+        JSON Schema for world.yaml (also: sources, episodes, intro, brief).
 """
 
 from __future__ import annotations
@@ -57,11 +61,12 @@ from commands import (
     cmd_episodes,
     cmd_list,
     cmd_mark,
+    cmd_play,
     cmd_schema,
     cmd_show,
     cmd_validate,
 )
-from config import OBSERVER
+from config import DEFAULT_GAME, OBSERVER
 from schema.common import Status
 
 
@@ -112,8 +117,20 @@ def main() -> int:
     )
     p_mark.add_argument("--no-open", action="store_true", help="Don't open the browser")
 
+    p_play = sub.add_parser("play", help="Open a game in the browser")
+    p_play.add_argument("world", metavar="WORLD")
+    p_play.add_argument(
+        "game",
+        metavar="GAME",
+        nargs="?",
+        default=DEFAULT_GAME,
+        help=f"Game folder under games/ (default: {DEFAULT_GAME})",
+    )
+
     p_schema = sub.add_parser("schema", help="Print JSON Schema")
-    p_schema.add_argument("kind", choices=["world", "sources", "episodes", "intro"])
+    p_schema.add_argument(
+        "kind", choices=["world", "sources", "episodes", "intro", "brief"]
+    )
 
     args = parser.parse_args()
     dispatch = {
@@ -122,6 +139,7 @@ def main() -> int:
         "show": cmd_show,
         "episodes": cmd_episodes,
         "mark": cmd_mark,
+        "play": cmd_play,
         "schema": cmd_schema,
     }
     return dispatch[args.cmd](args)

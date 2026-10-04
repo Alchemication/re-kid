@@ -22,6 +22,8 @@ worlds/<id>/
   episodes/index.yaml   episode catalogue (schema.episode.EpisodeCatalogue)
   intro.yaml            title sequence, beat by beat (schema.breakdown.Breakdown)
   audio/intro/          measurements, spectrograms, mark clips (generated, gitignored)
+  games/<game>/brief.yaml  game brief (schema.brief.GameBrief)
+  games/<game>/game/    the game: static HTML, CSS and plain scripts
   media/intro/          intro video clips (downloaded, gitignored)
 tests/
 ```
@@ -47,7 +49,8 @@ uv run python main.py validate [WORLD...]
 uv run python main.py show WORLD [--status unknown] [--section sound]
 uv run python main.py episodes WORLD [--online]
 uv run python main.py mark WORLD [MEDIA] [--by NAME] [--no-open]
-uv run python main.py schema world|sources|episodes|intro
+uv run python main.py play WORLD [GAME]       # opens a game (default: yard); no server
+uv run python main.py schema world|sources|episodes|intro|brief
 ```
 
 Development: `uv run ruff check . && uv run ruff format . && uv run pytest`.

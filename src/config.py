@@ -81,3 +81,17 @@ one listener; pass ``--by`` to record someone else."""
 MARK_CLIPS_DIR = "marks"
 """Folder under the intro's audio output holding one clip per mark,
 ``audio/intro/marks/<mark id>.wav``, kept in step with the marks on every save."""
+
+
+GAMES_DIR = "games"
+"""Games inside a world directory, one folder each: ``games/<game>/``."""
+
+BRIEF_NAME = "brief.yaml"
+"""A game's brief inside its folder (``schema.brief.GameBrief``)."""
+
+GAME_PAGE = "game/index.html"
+"""A game's page inside its folder: static HTML with plain scripts, so it opens
+straight from disk with no server."""
+
+DEFAULT_GAME = "yard"
+"""The game ``main.py play`` opens when none is named: the one being built."""

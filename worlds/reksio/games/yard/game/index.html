@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reksio</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div id="stage" class="stage">
+    <canvas id="paint" aria-hidden="true"></canvas>
+
+    <svg id="world" viewBox="0 0 1600 900" role="img" aria-label="Reksio in his yard">
+      <defs>
+        <!-- "Boiling" ink: outlines wobble slightly, re-seeded a few times a second. -->
+        <filter id="boil" x="-5%" y="-5%" width="110%" height="110%">
+          <feTurbulence id="boil-noise" type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="1" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.2" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+
+      <g id="things" filter="url(#boil)">
+        <!-- ============ doghouse ============ -->
+        <g id="doghouse" class="thing" data-thing="doghouse">
+          <rect class="hit" x="110" y="540" width="330" height="270" />
+          <g class="wiggle" style="transform-origin: 275px 790px">
+            <rect class="plank" x="148" y="640" width="254" height="150" />
+            <path class="plank-line" d="M150 670 H400 M150 700 H400 M150 730 H400 M150 760 H400" />
+            <ellipse class="door" cx="275" cy="726" rx="44" ry="50" />
+            <path class="roof" d="M118 668 L275 560 L432 668" />
+            <path class="roof-edge" d="M118 668 L275 560 L432 668" />
+          </g>
+          <!-- Reksio's face peeking out of the door, front view -->
+          <g id="peek" opacity="0">
+            <clipPath id="door-clip"><ellipse cx="275" cy="726" rx="44" ry="50" /></clipPath>
+            <g clip-path="url(#door-clip)">
+              <g id="peek-face" style="transform: translateY(70px)">
+                <ellipse class="ink" cx="275" cy="726" rx="36" ry="38" />
+                <ellipse class="white" cx="275" cy="726" rx="36" ry="38" />
+                <ellipse class="ochre" cx="291" cy="718" rx="14" ry="12" />
+                <g id="peek-eyes">
+                  <circle class="eye" cx="263" cy="718" r="4" />
+                  <circle class="eye" cx="291" cy="718" r="4" />
+                </g>
+                <ellipse class="eye" cx="277" cy="736" rx="8" ry="5.5" />
+                <path class="lid" d="M265 748 Q277 757 289 748" />
+                <path class="ear-ochre" d="M296 696 Q310 682 322 692 Q322 706 312 712 Z" />
+              </g>
+            </g>
+          </g>
+        </g>
+
+        <!-- ============ water tap on the wall, red hose below ============ -->
+        <g id="tap" class="thing" data-thing="tap">
+          <rect class="hit" x="760" y="470" width="150" height="340" />
+          <g class="wiggle" style="transform-origin: 830px 560px">
+            <path class="pipe" d="M830 470 V540 H860" />
+            <path class="pipe-inner" d="M830 470 V540 H860" />
+            <path class="spout" d="M860 540 Q880 540 880 562" />
+            <g id="tap-handle" style="transform-origin: 830px 528px">
+              <path class="handle" d="M810 528 H850" />
+              <circle class="handle-knob" cx="830" cy="528" r="7" />
+            </g>
+          </g>
+          <path id="water" class="water" d="M880 566 Q876 640 884 712 Q880 760 882 790" opacity="0" />
+          <path class="hose" d="M842 790 C800 795 790 772 822 768 C862 763 872 788 836 786 C812 785 812 776 830 776 M842 790 C870 796 920 794 940 788" />
+          <path class="hose hose-red" d="M842 790 C800 795 790 772 822 768 C862 763 872 788 836 786 C812 785 812 776 830 776 M842 790 C870 796 920 794 940 788" />
+        </g>
+
+        <!-- ============ food bowl ============ -->
+        <g id="bowl" class="thing" data-thing="bowl">
+          <rect class="hit" x="500" y="700" width="140" height="110" />
+          <g class="wiggle" style="transform-origin: 570px 800px">
+            <g id="food" style="transform-origin: 570px 770px">
+              <path class="food" d="M532 770 Q540 752 552 762 Q560 748 572 760 Q584 748 594 762 Q604 754 608 770 Z" />
+            </g>
+            <path class="bowl" d="M520 768 H620 L606 800 H534 Z" />
+            <path class="bowl-rim" d="M520 768 H620" />
+          </g>
+        </g>
+
+        <!-- ============ mound of earth, with a bone inside ============ -->
+        <g id="mound" class="thing" data-thing="dig">
+          <rect class="hit" x="1300" y="700" width="180" height="110" />
+          <g class="wiggle" style="transform-origin: 1390px 805px">
+            <path class="earth" d="M1310 805 Q1330 760 1390 752 Q1450 760 1470 805 Z" />
+            <path class="earth-dots" d="M1350 785 h2 M1380 772 h2 M1410 790 h2 M1440 782 h2 M1372 795 h2" />
+          </g>
+          <g id="found-bone" opacity="0" style="transform-origin: 1390px 760px">
+            <path class="bone" d="M1366 760 H1414 M1362 754 a6 6 0 1 0 0 12 M1418 754 a6 6 0 1 1 0 12" /><path class="bone-white" d="M1366 760 H1414 M1362 754 a6 6 0 1 0 0 12 M1418 754 a6 6 0 1 1 0 12" />
+          </g>
+        </g>
+
+        <!-- ============ the bird on the wall ============ -->
+        <g id="bird" class="thing" data-thing="bird" style="transform: translate(1150px, 330px)">
+          <rect class="hit" x="-55" y="-70" width="110" height="90" />
+          <g id="bird-body">
+            <ellipse class="bird" cx="0" cy="-16" rx="22" ry="16" />
+            <circle class="bird" cx="18" cy="-32" r="11" />
+            <path class="beak" d="M27 -34 L42 -30 L27 -26 Z" />
+            <circle class="bird-eye" cx="21" cy="-34" r="2.6" />
+            <path class="bird" d="M-20 -14 L-40 -24 L-36 -10 Z" />
+            <g id="bird-wing" style="transform-origin: 0px -20px">
+              <path class="wing" d="M-6 -22 Q-2 -40 14 -20 Z" />
+            </g>
+            <path class="legs-thin" d="M-4 -2 V6 M6 -2 V6" />
+          </g>
+        </g>
+
+        <!-- grass tufts, for life -->
+        <path class="grass" d="M470 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
+        <path class="grass" d="M1010 818 l6 -20 l4 16 l6 -24 l4 24 l6 -16 l4 20" />
+        <path class="grass" d="M1520 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
+      </g>
+
+      <!-- ============ Reksio, side view, facing right; feet at y=0 ============ -->
+      <g id="reksio" filter="url(#boil)" style="transform: translate(700px, 812px)">
+        <g id="rk-scale" style="transform: scale(1.7)">
+          <g id="rk-flip">
+            <g id="rk-bob">
+              <g id="rk-legs-back">
+                <g class="leg" id="leg-1" style="transform-origin: -30px -30px">
+                  <path class="limb-ink" d="M-30 -30 L-31 -2" /><path class="limb" d="M-30 -30 L-31 -2" />
+                  <ellipse class="foot" cx="-28" cy="-1" rx="7" ry="4" />
+                </g>
+                <g class="leg" id="leg-2" style="transform-origin: 14px -30px">
+                  <path class="limb-ink" d="M14 -30 L15 -2" /><path class="limb" d="M14 -30 L15 -2" />
+                  <ellipse class="foot" cx="18" cy="-1" rx="7" ry="4" />
+                </g>
+              </g>
+              <g id="tail" style="transform-origin: -38px -52px">
+                <path class="limb-ink" d="M-38 -52 L-52 -76" /><path class="limb" d="M-38 -52 L-52 -76" />
+              </g>
+              <rect class="ink" x="-42" y="-64" width="76" height="38" rx="15" />
+              <rect class="white" x="-42" y="-64" width="76" height="38" rx="15" />
+              <ellipse class="ochre" cx="-20" cy="-55" rx="13" ry="9" />
+              <g id="rk-legs-front">
+                <g class="leg" id="leg-3" style="transform-origin: -18px -30px">
+                  <path class="limb-ink" d="M-18 -30 L-18 -2" /><path class="limb" d="M-18 -30 L-18 -2" />
+                  <ellipse class="foot" cx="-15" cy="-1" rx="7" ry="4" />
+                </g>
+                <g class="leg" id="leg-4" style="transform-origin: 26px -30px">
+                  <path class="limb-ink" d="M26 -30 L28 -2" /><path class="limb" d="M26 -30 L28 -2" />
+                  <ellipse class="foot" cx="31" cy="-1" rx="7" ry="4" />
+                </g>
+              </g>
+              <g id="rk-head" style="transform-origin: 22px -60px">
+                <g id="rk-head-shape">
+                  <ellipse class="ink" cx="28" cy="-86" rx="27" ry="23" />
+                  <ellipse class="ink" cx="58" cy="-74" rx="30" ry="15" transform="rotate(16 58 -74)" />
+                  <ellipse class="white" cx="28" cy="-86" rx="27" ry="23" />
+                  <ellipse class="white" cx="58" cy="-74" rx="30" ry="15" transform="rotate(16 58 -74)" />
+                </g>
+                <ellipse class="eye" cx="84" cy="-66" rx="8" ry="6.5" />
+                <circle id="rk-eye" class="eye" cx="49" cy="-87" r="4" />
+                <path id="rk-smile" class="lid" d="M60 -63 Q68 -60 75 -63" />
+                <path id="rk-mouth" class="mouth" d="M56 -66 L80 -60 Q70 -48 58 -56 Z" opacity="0" />
+                <path id="rk-tongue" class="tongue" d="M76 -60 Q86 -58 84 -50 Q78 -50 74 -56 Z" opacity="0" />
+                <path class="ear-ochre" d="M6 -102 Q22 -116 38 -106 Q34 -92 22 -88 Q12 -94 6 -102 Z" />
+                <g id="rk-bone" opacity="0">
+                  <path class="bone" d="M64 -64 H100 M60 -69 a5 5 0 1 0 0 10 M104 -69 a5 5 0 1 1 0 10" /><path class="bone-white" d="M64 -64 H100 M60 -69 a5 5 0 1 0 0 10 M104 -69 a5 5 0 1 1 0 10" />
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+
+      <!-- particles (crumbs, earth, drops) are added here by the script -->
+      <g id="fx"></g>
+    </svg>
+
+    <div id="evening" class="evening" aria-hidden="true"></div>
+    <div id="iris" class="iris" aria-hidden="true"></div>
+    <button id="fullscreen" class="corner" type="button" title="Full screen (for the grown-up)" aria-label="Full screen">⤢</button>
+  </div>
+
+  <script src="painting.js"></script>
+  <script src="sound.js"></script>
+  <script src="reksio.js"></script>
+  <script src="yard.js"></script>
+</body>
+</html>

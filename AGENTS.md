@@ -24,10 +24,16 @@ Flow, one validated file per stage, under `worlds/<id>/`:
 2. `episodes/index.yaml` — episode catalogue (`schema.episode`).
 3. `intro.yaml`, `episodes/<slug>.yaml` — beat-by-beat breakdowns
    (`schema.breakdown`), plus the sounds a listener marked in them.
-4. Game brief → game → playtest logs (not written yet).
+4. `games/<game>/brief.yaml` — a game brief (`schema.brief`): every part
+   marked `original`, `inspired` or `invented`, with refs to what it is based
+   on. Then the game itself, `games/<game>/game/` (opened with
+   `main.py play <world> [game]`), and playtest logs (not written yet). The
+   current game is `yard`; `intro` is a parked brief.
 
 Research files hold research only. Game ideas go in a game brief; the one bridge
-is `design_notes`, which must be `interpretation` claims.
+is `design_notes`, which must be `interpretation` claims. The game is inspired
+by the original, not copied from it: original sounds or melodies only as
+occasional easter eggs.
 
 ## Research
 
@@ -90,6 +96,10 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   the claim that carries their provenance.
 - **File size:** keep source files under ~1000 lines.
 - **No backward-compat shims:** when moving code, update all callers.
+- **Game (`worlds/<id>/games/<game>/game/`):** plain HTML, CSS and classic
+  scripts (not modules), so the page opens straight from disk with no server.
+  Characters are drawn in code (SVG), sounds made with Web Audio; original
+  audio only as easter eggs.
 - **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build
   step. Libraries are vendored at a pinned version under `vendor/`, never loaded
   from a CDN. wavesurfer draws inside a shadow DOM, so styles for anything
@@ -110,7 +120,7 @@ file layout update `README.md` and the `main.py` docstring in the same change.
 round-trips, the marking server's API. Group in classes; use `tmp_path`; cover
 the edge cases that would let bad data pass silently.
 
-**Browser UI:** after changing `src/mark_ui/`, drive it in the installed Chrome
+**Browser UI:** after changing `src/mark_ui/` or a game, drive it in the installed Chrome
 with Playwright (`uv run --no-project --with playwright`, `channel="chrome"` —
 the bundled Chromium can't decode the H.264/AAC media). Check for console
 errors and take a screenshot. Test against a scratch copy of the data or
