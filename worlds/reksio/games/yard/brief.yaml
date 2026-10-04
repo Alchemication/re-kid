@@ -111,9 +111,9 @@ scenes:
     origin: inspired
     refs: [intro:studio-card, mark:stamping-sound-1-longer]
   sound:
-    text: A thump for each stamp, then the rattle of the reel winding up.
+    text: 'Thump, thump … double squeak: a thud with a wooden tok for each stamp, alternating dull and bright, then two rubbery squeaks as the little Reksios squash and stretch, then the rattle of the reel winding up.'
     origin: inspired
-    refs: [mark:stamping-sound-1-longer]
+    refs: [mark:stamping-sound-1-longer, mark:stamping-sound-2-short]
 - id: flowers
   action: {text: Tap the flowers., origin: invented}
   result:

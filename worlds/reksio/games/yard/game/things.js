@@ -604,7 +604,6 @@ const Things = (() => {
           Reksio.face(1)
           await Reksio.stamp(() => {
             Sound.stamp(i)
-            setTimeout(() => Sound.bip(i * 2), 60) // the print pops in
             Music.react.stamp()
             const print = prints[i]
             print.setAttribute('opacity', '1')
@@ -614,7 +613,17 @@ const Things = (() => {
           })
           stamped = i + 1
         }
-        await wait(350)
+        // thump, thump … and the double squeak: the little Reksios squeak back
+        await wait(250)
+        Sound.squeaks()
+        prints.forEach((p, k) => {
+          p.style.transformOrigin = `${FRAMES_DRAWN[k]}px 800px`
+          p.animate(
+            [{ transform: 'scale(1, 1)' }, { transform: 'scale(1.2, 0.75)' }, { transform: 'scale(0.9, 1.15)' }, { transform: 'scale(1.2, 0.75)' }, { transform: 'scale(1, 1)' }],
+            { duration: 420 },
+          )
+        })
+        await wait(650)
         // the full strip rolls up into a reel
         Sound.reel()
         const strip = $('strip')

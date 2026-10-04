@@ -59,6 +59,33 @@ const Sound = (() => {
     src.stop(t + attack + decay + 0.05)
   }
 
+  /** A squeaky-toy squeak: a nasal, wobbly tone that slides up and sags back. */
+  function rubberSqueak(at, f0, f1) {
+    const c = ensure()
+    const t = c.currentTime + at
+    const o = c.createOscillator()
+    o.type = 'sawtooth'
+    o.frequency.setValueAtTime(f0, t)
+    o.frequency.exponentialRampToValueAtTime(f1, t + 0.06)
+    o.frequency.exponentialRampToValueAtTime(f1 * 0.9, t + 0.14)
+    const wobble = c.createOscillator()
+    wobble.frequency.value = 28
+    const depth = c.createGain()
+    depth.gain.value = 60
+    wobble.connect(depth).connect(o.frequency)
+    const nasal = c.createBiquadFilter()
+    nasal.type = 'bandpass'
+    nasal.frequency.value = 2400
+    nasal.Q.value = 2.5
+    const g = c.createGain()
+    env(g, t, 0.5, 0.008, 0.14)
+    o.connect(nasal).connect(g).connect(master)
+    o.start(t)
+    wobble.start(t)
+    o.stop(t + 0.2)
+    wobble.stop(t + 0.2)
+  }
+
   /** A cartoon "woof": a short voiced burst that drops in pitch. */
   function woof(at = 0) {
     const c = ensure()
@@ -248,13 +275,11 @@ const Sound = (() => {
       tone('triangle', bright ? 392 : 294, bright ? 360 : 270, 0, 0.22, 0.002, 0.07)
       hiss(0, 0.16, 0.002, 0.04, 'bandpass', bright ? 1600 : 800, 1.2)
     },
-    /** The funny high "bip" over a stamp (Adam's second stamping mark): a
-     * quick upward slide with a hollow, reedy tone. n nudges it up a little,
-     * so a run of stamps climbs. */
-    bip(n = 0) {
-      const up = 2 ** (n / 12)
-      tone('square', 1760 * up, 2500 * up, 0, 0.05, 0.004, 0.06)
-      tone('sine', 1760 * up, 2500 * up, 0, 0.08, 0.004, 0.07)
+    /** The double squeak after the stamping (Adam's second stamping mark,
+     * "thump, thump … double squeak"): two rubbery squeaks sliding up. */
+    squeaks() {
+      rubberSqueak(0, 1700, 2500)
+      rubberSqueak(0.19, 1800, 2650)
     },
     /** The rattle of a film reel winding up. */
     reel() { for (let i = 0; i < 14; i++) tone('square', 1300, 1200, i * 0.06, 0.035, 0.002, 0.025) },
