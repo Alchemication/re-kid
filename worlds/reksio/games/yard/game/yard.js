@@ -7,15 +7,17 @@
 
 /* global Painting, Sound, Reksio */
 (() => {
-  const WISH_AFTER_IDLE_MS = 3500 // Reksio shows a wish once left alone this long
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
-  const WISH_GAP_MS = 6500 // at least this long between bubbles
+  const WISH_GAP_MS = 12000 // at least this long between bubbles
+  const IDLE_FIRST_MS = 2500 // left alone this long, Reksio starts doing things
+  const IDLE_GAP_MS = [1500, 3500] // then something new every 1.5–3.5 s
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
-  const IDLE_ACT_MS = [5000, 9000] // when left alone, a small dog move every 5–9 s
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
-  const EVENING_NEEDS = ['doghouse', 'bowl', 'tap', 'bird', 'dig']
+  const EVENING_NEEDS = ['doghouse', 'bowl', 'tap', 'bird', 'dig', 'film']
+  const FRAMES = [2290, 2360, 2430, 2500, 2570] // film frame centres, scene units
+  const PAW_REACH = 31 // from Reksio's middle to where his front paws land
 
   const $ = (id) => document.getElementById(id)
   const svg = $('world')
@@ -143,6 +145,7 @@
 
   const food = $('food')
   let foodLeft = 1
+  let stamped = 0 // film frames stamped so far
 
   const THINGS = {
     doghouse: {
@@ -270,6 +273,44 @@
         await Reksio.bark()
       },
     },
+    film: {
+      at: () => FRAMES[Math.min(stamped, FRAMES.length - 1)] - PAW_REACH,
+      face: 1,
+      async run() {
+        if (stamped >= FRAMES.length) {
+          // already a reel: give it a spin
+          Sound.reel()
+          await $('reel').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(720deg)' }], { duration: 900, easing: 'ease-out' }).finished
+          await Reksio.bark()
+          return
+        }
+        const prints = document.querySelectorAll('#strip .print')
+        for (let i = stamped; i < FRAMES.length; i++) {
+          if (i > stamped) await Reksio.walkTo(FRAMES[i] - PAW_REACH)
+          Reksio.face(1)
+          await Reksio.stamp(() => {
+            Sound.thump()
+            const print = prints[i]
+            print.setAttribute('opacity', '1')
+            print.style.transformOrigin = `${FRAMES[i]}px 791px`
+            print.animate([{ transform: 'scale(1.6)', opacity: 0.2 }, { transform: 'scale(1)', opacity: 1 }], { duration: 220, easing: 'ease-out' })
+            burst(FRAMES[i], 812, 5, 'dust', { height: 22, reach: 40, size: 3.5 })
+          })
+          stamped = i + 1
+        }
+        await wait(350)
+        // the full strip rolls up into a reel
+        Sound.reel()
+        const strip = $('strip')
+        const reel = $('reel')
+        reel.setAttribute('opacity', '1')
+        reel.animate([{ transform: 'scale(0.2) rotate(0)' }, { transform: 'scale(1) rotate(900deg)' }], { duration: 900, easing: 'ease-out' })
+        await strip.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 900, easing: 'ease-in', fill: 'forwards' }).finished
+        strip.style.visibility = 'hidden'
+        Sound.ding()
+        await Reksio.hop(50, 2)
+      },
+    },
     bird: {
       at: () => PERCHES[perch].x - 110,
       face: 1,
@@ -374,9 +415,9 @@
 
   // ------------------------------------------------------------ the sunset
 
-  // Sun colour per step (0 to 5 main things done): yellow, through orange, to red.
-  const SUN_COLORS = ['#fbe08a', '#fbd06a', '#f8b14e', '#f2913f', '#e86f35', '#d9542e']
-  const SUN_STEP = 52 // how far the sun sinks per step, scene units
+  // Sun colour per step (0 to 6 main things done): yellow, through orange, to red.
+  const SUN_COLORS = ['#fbe08a', '#fbd57a', '#f9c05a', '#f6a64a', '#ef8a3e', '#e46c34', '#d9542e']
+  const SUN_STEP = 44 // how far the sun sinks per step, scene units
 
   /** Lower the sun and warm the sky to match how much is done. */
   function sunset() {
@@ -384,7 +425,7 @@
     $('sun').style.transform = `translateY(${step * SUN_STEP}px)`
     document.querySelector('#sun .sun').style.fill = SUN_COLORS[step]
     document.querySelector('#sun .sun-glow').style.fill = SUN_COLORS[step]
-    $('sunset').style.opacity = String(step * 0.11)
+    $('sunset').style.opacity = String(step * 0.095)
   }
 
   // ------------------------------------------------------------ the end
@@ -540,30 +581,79 @@
     wishEl.style.opacity = '0'
   }
 
-  function wishes() {
+  // ------------------------------------------------------------ left alone
+
+  // One loop decides what Reksio does when nobody is tapping: a thought
+  // bubble now and then, otherwise a dog move, picked at random (never the
+  // same one twice running) and a little different each time.
+  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  let nextIdleAt = 0
+  let acting = false
+  let lastAct = null
+  let firstWish = true
+
+  function wishFor() {
+    const left = EVENING_NEEDS.filter((n) => !done.has(n))
+    const dist = (n) => Math.abs((n === 'bird' ? PERCHES[perch].x : THINGS[n].at()) - Reksio.x)
+    return left.sort((a, b) => dist(a) - dist(b))[0]
+  }
+
+  function birdOnScreen() {
+    const x = PERCHES[perch].x
+    return x > camX && x < camX + Painting.VIEW_W
+  }
+
+  const ACTS = {
+    wish: { weight: 2, ok: () => wishFor() && performance.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
+    sniff: { weight: 3, run: () => Reksio.sniff() },
+    wander: {
+      weight: 3,
+      async run() {
+        const dir = Math.random() < 0.5 ? -1 : 1
+        if (await Reksio.walkTo(Reksio.x + dir * rnd(80, 260)) && Math.random() < 0.7) await Reksio.sniff()
+      },
+    },
+    look: { weight: 2, run: () => Reksio.lookAround() },
+    lookUp: {
+      weight: 2,
+      async run() {
+        if (birdOnScreen()) Reksio.face(PERCHES[perch].x > Reksio.x ? 1 : -1)
+        await Reksio.lookUp()
+      },
+    },
+    scratch: { weight: 2, run: () => Reksio.scratch() },
+    hop: { weight: 2, run: () => Reksio.hop() },
+    bow: { weight: 2, run: () => Reksio.playBow() },
+    tail: { weight: 1, run: () => Reksio.chaseTail() },
+    yawn: { weight: 1, ok: () => done.size >= 2, run: () => Reksio.yawn() },
+  }
+
+  function pickAct() {
+    if (firstWish && ACTS.wish.ok()) return 'wish' // first, show what he wants
+    const names = Object.keys(ACTS).filter((n) => n !== lastAct && (!ACTS[n].ok || ACTS[n].ok()))
+    let r = Math.random() * names.reduce((sum, n) => sum + ACTS[n].weight, 0)
+    for (const n of names) if ((r -= ACTS[n].weight) < 0) return n
+    return names[0]
+  }
+
+  function idleLoop() {
     const now = performance.now()
     if (wishing) {
       placeWish()
       if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
-    } else if (!ended && !busy && !Reksio.walking && now - lastTap > WISH_AFTER_IDLE_MS && now - lastWishAt > WISH_GAP_MS) {
-      const left = EVENING_NEEDS.filter((n) => !done.has(n))
-      if (left.length) {
-        const dist = (n) => Math.abs((n === 'bird' ? PERCHES[perch].x : THINGS[n].at()) - Reksio.x)
-        showWish(left.sort((a, b) => dist(a) - dist(b))[0])
-      }
     }
-    setTimeout(wishes, 250)
-  }
-
-  // When left alone, now and then a small dog move: sniff, look around,
-  // scratch, hop. Never while busy, walking, stretching or at the end.
-  async function idleAct() {
-    const quiet = !ended && !busy && !hold && !Reksio.walking && !Reksio.stretching && !wishing
-    if (quiet && performance.now() - lastTap > IDLE_ACT_MS[0]) {
-      const acts = [Reksio.sniff, Reksio.lookAround, Reksio.scratch, Reksio.hop]
-      await acts[Math.floor(Math.random() * acts.length)]()
+    const quiet = !ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
+    if (quiet && now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
+      const name = pickAct()
+      lastAct = name
+      if (name === 'wish') firstWish = false
+      acting = true
+      Promise.resolve(ACTS[name].run()).finally(() => {
+        acting = false
+        nextIdleAt = performance.now() + (ACTS[name].ms || rnd(IDLE_GAP_MS[0], IDLE_GAP_MS[1]))
+      })
     }
-    setTimeout(idleAct, IDLE_ACT_MS[0] + Math.random() * (IDLE_ACT_MS[1] - IDLE_ACT_MS[0]))
+    setTimeout(idleLoop, 200)
   }
 
   let last = performance.now()
@@ -592,9 +682,8 @@
   birdAt(PERCHES[0])
   requestAnimationFrame(frame)
   setTimeout(birdIdle, 3000)
-  lastTap = performance.now() - WISH_AFTER_IDLE_MS + 2000 // first wish soon after start
-  setTimeout(wishes, 250)
-  setTimeout(idleAct, IDLE_ACT_MS[1])
+  lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
+  setTimeout(idleLoop, 200)
 
-  window.yardGame = { goAndDo, done, state: () => ({ busy, ended, done: [...done], camX }) } // for testing
+  window.yardGame = { goAndDo, done, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped }) } // for testing
 })()

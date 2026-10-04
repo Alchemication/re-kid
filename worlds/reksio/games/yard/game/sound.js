@@ -201,6 +201,13 @@ const Sound = (() => {
     hop() { tone('sine', 300, 620, 0.1, 0.08, 0.02, 0.18) },
     sniff() { hiss(0, 0.07, 0.015, 0.06, 'bandpass', 2600, 1.5) },
     scratch() { for (let i = 0; i < 6; i++) hiss(i * 0.16, 0.09, 0.004, 0.06, 'highpass', 2500) },
+    /** A rubber-stamp thump. */
+    thump() {
+      tone('sine', 120, 55, 0, 0.5, 0.004, 0.16)
+      hiss(0, 0.12, 0.003, 0.05, 'lowpass', 900)
+    },
+    /** The rattle of a film reel winding up. */
+    reel() { for (let i = 0; i < 14; i++) tone('square', 1300, 1200, i * 0.06, 0.035, 0.002, 0.025) },
     /** A soft pop, for a thought bubble appearing. */
     blip() { tone('sine', 660, 990, 0, 0.1, 0.01, 0.12) },
     squeak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },

@@ -187,12 +187,13 @@ wake Reksio at home.
    ground and he walks there; tap a thing and he uses it: naps and snores in
    the doghouse doorway, laps from his bowl, drinks at the tap and shakes
    himself dry, sniffs the flowers and sneezes, barks at the house window,
-   pokes at the gate, barks the bird off its perch, digs up a bone. Press and
+   pokes at the gate, barks the bird off its perch, digs up a bone, stamps a
+   red film strip frame by frame until it rolls up into a reel. Press and
    hold on Reksio and he stretches like a dachshund, snapping back on release.
-   He walks short trips, runs long ones, hops for joy, and sniffs, looks
-   around or scratches when left alone. Each of
-   the five main things lowers the sun a step and warms the sky; after the
-   fifth, evening falls and the picture closes in a circle on the doghouse. No text. When left alone, Reksio shows a thought bubble with a
+   He walks short trips, runs long ones, hops for joy, and when left alone
+   keeps busy with random dog moves (sniffing, wandering, scratching, a
+   play-bow, chasing his tail…) and the odd thought bubble. Each of the six
+   main things lowers the sun a step and warms the sky; after the sixth, evening falls and the picture closes in a circle on the doghouse. No text. When left alone, Reksio shows a thought bubble with a
    picture of the nearest main thing he still wants, and it twinkles; arrows
    and space work too. All sounds are new, made in the browser; the bone find
    plays Adam's bark clip as an easter egg if it exists locally.

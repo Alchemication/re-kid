@@ -5,7 +5,7 @@ audience: Eliot, about 3, playing with a parent who remembers Reksio.
 length: As long as he likes, usually a few minutes; it ends with evening.
 
 pitch:
-  text: The child is Reksio in his own yard, which is wider than the screen; the view follows him from the house wall at one end to the fence and gate at the other. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — naps and snores in his doghouse, laps from his bowl, drinks from the tap, sniffs the flowers and sneezes, barks at the bird, digs up a bone. Once he has done the five main things, evening comes and he goes to sleep in his doghouse.
+  text: The child is Reksio in his own yard, which is wider than the screen; the view follows him from the house wall at one end to the fence and gate at the other. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — naps and snores in his doghouse, laps from his bowl, drinks from the tap, sniffs the flowers and sneezes, barks at the bird, digs up a bone, stamps a film strip. Once he has done the six main things, evening comes and he goes to sleep in his doghouse.
   origin: inspired
   refs: ['world:places[yard].description', 'world:places[doghouse].description', world:premise]
 
@@ -17,16 +17,16 @@ principles:
   origin: invented
 - text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs.
   origin: invented
-- text: Finite, and you can see the end coming. The sun sinks a step and the sky warms with each of the five main things done; after the fifth, evening falls and the game ends with him asleep. No counter, no text.
+- text: Finite, and you can see the end coming. The sun sinks a step and the sky warms with each of the six main things done; after the sixth, evening falls and the game ends with him asleep. No counter, no text.
   origin: inspired
   refs: ['world:places[doghouse].description']
 - text: The yard is built to grow. Later it becomes the game's home screen, and new things in it lead into episode games — say, a toy rocket by the doghouse that starts Kosmonauta.
   origin: invented
 
-- text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird or his doghouse, the nearest one he hasn't done — and that thing twinkles. Only the five main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
+- text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird, his doghouse or the film strip, the nearest one he hasn't done — and that thing twinkles. Only the six main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
   origin: inspired
   refs: [world:humour]
-- text: He moves like a dog. Short trips are a walk, long ones a bounding run, easing in and out of speed; he hops for joy after each main thing; and when left alone he now and then sniffs the ground, looks around, scratches behind his ear or hops.
+- text: He moves like a dog. Short trips are a walk, long ones a bounding run, easing in and out of speed; he hops for joy after each main thing. Left alone, he keeps busy every few seconds with something picked at random and a little different each time — sniffing, wandering with his nose down, glancing around, looking up at the sky or the bird, scratching, hopping, a play-bow, chasing his tail, yawning — with a thought bubble now and then.
   origin: invented
 controls:
   text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, a quick tap barks and pressing and holding stretches him. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, any other key barks (hold it to stretch).'
@@ -85,6 +85,17 @@ scenes:
     text: A rising, rubbery stretching sound while held, and a cartoon boing on release.
     origin: inspired
     refs: [intro:stretch]
+- id: film
+  moment: studio-card
+  action: {text: Tap the red film strip lying in the yard., origin: invented}
+  result:
+    text: Reksio rears up and stamps each of the five empty frames with his front paws, and a little Reksio appears in each one; the full strip rolls up into a film reel that stays in the yard — later, the door into episodes.
+    origin: inspired
+    refs: [intro:studio-card, mark:stamping-sound-1-longer]
+  sound:
+    text: A thump for each stamp, then the rattle of the reel winding up.
+    origin: inspired
+    refs: [mark:stamping-sound-1-longer]
 - id: flowers
   action: {text: Tap the flowers., origin: invented}
   result:
@@ -122,7 +133,7 @@ scenes:
     refs: [mark:bark]
 
 ending:
-  text: Once Reksio has done the five main things (doghouse, bowl, tap, bird, bone), the sky turns to evening, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.
+  text: Once Reksio has done the six main things (doghouse, bowl, tap, bird, bone, film), the sky turns to evening, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.
   origin: inspired
   refs: ['world:places[doghouse].description', intro:fade-out]
 

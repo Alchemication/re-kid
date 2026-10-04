@@ -17,6 +17,13 @@
     <svg id="world" viewBox="0 0 1600 900" role="img" aria-label="Reksio in his yard">
       <defs>
         <path id="zee" d="M0 0 H16 L0 18 H16" />
+        <!-- the little Reksio printed into each film frame -->
+        <g id="mini-reksio">
+          <path class="mini-head" d="M-12 2 C-13 -8 -4 -13 4 -10 C10 -8 16 -4 18 0 C19 4 16 6 12 6 L-2 6 C-8 6 -11 5 -12 2 Z" />
+          <path class="mini-ear" d="M-10 -6 Q-11 -16 -3 -16 Q4 -16 5 -10 Q0 -9 -3 -6 Z" />
+          <circle class="eye" cx="-1" cy="-4" r="1.6" />
+          <circle class="eye" cx="17" cy="1" r="2.2" />
+        </g>
         <g id="twinkle-shape">
           <path d="M0 -14 L3 -3 L14 0 L3 3 L0 14 L-3 3 L-14 0 L-3 -3 Z" />
         </g>
@@ -136,6 +143,34 @@
             </g>
           </g>
 
+          <!-- ============ a red film strip on the ground, five empty frames ============ -->
+          <g id="film" class="thing" data-thing="film" data-hint-y="730">
+            <rect class="hit" x="2235" y="720" width="450" height="110" />
+            <g id="strip" style="transform-origin: 2612px 790px">
+              <rect class="strip" x="2248" y="756" width="364" height="66" rx="4" />
+              <path class="sprockets" d="M2258 763 h8 M2278 763 h8 M2298 763 h8 M2318 763 h8 M2338 763 h8 M2358 763 h8 M2378 763 h8 M2398 763 h8 M2418 763 h8 M2438 763 h8 M2458 763 h8 M2478 763 h8 M2498 763 h8 M2518 763 h8 M2538 763 h8 M2558 763 h8 M2578 763 h8 M2598 763 h4 M2258 815 h8 M2278 815 h8 M2298 815 h8 M2318 815 h8 M2338 815 h8 M2358 815 h8 M2378 815 h8 M2398 815 h8 M2418 815 h8 M2438 815 h8 M2458 815 h8 M2478 815 h8 M2498 815 h8 M2518 815 h8 M2538 815 h8 M2558 815 h8 M2578 815 h8 M2598 815 h4" />
+              <rect class="frame" x="2260" y="771" width="60" height="36" />
+              <rect class="frame" x="2330" y="771" width="60" height="36" />
+              <rect class="frame" x="2400" y="771" width="60" height="36" />
+              <rect class="frame" x="2470" y="771" width="60" height="36" />
+              <rect class="frame" x="2540" y="771" width="60" height="36" />
+              <use class="print" href="#mini-reksio" x="2290" y="791" opacity="0" />
+              <use class="print" href="#mini-reksio" x="2360" y="791" opacity="0" />
+              <use class="print" href="#mini-reksio" x="2430" y="791" opacity="0" />
+              <use class="print" href="#mini-reksio" x="2500" y="791" opacity="0" />
+              <use class="print" href="#mini-reksio" x="2570" y="791" opacity="0" />
+            </g>
+            <!-- the reel it rolls up into: later, the door to episodes -->
+            <g id="reel" opacity="0" style="transform-origin: 2620px 778px">
+              <path class="strip-tail" d="M2620 818 Q2650 820 2672 812 L2676 820 Q2652 830 2618 826 Z" />
+              <circle class="reel" cx="2620" cy="778" r="40" />
+              <circle class="reel-hole" cx="2620" cy="756" r="8" />
+              <circle class="reel-hole" cx="2640" cy="788" r="8" />
+              <circle class="reel-hole" cx="2600" cy="788" r="8" />
+              <circle class="reel-hub" cx="2620" cy="778" r="6" />
+            </g>
+          </g>
+
           <!-- ============ the fence and gate: the right end of the yard ============ -->
           <g id="fence" class="thing" data-thing="gate" data-hint-y="520">
             <rect class="hit" x="2740" y="520" width="280" height="290" />
@@ -169,7 +204,7 @@
           <path class="grass sway" style="transform-origin: 1462px 818px" d="M1450 818 l6 -20 l4 16 l6 -24 l4 24 l6 -16 l4 20" />
           <path class="grass sway" style="transform-origin: 1912px 812px" d="M1900 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
           <path class="grass sway" style="transform-origin: 2412px 816px" d="M2400 816 l6 -20 l4 16 l6 -24 l4 24 l6 -16 l4 20" />
-          <path class="grass sway" style="transform-origin: 2632px 812px" d="M2620 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
+          <path class="grass sway" style="transform-origin: 2212px 812px" d="M2200 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
         </g>
 
         <!-- ============ Reksio, side view, facing right; feet at y=0 ============ -->
@@ -247,6 +282,13 @@
                 <path class="beak" d="M74 -264 L86 -260 L74 -257 Z" />
                 <circle class="bird-eye" cx="68" cy="-264" r="2.2" />
                 <path class="bird" d="M34 -246 L20 -254 L24 -242 Z" />
+              </g>
+              <!-- the film strip -->
+              <g class="wish-icon" data-wish="film" opacity="0">
+                <rect class="strip" x="20" y="-268" width="72" height="34" rx="3" />
+                <rect class="frame" x="27" y="-261" width="17" height="20" />
+                <rect class="frame" x="48" y="-261" width="17" height="20" />
+                <rect class="frame" x="69" y="-261" width="17" height="20" />
               </g>
               <!-- sleep in the doghouse -->
               <g class="wish-icon" data-wish="doghouse" opacity="0">

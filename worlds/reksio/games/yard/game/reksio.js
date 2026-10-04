@@ -253,55 +253,118 @@ const Reksio = (() => {
     await head.animate([{ transform: 'rotate(22deg)' }, { transform: 'rotate(0)' }], { duration: 260, easing: 'ease-in-out' }).finished
   }
 
-  /** A happy little hop on the spot. */
-  async function hop() {
-    Sound.hop()
-    await bob.animate(
-      [
-        { transform: 'translateY(0)' },
-        { transform: 'translateY(5px)', offset: 0.18 },
-        { transform: 'translateY(-46px)', offset: 0.55, easing: 'ease-in' },
-        { transform: 'translateY(3px)', offset: 0.85 },
-        { transform: 'translateY(0)' },
-      ],
-      { duration: 620, easing: 'ease-out' },
-    ).finished
+  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  const rndInt = (lo, hi) => Math.floor(rnd(lo, hi + 1))
+
+  /** A happy hop on the spot; height and count vary unless given. */
+  async function hop(height = rnd(30, 56), times = Math.random() < 0.3 ? 2 : 1) {
+    for (let i = 0; i < times; i++) {
+      Sound.hop()
+      const h = i ? height * 0.6 : height
+      await bob.animate(
+        [
+          { transform: 'translateY(0)' },
+          { transform: 'translateY(5px)', offset: 0.18 },
+          { transform: `translateY(${-h}px)`, offset: 0.55, easing: 'ease-in' },
+          { transform: 'translateY(3px)', offset: 0.85 },
+          { transform: 'translateY(0)' },
+        ],
+        { duration: 480 + h * 3, easing: 'ease-out' },
+      ).finished
+    }
   }
 
-  /** Nose to the ground, a few sniffs. */
-  async function sniff() {
-    const down = head.animate(
-      [{ transform: 'rotate(0)' }, { transform: 'rotate(30deg)', offset: 0.2 }, { transform: 'rotate(26deg)', offset: 0.5 },
-        { transform: 'rotate(31deg)', offset: 0.7 }, { transform: 'rotate(27deg)', offset: 0.85 }, { transform: 'rotate(0)' }],
-      { duration: 1500, easing: 'ease-in-out' },
-    )
-    for (let i = 0; i < 3; i++) {
-      await wait(330)
+  /** Nose to the ground, a few sniffs (how many, and how low, varies). */
+  async function sniff(times = rndInt(2, 5)) {
+    const low = rnd(24, 34)
+    await head.animate([{ transform: 'rotate(0)' }, { transform: `rotate(${low}deg)` }], { duration: 260, fill: 'forwards' }).finished
+    for (let i = 0; i < times; i++) {
       Sound.sniff()
+      await head.animate(
+        [{ transform: `rotate(${low}deg)` }, { transform: `rotate(${low - 5}deg)` }, { transform: `rotate(${low}deg)` }],
+        { duration: rnd(200, 320) },
+      ).finished
     }
-    await down.finished
+    await head.animate([{ transform: `rotate(${low}deg)` }, { transform: 'rotate(0)' }], { duration: 300 }).finished
+    head.getAnimations().forEach((a) => a.cancel())
   }
 
   /** Glance the other way, then back (unless he has set off meanwhile). */
-  async function lookAround() {
+  async function lookAround(ms = rnd(600, 1400)) {
     const was = facing
     face(-was)
-    await wait(800)
+    await wait(ms)
     if (target === null && !stretching && facing === -was) face(was)
   }
 
-  /** Scratch behind the ear with a back leg, head tilted. */
-  async function scratch() {
-    head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(20deg)', offset: 0.15 }, { transform: 'rotate(20deg)', offset: 0.85 }, { transform: 'rotate(0)' }], { duration: 1150 })
-    bob.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-6deg)', offset: 0.15 }, { transform: 'rotate(-6deg)', offset: 0.85 }, { transform: 'rotate(0)' }], { duration: 1150 })
+  /** Look up at the sky (or the bird) for a moment. */
+  async function lookUp(ms = rnd(900, 1800)) {
+    const up = rnd(-28, -18)
+    await head.animate(
+      [{ transform: 'rotate(0)' }, { transform: `rotate(${up}deg)`, offset: 0.2 }, { transform: `rotate(${up}deg)`, offset: 0.8 }, { transform: 'rotate(0)' }],
+      { duration: ms, easing: 'ease-in-out' },
+    ).finished
+  }
+
+  /** Scratch behind the ear with a back leg, head tilted to meet it. */
+  async function scratch(times = rndInt(4, 8)) {
+    const ms = 140 * times + 250
+    head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(20deg)', offset: 0.15 }, { transform: 'rotate(20deg)', offset: 0.85 }, { transform: 'rotate(0)' }], { duration: ms })
+    bob.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-6deg)', offset: 0.15 }, { transform: 'rotate(-6deg)', offset: 0.85 }, { transform: 'rotate(0)' }], { duration: ms })
     const up = legs[2].animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-82deg)' }], { duration: 120, fill: 'forwards' })
     await up.finished
     Sound.scratch()
     await legs[2].animate(
       [{ transform: 'rotate(-82deg)' }, { transform: 'rotate(-62deg)' }, { transform: 'rotate(-82deg)' }],
-      { duration: 140, iterations: 6, easing: 'ease-in-out' },
+      { duration: 140, iterations: times, easing: 'ease-in-out' },
     ).finished
     up.cancel()
+  }
+
+  /** A play-bow: front down, rear up, tail going; sometimes a bark. */
+  async function playBow() {
+    const ms = rnd(900, 1500)
+    await bob.animate(
+      [{ transform: 'rotate(0)' }, { transform: 'rotate(11deg) translateY(4px)', offset: 0.2 }, { transform: 'rotate(11deg) translateY(4px)', offset: 0.8 }, { transform: 'rotate(0)' }],
+      { duration: ms, easing: 'ease-in-out' },
+    ).finished
+    if (Math.random() < 0.5) await bark()
+  }
+
+  /** Chase his own tail: a few quick turns with little hops. */
+  async function chaseTail(turns = rndInt(3, 5)) {
+    const was = facing
+    for (let i = 0; i < turns; i++) {
+      face(-facing)
+      Sound.step()
+      await bob.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }], { duration: 200 }).finished
+    }
+    if (target === null && !stretching) face(was)
+  }
+
+  /** Rear up and stamp down with both front paws; onImpact runs as they land. */
+  async function stamp(onImpact) {
+    const up = 'rotate(-24deg) translateY(-8px)'
+    const down = 'rotate(5deg) translateY(2px)'
+    await bob.animate([{ transform: 'rotate(0)' }, { transform: up }], { duration: rnd(200, 260), easing: 'ease-out', fill: 'forwards' }).finished
+    const slam = bob.animate([{ transform: up }, { transform: down }], { duration: 110, easing: 'ease-in', fill: 'forwards' })
+    await slam.finished
+    onImpact()
+    bob.getAnimations().forEach((a) => a.cancel())
+    await bob.animate([{ transform: down }, { transform: 'rotate(0)' }], { duration: 170, easing: 'ease-out' }).finished
+  }
+
+  /** A big yawn. */
+  async function yawn() {
+    Sound.yawn()
+    show(mouth, true)
+    show(smile, false)
+    await head.animate(
+      [{ transform: 'rotate(0)' }, { transform: 'rotate(-18deg)', offset: 0.3 }, { transform: 'rotate(-18deg)', offset: 0.7 }, { transform: 'rotate(0)' }],
+      { duration: 1300, easing: 'ease-in-out' },
+    ).finished
+    show(mouth, false)
+    show(smile, true)
   }
 
   async function shake() {
@@ -352,7 +415,8 @@ const Reksio = (() => {
     /** Mouth position in scene units, for effects. */
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
     walkTo, stopWalking, face, tick, bark, nod, lick, lap, shake, paddle, duck, holdBone,
-    beginStretch, endStretch, hop, sniff, lookAround, scratch,
+    beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
+    stamp,
     MIN_X, MAX_X,
   }
 })()
