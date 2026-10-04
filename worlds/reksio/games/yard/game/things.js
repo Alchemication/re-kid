@@ -283,7 +283,7 @@ const Things = (() => {
     const bar = $('trap-bar')
     const cheese = $('cheese')
     await Reksio.stamp(() => {
-      Sound.thump()
+      Sound.stamp(0)
       Music.react.stamp()
       burst(Reksio.x + PAW_REACH, GROUND, 5, 'dust', { height: 22, reach: 40, size: 3.5 })
       // the thump sets the trap off: SNAP, it jumps, and the cheese flies
@@ -603,7 +603,8 @@ const Things = (() => {
           if (i > stamped) await Reksio.walkTo(FRAMES[i] - PAW_REACH)
           Reksio.face(1)
           await Reksio.stamp(() => {
-            Sound.thump()
+            Sound.stamp(i)
+            setTimeout(() => Sound.bip(i * 2), 60) // the print pops in
             Music.react.stamp()
             const print = prints[i]
             print.setAttribute('opacity', '1')

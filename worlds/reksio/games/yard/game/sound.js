@@ -239,10 +239,22 @@ const Sound = (() => {
       hiss(0, 0.16, 0.004, 0.12, 'bandpass', 1300, 1.2)
       hiss(0.05, 0.08, 0.004, 0.1, 'bandpass', 2600, 1.5)
     },
-    /** A rubber-stamp thump. */
-    thump() {
-      tone('sine', 120, 55, 0, 0.5, 0.004, 0.16)
-      hiss(0, 0.12, 0.003, 0.05, 'lowpass', 900)
+    /** The film stamp, after the intro's stamping (Adam's mark): a thud with
+     * a short wooden "tok" on top, alternating dull and bright like the
+     * original's hits. n counts the stamps. */
+    stamp(n = 0) {
+      const bright = n % 2 === 1
+      tone('sine', 140, 60, 0, 0.55, 0.003, 0.14)
+      tone('triangle', bright ? 392 : 294, bright ? 360 : 270, 0, 0.22, 0.002, 0.07)
+      hiss(0, 0.16, 0.002, 0.04, 'bandpass', bright ? 1600 : 800, 1.2)
+    },
+    /** The funny high "bip" over a stamp (Adam's second stamping mark): a
+     * quick upward slide with a hollow, reedy tone. n nudges it up a little,
+     * so a run of stamps climbs. */
+    bip(n = 0) {
+      const up = 2 ** (n / 12)
+      tone('square', 1760 * up, 2500 * up, 0, 0.05, 0.004, 0.06)
+      tone('sine', 1760 * up, 2500 * up, 0, 0.08, 0.004, 0.07)
     },
     /** The rattle of a film reel winding up. */
     reel() { for (let i = 0; i < 14; i++) tone('square', 1300, 1200, i * 0.06, 0.035, 0.002, 0.025) },

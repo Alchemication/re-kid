@@ -144,14 +144,23 @@ const Music = (() => {
 
   // ------------------------------------------------------------ public
 
+  /** Load the samples (once); needs a tap first, like all sound. */
+  let loading = null
+  function prepare() {
+    if (!loading) {
+      bus = Sound.bus()
+      out = bus.ctx.createGain()
+      out.gain.value = VOLUME
+      out.connect(bus.master)
+      loading = load()
+    }
+    return loading
+  }
+
   /** Start on the first tap (browsers need a gesture before sound). */
   async function start() {
-    if (bus) return
-    bus = Sound.bus()
-    out = bus.ctx.createGain()
-    out.gain.value = VOLUME
-    out.connect(bus.master)
-    await load()
+    if (loading) return
+    await prepare()
     running = true
     nextTime = bus.ctx.currentTime + 0.1
     timer = setInterval(tick, 25)
@@ -213,7 +222,7 @@ const Music = (() => {
       play('flexatone', null, t, 0.7, { index: 1 })
       ;[82, 80, 79, 77, 75].forEach((n, k) => play('pizz', n - 12, t + 0.12 + k * 0.07, 0.5))
     },
-    /** A stamp lands: a soft timpani under the thump. */
+    /** A stamp lands: a soft timpani under it. */
     stamp() {
       if (ready) play('timpani', null, bus.ctx.currentTime, 0.5)
     },
@@ -248,5 +257,27 @@ const Music = (() => {
     out.gain.setTargetAtTime(0.0001, t0 + 9, 1.2)
   }
 
-  return { start, setEnergy, setDusk, setRain, react, evening, get ready() { return ready }, get buffers() { return buffers } }
+  /** One part on its own, for listening to it next to the original:
+   * 'hook' (the clarinet tune), 'groove' (one turn of the loop with the
+   * tune), 'stretch' (the climb while held, then the snap back). bpm
+   * replaces the tempo for 'hook' and 'groove'. */
+  async function audition(part, bpm = BPM) {
+    await prepare()
+    const t0 = bus.ctx.currentTime + 0.1
+    const e = 60 / bpm / 2
+    if (part === 'hook') {
+      HOOK.forEach((n, k) => n != null && play('clarinet', n, t0 + k * e, 0.6))
+    } else if (part === 'groove') {
+      const saved = [energy, loopCount]
+      energy = 2
+      loopCount = 0
+      for (let i = 0; i < STEPS; i++) scheduleStep(i, t0 + i * e)
+      ;[energy, loopCount] = saved
+    } else if (part === 'stretch') {
+      for (let n = 0; n < 6; n++) setTimeout(() => react.stretchStep(n), n * 300)
+      setTimeout(() => react.snap(), 6 * 300 + 200)
+    }
+  }
+
+  return { start, audition, setEnergy, setDusk, setRain, react, evening, get ready() { return ready }, get buffers() { return buffers } }
 })()
