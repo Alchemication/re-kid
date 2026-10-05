@@ -272,3 +272,41 @@ body { display: grid; place-items: center; }
 /* the puddle's near edge, in front of his paws, so he stands in the water */
 .paw-water { fill: #8fb3c9; stroke: #5d7e94; stroke-width: 2.5; opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
 .paw-water.on { opacity: 0.85; }
+
+/* ---- the fruit tree, its fruit, and the squirrel ---- */
+.trunk { fill: #7a5233; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.branch-ink { fill: none; stroke: var(--ink); stroke-width: 16; stroke-linecap: round; }
+.branch { fill: none; stroke: #7a5233; stroke-width: 9; stroke-linecap: round; }
+.leaves-ink { fill: var(--ink); stroke: var(--ink); stroke-width: 8; }
+.leaves { fill: #6f8f4a; }
+.leaves-dab { fill: #86a65c; }
+.crown-sway { animation: crown-sway 6s ease-in-out infinite; }
+@keyframes crown-sway {
+  0%, 100% { transform: rotate(calc(-0.25 * var(--sway, 2.5deg))); }
+  50% { transform: rotate(calc(0.25 * var(--sway, 2.5deg))); }
+}
+.apple { fill: #d8432b; stroke: var(--ink); stroke-width: 2.5; }
+.plum { fill: #6b3c78; stroke: var(--ink); stroke-width: 2.5; }
+.plum-line { fill: none; stroke: #4a2654; stroke-width: 1.5; }
+.nut { fill: #a8763e; stroke: var(--ink); stroke-width: 2.5; }
+.nut-cap { fill: #6e4a26; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.fruit-stem { fill: none; stroke: #5a3d22; stroke-width: 2.5; stroke-linecap: round; }
+.fruit-leaf { fill: #6f8f4a; stroke: var(--ink); stroke-width: 1.5; }
+.fruit-shine { fill: #fff; opacity: 0.55; }
+.leaf { fill: #6f8f4a; }
+.nutshell { fill: #8a5a2e; }
+.squirrel-fur, .squirrel-tail { fill: #c0612b; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.squirrel-belly { fill: #f1dcc0; }
+.squirrel-cheek { fill: #d07a46; stroke: var(--ink); stroke-width: 1.2; }
+.squirrel-paws, .squirrel-feet { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
+#tree.not-yet { pointer-events: none; }
+
+/* ---- the blackberry bramble ---- */
+.bramble-leaves { fill: #7f9c55; }
+.bramble-dab { fill: #93b066; }
+.cane { fill: none; stroke: #6b3b4b; stroke-width: 5; stroke-linecap: round; }
+.thorns { fill: none; stroke: #6b3b4b; stroke-width: 2.5; stroke-linecap: round; }
+.berry { fill: #3a1446; stroke: var(--ink); stroke-width: 1.2; }
+.berry-shine { fill: #f1e2f7; }
+.berry-calyx { fill: none; stroke: #4f6e3a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.berry-juice { fill: #5a2a5c; }

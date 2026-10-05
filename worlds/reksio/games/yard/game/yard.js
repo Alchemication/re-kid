@@ -279,6 +279,8 @@
     gate: () => ({ x: Reksio.MAX_X + 20, r: 90 }),
     bird: () => ({ x: Things.perch.x - 30, r: 130 }), // on the ground, under the bird
     trap: () => ({ x: (Things.mouse === 'fed' ? 960 : 1000) + X('trap'), r: 110 }),
+    tree: () => ({ x: 1600 + X('tree'), r: 120 }),
+    berries: () => ({ x: 2330 + X('berries'), r: 110 }),
   }
   const spotEls = {}
 
@@ -659,10 +661,8 @@
       spotEls.bird.setAttribute('cx', SPOTS.bird().x)
       spotEls.bird.style.opacity = Things.flying ? '0' : ''
     }
-    if (spotEls.trap) {
-      spotEls.trap.setAttribute('cx', SPOTS.trap().x)
-      spotEls.trap.style.opacity = Things.ready('trap') ? '' : '0'
-    }
+    if (spotEls.trap) spotEls.trap.setAttribute('cx', SPOTS.trap().x)
+    for (const n of ['trap', 'tree']) if (spotEls[n]) spotEls[n].style.opacity = Things.ready(n) ? '' : '0'
     const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
     if (Math.abs(camX - shownCam) > 0.05) {
@@ -681,7 +681,7 @@
   paint()
 
   // this play's layout: move the movable things, hide what isn't in play
-  const GROUPS = { bowl: 'bowl', tap: 'tap', flowers: 'flowers', dig: 'mound', film: 'film', trap: 'trap', gate: 'fence' }
+  const GROUPS = { bowl: 'bowl', tap: 'tap', flowers: 'flowers', dig: 'mound', film: 'film', trap: 'trap', tree: 'tree', berries: 'bramble', gate: 'fence' }
   for (const [name, id] of Object.entries(GROUPS)) {
     const g = $(id)
     if (Layout.hidden.includes(name)) g.style.display = 'none'

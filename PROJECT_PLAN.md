@@ -227,9 +227,9 @@ wake Reksio at home.
    fly, getting startled.
 
    **Variety and reach:** each play counts the doghouse plus three of the
-   other six main things and brings two of the three creatures; the flowers
+   other eight main things and brings two of the three creatures; the flowers
    only sometimes. The doghouse and gate are fixed anchors; the things
-   between (bowl, tap, flowers, mound, film, mouse trap) come in a shuffled order with
+   between (bowl, tap, flowers, mound, film, mouse trap, tree, bramble) come in a shuffled order with
    uneven gaps of at least a dog's length, in a yard 4000 wide; puddles and
    the bird's wall perches go in the widest gaps (`layout.js`; the last play
    is remembered in the browser so the next prefers what wasn't seen). Every usable thing has a
@@ -254,12 +254,19 @@ wake Reksio at home.
    for testing. **To watch with Eliot:** does a mouse that can't eat worry
    him, or does he want to help?
 
+   **Tree and bramble (`tree.js`, `things.js`):** some plays have a fruit
+   tree (apples, plums or hazelnuts). A hungry snail or squirrel waits under
+   it; Reksio shakes the trunk and the fruit falls. Snails slowly eat and more
+   come; the squirrel eats a nut, buries one and runs up the trunk. A repeat
+   may bonk Reksio on the head. Some plays have a blackberry bramble: he
+   flicks a berry up, jumps and catches it, licks his lips (or misses and
+   gobbles it off the ground). `?fruit=apple|plum|nut` and
+   `?visitor-at=SECONDS` force a play.
+
    **Next ideas for a living yard** (pick and order with Adam; each should
    teach a small cause and effect a toddler can see):
-   - *Tree:* a fruit tree in the yard; now and then an apple or a nut drops
-     (Reksio looks up, sniffs it). A squirrel comes down for nuts, eats one
-     and buries another; a snail eats a fallen apple slowly; wasps come to
-     the fruit. Wind shakes more down. Wondering at it is the point.
+   - *More on the tree:* wasps at fallen fruit; a gust of wind shaking a
+     fruit down on its own; Eliot giving an apple to a snail directly.
    - *Butterfly:* only in sunshine; flutters from flower to flower, sometimes
      lands on Reksio's nose (he goes cross-eyed, sneezes); hides from rain.
    - *Wasp:* hovers at the bowl when there is food; Reksio barks, it circles

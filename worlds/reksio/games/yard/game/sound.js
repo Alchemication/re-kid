@@ -363,6 +363,18 @@ const Sound = (() => {
         bp.frequency.setTargetAtTime(320 + level * 520, now, 0.4)
       }
     },
+    /** Leaves rustling as the tree is shaken. */
+    rustle() { for (let i = 0; i < 4; i++) hiss(i * 0.09, 0.07, 0.02, 0.12, 'bandpass', 3200 + Math.random() * 1200, 0.9) },
+    /** An apple or plum landing in the grass. */
+    plop() { tone('sine', 260, 110, 0, 0.22, 0.003, 0.1); hiss(0, 0.05, 0.002, 0.04, 'lowpass', 900) },
+    /** A hazelnut landing: a little wooden tock. */
+    tok() { tone('triangle', 950, 700, 0, 0.12, 0.001, 0.05) },
+    /** A squirrel's quick chitter. */
+    chitter() { for (let i = 0; i < 5; i++) tone('square', 2600 + (i % 2) * 300, 2300, i * 0.05, 0.025, 0.002, 0.03) },
+    /** A berry flicked up into the air. */
+    toss() { tone('sine', 420, 1100, 0, 0.1, 0.01, 0.18) },
+    /** Fruit on the head: bonk. */
+    bonk() { tone('triangle', 520, 190, 0, 0.25, 0.002, 0.16); hiss(0, 0.06, 0.002, 0.04, 'bandpass', 1400) },
     /** Paws in a puddle. */
     splash() {
       hiss(0, 0.16, 0.004, 0.12, 'bandpass', 1300, 1.2)

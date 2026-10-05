@@ -30,6 +30,7 @@ const Reksio = (() => {
   const legs = ['leg-1', 'leg-2', 'leg-3', 'leg-4'].map($)
   const mouth = $('rk-mouth')
   const tongue = $('rk-tongue')
+  const lickTip = $('rk-lick')
   const smile = $('rk-smile')
   const bone = $('rk-bone')
   const bodyInk = $('rk-body-ink')
@@ -95,8 +96,20 @@ const Reksio = (() => {
     legs[2].style.transform = `rotate(${-swing * 0.85}deg)`
   }
 
+  /** A walking dog holds no pose: drop any finished gesture still holding
+   * his body, head or legs (a rear-up, a sit, a raised leg), however it was
+   * left behind. Gestures still in motion (a pounce, a startle) are left be. */
+  function dropHeldPoses() {
+    for (const e of [bob, head, ...legs]) {
+      for (const a of e.getAnimations()) {
+        if (a.playState === 'finished' && a.effect.getTiming().fill === 'forwards') a.cancel()
+      }
+    }
+  }
+
   function tick(dt) {
     if (target !== null && !stretching) {
+      dropHeldPoses()
       const dx = target - x
       const dist = Math.abs(dx)
       // speed up to the gait's speed, and slow down in time to stop
@@ -227,11 +240,15 @@ const Reksio = (() => {
     await anim.finished
   }
 
+  /** Lick his lips: the tongue tip sweeps up over his nose and back. */
   async function lick() {
-    show(tongue, true)
+    show(lickTip, true)
     show(smile, false)
-    await wait(500)
-    show(tongue, false)
+    await lickTip.animate(
+      [{ transform: 'rotate(18deg) scale(0.6)' }, { transform: 'rotate(-6deg) scale(1)', offset: 0.45 }, { transform: 'rotate(4deg) scale(1)', offset: 0.7 }, { transform: 'rotate(18deg) scale(0.5)' }],
+      { duration: 520, easing: 'ease-in-out' },
+    ).finished.catch(() => {})
+    show(lickTip, false)
     show(smile, true)
   }
 
@@ -287,6 +304,7 @@ const Reksio = (() => {
     pose += 1
     for (const e of [bob, head, ...legs]) e.getAnimations().forEach((a) => a.cancel())
     show(tongue, false)
+    show(lickTip, false)
     show(mouth, false)
     show(smile, true)
   }

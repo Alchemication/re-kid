@@ -65,6 +65,47 @@
                 <circle class="eye" cx="48" cy="-250" r="2" />
                 <circle class="mouse-nose" cx="58" cy="-246" r="2.6" />
         </g>
+        <g id="icon-tree">
+                <rect class="trunk" x="51" y="-250" width="10" height="24" />
+                <circle class="leaves-ink" cx="56" cy="-262" r="22" />
+                <circle class="leaves" cx="56" cy="-262" r="22" />
+                <use class="icon-fruit" href="#fruit-apple" transform="translate(46 -262) scale(0.5)" />
+                <use class="icon-fruit" href="#fruit-apple" transform="translate(64 -270) scale(0.5)" />
+                <use class="icon-fruit" href="#fruit-apple" transform="translate(63 -254) scale(0.5)" />
+        </g>
+        <g id="icon-berries">
+                <circle class="bramble-leaves" cx="56" cy="-254" r="20" />
+                <use href="#berry" transform="translate(44 -260) scale(1.4)" />
+                <use href="#berry" transform="translate(64 -264) scale(1.4)" />
+                <use href="#berry" transform="translate(58 -246) scale(1.4)" />
+        </g>
+        <!-- a blackberry: a cluster of little drupelets, round (0, 0) -->
+        <g id="berry">
+          <circle class="berry" cx="-3" cy="-1" r="3.4" />
+          <circle class="berry" cx="3" cy="-1" r="3.4" />
+          <circle class="berry" cx="0" cy="-5" r="3.4" />
+          <circle class="berry" cx="-2" cy="4" r="3.4" />
+          <circle class="berry" cx="3" cy="4" r="3.4" />
+          <circle class="berry-shine" cx="-2" cy="-5" r="1.4" />
+          <circle class="berry-shine" cx="3.5" cy="-1.5" r="1" />
+          <path class="berry-calyx" d="M-4 -8 L0 -11 L4 -8" />
+        </g>
+        <!-- fruit, drawn round (0, 0) -->
+        <g id="fruit-apple">
+          <circle class="apple" r="11" />
+          <path class="fruit-stem" d="M0 -10 q1 -5 3 -7" />
+          <path class="fruit-leaf" d="M2 -14 q7 -5 11 0 q-6 4 -11 0 z" />
+          <circle class="fruit-shine" cx="-4" cy="-4" r="2.5" />
+        </g>
+        <g id="fruit-plum">
+          <ellipse class="plum" rx="9" ry="11" />
+          <path class="fruit-stem" d="M0 -10 q1 -5 3 -7" />
+          <path class="plum-line" d="M1 -9 q-4 9 0 18" />
+        </g>
+        <g id="fruit-nut">
+          <circle class="nut" cy="2" r="8" />
+          <path class="nut-cap" d="M-9 -2 Q-9 -10 0 -11 Q9 -10 9 -2 Q4 -4 0 -3 Q-4 -4 -9 -2 Z" />
+        </g>
         <path id="heart-shape" d="M0 10 C-16 -2 -14 -16 -5 -16 C-2 -16 0 -13 0 -11 C0 -13 2 -16 5 -16 C14 -16 16 -2 0 10 Z" />
         <g id="twinkle-shape">
           <path d="M0 -14 L3 -3 L14 0 L3 3 L0 14 L-3 3 L-14 0 L-3 -3 Z" />
@@ -238,6 +279,60 @@
             </g>
           </g>
 
+          <!-- ============ a blackberry bramble by the wall ============ -->
+          <g id="bramble" class="thing" data-thing="berries" data-hint-y="640">
+            <rect class="hit" x="2390" y="640" width="260" height="190" />
+            <path class="cane" d="M2420 806 Q2398 720 2452 668 M2620 806 Q2650 730 2600 676 M2530 800 Q2540 690 2500 650" />
+            <path class="thorns" d="M2404 760 l-7 -2 M2414 712 l-7 -5 M2436 680 l-4 -7 M2642 760 l7 -2 M2634 712 l7 -4 M2612 684 l5 -6 M2536 712 l7 -3 M2520 668 l5 -6" />
+            <circle class="leaves-ink" cx="2452" cy="762" r="50" />
+            <circle class="leaves-ink" cx="2522" cy="736" r="62" />
+            <circle class="leaves-ink" cx="2592" cy="764" r="48" />
+            <circle class="leaves-ink" cx="2486" cy="712" r="40" />
+            <circle class="leaves-ink" cx="2562" cy="706" r="38" />
+            <circle class="bramble-leaves" cx="2452" cy="762" r="50" />
+            <circle class="bramble-leaves" cx="2522" cy="736" r="62" />
+            <circle class="bramble-leaves" cx="2592" cy="764" r="48" />
+            <circle class="bramble-leaves" cx="2486" cy="712" r="40" />
+            <circle class="bramble-leaves" cx="2562" cy="706" r="38" />
+            <circle class="bramble-dab" cx="2500" cy="740" r="16" />
+            <circle class="bramble-dab" cx="2560" cy="730" r="14" />
+            <circle class="bramble-dab" cx="2470" cy="770" r="12" />
+            <circle class="bramble-dab" cx="2600" cy="760" r="12" />
+            <g id="berry-bush"></g>
+          </g>
+
+          <!-- ============ a fruit tree by the wall (tree.js: fruit, snails, squirrel) ============ -->
+          <g id="tree" class="thing" data-thing="tree" data-hint-y="260">
+            <rect class="hit" x="1480" y="240" width="360" height="590" />
+            <path class="branch-ink" d="M1652 540 Q1610 490 1574 440 M1668 520 Q1716 470 1752 432" />
+            <path class="branch" d="M1652 540 Q1610 490 1574 440 M1668 520 Q1716 470 1752 432" />
+            <path class="trunk" d="M1638 812 C1646 720 1646 600 1634 500 L1688 500 C1676 600 1676 720 1684 812 Z" />
+            <g class="crown-sway" style="transform-origin: 1660px 520px">
+              <g id="crown-shake" style="transform-origin: 1660px 520px">
+                  <circle class="leaves-ink" cx="1660" cy="360" r="108" />
+                  <circle class="leaves-ink" cx="1572" cy="412" r="78" />
+                  <circle class="leaves-ink" cx="1752" cy="410" r="82" />
+                  <circle class="leaves-ink" cx="1612" cy="302" r="72" />
+                  <circle class="leaves-ink" cx="1712" cy="298" r="78" />
+                  <circle class="leaves-ink" cx="1660" cy="450" r="70" />
+                  <circle class="leaves" cx="1660" cy="360" r="108" />
+                  <circle class="leaves" cx="1572" cy="412" r="78" />
+                  <circle class="leaves" cx="1752" cy="410" r="82" />
+                  <circle class="leaves" cx="1612" cy="302" r="72" />
+                  <circle class="leaves" cx="1712" cy="298" r="78" />
+                  <circle class="leaves" cx="1660" cy="450" r="70" />
+                  <circle class="leaves-dab" cx="1620" cy="330" r="22" />
+                  <circle class="leaves-dab" cx="1700" cy="280" r="18" />
+                  <circle class="leaves-dab" cx="1760" cy="390" r="20" />
+                  <circle class="leaves-dab" cx="1580" cy="400" r="16" />
+                  <circle class="leaves-dab" cx="1680" cy="380" r="26" />
+                  <circle class="leaves-dab" cx="1640" cy="440" r="18" />
+                <g id="tree-fruit"></g>
+              </g>
+            </g>
+            <g id="tree-ground"></g>
+          </g>
+
           <!-- ============ a mouse trap with cheese, by a mouse hole in the wall ============ -->
           <g id="trap" class="thing" data-thing="trap" data-hint-y="700">
             <rect class="hit" x="960" y="660" width="240" height="170" />
@@ -344,13 +439,16 @@
                 <!-- head: a big rounded skull flowing into a long, drooping muzzle -->
                 <g class="front-part"><g id="rk-head" style="transform-origin: 20px -92px">
                   <path id="rk-mouth" class="mouth" d="M44 -78 L88 -78 Q82 -60 62 -62 Q48 -64 44 -78 Z" opacity="0" />
-                  <path id="rk-tongue" class="tongue" d="M80 -78 Q92 -76 94 -58 Q86 -56 80 -68 Z" opacity="0" />
+                  <!-- tongue out (lapping, catching drops) -->
+                  <path id="rk-tongue" class="tongue" d="M78 -77 Q89 -77 90 -68 Q90 -63 85 -64 Q80 -66 78 -72 Z" opacity="0" />
                   <path class="ink" d="M2 -104 C0 -128 20 -138 40 -132 C58 -126 80 -114 92 -100 C100 -90 96 -78 86 -76 L44 -76 C26 -76 10 -84 2 -104 Z" />
                   <path class="white" d="M2 -104 C0 -128 20 -138 40 -132 C58 -126 80 -114 92 -100 C100 -90 96 -78 86 -76 L44 -76 C26 -76 10 -84 2 -104 Z" />
                   <ellipse class="eye" cx="93" cy="-89" rx="5.5" ry="6" />
                   <path class="lid" d="M34 -124 Q42 -129 50 -123" />
                   <circle id="rk-eye" class="eye" cx="42" cy="-116" r="3.4" />
                   <path id="rk-smile" class="lid" d="M62 -79 Q72 -77 82 -80" />
+                  <!-- the tongue tip that licks his lips, in front of the muzzle -->
+                  <path id="rk-lick" class="tongue" style="transform-origin: 86px -77px" d="M84 -77 Q100 -76 104 -84 Q106 -93 100 -94 Q98 -86 88 -80 Z" opacity="0" />
                   <!-- the ear: one flap, folded forward over the top of the head -->
                   <path class="ear-ochre" d="M10 -124 Q8 -146 28 -150 Q46 -152 52 -136 Q44 -130 36 -130 Q26 -128 22 -122 Z" />
                   <g id="rk-bone" opacity="0">
@@ -380,6 +478,10 @@
               <use class="wish-icon" data-wish="film" href="#icon-film" opacity="0" />
               <!-- the mouse who wants her cheese -->
               <use class="wish-icon" data-wish="trap" href="#icon-trap" opacity="0" />
+              <!-- blackberries -->
+              <use class="wish-icon" data-wish="berries" href="#icon-berries" opacity="0" />
+              <!-- the tree, with someone hungry under it -->
+              <use class="wish-icon" data-wish="tree" href="#icon-tree" opacity="0" />
               <!-- sleep in the doghouse -->
               <use class="wish-icon" data-wish="doghouse" href="#icon-doghouse" opacity="0" />
             </g>
@@ -415,6 +517,7 @@
   <script src="reksio.js"></script>
   <script src="creatures.js"></script>
   <script src="weather.js"></script>
+  <script src="tree.js"></script>
   <script src="things.js"></script>
   <script src="yard.js"></script>
 </body>

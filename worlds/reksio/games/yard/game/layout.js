@@ -1,5 +1,5 @@
 // What this play of the yard holds, decided once at load: which main things
-// count (the doghouse and three of the other six), which creatures are about
+// count (the doghouse and three of the other eight), which creatures are about
 // (two of them), whether the flowers are out, whether it rains, and where
 // everything stands. Not everything at once, so the next play has something
 // new; the last play is remembered and things not seen then are preferred.
@@ -19,7 +19,7 @@ const Layout = (() => {
   const ROW_FROM = 725 // the doghouse's right edge
   const ROW_TO = MAX_X - 70 // the gate's action spot starts here
   const MIN_GAP = 140 // at least a dog's length between two things
-  const MAIN_POOL = ['bowl', 'tap', 'bird', 'dig', 'film', 'trap'] // doghouse always counts
+  const MAIN_POOL = ['bowl', 'tap', 'bird', 'dig', 'film', 'trap', 'tree', 'berries'] // doghouse always counts
   const MAINS_PER_PLAY = 3
   const CREATURE_POOL = ['fly', 'bee', 'spider']
   const CREATURES_PER_PLAY = 2
@@ -29,7 +29,7 @@ const Layout = (() => {
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
   // Each thing on the ground as drawn: from the left of its drawing or action
   // spot (whichever is further left) to the right of the other.
-  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290] }
+  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650] }
 
   const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
 
@@ -69,9 +69,13 @@ const Layout = (() => {
   const asked = (params.get('mains') || '').split(',').filter((n) => MAIN_POOL.includes(n))
   if (asked.length) mains.splice(1, mains.length, ...asked)
   const mouseAt = params.has('mouse-at') ? Number(params.get('mouse-at')) : null
+  // the tree's fruit this play (?fruit=apple|plum|nut forces it), and when its visitor comes
+  const FRUITS = ['apple', 'plum', 'nut']
+  const fruit = FRUITS.includes(params.get('fruit')) ? params.get('fruit') : FRUITS[Math.floor(Math.random() * FRUITS.length)]
+  const visitorAt = params.has('visitor-at') ? Number(params.get('visitor-at')) : null
 
   // props that are only there when they count this time (the tap is on the wall for good)
-  const hidden = ['bowl', 'dig', 'film', 'trap'].filter((n) => !mains.includes(n))
+  const hidden = ['bowl', 'dig', 'film', 'trap', 'tree', 'berries'].filter((n) => !mains.includes(n))
   if (!flowers) hidden.push('flowers')
 
   // the row: things in a new order, the spare room shared out unevenly as gaps
@@ -108,7 +112,7 @@ const Layout = (() => {
   }
 
   return {
-    WORLD_W, MIN_X, MAX_X, mains, creatures, flowers, rain, rainAt, mouseAt, shift, hidden, puddles, perches,
+    WORLD_W, MIN_X, MAX_X, mains, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, shift, hidden, puddles, perches,
     x: (name) => shift[name] || 0,
   }
 })()

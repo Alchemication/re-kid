@@ -23,7 +23,7 @@ principles:
 - text: The yard is built to grow. Later it becomes the game's home screen, and new things in it lead into episode games — say, a toy rocket by the doghouse that starts Kosmonauta.
   origin: invented
 
-- text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird, his doghouse, the film strip or the mouse, the nearest one he hasn't done — and that thing twinkles. Only this play's main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
+- text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird, his doghouse, the film strip, the mouse, the tree or the blackberries, the nearest one he hasn't done — and that thing twinkles. Only this play's main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
   origin: inspired
   refs: [world:humour]
 - text: Tapping a creature sends Reksio after it in his own way — he stalks and pounces on the fly, sniffs the bee and jumps back, looks up at the web and gets a fright when the spider drops onto his nose.
@@ -32,7 +32,7 @@ principles:
   origin: invented
 - text: It is always clear what can be tapped and what is left. Every usable thing has an action spot — a wide, faint oval on the ground — that glows when Reksio stands in it; tapping the spot works like tapping the thing, and it is a big, low target for small fingers (the bird's spot is on the ground under its perch). A main thing's spot is bright until it is done, then faint like the extras'; nothing floats over the things themselves, to keep the picture clean. A row of pictures in the corner fills in as each main thing is done, and tapping a picture sends Reksio there.
   origin: invented
-- text: Not everything at once. Each play counts the doghouse and three of the other six main things, brings two of the creatures, and only sometimes the flowers; the bowl, mound, film strip and mouse trap appear only when they count. The doghouse stays by the house and the gate at the far end, so the child always knows where home and the way out are; everything between comes in a new order each play, with wide, uneven gaps and nothing overlapping, so each play is a small new walk to explore. Puddles and the bird's perches fall in the open stretches. The last play is remembered so the next one prefers what wasn't seen.
+- text: Not everything at once. Each play counts the doghouse and three of the other eight main things, brings two of the creatures, and only sometimes the flowers; the bowl, mound, film strip, mouse trap, tree and bramble appear only when they count. The doghouse stays by the house and the gate at the far end, so the child always knows where home and the way out are; everything between comes in a new order each play, with wide, uneven gaps and nothing overlapping, so each play is a small new walk to explore. Puddles and the bird's perches fall in the open stretches. The last play is remembered so the next one prefers what wasn't seen.
   origin: invented
 - text: The yard is quietly alive. Small creatures go about their own business and meet each other — a fly wanders, lands on the bowl and dodges Reksio's snaps; a bumblebee works the flowers and huffs off if he comes close; a spider builds a web in the corner by the house, dangles on its swinging thread, catches the fly and wraps it, and hides when Reksio barks. Cartoon physics (momentum, pendulums, startled darts), small and mostly quiet, never in the way.
   origin: invented
@@ -169,6 +169,19 @@ scenes:
     origin: inspired
     refs: ['world:themes_and_values[0]']
   sound: {text: 'Tiny squeaks, a stamp, the crack and twang of the trap, nibbling.', origin: invented}
+- id: tree
+  action: {text: 'Once someone hungry is waiting under it, tap the fruit tree.', origin: invented}
+  result:
+    text: In some plays a tree by the wall hangs with apples, plums or hazelnuts. A while in, someone hungry turns up at its foot and looks up at fruit it can't reach — a snail for apples or plums, a squirrel for nuts. Reksio rears up against the trunk and shakes it three times; leaves fly and fruit drops. The snail creeps to it and slowly eats it, and over the next minute more snails come to share. The squirrel eats one nut, buries another, and runs off up the trunk. Shaking again drops more, and once an apple lands on Reksio's head and he sits down, dazed.
+    origin: inspired
+    refs: ['world:themes_and_values[0]']
+  sound: {text: 'Rustling leaves, a plop or a tock as fruit lands, quiet nibbling, a squirrel''s chitter, a bonk.', origin: invented}
+- id: berries
+  action: {text: Tap the blackberry bramble., origin: invented}
+  result:
+    text: Reksio sniffs the bramble, nips off a blackberry, flicks it high into the air with his head, jumps, catches it in his mouth, chews, and licks his lips. Doing it again, he sometimes misses — it sails over his head, and he spins round and gobbles it off the ground.
+    origin: invented
+  sound: {text: 'A snap, a rising whoosh, a snap as he catches it, munching.', origin: invented}
 
 ending:
   text: Once Reksio has done this play's main things, the sky turns to evening, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.

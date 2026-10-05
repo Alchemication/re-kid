@@ -11,7 +11,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Layout, Sound, Music, Reksio */
+/* global Layout, Sound, Music, Reksio, Tree */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -390,6 +390,89 @@ const Things = (() => {
     setTimeout(mouseComesOut, (Layout.mouseAt ?? rnd(...MOUSE_AT_S)) * 1000)
   }
 
+  // ------------------------------------------------------------ blackberries
+
+  // Berries on the bramble, as drawn; the ones nearest Reksio (on the left,
+  // where he stands) go first.
+  const ON_BUSH = [[2418, 758], [2436, 718], [2462, 686], [2500, 676], [2470, 744], [2540, 668], [2512, 728], [2582, 684], [2556, 742], [2612, 722], [2628, 760]]
+  const BERRY_SCALE = 1.7 // on the bush
+  const FLYING_BERRY = 2.2 // bigger in the air, so the child can follow it
+  const TOSS_UP = 300 // how high he flicks a berry above his nose
+  const CATCH_HOP = 60 // and how high he jumps to catch it
+  let onBush = []
+
+  function makeBerries() {
+    if (Layout.hidden.includes('berries')) return
+    const bush = $('berry-bush')
+    onBush = ON_BUSH.map(([x, y]) => {
+      const u = document.createElementNS(SVG_NS, 'use')
+      u.setAttribute('href', '#berry')
+      u.setAttribute('transform', `translate(${x} ${y}) scale(${BERRY_SCALE})`)
+      bush.appendChild(u)
+      return { x, y, el: u }
+    })
+  }
+
+  /** Nip a berry off, flick it up high, jump and catch it (or, the extra,
+   * miss, and gobble it off the ground), then lick his lips. */
+  async function berryToss(extra) {
+    if (!onBush.length) {
+      // all eaten: a puzzled sniff
+      await Reksio.sniff(3)
+      await Reksio.lookAround(700)
+      return
+    }
+    await Reksio.sniff(2)
+    const b = onBush.shift()
+    await Reksio.nod(16, 320)
+    b.el.remove()
+    Sound.snap()
+    const m = Reksio.mouth()
+    const berry = document.createElementNS(SVG_NS, 'use')
+    berry.setAttribute('href', '#berry')
+    fx.appendChild(berry)
+    const at = (x, y) => ({ transform: `translate(${x}px, ${y}px) scale(${FLYING_BERRY})` })
+    Reksio.nod(-30, 380) // the flick
+    Sound.toss()
+    const catchY = m.y - CATCH_HOP * 1.3
+    if (!extra) {
+      const flight = berry.animate(
+        [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x + 12, m.y - TOSS_UP), offset: 0.55, easing: 'ease-in' }, at(m.x + 4, catchY)],
+        { duration: 1100, fill: 'forwards' },
+      )
+      await wait(1100 - (480 + CATCH_HOP * 3) * 0.55) // jump so he's at the top as it comes down
+      const jump = Reksio.hop(CATCH_HOP, 1)
+      await flight.finished
+      berry.remove()
+      Sound.snap()
+      Music.react.wish()
+      await jump
+    } else {
+      // too far: it sails over his head and lands behind him
+      const lands = m.x - Reksio.facing * 170
+      const flight = berry.animate(
+        [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x - Reksio.facing * 60, m.y - TOSS_UP), offset: 0.5, easing: 'ease-in' }, at(lands, 806)],
+        { duration: 1300, fill: 'forwards' },
+      )
+      await wait(500)
+      await Reksio.hop(CATCH_HOP, 1)
+      Sound.snap() // snaps at nothing
+      await flight.finished
+      Sound.plop()
+      await Reksio.lookAround(500)
+      Reksio.face(-Reksio.facing)
+      await Reksio.pounce(lands)
+      berry.remove()
+    }
+    for (let i = 0; i < 3; i++) {
+      Sound.munch()
+      await Reksio.nod(6, 220)
+    }
+    await Reksio.lick()
+    await wait(150)
+    await Reksio.lick()
+  }
+
   // ------------------------------------------------------------ things
 
   const food = $('food')
@@ -682,6 +765,12 @@ const Things = (() => {
         await Reksio.nod(-14, 700)
       },
     },
+    tree: Tree.thing,
+    berries: {
+      at: () => 2310 + X('berries'),
+      face: 1,
+      run: ({ extra }) => berryToss(extra),
+    },
     trap: {
       // before: stand so his paws land just short of the trap; after: nose at her hole
       at: () => (mouse === 'fed' ? HOLE.x - 210 : TRAP_X - 60 - PAW_REACH) + X('trap'),
@@ -693,16 +782,19 @@ const Things = (() => {
     },
   }
 
-  /** Can it be used now? The trap only once the mouse is out; the bird only
-   * while it is sitting somewhere. */
+  /** Can it be used now? The trap only once the mouse is out, the tree once
+   * someone hungry is under it, the bird only while it sits somewhere. */
   const ready = (name) =>
-    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !flying : true
+    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !flying : name === 'tree' ? Tree.ready : true
 
   function init({ ended }) {
     isEnded = ended
     birdAt(PERCHES[0])
     setTimeout(birdIdle, 3000)
     startMouse()
+    makeBerries()
+    Tree.init({ ended, effects: { burst, twinkle } })
+    document.querySelectorAll('.icon-fruit').forEach((u) => u.setAttribute('href', `#fruit-${Layout.fruit}`))
   }
 
   return {
