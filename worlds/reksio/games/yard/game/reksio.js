@@ -264,15 +264,15 @@ const Reksio = (() => {
     await head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(22deg)' }], { duration: 220, easing: 'ease-out' }).finished
     show(tongue, true)
     show(smile, false)
-    const dip = head.animate(
+    const dip = ending(head.animate(
       [{ transform: 'rotate(22deg)' }, { transform: 'rotate(30deg)' }, { transform: 'rotate(22deg)' }],
       { duration: 190, iterations: n, easing: 'ease-in-out' },
-    )
+    ))
     for (let i = 0; i < n; i++) {
       Sound.lap()
       await wait(190)
     }
-    await dip.finished
+    await dip
     show(tongue, false)
     show(smile, true)
     await head.animate([{ transform: 'rotate(22deg)' }, { transform: 'rotate(0)' }], { duration: 260, easing: 'ease-in-out' }).finished
@@ -323,6 +323,17 @@ const Reksio = (() => {
     show(lickTip, false)
     show(mouth, false)
     show(smile, true)
+  }
+
+  /** An animation's end, taken the moment it starts. Await this, not
+   * `anim.finished` later on: once an animation is cancelled (relax() does
+   * that), its `finished` is replaced by a promise that never settles, and a
+   * gesture awaiting it would hang for good, leaving him busy and deaf to
+   * taps. Taken early, a cancel rejects it and the gesture just stops. */
+  function ending(anim) {
+    const done = anim.finished
+    done.catch(() => {}) // cut short: whoever awaits it hears; nobody else need
+    return done
   }
 
   /** Nose to the ground, a few sniffs (how many, and how low, varies). */
@@ -441,13 +452,13 @@ const Reksio = (() => {
     face(tx > x ? 1 : -1)
     const leap = Math.max(-160, Math.min(160, tx - x))
     walkTo(x + leap)
-    const up = bob.animate(
+    const up = ending(bob.animate(
       [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-50px) rotate(-14deg)', offset: 0.45 }, { transform: 'translateY(0) rotate(4deg)', offset: 0.85 }, { transform: 'translateY(0) rotate(0)' }],
       { duration: 620, easing: 'ease-out' },
-    )
+    ))
     await wait(200)
     await snap(2)
-    await up.finished
+    await up
   }
 
   /** Chase and bite his own tail: fast turns, snapping. */

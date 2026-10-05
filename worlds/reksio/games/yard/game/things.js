@@ -440,9 +440,10 @@ const Things = (() => {
         [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x + 12, m.y - TOSS_UP), offset: 0.55, easing: 'ease-in' }, at(m.x + 4, catchY)],
         { duration: 1100, fill: 'forwards' },
       )
+      const flightDone = flight.finished // taken now: see Reksio's ending()
       await wait(1100 - (480 + CATCH_HOP * 3) * 0.55) // jump so he's at the top as it comes down
       const jump = Reksio.hop(CATCH_HOP, 1)
-      await flight.finished
+      await flightDone
       berry.remove()
       Sound.snap()
       Music.react.wish()
@@ -454,10 +455,11 @@ const Things = (() => {
         [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x - Reksio.facing * 60, m.y - TOSS_UP), offset: 0.5, easing: 'ease-in' }, at(lands, 806)],
         { duration: 1300, fill: 'forwards' },
       )
+      const flightDone = flight.finished // taken now: see Reksio's ending()
       await wait(500)
       await Reksio.hop(CATCH_HOP, 1)
       Sound.snap() // snaps at nothing
-      await flight.finished
+      await flightDone
       Sound.plop()
       await Reksio.lookAround(500)
       Reksio.face(-Reksio.facing)
