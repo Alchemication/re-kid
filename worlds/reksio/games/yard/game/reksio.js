@@ -100,6 +100,7 @@ const Reksio = (() => {
    * his body, head or legs (a rear-up, a sit, a raised leg), however it was
    * left behind. Gestures still in motion (a pounce, a startle) are left be. */
   function dropHeldPoses() {
+    if (current !== 'stand') return relax() // walking off from a rest pose: up first
     for (const e of [bob, head, ...legs]) {
       for (const a of e.getAnimations()) {
         if (a.playState === 'finished' && a.effect.getTiming().fill === 'forwards') a.cancel()
@@ -296,6 +297,7 @@ const Reksio = (() => {
   // Gestures that hold a pose (sitting, sniffing, catching drops) note `pose`
   // when they start; relax() bumps it, so a cut-short gesture stops quietly.
   let pose = 0
+  const RELAX_MS = 220 // how fast he springs up from a rest when asked to do something
 
   /** Drop whatever pose he is holding, at once: someone has asked him to do
    * something else. A gesture cut short this way ends early (its awaited
@@ -303,6 +305,12 @@ const Reksio = (() => {
   function relax() {
     pose += 1
     for (const e of [bob, head, tail, ...legs]) e.getAnimations().forEach((a) => a.cancel())
+    if (current !== 'stand') {
+      // up quickly, but not in a blink
+      const from = POSES[current]
+      for (const [e, part] of PARTS()) e.animate([{ transform: from[part] }, { transform: POSES.stand[part] }], { duration: RELAX_MS, easing: 'ease-out' })
+      current = 'stand'
+    }
     show(eyeShut, false)
     show(eye, true)
     show(tongue, false)
@@ -466,57 +474,61 @@ const Reksio = (() => {
 
   // ------------------------------------------------------------ resting
 
-  // Resting poses, for when he's left alone a while. Each part's transform
-  // (the body turns about his haunch: pivot -30,-40 in his own units, while
-  // the bob's transform origin is 0,-40).
+  // Resting poses, for when he's left alone a while. Every pose gives each
+  // part its transform in the same form, so moving from one to the next is
+  // a smooth blend of the same numbers. The body turns about his haunch
+  // (pivot -30,-40 in his own units; the bob's transform origin is 0,-40).
+  const pose3 = (x, y, deg, back = 0) => `translate(${x}px, ${y}px) rotate(${deg}deg) translate(${back}px, 0px)`
+  const headAt = (deg, x = 0, y = 0) => `rotate(${deg}deg) translate(${x}px, ${y}px)`
+  const turn = (deg) => `rotate(${deg}deg)`
+  const pose5 = (bob, head, front, rear, tail = 0) => ({ bob, head, front: turn(front), rear: turn(rear), tail: turn(tail) })
   const POSES = {
-    // rump down on the ground, back legs folded under, front legs upright,
-    // head level: watching the yard
-    sit: {
-      bob: 'translate(-30px, 30px) rotate(-30deg) translate(30px, 0px)',
-      front: 'rotate(30deg)',
-      rear: 'rotate(-45deg)',
-      head: 'rotate(18deg)',
-    },
+    stand: pose5(pose3(0, 0, 0), headAt(0), 0, 0),
+    // rump down on the ground, back legs folded under, front legs upright, head level
+    sit: pose5(pose3(-30, 30, -30, 30), headAt(18), 30, -45),
     // lying like a sphinx: body on the ground, legs out in front, head up
-    lie: { bob: 'translate(0px, 30px)', front: 'rotate(-82deg)', rear: 'rotate(-75deg)', head: 'rotate(0deg)' },
-    // asleep: the same, head down on his paws
-    nap: { bob: 'translate(0px, 30px)', front: 'rotate(-82deg)', rear: 'rotate(-75deg)', head: 'rotate(26deg) translate(0px, 6px)' },
+    lie: pose5(pose3(0, 30, 0), headAt(0), -82, -75),
+    // asleep, head down on his paws
+    nap: pose5(pose3(0, 30, 0), headAt(26, 0, 6), -82, -75),
     // asleep curled up: legs tucked under, nose down, tail round behind
-    curl: { bob: 'translate(4px, 34px)', front: 'rotate(75deg)', rear: 'rotate(-80deg)', head: 'rotate(44deg) translate(-8px, 8px)', tail: 'rotate(-95deg)' },
+    curl: pose5(pose3(4, 34, 0), headAt(44, -8, 8), 75, -80, -95),
     // asleep sprawled out: front legs stretched forward, back legs straight behind
-    sprawl: { bob: 'translate(0px, 32px)', front: 'rotate(-86deg)', rear: 'rotate(80deg)', head: 'rotate(22deg) translate(4px, 8px)', tail: 'rotate(-70deg)' },
+    sprawl: pose5(pose3(0, 32, 0), headAt(22, 4, 8), -86, 80, -70),
     // waking up, the dog stretch: front legs reaching forward, chest down, rump up…
-    bowStretch: { bob: 'rotate(16deg) translate(0px, 4px)', front: 'rotate(-58deg)', rear: 'rotate(-6deg)', head: 'rotate(-14deg)' },
+    bowStretch: pose5(pose3(0, 4, 16), headAt(-14), -58, -6),
     // …then the back legs, stretched out behind
-    backStretch: { bob: 'rotate(-6deg) translate(4px, 0px)', front: 'rotate(-8deg)', rear: 'rotate(48deg)', head: 'rotate(-6deg)' },
+    backStretch: pose5(pose3(4, 0, -6), headAt(-6), -8, 48),
   }
+  const LYING = ['lie', 'nap', 'curl', 'sprawl']
   const NAPS = ['nap', 'curl', 'sprawl']
+  const EASE = 'cubic-bezier(0.45, 0, 0.3, 1)'
   const eyeShut = $('rk-eye-shut')
   const eye = $('rk-eye')
+  let current = 'stand' // the pose he's in (or moving into)
 
-  /** Settle into a pose (held until rise()); false if cut short. */
-  async function settle(name, ms = 450) {
-    const p = POSES[name]
-    // from wherever he is now (standing, or the pose before)
-    const to = (e, t) => {
-      const from = getComputedStyle(e).transform
+  const PARTS = () => [
+    [bob, 'bob'], [head, 'head'], [tail, 'tail'],
+    [legs[1], 'front'], [legs[3], 'front'], [legs[0], 'rear'], [legs[2], 'rear'],
+  ]
+
+  /** Move from the current pose into another, and hold it. Rejects if cut
+   * short (relax() cancels the animations). */
+  async function settle(name, ms = 600) {
+    const from = POSES[current]
+    const to = POSES[name]
+    current = name
+    const anims = PARTS().map(([e, part]) => {
       e.getAnimations().forEach((a) => a.cancel())
-      return e.animate([{ transform: from }, { transform: t }], { duration: ms, easing: 'ease-in-out', fill: 'forwards' })
-    }
-    const anims = [to(bob, p.bob), to(head, p.head), to(legs[1], p.front), to(legs[3], p.front), to(legs[0], p.rear), to(legs[2], p.rear), to(tail, p.tail || 'rotate(0deg)')]
+      return e.animate([{ transform: from[part] }, { transform: to[part] }], { duration: ms, easing: EASE, fill: name === 'stand' ? 'none' : 'forwards' })
+    })
     await Promise.all(anims.map((a) => a.finished))
   }
 
-  /** Back up on all fours from whatever pose he's in. */
-  async function rise(ms = 320) {
-    for (const e of [bob, head, tail, ...legs]) {
-      const held = e.getAnimations()
-      const from = getComputedStyle(e).transform
-      held.forEach((a) => a.cancel())
-      e.animate([{ transform: from === 'none' ? 'none' : from }, { transform: 'none' }], { duration: ms, easing: 'ease-out' })
-    }
-    await wait(ms)
+  /** Back up on all fours: from lying, the front comes up first (through a
+   * sit), as a dog's does. */
+  async function rise(ms = 500) {
+    if (LYING.includes(current)) await settle('sit', ms)
+    await settle('stand', ms)
   }
 
   /** Little looks about while resting: the head turns up, down, along. */
@@ -528,7 +540,7 @@ const Reksio = (() => {
   /** Sit and watch the yard for a while, looking about. */
   async function sit(ms = rnd(4000, 8000)) {
     const mine = pose
-    await settle('sit')
+    await settle('sit', 700)
     const end = performance.now() + ms
     while (performance.now() < end) {
       await wait(rnd(1500, 3000))
@@ -543,9 +555,9 @@ const Reksio = (() => {
   /** Lie down, head up, looking about. */
   async function lieDown(ms = rnd(6000, 10000)) {
     const mine = pose
-    await settle('sit', 380)
+    await settle('sit', 650)
     if (mine !== pose) return
-    await settle('lie', 500)
+    await settle('lie', 800)
     const end = performance.now() + ms
     while (performance.now() < end) {
       await wait(rnd(1800, 3200))
@@ -553,19 +565,19 @@ const Reksio = (() => {
       glance(POSES.lie.head, 22)
     }
     if (mine !== pose) return
-    await rise(420)
+    await rise()
   }
 
   /** A nap in the open: lie down, then sleep, head on paws, curled up or
    * sprawled out, with little snores; wake with a proper dog stretch. */
   async function nap(ms = rnd(10000, 18000)) {
     const mine = pose
-    await settle('sit', 380)
+    await settle('sit', 650)
     if (mine !== pose) return
-    await settle('lie', 500)
+    await settle('lie', 800)
     if (mine !== pose) return
     yawnSound()
-    await settle(NAPS[Math.floor(Math.random() * NAPS.length)], 900)
+    await settle(NAPS[Math.floor(Math.random() * NAPS.length)], 1200)
     show(eye, false)
     show(eyeShut, true)
     const end = performance.now() + ms
@@ -579,17 +591,17 @@ const Reksio = (() => {
     if (mine !== pose) return
     show(eyeShut, false)
     show(eye, true)
-    await settle('lie', 500)
-    await rise(400)
+    await settle('lie', 700)
+    await rise()
     if (mine !== pose) return
-    await settle('bowStretch', 600)
+    await settle('bowStretch', 800)
     await wait(900)
     if (mine !== pose) return
     yawnSound()
-    await settle('backStretch', 500)
+    await settle('backStretch', 700)
     await wait(700)
     if (mine !== pose) return
-    await rise(350)
+    await rise(450)
     await shake()
   }
 
