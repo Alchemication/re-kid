@@ -262,3 +262,13 @@ body { display: grid; place-items: center; }
 .heart { fill: #e0564a; stroke: var(--ink); stroke-width: 2.5; }
 /* the trap is just a trap until the mouse comes out */
 #trap.not-yet { pointer-events: none; }
+
+/* ---- Reksio muddy (paws, after a puddle) and soaked (fur a touch darker,
+   until he shakes himself dry) ---- */
+#reksio .white, #reksio .leg-white, #reksio .ochre { transition: fill 1.2s ease, stroke 1.2s ease; }
+#reksio.muddy .leg-white { stroke: #cdbf9f; }
+#reksio.wet .white { fill: #e4e2da; }
+#reksio.wet .ochre { fill: #cf9030; }
+/* the puddle's near edge, in front of his paws, so he stands in the water */
+.paw-water { fill: #8fb3c9; stroke: #5d7e94; stroke-width: 2.5; opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
+.paw-water.on { opacity: 0.85; }

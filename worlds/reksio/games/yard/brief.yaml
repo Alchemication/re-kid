@@ -70,6 +70,8 @@ sound:
 - text: Reksio barks with the original barks from the intro, played a little higher and quicker by a random amount each time, so he sounds like himself but never twice the same. (A private-play choice, to be replaced before any public release.)
   origin: original
   refs: [mark:bark]
+- text: Reksio stands in a puddle with his paws in the water, and walking through one leaves his legs muddy for a while. Rain, a jump into a puddle, or splashing through plenty of water soaks him — fur a touch darker, drops dripping — and as soon as he stops out of the rain he gives a proper wet-dog shake from nose to tail, spraying drops everywhere. One step through a small puddle doesn't soak him, so he doesn't shake for it.
+  origin: invented
 - text: The fly and the bumblebee are visitors, not residents. Each turns up a while into the play, stays a while, flies off, and may come back later; both stay away while it rains.
   origin: invented
 - text: Creatures sound like what they are, quietly, and fade with distance from Reksio — flies whine now and then and bees hum, the bird chirps, the mouse squeaks. Spiders, snails and worms are silent, except for small cartoon noises when they do something (a plink as the spider drops, a schlup as the snail hides, a pop as a worm comes up).

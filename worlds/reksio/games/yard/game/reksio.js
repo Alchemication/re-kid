@@ -507,6 +507,27 @@ const Reksio = (() => {
     ).finished
   }
 
+  /** A proper wet-dog shake: fast and hard from nose to tail, the head
+   * swinging against the body, then a last little shiver. */
+  async function shakeDry() {
+    const swings = [0, 14, -14, 13, -13, 12, -12, 10, -10, 7, -7, 3, 0]
+    head.animate(swings.map((d) => ({ transform: `rotate(${-d * 1.3}deg)` })), { duration: 700 })
+    tail.animate(swings.map((d) => ({ transform: `rotate(${d * 2}deg)` })), { duration: 700 })
+    await bob.animate(swings.map((d) => ({ transform: `rotate(${d}deg) translateY(${-Math.abs(d) * 0.4}px)` })), { duration: 700 }).finished
+    await wait(120)
+    await bob.animate([0, 3, -3, 2, -2, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: 260 }).finished
+  }
+
+  /** Soaked fur looks a touch darker. */
+  function setWet(on) {
+    root.classList.toggle('wet', on)
+  }
+
+  /** Muddy legs, after puddles. */
+  function setMuddy(on) {
+    root.classList.toggle('muddy', on)
+  }
+
   /** Paddle the front legs, as when digging. */
   async function paddle(ms) {
     const opts = { duration: 180, iterations: Math.round(ms / 180) }
@@ -547,7 +568,7 @@ const Reksio = (() => {
     get stretching() { return stretching || stretch !== 0 },
     /** Mouth position in scene units, for effects. */
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
-    walkTo, stopWalking, face, tick, relax, bark, nod, lick, lap, shake, paddle, duck, holdBone,
+    walkTo, stopWalking, face, tick, relax, shakeDry, setWet, setMuddy, bark, nod, lick, lap, shake, paddle, duck, holdBone,
     beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
     stamp, snap, watch, pounce, biteTail, howl, sit, startle, catchDrops,
     MIN_X, MAX_X,

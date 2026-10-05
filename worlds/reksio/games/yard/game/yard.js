@@ -505,10 +505,11 @@
         const p = Weather.puddles.reduce((a, b) => (Math.abs(a.x - Reksio.x) < Math.abs(b.x - Reksio.x) ? a : b))
         if (await Reksio.walkTo(p.x - Math.sign(p.x - Reksio.x || 1) * 90)) {
           await Reksio.pounce(p.x)
-          await Reksio.hop(30, 2)
-          Sound.shake()
-          burst(Reksio.x, 730, 10, 'drop', { height: 60, reach: 80, size: 3 })
-          await Reksio.shake()
+          Weather.splash(p.x)
+          Sound.splash()
+          wetten(1)
+          await Reksio.hop(30, 2) // splish, splash; he'll shake once he steps out
+          await Reksio.walkTo(p.x + Math.sign(p.x - Reksio.x || 1) * (p.rx + 50))
         }
       },
     },
@@ -549,6 +550,62 @@
     return since < 15000 ? 1 : 0
   }
 
+  // ------------------------------------------------------------ wet
+
+  // Puddles muddy his paws (it fades after a while). Rain, a jump into a
+  // puddle, or splashing through plenty of water soaks him: fur a touch
+  // darker, drips. Soaked, as soon as he stops out of the rain, he shakes
+  // himself dry, like every dog. While he stands in a puddle, its near edge
+  // is drawn in front of his paws.
+  const SOAK_PER_SPLASH = 0.15 // each splashing step through a puddle (about 3 per puddle)
+  const SOAKED = 0.7 // soaked from here on: drips, and a shake when he stops
+  const DRY_S = 40 // without a shake, the wet slowly dries off over this long
+  const MUDDY_S = 10 // muddy paws last this long after the last puddle
+  const DRIP_EVERY_MS = 350
+  let soak = 0 // 0 dry … 1 soaked through
+  let muddyUntil = 0
+  let lastDrip = 0
+  let lastWetFrame = 0
+  const pawWater = document.createElementNS(SVG_NS, 'path')
+  pawWater.setAttribute('class', 'paw-water')
+  pawWater.setAttribute('d', 'M-44 814 A44 10 0 0 0 44 814 Z')
+  $('fx').appendChild(pawWater)
+
+  const soaked = () => soak >= SOAKED
+
+  /** Wetter by `amount` (1 = soaked through at once). */
+  function wetten(amount) {
+    soak = Math.min(1, soak + amount)
+    muddyUntil = performance.now() + MUDDY_S * 1000
+  }
+
+  async function shakeDry() {
+    Sound.shake()
+    const spray = setInterval(() => burst(Reksio.x, 740, 8, 'drop', { height: 60, reach: 110, size: 3.5 }), 120)
+    try {
+      await Reksio.shakeDry()
+    } finally {
+      clearInterval(spray)
+    }
+    soak = 0
+  }
+
+  function wetFrame(t) {
+    const dt = Math.min(0.1, (t - lastWetFrame) / 1000)
+    lastWetFrame = t
+    if (Weather.raining) soak = 1
+    else soak = Math.max(0, soak - dt / DRY_S)
+    const inPuddle = Weather.puddleAt(Reksio.x)
+    pawWater.classList.toggle('on', !!inPuddle)
+    pawWater.setAttribute('transform', `translate(${Reksio.x} 0)`)
+    Reksio.setWet(soaked())
+    Reksio.setMuddy(t < muddyUntil)
+    if (soaked() && !Weather.raining && t - lastDrip > DRIP_EVERY_MS) {
+      lastDrip = t
+      burst(Reksio.x + rnd(-40, 40), 770, 1, 'drop', { height: 4, reach: 6, size: 2.5 })
+    }
+  }
+
   function idleLoop() {
     const now = performance.now()
     Music.setEnergy(musicEnergy(now))
@@ -560,7 +617,13 @@
       if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
     }
     const quiet = !ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
-    if (quiet && now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
+    if (quiet && soaked() && !Weather.raining && !Weather.puddleAt(Reksio.x)) {
+      // stopped, wet, and out of the rain: shake it off, straight away
+      acting = true
+      shakeDry()
+        .catch(() => {}) // cut short by a tap (Reksio.relax): still wet, he'll shake later
+        .finally(() => (acting = false))
+    } else if (quiet && now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
       const name = pickAct()
       lastAct = name
       if (name === 'wish') firstWish = false
@@ -585,8 +648,10 @@
     Reksio.tick(dt)
     Creatures.tick(dt)
     Weather.tick(dt, camX)
+    wetFrame(t)
     if (Reksio.walking && t - lastSplash > 280 && Weather.splash(Reksio.x)) {
       lastSplash = t
+      wetten(SOAK_PER_SPLASH)
       Sound.splash()
       burst(Reksio.x, 830, 4, 'drop', { height: 34, reach: 50, size: 3 })
     }

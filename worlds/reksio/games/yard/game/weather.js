@@ -24,6 +24,7 @@ const Weather = (() => {
   const CLOUD_IN_S = 4 // clouds take this long to cover the sky
   const DRY_S = 70 // puddles take this long to dry up after the rain
   const DROPS = 220 // raindrops on screen at full rain
+  const PUDDLE_DROP = 6 // puddles sit this far below Reksio's feet line: paws in the water
   const BREEZE = [0.08, 0.38] // wind level most of the time (0 still, 1 a gust)
   const GUST = [0.6, 1] // …and in a gust
   const GUST_CHANCE = 0.2 // of each change of wind, this many are gusts
@@ -131,7 +132,7 @@ const Weather = (() => {
 
   const puddleLayer = $('puddles')
   const puddles = Layout.puddles.map(({ x, rx }) => {
-    const g = el('g', { class: 'puddle', transform: `translate(${x} ${GROUND_Y + 22})` }, puddleLayer)
+    const g = el('g', { class: 'puddle', transform: `translate(${x} ${GROUND_Y + PUDDLE_DROP})` }, puddleLayer)
     const water = el('ellipse', { rx: 0, ry: 0, class: 'puddle-water' }, g)
     const shine = el('ellipse', { rx: 0, ry: 0, cx: -18, cy: -3, class: 'puddle-shine' }, g)
     return { x, g, water, shine, rx }
