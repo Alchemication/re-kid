@@ -25,6 +25,7 @@ const Tree = (() => {
   const SNAIL_SCALE = 2.1
   const SQUIRREL_SPEED = 420
   const SQUIRREL_SCALE = 1.7
+  const SNAIL_REACH = 72 // a snail eating sits this far from the fruit's middle: its nose at the edge
   const MORE_SNAILS = [1, 2] // after the first shake, this many more come to eat
   const MAX_SNAILS = 4
   const BITES = 8 // a snail's apple is gone after this many bites
@@ -194,7 +195,8 @@ const Tree = (() => {
   async function drop(f, toX, toY = FRUIT_REST_Y) {
     const layer = $('tree-ground')
     f.el.remove()
-    const g = el('use', { href: `#fruit-${Layout.fruit}`, x: 0, y: 0 }, layer)
+    const g = el('g', { class: 'fallen' }, layer)
+    el('use', { href: `#fruit-${Layout.fruit}` }, g)
     const fall = Math.max(200, (toY - f.y) * 1.3)
     await g.animate(
       [
@@ -275,6 +277,52 @@ const Tree = (() => {
     }
   }
 
+  // Bites: each one takes a chunk out of the side the snail eats from. Two
+  // masks per fruit: the skin is cut a little wider than the flesh under it,
+  // so every bite shows a pale rim of fruit.
+  const BITE_R = 6.4 // a bite's radius, in fruit units (an apple is 11 across the middle)
+  const BITE_STEP = 3.2 // how far each bite eats in
+  let masks = 0
+
+  function bitable(f, side) {
+    const defs = document.querySelector('#world defs')
+    const id = `bites-${masks++}`
+    const mask = (name) => {
+      const m = el('mask', { id: `${id}-${name}`, maskUnits: 'userSpaceOnUse', x: -24, y: -28, width: 48, height: 50 }, defs)
+      el('rect', { x: -24, y: -28, width: 48, height: 50, fill: 'white' }, m)
+      return m
+    }
+    const skin = mask('skin')
+    const flesh = mask('flesh')
+    const skinUse = f.el.querySelector('use')
+    const plum = Layout.fruit === 'plum'
+    const inside = el(plum ? 'ellipse' : 'circle', plum ? { rx: 8, ry: 10, class: 'plum-flesh' } : { r: 10, class: 'apple-flesh' })
+    f.el.insertBefore(inside, skinUse)
+    inside.setAttribute('mask', `url(#${id}-flesh)`)
+    skinUse.setAttribute('mask', `url(#${id}-skin)`)
+    f.bite = (k) => {
+      const cx = side * (13 - k * BITE_STEP)
+      const cy = (k % 2 ? -1 : 1) * rnd(2, 5)
+      el('circle', { cx, cy, r: BITE_R, fill: 'black' }, skin)
+      el('circle', { cx: cx + side * 1.4, cy, r: BITE_R - 0.8, fill: 'black' }, flesh)
+    }
+    f.masks = [skin, flesh]
+  }
+
+  /** All eaten: the core (or a plum's stone) is left a moment, then goes. */
+  async function leaveCore(f) {
+    f.el.replaceChildren()
+    if (Layout.fruit === 'plum') el('ellipse', { rx: 3.5, ry: 5.5, class: 'plum-stone' }, f.el)
+    else {
+      el('path', { d: 'M-4 -9 Q-1 0 -4 9 L4 9 Q1 0 4 -9 Z', class: 'apple-core' }, f.el)
+      el('path', { d: 'M0 -9 q1 -4 3 -6', class: 'fruit-stem' }, f.el)
+    }
+    f.masks?.forEach((m) => m.remove())
+    await wait(3000)
+    await f.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' }).finished
+    f.el.remove()
+  }
+
   async function snailTo(s) {
     const free = fallen.filter((f) => !f.eater && f.bites < BITES)
     if (!free.length) return
@@ -283,18 +331,22 @@ const Tree = (() => {
     s.fruit = f
     snailLooksUp(s, false)
     const side = s.x < f.x ? -1 : 1
-    await creep(s, f.x + side * 44)
+    // nose to the fruit's edge; then it inches in as it eats
+    await creep(s, f.x + side * SNAIL_REACH)
     s.dir = -side
     placeSnail(s)
+    if (!f.bite) bitable(f, side)
     while (f.bites < BITES && !isEnded()) {
       await wait(rnd(1100, 1700))
+      f.bite(f.bites)
       f.bites += 1
+      s.x -= side * BITE_STEP * FRUIT_SCALE * 0.8
+      placeSnail(s)
       hear(f.x, () => Sound.nibble())
       s.stalks.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(12deg)' }, { transform: 'rotate(0)' }], { duration: 400 })
-      const k = 1 - f.bites / BITES
-      f.el.style.transform = at(f.x, FRUIT_REST_Y + (1 - k) * 10, Math.max(0.15, k))
+      fx.burst(f.x + X() + side * 10, FRUIT_REST_Y - 4, 1, 'crumb-apple', { height: 8, reach: 10, size: 1.8 })
     }
-    f.el.remove()
+    leaveCore(f)
     s.fruit = null
     // full: a slow wander off, or the next apple
     if (fallen.some((g) => !g.eater && g.bites < BITES)) return snailTo(s)

@@ -475,6 +475,10 @@
     return x > camX && x < camX + Painting.VIEW_W
   }
 
+  // Left alone this long (seconds), he may sit, lie down, or nap.
+  const REST_AFTER_S = { sit: 8, lie: 18, nap: 30 }
+  const idleFor = () => (performance.now() - lastTap) / 1000
+
   const ACTS = {
     wish: { weight: 2, ok: () => wishFor() && performance.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
     sniff: { weight: 3, run: () => Reksio.sniff() },
@@ -521,7 +525,10 @@
       run: () => CRITTERS.snail(),
     },
     biteTail: { weight: 1, run: () => Reksio.biteTail() },
-    sit: { weight: 2, run: () => Reksio.sit() },
+    // resting, the longer he's left alone: sit and watch, lie down, nap
+    sit: { weight: 3, ok: () => idleFor() > REST_AFTER_S.sit, run: () => Reksio.sit() },
+    lie: { weight: 3, ok: () => idleFor() > REST_AFTER_S.lie, run: () => Reksio.lieDown() },
+    nap: { weight: 4, ok: () => idleFor() > REST_AFTER_S.nap && !Weather.raining, run: () => Reksio.nap() },
     howl: { weight: 1, ok: () => done.size >= 1, run: () => Reksio.howl() },
     fly: {
       // the fly is close: watch it, and sometimes pounce

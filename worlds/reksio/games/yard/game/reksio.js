@@ -302,7 +302,9 @@ const Reksio = (() => {
    * animations reject; callers catch that). */
   function relax() {
     pose += 1
-    for (const e of [bob, head, ...legs]) e.getAnimations().forEach((a) => a.cancel())
+    for (const e of [bob, head, tail, ...legs]) e.getAnimations().forEach((a) => a.cancel())
+    show(eyeShut, false)
+    show(eye, true)
     show(tongue, false)
     show(lickTip, false)
     show(mouth, false)
@@ -462,17 +464,155 @@ const Reksio = (() => {
     show(smile, true)
   }
 
-  /** Sit for a while: rear down, front up, tail sweeping. */
-  async function sit(ms = rnd(1800, 3500)) {
-    const mine = pose
-    const down = 'rotate(-14deg) translate(4px, 7px)'
-    await bob.animate([{ transform: 'rotate(0)' }, { transform: down }], { duration: 300, fill: 'forwards' }).finished
-    const rear = [legs[0], legs[2]].map((l) => l.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(55deg)' }], { duration: 300, fill: 'forwards' }))
+  // ------------------------------------------------------------ resting
+
+  // Resting poses, for when he's left alone a while. Each part's transform
+  // (the body turns about his haunch: pivot -30,-40 in his own units, while
+  // the bob's transform origin is 0,-40).
+  const POSES = {
+    // rump down on the ground, back legs folded under, front legs upright,
+    // head level: watching the yard
+    sit: {
+      bob: 'translate(-30px, 30px) rotate(-30deg) translate(30px, 0px)',
+      front: 'rotate(30deg)',
+      rear: 'rotate(-45deg)',
+      head: 'rotate(18deg)',
+    },
+    // lying like a sphinx: body on the ground, legs out in front, head up
+    lie: { bob: 'translate(0px, 30px)', front: 'rotate(-82deg)', rear: 'rotate(-75deg)', head: 'rotate(0deg)' },
+    // asleep: the same, head down on his paws
+    nap: { bob: 'translate(0px, 30px)', front: 'rotate(-82deg)', rear: 'rotate(-75deg)', head: 'rotate(26deg) translate(0px, 6px)' },
+    // asleep curled up: legs tucked under, nose down, tail round behind
+    curl: { bob: 'translate(4px, 34px)', front: 'rotate(75deg)', rear: 'rotate(-80deg)', head: 'rotate(44deg) translate(-8px, 8px)', tail: 'rotate(-95deg)' },
+    // asleep sprawled out: front legs stretched forward, back legs straight behind
+    sprawl: { bob: 'translate(0px, 32px)', front: 'rotate(-86deg)', rear: 'rotate(80deg)', head: 'rotate(22deg) translate(4px, 8px)', tail: 'rotate(-70deg)' },
+    // waking up, the dog stretch: front legs reaching forward, chest down, rump up…
+    bowStretch: { bob: 'rotate(16deg) translate(0px, 4px)', front: 'rotate(-58deg)', rear: 'rotate(-6deg)', head: 'rotate(-14deg)' },
+    // …then the back legs, stretched out behind
+    backStretch: { bob: 'rotate(-6deg) translate(4px, 0px)', front: 'rotate(-8deg)', rear: 'rotate(48deg)', head: 'rotate(-6deg)' },
+  }
+  const NAPS = ['nap', 'curl', 'sprawl']
+  const eyeShut = $('rk-eye-shut')
+  const eye = $('rk-eye')
+
+  /** Settle into a pose (held until rise()); false if cut short. */
+  async function settle(name, ms = 450) {
+    const p = POSES[name]
+    // from wherever he is now (standing, or the pose before)
+    const to = (e, t) => {
+      const from = getComputedStyle(e).transform
+      e.getAnimations().forEach((a) => a.cancel())
+      return e.animate([{ transform: from }, { transform: t }], { duration: ms, easing: 'ease-in-out', fill: 'forwards' })
+    }
+    const anims = [to(bob, p.bob), to(head, p.head), to(legs[1], p.front), to(legs[3], p.front), to(legs[0], p.rear), to(legs[2], p.rear), to(tail, p.tail || 'rotate(0deg)')]
+    await Promise.all(anims.map((a) => a.finished))
+  }
+
+  /** Back up on all fours from whatever pose he's in. */
+  async function rise(ms = 320) {
+    for (const e of [bob, head, tail, ...legs]) {
+      const held = e.getAnimations()
+      const from = getComputedStyle(e).transform
+      held.forEach((a) => a.cancel())
+      e.animate([{ transform: from === 'none' ? 'none' : from }, { transform: 'none' }], { duration: ms, easing: 'ease-out' })
+    }
     await wait(ms)
+  }
+
+  /** Little looks about while resting: the head turns up, down, along. */
+  function glance(base, range) {
+    const to = rnd(-range, range * 0.5)
+    head.animate([{ transform: base }, { transform: `${base} rotate(${to}deg)`, offset: 0.3 }, { transform: `${base} rotate(${to}deg)`, offset: 0.75 }, { transform: base }], { duration: rnd(1400, 2400), easing: 'ease-in-out' })
+  }
+
+  /** Sit and watch the yard for a while, looking about. */
+  async function sit(ms = rnd(4000, 8000)) {
+    const mine = pose
+    await settle('sit')
+    const end = performance.now() + ms
+    while (performance.now() < end) {
+      await wait(rnd(1500, 3000))
+      if (mine !== pose) return
+      if (Math.random() < 0.7) glance(POSES.sit.head, 16)
+      else tail.animate([0, 14, -6, 14, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: 700 }) // a wag
+    }
     if (mine !== pose) return
-    rear.forEach((a) => a.cancel())
-    bob.getAnimations().forEach((a) => a.cancel())
-    await bob.animate([{ transform: down }, { transform: 'rotate(0)' }], { duration: 260 }).finished
+    await rise()
+  }
+
+  /** Lie down, head up, looking about. */
+  async function lieDown(ms = rnd(6000, 10000)) {
+    const mine = pose
+    await settle('sit', 380)
+    if (mine !== pose) return
+    await settle('lie', 500)
+    const end = performance.now() + ms
+    while (performance.now() < end) {
+      await wait(rnd(1800, 3200))
+      if (mine !== pose) return
+      glance(POSES.lie.head, 22)
+    }
+    if (mine !== pose) return
+    await rise(420)
+  }
+
+  /** A nap in the open: lie down, then sleep, head on paws, curled up or
+   * sprawled out, with little snores; wake with a proper dog stretch. */
+  async function nap(ms = rnd(10000, 18000)) {
+    const mine = pose
+    await settle('sit', 380)
+    if (mine !== pose) return
+    await settle('lie', 500)
+    if (mine !== pose) return
+    yawnSound()
+    await settle(NAPS[Math.floor(Math.random() * NAPS.length)], 900)
+    show(eye, false)
+    show(eyeShut, true)
+    const end = performance.now() + ms
+    let n = 0
+    while (performance.now() < end) {
+      await wait(1700)
+      if (mine !== pose) return
+      if (n++ % 2 === 0) Sound.from(250, Sound.snore)
+      floatZ()
+    }
+    if (mine !== pose) return
+    show(eyeShut, false)
+    show(eye, true)
+    await settle('lie', 500)
+    await rise(400)
+    if (mine !== pose) return
+    await settle('bowStretch', 600)
+    await wait(900)
+    if (mine !== pose) return
+    yawnSound()
+    await settle('backStretch', 500)
+    await wait(700)
+    if (mine !== pose) return
+    await rise(350)
+    await shake()
+  }
+
+  function yawnSound() {
+    Sound.from(150, Sound.yawn)
+  }
+
+  /** A Z drifting up from his head as he sleeps. */
+  function floatZ() {
+    const fx = $('fx')
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+    g.setAttribute('class', 'zzz')
+    const z = document.createElementNS('http://www.w3.org/2000/svg', 'use')
+    z.setAttribute('href', '#zee')
+    z.style.opacity = '1'
+    g.appendChild(z)
+    fx.appendChild(g)
+    const zx = x + facing * 70
+    const zy = GROUND - 90
+    g.animate(
+      [{ transform: `translate(${zx}px, ${zy}px) scale(0.6)`, opacity: 0 }, { transform: `translate(${zx + 8}px, ${zy - 20}px) scale(0.9)`, opacity: 1, offset: 0.3 }, { transform: `translate(${zx + 18}px, ${zy - 60}px) scale(1.1)`, opacity: 0 }],
+      { duration: 1800, easing: 'ease-out' },
+    ).finished.then(() => g.remove())
   }
 
   /** Startled by something in front: a yelp and a hop backwards. */
@@ -588,7 +728,7 @@ const Reksio = (() => {
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
     walkTo, stopWalking, face, tick, relax, shakeDry, setWet, setMuddy, bark, nod, lick, lap, shake, paddle, duck, holdBone,
     beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
-    stamp, snap, watch, pounce, biteTail, howl, sit, startle, catchDrops,
+    stamp, snap, watch, pounce, biteTail, howl, sit, lieDown, nap, startle, catchDrops,
     MIN_X, MAX_X,
   }
 })()
