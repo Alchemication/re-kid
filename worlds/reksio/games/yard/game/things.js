@@ -731,10 +731,10 @@ const Things = (() => {
       },
     },
     dig: {
+      // the bone goes round: dug up and carried off, buried again, dug up again…
       at: () => 2000 + X('dig'),
       face: 1,
       async run({ extra }) {
-        Reksio.holdBone(false)
         const digFor = async (ms, clods) => {
           const digging = Reksio.paddle(ms)
           Sound.dig()
@@ -744,6 +744,36 @@ const Things = (() => {
           }
           await digging
         }
+        const bone = $('found-bone')
+        if (Reksio.holdingBone) {
+          // bury it: (the extra: a sly look round first) dig a hole, drop it in,
+          // nose the earth back over it, pat it down
+          if (extra) {
+            await Reksio.lookAround(700)
+            Reksio.face(1)
+            await Reksio.lookAround(500)
+            Reksio.face(1)
+          }
+          await digFor(1000, 4)
+          Reksio.holdBone(false)
+          bone.style.opacity = '1'
+          await bone.animate(
+            [{ transform: 'translateY(-30px) scale(1)', opacity: 1 }, { transform: 'translateY(26px) scale(0.6)', opacity: 0 }],
+            { duration: 500, easing: 'ease-in', fill: 'forwards' },
+          ).finished
+          bone.style.opacity = '0'
+          for (let i = 0; i < 3; i++) {
+            Sound.from(150, Sound.dig)
+            burst(2010 + X('dig'), 800, 3, 'clod', { dir: 1, height: 20, reach: 40, size: 4 })
+            await Reksio.nod(22, 380)
+          }
+          await Reksio.stamp(() => {
+            Sound.stamp(0)
+            burst(2040 + X('dig'), 806, 4, 'dust', { height: 16, reach: 30, size: 3 })
+          })
+          await Reksio.nod(-12, 500) // pleased with that
+          return
+        }
         await digFor(1300, 6)
         if (extra) {
           // the extra: nothing there… a puzzled look, then dig harder
@@ -751,7 +781,6 @@ const Things = (() => {
           Reksio.face(1)
           await digFor(1500, 9)
         }
-        const bone = $('found-bone')
         bone.style.opacity = '1'
         await bone.animate(
           [{ transform: 'translateY(30px) scale(0.4)' }, { transform: 'translateY(-50px) scale(1.2)' }, { transform: 'translateY(-30px) scale(1)' }],
@@ -759,6 +788,7 @@ const Things = (() => {
         ).finished
         Music.react.wish()
         await wait(500)
+        bone.getAnimations().forEach((a) => a.cancel())
         bone.style.opacity = '0'
         Reksio.holdBone(true)
         Sound.original('bark') // easter egg: his original quick barks, if the clip exists

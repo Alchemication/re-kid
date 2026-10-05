@@ -40,7 +40,7 @@ principles:
   origin: invented
 - text: Most plays bring a shower, and each step of it is something a toddler can watch cause the next. Clouds roll in and the yard dims; rain falls, Reksio snaps at drops and shakes himself off, puddles form and ring where drops land, and he splashes through them. Then the clouds drift off, a rainbow shows for a while, the flowers grow a little taller, a snail comes out and leaves a shiny trail (and pulls into its shell if he sniffs it), worms come up by the puddles, and the bird may hop down and catch one. The puddles dry, and the music goes quieter while it rains.
   origin: invented
-- text: Doing a thing again does the same thing again — small children love exact repetition — and the second time, then about every other time after, something small is added on top. Asleep in the doghouse he dreams of a bone, paws twitching; the empty bowl gets licked clean and nosed along; the tap sprays sideways and soaks him; a second, bigger sneeze blows him back from the flowers; the mound needs digging twice before the bone turns up; the film reel rolls off and he chases it back; the mouse brings him a crumb, or a baby mouse comes out too.
+- text: Doing a thing again does the same thing again — small children love exact repetition — and the second time, then about every other time after, something small is added on top. Asleep in the doghouse he dreams of a bone, paws twitching; the empty bowl gets licked clean and nosed along; the tap sprays sideways and soaks him; a second, bigger sneeze blows him back from the flowers; the mound needs digging twice before the bone turns up, and the bone gets buried after a sly look round; the film reel rolls off and he chases it back; the mouse brings him a crumb, or a baby mouse comes out too.
   origin: invented
 controls:
   text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, a quick tap barks and pressing and holding stretches him. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, any other key barks (hold it to stretch).'
@@ -157,7 +157,7 @@ scenes:
 - id: dig
   action: {text: Tap the mound of earth., origin: invented}
   result:
-    text: Reksio digs, earth flying, and finds a bone, which he proudly holds up.
+    text: Reksio digs, earth flying, finds a bone, and carries it off in his teeth. Next time he buries it — digs a hole, drops it in, noses the earth back and pats it down (sometimes after a sly look round to check nobody's watching) — and the time after he digs it up again, round and round.
     origin: invented
   sound: {text: Scratchy digging and a bright "found it" ding., origin: invented}
   easter_egg:

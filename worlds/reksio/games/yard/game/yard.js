@@ -49,28 +49,30 @@
     const arrived = await Reksio.walkTo(thing.at())
     if (!arrived || !Things.ready(name)) return // tapped elsewhere on the way, or nothing to do yet
     if (thing.face) Reksio.face(thing.face)
+    // busy until it's all over, the hop of joy included, so nothing else
+    // (a left-alone move) can start on him half-way through
     busy = true
-    // a repeat keeps the same core; the first repeat and then every other
-    // one or so adds a variation on top
-    const n = (uses[name] = (uses[name] || 0) + 1)
     try {
-      await thing.run({ extra: n === 2 || (n > 2 && Math.random() < 0.5) })
+      // a repeat keeps the same core; the first repeat and then every other
+      // one or so adds a variation on top
+      const n = (uses[name] = (uses[name] || 0) + 1)
+      await thing.run({ extra: n === 2 || (n > 2 && Math.random() < 0.5) }).catch(() => {}) // cut short: still counts
+      const firstTime = EVENING_NEEDS.includes(name) && !done.has(name)
+      done.add(name)
+      sunset()
+      if (firstTime) {
+        Music.react.done()
+        fillSlot(name)
+      }
+      if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
+        await Reksio.hop().catch(() => {}) // the last one: a hop of joy, then evening
+        evening()
+        return
+      }
+      if (firstTime && !pending) await Reksio.hop().catch(() => {}) // a hop of joy
     } finally {
       busy = false
     }
-    const firstTime = EVENING_NEEDS.includes(name) && !done.has(name)
-    done.add(name)
-    sunset()
-    if (firstTime) {
-      Music.react.done()
-      fillSlot(name)
-    }
-    if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
-      await Reksio.hop() // the last one: a hop of joy, then evening
-      evening()
-      return
-    }
-    if (firstTime && !pending) await Reksio.hop() // a hop of joy
     runPending()
   }
 
@@ -633,19 +635,23 @@
         .catch(() => {}) // cut short by a tap (Reksio.relax): still wet, he'll shake later
         .finally(() => (acting = false))
     } else if (quiet && now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
-      const name = pickAct()
-      lastAct = name
-      if (name === 'wish') firstWish = false
-      acting = true
-      Promise.resolve()
-        .then(() => ACTS[name].run())
-        .catch(() => {}) // cut short by a tap (Reksio.relax)
-        .finally(() => {
-          acting = false
-          nextIdleAt = performance.now() + (ACTS[name].ms || rnd(IDLE_GAP_MS[0], IDLE_GAP_MS[1]))
-        })
+      startAct(pickAct())
     }
     setTimeout(idleLoop, 200)
+  }
+
+  /** Do one of the left-alone moves. */
+  function startAct(name) {
+    lastAct = name
+    if (name === 'wish') firstWish = false
+    acting = true
+    Promise.resolve()
+      .then(() => ACTS[name].run())
+      .catch(() => {}) // cut short by a tap (Reksio.relax)
+      .finally(() => {
+        acting = false
+        nextIdleAt = performance.now() + (ACTS[name].ms || rnd(IDLE_GAP_MS[0], IDLE_GAP_MS[1]))
+      })
   }
 
   let last = performance.now()
@@ -710,5 +716,5 @@
   lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
   setTimeout(idleLoop, 200)
 
-  window.yardGame = { goAndDo, tap: (name) => command(() => goAndDo(name)), done, pickAct, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped: Things.stamped, mouse: Things.mouse, uses: { ...uses } }) } // for testing
+  window.yardGame = { goAndDo, tap: (name) => command(() => goAndDo(name)), act: startAct, done, pickAct, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped: Things.stamped, mouse: Things.mouse, uses: { ...uses } }) } // for testing
 })()

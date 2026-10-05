@@ -38,6 +38,7 @@ const Reksio = (() => {
   const frontParts = [...root.querySelectorAll('.front-part')]
 
   let x = 1000
+  let holding = false // carrying a bone
   let facing = 1
   let target = null
   let arrive = null // resolves the current walk: true if he got there
@@ -101,9 +102,9 @@ const Reksio = (() => {
    * left behind. Gestures still in motion (a pounce, a startle) are left be. */
   function dropHeldPoses() {
     if (current !== 'stand') return relax() // walking off from a rest pose: up first
-    for (const e of [bob, head, ...legs]) {
+    for (const e of [bob, head, tail, ...legs]) {
       for (const a of e.getAnimations()) {
-        if (a.playState === 'finished' && a.effect.getTiming().fill === 'forwards') a.cancel()
+        if (a.effect.getTiming().fill === 'forwards') a.cancel() // a pose meant to be held, held or on its way
       }
     }
   }
@@ -216,6 +217,11 @@ const Reksio = (() => {
 
   function show(el, on) {
     el.style.opacity = on ? '1' : '0'
+    // a bone he's carrying makes way while his mouth is busy, and comes back after
+    if (el === mouth || el === tongue || el === lickTip) {
+      const busyMouth = [mouth, tongue, lickTip].some((m) => m.style.opacity === '1')
+      bone.style.opacity = holding && !busyMouth ? '1' : '0'
+    }
   }
 
   async function bark() {
@@ -725,8 +731,10 @@ const Reksio = (() => {
     ducked = null
   }
 
+  /** Carry a bone in his mouth (or not). */
   function holdBone(on) {
-    show(bone, on)
+    holding = on
+    bone.style.opacity = on ? '1' : '0'
   }
 
   place()
@@ -738,6 +746,7 @@ const Reksio = (() => {
     get stretching() { return stretching || stretch !== 0 },
     /** Mouth position in scene units, for effects. */
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
+    get holdingBone() { return holding },
     walkTo, stopWalking, face, tick, relax, shakeDry, setWet, setMuddy, bark, nod, lick, lap, shake, paddle, duck, holdBone,
     beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
     stamp, snap, watch, pounce, biteTail, howl, sit, lieDown, nap, startle, catchDrops,
