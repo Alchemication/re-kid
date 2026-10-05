@@ -43,7 +43,7 @@ principles:
 - text: Doing a thing again does the same thing again — small children love exact repetition — and the second time, then about every other time after, something small is added on top. Asleep in the doghouse he dreams of a bone, paws twitching; the empty bowl gets licked clean and nosed along; the tap sprays sideways and soaks him; a second, bigger sneeze blows him back from the flowers; the mound needs digging twice before the bone turns up, and the bone gets buried after a sly look round; the film reel rolls off and he chases it back; the mouse brings him a crumb, or a baby mouse comes out too.
   origin: invented
 controls:
-  text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it; on Reksio himself, a quick tap barks and pressing and holding stretches him. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, any other key barks (hold it to stretch).'
+  text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it, and if there is nothing to do there yet he sniffs round and looks about; on a puddle, he runs over and jumps in; on a creature, he goes to see it. Small creatures answer to a tap a finger''s width off; on Reksio himself, a quick tap barks and pressing and holding stretches him. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, any other key barks (hold it to stretch).'
   origin: invented
 
 look:

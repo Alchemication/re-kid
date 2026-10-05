@@ -20,6 +20,10 @@ const Creatures = (() => {
   const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
   const dist = (ax, ay, bx, by) => Math.hypot(ax - bx, ay - by)
+  // A critter's invisible tap circle (scene units): about 80 CSS px across on
+  // a tablet, so a small finger catches a small, moving fly. Where it covers
+  // a thing or Reksio, yard.js lets the critter win only near its middle.
+  const HIT_R = 64
 
   function el(tag, attrs = {}, parent = layer) {
     const node = document.createElementNS(SVG_NS, tag)
@@ -129,7 +133,7 @@ const Creatures = (() => {
     g: null,
     make() {
       this.g = el('g', { class: 'critter fly', 'data-critter': 'fly' })
-      el('circle', { r: 26, class: 'critter-hit' }, this.g)
+      el('circle', { r: HIT_R / 1.5, class: 'critter-hit' }, this.g) // the fly is drawn at 1.5×
       this.body = el('g', {}, this.g)
       el('ellipse', { cx: -2, cy: -5, rx: 6, ry: 3.5, class: 'fly-wing', transform: 'rotate(-25 -2 -5)' }, this.body)
       el('ellipse', { cx: 2, cy: -5, rx: 6, ry: 3.5, class: 'fly-wing', transform: 'rotate(25 2 -5)' }, this.body)
@@ -289,7 +293,7 @@ const Creatures = (() => {
     g: null,
     make() {
       this.g = el('g', { class: 'critter bee', 'data-critter': 'bee' })
-      el('circle', { r: 30, class: 'critter-hit' }, this.g)
+      el('circle', { r: HIT_R / 1.3, class: 'critter-hit' }, this.g) // the bee is drawn at 1.3×
       this.body = el('g', {}, this.g)
       el('ellipse', { cx: -3, cy: -11, rx: 8, ry: 5, class: 'bee-wing', transform: 'rotate(-20 -3 -11)' }, this.body)
       el('ellipse', { cx: 4, cy: -11, rx: 8, ry: 5, class: 'bee-wing', transform: 'rotate(20 4 -11)' }, this.body)
@@ -381,7 +385,7 @@ const Creatures = (() => {
     make() {
       this.thread = el('line', { class: 'thread', x1: 0, y1: 0, x2: 0, y2: 0 })
       this.g = el('g', { class: 'critter spider', 'data-critter': 'spider' })
-      el('circle', { r: 26, class: 'critter-hit' }, this.g)
+      el('circle', { r: HIT_R, class: 'critter-hit' }, this.g)
       this.legs = el('g', { class: 'spider-legs' }, this.g)
       for (const s of [-1, 1]) {
         for (const [a, b] of [[-14, -10], [-15, -3], [-14, 4], [-12, 10]]) {
@@ -531,7 +535,7 @@ const Creatures = (() => {
     make() {
       this.trailPath = el('path', { class: 'snail-trail' })
       this.g = el('g', { class: 'critter snail', 'data-critter': 'snail' })
-      el('circle', { r: 30, cy: -10, class: 'critter-hit' }, this.g)
+      el('circle', { r: HIT_R, cy: -10, class: 'critter-hit' }, this.g)
       this.flip = el('g', {}, this.g)
       this.body = el('g', { class: 'snail-body' }, this.flip)
       el('path', { d: 'M-16 0 Q-18 -8 -6 -8 L14 -8 Q22 -8 24 -2 Q26 2 20 2 L-14 2 Z', class: 'snail-foot' }, this.body)
@@ -601,8 +605,9 @@ const Creatures = (() => {
       for (const p of Weather.puddles.slice(0, 2)) {
         const x = p.x + (Math.random() < 0.5 ? -1 : 1) * (p.rx + rnd(20, 60))
         const g = el('g', { class: 'critter worm', 'data-critter': 'worm', transform: `translate(${x} ${GROUND + 26})` })
+        const hit = el('circle', { r: HIT_R, cy: -20, class: 'critter-hit', display: 'none' }, g)
         const path = el('path', { class: 'worm-body' }, g)
-        this.list.push({ x, y: GROUND + 10, g, path, h: 0, age: 0, life: rnd(20, 30), eaten: false })
+        this.list.push({ x, y: GROUND + 10, g, hit, path, h: 0, age: 0, life: rnd(20, 30), eaten: false })
       }
     },
     update(dt) {
@@ -623,6 +628,7 @@ const Creatures = (() => {
           pts.push(`${k ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`)
         }
         w.path.setAttribute('d', pts.join(' '))
+        w.hit.setAttribute('display', w.h > 4 ? 'inline' : 'none') // tappable only while it shows
         if (going && w.h <= 0) {
           w.eaten = true
           w.g.remove()

@@ -17,6 +17,8 @@
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
+  const CRITTER_CORE = 0.45 // where a critter's tap circle covers a thing or Reksio, the critter wins only this close to its middle (share of the circle): about its drawn size
+  const PUDDLE_REACH = 40 // a ground tap this far past a puddle's edge (scene units) still means "jump in"
   const EVENING_NEEDS = Layout.mains // this play's main things
   const X = Layout.x // per-play offset of a movable thing, scene units
 
@@ -47,8 +49,9 @@
   async function goAndDo(name) {
     const thing = THINGS[name]
     const arrived = await Reksio.walkTo(thing.at())
-    if (!arrived || !Things.ready(name)) return // tapped elsewhere on the way, or nothing to do yet
+    if (!arrived) return // tapped elsewhere on the way
     if (thing.face) Reksio.face(thing.face)
+    if (!Things.ready(name)) return notYet(name)
     // busy until it's all over, the hop of joy included, so nothing else
     // (a left-alone move) can start on him half-way through
     busy = true
@@ -70,6 +73,24 @@
         return
       }
       if (firstTime && !pending) await Reksio.hop().catch(() => {}) // a hop of joy
+    } finally {
+      busy = false
+    }
+    runPending()
+  }
+
+  /** Tapped something with nothing to do yet: still an answer, never a dead
+   * tap. He looks up after the bird, and sniffs round the rest; at the trap a
+   * peep from the hole says someone is in there. */
+  async function notYet(name) {
+    busy = true
+    try {
+      if (name === 'bird') await Reksio.lookUp(900)
+      else {
+        if (name === 'trap') setTimeout(() => Sound.mouse(), 500)
+        await Reksio.sniff(2)
+        await Reksio.lookAround(700)
+      }
     } finally {
       busy = false
     }
@@ -244,11 +265,25 @@
   }
 
   /** Where in the yard (scene units) a pointer event landed. */
-  function yardX(e) {
+  function yardAt(e) {
     const p = svg.createSVGPoint()
     p.x = e.clientX
     p.y = e.clientY
-    return p.matrixTransform(svg.getScreenCTM().inverse()).x + camX
+    const at = p.matrixTransform(svg.getScreenCTM().inverse())
+    return { x: at.x + camX, y: at.y }
+  }
+
+  /** Is a thing or Reksio also under the pointer (ground spots don't count)? */
+  function somethingUnder(e) {
+    return document.elementsFromPoint(e.clientX, e.clientY).some((el) =>
+      !el.closest('[data-critter]') && (el.closest('#things [data-thing]') || el.closest('#reksio')))
+  }
+
+  /** Did the pointer land near the critter's middle, where it is drawn? */
+  function onCritter(critter, e) {
+    const box = critter.querySelector('.critter-hit').getBoundingClientRect()
+    const d = Math.hypot(e.clientX - (box.left + box.width / 2), e.clientY - (box.top + box.height / 2))
+    return d < (box.width / 2) * CRITTER_CORE
   }
 
   $('stage').addEventListener('pointerdown', (e) => {
@@ -256,12 +291,22 @@
     e.preventDefault()
     Sound.ensure()
     Music.start()
-    const critter = e.target.closest('[data-critter]')
-    if (critter) return command(() => chase(critter.dataset.critter))
-    const thing = e.target.closest('[data-thing]')
+    let target = e.target
+    // a critter's tap circle is wide; over a thing or Reksio it gives way
+    // except near its middle
+    const critter = target.closest('[data-critter]')
+    if (critter && somethingUnder(e) && !onCritter(critter, e)) {
+      target = document.elementsFromPoint(e.clientX, e.clientY).find((el) => !el.closest('[data-critter]')) || target
+    } else if (critter) return command(() => chase(critter.dataset.critter))
+    const thing = target.closest('#things [data-thing]')
     if (thing) return command(() => goAndDo(thing.dataset.thing))
-    if (e.target.closest('#reksio')) return holdStart()
-    const x = yardX(e)
+    if (target.closest('#reksio')) return holdStart()
+    // a puddle is drawn on the ground, so it wins over the faint action spots
+    const { x, y } = yardAt(e)
+    const puddle = y > Painting.GROUND_TOP && Weather.puddles.find((p) => Math.abs(p.x - x) < p.rx + PUDDLE_REACH)
+    if (puddle) return command(() => jumpIn(puddle))
+    const spot = target.closest('#spots [data-thing]')
+    if (spot) return command(() => goAndDo(spot.dataset.thing))
     command(() => Reksio.walkTo(x))
   })
 
@@ -512,12 +557,8 @@
       async run() {
         const p = Weather.puddles.reduce((a, b) => (Math.abs(a.x - Reksio.x) < Math.abs(b.x - Reksio.x) ? a : b))
         if (await Reksio.walkTo(p.x - Math.sign(p.x - Reksio.x || 1) * 90)) {
-          await Reksio.pounce(p.x)
-          Weather.splash(p.x)
-          Sound.splash()
-          wetten(1)
-          await Reksio.hop(30, 2) // splish, splash; he'll shake once he steps out
-          await Reksio.walkTo(p.x + Math.sign(p.x - Reksio.x || 1) * (p.rx + 50))
+          await splashIn(p)
+          await stepOut(p)
         }
       },
     },
@@ -585,6 +626,30 @@
   const soaked = () => soak >= SOAKED
 
   /** Wetter by `amount` (1 = soaked through at once). */
+  /** Pounce into a puddle: splish, splash. He'll shake once he steps out. */
+  async function splashIn(p) {
+    await Reksio.pounce(p.x)
+    Weather.splash(p.x)
+    Sound.splash()
+    wetten(1)
+    await Reksio.hop(30, 2)
+  }
+
+  const stepOut = (p) => Reksio.walkTo(p.x + Math.sign(p.x - Reksio.x || 1) * (p.rx + 50))
+
+  /** A tapped puddle: run over and jump in. */
+  async function jumpIn(p) {
+    if (!(await Reksio.walkTo(p.x - Math.sign(p.x - Reksio.x || 1) * 90))) return
+    busy = true
+    try {
+      await splashIn(p)
+    } finally {
+      busy = false
+    }
+    if (pending) runPending()
+    else await stepOut(p)
+  }
+
   function wetten(amount) {
     soak = Math.min(1, soak + amount)
     muddyUntil = performance.now() + MUDDY_S * 1000
@@ -716,5 +781,5 @@
   lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
   setTimeout(idleLoop, 200)
 
-  window.yardGame = { goAndDo, tap: (name) => command(() => goAndDo(name)), act: startAct, done, pickAct, state: () => ({ busy, ended, done: [...done], camX, lastAct, stamped: Things.stamped, mouse: Things.mouse, uses: { ...uses } }) } // for testing
+  window.yardGame = { goAndDo, tap: (name) => command(() => goAndDo(name)), act: startAct, done, pickAct, state: () => ({ busy, ended, acting, holding: !!hold, pending: !!pending, done: [...done], camX, lastAct, stamped: Things.stamped, mouse: Things.mouse, uses: { ...uses } }) } // for testing
 })()
