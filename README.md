@@ -15,6 +15,7 @@ src/
   commands.py           subcommand handlers
   audio.py              audio measurements, clips, spectrograms (ffmpeg, librosa)
   samples.py            downloads, measures and packs a game's instrument samples
+  barks.py              cuts the marked original barks into a local script for the games
   mark.py               local server for the sound-marking tool
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
 worlds/<id>/
@@ -23,6 +24,7 @@ worlds/<id>/
   episodes/index.yaml   episode catalogue (schema.episode.EpisodeCatalogue)
   intro.yaml            title sequence, beat by beat (schema.breakdown.Breakdown)
   audio/intro/          measurements, spectrograms, mark clips (generated, gitignored)
+  audio/barks.js        the original barks, packed for the games (generated, gitignored)
   games/<game>/brief.yaml  game brief (schema.brief.GameBrief)
   games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
   games/<game>/game/    the game: static HTML, CSS and plain scripts
@@ -53,6 +55,7 @@ uv run python main.py episodes WORLD [--online]
 uv run python main.py mark WORLD [MEDIA] [--by NAME] [--no-open]
 uv run python main.py play WORLD [GAME]       # opens a game (default: yard); no server
 uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
+uv run python main.py barks WORLD             # packs the marked barks (local only)
 uv run python main.py schema world|sources|episodes|intro|brief
 ```
 

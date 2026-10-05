@@ -33,7 +33,8 @@ Flow, one validated file per stage, under `worlds/<id>/`:
 Research files hold research only. Game ideas go in a game brief; the one bridge
 is `design_notes`, which must be `interpretation` claims. The game is inspired
 by the original, not copied from it: original sounds or melodies only as
-occasional easter eggs.
+occasional easter eggs. One exception, Adam's call: Reksio barks with the
+original barks, varied each time — packed locally, never committed.
 
 ## Research
 
@@ -101,7 +102,10 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   Characters are drawn in code (SVG). Sound effects are made with Web Audio;
   music is played note by note from CC0 instrument samples listed in the
   game's `samples.yaml` and packed into `samples.js` by `main.py samples`
-  (generated: don't edit it, rebuild it). Original audio only as easter eggs.
+  (generated: don't edit it, rebuild it). Original audio only as easter eggs,
+  plus the bark: `main.py barks` packs the original barks into the world's
+  gitignored `audio/barks.js`, and the game falls back to a synthesised bark
+  without it. Never commit original audio.
 - **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build
   step. Libraries are vendored at a pinned version under `vendor/`, never loaded
   from a CDN. wavesurfer draws inside a shadow DOM, so styles for anything

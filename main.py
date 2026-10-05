@@ -8,6 +8,7 @@ Subcommands:
     mark      Open the local tool for marking sounds in the intro.
     play      Open a game in the browser (default: the yard).
     samples   Download and pack a game's instrument samples into samples.js.
+    barks     Cut the marked original barks into a local script for the games.
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -49,6 +50,12 @@ Examples:
         Downloads the samples listed in games/yard/samples.yaml (CC0
         libraries), measures their pitch and packs them into samples.js.
 
+    uv run python main.py barks reksio
+        Cuts the barks Adam marked (audio/intro/marks/bark.wav) apart and
+        packs them into audio/barks.js. The games play them a little higher
+        and quicker each time; without the file they use a synthesised bark.
+        The file is the original recording, so it stays local (gitignored).
+
     uv run python main.py schema world
         JSON Schema for world.yaml (also: sources, episodes, intro, brief).
 """
@@ -63,6 +70,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 from commands import (
+    cmd_barks,
     cmd_episodes,
     cmd_list,
     cmd_mark,
@@ -143,6 +151,9 @@ def main() -> int:
         help=f"Game folder under games/ (default: {DEFAULT_GAME})",
     )
 
+    p_barks = sub.add_parser("barks", help="Pack the marked barks for the games")
+    p_barks.add_argument("world", metavar="WORLD")
+
     p_schema = sub.add_parser("schema", help="Print JSON Schema")
     p_schema.add_argument(
         "kind", choices=["world", "sources", "episodes", "intro", "brief"]
@@ -157,6 +168,7 @@ def main() -> int:
         "mark": cmd_mark,
         "play": cmd_play,
         "samples": cmd_samples,
+        "barks": cmd_barks,
         "schema": cmd_schema,
     }
     return dispatch[args.cmd](args)

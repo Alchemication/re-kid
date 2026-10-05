@@ -55,6 +55,11 @@ Update the **Status** and **Next steps** sections as work lands.
   is visible).** The game's drawings, sounds and music are new and made for
   it, in the spirit of the original. Original sounds and melodies appear only
   as occasional easter eggs. Adam's marks are inspiration, not a parts list.
+  Exception (Adam, after the synthesised bark fell flat): Reksio barks with
+  the original barks, played higher and quicker by a random amount each time.
+  They stay local (`main.py barks`, gitignored); without them the game uses
+  its synthesised woof. Like the hook, this must be replaced before any
+  public release.
   This replaces the earlier idea of looping the original theme, and makes a
   public version far easier to license.
 - **Every statement about the original is a claim with provenance**
@@ -196,7 +201,7 @@ wake Reksio at home.
    play's main things lowers the sun a step and warms the sky; after the last, evening falls and the picture closes in a circle on the doghouse. No text. When left alone, Reksio shows a thought bubble with a
    picture of the nearest main thing he still wants, and it twinkles; arrows
    and space work too. All sounds are new, made in the browser; the bone find
-   plays Adam's bark clip as an easter egg if it exists locally.
+   plays Adam's whole bark clip as an easter egg if it exists locally.
 
    **Music:** a pizzicato "oom-pah" in B-flat with a clarinet hook, played
    note by note from CC0 instrument samples (VSCO-2 CE and VCSL, packed by

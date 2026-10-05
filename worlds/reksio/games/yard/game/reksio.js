@@ -276,6 +276,21 @@ const Reksio = (() => {
     }
   }
 
+  // Gestures that hold a pose (sitting, sniffing, catching drops) note `pose`
+  // when they start; relax() bumps it, so a cut-short gesture stops quietly.
+  let pose = 0
+
+  /** Drop whatever pose he is holding, at once: someone has asked him to do
+   * something else. A gesture cut short this way ends early (its awaited
+   * animations reject; callers catch that). */
+  function relax() {
+    pose += 1
+    for (const e of [bob, head, ...legs]) e.getAnimations().forEach((a) => a.cancel())
+    show(tongue, false)
+    show(mouth, false)
+    show(smile, true)
+  }
+
   /** Nose to the ground, a few sniffs (how many, and how low, varies). */
   async function sniff(times = rndInt(2, 5)) {
     const low = rnd(24, 34)
@@ -431,10 +446,12 @@ const Reksio = (() => {
 
   /** Sit for a while: rear down, front up, tail sweeping. */
   async function sit(ms = rnd(1800, 3500)) {
+    const mine = pose
     const down = 'rotate(-14deg) translate(4px, 7px)'
     await bob.animate([{ transform: 'rotate(0)' }, { transform: down }], { duration: 300, fill: 'forwards' }).finished
     const rear = [legs[0], legs[2]].map((l) => l.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(55deg)' }], { duration: 300, fill: 'forwards' }))
     await wait(ms)
+    if (mine !== pose) return
     rear.forEach((a) => a.cancel())
     bob.getAnimations().forEach((a) => a.cancel())
     await bob.animate([{ transform: down }, { transform: 'rotate(0)' }], { duration: 260 }).finished
@@ -454,11 +471,13 @@ const Reksio = (() => {
 
   /** Head up, tongue out: catching raindrops. */
   async function catchDrops(n = rndInt(3, 6)) {
+    const mine = pose
     await head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-34deg)' }], { duration: 300, fill: 'forwards' }).finished
     show(tongue, true)
     show(smile, false)
     for (let i = 0; i < n; i++) {
       await wait(rnd(250, 500))
+      if (mine !== pose) return
       Sound.lap()
       head.animate([{ transform: 'rotate(-34deg)' }, { transform: 'rotate(-28deg)' }, { transform: 'rotate(-34deg)' }], { duration: 160 })
     }
@@ -528,7 +547,7 @@ const Reksio = (() => {
     get stretching() { return stretching || stretch !== 0 },
     /** Mouth position in scene units, for effects. */
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
-    walkTo, stopWalking, face, tick, bark, nod, lick, lap, shake, paddle, duck, holdBone,
+    walkTo, stopWalking, face, tick, relax, bark, nod, lick, lap, shake, paddle, duck, holdBone,
     beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
     stamp, snap, watch, pounce, biteTail, howl, sit, startle, catchDrops,
     MIN_X, MAX_X,

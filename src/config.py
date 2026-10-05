@@ -132,3 +132,30 @@ suggests a wrong file."""
 
 DOWNLOAD_TIMEOUT_S = 60
 """Upper bound for downloading one sample file."""
+
+BARK_CLIP = "audio/intro/marks/bark.wav"
+"""Adam's bark mark, cut by ``main.py mark``, inside a world directory: the
+original barks the game's bark is made from."""
+
+BARKS_JS = "audio/barks.js"
+"""Where ``main.py barks`` writes the cut barks inside a world directory. Under
+the gitignored ``audio/`` folder, because they are the original recording: they
+stay on this machine and never reach the repository. Games load it with a
+relative script tag and fall back to a synthesised bark without it."""
+
+BARK_THRESHOLD = 0.15
+"""A bark is where the loudness (RMS) is above this fraction of the clip's
+loudest moment. The bark clip is two quick barks with a short gap; 0.15 splits
+them cleanly while keeping each one's soft tail."""
+
+BARK_MIN_S = 0.05
+"""Louder stretches shorter than this are clicks, not barks, and are dropped."""
+
+BARK_PAD_S = 0.015
+"""Kept before and after each bark, so its attack and tail aren't clipped."""
+
+BARK_FADE_S = 0.008
+"""Fade in and out on each cut bark, so it starts and ends without a click."""
+
+BARK_PEAK = 0.9
+"""Each bark is scaled so its loudest sample reaches this (full scale = 1)."""

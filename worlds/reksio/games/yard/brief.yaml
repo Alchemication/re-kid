@@ -15,7 +15,7 @@ principles:
   refs: [world:sound.dialogue]
 - text: The child is Reksio, and every tap gets an answer. Nothing to get wrong, no score, no timer.
   origin: invented
-- text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs.
+- text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs. One exception, for now — the bark.
   origin: invented
 - text: Finite, and you can see the end coming. The sun sinks and the sky warms as the main things are done; after the last, evening falls and the game ends with him asleep. No counter, no text.
   origin: inspired
@@ -66,6 +66,11 @@ sound:
 - text: Three tunes take turns over the oom-pah so it doesn't wear thin — the hook twice, a skipping flute tune twice, the hook again, then a tiptoeing tune in G minor that climbs back home to B-flat. The two new tunes are written for the game in the same bouncy spirit, not taken from the original.
   origin: invented
 - text: A quiet wind is always there, changing like real wind — mostly a light breeze that comes and goes, now and then a gust, stronger when the clouds come, dropping at evening. The grass and flowers lean further in a gust, so the child can see what they hear. Rain is a soft hush under everything.
+  origin: invented
+- text: Reksio barks with the original barks from the intro, played a little higher and quicker by a random amount each time, so he sounds like himself but never twice the same. (A private-play choice, to be replaced before any public release.)
+  origin: original
+  refs: [mark:bark]
+- text: The fly and the bumblebee are visitors, not residents. Each turns up a while into the play, stays a while, flies off, and may come back later; both stay away while it rains.
   origin: invented
 - text: Creatures sound like what they are, quietly, and fade with distance from Reksio — flies whine now and then and bees hum, the bird chirps, the mouse squeaks. Spiders, snails and worms are silent, except for small cartoon noises when they do something (a plink as the spider drops, a schlup as the snail hides, a pop as a worm comes up).
   origin: invented

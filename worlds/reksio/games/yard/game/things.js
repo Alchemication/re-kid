@@ -693,8 +693,10 @@ const Things = (() => {
     },
   }
 
-  /** Can it be used now? The trap only once the mouse is out. */
-  const ready = (name) => name !== 'trap' || mouse === 'wanting' || mouse === 'fed'
+  /** Can it be used now? The trap only once the mouse is out; the bird only
+   * while it is sitting somewhere. */
+  const ready = (name) =>
+    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !flying : true
 
   function init({ ended }) {
     isEnded = ended

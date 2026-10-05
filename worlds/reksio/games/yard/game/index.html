@@ -93,6 +93,13 @@
 
         <g id="things">
 
+          <!-- grass tufts, behind everything (they sway in the breeze; taps go through them) -->
+          <path class="grass sway" style="transform-origin: 772px 812px" d="M760 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
+          <path class="grass sway" style="transform-origin: 1462px 818px" d="M1450 818 l6 -20 l4 16 l6 -24 l4 24 l6 -16 l4 20" />
+          <path class="grass sway" style="transform-origin: 1912px 812px" d="M1900 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
+          <path class="grass sway" style="transform-origin: 2412px 816px" d="M2400 816 l6 -20 l4 16 l6 -24 l4 24 l6 -16 l4 20" />
+          <path class="grass sway" style="transform-origin: 2212px 812px" d="M2200 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
+
           <!-- ============ the family house: the left end of the yard ============ -->
           <g id="house" class="thing" data-thing="house" data-hint-y="380">
             <rect class="hit" x="0" y="300" width="320" height="510" />
@@ -241,9 +248,10 @@
               <path id="trap-bar" class="trap-bar" style="transform-origin: 1080px 796px" d="M1080 796 H1042 V790" />
               <circle class="trap-spring" cx="1080" cy="796" r="5" />
             </g>
-            <g id="cheese" style="transform-origin: 1103px 790px">
-              <path class="cheese" d="M1090 797 H1116 V780 Z" />
-              <circle class="cheese-hole" cx="1110" cy="790" r="2.4" />
+            <g id="cheese" style="transform-origin: 1104px 786px">
+              <path class="cheese" d="M1084 797 H1124 V771 Z" />
+              <circle class="cheese-hole" cx="1116" cy="787" r="3.4" />
+              <circle class="cheese-hole" cx="1106" cy="792" r="2.4" />
             </g>
           </g>
 
@@ -304,12 +312,6 @@
               </g>
           </g>
 
-          <!-- grass tufts (they sway in the breeze) -->
-          <path class="grass sway" style="transform-origin: 772px 812px" d="M760 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
-          <path class="grass sway" style="transform-origin: 1462px 818px" d="M1450 818 l6 -20 l4 16 l6 -24 l4 24 l6 -16 l4 20" />
-          <path class="grass sway" style="transform-origin: 1912px 812px" d="M1900 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
-          <path class="grass sway" style="transform-origin: 2412px 816px" d="M2400 816 l6 -20 l4 16 l6 -24 l4 24 l6 -16 l4 20" />
-          <path class="grass sway" style="transform-origin: 2212px 812px" d="M2200 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
         </g>
 
         <!-- ============ Reksio, side view, facing right; feet at y=0 ============ -->
@@ -405,6 +407,8 @@
 
   <script src="layout.js"></script>
   <script src="painting.js"></script>
+  <!-- the original barks, packed by `main.py barks` (local only; optional) -->
+  <script src="../../../audio/barks.js"></script>
   <script src="sound.js"></script>
   <script src="samples.js"></script>
   <script src="music.js"></script>

@@ -14,6 +14,8 @@ from pathlib import Path
 
 from config import (
     AUDIO_DIR,
+    BARK_CLIP,
+    BARKS_JS,
     EPISODES_FILE,
     GAME_PAGE,
     GAMES_DIR,
@@ -344,4 +346,21 @@ def cmd_samples(args: argparse.Namespace) -> int:
 def cmd_schema(args: argparse.Namespace) -> int:
     """Print the JSON Schema of a research file type."""
     print(json.dumps(_SCHEMAS[args.kind].model_json_schema(), indent=2))
+    return 0
+
+
+def cmd_barks(args: argparse.Namespace) -> int:
+    """Cut the marked original barks into a local script the games play from."""
+    from barks import BarkError, build
+
+    root = world_dir(args.world)
+    try:
+        count = build(root / BARK_CLIP, root / BARKS_JS)
+    except BarkError as exc:
+        logger.error("%s", exc)
+        return 1
+    print(
+        f"Wrote {root / BARKS_JS} ({count} barks). It is the original recording: "
+        "it stays on this machine (audio/ is gitignored)."
+    )
     return 0

@@ -61,13 +61,14 @@
     const firstTime = EVENING_NEEDS.includes(name) && !done.has(name)
     done.add(name)
     sunset()
-    if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
-      evening()
-      return
-    }
     if (firstTime) {
       Music.react.done()
       fillSlot(name)
+    }
+    if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
+      await Reksio.hop() // the last one: a hop of joy, then evening
+      evening()
+      return
     }
     if (firstTime && !pending) await Reksio.hop() // a hop of joy
     runPending()
@@ -231,6 +232,7 @@
 
   function command(fn) {
     lastTap = performance.now()
+    if (acting && !busy) Reksio.relax() // left alone, he was doing something: drop it
     if (ended) {
       if (endedAt && performance.now() - endedAt > RESTART_AFTER_MS) location.reload()
       return
@@ -306,7 +308,7 @@
   function nearest() {
     let best = null
     for (const name of Object.keys(spotEls)) {
-      if ((name === 'bird' && Things.flying) || !Things.ready(name)) continue
+      if (!Things.ready(name)) continue
       const { x, r } = SPOTS[name]()
       const d = Math.abs(Reksio.x - x)
       if (d <= r && (!best || d < best.d)) best = { name, d }
@@ -563,10 +565,13 @@
       lastAct = name
       if (name === 'wish') firstWish = false
       acting = true
-      Promise.resolve(ACTS[name].run()).finally(() => {
-        acting = false
-        nextIdleAt = performance.now() + (ACTS[name].ms || rnd(IDLE_GAP_MS[0], IDLE_GAP_MS[1]))
-      })
+      Promise.resolve()
+        .then(() => ACTS[name].run())
+        .catch(() => {}) // cut short by a tap (Reksio.relax)
+        .finally(() => {
+          acting = false
+          nextIdleAt = performance.now() + (ACTS[name].ms || rnd(IDLE_GAP_MS[0], IDLE_GAP_MS[1]))
+        })
     }
     setTimeout(idleLoop, 200)
   }

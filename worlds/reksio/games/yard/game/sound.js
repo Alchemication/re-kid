@@ -1,8 +1,17 @@
 // Sounds made in the browser, new for the game. All gentle: small ears.
+//
+// The one exception is the bark: if `main.py barks` has packed the original
+// barks Adam marked (a local file, never committed), Reksio barks with those,
+// a little higher and quicker by a random amount each time. Without it, he
+// has a synthesised woof.
 
+/* global BARKS */
 /* exported Sound */
 const Sound = (() => {
   const VOLUME = 0.5
+  const BARK_RATE = [1.06, 1.2] // the original barks, sped up (and so higher) by this much
+  const BARK_GAP_S = [0.2, 0.26] // between the two barks of a "hau hau"
+  const BARK_VOLUME = 0.8
   const CRITTER_VOLUME = 0.55 // the yard's creatures, even right by Reksio: quiet
   const HEARING = 900 // creatures further from Reksio than this are not heard
   let ctx = null
@@ -10,6 +19,7 @@ const Sound = (() => {
   let noise = null
   let original = null // easter-egg clips, if present (see play())
   let scale = 1 // loudness of what is being played now (see from())
+  let barks = [] // decoded original barks, if the local file is there
 
   /** Create the audio context on the first tap (browsers require a gesture). */
   function ensure() {
@@ -21,6 +31,12 @@ const Sound = (() => {
       noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate)
       const data = noise.getChannelData(0)
       for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
+      if (typeof BARKS !== 'undefined') {
+        for (const b64 of BARKS) {
+          const bytes = Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0))
+          ctx.decodeAudioData(bytes.buffer).then((buffer) => barks.push(buffer))
+        }
+      }
     }
     if (ctx.state === 'suspended') ctx.resume()
     return ctx
@@ -89,6 +105,18 @@ const Sound = (() => {
     wobble.stop(t + 0.2)
   }
 
+  /** One of the original barks, played at a random speed (and so pitch). */
+  function realBark(at) {
+    const c = ensure()
+    const src = c.createBufferSource()
+    src.buffer = barks[Math.floor(Math.random() * barks.length)]
+    src.playbackRate.value = BARK_RATE[0] + Math.random() * (BARK_RATE[1] - BARK_RATE[0])
+    const g = c.createGain()
+    g.gain.value = BARK_VOLUME
+    src.connect(g).connect(master)
+    src.start(c.currentTime + at)
+  }
+
   /** A cartoon "woof": a short voiced burst that drops in pitch. */
   function woof(at = 0) {
     const c = ensure()
@@ -128,7 +156,16 @@ const Sound = (() => {
     get running() { return !!ctx && ctx.state === 'running' },
     /** The shared audio context and output, for the music engine. */
     bus() { ensure(); return { ctx, master } },
-    bark() { woof(0); woof(0.2) },
+    /** "Hau hau": two barks, the originals if they're here, else synthesised. */
+    bark() {
+      if (barks.length) {
+        realBark(0)
+        realBark(BARK_GAP_S[0] + Math.random() * (BARK_GAP_S[1] - BARK_GAP_S[0]))
+      } else {
+        woof(0)
+        woof(0.2)
+      }
+    },
     step() { hiss(0, 0.05, 0.002, 0.04, 'bandpass', 2400, 2) },
     knock() { tone('sine', 220, 160, 0, 0.3, 0.003, 0.12); tone('sine', 220, 160, 0.14, 0.25, 0.003, 0.12) },
     munch() { hiss(0, 0.22, 0.004, 0.07, 'bandpass', 1100, 1.5) },
