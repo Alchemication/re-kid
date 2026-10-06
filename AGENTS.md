@@ -147,9 +147,12 @@ the edge cases that would let bad data pass silently.
 **Games**, three layers:
 
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
-  `uv run pytest`): pure logic, loaded into a sandbox by `tests/load.js`.
-  Layout invariants, seeding, the recorder. Logic that can be pure should be,
-  and tested here.
+  `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
+  live in pure modules with no drawing or clock of their own (`day.js`,
+  `shower.js`, `idle.js`, `layout.js`): the part that draws tells them what
+  happened and does what they say. Drawing parts can still be stepped here on
+  a pretend page (`load(…, { dom: true, globals })`, as `creatures.test.js`
+  does). Logic that can be pure should be, and tested here.
 - *Conventions* (`tests/test_game.py`, in `uv run pytest`): the debuggability
   rules above that a grep can check.
 - *Browser* (`tests/test_game_browser.py`, `uv run pytest -m browser -n 4`,

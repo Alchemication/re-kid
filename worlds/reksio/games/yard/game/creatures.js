@@ -193,20 +193,7 @@ const Creatures = (() => {
     },
     update(dt) {
       const now = world.t
-      if (this.state === 'away') {
-        if (now > this.stateUntil && !stormy()) {
-          // a fly arrives from the side of the screen
-          this.state = 'fly'
-          this.leaveAt = now + rnd(...FLY_STAY_S)
-          this.x = world.reksio.x + (random() < 0.5 ? -900 : 900)
-          this.y = rnd(400, 600)
-          this.g.style.display = ''
-          this.cocoon.setAttribute('opacity', '0')
-          this.body.style.display = ''
-          this.pick()
-        }
-        return
-      }
+      if (this.state === 'away') return this.arrive(now)
       if (this.state === 'wrapped') return
       if (!this.leaving && (this.state === 'fly' || this.state === 'land') && (now > this.leaveAt || stormy())) this.leave()
       if (this.state === 'stuck') {
@@ -214,21 +201,44 @@ const Creatures = (() => {
         this.body.setAttribute('transform', `rotate(${Math.sin(now * 40) * 18})`)
         return
       }
-      if (this.state === 'land') {
-        // rubs its hands, and keeps an eye out
-        this.body.setAttribute('transform', `translate(0 ${Math.sin(now * 30) * 0.6})`)
-        const near = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y)
-        if (now > this.stateUntil || (near < 70 && random() < 0.03)) {
-          this.state = 'fly'
-          this.landedOn = null
-          this.vy = -260
-          this.pick()
-        }
-        this.place()
-        return
+      if (this.state === 'land') return this.landed(now)
+      this.flying(dt, now)
+    },
+    /** Away: after a while (and not in the rain), it arrives from the side of the screen. */
+    arrive(now) {
+      if (now <= this.stateUntil || stormy()) return
+      this.state = 'fly'
+      this.leaveAt = now + rnd(...FLY_STAY_S)
+      this.x = world.reksio.x + (random() < 0.5 ? -900 : 900)
+      this.y = rnd(400, 600)
+      this.g.style.display = ''
+      this.cocoon.setAttribute('opacity', '0')
+      this.body.style.display = ''
+      this.pick()
+    },
+    /** Landed: rubs its hands, keeps an eye out, and takes off when it's had enough or Reksio comes close. */
+    landed(now) {
+      this.body.setAttribute('transform', `translate(0 ${Math.sin(now * 30) * 0.6})`)
+      const near = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y)
+      if (now > this.stateUntil || (near < 70 && random() < 0.03)) {
+        this.state = 'fly'
+        this.landedOn = null
+        this.vy = -260
+        this.pick()
       }
-      // flying: steer towards the target with a little zig-zag, now and then whining
+      this.place()
+    },
+    /** Flying: steer towards the target with a little zig-zag, now and then whining. */
+    flying(dt, now) {
       if (random() < dt / WHINE_EVERY_S) hear(this.x, () => Sound.whine())
+      const d = this.steer(dt, now)
+      if (d < 18) this.reached(now)
+      this.sense()
+      this.body.setAttribute('transform', this.vx < 0 ? 'scale(-1 1)' : '')
+      this.place()
+    },
+    /** One frame's steering; how far it still is from the target. */
+    steer(dt, now) {
       const tx = this.target.x + Math.sin(now * 7) * 30
       const ty = this.target.y + Math.cos(now * 9) * 22
       const dx = tx - this.x
@@ -239,22 +249,25 @@ const Creatures = (() => {
       this.vy += ((dy / d) * speed - this.vy) * Math.min(1, dt * 3)
       this.x += this.vx * dt
       this.y = clamp(this.y + this.vy * dt, 300, 800)
-      if (d < 18 && this.leaving) {
-        // off screen: gone for a while; still in view: keep going
+      return d
+    },
+    /** At the target: leaving, gone (off screen) or on again; else land, or pick another. */
+    reached(now) {
+      if (this.leaving) {
         if (Math.abs(this.x - world.reksio.x) > 1000) this.goAway(rnd(...FLY_GONE_S))
         else this.leave()
-      } else if (d < 18) {
-        if (this.target.land) {
-          this.state = 'land'
-          this.landedOn = this.target.name
-          this.x = this.target.x
-          this.y = this.target.y
-          this.stateUntil = now + rnd(2.5, 6)
-        } else {
-          this.pick()
-        }
+      } else if (this.target.land) {
+        this.state = 'land'
+        this.landedOn = this.target.name
+        this.x = this.target.x
+        this.y = this.target.y
+        this.stateUntil = now + rnd(2.5, 6)
+      } else {
+        this.pick()
       }
-      // flies too close to Reksio's nose get startled
+    },
+    /** Startled by Reksio's nose close by; stuck if it flies into the web. */
+    sense() {
       if (dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 45 && random() < 0.05) {
         this.dodge(world.reksio.nose.x, world.reksio.nose.y)
       }
@@ -264,8 +277,6 @@ const Creatures = (() => {
         hear(this.x, () => Sound.buzz(0.4))
         spider.prey(this)
       }
-      this.body.setAttribute('transform', this.vx < 0 ? 'scale(-1 1)' : '')
-      this.place()
     },
     place() {
       this.g.setAttribute('transform', `translate(${this.x} ${this.y}) scale(1.5)`)
@@ -306,63 +317,11 @@ const Creatures = (() => {
     },
     update(dt) {
       const now = world.t
-      if (this.state === 'away') {
-        if (now > this.stateUntil && !stormy()) {
-          // over the wall, to the flowers
-          this.state = 'fly'
-          this.leaving = false
-          this.leaveAt = now + rnd(...BEE_STAY_S)
-          this.x = this.FLOWERS[0].x + (random() < 0.5 ? -1 : 1) * rnd(300, 600)
-          this.y = 240
-          this.vx = this.vy = 0
-          this.g.style.display = ''
-        }
-        return
-      }
-      if (!this.leaving && (now > this.leaveAt || stormy())) {
-        // off home, back over the wall
-        this.leaving = true
-        this.state = 'fly'
-        this.away = { x: this.x + (random() < 0.5 ? -1 : 1) * rnd(400, 700), y: 180 }
-      }
-      const f = this.FLOWERS[this.flower]
-      const reksioNear = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 110
-      if (reksioNear && this.state !== 'huff' && !this.leaving) {
-        // a huffy loop up and away, with a buzz
-        this.state = 'huff'
-        this.stateUntil = now + rnd(4, 7)
-        hear(this.x, () => Sound.buzz(0.8))
-      }
-      let tx = f.x
-      let ty = f.y - 26
-      if (this.leaving) {
-        tx = this.away.x
-        ty = this.away.y
-        if (dist(tx, ty, this.x, this.y) < 30) {
-          this.g.style.display = 'none'
-          this.state = 'away'
-          this.stateUntil = now + rnd(...BEE_GONE_S)
-          return
-        }
-      } else if (this.state === 'huff') {
-        tx = f.x + Math.cos(now * 2.2) * 140
-        ty = 470 + Math.sin(now * 2.2) * 60
-        if (now > this.stateUntil) this.state = 'fly'
-      } else if (this.state === 'hover') {
-        ty += Math.sin(now * 6) * 5 // bobbing in the flower
-        if (now > this.stateUntil) {
-          this.state = 'fly'
-          this.flower = (this.flower + 1 + Math.floor(random() * 2)) % this.FLOWERS.length
-        }
-      }
-      const dx = tx - this.x
-      const dy = ty - this.y
-      const d = Math.hypot(dx, dy) || 1
-      const speed = this.state === 'huff' ? 220 : 120
-      this.vx += ((dx / d) * Math.min(speed, d * 3) - this.vx) * Math.min(1, dt * 2.5)
-      this.vy += ((dy / d) * Math.min(speed, d * 3) - this.vy) * Math.min(1, dt * 2.5)
-      this.x += this.vx * dt
-      this.y += this.vy * dt + Math.sin(now * 4) * 0.4 // a heavy, bumbling flight
+      if (this.state === 'away') return this.arrive(now)
+      this.moods(now)
+      const to = this.heading(now)
+      if (!to) return // gone home
+      const d = this.steer(dt, now, to)
       if (this.state === 'fly' && random() < dt / HUM_EVERY_S) hear(this.x, () => Sound.buzz(0.6))
       if (this.state === 'fly' && d < 8 && !this.leaving) {
         this.state = 'hover'
@@ -370,6 +329,68 @@ const Creatures = (() => {
       }
       this.body.setAttribute('transform', this.vx < -5 ? 'scale(-1 1)' : '')
       this.g.setAttribute('transform', `translate(${this.x} ${this.y}) scale(1.3)`)
+    },
+    /** Away: after a while (and not in the rain), over the wall to the flowers. */
+    arrive(now) {
+      if (now <= this.stateUntil || stormy()) return
+      this.state = 'fly'
+      this.leaving = false
+      this.leaveAt = now + rnd(...BEE_STAY_S)
+      this.x = this.FLOWERS[0].x + (random() < 0.5 ? -1 : 1) * rnd(300, 600)
+      this.y = 240
+      this.vx = this.vy = 0
+      this.g.style.display = ''
+    },
+    /** Time to go home (or the rain is coming); huffy if Reksio puts his nose in. */
+    moods(now) {
+      if (!this.leaving && (now > this.leaveAt || stormy())) {
+        // off home, back over the wall
+        this.leaving = true
+        this.state = 'fly'
+        this.away = { x: this.x + (random() < 0.5 ? -1 : 1) * rnd(400, 700), y: 180 }
+      }
+      const reksioNear = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 110
+      if (reksioNear && this.state !== 'huff' && !this.leaving) {
+        // a huffy loop up and away, with a buzz
+        this.state = 'huff'
+        this.stateUntil = now + rnd(4, 7)
+        hear(this.x, () => Sound.buzz(0.8))
+      }
+    },
+    /** Where it is heading this frame, or null once it has gone home. */
+    heading(now) {
+      const f = this.FLOWERS[this.flower]
+      if (this.leaving) {
+        if (dist(this.away.x, this.away.y, this.x, this.y) >= 30) return this.away
+        this.g.style.display = 'none'
+        this.state = 'away'
+        this.stateUntil = now + rnd(...BEE_GONE_S)
+        return null
+      }
+      if (this.state === 'huff') {
+        if (now > this.stateUntil) this.state = 'fly'
+        return { x: f.x + Math.cos(now * 2.2) * 140, y: 470 + Math.sin(now * 2.2) * 60 }
+      }
+      if (this.state === 'hover') {
+        if (now > this.stateUntil) {
+          this.state = 'fly'
+          this.flower = (this.flower + 1 + Math.floor(random() * 2)) % this.FLOWERS.length
+        }
+        return { x: f.x, y: f.y - 26 + Math.sin(now * 6) * 5 } // bobbing in the flower
+      }
+      return { x: f.x, y: f.y - 26 }
+    },
+    /** One frame of heavy, bumbling flight towards `to`; how far it still is. */
+    steer(dt, now, to) {
+      const dx = to.x - this.x
+      const dy = to.y - this.y
+      const d = Math.hypot(dx, dy) || 1
+      const speed = this.state === 'huff' ? 220 : 120
+      this.vx += ((dx / d) * Math.min(speed, d * 3) - this.vx) * Math.min(1, dt * 2.5)
+      this.vy += ((dy / d) * Math.min(speed, d * 3) - this.vy) * Math.min(1, dt * 2.5)
+      this.x += this.vx * dt
+      this.y += this.vy * dt + Math.sin(now * 4) * 0.4
+      return d
     },
   }
 
@@ -689,6 +710,8 @@ const Creatures = (() => {
       const w = worms.up
       return w && { x: w.x, y: w.y, eat() { w.eaten = true; w.g.remove() } }
     },
+    /** Where the bee feeds: the flowers' heads. */
+    get flowers() { return bee.FLOWERS },
     /** Where the bee is. */
     get bee() { return active(bee) && bee.state !== 'away' ? { x: bee.x, y: bee.y } : null },
     /** Where the fly is, if it's about and free. */

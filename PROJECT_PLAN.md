@@ -230,9 +230,8 @@ wake Reksio at home.
    - *Leaves:* a gust (the wind is already there) blows leaves across; Reksio chases one.
 
    **Each new gag** comes with its browser tests and a look at it (CLAUDE.md,
-   "Adding a gag"). Known complexity hotspots to split when next touched
-   (ESLint warnings): the creatures' `update` methods, `idleLoop`,
-   `Weather.tick`, `Music.scheduleStep`.
+   "Adding a gag"). Known complexity hotspot to split when next touched
+   (ESLint warning): `Music.scheduleStep`.
 2. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
 3. **Later:** the yard becomes the home screen, and new things in it lead
