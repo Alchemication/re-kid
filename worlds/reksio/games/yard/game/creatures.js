@@ -11,7 +11,7 @@
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Debug, Sound, Reksio, Layout, Weather */
+/* global Clock, Debug, Sound, Reksio, Layout, Weather */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -288,7 +288,7 @@ const Creatures = (() => {
     },
     /** After a while, the wrapped fly is gone and a new one comes along. */
     later() {
-      setTimeout(() => this.goAway(rnd(12, 25)), 15000)
+      Clock.after(15000, () => this.goAway(rnd(12, 25)))
     },
   }
 
@@ -438,17 +438,18 @@ const Creatures = (() => {
       const sx = this.x
       const sy = this.y
       const ms = Math.max(1, (dist(sx, sy, x, y) / speed) * 1000)
-      const start = performance.now()
+      const start = Clock.now()
       await new Promise((resolve) => {
-        const step = (t) => {
+        const step = () => {
+          const t = Clock.now()
           const k = Math.min(1, (t - start) / ms)
           this.x = sx + (x - sx) * k
           this.y = sy + (y - sy) * k
           this.legs.setAttribute('transform', `rotate(${Math.sin(t / 40) * 14})`)
-          if (k < 1) requestAnimationFrame(step)
+          if (k < 1) Clock.after(0, step)
           else resolve()
         }
-        requestAnimationFrame(step)
+        Clock.after(0, step)
       })
     },
     /** Let out (or reel in) the thread to length to, over ms. A newer drop
@@ -457,16 +458,16 @@ const Creatures = (() => {
       const token = ++this.dropToken
       const from = this.hang
       if (to - from > 30) hear(this.x, () => Sound.plink())
-      const start = performance.now()
+      const start = Clock.now()
       await new Promise((resolve) => {
-        const step = (t) => {
+        const step = () => {
           if (token !== this.dropToken) return resolve()
-          const k = Math.min(1, (t - start) / ms)
+          const k = Math.min(1, (Clock.now() - start) / ms)
           this.hang = from + (to - from) * (1 - (1 - k) * (1 - k))
-          if (k < 1) requestAnimationFrame(step)
+          if (k < 1) Clock.after(0, step)
           else resolve()
         }
-        requestAnimationFrame(step)
+        Clock.after(0, step)
       })
     },
     /** Build the web strand by strand, then wait at the hub. */
@@ -490,7 +491,7 @@ const Creatures = (() => {
       hear(f.x, () => Sound.buzz(0.3))
       for (let i = 0; i < 6; i++) {
         this.legs.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(40deg)' }, { transform: 'rotate(0)' }], { duration: 160 })
-        await new Promise((r) => setTimeout(r, 160))
+        await Clock.wait(160)
       }
       f.wrap()
       f.later()
@@ -504,7 +505,7 @@ const Creatures = (() => {
       this.swingV = rnd(-0.8, 0.8)
       await this.drop(depth, 1400)
       if (this.mode !== 'dangle') return
-      await new Promise((r) => setTimeout(r, rnd(1500, 3500)))
+      await Clock.wait(rnd(1500, 3500))
       if (this.mode !== 'dangle') return
       await this.drop(0, 1600)
       if (this.mode === 'dangle') this.mode = 'idle'
@@ -516,7 +517,7 @@ const Creatures = (() => {
       this.swing = 0
       this.swingV = 0.3
       await this.drop(Math.max(40, toY - this.y), 900)
-      await new Promise((r) => setTimeout(r, 1300))
+      await Clock.wait(1300)
       await this.drop(0, 1200)
       if (this.mode === 'dangle') this.mode = 'idle'
       return true
@@ -527,7 +528,7 @@ const Creatures = (() => {
       this.mode = 'hide'
       await this.drop(0, 250)
       await this.crawl(CORNER.x + 4, CORNER.y + 4, 400)
-      await new Promise((r) => setTimeout(r, 4000))
+      await Clock.wait(4000)
       await this.crawl(WEB.hub.x, WEB.hub.y, 80)
       this.mode = 'idle'
     },

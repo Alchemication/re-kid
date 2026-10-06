@@ -459,6 +459,27 @@ class TestScreens:
         assert not y.errors, "\n---\n".join(y.errors)
 
 
+class TestHidden:
+    def test_hiding_the_page_pauses_what_moves_and_showing_it_plays_on(
+        self, yard: callable
+    ) -> None:
+        y = yard(STILL)
+        y.start("Reksio.nap(4000)")
+        y.page.wait_for_timeout(300)  # settling down: animations running
+        states = """() => document.getAnimations().map((a) => a.playState)"""
+        assert "running" in y.page.evaluate(states)
+        set_hidden = """(hidden) => {
+            Object.defineProperty(document, 'hidden', { value: hidden, configurable: true })
+            document.dispatchEvent(new Event('visibilitychange'))
+        }"""
+        y.page.evaluate(set_hidden, True)
+        assert "running" not in y.page.evaluate(states)
+        y.page.evaluate(set_hidden, False)
+        assert "paused" not in y.page.evaluate(states)
+        y.page.evaluate("window.__running")  # the nap plays on to its end
+        y.settled()
+
+
 class TestRecorder:
     """Save a bug report from the game, then replay it."""
 

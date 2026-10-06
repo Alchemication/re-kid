@@ -115,6 +115,10 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   - randomness comes from `Debug.random('<part>')`, never `Math.random`
     (sound.js texture excepted); anything drawn every frame gets its own
     stream, so it can't shift the others;
+  - time and timers come from `Clock` (debug.js): `Clock.now`, `after`,
+    `wait`, `every`, never `setTimeout`, `setInterval` or `performance.now`
+    (sound's audio clock aside). Game time moves only as frames are drawn,
+    so a hidden page pauses the game instead of running it on unseen;
   - an awaited gesture a tap may cut short goes through
     `Debug.ignoreCut(promise, 'what')`, never `.catch(() => {})`; an empty
     catch needs a comment on the line saying why;

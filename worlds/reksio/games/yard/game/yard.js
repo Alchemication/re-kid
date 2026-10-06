@@ -10,7 +10,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -23,7 +23,7 @@
   const $ = (id) => document.getElementById(id)
   const svg = $('world')
   const cam = $('cam')
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const wait = Clock.wait
   const random = Debug.random('yard') // this part's own random stream (debug.js)
   const huntRandom = Debug.random('bird-hunt') // drawn every idle tick, so kept out of the stream above
   const rnd = (lo, hi) => lo + random() * (hi - lo)
@@ -33,9 +33,9 @@
   let pending = null
   // the day (day.js): one sunset step per new thing, so the sun sets after as
   // many new things as the sunset has steps, a few of the eight or nine short
-  const day = Day.start(performance.now(), { things: Sky.STEPS })
+  const day = Day.start(Clock.now(), { things: Sky.STEPS })
   let endedAt = 0
-  let lastTap = performance.now()
+  let lastTap = Clock.now()
   let camX = clampCam(Reksio.x - Painting.VIEW_W / 2)
 
   function clampCam(v) {
@@ -89,7 +89,7 @@
     try {
       if (name === 'bird') await Reksio.lookUp(900)
       else {
-        if (name === 'trap') setTimeout(() => Sound.mouse(), 500)
+        if (name === 'trap') Clock.after(500, () => Sound.mouse())
         await Reksio.sniff(2)
         await Reksio.lookAround(700)
       }
@@ -115,34 +115,33 @@
 
   function holdStart() {
     if (day.ended || busy || hold) return command(() => Reksio.bark(), 'bark')
-    lastTap = performance.now()
+    lastTap = Clock.now()
     hold = { stretching: false, stopSound: null }
     const mine = hold
-    mine.timer = setTimeout(() => {
+    mine.timer = Clock.after(HOLD_MS, () => {
       if (hold !== mine) return
       mine.stretching = true
       Debug.trace('stretch')
       busy = true
       Reksio.beginStretch()
       mine.stopSound = stretchMusic()
-    }, HOLD_MS)
+    })
   }
 
   /** While he stretches, the bassoon climbs a note at a time. */
   function stretchMusic() {
     let n = 0
     Music.react.stretchStep(n++)
-    const id = setInterval(() => Music.react.stretchStep(n++), 300)
-    return () => clearInterval(id)
+    return Clock.every(300, () => Music.react.stretchStep(n++))
   }
 
   async function holdEnd() {
     if (!hold) return
     const h = hold
     hold = null
-    clearTimeout(h.timer)
+    Clock.cancel(h.timer)
     if (!h.stretching) return command(() => Reksio.bark(), 'bark')
-    lastTap = performance.now()
+    lastTap = Clock.now()
     h.stopSound()
     Music.react.snap()
     await Reksio.endStretch()
@@ -242,17 +241,17 @@
     const iris = $('iris')
     iris.style.setProperty('--x', `${((DOOR.x - camX) / Painting.VIEW_W) * 100}%`)
     iris.style.setProperty('--y', `${(DOOR.y / 900) * 100}%`)
-    const start = performance.now()
+    const start = Clock.now()
     await new Promise((resolve) => {
-      function close(t) {
-        const k = Math.min(1, (t - start) / 2600)
+      function close() {
+        const k = Math.min(1, (Clock.now() - start) / 2600)
         iris.style.setProperty('--r', `${(1 - k) * (1 - k) * 120}%`)
-        if (k < 1) requestAnimationFrame(close)
+        if (k < 1) Clock.after(0, close)
         else resolve()
       }
-      requestAnimationFrame(close)
+      Clock.after(0, close)
     })
-    endedAt = performance.now()
+    endedAt = Clock.now()
   }
 
   // ------------------------------------------------------------ input
@@ -260,13 +259,13 @@
   /** Ask Reksio to do something (`what` names it, for the trace): now, or
    * once he's done with what he's busy with (a newer ask replaces an older). */
   function command(fn, what) {
-    lastTap = performance.now()
+    lastTap = Clock.now()
     Debug.trace('ask', { what, busy, acting })
     if (acting && !busy) {
       Debug.trace('relax', { from: lastAct })
       Reksio.relax() // left alone, he was doing something: drop it
     }
-    const now = Input.ask({ busy, ended: day.ended, endedAt, now: performance.now() })
+    const now = Input.ask({ busy, ended: day.ended, endedAt, now: Clock.now() })
     if (now === 'restart') location.reload()
     else if (now === 'wait') {
       if (pending) Debug.trace('replaced', { by: what })
@@ -470,7 +469,7 @@
 
   function showWish(name) {
     wishing = name
-    wishShownAt = performance.now()
+    wishShownAt = Clock.now()
     lastWishAt = wishShownAt
     document.querySelectorAll('.wish-icon').forEach((icon) => {
       icon.style.opacity = icon.dataset.wish === name ? '1' : '0'
@@ -527,10 +526,10 @@
     return x > camX && x < camX + Painting.VIEW_W
   }
 
-  const idleFor = () => (performance.now() - lastTap) / 1000
+  const idleFor = () => (Clock.now() - lastTap) / 1000
 
   const ACTS = {
-    wish: { weight: 2, ok: () => wishFor() && performance.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
+    wish: { weight: 2, ok: () => wishFor() && Clock.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
     sniff: { weight: 3, run: () => Reksio.sniff() },
     wander: {
       weight: 3,
@@ -647,16 +646,16 @@
 
   function wetten(amount) {
     soak = Math.min(1, soak + amount)
-    muddyUntil = performance.now() + MUDDY_S * 1000
+    muddyUntil = Clock.now() + MUDDY_S * 1000
   }
 
   async function shakeDry() {
     Sound.shake()
-    const spray = setInterval(() => burst(Reksio.x, 740, 8, 'drop', { height: 60, reach: 110, size: 3.5 }), 120)
+    const stopSpray = Clock.every(120, () => burst(Reksio.x, 740, 8, 'drop', { height: 60, reach: 110, size: 3.5 }))
     try {
       await Reksio.shakeDry()
     } finally {
-      clearInterval(spray)
+      stopSpray()
     }
     soak = 0
   }
@@ -678,7 +677,7 @@
   }
 
   function idleLoop() {
-    const now = performance.now()
+    const now = Clock.now()
     Music.setEnergy(musicEnergy(now))
     showNear()
     birdAndWish(now)
@@ -687,7 +686,7 @@
     dayAndNight(now)
     checkRules(now)
     Debug.show(state())
-    setTimeout(idleLoop, 200)
+    Clock.after(200, idleLoop)
   }
 
   /** The bird may go after a worm; a thought bubble follows him, and goes when it's done its job. */
@@ -751,14 +750,15 @@
     return Debug.ignoreCut(Promise.resolve().then(() => ACTS[name].run()), `act ${name}`)
       .finally(() => {
         acting = false
-        nextIdleAt = performance.now() + Idle.gap(ACTS[name].ms, random)
+        nextIdleAt = Clock.now() + Idle.gap(ACTS[name].ms, random)
       })
   }
 
-  let last = performance.now()
+  let last = Clock.now()
   let lastSplash = 0
   let shownCam = -1
-  function frame(t) {
+  function frame() {
+    const t = Clock.now() // game time: stands still while the page is hidden
     const dt = Math.min(0.05, (t - last) / 1000)
     last = t
     Reksio.tick(dt)
@@ -817,8 +817,8 @@
   requestAnimationFrame(frame)
   Debug.record(state)
   console.info(`[yard] replay this play: ${Debug.replayUrl()}`)
-  lastTap = performance.now() - Idle.FIRST_MS + 1500 // the first wish shows soon after start
-  setTimeout(idleLoop, 200)
+  lastTap = Clock.now() - Idle.FIRST_MS + 1500 // the first wish shows soon after start
+  Clock.after(200, idleLoop)
 
   // For tests and the console: do things, read the state, read what happened.
   // tap/walk go through command() like a real tap; use/act/chase run one thing

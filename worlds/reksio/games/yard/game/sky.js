@@ -4,7 +4,7 @@
 // draws it). The sun is under the evening shade; the moon is on a layer of
 // its own above it, so it still shines when night falls.
 
-/* global Debug, Layout, Music */
+/* global Clock, Debug, Layout, Music */
 /* exported Sky */
 const Sky = (() => {
   const STEPS = 6 // the sunset, from high afternoon to the sun behind the wall
@@ -72,18 +72,18 @@ const Sky = (() => {
     setStep(STEPS)
     const riseMs = (Layout.moonRise ?? MOON_RISE_S) * 1000
     return new Promise((resolve) => {
-      setTimeout(() => {
+      Clock.after(DUSK_AFTER_MS, () => {
         $('evening').classList.add('dusk')
         Debug.trace('moon rising', { ms: riseMs })
-        const start = performance.now()
-        function rise(t) {
-          moonUp = Math.min(1, Math.max(0, (t - start) / riseMs))
+        const start = Clock.now()
+        function rise() {
+          moonUp = Math.min(1, Math.max(0, (Clock.now() - start) / riseMs))
           placeMoon()
-          if (moonUp < 1) requestAnimationFrame(rise)
+          if (moonUp < 1) Clock.after(0, rise)
           else resolve()
         }
-        requestAnimationFrame(rise)
-      }, DUSK_AFTER_MS)
+        Clock.after(0, rise)
+      })
     })
   }
 

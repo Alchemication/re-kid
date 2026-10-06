@@ -5,7 +5,7 @@
 // a little higher and quicker by a random amount each time. Without it, he
 // has a synthesised woof.
 
-/* global BARKS */
+/* global BARKS, Clock */
 /* exported Sound */
 const Sound = (() => {
   const VOLUME = 0.5
@@ -20,6 +20,14 @@ const Sound = (() => {
   let original = null // easter-egg clips, if present (see play())
   let scale = 1 // loudness of what is being played now (see from())
   let barks = [] // decoded original barks, if the local file is there
+
+  // the page hidden: all sound pauses with the game (debug.js Clock), and
+  // the phone saves its battery; shown again, it plays on
+  Clock.onHidden((hidden) => {
+    if (!ctx) return
+    if (hidden) ctx.suspend()
+    else ctx.resume()
+  })
 
   /** Create the audio context on the first tap (browsers require a gesture). */
   function ensure() {
@@ -41,7 +49,7 @@ const Sound = (() => {
         }
       }
     }
-    if (ctx.state === 'suspended') ctx.resume()
+    if (ctx.state === 'suspended' && !document.hidden) ctx.resume()
     return ctx
   }
 

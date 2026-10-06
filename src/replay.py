@@ -205,7 +205,7 @@ def replay(
         page.goto(replay_url(report))
         page.wait_for_function("window.yardGame && typeof Debug !== 'undefined'")
         page.evaluate(
-            "(inputs) => inputs.forEach((i) => setTimeout(() => yardGame.perform(i.intent), i.t - Debug.now()))",
+            "(inputs) => inputs.forEach((i) => Clock.after(i.t - Clock.now(), () => yardGame.perform(i.intent)))",  # game time, as recorded
             report["inputs"],
         )
         start = max(0, at - last_s * 1000)

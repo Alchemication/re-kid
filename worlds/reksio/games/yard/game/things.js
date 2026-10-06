@@ -11,7 +11,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Debug, Layout, Sound, Music, Reksio, Tree */
+/* global Clock, Debug, Layout, Sound, Music, Reksio, Tree */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -32,7 +32,7 @@ const Things = (() => {
 
   const $ = (id) => document.getElementById(id)
   const fx = $('fx')
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const wait = Clock.wait
   const random = Debug.random('things') // this part's own random stream (debug.js)
   const rnd = (lo, hi) => lo + random() * (hi - lo)
   const sparkle = Debug.random('fx') // particles only: how many fly depends on frame timing, so they keep out of the stream above
@@ -166,7 +166,7 @@ const Things = (() => {
       )
       if (random() < 0.6) Sound.from(Math.abs(PERCHES[perch].x - Reksio.x), Sound.chirp)
     }
-    setTimeout(birdIdle, 4000 + random() * 4000)
+    Clock.after(4000 + random() * 4000, birdIdle)
   }
 
   // ------------------------------------------------------------ the mouse
@@ -389,7 +389,7 @@ const Things = (() => {
   function startMouse() {
     if (Layout.hidden.includes('trap')) return
     $('trap').classList.add('not-yet')
-    setTimeout(mouseComesOut, (Layout.mouseAt ?? rnd(...MOUSE_AT_S)) * 1000)
+    Clock.after((Layout.mouseAt ?? rnd(...MOUSE_AT_S)) * 1000, mouseComesOut)
   }
 
   // ------------------------------------------------------------ blackberries
@@ -824,7 +824,7 @@ const Things = (() => {
   function init({ ended }) {
     isEnded = ended
     birdAt(PERCHES[0])
-    setTimeout(birdIdle, 3000)
+    Clock.after(3000, birdIdle)
     startMouse()
     makeBerries()
     Tree.init({ ended, effects: { burst, twinkle } })

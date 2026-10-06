@@ -107,3 +107,24 @@ class TestConventions:
         assert not bad, (
             f"hold it in `held` (holdAt) or a pose, not a frozen animation: {bad}"
         )
+
+    @pytest.mark.parametrize("game", GAMES, ids=GAME_IDS)
+    def test_gameplay_runs_on_the_game_clock(self, game: Path) -> None:
+        """Timers and time go through Clock (debug.js), which pauses with the
+        page; a browser timer runs on while the page is hidden, and the game
+        moves on unseen. Sound keeps the audio clock; the frame loop is the
+        one place that asks the browser for frames."""
+        browser_time = re.compile(r"\b(setTimeout|setInterval|performance\.now)\(")
+        own_clock = {"debug.js", "sound.js", "music.js"}
+        bad = [
+            f"{p.name}:{i}"
+            for p in scripts(game)
+            if p.name not in own_clock
+            for i, line in enumerate(p.read_text().splitlines(), 1)
+            if browser_time.search(line)
+            or (
+                "requestAnimationFrame(" in line
+                and "requestAnimationFrame(frame)" not in line
+            )
+        ]
+        assert not bad, f"use Clock.after / Clock.wait / Clock.now: {bad}"

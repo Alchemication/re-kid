@@ -1,5 +1,12 @@
-// Finding and replaying bugs in the yard. Loaded first, so every other script
-// can use it.
+// Finding and replaying bugs in the yard, and the game's clock. Loaded
+// first, so every other script can use them.
+//
+// - The clock (`Clock`): game time, timers and waits. It moves on only as
+//   frames are drawn, a frame counting for at most MAX_STEP_MS, so when the
+//   page is hidden (another tab, a covered window, a locked phone) the game
+//   pauses rather than running on unseen; its animations and sound pause too.
+//   Everything that plays out over time uses it, never setTimeout or
+//   performance.now (sound's own audio clock aside).
 //
 // - Random numbers: every part of the game draws from its own stream, made
 //   from one seed. `?seed=N` in the page address replays a play: the layout
@@ -24,7 +31,85 @@
 //   on its own.
 
 /* global Layout */
-/* exported Debug */
+/* exported Clock, Debug */
+const Clock = (() => {
+  const MAX_STEP_MS = 100 // a longer frame (the page was hidden, or very busy) counts as this: the game pauses, it doesn't jump
+  let now = 0
+  let last = null
+  let seq = 0
+  const due = [] // {at, seq, fn}, soonest first
+  const listeners = []
+  const paused = new Set() // animations the clock paused when the page was hidden
+
+  function frame(t) {
+    if (last !== null) now += Math.max(0, Math.min(MAX_STEP_MS, t - last))
+    last = t
+    const before = seq // timers set during this frame wait for the next one
+    while (due.length && due[0].at <= now && due[0].seq < before) due.shift().fn()
+    requestAnimationFrame(frame)
+  }
+  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(frame)
+
+  function cancel(timer) {
+    const i = due.indexOf(timer)
+    if (i >= 0) due.splice(i, 1)
+  }
+
+  /** Run fn after ms of game time (whole frames: about 16 ms apart). */
+  function after(ms, fn) {
+    const timer = { at: now + Math.max(0, ms || 0), seq: seq++, fn }
+    due.push(timer)
+    due.sort((a, b) => a.at - b.at || a.seq - b.seq)
+    return timer
+  }
+
+  // Hidden: pause what is playing; shown again: play it on, and tell the
+  // listeners (sound) either way.
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('visibilitychange', () => {
+      const hidden = document.hidden
+      if (hidden) {
+        for (const a of document.getAnimations()) {
+          if (a.playState === 'running') {
+            a.pause()
+            paused.add(a)
+          }
+        }
+      } else {
+        paused.forEach((a) => a.playState === 'paused' && a.play())
+        paused.clear()
+      }
+      listeners.forEach((fn) => fn(hidden))
+    })
+  }
+
+  return {
+    /** Game time, ms since the page started. */
+    now: () => now,
+    after,
+    /** Run fn every ms of game time until the returned stop() is called. */
+    every(ms, fn) {
+      let timer = null
+      const tick = () => {
+        fn()
+        timer = after(ms, tick)
+      }
+      timer = after(ms, tick)
+      return () => cancel(timer)
+    },
+    /** Stop a timer `after` returned, if it hasn't run. */
+    cancel,
+    /** A promise that resolves after ms of game time. */
+    wait: (ms) => new Promise((resolve) => after(ms, resolve)),
+    /** A promise that resolves at the next frame. */
+    frame: () => new Promise((resolve) => after(0, resolve)),
+    /** fn(hidden) whenever the page is hidden or shown again. */
+    onHidden(fn) {
+      listeners.push(fn)
+    },
+  }
+})()
+
 const Debug = (() => {
   const TRACE_SIZE = 300 // events kept: a few minutes of play, enough to see how a bug came about
   const OVERLAY_EVENTS = 8 // latest trace events shown in the ?debug overlay
@@ -64,11 +149,10 @@ const Debug = (() => {
   // ------------------------------------------------------------ the trace
 
   const events = []
-  const t0 = performance.now()
 
   /** Note something that happened: `kind` is a short word, `data` small. */
   function trace(kind, data = {}) {
-    events.push({ t: Math.round(performance.now() - t0), kind, ...data })
+    events.push({ t: Math.round(Clock.now()), kind, ...data })
     if (events.length > TRACE_SIZE) events.shift()
     if (on) console.debug('[yard]', kind, data)
   }
@@ -86,7 +170,7 @@ const Debug = (() => {
 
   /** Note an input (an intent, e.g. "go to bowl") for replays; returns it. */
   function input(intent) {
-    if (inputs.length < INPUTS) inputs.push({ t: Math.round(performance.now() - t0), intent })
+    if (inputs.length < INPUTS) inputs.push({ t: Math.round(Clock.now()), intent })
     trace('input', { intent })
     return intent
   }
@@ -95,7 +179,7 @@ const Debug = (() => {
   function record(state) {
     stateOf = state
     setInterval(() => {
-      snapshots.push({ t: Math.round(performance.now() - t0), ...state() })
+      snapshots.push({ t: Math.round(Clock.now()), ...state() })
       if (snapshots.length > SNAPSHOTS) snapshots.shift()
     }, SNAPSHOT_MS)
   }
@@ -103,7 +187,7 @@ const Debug = (() => {
   /** Everything needed to see, and replay, what just happened. `moment` is
    * when it happened, noted before asking for the description (asking pauses
    * the page, so the time after it is late by however long the typing took). */
-  function bugReport(description, moment = { at: Math.round(performance.now() - t0), state: stateOf() }) {
+  function bugReport(description, moment = { at: Math.round(Clock.now()), state: stateOf() }) {
     return {
       version: REPORT_VERSION,
       description,
@@ -125,7 +209,7 @@ const Debug = (() => {
 
   /** Ask what went wrong, then download the report as a file. */
   function saveBugReport() {
-    const moment = { at: Math.round(performance.now() - t0), state: stateOf() }
+    const moment = { at: Math.round(Clock.now()), state: stateOf() }
     const description = window.prompt('What went wrong? (Saved with the last two minutes of play.)')
     if (description === null) return // cancelled
     const report = bugReport(description, moment)
@@ -224,8 +308,8 @@ const Debug = (() => {
 
   console.info(`[yard] seed ${seed}`)
 
-  /** Milliseconds since the page started, the clock of the trace, inputs and snapshots. */
-  const now = () => Math.round(performance.now() - t0)
+  /** Game time (Clock), the clock of the trace, inputs and snapshots. */
+  const now = () => Math.round(Clock.now())
 
   return { on, still, seed, seeded, now, random, trace, dump, replayUrl, ignoreCut, check, show, events, input, inputs, record, snapshots, bugReport, saveBugReport }
 })()

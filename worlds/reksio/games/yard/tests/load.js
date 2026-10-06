@@ -76,6 +76,11 @@ function fakeClock() {
     now: () => now,
     setTimeout: (fn, ms) => add(fn, ms),
     requestAnimationFrame: (fn) => add(() => fn(now), 16),
+    /** Time passes with no frames and no timers, as for a hidden page: then
+     * everything due runs late, as a browser's would. */
+    skip(ms) {
+      now += ms
+    },
     async advance(ms) {
       const end = now + ms
       await settle()
@@ -83,7 +88,7 @@ function fakeClock() {
         due.sort((a, b) => a.at - b.at || a.seq - b.seq)
         if (!due.length || due[0].at > end) break
         const next = due.shift()
-        now = next.at
+        now = Math.max(now, next.at) // never backwards: after a skip, what fell due runs late
         next.fn()
         await settle()
       }
@@ -143,6 +148,8 @@ function load(files, { query = '', storage = {}, storageThrows = false, dom = fa
     tick: () => intervals.forEach((fn) => fn()),
     /** Move the pretend clock on by `ms`, running what falls due (dom only). */
     advance: clock.advance,
+    /** Let ms pass with no frames drawn (a hidden page), then carry on (dom only). */
+    skip: clock.skip,
     logs,
     store,
   }

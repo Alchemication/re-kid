@@ -3,7 +3,7 @@
 // dachshund stretch, and his small moves (bark, nod, shake, hop, sniff,
 // scratch, ducking into the doghouse). Drawn in index.html.
 
-/* global Debug, Sound, Music, Creatures, Layout */
+/* global Clock, Debug, Sound, Music, Creatures, Layout */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
@@ -51,7 +51,7 @@ const Reksio = (() => {
   let stretching = false
 
   const clamp = (v) => Math.max(MIN_X, Math.min(MAX_X, v))
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const wait = Clock.wait
 
   function place() {
     root.style.transform = `translate(${x}px, ${GROUND}px)`
@@ -177,7 +177,7 @@ const Reksio = (() => {
       motion.set(bob, `translateY(${Math.sin(idleTime * 2.2) * 0.8}px)`)
     }
     const wagFast = target !== null || stretching
-    motion.set(tail, `rotate(${Math.sin(performance.now() / (wagFast ? 80 : 260)) * (wagFast ? 14 : 10)}deg)`)
+    motion.set(tail, `rotate(${Math.sin(Clock.now() / (wagFast ? 80 : 260)) * (wagFast ? 14 : 10)}deg)`)
     finish()
   }
 
@@ -220,10 +220,10 @@ const Reksio = (() => {
   function endStretch() {
     stretching = false
     const from = stretch
-    const start = performance.now()
+    const start = Clock.now()
     return new Promise((resolve) => {
-      function spring(t) {
-        const s = (t - start) / 1000
+      function spring() {
+        const s = (Clock.now() - start) / 1000
         const value = from * Math.exp(-5.5 * s) * Math.cos(15 * s)
         if (s > 1 || Math.abs(value) < 0.5) {
           setStretch(0)
@@ -231,9 +231,9 @@ const Reksio = (() => {
           return
         }
         setStretch(Math.max(-14, value))
-        requestAnimationFrame(spring)
+        Clock.after(0, spring)
       }
-      requestAnimationFrame(spring)
+      Clock.after(0, spring)
     })
   }
 
@@ -463,8 +463,8 @@ const Reksio = (() => {
   /** Watch something that moves: turn to it and follow it with the head for
    * ms. where() returns its current {x, y} (or null once it's gone). */
   async function watch(where, ms = rnd(1500, 3000)) {
-    const end = performance.now() + ms
-    while (performance.now() < end && target === null && !stretching) {
+    const end = Clock.now() + ms
+    while (Clock.now() < end && target === null && !stretching) {
       const p = where()
       if (!p) break
       const hx = x + facing * 26
@@ -472,7 +472,7 @@ const Reksio = (() => {
       if (Math.abs(p.x - x) > 40) face(p.x > x ? 1 : -1)
       const angle = (Math.atan2(p.y - hy, Math.abs(p.x - hx)) * 180) / Math.PI
       held.set(head, `rotate(${Math.max(-40, Math.min(30, angle))}deg)`)
-      await new Promise((r) => requestAnimationFrame(r))
+      await Clock.frame()
     }
     held.delete(head)
   }
@@ -589,8 +589,8 @@ const Reksio = (() => {
   async function sit(ms = rnd(4000, 8000)) {
     const mine = pose
     await settle('sit', 700)
-    const end = performance.now() + ms
-    while (performance.now() < end) {
+    const end = Clock.now() + ms
+    while (Clock.now() < end) {
       await wait(rnd(1500, 3000))
       if (mine !== pose) return
       if (random() < 0.7) glance(POSES.sit.head, 16)
@@ -606,8 +606,8 @@ const Reksio = (() => {
     await settle('sit', 650)
     if (mine !== pose) return
     await settle('lie', 800)
-    const end = performance.now() + ms
-    while (performance.now() < end) {
+    const end = Clock.now() + ms
+    while (Clock.now() < end) {
       await wait(rnd(1800, 3200))
       if (mine !== pose) return
       glance(POSES.lie.head, 22)
@@ -628,9 +628,9 @@ const Reksio = (() => {
     await settle(NAPS[Math.floor(random() * NAPS.length)], 1200)
     show(eye, false)
     show(eyeShut, true)
-    const end = performance.now() + ms
+    const end = Clock.now() + ms
     let n = 0
-    while (performance.now() < end) {
+    while (Clock.now() < end) {
       await wait(1700)
       if (mine !== pose) return
       if (n++ % 2 === 0) Sound.from(250, Sound.snore)

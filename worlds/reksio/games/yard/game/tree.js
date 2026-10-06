@@ -12,7 +12,7 @@
 // Everything here lives inside the tree's own group, in the coordinates it
 // is drawn in (index.html); Layout.x('tree') moves the lot.
 
-/* global Debug, Layout, Sound, Music, Reksio */
+/* global Clock, Debug, Layout, Sound, Music, Reksio */
 /* exported Tree */
 const Tree = (() => {
   const TRUNK_X = 1660 // drawn
@@ -38,7 +38,7 @@ const Tree = (() => {
 
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const $ = (id) => document.getElementById(id)
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const wait = Clock.wait
   const random = Debug.random('tree') // this part's own random stream (debug.js)
   const rnd = (lo, hi) => lo + random() * (hi - lo)
   const el = (tag, attrs, parent) => {
@@ -229,7 +229,7 @@ const Tree = (() => {
     g.getAnimations().forEach((a) => a.cancel())
     g.style.transform = at(rest, FRUIT_REST_Y)
     fallen.push({ el: g, x: rest, bites: 0, eater: null })
-    for (let i = 0; i < 3; i++) setTimeout(() => fx.twinkle(head.x + rnd(-50, 30), head.y - 70 + rnd(-20, 20)), i * 220)
+    for (let i = 0; i < 3; i++) Clock.after(i * 220, () => fx.twinkle(head.x + rnd(-50, 30), head.y - 70 + rnd(-20, 20)))
     await Reksio.sit(1300)
   }
 
@@ -267,13 +267,13 @@ const Tree = (() => {
     if (shakes === 1 || fallen.some((f) => !f.eater && f.bites < BITES)) {
       const more = Math.round(rnd(...MORE_SNAILS))
       for (let i = 0; i < more && snails.length < MAX_SNAILS; i++) {
-        setTimeout(() => {
+        Clock.after(rnd(3000, 9000) * (i + 1), () => {
           if (isEnded() || snails.length >= MAX_SNAILS) return
           const side = random() < 0.5 ? -1 : 1
           const s = makeSnail(WAITS_AT + side * rnd(260, 360))
           s.body.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 1200, easing: 'ease-out' })
           snailTo(s)
-        }, rnd(3000, 9000) * (i + 1))
+        })
       }
     }
   }
@@ -435,7 +435,7 @@ const Tree = (() => {
     if (Layout.hidden.includes('tree')) return
     makeFruit()
     $('tree').classList.add('not-yet')
-    setTimeout(visitorComes, (Layout.visitorAt ?? rnd(...VISITOR_AT_S)) * 1000)
+    Clock.after((Layout.visitorAt ?? rnd(...VISITOR_AT_S)) * 1000, visitorComes)
   }
 
   return {
