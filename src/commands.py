@@ -16,6 +16,7 @@ from config import (
     AUDIO_DIR,
     BARK_CLIP,
     BARKS_JS,
+    BUG_REPORT_DIR,
     EPISODES_FILE,
     GAME_PAGE,
     GAMES_DIR,
@@ -25,6 +26,7 @@ from config import (
     MARK_HOST,
     MARK_PORT,
     MARK_PORT_TRIES,
+    PLAY_STUB,
     SAMPLE_CACHE_DIR,
     SAMPLES_JS,
     SAMPLES_NAME,
@@ -282,8 +284,34 @@ def game_page(world_id: str, game: str) -> Path:
     return world_dir(world_id) / GAMES_DIR / game / GAME_PAGE
 
 
+def play_query(args: argparse.Namespace) -> str:
+    """The game page's ``?query`` for the debugging flags given (or "")."""
+    from urllib.parse import urlencode
+
+    flags = {}
+    if getattr(args, "seed", None) is not None:
+        flags["seed"] = str(args.seed)
+    if getattr(args, "debug", False):
+        flags["debug"] = ""
+    if getattr(args, "still", False):
+        flags["still"] = ""
+    return f"?{urlencode(flags)}" if flags else ""
+
+
+def play_stub(url: str, folder: Path) -> Path:
+    """Write a page that forwards to `url` (see ``config.PLAY_STUB``)."""
+    stub = folder / PLAY_STUB
+    safe = url.replace('"', "%22")
+    stub.write_text(
+        f'<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url={safe}">'
+        f'<a href="{safe}">{safe}</a>\n'
+    )
+    return stub
+
+
 def cmd_play(args: argparse.Namespace) -> int:
     """Open one of the world's games in the browser."""
+    import tempfile
     import webbrowser
 
     page = game_page(args.world, args.game)
@@ -296,8 +324,49 @@ def cmd_play(args: argparse.Namespace) -> int:
             "No game at %s. Games with a page: %s.", page, ", ".join(found) or "none"
         )
         return 1
-    print(f"Opening {page}")
-    webbrowser.open(page.resolve().as_uri())
+    url = page.resolve().as_uri() + play_query(args)
+    print(f"Opening {url}")
+    if "?" in url:
+        webbrowser.open(play_stub(url, Path(tempfile.gettempdir())).as_uri())
+    else:
+        webbrowser.open(url)
+    return 0
+
+
+def cmd_replay(args: argparse.Namespace) -> int:
+    """Replay a game's bug report and photograph the run-up to it."""
+    from replay import ReplayError, latest_report, load_report, replay
+
+    try:
+        path = Path(args.report) if args.report else latest_report(BUG_REPORT_DIR)
+        report = load_report(path)
+        out = Path(args.out) if args.out else path.with_suffix("")
+        print(f"Replaying {path}: {report.get('description')!r}")
+        print(
+            f"  {len(report['inputs'])} inputs over {report['at'] / 1000:.1f} s (seed {report.get('seed')})"
+        )
+        result = replay(report, out, args.last, args.every)
+    except ReplayError as e:
+        logger.error("%s", e)
+        return 1
+    print(
+        f"  {len(result.frames)} frames of the last {args.last:g} s in {out / 'frames'}"
+    )
+    if result.sheet:
+        print(f"  contact sheet: {result.sheet}")
+    else:
+        print("  no contact sheet (install ffmpeg for one)")
+    if result.differences:
+        print(
+            "  the replay went differently (real-clock drift, or the bug is timing-dependent):"
+        )
+        for key, (was, now) in result.differences.items():
+            print(f"    {key}: recorded {was!r}, replayed {now!r}")
+    else:
+        print("  the replay ended in the recorded state")
+    for e in result.errors:
+        print(f"  error during replay: {e.splitlines()[0]}")
+    print(f"  details: {out / 'replay.json'}")
     return 0
 
 

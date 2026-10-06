@@ -13,13 +13,18 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "playwright==1.63.0",
     "pytest==9.1.1",
+    "pytest-xdist==3.8.0",
     "ruff==0.16.9",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]
+# The browser tests play the game in real time (minutes); run them with -m browser.
+addopts = "-m 'not browser'"
+markers = ["browser: drives a game in the installed Chrome (slow: uv run pytest -m browser -n 4)"]
 
 [tool.ruff.lint]
 extend-select = ["I", "UP", "B"]

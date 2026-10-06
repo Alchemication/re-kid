@@ -7,6 +7,7 @@ Subcommands:
     episodes  Print a world's episode catalogue as a table.
     mark      Open the local tool for marking sounds in the intro.
     play      Open a game in the browser (default: the yard).
+    replay    Replay a game's bug report and photograph the run-up to it.
     samples   Download and pack a game's instrument samples into samples.js.
     barks     Cut the marked original barks into a local script for the games.
     schema    Print the JSON Schema for a research file type.
@@ -46,6 +47,16 @@ Examples:
     uv run python main.py play reksio
         Opens the yard game (a static page, no server needed).
 
+    uv run python main.py play reksio --debug --seed 42
+        The same play every time, with the state overlay and a "report a
+        bug" button (Ctrl+Shift+B works in any play). --still: Reksio only
+        moves when asked, for trying one gesture or gag on its own.
+
+    uv run python main.py replay
+        Replays the newest bug report in ~/Downloads in Chrome: same seed,
+        same inputs at the same times. Saves a screenshot every 0.5 s of the
+        last 10 s, a contact sheet, and how the replayed state compares.
+
     uv run python main.py samples reksio yard
         Downloads the samples listed in games/yard/samples.yaml (CC0
         libraries), measures their pitch and packs them into samples.js.
@@ -75,12 +86,13 @@ from commands import (
     cmd_list,
     cmd_mark,
     cmd_play,
+    cmd_replay,
     cmd_samples,
     cmd_schema,
     cmd_show,
     cmd_validate,
 )
-from config import DEFAULT_GAME, OBSERVER
+from config import DEFAULT_GAME, OBSERVER, REPLAY_EVERY_MS, REPLAY_LAST_S
 from schema.common import Status
 
 
@@ -140,6 +152,38 @@ def main() -> int:
         default=DEFAULT_GAME,
         help=f"Game folder under games/ (default: {DEFAULT_GAME})",
     )
+    p_play.add_argument(
+        "--debug", action="store_true", help="State overlay and bug button"
+    )
+    p_play.add_argument(
+        "--seed", type=int, help="Replay this play (printed in the console)"
+    )
+    p_play.add_argument(
+        "--still", action="store_true", help="Reksio moves only when asked"
+    )
+
+    p_replay = sub.add_parser("replay", help="Replay a game's bug report")
+    p_replay.add_argument(
+        "report",
+        metavar="REPORT",
+        nargs="?",
+        help="Report file (default: newest in ~/Downloads)",
+    )
+    p_replay.add_argument(
+        "--last",
+        type=float,
+        default=REPLAY_LAST_S,
+        help=f"Seconds to photograph (default: {REPLAY_LAST_S})",
+    )
+    p_replay.add_argument(
+        "--every",
+        type=int,
+        default=REPLAY_EVERY_MS,
+        help=f"ms between frames (default: {REPLAY_EVERY_MS})",
+    )
+    p_replay.add_argument(
+        "--out", help="Folder for the frames (default: next to the report)"
+    )
 
     p_samples = sub.add_parser("samples", help="Pack a game's instrument samples")
     p_samples.add_argument("world", metavar="WORLD")
@@ -167,6 +211,7 @@ def main() -> int:
         "episodes": cmd_episodes,
         "mark": cmd_mark,
         "play": cmd_play,
+        "replay": cmd_replay,
         "samples": cmd_samples,
         "barks": cmd_barks,
         "schema": cmd_schema,

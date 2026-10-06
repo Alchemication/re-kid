@@ -10,6 +10,7 @@
 // uneven gaps that never let two of them (or their action spots) overlap.
 // Puddles and the bird's perches on the wall go in the widest gaps.
 
+/* global Debug */
 /* exported Layout */
 const Layout = (() => {
   const WORLD_W = 4000 // the whole yard, in scene units (2.5 screens)
@@ -31,9 +32,12 @@ const Layout = (() => {
   // spot (whichever is further left) to the right of the other.
   const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650] }
 
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  const random = Debug.random('layout') // this part's own random stream (debug.js)
+
+  const rnd = (lo, hi) => lo + random() * (hi - lo)
 
   function remembered() {
+    if (Debug.seeded) return {} // a replay: the same play whatever came before
     try {
       return JSON.parse(localStorage.getItem(MEMORY_KEY)) || {}
     } catch {
@@ -47,7 +51,7 @@ const Layout = (() => {
     const chosen = []
     while (chosen.length < n && left.length) {
       const weights = left.map((x) => (seenBefore.includes(x) ? 1 : 3))
-      let r = Math.random() * weights.reduce((a, b) => a + b, 0)
+      let r = random() * weights.reduce((a, b) => a + b, 0)
       const i = weights.findIndex((w) => (r -= w) < 0)
       chosen.push(left.splice(i, 1)[0])
     }
@@ -56,22 +60,33 @@ const Layout = (() => {
 
   const shuffled = (list) => pick(list, list.length)
 
+  // Flags in the page address force parts of a play, for trying them out and
+  // for tests (README lists them all). Every draw is made either way, so a
+  // flag doesn't shift the rest of a seeded play.
+  const params = new URLSearchParams(location.search)
+  const listed = (name, pool) => (params.get(name) || '').split(',').filter((n) => pool.includes(n))
+
   const last = remembered()
   const mains = ['doghouse', ...pick(MAIN_POOL, MAINS_PER_PLAY, last.mains)]
   const creatures = pick(CREATURE_POOL, CREATURES_PER_PLAY, last.creatures)
-  const flowers = creatures.includes('bee') || Math.random() < 0.5
-  // ?rain=1 (or 0) and ?rain-at=SECONDS in the page address force the weather,
-  // for trying it out without waiting.
-  const params = new URLSearchParams(location.search)
-  const rain = params.has('rain') ? params.get('rain') !== '0' : Math.random() < (last.rain ? RAIN_CHANCE / 2 : RAIN_CHANCE)
+  // ?creatures=fly,spider picks the creatures
+  if (params.has('creatures')) creatures.splice(0, creatures.length, ...listed('creatures', CREATURE_POOL))
+  // ?flowers=1 (or 0) puts the flowers out (or not)
+  const flowerCoin = random() < 0.5
+  const flowersDrawn = creatures.includes('bee') || flowerCoin
+  const flowers = params.has('flowers') ? params.get('flowers') !== '0' : flowersDrawn
+  // ?rain=1 (or 0) and ?rain-at=SECONDS force the weather
+  const rainDrawn = random() < (last.rain ? RAIN_CHANCE / 2 : RAIN_CHANCE)
+  const rain = params.has('rain') ? params.get('rain') !== '0' : rainDrawn
   const rainAt = Number(params.get('rain-at')) || null
   // ?mains=trap,bowl picks main things, and ?mouse-at=SECONDS brings the mouse out, likewise
-  const asked = (params.get('mains') || '').split(',').filter((n) => MAIN_POOL.includes(n))
+  const asked = listed('mains', MAIN_POOL)
   if (asked.length) mains.splice(1, mains.length, ...asked)
   const mouseAt = params.has('mouse-at') ? Number(params.get('mouse-at')) : null
   // the tree's fruit this play (?fruit=apple|plum|nut forces it), and when its visitor comes
   const FRUITS = ['apple', 'plum', 'nut']
-  const fruit = FRUITS.includes(params.get('fruit')) ? params.get('fruit') : FRUITS[Math.floor(Math.random() * FRUITS.length)]
+  const fruitDrawn = FRUITS[Math.floor(random() * FRUITS.length)]
+  const fruit = FRUITS.includes(params.get('fruit')) ? params.get('fruit') : fruitDrawn
   const visitorAt = params.has('visitor-at') ? Number(params.get('visitor-at')) : null
 
   // props that are only there when they count this time (the tap is on the wall for good)
@@ -112,7 +127,7 @@ const Layout = (() => {
   }
 
   return {
-    WORLD_W, MIN_X, MAX_X, mains, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, shift, hidden, puddles, perches,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, mains, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, shift, hidden, puddles, perches,
     x: (name) => shift[name] || 0,
   }
 })()

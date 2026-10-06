@@ -8,7 +8,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Layout, Painting, Sound, Music, Reksio, Creatures, Weather, Things */
+/* global Debug, Layout, Painting, Sound, Music, Reksio, Creatures, Weather, Things */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -16,6 +16,7 @@
   const IDLE_GAP_MS = [1500, 3500] // then something new every 1.5–3.5 s
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
+  const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
   const CRITTER_CORE = 0.45 // where a critter's tap circle covers a thing or Reksio, the critter wins only this close to its middle (share of the circle): about its drawn size
   const PUDDLE_REACH = 40 // a ground tap this far past a puddle's edge (scene units) still means "jump in"
@@ -26,6 +27,9 @@
   const svg = $('world')
   const cam = $('cam')
   const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+  const random = Debug.random('yard') // this part's own random stream (debug.js)
+  const huntRandom = Debug.random('bird-hunt') // drawn every idle tick, so kept out of the stream above
+  const rnd = (lo, hi) => lo + random() * (hi - lo)
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
   const done = new Set()
@@ -46,7 +50,9 @@
 
   const uses = {} // how many times each thing has been used this play
 
-  async function goAndDo(name) {
+  /** Walk to a thing and use it. `forceExtra` (tests) picks the plain use
+   * (false) or the variation (true) instead of leaving it to the count. */
+  async function goAndDo(name, forceExtra) {
     const thing = THINGS[name]
     const arrived = await Reksio.walkTo(thing.at())
     if (!arrived) return // tapped elsewhere on the way
@@ -59,7 +65,10 @@
       // a repeat keeps the same core; the first repeat and then every other
       // one or so adds a variation on top
       const n = (uses[name] = (uses[name] || 0) + 1)
-      await thing.run({ extra: n === 2 || (n > 2 && Math.random() < 0.5) }).catch(() => {}) // cut short: still counts
+      const drawn = n === 2 || (n > 2 && random() < 0.5)
+      const extra = forceExtra ?? drawn
+      Debug.trace('use', { name, n, extra })
+      await Debug.ignoreCut(thing.run({ extra }), `use ${name}`) // cut short: still counts
       const firstTime = EVENING_NEEDS.includes(name) && !done.has(name)
       done.add(name)
       sunset()
@@ -68,11 +77,11 @@
         fillSlot(name)
       }
       if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
-        await Reksio.hop().catch(() => {}) // the last one: a hop of joy, then evening
+        await Debug.ignoreCut(Reksio.hop(), 'last hop') // the last one: a hop of joy, then evening
         evening()
         return
       }
-      if (firstTime && !pending) await Reksio.hop().catch(() => {}) // a hop of joy
+      if (firstTime && !pending) await Debug.ignoreCut(Reksio.hop(), 'hop of joy')
     } finally {
       busy = false
     }
@@ -83,6 +92,7 @@
    * tap. He looks up after the bird, and sniffs round the rest; at the trap a
    * peep from the hole says someone is in there. */
   async function notYet(name) {
+    Debug.trace('not yet', { name })
     busy = true
     try {
       if (name === 'bird') await Reksio.lookUp(900)
@@ -112,13 +122,14 @@
   let hold = null
 
   function holdStart() {
-    if (ended || busy || hold) return command(() => Reksio.bark())
+    if (ended || busy || hold) return command(() => Reksio.bark(), 'bark')
     lastTap = performance.now()
     hold = { stretching: false, stopSound: null }
     const mine = hold
     mine.timer = setTimeout(() => {
       if (hold !== mine) return
       mine.stretching = true
+      Debug.trace('stretch')
       busy = true
       Reksio.beginStretch()
       mine.stopSound = stretchMusic()
@@ -138,7 +149,7 @@
     const h = hold
     hold = null
     clearTimeout(h.timer)
-    if (!h.stretching) return command(() => Reksio.bark())
+    if (!h.stretching) return command(() => Reksio.bark(), 'bark')
     lastTap = performance.now()
     h.stopSound()
     Music.react.snap()
@@ -212,6 +223,7 @@
   }
 
   async function chase(name) {
+    Debug.trace('chase', { name })
     busy = true
     try {
       await CRITTERS[name]()
@@ -224,6 +236,7 @@
   // ------------------------------------------------------------ the end
 
   async function evening() {
+    Debug.trace('evening')
     ended = true
     Weather.stop()
     await wait(1800) // let the last step of the sunset be seen
@@ -253,15 +266,23 @@
 
   // ------------------------------------------------------------ input
 
-  function command(fn) {
+  /** Ask Reksio to do something (`what` names it, for the trace): now, or
+   * once he's done with what he's busy with (a newer ask replaces an older). */
+  function command(fn, what) {
     lastTap = performance.now()
-    if (acting && !busy) Reksio.relax() // left alone, he was doing something: drop it
+    Debug.trace('ask', { what, busy, acting })
+    if (acting && !busy) {
+      Debug.trace('relax', { from: lastAct })
+      Reksio.relax() // left alone, he was doing something: drop it
+    }
     if (ended) {
       if (endedAt && performance.now() - endedAt > RESTART_AFTER_MS) location.reload()
       return
     }
-    if (busy) pending = fn
-    else fn()
+    if (busy) {
+      if (pending) Debug.trace('replaced', { by: what })
+      pending = fn
+    } else fn()
   }
 
   /** Where in the yard (scene units) a pointer event landed. */
@@ -286,28 +307,59 @@
     return d < (box.width / 2) * CRITTER_CORE
   }
 
-  $('stage').addEventListener('pointerdown', (e) => {
-    if (e.target.closest('#fullscreen')) return
-    e.preventDefault()
-    Sound.ensure()
-    Music.start()
+  // Every input becomes an intent, a short line of text ("go to bowl", "walk
+  // to 1830", "press"), and perform() carries it out. Live play and replays
+  // (debug.js records every intent) go through the same path.
+  const INTENTS = [
+    [/^go to (\w+)$/, (m) => command(() => goAndDo(m[1]), m[0])],
+    [/^chase (\w+)$/, (m) => command(() => chase(m[1]), m[0])],
+    [/^walk to (-?\d+)$/, (m) => command(() => Reksio.walkTo(Number(m[1])), m[0])],
+    [/^jump in puddle at (-?\d+)$/, (m) => {
+      const p = Weather.puddles.find((q) => Math.abs(q.x - Number(m[1])) < q.rx + PUDDLE_REACH)
+      return p ? command(() => jumpIn(p), m[0]) : command(() => Reksio.walkTo(Number(m[1])), m[0]) // dried up since
+    }],
+    [/^bark$/, () => command(() => Reksio.bark(), 'bark')],
+    [/^press$/, () => holdStart()],
+    [/^release$/, () => holdEnd()],
+    [/^stop$/, () => !busy && Reksio.stopWalking()],
+  ]
+
+  function perform(intent) {
+    Debug.input(intent)
+    for (const [re, run] of INTENTS) {
+      const m = intent.match(re)
+      if (m) return run(m)
+    }
+    Debug.check(`known intent: ${intent}`, false)
+  }
+
+  /** What a tap at this pointer event means. */
+  function tapIntent(e) {
     let target = e.target
     // a critter's tap circle is wide; over a thing or Reksio it gives way
     // except near its middle
     const critter = target.closest('[data-critter]')
     if (critter && somethingUnder(e) && !onCritter(critter, e)) {
       target = document.elementsFromPoint(e.clientX, e.clientY).find((el) => !el.closest('[data-critter]')) || target
-    } else if (critter) return command(() => chase(critter.dataset.critter))
+    } else if (critter) return `chase ${critter.dataset.critter}`
     const thing = target.closest('#things [data-thing]')
-    if (thing) return command(() => goAndDo(thing.dataset.thing))
-    if (target.closest('#reksio')) return holdStart()
+    if (thing) return `go to ${thing.dataset.thing}`
+    if (target.closest('#reksio')) return 'press'
     // a puddle is drawn on the ground, so it wins over the faint action spots
     const { x, y } = yardAt(e)
     const puddle = y > Painting.GROUND_TOP && Weather.puddles.find((p) => Math.abs(p.x - x) < p.rx + PUDDLE_REACH)
-    if (puddle) return command(() => jumpIn(puddle))
+    if (puddle) return `jump in puddle at ${Math.round(puddle.x)}`
     const spot = target.closest('#spots [data-thing]')
-    if (spot) return command(() => goAndDo(spot.dataset.thing))
-    command(() => Reksio.walkTo(x))
+    if (spot) return `go to ${spot.dataset.thing}`
+    return `walk to ${Math.round(x)}`
+  }
+
+  $('stage').addEventListener('pointerdown', (e) => {
+    if (e.target.closest('#fullscreen')) return
+    e.preventDefault()
+    Sound.ensure()
+    Music.start()
+    perform(tapIntent(e))
   })
 
   // ------------------------------------------------------------ action spots
@@ -372,31 +424,32 @@
     Sound.ensure()
     Music.start()
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      if (!e.repeat) command(() => Reksio.walkTo(e.key === 'ArrowLeft' ? Reksio.MIN_X : Reksio.MAX_X))
+      if (!e.repeat) perform(`walk to ${e.key === 'ArrowLeft' ? Reksio.MIN_X : Reksio.MAX_X}`)
       return
     }
     if (e.repeat) return
     if (e.key === ' ' || e.key === 'Enter') {
       const name = nearest()
-      return command(() => (name ? goAndDo(name) : Reksio.bark()))
+      return perform(name ? `go to ${name}` : 'bark')
     }
     // any other key: tap to bark, hold to stretch
     holdKey = e.key
-    holdStart()
+    perform('press')
   })
 
   let holdKey = null
   document.addEventListener('keyup', (e) => {
-    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !busy) Reksio.stopWalking()
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform('stop')
     if (e.key === holdKey) {
       holdKey = null
-      holdEnd()
+      perform('release')
     }
   })
 
-  window.addEventListener('pointerup', () => holdEnd())
-  window.addEventListener('pointercancel', () => holdEnd())
-  window.addEventListener('blur', () => holdEnd())
+  const release = () => hold && perform('release')
+  window.addEventListener('pointerup', release)
+  window.addEventListener('pointercancel', release)
+  window.addEventListener('blur', release)
 
   // the mouse over a thing lights up its spot
   $('stage').addEventListener('pointerover', (e) => {
@@ -505,7 +558,6 @@
   // One loop decides what Reksio does when nobody is tapping: a thought
   // bubble now and then, otherwise a dog move, picked at random (never the
   // same one twice running) and a little different each time.
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
   let nextIdleAt = 0
   let acting = false
   let lastAct = null
@@ -532,8 +584,8 @@
     wander: {
       weight: 3,
       async run() {
-        const dir = Math.random() < 0.5 ? -1 : 1
-        if (await Reksio.walkTo(Reksio.x + dir * rnd(80, 260)) && Math.random() < 0.7) await Reksio.sniff()
+        const dir = random() < 0.5 ? -1 : 1
+        if (await Reksio.walkTo(Reksio.x + dir * rnd(80, 260)) && random() < 0.7) await Reksio.sniff()
       },
     },
     look: { weight: 2, run: () => Reksio.lookAround() },
@@ -580,7 +632,7 @@
       async run() {
         await Reksio.watch(() => Creatures.fly)
         const f = Creatures.fly
-        if (f && Math.random() < 0.6 && Math.abs(f.x - Reksio.x) < 380) await Reksio.pounce(f.x)
+        if (f && random() < 0.6 && Math.abs(f.x - Reksio.x) < 380) await Reksio.pounce(f.x)
       },
     },
     yawn: { weight: 1, ok: () => done.size >= 2, run: () => Reksio.yawn() },
@@ -589,7 +641,7 @@
   function pickAct() {
     if (firstWish && ACTS.wish.ok()) return 'wish' // first, show what he wants
     const names = Object.keys(ACTS).filter((n) => n !== lastAct && (!ACTS[n].ok || ACTS[n].ok()))
-    let r = Math.random() * names.reduce((sum, n) => sum + ACTS[n].weight, 0)
+    let r = random() * names.reduce((sum, n) => sum + ACTS[n].weight, 0)
     for (const n of names) if ((r -= ACTS[n].weight) < 0) return n
     return names[0]
   }
@@ -687,32 +739,53 @@
     Music.setEnergy(musicEnergy(now))
     showNear()
     const worm = Creatures.worm
-    if (worm && !Things.flying && !ended && Math.random() < 0.02) Things.birdHunt(worm)
+    if (worm && !Things.flying && !ended && !Debug.still && huntRandom() < 0.02) Things.birdHunt(worm)
     if (wishing) {
       placeWish()
       if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
     }
-    const quiet = !ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
+    const quiet = !Debug.still && !ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
     if (quiet && soaked() && !Weather.raining && !Weather.puddleAt(Reksio.x)) {
       // stopped, wet, and out of the rain: shake it off, straight away
       acting = true
-      shakeDry()
-        .catch(() => {}) // cut short by a tap (Reksio.relax): still wet, he'll shake later
+      Debug.trace('shake dry')
+      Debug.ignoreCut(shakeDry(), 'shake dry') // cut short by a tap: still wet, he'll shake later
         .finally(() => (acting = false))
     } else if (quiet && now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
       startAct(pickAct())
     }
+    checkRules(now)
+    Debug.show(state())
     setTimeout(idleLoop, 200)
   }
 
-  /** Do one of the left-alone moves. */
+  // Rules that should always hold (debug.js reports a broken one, with the trace).
+  let busySince = 0
+  function checkRules(now) {
+    busySince = busy && !hold ? busySince || now : 0
+    Debug.check('walks only standing up', !Reksio.walking || Reksio.pose === 'stand', { pose: Reksio.pose })
+    Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
+    Debug.check('a waiting ask runs once he is free', !pending || busy || ended)
+  }
+
+  /** The game's state, for tests and the ?debug overlay. */
+  function state() {
+    return {
+      seed: Debug.seed, busy, ended, acting, holding: !!hold, pending: !!pending, lastAct,
+      done: [...done], mains: EVENING_NEEDS, uses: { ...uses },
+      reksio: { x: Math.round(Reksio.x), pose: Reksio.pose, walking: Reksio.walking },
+      soak: Number(soak.toFixed(2)), weather: Weather.phase, camX: Math.round(camX),
+      stamped: Things.stamped, mouse: Things.mouse,
+    }
+  }
+
+  /** Do one of the left-alone moves; resolves when it's over. */
   function startAct(name) {
     lastAct = name
     if (name === 'wish') firstWish = false
     acting = true
-    Promise.resolve()
-      .then(() => ACTS[name].run())
-      .catch(() => {}) // cut short by a tap (Reksio.relax)
+    Debug.trace('act', { name })
+    return Debug.ignoreCut(Promise.resolve().then(() => ACTS[name].run()), `act ${name}`)
       .finally(() => {
         acting = false
         nextIdleAt = performance.now() + (ACTS[name].ms || rnd(IDLE_GAP_MS[0], IDLE_GAP_MS[1]))
@@ -772,14 +845,37 @@
   Creatures.init()
   Weather.init()
   Weather.on((phase) => {
+    Debug.trace('weather', { phase })
     // Reksio notices the weather turn (unless he's in the middle of something)
     if (busy || ended || Reksio.walking) return
     if (phase === 'clouding') Reksio.lookUp(1600)
     if (phase === 'after') Reksio.hop(40, 2)
   })
   requestAnimationFrame(frame)
+  Debug.record(state)
   lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
   setTimeout(idleLoop, 200)
 
-  window.yardGame = { goAndDo, tap: (name) => command(() => goAndDo(name)), act: startAct, done, pickAct, state: () => ({ busy, ended, acting, holding: !!hold, pending: !!pending, done: [...done], camX, lastAct, stamped: Things.stamped, mouse: Things.mouse, uses: { ...uses } }) } // for testing
+  // For tests and the console: do things, read the state, read what happened.
+  // tap/walk go through command() like a real tap; use/act/chase run one thing
+  // directly and resolve when it's over.
+  window.yardGame = {
+    tap: (name) => perform(`go to ${name}`),
+    walk: (x) => perform(`walk to ${Math.round(x)}`),
+    perform,
+    use: (name, extra) => goAndDo(name, extra),
+    act: startAct,
+    actOk: (name) => !ACTS[name].ok || !!ACTS[name].ok(),
+    chase,
+    acts: Object.keys(ACTS),
+    things: Object.keys(SPOTS),
+    critters: Object.keys(CRITTERS),
+    /** Nothing going on: not busy, acting, walking or waiting to do something. */
+    free: () => !busy && !acting && !hold && !pending && !Reksio.walking,
+    pickAct,
+    state,
+    trace: () => Debug.dump(),
+    events: () => [...Debug.events],
+    replayUrl: Debug.replayUrl,
+  }
 })()

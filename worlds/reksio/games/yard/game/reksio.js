@@ -3,7 +3,7 @@
 // dachshund stretch, and his small moves (bark, nod, shake, hop, sniff,
 // scratch, ducking into the doghouse). Drawn in index.html.
 
-/* global Sound, Music, Creatures, Layout */
+/* global Debug, Sound, Music, Creatures, Layout */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
@@ -254,7 +254,7 @@ const Reksio = (() => {
     await lickTip.animate(
       [{ transform: 'rotate(18deg) scale(0.6)' }, { transform: 'rotate(-6deg) scale(1)', offset: 0.45 }, { transform: 'rotate(4deg) scale(1)', offset: 0.7 }, { transform: 'rotate(18deg) scale(0.5)' }],
       { duration: 520, easing: 'ease-in-out' },
-    ).finished.catch(() => {})
+    ).finished.catch(() => {}) // cut short: still put the tongue away below
     show(lickTip, false)
     show(smile, true)
   }
@@ -278,11 +278,13 @@ const Reksio = (() => {
     await head.animate([{ transform: 'rotate(22deg)' }, { transform: 'rotate(0)' }], { duration: 260, easing: 'ease-in-out' }).finished
   }
 
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  const random = Debug.random('reksio') // this part's own random stream (debug.js)
+
+  const rnd = (lo, hi) => lo + random() * (hi - lo)
   const rndInt = (lo, hi) => Math.floor(rnd(lo, hi + 1))
 
   /** A happy hop on the spot; height and count vary unless given. */
-  async function hop(height = rnd(30, 56), times = Math.random() < 0.3 ? 2 : 1) {
+  async function hop(height = rnd(30, 56), times = random() < 0.3 ? 2 : 1) {
     for (let i = 0; i < times; i++) {
       Sound.hop()
       Music.react.hop()
@@ -390,7 +392,7 @@ const Reksio = (() => {
       [{ transform: 'rotate(0)' }, { transform: 'rotate(11deg) translateY(4px)', offset: 0.2 }, { transform: 'rotate(11deg) translateY(4px)', offset: 0.8 }, { transform: 'rotate(0)' }],
       { duration: ms, easing: 'ease-in-out' },
     ).finished
-    if (Math.random() < 0.5) await bark()
+    if (random() < 0.5) await bark()
   }
 
   /** Chase his own tail: a few quick turns with little hops. */
@@ -562,7 +564,7 @@ const Reksio = (() => {
     while (performance.now() < end) {
       await wait(rnd(1500, 3000))
       if (mine !== pose) return
-      if (Math.random() < 0.7) glance(POSES.sit.head, 16)
+      if (random() < 0.7) glance(POSES.sit.head, 16)
       else tail.animate([0, 14, -6, 14, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: 700 }) // a wag
     }
     if (mine !== pose) return
@@ -594,7 +596,7 @@ const Reksio = (() => {
     await settle('lie', 800)
     if (mine !== pose) return
     yawnSound()
-    await settle(NAPS[Math.floor(Math.random() * NAPS.length)], 1200)
+    await settle(NAPS[Math.floor(random() * NAPS.length)], 1200)
     show(eye, false)
     show(eyeShut, true)
     const end = performance.now() + ms
@@ -754,6 +756,8 @@ const Reksio = (() => {
     get x() { return x },
     get facing() { return facing },
     get walking() { return target !== null },
+    /** The pose he is in or moving into: a key of POSES (stand, sit, lie, nap…) */
+    get pose() { return current },
     get stretching() { return stretching || stretch !== 0 },
     /** Mouth position in scene units, for effects. */
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },

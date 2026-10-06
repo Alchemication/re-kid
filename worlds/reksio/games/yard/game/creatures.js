@@ -11,13 +11,14 @@
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Sound, Reksio, Layout, Weather */
+/* global Debug, Sound, Reksio, Layout, Weather */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const GROUND = 812
   const layer = document.getElementById('critters')
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  const random = Debug.random('creatures') // this part's own random stream (debug.js)
+  const rnd = (lo, hi) => lo + random() * (hi - lo)
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v))
   const dist = (ax, ay, bx, by) => Math.hypot(ax - bx, ay - by)
   // A critter's invisible tap circle (scene units): about 80 CSS px across on
@@ -159,7 +160,7 @@ const Creatures = (() => {
     },
     /** Where next: mostly wandering about, sometimes a place to land. */
     pick() {
-      const r = Math.random()
+      const r = random()
       const spots = [
         { x: 480, y: 612, name: 'roof' }, // the doghouse roof
         { x: 1321 + Layout.x('tap'), y: 556, name: 'tap' }, // the tap's spout
@@ -167,7 +168,7 @@ const Creatures = (() => {
       if (!Layout.hidden.includes('bowl')) spots.push({ x: 880 + Layout.x('bowl'), y: 760, name: 'bowl' })
       if (Layout.flowers) spots.push({ x: 1648 + Layout.x('flowers'), y: 646, name: 'flower' })
       if (r < 0.25) {
-        this.target = { ...spots[Math.floor(Math.random() * spots.length)], land: true }
+        this.target = { ...spots[Math.floor(random() * spots.length)], land: true }
       } else if (r < 0.35 && web.built && !spider.busy) {
         this.target = { x: rnd(345, 420), y: rnd(370, 440) } // drifts near the web…
       } else if (r < 0.45) {
@@ -197,7 +198,7 @@ const Creatures = (() => {
           // a fly arrives from the side of the screen
           this.state = 'fly'
           this.leaveAt = now + rnd(...FLY_STAY_S)
-          this.x = world.reksio.x + (Math.random() < 0.5 ? -900 : 900)
+          this.x = world.reksio.x + (random() < 0.5 ? -900 : 900)
           this.y = rnd(400, 600)
           this.g.style.display = ''
           this.cocoon.setAttribute('opacity', '0')
@@ -217,7 +218,7 @@ const Creatures = (() => {
         // rubs its hands, and keeps an eye out
         this.body.setAttribute('transform', `translate(0 ${Math.sin(now * 30) * 0.6})`)
         const near = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y)
-        if (now > this.stateUntil || (near < 70 && Math.random() < 0.03)) {
+        if (now > this.stateUntil || (near < 70 && random() < 0.03)) {
           this.state = 'fly'
           this.landedOn = null
           this.vy = -260
@@ -227,7 +228,7 @@ const Creatures = (() => {
         return
       }
       // flying: steer towards the target with a little zig-zag, now and then whining
-      if (Math.random() < dt / WHINE_EVERY_S) hear(this.x, () => Sound.whine())
+      if (random() < dt / WHINE_EVERY_S) hear(this.x, () => Sound.whine())
       const tx = this.target.x + Math.sin(now * 7) * 30
       const ty = this.target.y + Math.cos(now * 9) * 22
       const dx = tx - this.x
@@ -254,10 +255,10 @@ const Creatures = (() => {
         }
       }
       // flies too close to Reksio's nose get startled
-      if (dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 45 && Math.random() < 0.05) {
+      if (dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 45 && random() < 0.05) {
         this.dodge(world.reksio.nose.x, world.reksio.nose.y)
       }
-      if (inWeb(this.x, this.y) && !spider.busy && Math.random() < 0.15) {
+      if (inWeb(this.x, this.y) && !spider.busy && random() < 0.15) {
         this.state = 'stuck'
         web.shiver()
         hear(this.x, () => Sound.buzz(0.4))
@@ -311,7 +312,7 @@ const Creatures = (() => {
           this.state = 'fly'
           this.leaving = false
           this.leaveAt = now + rnd(...BEE_STAY_S)
-          this.x = this.FLOWERS[0].x + (Math.random() < 0.5 ? -1 : 1) * rnd(300, 600)
+          this.x = this.FLOWERS[0].x + (random() < 0.5 ? -1 : 1) * rnd(300, 600)
           this.y = 240
           this.vx = this.vy = 0
           this.g.style.display = ''
@@ -322,7 +323,7 @@ const Creatures = (() => {
         // off home, back over the wall
         this.leaving = true
         this.state = 'fly'
-        this.away = { x: this.x + (Math.random() < 0.5 ? -1 : 1) * rnd(400, 700), y: 180 }
+        this.away = { x: this.x + (random() < 0.5 ? -1 : 1) * rnd(400, 700), y: 180 }
       }
       const f = this.FLOWERS[this.flower]
       const reksioNear = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 110
@@ -351,7 +352,7 @@ const Creatures = (() => {
         ty += Math.sin(now * 6) * 5 // bobbing in the flower
         if (now > this.stateUntil) {
           this.state = 'fly'
-          this.flower = (this.flower + 1 + Math.floor(Math.random() * 2)) % this.FLOWERS.length
+          this.flower = (this.flower + 1 + Math.floor(random() * 2)) % this.FLOWERS.length
         }
       }
       const dx = tx - this.x
@@ -362,7 +363,7 @@ const Creatures = (() => {
       this.vy += ((dy / d) * Math.min(speed, d * 3) - this.vy) * Math.min(1, dt * 2.5)
       this.x += this.vx * dt
       this.y += this.vy * dt + Math.sin(now * 4) * 0.4 // a heavy, bumbling flight
-      if (this.state === 'fly' && Math.random() < dt / HUM_EVERY_S) hear(this.x, () => Sound.buzz(0.6))
+      if (this.state === 'fly' && random() < dt / HUM_EVERY_S) hear(this.x, () => Sound.buzz(0.6))
       if (this.state === 'fly' && d < 8 && !this.leaving) {
         this.state = 'hover'
         this.stateUntil = now + rnd(2, 4)
@@ -519,7 +520,7 @@ const Creatures = (() => {
       } else {
         this.swing *= 0.9
       }
-      if (this.mode === 'idle' && Math.random() < dt / 14) this.dangle()
+      if (this.mode === 'idle' && random() < dt / 14) this.dangle()
       this.place()
     },
   }
@@ -550,9 +551,9 @@ const Creatures = (() => {
     comeOut() {
       // from beside a puddle (or the flowers), heading across the yard
       const ps = Weather.puddles
-      const near = ps.length ? ps[Math.floor(Math.random() * ps.length)].x : 1700 + Layout.x('flowers')
+      const near = ps.length ? ps[Math.floor(random() * ps.length)].x : 1700 + Layout.x('flowers')
       this.x = near + rnd(-120, 120)
-      this.dir = Math.random() < 0.5 ? -1 : 1
+      this.dir = random() < 0.5 ? -1 : 1
       this.out = true
       this.g.style.display = ''
       this.body.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 1500, easing: 'ease-out' })
@@ -603,7 +604,7 @@ const Creatures = (() => {
     comeUp() {
       this.made = true
       for (const p of Weather.puddles.slice(0, 2)) {
-        const x = p.x + (Math.random() < 0.5 ? -1 : 1) * (p.rx + rnd(20, 60))
+        const x = p.x + (random() < 0.5 ? -1 : 1) * (p.rx + rnd(20, 60))
         const g = el('g', { class: 'critter worm', 'data-critter': 'worm', transform: `translate(${x} ${GROUND + 26})` })
         const hit = el('circle', { r: HIT_R, cy: -20, class: 'critter-hit', display: 'none' }, g)
         const path = el('path', { class: 'worm-body' }, g)

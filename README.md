@@ -13,6 +13,7 @@ src/
   schema/               pydantic models for every research file
   worlds.py             load/save YAML, cross-file validation
   commands.py           subcommand handlers
+  replay.py             replays a game's bug report in Chrome and photographs it
   audio.py              audio measurements, clips, spectrograms (ffmpeg, librosa)
   samples.py            downloads, measures and packs a game's instrument samples
   barks.py              cuts the marked original barks into a local script for the games
@@ -28,8 +29,10 @@ worlds/<id>/
   games/<game>/brief.yaml  game brief (schema.brief.GameBrief)
   games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
   games/<game>/game/    the game: static HTML, CSS and plain scripts
+  games/<game>/tests/   the game's JS unit tests (node:test)
   media/intro/          intro video clips (downloaded, gitignored)
-tests/
+tests/                  pytest; test_game_browser.py drives the games in Chrome
+eslint.config.mjs       lint for the game scripts (run with npx, no npm project)
 ```
 
 Every statement about an original work is a claim with a status —
@@ -53,10 +56,40 @@ uv run python main.py validate [WORLD...]
 uv run python main.py show WORLD [--status unknown] [--section sound]
 uv run python main.py episodes WORLD [--online]
 uv run python main.py mark WORLD [MEDIA] [--by NAME] [--no-open]
-uv run python main.py play WORLD [GAME]       # opens a game (default: yard); no server
+uv run python main.py play WORLD [GAME] [--debug] [--seed N] [--still]
+uv run python main.py replay [REPORT] [--last S] [--every MS] [--out DIR]
 uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
 uv run python main.py barks WORLD             # packs the marked barks (local only)
 uv run python main.py schema world|sources|episodes|intro|brief
 ```
 
-Development: `uv run ruff check . && uv run ruff format . && uv run pytest`.
+Development: `uv run ruff check . && uv run ruff format . && uv run pytest`,
+`npx --yes eslint@10.12.0 worlds` for the game scripts, and
+`uv run pytest -m browser -n 4` (a few minutes) after changing a game.
+
+## Debugging the yard
+
+Flags in the page address (`main.py play` takes the first three):
+
+| Flag | Does |
+|------|------|
+| `?seed=N` | Replays a play: the layout exactly, what happens in it closely. Every play prints its seed in the console. |
+| `?debug` | State overlay, every event in the console, a "report a bug" button. |
+| `?still` | Reksio moves only when asked: try one gesture or gag alone. |
+| `?mains=trap,bowl` | Which main things count. |
+| `?creatures=fly,spider` | Which creatures come (`?creatures=` for none). |
+| `?flowers=1` / `0` | Flowers out or not. |
+| `?rain=1` / `0`, `?rain-at=S` | Force the shower, and when it starts. |
+| `?mouse-at=S`, `?visitor-at=S` | When the mouse, and the tree's visitor, come out. |
+| `?fruit=apple\|plum\|nut` | The tree's fruit. |
+
+In the console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,
+`yardGame.use('bowl', true)` (true: the variation), `yardGame.perform('go to tap')`.
+
+**Bug reports.** The game keeps every input since the start and its state every
+half second. Ctrl+Shift+B (any play) asks what went wrong and downloads
+`yard-bug-<time>.json`. `main.py replay` replays the newest one in ~/Downloads:
+same seed, same inputs at the same times. It saves a screenshot every 0.5 s of
+the last 10 s, a contact sheet, and `replay.json` (recorded vs replayed state,
+trace). The game runs on the real clock, so a replay is close, not exact; the
+command says when it ended differently.

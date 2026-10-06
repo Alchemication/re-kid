@@ -11,7 +11,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Layout, Sound, Music, Reksio, Tree */
+/* global Debug, Layout, Sound, Music, Reksio, Tree */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -33,7 +33,9 @@ const Things = (() => {
   const $ = (id) => document.getElementById(id)
   const fx = $('fx')
   const wait = (ms) => new Promise((r) => setTimeout(r, ms))
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  const random = Debug.random('things') // this part's own random stream (debug.js)
+  const rnd = (lo, hi) => lo + random() * (hi - lo)
+  const sparkle = Debug.random('fx') // particles only: how many fly depends on frame timing, so they keep out of the stream above
   const SVG_NS = 'http://www.w3.org/2000/svg'
   let isEnded = () => false
 
@@ -46,18 +48,18 @@ const Things = (() => {
       c.setAttribute('class', cls)
       c.setAttribute('cx', x)
       c.setAttribute('cy', y)
-      c.setAttribute('r', size * (0.6 + Math.random() * 0.8))
+      c.setAttribute('r', size * (0.6 + sparkle() * 0.8))
       fx.appendChild(c)
-      const side = dir || (Math.random() < 0.5 ? -1 : 1)
-      const dx = side * reach * (0.3 + Math.random() * spread)
-      const up = height * (0.5 + Math.random())
+      const side = dir || (sparkle() < 0.5 ? -1 : 1)
+      const dx = side * reach * (0.3 + sparkle() * spread)
+      const up = height * (0.5 + sparkle())
       c.animate(
         [
           { transform: 'translate(0, 0)', opacity: 1 },
           { transform: `translate(${dx * 0.5}px, ${-up}px)`, opacity: 1, offset: 0.45 },
           { transform: `translate(${dx}px, ${up * 0.4}px)`, opacity: 0 },
         ],
-        { duration: 600 + Math.random() * 300, easing: 'ease-out' },
+        { duration: 600 + sparkle() * 300, easing: 'ease-out' },
       ).finished.then(() => c.remove())
     }
   }
@@ -131,7 +133,7 @@ const Things = (() => {
   async function flyAway(from = PERCHES[perch]) {
     flying = true
     const choices = PERCHES.map((p, i) => i).filter((i) => i !== perch)
-    perch = choices.sort((a, b) => Math.abs(PERCHES[b].x - Reksio.x) - Math.abs(PERCHES[a].x - Reksio.x))[Math.floor(Math.random() * 2)]
+    perch = choices.sort((a, b) => Math.abs(PERCHES[b].x - Reksio.x) - Math.abs(PERCHES[a].x - Reksio.x))[Math.floor(random() * 2)]
     const to = PERCHES[perch]
     Music.react.bird()
     await flyBetween(from, to)
@@ -162,9 +164,9 @@ const Things = (() => {
         [{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }],
         { duration: 300 },
       )
-      if (Math.random() < 0.6) Sound.from(Math.abs(PERCHES[perch].x - Reksio.x), Sound.chirp)
+      if (random() < 0.6) Sound.from(Math.abs(PERCHES[perch].x - Reksio.x), Sound.chirp)
     }
-    setTimeout(birdIdle, 4000 + Math.random() * 4000)
+    setTimeout(birdIdle, 4000 + random() * 4000)
   }
 
   // ------------------------------------------------------------ the mouse
@@ -232,7 +234,7 @@ const Things = (() => {
     mouse = 'wanting'
     $('trap').classList.remove('not-yet')
     // a rescue cancels her animations mid-way: that ends this loop, quietly
-    mouseWants().catch(() => {})
+    Debug.ignoreCut(mouseWants(), 'mouse wants')
   }
 
   /** While she can't get the cheese: creep up, reach, flinch back, look to Reksio. */
@@ -258,7 +260,7 @@ const Things = (() => {
       await wait(rnd(2500, 5000))
       if (mouse !== 'wanting') return
       mouseAt(mousePos.x, mousePos.y, -1)
-      if (Math.random() < 0.25) {
+      if (random() < 0.25) {
         // back into the hole for a moment, then out again
         await goHome()
         await wait(rnd(1500, 3000))
@@ -358,7 +360,7 @@ const Things = (() => {
     // nose to nose
     Sound.mouse()
     await Reksio.nod(18, 450)
-    if (extra && Math.random() < 0.5) {
+    if (extra && random() < 0.5) {
       // she brings him a crumb of cheese
       burst(front.x + X('trap') - 40, GROUND - 6, 5, 'cheese-crumb', { dir: -1, height: 18, reach: 30, size: 2.5 })
       Sound.munch()

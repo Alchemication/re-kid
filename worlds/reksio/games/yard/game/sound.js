@@ -440,7 +440,7 @@ const Sound = (() => {
       const audio = original[id] || (original[id] = new Audio(`../../../audio/intro/marks/${id}.wav`))
       audio.currentTime = 0
       audio.volume = 0.6
-      audio.play().catch(() => {})
+      audio.play().catch(() => {}) // clip not here (it is never committed) or play refused: the egg stays silent
     },
   }
 })()

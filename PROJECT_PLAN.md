@@ -58,8 +58,8 @@ Update the **Status** and **Next steps** sections as work lands.
   Exception (Adam, after the synthesised bark fell flat): Reksio barks with
   the original barks, played higher and quicker by a random amount each time.
   They stay local (`main.py barks`, gitignored); without them the game uses
-  its synthesised woof. Like the hook, this must be replaced before any
-  public release.
+  its synthesised woof. Like the hook, it needs a licence (or a replacement)
+  before the game goes beyond Adam's home.
   This replaces the earlier idea of looping the original theme, and makes a
   public version far easier to license.
 - **Every statement about the original is a claim with provenance**
@@ -68,8 +68,12 @@ Update the **Status** and **Next steps** sections as work lands.
 - **No live AI in the finished game is assumed.** AI is for research, design
   and building. Don't use image models to imitate the original artwork; use
   code-drawn or SVG characters over a few painted background plates.
-- **Licensing is parked for the private MVP** but blocks any public release.
-  Recorded as `rights` (unknown) in `worlds/reksio/world.yaml`.
+- **Licensing: Adam contacts the rights holders before the game leaves his
+  home** (Adam, 2026-10-06). Until then it is a private build, so the game may
+  aim for a recognisable Reksio (on-model character, the original barks, a
+  melody close to the theme) without blocking on rights. Who holds them is
+  still an open research question: `rights` (unknown) in
+  `worlds/reksio/world.yaml`.
 
 ## Flow
 
@@ -82,7 +86,7 @@ One validated file per stage, under `worlds/<id>/`:
 | 3 | Selection | The intro first, Kosmonauta next (see Decisions) | Done |
 | 4 | Breakdowns | `intro.yaml`, `episodes/<slug>.yaml` (beat by beat) | Intro: frames done, sound pending |
 | 5 | Game brief | `games/yard/brief.yaml` (`schema.brief`); `games/intro/` parked | Yard: first draft |
-| 6 | Game | `games/yard/game/` (static web game) | Yard proof of concept built |
+| 6 | Game | `games/yard/game/` (static web game) | Yard playable; unit, browser and replay tests |
 | 7 | Playtests | `playtests/<date>-<family>.yaml` | Not started |
 
 Check stage 1 with `uv run python main.py validate reksio` and
@@ -185,83 +189,28 @@ wake Reksio at home.
 ## Next steps
 
 1. **Adam: try the yard** (`uv run python main.py play reksio`), alone and
-   then with Eliot. The yard is wider than the screen and the view follows
-   Reksio, from the house wall (left end) to the fence and gate (right end).
-   Reksio is small, seen from the side, drawn in code on a sponge-painted
-   yard; solid things stay still, only plants sway and the bird hops. Tap the
-   ground and he walks there; tap a thing and he uses it: naps and snores in
-   the doghouse doorway, laps from his bowl, drinks at the tap and shakes
-   himself dry, sniffs the flowers and sneezes, barks at the house window,
-   pokes at the gate, barks the bird off its perch, digs up a bone, stamps a
-   red film strip frame by frame until it rolls up into a reel. Press and
-   hold on Reksio and he stretches like a dachshund, snapping back on release.
-   He walks short trips, runs long ones, hops for joy, and when left alone
-   keeps busy with random dog moves (sniffing, wandering, scratching, a
-   play-bow, chasing his tail…) and the odd thought bubble. Each of this
-   play's main things lowers the sun a step and warms the sky; after the last, evening falls and the picture closes in a circle on the doghouse. No text. When left alone, Reksio shows a thought bubble with a
-   picture of the nearest main thing he still wants, and it twinkles; arrows
-   and space work too. All sounds are new, made in the browser; the bone find
-   plays Adam's whole bark clip as an easter egg if it exists locally.
+   then with Eliot. What is in it, part by part and what each is based on, is
+   in `games/yard/brief.yaml`; the testing flags and console helpers are in
+   README ("Debugging the yard"). In short: a wide, wordless yard where every
+   tap gets an answer; each play counts the doghouse plus three of eight other
+   main things (a tray of pictures fills in, the sun sinks a step for each)
+   and brings two of three creatures and usually a shower; after the last,
+   evening falls and the picture closes on the doghouse. Left alone, Reksio
+   keeps busy, rests, and shows a thought bubble of what he still wants.
 
-   **Music:** a pizzicato "oom-pah" in B-flat with a clarinet hook, played
-   note by note from CC0 instrument samples (VSCO-2 CE and VCSL, packed by
-   `main.py samples reksio yard`), that follows the game: fuller while
-   playing, sparse when left alone, in-key flourishes for actions, slower
-   with each sunset step, a harp lullaby at evening. The hook and the
-   stretch run come from a Basic Pitch transcription of Adam's two melody
-   marks, which is a measurement, not an observation: **Adam to confirm by
-   ear whether it sounds like the theme**, and say what is too busy, too sad
-   or annoying. A recognisable melody is still Kowalowski's composition, so
-   it blocks a public release like the recording does.
-   A quiet background wind varies like real wind (breeze, the odd gust,
-   stronger under clouds) and sets how far the plants sway; the rain is
-   quieter.
-   Three themes take turns (A A B B A A C C): the hook, a new skipping
-   flute tune, and a new tiptoeing one in G minor; **Adam to judge** whether
-   B and C are catchy and still Reksio. Creatures make quiet, real sounds
-   that fade with distance; the silent ones only make small action noises.
-   **Clarity and life:** a tray of pictures that fill in as main things are
-   done, and a first wave of creatures (`creatures.js`): a fly, a bumblebee
-   and a spider with its web, which notice Reksio and each other. New
-   gestures: biting his tail, sitting, howling, watching and pouncing on the
-   fly, getting startled.
+   **Something wrong? Press Ctrl+Shift+B** in the game, say what you saw, and
+   tell Claude: it replays the report (`main.py replay`) and sees the run-up.
 
-   **Variety and reach:** each play counts the doghouse plus three of the
-   other eight main things and brings two of the three creatures; the flowers
-   only sometimes. The doghouse and gate are fixed anchors; the things
-   between (bowl, tap, flowers, mound, film, mouse trap, tree, bramble) come in a shuffled order with
-   uneven gaps of at least a dog's length, in a yard 4000 wide; puddles and
-   the bird's wall perches go in the widest gaps (`layout.js`; the last play
-   is remembered in the browser so the next prefers what wasn't seen). Every usable thing has a
-   wide action spot on the ground that glows when Reksio stands in it and
-   can be tapped; the bird's is under its perch.
-
-   **Weather (`weather.js`):** most plays bring a shower (60%, halved after
-   a rainy play; `?rain=1`, `?rain=0` and `?rain-at=SECONDS` in the page
-   address force it). Clouds, rain, puddles that ring and splash, Reksio
-   catching drops and shaking off, then a rainbow, flowers growing, a snail
-   with a trail, worms by the puddles, and the bird hunting one.
-
-   **Helping and repeats (`things.js`):** some plays bring a mouse trap
-   baited with cheese by a mouse hole. A mouse comes out (14–30 s in), can't
-   get the cheese past the trap, and squeaks at Reksio; he stamps beside it,
-   it snaps on nothing and flings her the cheese, and he noses it away.
-   Afterwards she comes out to touch noses. Every main thing done again
-   repeats its core, and the second time (then about every other time) adds
-   a small variation: a dream of a bone, the bowl nosed along, the tap
-   spraying him, a bigger sneeze, digging twice, the reel rolling off, a crumb
-   or a baby mouse. `?mains=trap,bowl` and `?mouse-at=SECONDS` force a play
-   for testing. **To watch with Eliot:** does a mouse that can't eat worry
-   him, or does he want to help?
-
-   **Tree and bramble (`tree.js`, `things.js`):** some plays have a fruit
-   tree (apples, plums or hazelnuts). A hungry snail or squirrel waits under
-   it; Reksio shakes the trunk and the fruit falls. Snails slowly eat and more
-   come; the squirrel eats a nut, buries one and runs up the trunk. A repeat
-   may bonk Reksio on the head. Some plays have a blackberry bramble: he
-   flicks a berry up, jumps and catches it, licks his lips (or misses and
-   gobbles it off the ground). `?fruit=apple|plum|nut` and
-   `?visitor-at=SECONDS` force a play.
+   **Adam to judge by ear and eye:**
+   - *The hook and the stretch run* come from a Basic Pitch transcription of
+     Adam's two melody marks: a measurement, not an observation. Does it
+     sound like the theme? What is too busy, too sad or annoying? (A
+     recognisable melody is still Kowalowski's composition, so it goes into
+     the licensing talk along with the recording and the character.)
+   - *Themes B and C* (a skipping flute tune, a tiptoeing one in G minor) take
+     turns with the hook (A A B B A A C C): catchy, and still Reksio?
+   - *With Eliot:* does a mouse that can't eat worry him, or does he want to
+     help? Does he find the main things unaided, and does the ending land?
 
    **Next ideas for a living yard** (pick and order with Adam; each should
    teach a small cause and effect a toddler can see):
@@ -276,6 +225,11 @@ wake Reksio at home.
    - *Ants:* a line marching to crumbs the lapping dropped by the bowl,
      carrying them home; a raindrop scatters them.
    - *Leaves:* a gust (the wind is already there) blows leaves across; Reksio chases one.
+
+   **Each new gag** comes with its browser tests and a look at it (CLAUDE.md,
+   "Adding a gag"). Known complexity hotspots to split when next touched
+   (ESLint warnings): the creatures' `update` methods, `idleLoop`,
+   `Weather.tick`, `Music.scheduleStep`.
 2. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
 3. **Later:** the yard becomes the home screen, and new things in it lead

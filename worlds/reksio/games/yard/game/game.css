@@ -315,3 +315,14 @@ body { display: grid; place-items: center; }
 .apple-core { fill: #f4e7c0; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
 .plum-stone { fill: #b07a4a; stroke: var(--ink); stroke-width: 2; }
 .crumb-apple { fill: #f4e7c0; }
+
+/* ?debug: the game's state and latest events (debug.js) */
+#debug {
+  position: fixed; top: 8px; right: 8px; z-index: 100; max-width: 46ch; margin: 0; padding: 8px 10px;
+  font: 11px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; color: #f4f1e6;
+  background: rgba(20, 20, 20, 0.78); border-radius: 6px; pointer-events: none;
+}
+#bug-button {
+  position: fixed; bottom: 10px; left: 10px; z-index: 100; padding: 8px 12px;
+  font: 13px ui-monospace, Menlo, monospace; color: #fff; background: #b3261e; border: 0; border-radius: 6px; cursor: pointer;
+}

@@ -12,7 +12,7 @@
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
 
-/* global Layout, Sound, Music */
+/* global Debug, Layout, Sound, Music */
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -33,7 +33,10 @@ const Weather = (() => {
   const SWAY_DEG = [1, 6] // plants' sway at still and at a full gust
 
   const $ = (id) => document.getElementById(id)
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  const random = Debug.random('weather') // this part's own random stream (debug.js)
+  const rnd = (lo, hi) => lo + random() * (hi - lo)
+  const sparkle = Debug.random('weather-fx') // drops, splashes and rings: drawn per frame, so kept out of the stream above
+  const fxRnd = (lo, hi) => lo + sparkle() * (hi - lo)
   const el = (tag, attrs, parent) => {
     const n = document.createElementNS(SVG_NS, tag)
     for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v)
@@ -60,7 +63,7 @@ const Weather = (() => {
     for (let i = 0; i < 5; i++) {
       const g = el('g', { class: 'cloud' }, cloudLayer)
       const w = rnd(220, 340)
-      const bumps = 4 + Math.floor(Math.random() * 3)
+      const bumps = 4 + Math.floor(random() * 3)
       for (let k = 0; k < bumps; k++) {
         const cx = (k / (bumps - 1) - 0.5) * w * 0.8
         const r = rnd(42, 70) * (1 - Math.abs(cx) / w)
@@ -81,7 +84,7 @@ const Weather = (() => {
     canvas.height = Math.round(canvas.clientHeight * dpr)
   }
   function newDrop(top = false) {
-    return { x: rnd(-100, VIEW_W + 100), y: top ? rnd(-200, 0) : rnd(-200, VIEW_H), v: rnd(900, 1300), len: rnd(18, 30) }
+    return { x: fxRnd(-100, VIEW_W + 100), y: top ? fxRnd(-200, 0) : fxRnd(-200, VIEW_H), v: fxRnd(900, 1300), len: fxRnd(18, 30) }
   }
   const splashes = []
 
@@ -102,8 +105,8 @@ const Weather = (() => {
     for (const d of drops) {
       d.y += d.v * dt
       d.x -= d.v * dt * 0.12 // a slight slant from the breeze
-      if (d.y > GROUND_Y + rnd(0, 70)) {
-        if (Math.random() < 0.35) splashes.push({ x: d.x, y: d.y, age: 0 })
+      if (d.y > GROUND_Y + fxRnd(0, 70)) {
+        if (sparkle() < 0.35) splashes.push({ x: d.x, y: d.y, age: 0 })
         Object.assign(d, newDrop(true))
         continue
       }
@@ -146,12 +149,12 @@ const Weather = (() => {
       p.shine.setAttribute('rx', p.rx * 0.35 * k)
       p.shine.setAttribute('ry', 3 * k)
       // drops land in the puddle: rings
-      if (intensity > 0.2 && k > 0.3 && Math.random() < intensity * 0.12) ring(p, k)
+      if (intensity > 0.2 && k > 0.3 && sparkle() < intensity * 0.12) ring(p, k)
     }
   }
 
   function ring(p, k) {
-    const r = el('ellipse', { cx: rnd(-p.rx * 0.7, p.rx * 0.7) * k, cy: rnd(-4, 4), rx: 2, ry: 1, class: 'ripple' }, p.g)
+    const r = el('ellipse', { cx: fxRnd(-p.rx * 0.7, p.rx * 0.7) * k, cy: fxRnd(-4, 4), rx: 2, ry: 1, class: 'ripple' }, p.g)
     r.animate([{ rx: 2, ry: 1, opacity: 0.9 }, { rx: 26, ry: 7, opacity: 0 }], { duration: 700, easing: 'ease-out' }).finished.then(() => r.remove())
   }
 
@@ -223,7 +226,7 @@ const Weather = (() => {
 
   function blow(dt, cover) {
     if (t >= windChangeAt) {
-      const gust = !calm && Math.random() < GUST_CHANCE
+      const gust = !calm && random() < GUST_CHANCE
       windTarget = calm ? BREEZE[0] : rnd(...(gust ? GUST : BREEZE))
       windChangeAt = t + (gust ? rnd(2, 4) : rnd(...WIND_CHANGE_S)) // gusts pass quickly
     }

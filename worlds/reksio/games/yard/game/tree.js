@@ -12,7 +12,7 @@
 // Everything here lives inside the tree's own group, in the coordinates it
 // is drawn in (index.html); Layout.x('tree') moves the lot.
 
-/* global Layout, Sound, Music, Reksio */
+/* global Debug, Layout, Sound, Music, Reksio */
 /* exported Tree */
 const Tree = (() => {
   const TRUNK_X = 1660 // drawn
@@ -39,7 +39,8 @@ const Tree = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const $ = (id) => document.getElementById(id)
   const wait = (ms) => new Promise((r) => setTimeout(r, ms))
-  const rnd = (lo, hi) => lo + Math.random() * (hi - lo)
+  const random = Debug.random('tree') // this part's own random stream (debug.js)
+  const rnd = (lo, hi) => lo + random() * (hi - lo)
   const el = (tag, attrs, parent) => {
     const n = document.createElementNS(SVG_NS, tag)
     for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v)
@@ -268,7 +269,7 @@ const Tree = (() => {
       for (let i = 0; i < more && snails.length < MAX_SNAILS; i++) {
         setTimeout(() => {
           if (isEnded() || snails.length >= MAX_SNAILS) return
-          const side = Math.random() < 0.5 ? -1 : 1
+          const side = random() < 0.5 ? -1 : 1
           const s = makeSnail(WAITS_AT + side * rnd(260, 360))
           s.body.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 1200, easing: 'ease-out' })
           snailTo(s)
@@ -393,7 +394,7 @@ const Tree = (() => {
       await scamper(hide.x + 26)
       hide.el.remove()
       q.held.setAttribute('opacity', '1')
-      const spot = hide.x + (Math.random() < 0.5 ? -1 : 1) * rnd(140, 220)
+      const spot = hide.x + (random() < 0.5 ? -1 : 1) * rnd(140, 220)
       await scamper(spot)
       // dig a little hole, drop the nut in, pat it down
       for (let i = 0; i < 6; i++) {

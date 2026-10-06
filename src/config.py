@@ -159,3 +159,34 @@ BARK_FADE_S = 0.008
 
 BARK_PEAK = 0.9
 """Each bark is scaled so its loudest sample reaches this (full scale = 1)."""
+
+PLAY_STUB = "re-kid-play.html"
+"""``main.py play`` with flags writes this tiny page to the system temp folder
+and opens it; it forwards to the game with the flags in its address. Opening a
+``file://`` address with a ``?query`` directly loses the query on macOS."""
+
+BUG_REPORT_DIR = Path.home() / "Downloads"
+"""Where a game's bug reports land: the browser saves them as downloads, and
+this is every major browser's default download folder."""
+
+BUG_REPORT_GLOB = "*-bug-*.json"
+"""A game's bug report file name (the yard saves ``yard-bug-<time>.json``)."""
+
+BUG_REPORT_VERSION = 1
+"""The report shape ``main.py replay`` reads; matches ``REPORT_VERSION`` in the
+game's ``debug.js``."""
+
+REPLAY_LAST_S = 10
+"""How much of the run-up to a bug report the replay photographs: long enough
+to see how the trouble started, short enough to look through."""
+
+REPLAY_EVERY_MS = 500
+"""One replay screenshot this often: a gesture's poses last a few hundred ms,
+so this catches each one without a flood of frames."""
+
+REPLAY_SHEET_COLUMNS = 5
+"""Frames per row on the replay's contact sheet."""
+
+REPLAY_SHEET_WIDTH = 384
+"""Each frame's width on the contact sheet, in pixels: small enough for a whole
+sheet to be read at once, big enough to see Reksio's pose."""

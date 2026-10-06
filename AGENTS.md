@@ -87,7 +87,9 @@ file layout update `README.md` and the `main.py` docstring in the same change.
 
 ## Code Style
 
-- **Linter/formatter:** `uv run ruff check .` and `uv run ruff format .`
+- **Linter/formatter:** `uv run ruff check .` and `uv run ruff format .`;
+  game scripts: `npx --yes eslint@10.12.0 worlds` (errors fail; complexity
+  warnings are the hotspot list: add none, split one when working in it).
 - **Type hints:** required on all signatures. Native types only (`list`, `dict`,
   `str | None`) — never `typing.List` etc.
 - **Docstrings:** Google style. Module docstrings say what the module is for.
@@ -106,6 +108,20 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   plus the bark: `main.py barks` packs the original barks into the world's
   gitignored `audio/barks.js`, and the game falls back to a synthesised bark
   without it. Never commit original audio.
+- **Game debuggability (`debug.js`, loaded first):** every bug must be
+  replayable, so:
+  - randomness comes from `Debug.random('<part>')`, never `Math.random`
+    (sound.js texture excepted); anything drawn every frame gets its own
+    stream, so it can't shift the others;
+  - an awaited gesture a tap may cut short goes through
+    `Debug.ignoreCut(promise, 'what')`, never `.catch(() => {})`; an empty
+    catch needs a comment on the line saying why;
+  - input goes through `perform(intent)` as a short text intent, so the
+    recorder captures it and replays reuse it; new input = new `INTENTS` entry;
+  - new behaviour notes itself with `Debug.trace(kind, data)`, and anything
+    that must always hold becomes a `Debug.check` rule in `checkRules`;
+  - a new page-address flag goes in layout.js, makes its random draw either
+    way (so seeded plays don't shift), and is listed in README.
 - **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build
   step. Libraries are vendored at a pinned version under `vendor/`, never loaded
   from a CDN. wavesurfer draws inside a shadow DOM, so styles for anything
@@ -126,9 +142,38 @@ file layout update `README.md` and the `main.py` docstring in the same change.
 round-trips, the marking server's API. Group in classes; use `tmp_path`; cover
 the edge cases that would let bad data pass silently.
 
-**Browser UI:** after changing `src/mark_ui/` or a game, drive it in the installed Chrome
-with Playwright (`uv run --no-project --with playwright`, `channel="chrome"` —
-the bundled Chromium can't decode the H.264/AAC media). Check for console
-errors and take a screenshot. Test against a scratch copy of the data or
-restore `intro.yaml` from git afterwards, and restart the server between runs:
-it keeps marks in memory.
+**Games**, three layers:
+
+- *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
+  `uv run pytest`): pure logic, loaded into a sandbox by `tests/load.js`.
+  Layout invariants, seeding, the recorder. Logic that can be pure should be,
+  and tested here.
+- *Conventions* (`tests/test_game.py`, in `uv run pytest`): the debuggability
+  rules above that a grep can check.
+- *Browser* (`tests/test_game_browser.py`, `uv run pytest -m browser -n 4`,
+  a few minutes, real time): every gesture, left-alone move, thing (plain and
+  variation) and creature chase run alone in a `?seed=1&still` play, then cut
+  short by a tap; plus a whole play to evening and a report-and-replay round
+  trip. Each must end with Reksio free and standing, no console error, no
+  broken rule. The tables at the top list everything; the coverage tests fail
+  until a new gesture, move, thing or creature is added there.
+
+**Adding a gag:** add its tests (tables in `test_game_browser.py`), run the
+browser tests for it (`-k name`), look at it: a timed-screenshot contact sheet
+or `main.py replay` frames. Then `/code-review` the diff for missed error cases
+and interleavings (what if a tap lands mid-gag, it rains, the evening comes)
+and `/simplify` for needless complexity. No tool checks judgement; these
+reviews are the step for it.
+
+**Bugs Adam reports:** he saves a report in the game (Ctrl+Shift+B, with a
+description). `main.py replay` replays it and photographs the run-up; read the
+contact sheet, `replay.json` (recorded vs replayed state, trace) and the
+report's snapshots. A replay is close, not exact (real clock): if it diverges,
+the bug may be timing-dependent; say so. Turn the bug into a browser test
+before fixing it.
+
+**Browser UI:** after changing `src/mark_ui/`, drive it in the installed
+Chrome with Playwright (`channel="chrome"`; the bundled Chromium can't decode
+the H.264/AAC media). Check for console errors and take a screenshot. Test
+against a scratch copy of the data or restore `intro.yaml` from git
+afterwards, and restart the server between runs: it keeps marks in memory.
