@@ -176,7 +176,7 @@ before a commit.
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
 | a thing in `things.js` / `tree.js` | `"TestThings and <name>"` (and its rules in `things.test.js` / `tree.test.js`) |
-| a gesture or pose in `reksio.js` | `"TestGestures or TestGettingUp"` |
+| a gesture or pose in `reksio.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |
 | `weather.js` / `shower.js` | `"drops or shakeOff or puddle or snail"` |
