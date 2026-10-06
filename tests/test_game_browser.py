@@ -16,6 +16,7 @@ import json
 import subprocess
 import sys
 from collections.abc import Iterator
+from itertools import pairwise
 from pathlib import Path
 
 import pytest
@@ -338,6 +339,21 @@ class TestWholePlay:
         y.page.wait_for_function("yardGame.state().ended", timeout=5_000)
         assert y.state()["moonUp"] == 1
         y.page.wait_for_timeout(7000)
+        assert not y.errors, "\n---\n".join(y.errors)
+
+
+class TestLeftAlone:
+    def test_he_keeps_busy_on_his_own(self, yard: callable) -> None:
+        y = yard("seed=2&rain=0&creatures=")
+        y.page.wait_for_timeout(20_000)
+        acts = [
+            e["name"]
+            for e in y.page.evaluate("yardGame.events()")
+            if e["kind"] == "act"
+        ]
+        assert acts and acts[0] == "wish", acts  # first, what he'd like to do
+        assert len(set(acts)) >= 3, acts
+        assert all(a != b for a, b in pairwise(acts)), acts  # never twice running
         assert not y.errors, "\n---\n".join(y.errors)
 
 

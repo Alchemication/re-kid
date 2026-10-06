@@ -10,12 +10,10 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Debug, Layout, Painting, Sky, Day, Sound, Music, Reksio, Creatures, Weather, Things */
+/* global Debug, Layout, Painting, Sky, Day, Idle, Sound, Music, Reksio, Creatures, Weather, Things */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
-  const IDLE_FIRST_MS = 2500 // left alone this long, Reksio starts doing things
-  const IDLE_GAP_MS = [1500, 3500] // then something new every 1.5–3.5 s
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
@@ -531,9 +529,11 @@
   const WISHABLE = [...document.querySelectorAll('.wish-icon')].map((u) => u.dataset.wish)
 
   function wishFor() {
-    const left = WISHABLE.filter((n) => spotEls[n] && day.wants(n) && Things.ready(n))
-    const dist = (n) => Math.abs((n === 'bird' ? Things.perch.x : THINGS[n].at()) - Reksio.x)
-    return left.sort((a, b) => dist(a) - dist(b))[0]
+    return Idle.wish(WISHABLE.filter((n) => spotEls[n]), {
+      wants: day.wants,
+      ready: Things.ready,
+      distance: (n) => Math.abs((n === 'bird' ? Things.perch.x : THINGS[n].at()) - Reksio.x),
+    })
   }
 
   function birdOnScreen() {
@@ -541,8 +541,6 @@
     return x > camX && x < camX + Painting.VIEW_W
   }
 
-  // Left alone this long (seconds), he may sit, lie down, or nap.
-  const REST_AFTER_S = { sit: 8, lie: 18, nap: 30 }
   const idleFor = () => (performance.now() - lastTap) / 1000
 
   const ACTS = {
@@ -588,9 +586,9 @@
     },
     biteTail: { weight: 1, run: () => Reksio.biteTail() },
     // resting, the longer he's left alone: sit and watch, lie down, nap
-    sit: { weight: 3, ok: () => idleFor() > REST_AFTER_S.sit, run: () => Reksio.sit() },
-    lie: { weight: 3, ok: () => idleFor() > REST_AFTER_S.lie, run: () => Reksio.lieDown() },
-    nap: { weight: 4, ok: () => idleFor() > REST_AFTER_S.nap && !Weather.raining, run: () => Reksio.nap() },
+    sit: { weight: 3, ok: () => Idle.restOk('sit', idleFor()), run: () => Reksio.sit() },
+    lie: { weight: 3, ok: () => Idle.restOk('lie', idleFor()), run: () => Reksio.lieDown() },
+    nap: { weight: 4, ok: () => Idle.restOk('nap', idleFor()) && !Weather.raining, run: () => Reksio.nap() },
     howl: { weight: 1, ok: () => day.count >= 1, run: () => Reksio.howl() },
     fly: {
       // the fly is close: watch it, and sometimes pounce
@@ -605,20 +603,12 @@
     yawn: { get weight() { return day.dusk ? 6 : 1 }, ok: () => day.count >= 2, run: () => Reksio.yawn() }, // sleepy at dusk
   }
 
-  function pickAct() {
-    if (firstWish && ACTS.wish.ok()) return 'wish' // first, show what he wants
-    const names = Object.keys(ACTS).filter((n) => n !== lastAct && (!ACTS[n].ok || ACTS[n].ok()))
-    let r = random() * names.reduce((sum, n) => sum + ACTS[n].weight, 0)
-    for (const n of names) if ((r -= ACTS[n].weight) < 0) return n
-    return names[0]
-  }
+  const actOk = (name) => !ACTS[name].ok || !!ACTS[name].ok()
+  const pickAct = () => Idle.pick(ACTS, { ok: actOk, last: lastAct, firstWish, random })
 
   /** How full the music is: busy or just tapped → fuller; left alone → sparser. */
   function musicEnergy(now) {
-    if (busy || hold || Reksio.stretching) return 3
-    const since = now - lastTap
-    if (Reksio.walking || since < 4000) return 2
-    return since < 15000 ? 1 : 0
+    return Idle.energy({ busy: busy || !!hold || Reksio.stretching, walking: Reksio.walking, sinceTap: now - lastTap })
   }
 
   // ------------------------------------------------------------ wet
@@ -705,18 +695,22 @@
     const now = performance.now()
     Music.setEnergy(musicEnergy(now))
     showNear()
-    const worm = Creatures.worm
-    if (worm && !Things.flying && !day.ended && !Debug.still && huntRandom() < 0.02) Things.birdHunt(worm)
-    if (wishing) {
-      placeWish()
-      if (busy || day.ended || !day.wants(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
-    }
+    birdAndWish(now)
     const quiet = !Debug.still && !day.ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
     if (quiet) leftAlone(now)
     dayAndNight(now)
     checkRules(now)
     Debug.show(state())
     setTimeout(idleLoop, 200)
+  }
+
+  /** The bird may go after a worm; a thought bubble follows him, and goes when it's done its job. */
+  function birdAndWish(now) {
+    const worm = Creatures.worm
+    if (worm && !Things.flying && !day.ended && !Debug.still && huntRandom() < 0.02) Things.birdHunt(worm)
+    if (!wishing) return
+    placeWish()
+    if (busy || day.ended || !day.wants(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
   }
 
   /** The sun sets anyway after a long play; once the moon is up, bed as soon as he's free. */
@@ -730,13 +724,14 @@
 
   /** Nothing going on: what he does next on his own, if anything. */
   function leftAlone(now) {
-    if (soaked() && !Weather.raining && !Weather.puddleAt(Reksio.x)) {
+    const what = Idle.next({ soaked: soaked(), raining: Weather.raining, inPuddle: !!Weather.puddleAt(Reksio.x), sinceTap: now - lastTap, now, nextAt: nextIdleAt })
+    if (what === 'shake') {
       // stopped, wet, and out of the rain: shake it off, straight away
       acting = true
       Debug.trace('shake dry')
       Debug.ignoreCut(shakeDry(), 'shake dry') // cut short by a tap: still wet, he'll shake later
         .finally(() => (acting = false))
-    } else if (now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
+    } else if (what === 'act') {
       startAct(pickAct())
     }
   }
@@ -770,7 +765,7 @@
     return Debug.ignoreCut(Promise.resolve().then(() => ACTS[name].run()), `act ${name}`)
       .finally(() => {
         acting = false
-        nextIdleAt = performance.now() + (ACTS[name].ms || rnd(IDLE_GAP_MS[0], IDLE_GAP_MS[1]))
+        nextIdleAt = performance.now() + Idle.gap(ACTS[name].ms, random)
       })
   }
 
@@ -836,7 +831,7 @@
   requestAnimationFrame(frame)
   Debug.record(state)
   console.info(`[yard] replay this play: ${Debug.replayUrl()}`)
-  lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
+  lastTap = performance.now() - Idle.FIRST_MS + 1500 // the first wish shows soon after start
   setTimeout(idleLoop, 200)
 
   // For tests and the console: do things, read the state, read what happened.
@@ -848,7 +843,7 @@
     perform,
     use: (name, extra) => goAndDo(name, extra),
     act: startAct,
-    actOk: (name) => !ACTS[name].ok || !!ACTS[name].ok(),
+    actOk,
     chase,
     acts: Object.keys(ACTS),
     things: Object.keys(SPOTS),
