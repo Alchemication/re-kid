@@ -83,36 +83,58 @@ const Reksio = (() => {
 
   function legsWalk(swing) {
     // diagonal pairs move together, as in a dog's walk
-    legs[0].style.transform = `rotate(${swing}deg)`
-    legs[3].style.transform = `rotate(${swing}deg)`
-    legs[1].style.transform = `rotate(${-swing}deg)`
-    legs[2].style.transform = `rotate(${-swing}deg)`
+    motion.set(legs[0], `rotate(${swing}deg)`)
+    motion.set(legs[3], `rotate(${swing}deg)`)
+    motion.set(legs[1], `rotate(${-swing}deg)`)
+    motion.set(legs[2], `rotate(${-swing}deg)`)
   }
 
   function legsRun(swing) {
     // a bound: front pair together, back pair together, out of step
-    legs[1].style.transform = `rotate(${swing}deg)`
-    legs[3].style.transform = `rotate(${swing * 0.85}deg)`
-    legs[0].style.transform = `rotate(${-swing}deg)`
-    legs[2].style.transform = `rotate(${-swing * 0.85}deg)`
+    motion.set(legs[1], `rotate(${swing}deg)`)
+    motion.set(legs[3], `rotate(${swing * 0.85}deg)`)
+    motion.set(legs[0], `rotate(${-swing}deg)`)
+    motion.set(legs[2], `rotate(${-swing * 0.85}deg)`)
   }
 
-  /** A walking dog holds no pose: drop any finished gesture still holding
-   * his body, head or legs (a rear-up, a sit, a raised leg), however it was
-   * left behind. Gestures still in motion (a pounce, a startle) are left be. */
-  function dropHeldPoses() {
-    if (current !== 'stand') return relax() // walking off from a rest pose: up first
-    for (const e of [bob, head, tail, ...legs]) {
-      for (const a of e.getAnimations()) {
-        if (a.effect.getTiming().fill === 'forwards') a.cancel() // a pose meant to be held, held or on its way
-      }
+  // How he is drawn. One place decides it: draw(), at the end of every
+  // frame, paints each part from the state: the pose he is in (`current`),
+  // or a gesture's held position (`held`: a lowered head, a raised leg), or,
+  // standing, the motion of walking, breathing and wagging. Animations only
+  // ever move a part between those, and never freeze on their last frame:
+  // when one ends or is cut short, the part shows what the state says.
+  const held = new Map() // part element -> its transform, while a gesture holds it
+  const motion = new Map() // part element -> this frame's walking/idle motion, standing
+
+  function draw() {
+    for (const [e, part] of PARTS()) {
+      e.style.transform = held.get(e) ?? (current === 'stand' ? motion.get(e) ?? '' : POSES[current][part])
     }
   }
 
+  /** Is his body drawn upright, as standing or walking (not tilted and down,
+   * as resting)? Read from the screen. */
+  function drawnUpright() {
+    const t = getComputedStyle(bob).transform
+    const m = new DOMMatrix(t === 'none' ? undefined : t)
+    return Math.abs((Math.atan2(m.b, m.a) * 180) / Math.PI) < 15 && m.f < 12
+  }
+
+  /** Move a part from one transform to another and hold it there, until the
+   * gesture lets go (held.delete) or relax(). Resolves when it gets there;
+   * rejects if cut short. */
+  function holdAt(e, from, to, opts) {
+    held.set(e, to) // the state first: the animation only covers the move
+    return ending(e.animate([{ transform: from }, { transform: to }], opts))
+  }
+
   function tick(dt) {
+    motion.clear()
     if (target !== null && !stretching) {
-      dropHeldPoses()
-      if (springing()) return place() // up on his feet first, then off
+      // a walking dog holds nothing: up from a rest pose first, any held head or leg let go
+      if (current !== 'stand') relax()
+      held.clear()
+      if (springing()) return finish() // up on his feet first, then off
       const dx = target - x
       const dist = Math.abs(dx)
       // speed up to the gait's speed, and slow down in time to stop
@@ -135,8 +157,7 @@ const Reksio = (() => {
       const swing = Math.sin(phase) * gait.swing * (0.5 + 0.5 * k)
       if (gait === GAITS.run) legsRun(swing)
       else legsWalk(swing)
-      bob.style.transform =
-        `translateY(${-Math.abs(Math.sin(phase)) * gait.bob * k}px) rotate(${-Math.cos(phase) * gait.pitch * k}deg)`
+      motion.set(bob, `translateY(${-Math.abs(Math.sin(phase)) * gait.bob * k}px) rotate(${-Math.cos(phase) * gait.pitch * k}deg)`)
       const sign = Math.sign(Math.sin(phase))
       if (sign !== lastStepSign) {
         lastStepSign = sign
@@ -146,22 +167,24 @@ const Reksio = (() => {
     } else if (stretching || stretch !== 0) {
       // front legs walk on the spot as his front half pulls forward
       const swing = Math.sin(stretch * 0.09) * 26
-      legs[1].style.transform = `rotate(${swing}deg)`
-      legs[3].style.transform = `rotate(${-swing}deg)`
-      legs[0].style.transform = ''
-      legs[2].style.transform = ''
+      motion.set(legs[1], `rotate(${swing}deg)`)
+      motion.set(legs[3], `rotate(${-swing}deg)`)
       if (stretching) {
         setStretch(Math.min(maxStretch(), stretch + STRETCH_RATE * dt))
       }
-      bob.style.transform = ''
     } else {
-      legs.forEach((l) => (l.style.transform = ''))
       idleTime += dt
-      bob.style.transform = `translateY(${Math.sin(idleTime * 2.2) * 0.8}px)`
+      motion.set(bob, `translateY(${Math.sin(idleTime * 2.2) * 0.8}px)`)
     }
     const wagFast = target !== null || stretching
-    tail.style.transform = `rotate(${Math.sin(performance.now() / (wagFast ? 80 : 260)) * (wagFast ? 14 : 10)}deg)`
+    motion.set(tail, `rotate(${Math.sin(performance.now() / (wagFast ? 80 : 260)) * (wagFast ? 14 : 10)}deg)`)
+    finish()
+  }
+
+  /** The end of every frame: where he is, and how he is drawn. */
+  function finish() {
     place()
+    draw()
   }
 
   // ------------------------------------------------------------ the stretch
@@ -319,6 +342,7 @@ const Reksio = (() => {
   function relax() {
     pose += 1
     for (const e of [bob, head, tail, ...legs]) e.getAnimations().forEach((a) => a.cancel())
+    held.clear()
     if (current !== 'stand') {
       // up quickly, but not in a blink
       const from = POSES[current]
@@ -347,7 +371,7 @@ const Reksio = (() => {
   /** Nose to the ground, a few sniffs (how many, and how low, varies). */
   async function sniff(times = rndInt(2, 5)) {
     const low = rnd(24, 34)
-    await head.animate([{ transform: 'rotate(0)' }, { transform: `rotate(${low}deg)` }], { duration: 260, fill: 'forwards' }).finished
+    await holdAt(head, 'rotate(0)', `rotate(${low}deg)`, { duration: 260 })
     for (let i = 0; i < times; i++) {
       Sound.sniff()
       await head.animate(
@@ -355,8 +379,8 @@ const Reksio = (() => {
         { duration: rnd(200, 320) },
       ).finished
     }
+    held.delete(head)
     await head.animate([{ transform: `rotate(${low}deg)` }, { transform: 'rotate(0)' }], { duration: 300 }).finished
-    head.getAnimations().forEach((a) => a.cancel())
   }
 
   /** Glance the other way, then back (unless he has set off meanwhile). */
@@ -381,14 +405,13 @@ const Reksio = (() => {
     const ms = 140 * times + 250
     head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(20deg)', offset: 0.15 }, { transform: 'rotate(20deg)', offset: 0.85 }, { transform: 'rotate(0)' }], { duration: ms })
     bob.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-6deg)', offset: 0.15 }, { transform: 'rotate(-6deg)', offset: 0.85 }, { transform: 'rotate(0)' }], { duration: ms })
-    const up = legs[2].animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-82deg)' }], { duration: 120, fill: 'forwards' })
-    await up.finished
+    await holdAt(legs[2], 'rotate(0)', 'rotate(-82deg)', { duration: 120 })
     Sound.scratch()
     await legs[2].animate(
       [{ transform: 'rotate(-82deg)' }, { transform: 'rotate(-62deg)' }, { transform: 'rotate(-82deg)' }],
       { duration: 140, iterations: times, easing: 'ease-in-out' },
     ).finished
-    up.cancel()
+    held.delete(legs[2])
   }
 
   /** A play-bow: front down, rear up, tail going; sometimes a bark. */
@@ -416,11 +439,10 @@ const Reksio = (() => {
   async function stamp(onImpact) {
     const up = 'rotate(-24deg) translateY(-8px)'
     const down = 'rotate(5deg) translateY(2px)'
-    await bob.animate([{ transform: 'rotate(0)' }, { transform: up }], { duration: rnd(200, 260), easing: 'ease-out', fill: 'forwards' }).finished
-    const slam = bob.animate([{ transform: up }, { transform: down }], { duration: 110, easing: 'ease-in', fill: 'forwards' })
-    await slam.finished
+    await holdAt(bob, 'rotate(0)', up, { duration: rnd(200, 260), easing: 'ease-out' })
+    await holdAt(bob, up, down, { duration: 110, easing: 'ease-in' })
     onImpact()
-    bob.getAnimations().forEach((a) => a.cancel())
+    held.delete(bob)
     await bob.animate([{ transform: down }, { transform: 'rotate(0)' }], { duration: 170, easing: 'ease-out' }).finished
   }
 
@@ -449,10 +471,10 @@ const Reksio = (() => {
       const hy = GROUND - 120
       if (Math.abs(p.x - x) > 40) face(p.x > x ? 1 : -1)
       const angle = (Math.atan2(p.y - hy, Math.abs(p.x - hx)) * 180) / Math.PI
-      head.style.transform = `rotate(${Math.max(-40, Math.min(30, angle))}deg)`
+      held.set(head, `rotate(${Math.max(-40, Math.min(30, angle))}deg)`)
       await new Promise((r) => requestAnimationFrame(r))
     }
-    head.style.transform = ''
+    held.delete(head)
   }
 
   /** Pounce towards x: a leap forward with snapping jaws. */
@@ -536,17 +558,18 @@ const Reksio = (() => {
     [legs[1], 'front'], [legs[3], 'front'], [legs[0], 'rear'], [legs[2], 'rear'],
   ]
 
-  /** Move from the current pose into another, and hold it. Rejects if cut
-   * short (relax() cancels the animations). */
+  /** Move from the current pose into another; draw() holds it from then on.
+   * Rejects if cut short (relax() cancels the animations). */
   async function settle(name, ms = 600) {
     const from = POSES[current]
     const to = POSES[name]
-    current = name
+    current = name // the state first: the animations only cover the move
+    held.clear()
     const anims = PARTS().map(([e, part]) => {
       e.getAnimations().forEach((a) => a.cancel())
-      return e.animate([{ transform: from[part] }, { transform: to[part] }], { duration: ms, easing: EASE, fill: name === 'stand' ? 'none' : 'forwards' })
+      return ending(e.animate([{ transform: from[part] }, { transform: to[part] }], { duration: ms, easing: EASE }))
     })
-    await Promise.all(anims.map((a) => a.finished))
+    await Promise.all(anims)
   }
 
   /** Back up on all fours: from lying, the front comes up first (through a
@@ -667,7 +690,7 @@ const Reksio = (() => {
   /** Head up, tongue out: catching raindrops. */
   async function catchDrops(n = rndInt(3, 6)) {
     const mine = pose
-    await head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-34deg)' }], { duration: 300, fill: 'forwards' }).finished
+    await holdAt(head, 'rotate(0)', 'rotate(-34deg)', { duration: 300 })
     show(tongue, true)
     show(smile, false)
     for (let i = 0; i < n; i++) {
@@ -678,8 +701,8 @@ const Reksio = (() => {
     }
     show(tongue, false)
     show(smile, true)
+    held.delete(head)
     await head.animate([{ transform: 'rotate(-34deg)' }, { transform: 'rotate(0)' }], { duration: 300 }).finished
-    head.getAnimations().forEach((a) => a.cancel())
   }
 
   /** A big yawn. */
@@ -767,8 +790,12 @@ const Reksio = (() => {
     get stretching() { return stretching || stretch !== 0 },
     /** Moving while a pose still holds his legs (a bug: he'd glide along
      * sitting or lying). His body may bob in a pounce; his legs never pose. */
+    /** Moving along while not drawn walking: a leg still posed, or his body
+     * still drawn resting (tilted, rump down). Read from what is on screen,
+     * not from the state, so a drawing that has come apart from the state
+     * shows up here (yard.js checks it as a rule). */
     get sliding() {
-      return target !== null && !springing() && legs.some((l) => l.getAnimations().length > 0)
+      return target !== null && !springing() && (legs.some((l) => l.getAnimations().length > 0) || !drawnUpright())
     },
     /** Mouth position in scene units, for effects. */
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },

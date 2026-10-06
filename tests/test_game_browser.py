@@ -527,15 +527,54 @@ class TestGettingUp:
         y.start(f"yardGame.act('{act}')")
         y.page.wait_for_timeout(after_ms)
         y.page.evaluate("yardGame.walk(Reksio.x + 900)")
-        glides, last_x = [], None
-        for _ in range(30):
-            s = y.page.evaluate(
-                "() => ({ x: Reksio.x, legs: ['leg-1', 'leg-2', 'leg-3', 'leg-4']"
-                ".some((id) => document.getElementById(id).getAnimations().length > 0) })"
-            )
-            if last_x is not None and abs(s["x"] - last_x) > 0.5 and s["legs"]:
-                glides.append(round(s["x"]))
-            last_x = s["x"]
-            y.page.wait_for_timeout(40)
-        assert not glides, f"moved with posed legs at x={glides}"
+        assert_moves_standing(y)
         y.settled()
+
+    @pytest.mark.parametrize("act", ["sit", "lie", "nap"])
+    def test_a_rest_that_ran_its_course_leaves_him_standing(
+        self, yard: callable, act: str
+    ) -> None:
+        """As in Adam's second report: he sat down on his own, got up, did other
+        things; then, walked off, he was still drawn sitting and slid along."""
+        y = yard()
+        y.run(f"yardGame.act('{act}')")
+        for other in ["lookUp", "tail", "wish"]:
+            y.run(f"yardGame.act('{other}')")
+        assert drawn(y)["bob"]["up"], f"still drawn resting: {drawn(y)}"
+        y.page.evaluate("yardGame.walk(Reksio.x + 900)")
+        assert_moves_standing(y)
+        y.settled()
+
+
+DRAWN = """() => {
+    const at = (id) => {
+        const m = new DOMMatrix(getComputedStyle(document.getElementById(id)).transform)
+        const deg = Math.atan2(m.b, m.a) * 180 / Math.PI
+        return { deg: Math.round(deg), dy: Math.round(m.f), up: Math.abs(deg) < 15 && m.f < 12 }
+    }
+    return { x: Reksio.x, bob: at('rk-bob'), anims: ['leg-1', 'leg-2', 'leg-3', 'leg-4']
+        .some((id) => document.getElementById(id).getAnimations().length > 0) }
+}"""
+
+
+def drawn(y: Yard) -> dict:
+    """How Reksio is drawn now: his body upright (as standing or walking), or
+    tilted and down (as sitting or lying); any leg still animating."""
+    return y.page.evaluate(DRAWN)
+
+
+def assert_moves_standing(y: Yard) -> None:
+    """While he moves along, he is drawn standing: never a resting pose, never
+    a leg still posed."""
+    wrong, last_x = [], None
+    for _ in range(30):
+        d = drawn(y)
+        if (
+            last_x is not None
+            and abs(d["x"] - last_x) > 0.5
+            and (d["anims"] or not d["bob"]["up"])
+        ):
+            wrong.append((round(d["x"]), d["bob"], d["anims"]))
+        last_x = d["x"]
+        y.page.wait_for_timeout(40)
+    assert not wrong, f"moved while drawn resting or posed: {wrong}"

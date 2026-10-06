@@ -12,7 +12,7 @@ const BROWSER = Object.fromEntries(
     'window', 'document', 'location', 'navigator', 'performance', 'console', 'localStorage',
     'setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'requestAnimationFrame',
     'URL', 'URLSearchParams', 'Blob', 'Audio', 'AudioContext', 'ResizeObserver', 'DOMParser',
-    'getComputedStyle', 'fetch', 'AbortController', 'DOMException', 'atob',
+    'getComputedStyle', 'DOMMatrix', 'fetch', 'AbortController', 'DOMException', 'atob',
   ].map((g) => [g, 'readonly']),
 )
 const NODE = Object.fromEntries(

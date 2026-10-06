@@ -91,3 +91,19 @@ class TestConventions:
             if (n := len(p.read_text().splitlines())) > MAX_LINES
         ]
         assert not big, f"split these: {big}"
+
+    def test_no_body_part_is_frozen_in_a_pose(self) -> None:
+        """Reksio's drawing comes from his state, painted every frame (reksio.js
+        draw()). An animation that freezes a body part on its last frame
+        (fill: 'forwards') is a second source of truth that can outlive the
+        state: he stayed drawn sitting while the game thought he stood (Adam's
+        reports, 2026-10-06). Only the whole-dog scaler (the doghouse duck) may."""
+        reksio = ROOT / "worlds/reksio/games/yard/game/reksio.js"
+        bad = [
+            f"reksio.js:{i}"
+            for i, line in enumerate(reksio.read_text().splitlines(), 1)
+            if "fill: 'forwards'" in line and "scaler.animate" not in line
+        ]
+        assert not bad, (
+            f"hold it in `held` (holdAt) or a pose, not a frozen animation: {bad}"
+        )
