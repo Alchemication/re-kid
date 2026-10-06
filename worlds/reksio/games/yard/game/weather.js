@@ -12,7 +12,7 @@
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
 
-/* global Debug, Layout, Sound, Music */
+/* global Debug, Layout, Shower, Sound, Music */
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -21,8 +21,6 @@ const Weather = (() => {
   const GROUND_Y = 812
   const START_S = [25, 55] // the shower starts this long into the play
   const RAIN_S = [22, 30] // and lasts this long
-  const CLOUD_IN_S = 4 // clouds take this long to cover the sky
-  const DRY_S = 70 // puddles take this long to dry up after the rain
   const DROPS = 220 // raindrops on screen at full rain
   const PUDDLE_DROP = 6 // puddles sit this far below Reksio's feet line: paws in the water
   const BREEZE = [0.08, 0.38] // wind level most of the time (0 still, 1 a gust)
@@ -44,14 +42,10 @@ const Weather = (() => {
     return n
   }
 
-  let phase = Layout.rain ? 'waiting' : 'dry' // waiting | clouding | raining | clearing | after | dry
+  // the shower's timeline (shower.js); the start is drawn even when ?rain-at sets it
+  const startAt = rnd(...START_S)
+  const shower = Shower.start({ rain: Layout.rain, startAt: Layout.rainAt ?? startAt, rainFor: rnd(...RAIN_S) })
   let t = 0
-  const startAt = Layout.rainAt ?? rnd(...START_S)
-  const rainFor = rnd(...RAIN_S)
-  let phaseAt = 0 // when the current phase began
-  let intensity = 0 // 0..1, how hard it's raining
-  let wet = 0 // 0..1, how full the puddles are
-  let afterRainAt = null
   const listeners = []
   let rainSound = null
 
@@ -94,8 +88,8 @@ const Weather = (() => {
     const sy = canvas.height / VIEW_H
     ctx.setTransform(sx, 0, 0, sy, 0, 0)
     ctx.clearRect(0, 0, VIEW_W, VIEW_H)
-    if (intensity <= 0.01 && !splashes.length) return
-    const wanted = Math.round(DROPS * intensity)
+    if (shower.intensity <= 0.01 && !splashes.length) return
+    const wanted = Math.round(DROPS * shower.intensity)
     while (drops.length < wanted) drops.push(newDrop(true))
     if (drops.length > wanted) drops.length = wanted
     ctx.strokeStyle = 'rgba(214, 230, 245, 0.75)'
@@ -143,13 +137,13 @@ const Weather = (() => {
 
   function drawPuddles() {
     for (const p of puddles) {
-      const k = Math.min(1, wet)
+      const k = Math.min(1, shower.wet)
       p.water.setAttribute('rx', p.rx * k)
       p.water.setAttribute('ry', 13 * k)
       p.shine.setAttribute('rx', p.rx * 0.35 * k)
       p.shine.setAttribute('ry', 3 * k)
       // drops land in the puddle: rings
-      if (intensity > 0.2 && k > 0.3 && sparkle() < intensity * 0.12) ring(p, k)
+      if (shower.intensity > 0.2 && k > 0.3 && sparkle() < shower.intensity * 0.12) ring(p, k)
     }
   }
 
@@ -160,15 +154,15 @@ const Weather = (() => {
 
   /** The puddle Reksio's feet are in, if any (and if there is water in it). */
   function puddleAt(x) {
-    if (wet < 0.25) return null
-    return puddles.find((p) => Math.abs(p.x - x) < p.rx * Math.min(1, wet) * 0.9) || null
+    if (shower.wet < 0.25) return null
+    return puddles.find((p) => Math.abs(p.x - x) < p.rx * Math.min(1, shower.wet) * 0.9) || null
   }
 
   /** A splash where something lands in a puddle (Reksio's feet). */
   function splash(x) {
     const p = puddleAt(x)
     if (!p) return false
-    for (let i = 0; i < 3; i++) ring(p, Math.min(1, wet))
+    for (let i = 0; i < 3; i++) ring(p, Math.min(1, shower.wet))
     return true
   }
 
@@ -210,9 +204,19 @@ const Weather = (() => {
 
   // ------------------------------------------------------------ the timeline
 
-  function setPhase(p) {
-    phase = p
-    phaseAt = t
+  /** A new phase of the shower: what starts and stops with it, then the listeners. */
+  function entered(p) {
+    if (p === 'raining') {
+      rainSound = Sound.rain()
+      Music.setRain(true)
+    } else if (p === 'clearing' && rainSound) {
+      rainSound()
+      rainSound = null
+      Music.setRain(false)
+    } else if (p === 'after') {
+      rainbow.animate([{ opacity: 0 }, { opacity: 0.75, offset: 0.2 }, { opacity: 0.75, offset: 0.75 }, { opacity: 0 }], { duration: 14000 })
+      growFlowers()
+    }
     for (const fn of listeners) fn(p)
   }
 
@@ -240,38 +244,10 @@ const Weather = (() => {
 
   function tick(dt, camX) {
     t += dt
-    const since = t - phaseAt
-    if (phase === 'waiting' && t >= startAt) setPhase('clouding')
-    if (phase === 'clouding') {
-      if (since >= CLOUD_IN_S) {
-        setPhase('raining')
-        rainSound = Sound.rain()
-        Music.setRain(true)
-      }
-    } else if (phase === 'raining') {
-      intensity = Math.min(1, since / 3)
-      wet = Math.min(1, wet + dt / 18)
-      if (since >= rainFor) setPhase('clearing')
-    } else if (phase === 'clearing') {
-      intensity = Math.max(0, 1 - since / 3)
-      if (rainSound && since > 0.1) {
-        rainSound()
-        rainSound = null
-        Music.setRain(false)
-      }
-      if (since >= 4) {
-        setPhase('after')
-        afterRainAt = t
-        rainbow.animate([{ opacity: 0 }, { opacity: 0.75, offset: 0.2 }, { opacity: 0.75, offset: 0.75 }, { opacity: 0 }], { duration: 14000 })
-        growFlowers()
-      }
-    } else if (phase === 'after') {
-      wet = Math.max(0, wet - dt / DRY_S)
-      if (wet <= 0) setPhase('dry')
-    }
+    shower.step(dt).forEach(entered)
 
     // clouds: in while clouding/raining, out after
-    const cover = phase === 'clouding' ? Math.min(1, since / CLOUD_IN_S) : phase === 'raining' ? 1 : phase === 'clearing' ? Math.max(0, 1 - since / 4) : 0
+    const cover = shower.cover
     for (const c of clouds) {
       const target = cover > 0 ? c.home + Math.sin(t / c.drift) * 30 : VIEW_W + 500
       const from = c.x
@@ -301,21 +277,21 @@ const Weather = (() => {
     tick,
     /** fn(phase) on every change of phase. */
     on(fn) { listeners.push(fn) },
-    get phase() { return phase },
-    get raining() { return phase === 'raining' },
+    get phase() { return shower.phase },
+    get raining() { return shower.phase === 'raining' },
     /** How windy it is now: 0 still, 1 a gust. */
     get wind() { return wind },
     /** Seconds since the rain stopped, or null if it hasn't rained yet. */
-    get sinceRain() { return afterRainAt == null ? null : t - afterRainAt },
+    get sinceRain() { return shower.sinceRain },
     puddleAt,
     splash,
     /** Puddles with water in them now, for creatures and for Reksio. */
-    get puddles() { return wet > 0.25 ? puddles.map((p) => ({ x: p.x, rx: p.rx * Math.min(1, wet) })) : [] },
+    get puddles() { return shower.wet > 0.25 ? puddles.map((p) => ({ x: p.x, rx: p.rx * Math.min(1, shower.wet) })) : [] },
     /** End any shower now (evening). */
     stop() {
       calm = true
       windChangeAt = t
-      if (phase === 'clouding' || phase === 'raining' || phase === 'waiting') setPhase(phase === 'waiting' ? 'dry' : 'clearing')
+      shower.stop().forEach(entered)
     },
   }
 })()
