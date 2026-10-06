@@ -24,7 +24,7 @@ testpaths = ["tests"]
 pythonpath = ["src", "."]
 # The browser tests play the game in real time (minutes); run them with -m browser.
 addopts = "-m 'not browser'"
-markers = ["browser: drives a game in the installed Chrome (slow: uv run pytest -m browser -n 4)"]
+markers = ["browser: drives a game in the installed Chrome (slow: uv run pytest -m browser -n 8)"]
 
 [tool.ruff.lint]
 extend-select = ["I", "UP", "B"]

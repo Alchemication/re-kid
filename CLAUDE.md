@@ -155,13 +155,30 @@ the edge cases that would let bad data pass silently.
   does). Logic that can be pure should be, and tested here.
 - *Conventions* (`tests/test_game.py`, in `uv run pytest`): the debuggability
   rules above that a grep can check.
-- *Browser* (`tests/test_game_browser.py`, `uv run pytest -m browser -n 4`,
-  a few minutes, real time): every gesture, left-alone move, thing (plain and
-  variation) and creature chase run alone in a `?seed=1&still` play, then cut
-  short by a tap; plus a whole play to evening and a report-and-replay round
-  trip. Each must end with Reksio free and standing, no console error, no
-  broken rule. The tables at the top list everything; the coverage tests fail
-  until a new gesture, move, thing or creature is added there.
+- *Browser* (`tests/test_game_browser.py`, `uv run pytest -m browser -n 8`,
+  about 2 minutes, real time): every gesture, left-alone move, thing (plain
+  and variation) and creature chase run alone in a `?seed=1&still` play, then
+  cut short by a tap; plus a whole day to bed, Reksio left alone, and a
+  report-and-replay round trip. Each must end with Reksio free and standing,
+  no console error, no broken rule. The tables at the top list everything;
+  the coverage tests fail until a new gesture, move, thing or creature is
+  added there. Eight workers load the machine, which flushes out timing bugs:
+  a test that fails only then is a real bug, not noise.
+
+**Which tests while working.** Unit and convention tests always (seconds).
+Browser tests: only the slice for what changed, then the whole suite once
+before a commit.
+
+| Changed | Browser slice (`-m browser -n 8 -k …`) |
+|---|---|
+| a thing in `things.js` / `tree.js` | `"TestThings and <name>"` |
+| a gesture or pose in `reksio.js` | `"TestGestures or TestGettingUp"` |
+| left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
+| `creatures.js` | `"TestCritters"` |
+| `weather.js` / `shower.js` | `"drops or shakeOff or puddle or snail"` |
+| `day.js` / `sky.js` / the end | `"TestWholePlay"` |
+| `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay"` |
+| `layout.js`, input, anything shared | the whole suite |
 
 **Adding a gag:** add its tests (tables in `test_game_browser.py`), run the
 browser tests for it (`-k name`), look at it: a timed-screenshot contact sheet

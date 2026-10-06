@@ -4,7 +4,7 @@ and creature chase on its own, then the same cut short by a tap.
 Each test opens a seeded, still play (`?seed=1&still`: Reksio does nothing
 unless asked), does one thing, and checks that it ends, that Reksio is free
 and standing again, and that nothing was reported: no console error, no broken
-rule (debug.js). Real time, so slow: `uv run pytest -m browser -n 4`.
+rule (debug.js). Real time, so slow: `uv run pytest -m browser -n 8`.
 
 Adding a gesture, move, thing or creature? Add it to the tables here too;
 test_every_*_is_tested fails until you do.
