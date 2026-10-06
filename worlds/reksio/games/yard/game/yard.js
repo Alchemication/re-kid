@@ -763,7 +763,7 @@
   let busySince = 0
   function checkRules(now) {
     busySince = busy && !hold ? busySince || now : 0
-    Debug.check('walks only standing up', !Reksio.walking || Reksio.pose === 'stand', { pose: Reksio.pose })
+    Debug.check('walks only standing up', !Reksio.walking || (Reksio.pose === 'stand' && !Reksio.sliding), { pose: Reksio.pose, sliding: Reksio.sliding })
     Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
     Debug.check('a waiting ask runs once he is free', !pending || busy || ended)
   }
@@ -853,6 +853,7 @@
   })
   requestAnimationFrame(frame)
   Debug.record(state)
+  console.info(`[yard] replay this play: ${Debug.replayUrl()}`)
   lastTap = performance.now() - IDLE_FIRST_MS + 1500 // the first wish shows soon after start
   setTimeout(idleLoop, 200)
 

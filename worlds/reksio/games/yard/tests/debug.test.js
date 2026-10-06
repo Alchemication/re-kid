@@ -35,10 +35,20 @@ describe('seeded streams', () => {
     assert.ok(Math.abs(mean - 0.5) < 0.02, `mean ${mean}`)
   })
 
-  it('picks a seed when none is given, and says how to replay it', () => {
+  it('picks a seed when none is given, and prints it', () => {
     const page = load(['debug.js'])
     assert.equal(page.get('Debug.seeded'), false)
-    assert.match(page.logs.info[0], new RegExp(`replay with \\?seed=${page.get('Debug.seed')}`))
+    assert.match(page.logs.info[0], new RegExp(`seed ${page.get('Debug.seed')}`))
+  })
+
+  it('pins the layout in the replay address, so the same yard is built', () => {
+    const page = load(['debug.js', 'layout.js'], { storage: { 'reksio-yard-last-play': JSON.stringify({ mains: ['doghouse', 'bowl', 'tap', 'dig'] }) } })
+    const url = new URL(page.get('Debug.replayUrl()'))
+    const L = page.json('Layout')
+    assert.equal(url.searchParams.get('mains'), L.mains.filter((m) => m !== 'doghouse').join(','))
+    // a replay of that address, with a different memory, builds the same layout
+    const again = load(['debug.js', 'layout.js'], { query: url.search, storage: { 'reksio-yard-last-play': JSON.stringify({ mains: ['doghouse', 'film', 'trap', 'tree'] }) } }).json('Layout')
+    assert.deepEqual(again, L)
   })
 
   it('treats a seed as a 32-bit number', () => {
@@ -160,6 +170,13 @@ describe('recorder', () => {
     const snaps = page.json('Debug.snapshots')
     assert.equal(snaps.length, 240)
     assert.equal(snaps.at(-1).n, 299)
+  })
+
+  it('keeps the moment it was asked for, not the time after typing', () => {
+    const page = load(['debug.js'])
+    const r = page.json('Debug.bugReport("x", { at: 1234, state: { busy: true } })')
+    assert.equal(r.at, 1234)
+    assert.deepEqual(r.state, { busy: true })
   })
 
   it('puts everything needed for a replay into a bug report', () => {

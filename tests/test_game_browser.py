@@ -385,3 +385,30 @@ class TestRecorder:
         assert replayed["replayed"]["uses"] == report["state"]["uses"], replayed[
             "differences"
         ]
+
+
+class TestGettingUp:
+    """Walking off from a rest: up on his feet first, never gliding along still
+    sitting or lying (Adam's report, 2026-10-06)."""
+
+    @pytest.mark.parametrize("act", ["sit", "lie", "nap"])
+    @pytest.mark.parametrize("after_ms", [150, 1500])
+    def test_never_moves_with_posed_legs(
+        self, yard: callable, act: str, after_ms: int
+    ) -> None:
+        y = yard()
+        y.start(f"yardGame.act('{act}')")
+        y.page.wait_for_timeout(after_ms)
+        y.page.evaluate("yardGame.walk(Reksio.x + 900)")
+        glides, last_x = [], None
+        for _ in range(30):
+            s = y.page.evaluate(
+                "() => ({ x: Reksio.x, legs: ['leg-1', 'leg-2', 'leg-3', 'leg-4']"
+                ".some((id) => document.getElementById(id).getAnimations().length > 0) })"
+            )
+            if last_x is not None and abs(s["x"] - last_x) > 0.5 and s["legs"]:
+                glides.append(round(s["x"]))
+            last_x = s["x"]
+            y.page.wait_for_timeout(40)
+        assert not glides, f"moved with posed legs at x={glides}"
+        y.settled()

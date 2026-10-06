@@ -109,9 +109,30 @@ def local_page(url: str) -> Path:
     return WORLDS_DIR / world / GAMES_DIR / game / GAME_PAGE
 
 
+def layout_flags(layout: dict | None) -> dict:
+    """Page-address flags that pin a play's layout, so a replay builds the same
+    yard: an unseeded play picks its things partly from the browser's memory of
+    the last play, which a replay doesn't have. (Forced flags still make their
+    random draws, so the rest of the seeded play is unchanged.)"""
+    if not layout:
+        return {}
+    flags = {
+        "mains": ",".join(m for m in layout.get("mains", []) if m != "doghouse"),
+        "creatures": ",".join(layout.get("creatures", [])),
+    }
+    for key in ("flowers", "rain"):
+        if key in layout:
+            flags[key] = "1" if layout[key] else "0"
+    if layout.get("fruit"):
+        flags["fruit"] = layout["fruit"]
+    return flags
+
+
 def replay_url(report: dict) -> str:
-    """The report's play on the local game page, seeded, with the debug overlay on."""
-    query = dict(parse_qsl(urlsplit(report["replayUrl"]).query, keep_blank_values=True))
+    """The report's play on the local game page: seeded, its layout pinned, with
+    the debug overlay on."""
+    query = layout_flags(report.get("layout"))
+    query.update(parse_qsl(urlsplit(report["replayUrl"]).query, keep_blank_values=True))
     query["debug"] = ""
     return f"{local_page(report['replayUrl']).resolve().as_uri()}?{urlencode(query)}"
 

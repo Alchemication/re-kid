@@ -100,12 +100,14 @@ const Debug = (() => {
     }, SNAPSHOT_MS)
   }
 
-  /** Everything needed to see, and replay, what just happened. */
-  function bugReport(description) {
+  /** Everything needed to see, and replay, what just happened. `moment` is
+   * when it happened, noted before asking for the description (asking pauses
+   * the page, so the time after it is late by however long the typing took). */
+  function bugReport(description, moment = { at: Math.round(performance.now() - t0), state: stateOf() }) {
     return {
       version: REPORT_VERSION,
       description,
-      at: Math.round(performance.now() - t0),
+      at: moment.at,
       saved: new Date().toISOString(),
       seed,
       url: location.href,
@@ -113,7 +115,7 @@ const Debug = (() => {
       viewport: { width: window.innerWidth, height: window.innerHeight },
       userAgent: navigator.userAgent,
       layout: typeof Layout === 'undefined' ? null : Layout,
-      state: stateOf(),
+      state: moment.state,
       inputs,
       snapshots,
       trace: events,
@@ -123,9 +125,10 @@ const Debug = (() => {
 
   /** Ask what went wrong, then download the report as a file. */
   function saveBugReport() {
+    const moment = { at: Math.round(performance.now() - t0), state: stateOf() }
     const description = window.prompt('What went wrong? (Saved with the last two minutes of play.)')
     if (description === null) return // cancelled
-    const report = bugReport(description)
+    const report = bugReport(description, moment)
     trace('bug report', { description })
     const stamp = report.saved.replace(/[-:]/g, '').replace('T', '-').slice(0, 15)
     const a = document.createElement('a')
@@ -144,9 +147,20 @@ const Debug = (() => {
     })
   }
 
+  /** This play's address: seeded, with its layout pinned. An unseeded play
+   * picks its things partly from the browser's memory of the last play, which
+   * a replay won't have, so the seed alone wouldn't build the same yard.
+   * (Forced flags still make their random draws: the rest is unchanged.) */
   function replayUrl() {
     const url = new URL(location.href)
     url.searchParams.set('seed', String(seed))
+    if (typeof Layout !== 'undefined') {
+      url.searchParams.set('mains', Layout.mains.filter((m) => m !== 'doghouse').join(','))
+      url.searchParams.set('creatures', Layout.creatures.join(','))
+      url.searchParams.set('flowers', Layout.flowers ? '1' : '0')
+      url.searchParams.set('rain', Layout.rain ? '1' : '0')
+      url.searchParams.set('fruit', Layout.fruit)
+    }
     return url.href
   }
 
@@ -208,7 +222,7 @@ const Debug = (() => {
     overlay.textContent = `seed ${seed}${broken.size ? `\nBROKEN: ${[...broken].join(', ')}` : ''}\n${lines.join('\n')}\n\n${dump(events.slice(-OVERLAY_EVENTS))}`
   }
 
-  console.info(`[yard] seed ${seed}${seeded ? '' : ` (replay with ?seed=${seed})`}`)
+  console.info(`[yard] seed ${seed}`)
 
   /** Milliseconds since the page started, the clock of the trace, inputs and snapshots. */
   const now = () => Math.round(performance.now() - t0)

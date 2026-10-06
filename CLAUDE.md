@@ -170,9 +170,12 @@ reviews are the step for it.
 **Bugs Adam reports:** he saves a report in the game (Ctrl+Shift+B, with a
 description). `main.py replay` replays it and photographs the run-up; read the
 contact sheet, `replay.json` (recorded vs replayed state, trace) and the
-report's snapshots. A replay is close, not exact (real clock): if it diverges,
-the bug may be timing-dependent; say so. Turn the bug into a browser test
-before fixing it.
+report's snapshots. Read the report's inputs and trace first: the moment may be
+well before the report (widen with `--last`). A replay is close, not exact
+(real clock): if it diverges, the bug may be timing-dependent; say so. When
+frames can't settle it, probe the replayed page (sample what you suspect every
+40 ms). Turn the bug into a browser test before fixing it, and check the test
+fails on the old code.
 
 **Browser UI:** after changing `src/mark_ui/`, drive it in the installed
 Chrome with Playwright (`channel="chrome"`; the bundled Chromium can't decode

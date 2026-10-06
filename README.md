@@ -84,7 +84,7 @@ Flags in the page address (`main.py play` takes the first three):
 
 | Flag | Does |
 |------|------|
-| `?seed=N` | Replays a play: the layout exactly, what happens in it closely. Every play prints its seed in the console. |
+| `?seed=N` | Seeds a play: with the layout flags below, the same yard every time, and what happens in it closely. Every play prints the address that replays it in the console. |
 | `?debug` | State overlay, every event in the console, a "report a bug" button. |
 | `?still` | Reksio moves only when asked: try one gesture or gag alone. |
 | `?mains=trap,bowl` | Which main things count. |
@@ -99,8 +99,9 @@ In the console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,
 
 **Bug reports.** The game keeps every input since the start and its state every
 half second. Ctrl+Shift+B (any play) asks what went wrong and downloads
-`yard-bug-<time>.json`. `main.py replay` replays the newest one in ~/Downloads:
-same seed, same inputs at the same times. It saves a screenshot every 0.5 s of
-the last 10 s, a contact sheet, and `replay.json` (recorded vs replayed state,
-trace). The game runs on the real clock, so a replay is close, not exact; the
+`yard-bug-<time>.json`; press it right after the moment, since the report
+is timed from the key press. `main.py replay` replays the newest one in
+~/Downloads: same yard, same seed, same inputs at the same times. It saves a
+screenshot every 0.5 s of the last 10 s (`--last 60` for more), a contact
+sheet, and `replay.json` (recorded vs replayed state, trace). The game runs on the real clock, so a replay is close, not exact; the
 command says when it ended differently.

@@ -119,6 +119,33 @@ class TestReplayHelpers:
         assert url.startswith(GAME.as_uri() + "?")
         assert "seed=3" in url and "rain=1" in url
 
+    def test_url_pins_the_layout_of_an_old_report(self) -> None:
+        layout = {
+            "mains": ["doghouse", "berries", "trap"],
+            "creatures": ["fly"],
+            "flowers": True,
+            "rain": False,
+            "fruit": "apple",
+        }
+        url = replay.replay_url(
+            report(replayUrl=f"{GAME.as_uri()}?seed=3", layout=layout)
+        )
+        for flag in [
+            "mains=berries%2Ctrap",
+            "creatures=fly",
+            "flowers=1",
+            "rain=0",
+            "fruit=apple",
+        ]:
+            assert flag in url, flag
+
+    def test_flags_in_the_report_win_over_its_layout(self) -> None:
+        site = f"{GAME.as_uri()}?seed=3&mains=bowl"
+        url = replay.replay_url(
+            report(replayUrl=site, layout={"mains": ["doghouse", "tap"]})
+        )
+        assert "mains=bowl" in url and "mains=tap" not in url
+
     def test_differences_skip_what_always_drifts(self) -> None:
         recorded = {"busy": False, "camX": 10, "done": ["bowl"]}
         replayed = {"busy": True, "camX": 12, "done": ["bowl"]}
