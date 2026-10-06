@@ -12,11 +12,10 @@
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
 
-/* global Debug, Layout, Shower, Sound, Music */
+/* global Debug, Layout, Painting, Shower, Sound, Music */
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
-  const VIEW_W = 1600
   const VIEW_H = 900
   const GROUND_Y = 812
   const START_S = [25, 55] // the shower starts this long into the play
@@ -78,16 +77,16 @@ const Weather = (() => {
     canvas.height = Math.round(canvas.clientHeight * dpr)
   }
   function newDrop(top = false) {
-    return { x: fxRnd(-100, VIEW_W + 100), y: top ? fxRnd(-200, 0) : fxRnd(-200, VIEW_H), v: fxRnd(900, 1300), len: fxRnd(18, 30) }
+    return { x: fxRnd(-100, Painting.VIEW_W + 100), y: top ? fxRnd(-200, 0) : fxRnd(-200, VIEW_H), v: fxRnd(900, 1300), len: fxRnd(18, 30) }
   }
   const splashes = []
 
   function drawRain(dt) {
     const ctx = canvas.getContext('2d')
-    const sx = canvas.width / VIEW_W
+    const sx = canvas.width / Painting.VIEW_W
     const sy = canvas.height / VIEW_H
     ctx.setTransform(sx, 0, 0, sy, 0, 0)
-    ctx.clearRect(0, 0, VIEW_W, VIEW_H)
+    ctx.clearRect(0, 0, Painting.VIEW_W, VIEW_H)
     if (shower.intensity <= 0.01 && !splashes.length) return
     const wanted = Math.round(DROPS * shower.intensity)
     while (drops.length < wanted) drops.push(newDrop(true))
@@ -249,7 +248,7 @@ const Weather = (() => {
     // clouds: in while clouding/raining, out after
     const cover = shower.cover
     for (const c of clouds) {
-      const target = cover > 0 ? c.home + Math.sin(t / c.drift) * 30 : VIEW_W + 500
+      const target = cover > 0 ? c.home + Math.sin(t / c.drift) * 30 : Painting.VIEW_W + 500
       const from = c.x
       c.x = from + (target - from) * Math.min(1, dt * (cover > 0 ? 0.9 : 0.35))
       c.g.setAttribute('transform', `translate(${c.x} ${c.y})`)

@@ -436,8 +436,14 @@
 
   document.addEventListener('contextmenu', (e) => e.preventDefault())
 
-  $('fullscreen').addEventListener('click', () => {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.()
+  // Full screen, for the grown-up: where the browser allows it (not an
+  // iPhone: there, add the page to the home screen and it opens full screen).
+  // On a phone, it also keeps the yard on its side.
+  if (!document.fullscreenEnabled) $('fullscreen').hidden = true
+  $('fullscreen').addEventListener('click', async () => {
+    if (document.fullscreenElement) return
+    await document.documentElement.requestFullscreen()
+    window.screen.orientation?.lock?.('landscape').catch(() => {}) // most desktops can't lock it: full screen is enough
   })
 
   // ------------------------------------------------------------ life

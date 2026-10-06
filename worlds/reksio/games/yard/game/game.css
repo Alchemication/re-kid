@@ -16,6 +16,7 @@ html, body {
   height: 100%;
   background: var(--letterbox);
   overflow: hidden;
+  overscroll-behavior: none; /* the page never bounces or scrolls under a finger */
   /* A toddler's taps should never select text or show a context menu. */
   user-select: none;
   -webkit-user-select: none;
@@ -23,15 +24,21 @@ html, body {
   touch-action: manipulation;
 }
 
-body { display: grid; place-items: center; }
+/* fixed to the window, so a phone's browser can't scroll it under its bars */
+body { display: grid; place-items: center; position: fixed; inset: 0; }
 
-/* 16:9, as large as the window allows. */
+/* As large as the visible window allows (dvh: without the browser's bars).
+   Up to 16:9 the whole view shows; a wider screen (a phone on its side) sees
+   more of the yard, up to 21:9, rather than black bars (painting.js). */
 .stage {
+  --h: min(100vh, 100vw * 9 / 16);
+  --h: min(100dvh, 100vw * 9 / 16);
   position: relative;
-  width: min(100vw, calc(100vh * 16 / 9));
-  aspect-ratio: 16 / 9;
+  height: var(--h);
+  width: min(100vw, var(--h) * 21 / 9);
   overflow: hidden;
   cursor: pointer;
+  touch-action: none; /* every touch is the game's: no panning or zooming the page, no cut-short holds */
 }
 
 #paint, #world { position: absolute; inset: 0; width: 100%; height: 100%; }

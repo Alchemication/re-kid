@@ -2,6 +2,10 @@
 // sponged, mottled sky, stone wall and sandy ground — thousands of small dabs
 // clustered into blotches, from a fixed seed so the yard is the same every time.
 //
+// The view is 900 scene units high and as wide as the screen's shape allows,
+// from 16:9 (1600) to 21:9 (2100): a phone on its side sees more of the yard,
+// not black bars. setup() fits it, on load and whenever the stage is resized.
+//
 // The yard is wider than the view. Two layers are painted once, off screen:
 // the sky (which moves at half speed, for depth) and the wall with the ground.
 // Each frame copies the visible part of each onto the visible canvas.
@@ -9,11 +13,13 @@
 /* global Layout */
 /* exported Painting */
 const Painting = (() => {
-  const VIEW_W = 1600 // the view, in scene units
-  const H = 900
+  const H = 900 // the view's height, in scene units
+  const VIEW_MIN_W = 1600 // the view's width at 16:9: all of it shows on any screen
+  const VIEW_MAX_W = 2100 // and at most, at 21:9 (wider than that, black bars at the sides)
   const WORLD_W = Layout.WORLD_W // the whole yard (layout.js)
   const SKY_SPEED = 0.5 // the sky scrolls this much slower than the ground
-  const SKY_W = VIEW_W + (WORLD_W - VIEW_W) * SKY_SPEED
+  const SKY_W = WORLD_W * SKY_SPEED + VIEW_MAX_W * (1 - SKY_SPEED) // enough sky for the widest view at the far end
+  let viewW = VIEW_MIN_W
   const WALL_TOP = 330
   const GROUND_TOP = 700
 
@@ -102,25 +108,44 @@ const Painting = (() => {
     ctx.globalAlpha = 1
   }
 
-  /** Size the visible canvas and repaint the layers (on load and resize). */
+  /** How wide the view is (scene units) on a stage of this shape. */
+  const viewFor = (w, h) => Math.max(VIEW_MIN_W, Math.min(VIEW_MAX_W, Math.round((H * w) / (h || 1))))
+
+  /** Fit the view to the stage, size the visible canvas and repaint the
+   * layers (on load and resize). */
   function setup(el) {
     canvas = el
+    const { width, height } = canvas.getBoundingClientRect() // exact: whole pixels would round the shape
+    viewW = viewFor(width, height)
+    for (const svg of document.querySelectorAll('svg.view')) svg.setAttribute('viewBox', `0 0 ${viewW} ${H}`)
+    for (const r of document.querySelectorAll('rect.view-wide')) r.setAttribute('width', viewW)
     const dpr = window.devicePixelRatio || 1
     canvas.width = Math.round(canvas.clientWidth * dpr)
     canvas.height = Math.round(canvas.clientHeight * dpr)
-    scale = canvas.width / VIEW_W
-    paintLayers()
+    scale = canvas.width / viewW
+    paintLayers() // at this screen's resolution
   }
 
   /** Show the yard with the camera's left edge at camX (scene units). */
   function render(camX) {
     if (!canvas || !sky) return
     const ctx = canvas.getContext('2d')
-    const sw = VIEW_W * scale
+    const sw = viewW * scale
     const sh = H * scale
     ctx.drawImage(sky, camX * SKY_SPEED * scale, 0, sw, sh, 0, 0, canvas.width, canvas.height)
     ctx.drawImage(near, camX * scale, 0, sw, sh, 0, 0, canvas.width, canvas.height)
   }
 
-  return { setup, render, WORLD_W, VIEW_W, WALL_TOP, GROUND_TOP }
+  return {
+    setup,
+    render,
+    viewFor,
+    WORLD_W,
+    VIEW_MIN_W,
+    VIEW_MAX_W,
+    WALL_TOP,
+    GROUND_TOP,
+    /** The view's width now, in scene units. */
+    get VIEW_W() { return viewW },
+  }
 })()

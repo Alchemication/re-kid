@@ -75,7 +75,11 @@ Every push to `main` that changes a game publishes it to GitHub Pages
 (forwards to the yard; each game is at `<site>/<world>/<game>/`). Only the
 game folders go out. The original barks are local only, so the site plays the
 synthesised bark; on an iPhone or iPad the sound plays even with the ringer
-switch on silent (Safari 17+). Bug reports saved on the site replay locally:
+switch on silent (Safari 17+). On a phone, play it on its side: a screen
+wider than 16:9 shows more of the yard (up to 21:9). An iPhone can't make a
+page full screen, so add it to the home screen (Share → Add to Home Screen)
+and it opens without Safari's bars; elsewhere the ⤢ corner button does it.
+Bug reports saved on the site replay locally:
 `main.py replay` maps them to this repository's copy of the game.
 
 ## Debugging the yard

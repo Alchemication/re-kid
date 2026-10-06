@@ -183,6 +183,7 @@ before a commit.
 | `day.js` / `sky.js` / the end | `"TestWholePlay"` |
 | `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay"` |
 | `input.js`, taps and keys | `"TestRealInput"` |
+| screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
 
 **Adding a gag:** add its tests (tables in `test_game_browser.py`), run the

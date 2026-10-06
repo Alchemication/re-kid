@@ -137,9 +137,13 @@ def browser() -> Iterator[object]:
 class Yard:
     """One open play of the yard, collecting what went wrong."""
 
-    def __init__(self, browser: object, query: str) -> None:
+    def __init__(
+        self, browser: object, query: str, size: tuple[int, int] = (1280, 720)
+    ) -> None:
         self.errors: list[str] = []
-        self.page = browser.new_page(viewport={"width": 1280, "height": 720})
+        self.page = browser.new_page(
+            viewport={"width": size[0], "height": size[1]}, has_touch=True
+        )
         self.page.on("console", self._console)
         self.page.on("pageerror", lambda e: self.errors.append(f"uncaught: {e}"))
         self.page.goto(f"{YARD.as_uri()}?{query}")
@@ -192,8 +196,8 @@ class Yard:
 def yard(browser: object) -> Iterator[callable]:
     opened: list[Yard] = []
 
-    def open_(query: str = STILL) -> Yard:
-        opened.append(Yard(browser, query))
+    def open_(query: str = STILL, size: tuple[int, int] = (1280, 720)) -> Yard:
+        opened.append(Yard(browser, query, size))
         return opened[-1]
 
     yield open_
@@ -402,6 +406,57 @@ class TestRealInput:
             e["kind"] == "ask" and e["what"] == "bark"
             for e in y.page.evaluate("yardGame.events()")
         )
+
+
+class TestScreens:
+    """The view fits the screen: all of the 16:9 view on any screen, and a
+    wider one (a phone on its side) sees more of the yard, not black bars."""
+
+    @staticmethod
+    def fit(y: Yard) -> dict:
+        return y.page.evaluate("""() => {
+            const s = document.getElementById('stage').getBoundingClientRect()
+            return { w: s.width, h: s.height, view: Painting.VIEW_W,
+                     box: document.getElementById('world').getAttribute('viewBox') }
+        }""")
+
+    def test_a_phone_on_its_side_fills_the_screen(self, yard: callable) -> None:
+        y = yard(STILL, size=(844, 390))
+        f = self.fit(y)
+        assert (f["w"], f["h"]) == (844, 390), f
+        assert (
+            f["view"] == round(900 * 844 / 390) and f["box"] == f"0 0 {f['view']} 900"
+        )
+
+    def test_he_can_go_anywhere_on_a_phone(self, yard: callable) -> None:
+        y = yard(STILL, size=(844, 390))
+        y.page.tap("#things [data-thing='house']")
+        y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
+        y.settled()
+        y.page.evaluate("yardGame.walk(3650)")  # the far end of the yard
+        y.settled()
+        y.page.wait_for_timeout(1500)  # the camera catches up
+        assert y.state()["camX"] == 4000 - self.fit(y)["view"]
+
+    def test_a_16_9_screen_shows_the_view_as_it_was(self, yard: callable) -> None:
+        f = self.fit(yard(STILL))
+        assert (f["w"], f["h"], f["view"]) == (1280, 720, 1600)
+
+    def test_wider_than_21_9_gets_bars_at_the_sides(self, yard: callable) -> None:
+        f = self.fit(yard(STILL, size=(1200, 400)))
+        assert (
+            f["view"] == 2100 and f["h"] == 400 and round(f["w"]) == round(400 * 21 / 9)
+        )
+
+    def test_turning_the_phone_refits_it(self, yard: callable) -> None:
+        y = yard(STILL, size=(390, 844))
+        assert (
+            self.fit(y)["view"] == 1600
+        )  # upright: all of the 16:9 view, bars above and below
+        y.page.set_viewport_size({"width": 844, "height": 390})
+        y.page.wait_for_timeout(300)
+        assert self.fit(y)["view"] == round(900 * 844 / 390)
+        assert not y.errors, "\n---\n".join(y.errors)
 
 
 class TestRecorder:
