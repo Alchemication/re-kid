@@ -106,9 +106,14 @@ const Reksio = (() => {
   const held = new Map() // part element -> its transform, while a gesture holds it
   const motion = new Map() // part element -> this frame's walking/idle motion, standing
 
+  const drawn = new Map() // part element -> the transform last written: unchanged parts aren't touched
+
   function draw() {
     for (const [e, part] of PARTS()) {
-      e.style.transform = held.get(e) ?? (current === 'stand' ? motion.get(e) ?? '' : POSES[current][part])
+      const t = held.get(e) ?? (current === 'stand' ? motion.get(e) ?? '' : POSES[current][part])
+      if (drawn.get(e) === t) continue // no style write, no style recalculation
+      drawn.set(e, t)
+      e.style.transform = t
     }
   }
 
