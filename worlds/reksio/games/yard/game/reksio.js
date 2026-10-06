@@ -112,7 +112,7 @@ const Reksio = (() => {
   function tick(dt) {
     if (target !== null && !stretching) {
       dropHeldPoses()
-      if (performance.now() < upUntil) return place() // up on his feet first, then off
+      if (springing()) return place() // up on his feet first, then off
       const dx = target - x
       const dist = Math.abs(dx)
       // speed up to the gait's speed, and slow down in time to stop
@@ -307,8 +307,11 @@ const Reksio = (() => {
   // when they start; relax() bumps it, so a cut-short gesture stops quietly.
   let pose = 0
   const RELAX_MS = 220 // how fast he springs up from a rest when asked to do something
-  const UP_MARGIN_MS = 30 // he sets off this long after the spring up should have ended, so it never overlaps a step
-  let upUntil = 0 // springing up from a rest until then: he stays put, so he never glides along still sitting
+  // springing up from a rest: he stays put until these animations are over,
+  // so he never glides along still sitting (on a slow machine they run late:
+  // their own state counts, not the clock)
+  let rising = []
+  const springing = () => rising.some((a) => a.playState === 'running')
 
   /** Drop whatever pose he is holding, at once: someone has asked him to do
    * something else. A gesture cut short this way ends early (its awaited
@@ -319,9 +322,8 @@ const Reksio = (() => {
     if (current !== 'stand') {
       // up quickly, but not in a blink
       const from = POSES[current]
-      for (const [e, part] of PARTS()) e.animate([{ transform: from[part] }, { transform: POSES.stand[part] }], { duration: RELAX_MS, easing: 'ease-out' })
+      rising = PARTS().map(([e, part]) => e.animate([{ transform: from[part] }, { transform: POSES.stand[part] }], { duration: RELAX_MS, easing: 'ease-out' }))
       current = 'stand'
-      upUntil = performance.now() + RELAX_MS + UP_MARGIN_MS
     }
     show(eyeShut, false)
     show(eye, true)
@@ -766,7 +768,7 @@ const Reksio = (() => {
     /** Moving while a pose still holds his legs (a bug: he'd glide along
      * sitting or lying). His body may bob in a pounce; his legs never pose. */
     get sliding() {
-      return target !== null && performance.now() >= upUntil && legs.some((l) => l.getAnimations().length > 0)
+      return target !== null && !springing() && legs.some((l) => l.getAnimations().length > 0)
     },
     /** Mouth position in scene units, for effects. */
     mouth() { return { x: x + facing * 121, y: GROUND - 114 } },
