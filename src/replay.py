@@ -14,6 +14,7 @@ import json
 import logging
 import shutil
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
@@ -24,6 +25,7 @@ from config import (
     BUG_REPORT_VERSION,
     GAME_PAGE,
     GAMES_DIR,
+    REPLAY_PROGRESS_EVERY_MS,
     REPLAY_SHEET_COLUMNS,
     REPLAY_SHEET_WIDTH,
     WORLDS_DIR,
@@ -161,8 +163,18 @@ def contact_sheet(frames: list[Path], out: Path) -> Path | None:
     return out
 
 
-def replay(report: dict, out: Path, last_s: float, every_ms: int) -> Replay:
-    """Replay `report` in Chrome, saving frames of its last `last_s` seconds to `out`."""
+def replay(
+    report: dict,
+    out: Path,
+    last_s: float,
+    every_ms: int,
+    progress: Callable[[float, float], None] | None = None,
+) -> Replay:
+    """Replay `report` in Chrome, saving frames of its last `last_s` seconds to `out`.
+
+    It plays in real time, so a long play takes as long to replay;
+    `progress(now_s, total_s)` hears how far it has got, every few seconds.
+    """
     try:
         from playwright.sync_api import sync_playwright
     except ImportError as e:
@@ -197,10 +209,13 @@ def replay(report: dict, out: Path, last_s: float, every_ms: int) -> Replay:
             report["inputs"],
         )
         start = max(0, at - last_s * 1000)
-        page.wait_for_function(
-            f"Debug.now() >= {start}", timeout=at + 60_000, polling=50
-        )
+        while (now := page.evaluate("Debug.now()")) < start:
+            if progress:
+                progress(now / 1000, at / 1000)
+            page.wait_for_timeout(min(REPLAY_PROGRESS_EVERY_MS, max(10, start - now)))
         while (now := page.evaluate("Debug.now()")) < at:
+            if progress:
+                progress(now / 1000, at / 1000)
             frame = frames_dir / f"{len(result.frames):03d}.jpg"
             page.screenshot(path=frame, type="jpeg", quality=80)
             result.frames.append(frame)

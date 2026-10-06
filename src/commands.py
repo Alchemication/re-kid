@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+from collections.abc import Callable
 from pathlib import Path
 
 from config import (
@@ -27,6 +28,7 @@ from config import (
     MARK_PORT,
     MARK_PORT_TRIES,
     PLAY_STUB,
+    REPLAY_PROGRESS_EVERY_MS,
     SAMPLE_CACHE_DIR,
     SAMPLES_JS,
     SAMPLES_NAME,
@@ -333,6 +335,20 @@ def cmd_play(args: argparse.Namespace) -> int:
     return 0
 
 
+def replay_progress() -> Callable[[float, float], None]:
+    """A progress line for a replay, rewritten in place, no more often than
+    REPLAY_PROGRESS_EVERY_MS."""
+    shown = [-1e9]
+
+    def show(now_s: float, total_s: float) -> None:
+        if (now_s - shown[0]) * 1000 < REPLAY_PROGRESS_EVERY_MS and now_s < total_s:
+            return
+        shown[0] = now_s
+        print(f"\r  {now_s:5.0f} s of {total_s:.0f} s", end="", flush=True)
+
+    return show
+
+
 def cmd_replay(args: argparse.Namespace) -> int:
     """Replay a game's bug report and photograph the run-up to it."""
     from replay import ReplayError, latest_report, load_report, replay
@@ -341,11 +357,17 @@ def cmd_replay(args: argparse.Namespace) -> int:
         path = Path(args.report) if args.report else latest_report(BUG_REPORT_DIR)
         report = load_report(path)
         out = Path(args.out) if args.out else path.with_suffix("")
+        total = report["at"] / 1000
         print(f"Replaying {path}: {report.get('description')!r}")
         print(
-            f"  {len(report['inputs'])} inputs over {report['at'] / 1000:.1f} s (seed {report.get('seed')})"
+            f"  {len(report['inputs'])} inputs over {total:.1f} s (seed {report.get('seed')})"
         )
-        result = replay(report, out, args.last, args.every)
+        print(
+            f"  It plays back in real time in a hidden Chrome: about {total / 60:.0f} min."
+            f" Photos start {args.last:g} s before the report."
+        )
+        result = replay(report, out, args.last, args.every, progress=replay_progress())
+        print()
     except ReplayError as e:
         logger.error("%s", e)
         return 1

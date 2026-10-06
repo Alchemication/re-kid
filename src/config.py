@@ -184,6 +184,10 @@ REPLAY_EVERY_MS = 500
 """One replay screenshot this often: a gesture's poses last a few hundred ms,
 so this catches each one without a flood of frames."""
 
+REPLAY_PROGRESS_EVERY_MS = 5000
+"""How often a replay says how far it has got: it plays in real time, so a
+long play would otherwise sit silent for minutes."""
+
 REPLAY_SHEET_COLUMNS = 5
 """Frames per row on the replay's contact sheet."""
 

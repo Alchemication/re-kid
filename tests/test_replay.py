@@ -151,3 +151,20 @@ class TestReplayHelpers:
 
     def test_no_contact_sheet_without_frames(self, tmp_path: Path) -> None:
         assert replay.contact_sheet([], tmp_path / "sheet.jpg") is None
+
+
+class TestProgress:
+    """The replay plays in real time, so it says how far it has got."""
+
+    def test_shows_progress_at_most_every_few_seconds_and_always_the_end(
+        self, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        from commands import replay_progress
+        from config import REPLAY_PROGRESS_EVERY_MS
+
+        show = replay_progress()
+        step = REPLAY_PROGRESS_EVERY_MS / 1000
+        for now in [0, step / 2, step, step * 1.5, 30.0]:
+            show(now, 30.0)
+        lines = [p for p in capsys.readouterr().out.split("\r") if p]
+        assert [p.split()[0] for p in lines] == ["0", str(round(step)), "30"]
