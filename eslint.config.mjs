@@ -16,7 +16,7 @@ const BROWSER = Object.fromEntries(
   ].map((g) => [g, 'readonly']),
 )
 const NODE = Object.fromEntries(
-  ['require', 'module', '__dirname', 'process', 'console', 'performance', 'URL', 'URLSearchParams', 'setTimeout'].map((g) => [g, 'readonly']),
+  ['require', 'module', '__dirname', 'process', 'console', 'performance', 'URL', 'URLSearchParams', 'setTimeout', 'setImmediate'].map((g) => [g, 'readonly']),
 )
 
 const CORRECTNESS = {

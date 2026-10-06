@@ -25,10 +25,25 @@ function fakeElement(tag = 'g') {
       node.children.push(child)
       return child
     },
+    insertBefore(child, before) {
+      child.parent = node
+      const i = node.children.indexOf(before)
+      node.children.splice(i < 0 ? node.children.length : i, 0, child)
+      return child
+    },
+    replaceChildren(...kids) {
+      node.children.length = 0
+      kids.forEach((k) => node.appendChild(k))
+    },
     remove() {
       if (node.parent) node.parent.children.splice(node.parent.children.indexOf(node), 1)
       node.parent = null
     },
+    classList: { add() {}, remove() {}, toggle() {}, contains: () => false },
+    // asked for something inside it: a stand-in, like the page's own lookups
+    querySelector: () => fakeElement(),
+    querySelectorAll: () => Array.from({ length: 12 }, () => fakeElement()),
+    cloneNode: () => fakeElement(tag),
     animate: () => ({ finished: Promise.resolve(), cancel() {} }),
     getAnimations: () => [],
     getTotalLength: () => 100,
@@ -42,7 +57,38 @@ function fakeDocument() {
   return {
     getElementById: (id) => byId.get(id) ?? byId.set(id, fakeElement()).get(id),
     createElementNS: (_ns, tag) => fakeElement(tag),
+    querySelector: () => fakeElement(),
+    querySelectorAll: () => Array.from({ length: 12 }, () => fakeElement()), // enough for any row of things (the film's five prints)
     addEventListener() {},
+  }
+}
+
+/** A clock the test moves on: timers and animation frames run when
+ * advance() reaches them, in order, and performance.now() reads it. */
+function fakeClock() {
+  let now = 0
+  let seq = 0
+  const due = [] // {at, seq, fn}
+  const add = (fn, ms) => due.push({ at: now + Math.max(0, ms || 0), seq: seq++, fn })
+  /** Let the promise chains a callback started run on to their next wait. */
+  const settle = () => new Promise((r) => setImmediate(r))
+  return {
+    now: () => now,
+    setTimeout: (fn, ms) => add(fn, ms),
+    requestAnimationFrame: (fn) => add(() => fn(now), 16),
+    async advance(ms) {
+      const end = now + ms
+      await settle()
+      for (;;) {
+        due.sort((a, b) => a.at - b.at || a.seq - b.seq)
+        if (!due.length || due[0].at > end) break
+        const next = due.shift()
+        now = next.at
+        next.fn()
+        await settle()
+      }
+      now = end
+    },
   }
 }
 
@@ -52,16 +98,16 @@ function fakeDocument() {
  * @param {{query?: string, storage?: object, storageThrows?: boolean, dom?: boolean, globals?: object}} options
  *   query: the page address's `?…` part; storage: localStorage to start from;
  *   storageThrows: localStorage blocked, as in some private windows;
- *   dom: a pretend page (document), with timers and animation frames that
- *   wait until runTimers() instead of running on their own; globals: stand-ins
- *   for other scripts (say a Weather the test controls).
+ *   dom: a pretend page (document) on a pretend clock: timers, animation
+ *   frames and performance.now() move only when the test calls advance(ms);
+ *   globals: stand-ins for other scripts (say a Weather the test controls).
  */
 function load(files, { query = '', storage = {}, storageThrows = false, dom = false, globals = {} } = {}) {
   const store = new Map(Object.entries(storage))
   const listeners = {}
   const logs = { info: [], debug: [], error: [] }
   const intervals = []
-  const timers = []
+  const clock = fakeClock()
   const blocked = () => {
     throw new Error('storage blocked')
   }
@@ -69,7 +115,7 @@ function load(files, { query = '', storage = {}, storageThrows = false, dom = fa
     location: { search: query, href: `file:///yard/index.html${query}` },
     URL,
     URLSearchParams,
-    performance,
+    performance: dom ? { now: clock.now } : performance,
     console: Object.fromEntries(Object.keys(logs).map((k) => [k, (...a) => logs[k].push(a.map(String).join(' '))])),
     localStorage: storageThrows
       ? { getItem: blocked, setItem: blocked }
@@ -79,8 +125,8 @@ function load(files, { query = '', storage = {}, storageThrows = false, dom = fa
     setInterval: (fn) => intervals.push(fn),
     ...(dom && {
       document: fakeDocument(),
-      setTimeout: (fn) => timers.push(fn),
-      requestAnimationFrame: (fn) => timers.push(() => fn(performance.now())),
+      setTimeout: clock.setTimeout,
+      requestAnimationFrame: clock.requestAnimationFrame,
     }),
     ...globals,
   }
@@ -95,8 +141,8 @@ function load(files, { query = '', storage = {}, storageThrows = false, dom = fa
     fire: (type, event) => (listeners[type] || []).forEach((fn) => fn(event)),
     /** Run every setInterval callback once, as if its interval had passed. */
     tick: () => intervals.forEach((fn) => fn()),
-    /** Run the timers and animation frames waiting so far (dom only). */
-    runTimers: () => timers.splice(0).forEach((fn) => fn()),
+    /** Move the pretend clock on by `ms`, running what falls due (dom only). */
+    advance: clock.advance,
     logs,
     store,
   }

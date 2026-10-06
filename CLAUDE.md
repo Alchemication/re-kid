@@ -150,9 +150,13 @@ the edge cases that would let bad data pass silently.
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
   `shower.js`, `idle.js`, `layout.js`): the part that draws tells them what
-  happened and does what they say. Drawing parts can still be stepped here on
-  a pretend page (`load(…, { dom: true, globals })`, as `creatures.test.js`
-  does). Logic that can be pure should be, and tested here.
+  happened and does what they say. Drawing parts are tested here too, on a
+  pretend page and clock: `load(…, { dom: true, globals })`, then
+  `await page.advance(ms)` runs the timers and animation frames due (all
+  animations end at once). `tests/fakes.js` has a Reksio whose gestures end
+  at once and a Sound/Music that note what played (as `things.test.js`,
+  `tree.test.js` and `creatures.test.js` use them). A minute of a gag runs
+  in milliseconds. Logic that can be pure should be, and tested here.
 - *Conventions* (`tests/test_game.py`, in `uv run pytest`): the debuggability
   rules above that a grep can check.
 - *Browser* (`tests/test_game_browser.py`, `uv run pytest -m browser -n 8`,
@@ -171,7 +175,7 @@ before a commit.
 
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
-| a thing in `things.js` / `tree.js` | `"TestThings and <name>"` |
+| a thing in `things.js` / `tree.js` | `"TestThings and <name>"` (and its rules in `things.test.js` / `tree.test.js`) |
 | a gesture or pose in `reksio.js` | `"TestGestures or TestGettingUp"` |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |
