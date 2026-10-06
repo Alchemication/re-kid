@@ -25,7 +25,7 @@ def report(**overrides: object) -> dict:
         "description": "he froze",
         "at": 5000,
         "seed": 3,
-        "replayUrl": f"{GAME.as_uri()}?mains=trap&seed=3",
+        "replayUrl": f"{GAME.as_uri()}?props=trap&seed=3",
         "viewport": {"width": 1280, "height": 720},
         "inputs": [{"t": 1000, "intent": "go to trap"}],
         "state": {"busy": False},
@@ -111,7 +111,7 @@ class TestLocalPage:
 class TestReplayHelpers:
     def test_url_keeps_the_flags_and_adds_debug(self) -> None:
         url = replay.replay_url(report())
-        assert "mains=trap" in url and "seed=3" in url and "debug=" in url
+        assert "props=trap" in url and "seed=3" in url and "debug=" in url
 
     def test_url_of_a_site_report_is_the_local_page(self) -> None:
         site = "https://alchemication.github.io/re-kid/reksio/yard/?seed=3&rain=1"
@@ -121,7 +121,7 @@ class TestReplayHelpers:
 
     def test_url_pins_the_layout_of_an_old_report(self) -> None:
         layout = {
-            "mains": ["doghouse", "berries", "trap"],
+            "props": ["berries", "trap"],
             "creatures": ["fly"],
             "flowers": True,
             "rain": False,
@@ -131,7 +131,7 @@ class TestReplayHelpers:
             report(replayUrl=f"{GAME.as_uri()}?seed=3", layout=layout)
         )
         for flag in [
-            "mains=berries%2Ctrap",
+            "props=berries%2Ctrap",
             "creatures=fly",
             "flowers=1",
             "rain=0",
@@ -140,11 +140,9 @@ class TestReplayHelpers:
             assert flag in url, flag
 
     def test_flags_in_the_report_win_over_its_layout(self) -> None:
-        site = f"{GAME.as_uri()}?seed=3&mains=bowl"
-        url = replay.replay_url(
-            report(replayUrl=site, layout={"mains": ["doghouse", "tap"]})
-        )
-        assert "mains=bowl" in url and "mains=tap" not in url
+        site = f"{GAME.as_uri()}?seed=3&props=bowl"
+        url = replay.replay_url(report(replayUrl=site, layout={"props": ["tap"]}))
+        assert "props=bowl" in url and "props=tap" not in url
 
     def test_differences_skip_what_always_drifts(self) -> None:
         recorded = {"busy": False, "camX": 10, "done": ["bowl"]}

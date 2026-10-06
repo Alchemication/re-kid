@@ -6,7 +6,7 @@
 // - Energy (0-3) sets how full it is: just the bass when nobody has tapped for
 //   a while, the full oom-pah, then the tune on top, then woodblock ticks.
 // - Actions play along, in key and on the beat: a xylophone flourish when a
-//   main thing is done, glockenspiel for a thought bubble, a flute trill for
+//   new thing is done, glockenspiel for a thought bubble, a flute trill for
 //   the bird, a rising bassoon as Reksio stretches and a falling run (the
 //   shape of the marked stretching melody) as he snaps back.
 // - Each sunset step slows it a little and makes it softer; at evening it
@@ -224,7 +224,7 @@ const Music = (() => {
 
   /** In-key reactions to what happens in the yard. */
   const react = {
-    /** A main thing done: a xylophone run up the chord, a glockenspiel on top. */
+    /** A new thing done: a xylophone run up the chord, a glockenspiel on top. */
     done() {
       if (!ready) return
       const t = nextBeat()

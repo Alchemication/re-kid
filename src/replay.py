@@ -117,7 +117,7 @@ def layout_flags(layout: dict | None) -> dict:
     if not layout:
         return {}
     flags = {
-        "mains": ",".join(m for m in layout.get("mains", []) if m != "doghouse"),
+        "props": ",".join(layout.get("props", [])),
         "creatures": ",".join(layout.get("creatures", [])),
     }
     for key in ("flowers", "rain"):

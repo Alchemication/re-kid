@@ -16,19 +16,18 @@ function placed(L) {
 }
 
 describe('a play', () => {
-  it('always counts the doghouse and three others, all different', () => {
+  it('puts out three different props', () => {
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}`)
-      assert.equal(L.mains.length, 4, `seed ${seed}`)
-      assert.ok(L.mains.includes('doghouse'), `seed ${seed}`)
-      assert.equal(new Set(L.mains).size, 4, `seed ${seed}`)
+      assert.equal(L.props.length, 3, `seed ${seed}`)
+      assert.equal(new Set(L.props).size, 3, `seed ${seed}`)
     }
   })
 
-  it('shows a prop only when it counts (the tap always, the flowers sometimes)', () => {
+  it('shows a prop only when it is out (the tap always, the flowers sometimes)', () => {
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}`)
-      for (const n of ['bowl', 'dig', 'film', 'trap', 'tree', 'berries']) assert.equal(L.hidden.includes(n), !L.mains.includes(n), `seed ${seed}: ${n}`)
+      for (const n of ['bowl', 'dig', 'film', 'trap', 'tree', 'berries']) assert.equal(L.hidden.includes(n), !L.props.includes(n), `seed ${seed}: ${n}`)
       assert.ok(!L.hidden.includes('tap'))
       assert.equal(L.hidden.includes('flowers'), !L.flowers)
     }
@@ -48,14 +47,16 @@ describe('a play', () => {
     }
   })
 
-  it('orders the tray from left to right, doghouse first', () => {
+  it('puts the sun and a moon somewhere in the sky, a different moon each play', () => {
+    const moons = new Set()
     for (const seed of SEEDS) {
-      const L = layout(`?seed=${seed}`)
-      assert.equal(L.mains[0], 'doghouse', `seed ${seed}`)
-      const where = (n) => (n === 'bird' ? L.perches[0] : L.FOOTPRINTS[n][0] + L.shift[n])
-      const xs = L.mains.slice(1).map(where)
-      assert.deepEqual(xs, [...xs].sort((a, b) => a - b), `seed ${seed}`)
+      const { sun, moon } = layout(`?seed=${seed}`)
+      assert.ok(sun.x >= 380 && sun.x <= 1300, `seed ${seed}: sun at ${sun.x}`)
+      assert.ok(moon.x >= 200 && moon.x <= 1400 && moon.y >= 80 && moon.y <= 190, `seed ${seed}`)
+      assert.ok(moon.lit > 0 && moon.lit <= 1, `seed ${seed}`)
+      moons.add(JSON.stringify(moon))
     }
+    assert.equal(moons.size, SEEDS.length)
   })
 })
 
@@ -95,7 +96,7 @@ describe('the row of things', () => {
 
 describe('replays and memory', () => {
   it('replays the same play from the same seed, whatever the last play was', () => {
-    const a = layout('?seed=11', { storage: { 'reksio-yard-last-play': JSON.stringify({ mains: ['doghouse', 'bowl', 'tap', 'dig'], rain: true }) } })
+    const a = layout('?seed=11', { storage: { 'reksio-yard-last-play': JSON.stringify({ props: ['bowl', 'tree', 'dig'], rain: true }) } })
     const b = layout('?seed=11')
     assert.deepEqual(a, b)
   })
@@ -103,29 +104,37 @@ describe('replays and memory', () => {
   it('remembers an unseeded play, and prefers new things next time', () => {
     const page = load(['debug.js', 'layout.js'])
     const memory = JSON.parse(page.store.get('reksio-yard-last-play'))
-    assert.deepEqual(memory.mains, page.json('Layout.mains'))
+    assert.deepEqual(memory.props, page.json('Layout.props'))
     // over many unseeded plays after the same one, its things come up less
-    const last = { mains: ['doghouse', 'bowl', 'tap', 'bird'], creatures: ['fly', 'bee'], rain: false }
+    const last = { props: ['bowl', 'trap', 'tree'], creatures: ['fly', 'bee'], rain: false }
     let again = 0
     for (let i = 0; i < 300; i++) {
       const L = layout('', { storage: { 'reksio-yard-last-play': JSON.stringify(last) } })
-      again += L.mains.filter((n) => last.mains.includes(n) && n !== 'doghouse').length
+      again += L.props.filter((n) => last.props.includes(n)).length
     }
-    assert.ok(again / 300 < 0.9 * 3 * (3 / 8), `seen-before things came up ${again / 300} a play`)
+    assert.ok(again / 300 < 0.9 * 3 * (3 / 6), `seen-before props came up ${again / 300} a play`)
   })
 
   it('still makes a play when storage is blocked', () => {
-    assert.equal(layout('', { storageThrows: true }).mains.length, 4)
+    assert.equal(layout('', { storageThrows: true }).props.length, 3)
   })
 
   it('survives a corrupted memory', () => {
-    assert.equal(layout('', { storage: { 'reksio-yard-last-play': '{not json' } }).mains.length, 4)
+    assert.equal(layout('', { storage: { 'reksio-yard-last-play': '{not json' } }).props.length, 3)
   })
 })
 
 describe('flags in the page address', () => {
-  it('picks the main things, ignoring unknown names', () => {
-    assert.deepEqual([...layout('?seed=3&mains=trap,nonsense,bowl').mains].sort(), ['bowl', 'doghouse', 'trap'])
+  it('picks the props, ignoring unknown names', () => {
+    assert.deepEqual([...layout('?seed=3&props=trap,nonsense,bowl').props].sort(), ['bowl', 'trap'])
+  })
+
+  it('sets how long the moon takes to rise, without shifting the play', () => {
+    const plain = layout('?seed=3')
+    const quick = layout('?seed=3&moon-rise=2')
+    assert.equal(quick.moonRise, 2)
+    assert.equal(plain.moonRise, null)
+    assert.deepEqual({ ...quick, moonRise: null }, plain)
   })
 
   it('picks the creatures', () => {

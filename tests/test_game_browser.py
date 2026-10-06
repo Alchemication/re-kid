@@ -117,16 +117,7 @@ THINGS = [
     "tree",
     "berries",
 ]
-POOL = {
-    "bowl",
-    "tap",
-    "bird",
-    "dig",
-    "film",
-    "trap",
-    "tree",
-    "berries",
-}  # layout.js MAIN_POOL
+POOL = {"bowl", "dig", "film", "trap", "tree", "berries"}  # layout.js PROP_POOL
 
 CRITTERS = {"fly": "fly", "bee": "bee", "spider": "spider"}
 CRITTER_NEEDS = {"snail": "a snail, after rain", "worm": "worms, after rain"}
@@ -266,8 +257,8 @@ class TestActs:
 
 
 def open_for_thing(yard: callable, name: str) -> Yard:
-    mains = f"&mains={name}" if name in POOL else ""
-    y = yard(f"{STILL}&flowers=1&mouse-at=0&visitor-at=0{mains}")
+    props = f"&props={name}" if name in POOL else ""
+    y = yard(f"{STILL}&flowers=1&mouse-at=0&visitor-at=0{props}")
     try:
         y.page.wait_for_function(f"Things.ready('{name}')", timeout=20_000)
     except playwright.TimeoutError:
@@ -317,18 +308,36 @@ class TestDebugOverlay:
         assert "busy: false" in text
 
 
+DAY = ["house", "tap", "bowl", "dig", "gate", "flowers"]  # six new things: the sun sets
+DAY_PLAY = f"{STILL}&props=bowl,dig,film&flowers=1"
+
+
 class TestWholePlay:
-    def test_doing_every_main_thing_brings_evening(self, yard: callable) -> None:
-        y = yard("seed=3&still&rain=0&creatures=&mains=bowl,dig,tap")
-        for name in y.state()["mains"]:
+    def test_six_new_things_bring_dusk_and_the_doghouse_brings_bed(
+        self, yard: callable
+    ) -> None:
+        y = yard(DAY_PLAY)
+        for name in DAY:
+            assert not y.state()["dusk"], name
             y.page.evaluate(f"yardGame.tap('{name}')")
-            y.page.wait_for_function(
-                "yardGame.free() || yardGame.state().ended", timeout=DONE_MS
-            )
+            y.settled()
+        assert y.state()["dusk"]
+        y.page.evaluate("yardGame.tap('bowl')")  # the yard is still open
+        y.settled()
+        assert y.state()["uses"]["bowl"] == 2 and not y.state()["ended"]
+        y.page.evaluate("yardGame.tap('doghouse')")
         y.page.wait_for_function("yardGame.state().ended", timeout=DONE_MS)
-        y.page.wait_for_timeout(
-            8000
-        )  # evening falls, he walks home, the picture closes
+        y.page.wait_for_timeout(7000)  # night falls, he walks home, the picture closes
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_once_the_moon_is_up_he_goes_to_bed(self, yard: callable) -> None:
+        y = yard(f"{DAY_PLAY}&moon-rise=3")
+        for name in DAY:
+            y.run(f"yardGame.use('{name}')")
+        y.page.wait_for_function("yardGame.state().bedtime", timeout=10_000)
+        y.page.wait_for_function("yardGame.state().ended", timeout=5_000)
+        assert y.state()["moonUp"] == 1
+        y.page.wait_for_timeout(7000)
         assert not y.errors, "\n---\n".join(y.errors)
 
 

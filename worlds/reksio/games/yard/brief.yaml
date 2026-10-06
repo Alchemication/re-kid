@@ -2,10 +2,10 @@ id: yard
 title: Reksio's yard (working title)
 status: draft
 audience: Eliot, about 3, playing with a parent who remembers Reksio.
-length: As long as he likes, usually a few minutes; it ends with evening.
+length: As long as he likes, usually a few minutes; it ends when he goes to bed at dusk.
 
 pitch:
-  text: The child is Reksio in his own yard, which is wider than the screen; the view follows him from the house wall at one end to the fence and gate at the other. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — naps and snores in his doghouse, laps from his bowl, drinks from the tap, sniffs the flowers and sneezes, barks at the bird, digs up a bone, stamps a film strip. Once he has done this play's four main things, evening comes and he goes to sleep in his doghouse.
+  text: The child is Reksio in his own yard, which is wider than the screen; the view follows him from the house wall at one end to the fence and gate at the other. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — naps and snores in his doghouse, laps from his bowl, drinks from the tap, sniffs the flowers and sneezes, barks at the bird, digs up a bone, stamps a film strip. The day passes as he plays — each new thing he does sinks the sun a little. When it has set, the moon comes up, slowly, and then he goes to sleep in his doghouse.
   origin: inspired
   refs: ['world:places[yard].description', 'world:places[doghouse].description', world:premise]
 
@@ -17,24 +17,24 @@ principles:
   origin: invented
 - text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs. One exception, for now — the bark.
   origin: invented
-- text: Finite, and you can see the end coming. The sun sinks and the sky warms as the main things are done; after the last, evening falls and the game ends with him asleep. No counter, no text.
+- text: Nothing is a goal, and the end never comes as a surprise. Every thing in the yard counts the same; the sun sinks a step and the sky warms with each new thing he does, six in all (or after ten minutes, whatever he does). At sunset nothing is taken away — the yard stays open while the moon comes up, and he goes to bed once it is up, or sooner if the child taps the doghouse. No goals, no counter, no text.
   origin: inspired
   refs: ['world:places[doghouse].description']
 - text: The yard is built to grow. Later it becomes the game's home screen, and new things in it lead into episode games — say, a toy rocket by the doghouse that starts Kosmonauta.
   origin: invented
 
-- text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird, his doghouse, the film strip, the mouse, the tree or the blackberries, the nearest one he hasn't done — and that thing twinkles. Only this play's main things ever appear, so it's clear which ones count; the flowers, window and gate are extras.
+- text: When left alone, Reksio shows what he still wants in a thought bubble — a picture of his bowl, a drop of water, a bone, the bird, his doghouse, the film strip, the mouse, the tree or the blackberries, the nearest one out this play that he hasn't done — and that thing twinkles. It is a suggestion, never a task. At dusk he wishes only for his doghouse.
   origin: inspired
   refs: [world:humour]
 - text: Tapping a creature sends Reksio after it in his own way — he stalks and pounces on the fly, sniffs the bee and jumps back, looks up at the web and gets a fright when the spider drops onto his nose.
   origin: invented
-- text: He moves like a dog. Short trips are a walk, long ones a bounding run, easing in and out of speed; he hops for joy after each main thing. Left alone, he keeps busy every few seconds with something picked at random and a little different each time — sniffing, wandering with his nose down, glancing around, looking up at the sky or the bird, scratching, hopping, a play-bow, chasing or biting his tail, sitting, howling, yawning, watching the fly and pouncing on it — with a thought bubble now and then.
+- text: He moves like a dog. Short trips are a walk, long ones a bounding run, easing in and out of speed; he hops for joy after each new thing, and yawns a lot at dusk. Left alone, he keeps busy every few seconds with something picked at random and a little different each time — sniffing, wandering with his nose down, glancing around, looking up at the sky or the bird, scratching, hopping, a play-bow, chasing or biting his tail, sitting, howling, yawning, watching the fly and pouncing on it — with a thought bubble now and then.
   origin: invented
 - text: The longer he is left alone, the more he rests, like a dog. After a little while he may sit and quietly watch the yard, looking about; later lie down, head up; later still take a nap — head on his paws, curled up, or sprawled out — with soft snores and drifting Zs. He wakes with a proper dog stretch, front legs reaching forward and rump up, then the back legs, then a shake. Any tap and he's up at once.
   origin: invented
-- text: It is always clear what can be tapped and what is left. Every usable thing has an action spot — a wide, faint oval on the ground — that glows when Reksio stands in it; tapping the spot works like tapping the thing, and it is a big, low target for small fingers (the bird's spot is on the ground under its perch). A main thing's spot is bright until it is done, then faint like the extras'; nothing floats over the things themselves, to keep the picture clean. A row of pictures in the corner fills in as each main thing is done, and tapping a picture sends Reksio there.
+- text: It is always clear what can be tapped. Every usable thing has an action spot — a wide, faint oval on the ground — that glows when Reksio stands in it; tapping the spot works like tapping the thing, and it is a big, low target for small fingers (the bird's spot is on the ground under its perch). Every spot looks the same, done or not; nothing floats over the things themselves or sits in a corner, to keep the picture clean.
   origin: invented
-- text: Not everything at once. Each play counts the doghouse and three of the other eight main things, brings two of the creatures, and only sometimes the flowers; the bowl, mound, film strip, mouse trap, tree and bramble appear only when they count. The doghouse stays by the house and the gate at the far end, so the child always knows where home and the way out are; everything between comes in a new order each play, with wide, uneven gaps and nothing overlapping, so each play is a small new walk to explore. Puddles and the bird's perches fall in the open stretches. The last play is remembered so the next one prefers what wasn't seen.
+- text: Not everything at once. Each play has the doghouse, the house, the tap, the bird and the gate, puts out three of six props (the bowl, mound, film strip, mouse trap, tree and bramble), brings two of the creatures, and only sometimes the flowers. That is eight or nine things, more than one day takes, so the child never runs out. The sun stands somewhere new each play. The doghouse stays by the house and the gate at the far end, so the child always knows where home and the way out are; everything between comes in a new order each play, with wide, uneven gaps and nothing overlapping, so each play is a small new walk to explore. Puddles and the bird's perches fall in the open stretches. The last play is remembered so the next one prefers what wasn't seen.
   origin: invented
 - text: The yard is quietly alive. Small creatures go about their own business and meet each other — a fly wanders, lands on the bowl and dodges Reksio's snaps; a bumblebee works the flowers and huffs off if he comes close; a spider builds a web in the corner by the house, dangles on its swinging thread, catches the fly and wraps it, and hides when Reksio barks. Cartoon physics (momentum, pendulums, startled darts), small and mostly quiet, never in the way.
   origin: invented
@@ -62,7 +62,7 @@ sound:
 - text: A light pizzicato "oom-pah" in B-flat runs under the yard, in the spirit of the Reksio theme — its key, its bouncing bass, and a clarinet hook echoing the main melody Adam marked (B-flat, B-flat, B-flat C B-flat C, D F, F, from a machine transcription he has not yet confirmed by ear). Played note by note from real instrument samples (CC0), so it can follow the game.
   origin: inspired
   refs: [mark:main-melody-part-1, world:sound.theme]
-- text: The music follows Reksio. It is fuller when the child is playing and thins to a bare bass line when left alone; actions play along in key and on the beat — a xylophone flourish for each main thing, glockenspiel for a thought bubble, a flute trill for the bird, timpani under each stamp, a rising bassoon as he stretches and a falling run (the shape of the marked stretching melody) as he snaps back.
+- text: The music follows Reksio. It is fuller when the child is playing and thins to a bare bass line when left alone; actions play along in key and on the beat — a xylophone flourish for each new thing, glockenspiel for a thought bubble, a flute trill for the bird, timpani under each stamp, a rising bassoon as he stretches and a falling run (the shape of the marked stretching melody) as he snaps back.
   origin: inspired
   refs: [mark:stretching-melody, world:sound.music_role]
 - text: Three tunes take turns over the oom-pah so it doesn't wear thin — the hook twice, a skipping flute tune twice, the hook again, then a tiptoeing tune in G minor that climbs back home to B-flat. The two new tunes are written for the game in the same bouncy spirit, not taken from the original.
@@ -186,7 +186,7 @@ scenes:
   sound: {text: 'A snap, a rising whoosh, a snap as he catches it, munching.', origin: invented}
 
 ending:
-  text: Once Reksio has done this play's main things, the sky turns to evening, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.
+  text: When the sun has set, the rain stops and the light goes, but everything still works. The moon comes up from behind the wall, slowly (about forty seconds), and it is a different moon each evening, in a new place, from a thin crescent to full. Reksio yawns and wishes for his doghouse. Once the moon is up, or as soon as the child taps the doghouse, night falls deep blue, he trots into his doghouse, and the picture closes in a circle on the doghouse, like the end of an episode.
   origin: inspired
   refs: ['world:places[doghouse].description', intro:fade-out]
 

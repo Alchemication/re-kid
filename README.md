@@ -87,7 +87,8 @@ Flags in the page address (`main.py play` takes the first three):
 | `?seed=N` | Seeds a play: with the layout flags below, the same yard every time, and what happens in it closely. Every play prints the address that replays it in the console. |
 | `?debug` | State overlay, every event in the console, a "report a bug" button. |
 | `?still` | Reksio moves only when asked: try one gesture or gag alone. |
-| `?mains=trap,bowl` | Which main things count. |
+| `?props=trap,bowl` | Which props are out (of bowl, dig, film, trap, tree, berries). |
+| `?moon-rise=S` | How long the moon takes to come up at dusk (40 s otherwise). |
 | `?creatures=fly,spider` | Which creatures come (`?creatures=` for none). |
 | `?flowers=1` / `0` | Flowers out or not. |
 | `?rain=1` / `0`, `?rain-at=S` | Force the shower, and when it starts. |

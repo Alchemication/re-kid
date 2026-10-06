@@ -155,7 +155,7 @@ const Debug = (() => {
     const url = new URL(location.href)
     url.searchParams.set('seed', String(seed))
     if (typeof Layout !== 'undefined') {
-      url.searchParams.set('mains', Layout.mains.filter((m) => m !== 'doghouse').join(','))
+      url.searchParams.set('props', Layout.props.join(','))
       url.searchParams.set('creatures', Layout.creatures.join(','))
       url.searchParams.set('flowers', Layout.flowers ? '1' : '0')
       url.searchParams.set('rain', Layout.rain ? '1' : '0')

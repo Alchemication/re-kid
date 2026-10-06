@@ -193,11 +193,13 @@ wake Reksio at home.
    bark), alone and then with Eliot. What is in it, part by part and what each is based on, is
    in `games/yard/brief.yaml`; the testing flags and console helpers are in
    README ("Debugging the yard"). In short: a wide, wordless yard where every
-   tap gets an answer; each play counts the doghouse plus three of eight other
-   main things (a tray of pictures fills in, the sun sinks a step for each)
-   and brings two of three creatures and usually a shower; after the last,
-   evening falls and the picture closes on the doghouse. Left alone, Reksio
-   keeps busy, rests, and shows a thought bubble of what he still wants.
+   tap gets an answer and nothing is a goal. Each play puts out three of six
+   props and brings two of three creatures and usually a shower; each new
+   thing he does sinks the sun a step, and after six it sets. The yard stays
+   open while a different moon each time comes up (40 s); then, or on a tap
+   on the doghouse, he goes to bed and the picture closes on it. Left alone,
+   Reksio keeps busy, rests, and shows a thought bubble of something he
+   hasn't done yet.
 
    **Something wrong? Press Ctrl+Shift+B** in the game, say what you saw, and
    tell Claude: it replays the report (`main.py replay`) and sees the run-up.
@@ -211,7 +213,7 @@ wake Reksio at home.
    - *Themes B and C* (a skipping flute tune, a tiptoeing one in G minor) take
      turns with the hook (A A B B A A C C): catchy, and still Reksio?
    - *With Eliot:* does a mouse that can't eat worry him, or does he want to
-     help? Does he find the main things unaided, and does the ending land?
+     help? What does he go for, and does the ending (sunset, moon, bed) land?
 
    **Next ideas for a living yard** (pick and order with Adam; each should
    teach a small cause and effect a toddler can see):

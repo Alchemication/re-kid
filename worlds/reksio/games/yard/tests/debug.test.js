@@ -42,12 +42,12 @@ describe('seeded streams', () => {
   })
 
   it('pins the layout in the replay address, so the same yard is built', () => {
-    const page = load(['debug.js', 'layout.js'], { storage: { 'reksio-yard-last-play': JSON.stringify({ mains: ['doghouse', 'bowl', 'tap', 'dig'] }) } })
+    const page = load(['debug.js', 'layout.js'], { storage: { 'reksio-yard-last-play': JSON.stringify({ props: ['bowl', 'tree', 'dig'] }) } })
     const url = new URL(page.get('Debug.replayUrl()'))
     const L = page.json('Layout')
-    assert.equal(url.searchParams.get('mains'), L.mains.filter((m) => m !== 'doghouse').join(','))
+    assert.equal(url.searchParams.get('props'), L.props.join(','))
     // a replay of that address, with a different memory, builds the same layout
-    const again = load(['debug.js', 'layout.js'], { query: url.search, storage: { 'reksio-yard-last-play': JSON.stringify({ mains: ['doghouse', 'film', 'trap', 'tree'] }) } }).json('Layout')
+    const again = load(['debug.js', 'layout.js'], { query: url.search, storage: { 'reksio-yard-last-play': JSON.stringify({ props: ['film', 'trap', 'berries'] }) } }).json('Layout')
     assert.deepEqual(again, L)
   })
 
@@ -56,8 +56,8 @@ describe('seeded streams', () => {
   })
 
   it('puts the seed into the replay address, keeping the other flags', () => {
-    const url = load(['debug.js'], { query: '?mains=trap&seed=9' }).get('Debug.replayUrl()')
-    assert.match(url, /mains=trap/)
+    const url = load(['debug.js'], { query: '?props=trap&seed=9' }).get('Debug.replayUrl()')
+    assert.match(url, /props=trap/)
     assert.match(url, /seed=9/)
   })
 })
@@ -180,7 +180,7 @@ describe('recorder', () => {
   })
 
   it('puts everything needed for a replay into a bug report', () => {
-    const page = load(['debug.js'], { query: '?seed=8&mains=trap' })
+    const page = load(['debug.js'], { query: '?seed=8&props=trap' })
     page.get('Debug.record(() => ({ busy: true })); Debug.input("go to trap"); Debug.check("r", false)')
     page.tick()
     const r = page.json('Debug.bugReport("he froze at the trap")')
@@ -188,7 +188,7 @@ describe('recorder', () => {
     assert.equal(r.description, 'he froze at the trap')
     assert.equal(r.seed, 8)
     assert.match(r.replayUrl, /seed=8/)
-    assert.match(r.replayUrl, /mains=trap/)
+    assert.match(r.replayUrl, /props=trap/)
     assert.deepEqual(r.inputs.map((i) => i.intent), ['go to trap'])
     assert.deepEqual(r.state, { busy: true })
     assert.equal(r.snapshots.length, 1)
@@ -198,6 +198,6 @@ describe('recorder', () => {
 
   it('includes the layout when there is one', () => {
     const page = load(['debug.js', 'layout.js'], { query: '?seed=8' })
-    assert.deepEqual(page.json('Debug.bugReport("x").layout.mains'), page.json('Layout.mains'))
+    assert.deepEqual(page.json('Debug.bugReport("x").layout.props'), page.json('Layout.props'))
   })
 })

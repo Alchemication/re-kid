@@ -1,14 +1,16 @@
 // Reksio's yard: tap the ground and he walks there; tap a thing and he goes
 // over and does something with it. The yard is wider than the screen and the
 // view follows him, from the house wall on the left to the fence on the right.
-// Pressing and holding on Reksio stretches him like a dachshund. Each play
-// counts four main things (layout.js picks them); when they're done, evening
-// comes and he goes to sleep. Every usable thing has an action spot on the
+// Pressing and holding on Reksio stretches him like a dachshund. The day
+// passes as he plays: each new thing he does sinks the sun a step (sky.js),
+// nothing is a goal and nothing is counted on screen. When the sun has set the
+// yard stays open while the moon comes up; then, or sooner if the doghouse is
+// tapped, he goes to bed. Every usable thing has an action spot on the
 // ground: stand in it and space uses the thing; tap it and Reksio goes there.
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Debug, Layout, Painting, Sound, Music, Reksio, Creatures, Weather, Things */
+/* global Debug, Layout, Painting, Sky, Day, Sound, Music, Reksio, Creatures, Weather, Things */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -20,7 +22,6 @@
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
   const CRITTER_CORE = 0.45 // where a critter's tap circle covers a thing or Reksio, the critter wins only this close to its middle (share of the circle): about its drawn size
   const PUDDLE_REACH = 40 // a ground tap this far past a puddle's edge (scene units) still means "jump in"
-  const EVENING_NEEDS = Layout.mains // this play's main things
   const X = Layout.x // per-play offset of a movable thing, scene units
 
   const $ = (id) => document.getElementById(id)
@@ -32,10 +33,11 @@
   const rnd = (lo, hi) => lo + random() * (hi - lo)
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
-  const done = new Set()
   let busy = false
   let pending = null
-  let ended = false
+  // the day (day.js): one sunset step per new thing, so the sun sets after as
+  // many new things as the sunset has steps, a few of the eight or nine short
+  const day = Day.start(performance.now(), { things: Sky.STEPS })
   let endedAt = 0
   let lastTap = performance.now()
   let camX = clampCam(Reksio.x - Painting.VIEW_W / 2)
@@ -69,19 +71,13 @@
       const extra = forceExtra ?? drawn
       Debug.trace('use', { name, n, extra })
       await Debug.ignoreCut(thing.run({ extra }), `use ${name}`) // cut short: still counts
-      const firstTime = EVENING_NEEDS.includes(name) && !done.has(name)
-      done.add(name)
-      sunset()
-      if (firstTime) {
+      const { first, step, dusk } = day.did(name)
+      if (step) {
         Music.react.done()
-        fillSlot(name)
+        Sky.setStep(step)
       }
-      if (EVENING_NEEDS.every((n) => done.has(n)) && !ended) {
-        await Debug.ignoreCut(Reksio.hop(), 'last hop') // the last one: a hop of joy, then evening
-        evening()
-        return
-      }
-      if (firstTime && !pending) await Debug.ignoreCut(Reksio.hop(), 'hop of joy')
+      if (dusk) startDusk()
+      if (first && !pending) await Debug.ignoreCut(Reksio.hop(), 'hop of joy')
     } finally {
       busy = false
     }
@@ -122,7 +118,7 @@
   let hold = null
 
   function holdStart() {
-    if (ended || busy || hold) return command(() => Reksio.bark(), 'bark')
+    if (day.ended || busy || hold) return command(() => Reksio.bark(), 'bark')
     lastTap = performance.now()
     hold = { stretching: false, stopSound: null }
     const mine = hold
@@ -156,23 +152,6 @@
     await Reksio.endStretch()
     busy = false
     runPending()
-  }
-
-  // ------------------------------------------------------------ the sunset
-
-  // Sun colour per step (0 to 6 main things done): yellow, through orange, to red.
-  const SUN_COLORS = ['#fbe08a', '#fbd57a', '#f9c05a', '#f6a64a', '#ef8a3e', '#e46c34', '#d9542e']
-  const SUN_STEP = 44 // how far the sun sinks per step, scene units
-
-  /** Lower the sun and warm the sky to match how much is done. */
-  function sunset() {
-    // the same six-step sunset, whatever the number of main things this play
-    const step = Math.round((EVENING_NEEDS.filter((n) => done.has(n)).length / EVENING_NEEDS.length) * 6)
-    $('sun').style.transform = `translateY(${step * SUN_STEP}px)`
-    document.querySelector('#sun .sun').style.fill = SUN_COLORS[step]
-    document.querySelector('#sun .sun-glow').style.fill = SUN_COLORS[step]
-    $('sunset').style.opacity = String(step * 0.095)
-    Music.setDusk(step)
   }
 
   // ------------------------------------------------------------ creatures
@@ -235,12 +214,28 @@
 
   // ------------------------------------------------------------ the end
 
-  async function evening() {
-    Debug.trace('evening')
-    ended = true
+  /** The sun has set: the rain stops, the light goes and the moon comes up.
+   * Everything still works; he yawns more and wishes for his doghouse. Once
+   * the moon is up it's bedtime. */
+  function startDusk() {
+    Debug.trace('dusk', { done: day.count })
     Weather.stop()
-    await wait(1800) // let the last step of the sunset be seen
-    $('evening').classList.add('on')
+    Sky.dusk().then(() => {
+      Debug.trace('moon up')
+      day.moonUp()
+    })
+  }
+
+  /** At dusk the doghouse means bed (tapped elsewhere on the way: not yet). */
+  async function goToBed() {
+    if (await Reksio.walkTo(THINGS.doghouse.at())) bed()
+  }
+
+  /** Off to bed: evening falls, he trots into the doghouse, the picture closes. */
+  async function bed() {
+    if (!day.bed()) return // not before the sun has set
+    Debug.trace('bed')
+    Sky.night()
     Music.evening()
     await wait(1600)
     if (await Reksio.walkTo(DOOR.x)) {
@@ -275,7 +270,7 @@
       Debug.trace('relax', { from: lastAct })
       Reksio.relax() // left alone, he was doing something: drop it
     }
-    if (ended) {
+    if (day.ended) {
       if (endedAt && performance.now() - endedAt > RESTART_AFTER_MS) location.reload()
       return
     }
@@ -311,7 +306,7 @@
   // to 1830", "press"), and perform() carries it out. Live play and replays
   // (debug.js records every intent) go through the same path.
   const INTENTS = [
-    [/^go to (\w+)$/, (m) => command(() => goAndDo(m[1]), m[0])],
+    [/^go to (\w+)$/, (m) => command(() => (day.dusk && m[1] === Day.BED ? goToBed() : goAndDo(m[1])), m[0])],
     [/^chase (\w+)$/, (m) => command(() => chase(m[1]), m[0])],
     [/^walk to (-?\d+)$/, (m) => command(() => Reksio.walkTo(Number(m[1])), m[0])],
     [/^jump in puddle at (-?\d+)$/, (m) => {
@@ -387,7 +382,7 @@
     for (const name of Object.keys(SPOTS)) {
       if (Layout.hidden.includes(name)) continue
       const e = document.createElementNS(SVG_NS, 'ellipse')
-      e.setAttribute('class', `spot ${EVENING_NEEDS.includes(name) ? 'main' : 'extra'}`)
+      e.setAttribute('class', 'spot')
       e.setAttribute('data-thing', name)
       e.setAttribute('cy', '826')
       e.setAttribute('ry', '30')
@@ -469,9 +464,9 @@
 
   // ------------------------------------------------------------ life
 
-  // A thought bubble above Reksio, with a picture of the nearest main thing
-  // he hasn't done yet; that thing twinkles too if it's on screen. Only the
-  // five main things ever appear, so it's clear which ones count.
+  // A thought bubble above Reksio, with a picture of the nearest thing he
+  // hasn't done yet (at dusk, his doghouse); that thing twinkles too if it's
+  // on screen. A suggestion, never a task.
   const wishEl = $('wish')
   let wishing = null
   let wishShownAt = 0
@@ -513,44 +508,13 @@
     wishEl.style.opacity = '0'
   }
 
-  // ------------------------------------------------------------ spots and tray
+  // ------------------------------------------------------------ spots
 
-  // What is left shows on the ground and on the tray: a main thing's spot is
-  // bright until it is done, then faint like the extras; the spot Reksio is
-  // standing in (or the mouse is over) glows. A done thing's picture fills in
-  // on the tray.
+  // Every spot looks the same: nothing is a goal. The spot Reksio is standing
+  // in (or the mouse is over) glows.
   function showNear() {
-    const name = !busy && !ended ? nearest() : null
-    for (const [n, e] of Object.entries(spotEls)) {
-      e.classList.toggle('on', n === name)
-      e.classList.toggle('main', EVENING_NEEDS.includes(n) && !done.has(n))
-      e.classList.toggle('extra', !EVENING_NEEDS.includes(n) || done.has(n))
-    }
-  }
-
-  function makeTray() {
-    EVENING_NEEDS.forEach((name, i) => {
-      const g = document.createElementNS(SVG_NS, 'g')
-      g.setAttribute('class', 'slot pending')
-      g.setAttribute('data-thing', name)
-      g.setAttribute('transform', `translate(${58 + i * 74} 54)`)
-      g.innerHTML =
-        '<circle r="31" />' +
-        `<use class="slot-icon" href="#icon-${name}" transform="scale(0.62) translate(-56 252)" />` +
-        '<circle class="tick" cx="22" cy="-22" r="9" />'
-      $('tray').appendChild(g)
-    })
-  }
-
-  function fillSlot(name) {
-    const slot = document.querySelector(`#tray [data-thing="${name}"]`)
-    if (!slot) return
-    slot.classList.remove('pending')
-    slot.classList.add('done')
-    slot.animate(
-      [{ transform: `${slot.getAttribute('transform')} scale(1)` }, { transform: `${slot.getAttribute('transform')} scale(1.35)` }, { transform: `${slot.getAttribute('transform')} scale(1)` }],
-      { duration: 500, easing: 'ease-out' },
-    )
+    const name = !busy && !day.ended ? nearest() : null
+    for (const [n, e] of Object.entries(spotEls)) e.classList.toggle('on', n === name)
   }
 
   // ------------------------------------------------------------ left alone
@@ -563,8 +527,11 @@
   let lastAct = null
   let firstWish = true
 
+  // what he can wish for: the things out this play that have a picture for it
+  const WISHABLE = [...document.querySelectorAll('.wish-icon')].map((u) => u.dataset.wish)
+
   function wishFor() {
-    const left = EVENING_NEEDS.filter((n) => !done.has(n) && Things.ready(n))
+    const left = WISHABLE.filter((n) => spotEls[n] && day.wants(n) && Things.ready(n))
     const dist = (n) => Math.abs((n === 'bird' ? Things.perch.x : THINGS[n].at()) - Reksio.x)
     return left.sort((a, b) => dist(a) - dist(b))[0]
   }
@@ -624,7 +591,7 @@
     sit: { weight: 3, ok: () => idleFor() > REST_AFTER_S.sit, run: () => Reksio.sit() },
     lie: { weight: 3, ok: () => idleFor() > REST_AFTER_S.lie, run: () => Reksio.lieDown() },
     nap: { weight: 4, ok: () => idleFor() > REST_AFTER_S.nap && !Weather.raining, run: () => Reksio.nap() },
-    howl: { weight: 1, ok: () => done.size >= 1, run: () => Reksio.howl() },
+    howl: { weight: 1, ok: () => day.count >= 1, run: () => Reksio.howl() },
     fly: {
       // the fly is close: watch it, and sometimes pounce
       weight: 7,
@@ -635,7 +602,7 @@
         if (f && random() < 0.6 && Math.abs(f.x - Reksio.x) < 380) await Reksio.pounce(f.x)
       },
     },
-    yawn: { weight: 1, ok: () => done.size >= 2, run: () => Reksio.yawn() },
+    yawn: { get weight() { return day.dusk ? 6 : 1 }, ok: () => day.count >= 2, run: () => Reksio.yawn() }, // sleepy at dusk
   }
 
   function pickAct() {
@@ -739,24 +706,39 @@
     Music.setEnergy(musicEnergy(now))
     showNear()
     const worm = Creatures.worm
-    if (worm && !Things.flying && !ended && !Debug.still && huntRandom() < 0.02) Things.birdHunt(worm)
+    if (worm && !Things.flying && !day.ended && !Debug.still && huntRandom() < 0.02) Things.birdHunt(worm)
     if (wishing) {
       placeWish()
-      if (busy || ended || done.has(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
+      if (busy || day.ended || !day.wants(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
     }
-    const quiet = !Debug.still && !ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
-    if (quiet && soaked() && !Weather.raining && !Weather.puddleAt(Reksio.x)) {
+    const quiet = !Debug.still && !day.ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
+    if (quiet) leftAlone(now)
+    dayAndNight(now)
+    checkRules(now)
+    Debug.show(state())
+    setTimeout(idleLoop, 200)
+  }
+
+  /** The sun sets anyway after a long play; once the moon is up, bed as soon as he's free. */
+  function dayAndNight(now) {
+    if (day.tick(now)) {
+      Sky.setStep(Sky.STEPS)
+      startDusk()
+    }
+    if (day.bedtime && !busy && !hold) command(() => bed(), 'bedtime')
+  }
+
+  /** Nothing going on: what he does next on his own, if anything. */
+  function leftAlone(now) {
+    if (soaked() && !Weather.raining && !Weather.puddleAt(Reksio.x)) {
       // stopped, wet, and out of the rain: shake it off, straight away
       acting = true
       Debug.trace('shake dry')
       Debug.ignoreCut(shakeDry(), 'shake dry') // cut short by a tap: still wet, he'll shake later
         .finally(() => (acting = false))
-    } else if (quiet && now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
+    } else if (now - lastTap > IDLE_FIRST_MS && now >= nextIdleAt) {
       startAct(pickAct())
     }
-    checkRules(now)
-    Debug.show(state())
-    setTimeout(idleLoop, 200)
   }
 
   // Rules that should always hold (debug.js reports a broken one, with the trace).
@@ -765,14 +747,14 @@
     busySince = busy && !hold ? busySince || now : 0
     Debug.check('walks only standing up', !Reksio.walking || (Reksio.pose === 'stand' && !Reksio.sliding), { pose: Reksio.pose, sliding: Reksio.sliding })
     Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
-    Debug.check('a waiting ask runs once he is free', !pending || busy || ended)
+    Debug.check('a waiting ask runs once he is free', !pending || busy || day.ended)
   }
 
   /** The game's state, for tests and the ?debug overlay. */
   function state() {
     return {
-      seed: Debug.seed, busy, ended, acting, holding: !!hold, pending: !!pending, lastAct,
-      done: [...done], mains: EVENING_NEEDS, uses: { ...uses },
+      seed: Debug.seed, busy, day: day.phase, dusk: day.dusk, ended: day.ended, acting, holding: !!hold, pending: !!pending, lastAct,
+      done: day.done, props: Layout.props, uses: { ...uses }, bedtime: day.bedtime, moonUp: Number(Sky.moonUp.toFixed(2)),
       reksio: { x: Math.round(Reksio.x), pose: Reksio.pose, walking: Reksio.walking },
       soak: Number(soak.toFixed(2)), weather: Weather.phase, camX: Math.round(camX),
       stamped: Things.stamped, mouse: Things.mouse,
@@ -839,15 +821,15 @@
     else if (X(name)) g.setAttribute('transform', `translate(${X(name)} 0)`)
   }
 
-  Things.init({ ended: () => ended })
+  Things.init({ ended: () => day.ended })
   makeSpots()
-  makeTray()
+  Sky.init()
   Creatures.init()
   Weather.init()
   Weather.on((phase) => {
     Debug.trace('weather', { phase })
     // Reksio notices the weather turn (unless he's in the middle of something)
-    if (busy || ended || Reksio.walking) return
+    if (busy || day.ended || Reksio.walking) return
     if (phase === 'clouding') Reksio.lookUp(1600)
     if (phase === 'after') Reksio.hop(40, 2)
   })

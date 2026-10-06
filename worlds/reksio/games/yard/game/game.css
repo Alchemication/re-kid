@@ -141,8 +141,7 @@ body { display: grid; place-items: center; }
 @keyframes buzz { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
 
 /* action spots on the ground: stand in one (or tap it) to use the thing */
-.spot { fill: rgba(255, 250, 232, 0.16); stroke: rgba(255, 252, 240, 0.65); stroke-width: 3; stroke-dasharray: 10 8; transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.4s ease; cursor: pointer; }
-.spot.extra { fill: rgba(255, 250, 232, 0.07); stroke: rgba(255, 252, 240, 0.35); }
+.spot { fill: rgba(255, 250, 232, 0.12); stroke: rgba(255, 252, 240, 0.5); stroke-width: 3; stroke-dasharray: 10 8; transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.4s ease; cursor: pointer; }
 .spot.on, .spot.hover { fill: rgba(255, 226, 140, 0.55); stroke: #e9a93a; stroke-dasharray: none; }
 
 @keyframes bob {
@@ -150,13 +149,6 @@ body { display: grid; place-items: center; }
   50% { transform: translateY(-7px); }
 }
 
-/* the tray: six main things, faded until done */
-.slot { cursor: pointer; }
-.slot circle { fill: rgba(255, 253, 246, 0.82); stroke: var(--ink); stroke-width: 3.5; }
-.slot.pending .slot-icon { opacity: 0.32; filter: grayscale(1); }
-.slot.pending circle { fill: rgba(255, 253, 246, 0.45); stroke-dasharray: 6 5; }
-.slot .tick { fill: #5f9a45; stroke: var(--ink); stroke-width: 2.5; opacity: 0; }
-.slot.done .tick { opacity: 1; }
 
 /* the thought bubble */
 .bubble { fill: #fffdf6; stroke: var(--ink); stroke-width: 4; }
@@ -213,7 +205,19 @@ body { display: grid; place-items: center; }
   opacity: 0;
   transition: opacity 3.5s ease;
 }
+.evening.dusk { opacity: 0.35; }
 .evening.on { opacity: 0.75; }
+/* night: the warm sunset goes out of the sky, leaving it deep blue */
+.sunset.night { opacity: 0 !important; transition: opacity 4s ease; }
+.night-blue { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#1d2556 0%, #2a3468 34%, rgba(42, 52, 104, 0) 40%); mix-blend-mode: color; opacity: 0; transition: opacity 4s ease; }
+.night-blue.on { opacity: 0.85; }
+
+/* the moon: up through the dusk, still bright at night */
+#night { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.moon-glow { opacity: 0.16; }
+.moon-dark { fill: rgba(70, 70, 110, 0.35); }
+.moon-lit { stroke: rgba(110, 96, 64, 0.55); stroke-width: 2.5; stroke-linejoin: round; }
+.moon-mark { fill: rgba(140, 124, 90, 0.22); }
 
 .iris {
   position: absolute;

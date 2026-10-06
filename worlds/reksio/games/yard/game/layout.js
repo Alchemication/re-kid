@@ -1,8 +1,9 @@
-// What this play of the yard holds, decided once at load: which main things
-// count (the doghouse and three of the other eight), which creatures are about
-// (two of them), whether the flowers are out, whether it rains, and where
-// everything stands. Not everything at once, so the next play has something
-// new; the last play is remembered and things not seen then are preferred.
+// What this play of the yard holds, decided once at load: which props are out
+// (three of six: the rest come another time), which creatures are about (two
+// of them), whether the flowers are out, whether it rains, where everything
+// stands, and where the sun and the moon are in the sky. Not everything at
+// once, so the next play has something new; the last play is remembered and
+// things not seen then are preferred.
 //
 // Two anchors never move: the doghouse by the house (home, where the day
 // ends) and the gate at the far end (the way out, later into episodes).
@@ -20,12 +21,18 @@ const Layout = (() => {
   const ROW_FROM = 725 // the doghouse's right edge
   const ROW_TO = MAX_X - 70 // the gate's action spot starts here
   const MIN_GAP = 140 // at least a dog's length between two things
-  const MAIN_POOL = ['bowl', 'tap', 'bird', 'dig', 'film', 'trap', 'tree', 'berries'] // doghouse always counts
-  const MAINS_PER_PLAY = 3
+  const PROP_POOL = ['bowl', 'dig', 'film', 'trap', 'tree', 'berries'] // the doghouse, house, tap, bird and gate are always there
+  const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do: more than a day takes (yard.js DAY_THINGS)
   const CREATURE_POOL = ['fly', 'bee', 'spider']
   const CREATURES_PER_PLAY = 2
   const MEMORY_KEY = 'reksio-yard-last-play'
   const RAIN_CHANCE = 0.6 // most plays have a shower; after one, the next leans dry
+  const SUN_X = [380, 1300] // where the sun stands across the sky (screen units, the sky stays put)
+  const MOON_X = [200, 1400] // where the moon comes up
+  const MOON_Y = [80, 190] // how high it climbs (its centre; the wall top is at 334)
+  const MOON_R = [30, 44] // its size
+  const MOON_PHASES = [0.2, 0.35, 0.5, 0.7, 0.85, 1] // how much of it is lit: a thin crescent to full
+  const MOON_TINTS = ['#fbf3d2', '#f4f1e6', '#fde7b0'] // cream, silver, honey
   const PUDDLES = 3 // at most; fewer when the gaps are tight
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
   // Each thing on the ground as drawn: from the left of its drawing or action
@@ -67,7 +74,7 @@ const Layout = (() => {
   const listed = (name, pool) => (params.get(name) || '').split(',').filter((n) => pool.includes(n))
 
   const last = remembered()
-  const mains = ['doghouse', ...pick(MAIN_POOL, MAINS_PER_PLAY, last.mains)]
+  const props = pick(PROP_POOL, PROPS_PER_PLAY, last.props)
   const creatures = pick(CREATURE_POOL, CREATURES_PER_PLAY, last.creatures)
   // ?creatures=fly,spider picks the creatures
   if (params.has('creatures')) creatures.splice(0, creatures.length, ...listed('creatures', CREATURE_POOL))
@@ -79,18 +86,20 @@ const Layout = (() => {
   const rainDrawn = random() < (last.rain ? RAIN_CHANCE / 2 : RAIN_CHANCE)
   const rain = params.has('rain') ? params.get('rain') !== '0' : rainDrawn
   const rainAt = Number(params.get('rain-at')) || null
-  // ?mains=trap,bowl picks main things, and ?mouse-at=SECONDS brings the mouse out, likewise
-  const asked = listed('mains', MAIN_POOL)
-  if (asked.length) mains.splice(1, mains.length, ...asked)
+  // ?props=trap,bowl picks the props, and ?mouse-at=SECONDS brings the mouse out, likewise
+  const asked = listed('props', PROP_POOL)
+  if (asked.length) props.splice(0, props.length, ...asked)
   const mouseAt = params.has('mouse-at') ? Number(params.get('mouse-at')) : null
   // the tree's fruit this play (?fruit=apple|plum|nut forces it), and when its visitor comes
   const FRUITS = ['apple', 'plum', 'nut']
   const fruitDrawn = FRUITS[Math.floor(random() * FRUITS.length)]
   const fruit = FRUITS.includes(params.get('fruit')) ? params.get('fruit') : fruitDrawn
   const visitorAt = params.has('visitor-at') ? Number(params.get('visitor-at')) : null
+  // ?moon-rise=SECONDS: how long the moon takes to come up at dusk
+  const moonRise = params.has('moon-rise') ? Number(params.get('moon-rise')) : null
 
-  // props that are only there when they count this time (the tap is on the wall for good)
-  const hidden = ['bowl', 'dig', 'film', 'trap', 'tree', 'berries'].filter((n) => !mains.includes(n))
+  // props that aren't out this time
+  const hidden = PROP_POOL.filter((n) => !props.includes(n))
   if (!flowers) hidden.push('flowers')
 
   // the row: things in a new order, the spare room shared out unevenly as gaps
@@ -116,18 +125,31 @@ const Layout = (() => {
   // two perches on the wall, over the two widest gaps, left one first
   const perches = widest.slice(0, 2).map(mid).sort((a, b) => a - b)
 
-  // the tray follows the yard from left to right; the bird starts on the first perch
-  const where = (n) => (n === 'doghouse' ? 0 : n === 'bird' ? perches[0] : FOOTPRINTS[n][0] + shift[n])
-  mains.sort((a, b) => where(a) - where(b))
+  // the sky, from its own stream so a seeded play's yard doesn't shift: where
+  // the sun stands, and a different moon every evening (how full, which way
+  // it faces, where it comes up, its size, tilt, colour and marks)
+  const sky = Debug.random('sky')
+  const skyRnd = (lo, hi) => lo + sky() * (hi - lo)
+  const sun = { x: Math.round(skyRnd(...SUN_X)) }
+  const moon = {
+    x: Math.round(skyRnd(...MOON_X)),
+    y: Math.round(skyRnd(...MOON_Y)),
+    r: Math.round(skyRnd(...MOON_R)),
+    lit: MOON_PHASES[Math.floor(sky() * MOON_PHASES.length)],
+    waning: sky() < 0.5,
+    tilt: Math.round(skyRnd(-25, 25)),
+    tint: MOON_TINTS[Math.floor(sky() * MOON_TINTS.length)],
+    marks: Array.from({ length: 3 }, () => ({ x: skyRnd(-0.55, 0.55), y: skyRnd(-0.55, 0.55), r: skyRnd(0.1, 0.22) })),
+  }
 
   try {
-    localStorage.setItem(MEMORY_KEY, JSON.stringify({ mains, creatures, rain }))
+    localStorage.setItem(MEMORY_KEY, JSON.stringify({ props, creatures, rain }))
   } catch {
     // private window or storage blocked: the next play just won't remember
   }
 
   return {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, mains, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, shift, hidden, puddles, perches,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, moonRise, shift, hidden, puddles, perches, sun, moon,
     x: (name) => shift[name] || 0,
   }
 })()
