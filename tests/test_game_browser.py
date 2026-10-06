@@ -357,6 +357,53 @@ class TestLeftAlone:
         assert not y.errors, "\n---\n".join(y.errors)
 
 
+class TestRealInput:
+    """Taps and keys on the real page become the right intents (input.js decides
+    what they mean; this checks what yard.js reads from under the finger)."""
+
+    @staticmethod
+    def intents(y: Yard) -> list[str]:
+        return [
+            e["intent"]
+            for e in y.page.evaluate("yardGame.events()")
+            if e["kind"] == "input"
+        ]
+
+    def test_a_tap_on_a_thing_uses_it(self, yard: callable) -> None:
+        y = yard(STILL)
+        y.page.click("#things [data-thing='house']")  # in view from the start
+        y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
+        assert self.intents(y) == ["go to house"]
+        y.settled()
+
+    def test_a_tap_on_open_sky_walks_there(self, yard: callable) -> None:
+        y = yard(STILL)
+        y.page.mouse.click(1000, 60)  # nothing to tap up there: walk below it
+        y.settled()
+        assert self.intents(y)[0].startswith("walk to ")
+        assert y.state()["reksio"]["x"] > 900
+
+    def test_arrows_walk_and_stop(self, yard: callable) -> None:
+        y = yard(STILL)
+        x0 = y.state()["reksio"]["x"]
+        y.page.keyboard.down("ArrowRight")
+        y.page.wait_for_timeout(800)
+        y.page.keyboard.up("ArrowRight")
+        y.settled()
+        assert self.intents(y) == ["walk to 3650", "stop"]
+        assert y.state()["reksio"]["x"] > x0
+
+    def test_a_key_tap_barks(self, yard: callable) -> None:
+        y = yard(STILL)
+        y.page.keyboard.press("b")
+        y.settled()
+        assert self.intents(y) == ["press", "release"]
+        assert any(
+            e["kind"] == "ask" and e["what"] == "bark"
+            for e in y.page.evaluate("yardGame.events()")
+        )
+
+
 class TestRecorder:
     """Save a bug report from the game, then replay it."""
 

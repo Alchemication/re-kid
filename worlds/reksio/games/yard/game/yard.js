@@ -10,16 +10,14 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Debug, Layout, Painting, Sky, Day, Idle, Sound, Music, Reksio, Creatures, Weather, Things */
+/* global Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
-  const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long
   const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
   const CRITTER_CORE = 0.45 // where a critter's tap circle covers a thing or Reksio, the critter wins only this close to its middle (share of the circle): about its drawn size
-  const PUDDLE_REACH = 40 // a ground tap this far past a puddle's edge (scene units) still means "jump in"
   const X = Layout.x // per-play offset of a movable thing, scene units
 
   const $ = (id) => document.getElementById(id)
@@ -268,14 +266,12 @@
       Debug.trace('relax', { from: lastAct })
       Reksio.relax() // left alone, he was doing something: drop it
     }
-    if (day.ended) {
-      if (endedAt && performance.now() - endedAt > RESTART_AFTER_MS) location.reload()
-      return
-    }
-    if (busy) {
+    const now = Input.ask({ busy, ended: day.ended, endedAt, now: performance.now() })
+    if (now === 'restart') location.reload()
+    else if (now === 'wait') {
       if (pending) Debug.trace('replaced', { by: what })
       pending = fn
-    } else fn()
+    } else if (now === 'run') fn()
   }
 
   /** Where in the yard (scene units) a pointer event landed. */
@@ -287,11 +283,6 @@
     return { x: at.x + camX, y: at.y }
   }
 
-  /** Is a thing or Reksio also under the pointer (ground spots don't count)? */
-  function somethingUnder(e) {
-    return document.elementsFromPoint(e.clientX, e.clientY).some((el) =>
-      !el.closest('[data-critter]') && (el.closest('#things [data-thing]') || el.closest('#reksio')))
-  }
 
   /** Did the pointer land near the critter's middle, where it is drawn? */
   function onCritter(critter, e) {
@@ -308,7 +299,7 @@
     [/^chase (\w+)$/, (m) => command(() => chase(m[1]), m[0])],
     [/^walk to (-?\d+)$/, (m) => command(() => Reksio.walkTo(Number(m[1])), m[0])],
     [/^jump in puddle at (-?\d+)$/, (m) => {
-      const p = Weather.puddles.find((q) => Math.abs(q.x - Number(m[1])) < q.rx + PUDDLE_REACH)
+      const p = Input.puddleAt(Number(m[1]), Weather.puddles)
       return p ? command(() => jumpIn(p), m[0]) : command(() => Reksio.walkTo(Number(m[1])), m[0]) // dried up since
     }],
     [/^bark$/, () => command(() => Reksio.bark(), 'bark')],
@@ -326,26 +317,25 @@
     Debug.check(`known intent: ${intent}`, false)
   }
 
-  /** What a tap at this pointer event means. */
-  function tapIntent(e) {
-    let target = e.target
-    // a critter's tap circle is wide; over a thing or Reksio it gives way
-    // except near its middle
-    const critter = target.closest('[data-critter]')
-    if (critter && somethingUnder(e) && !onCritter(critter, e)) {
-      target = document.elementsFromPoint(e.clientX, e.clientY).find((el) => !el.closest('[data-critter]')) || target
-    } else if (critter) return `chase ${critter.dataset.critter}`
-    const thing = target.closest('#things [data-thing]')
-    if (thing) return `go to ${thing.dataset.thing}`
-    if (target.closest('#reksio')) return 'press'
-    // a puddle is drawn on the ground, so it wins over the faint action spots
+  /** What is under the pointer (input.js decides what the tap means). */
+  function hitAt(e) {
+    const critter = e.target.closest('[data-critter]')
+    const below = critter ? document.elementsFromPoint(e.clientX, e.clientY).find((el) => !el.closest('[data-critter]')) : e.target
     const { x, y } = yardAt(e)
-    const puddle = y > Painting.GROUND_TOP && Weather.puddles.find((p) => Math.abs(p.x - x) < p.rx + PUDDLE_REACH)
-    if (puddle) return `jump in puddle at ${Math.round(puddle.x)}`
-    const spot = target.closest('#spots [data-thing]')
-    if (spot) return `go to ${spot.dataset.thing}`
-    return `walk to ${Math.round(x)}`
+    return {
+      critter: critter ? critter.dataset.critter : null,
+      nearMiddle: !!critter && onCritter(critter, e),
+      under: {
+        thing: below?.closest('#things [data-thing]')?.dataset.thing,
+        reksio: !!below?.closest('#reksio'),
+        spot: below?.closest('#spots [data-thing]')?.dataset.thing,
+      },
+      x,
+      y,
+    }
   }
+
+  const tapIntent = (e) => Input.tap(hitAt(e), { groundTop: Painting.GROUND_TOP, puddles: Weather.puddles })
 
   $('stage').addEventListener('pointerdown', (e) => {
     if (e.target.closest('#fullscreen')) return
@@ -410,33 +400,23 @@
     return best && best.name
   }
 
+  let holdKey = null
   document.addEventListener('keydown', (e) => {
-    if (e.metaKey || e.ctrlKey || e.altKey) return
-    if (['Shift', 'Meta', 'Control', 'Alt', 'CapsLock', 'Tab', 'Escape'].includes(e.key)) return
+    const key = { key: e.key, repeat: e.repeat, modified: e.metaKey || e.ctrlKey || e.altKey }
+    if (!Input.ownsKey(key)) return
     e.preventDefault()
     Sound.ensure()
     Music.start()
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      if (!e.repeat) perform(`walk to ${e.key === 'ArrowLeft' ? Reksio.MIN_X : Reksio.MAX_X}`)
-      return
-    }
-    if (e.repeat) return
-    if (e.key === ' ' || e.key === 'Enter') {
-      const name = nearest()
-      return perform(name ? `go to ${name}` : 'bark')
-    }
-    // any other key: tap to bark, hold to stretch
-    holdKey = e.key
-    perform('press')
+    const intent = Input.keyDown(key, { nearest: nearest(), minX: Reksio.MIN_X, maxX: Reksio.MAX_X })
+    if (!intent) return
+    if (intent === 'press') holdKey = e.key // any other key: tap to bark, hold to stretch
+    perform(intent)
   })
 
-  let holdKey = null
   document.addEventListener('keyup', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform('stop')
-    if (e.key === holdKey) {
-      holdKey = null
-      perform('release')
-    }
+    const intent = Input.keyUp(e.key, holdKey)
+    if (intent === 'release') holdKey = null
+    if (intent) perform(intent)
   })
 
   const release = () => hold && perform('release')

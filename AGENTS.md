@@ -149,7 +149,7 @@ the edge cases that would let bad data pass silently.
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
-  `shower.js`, `idle.js`, `layout.js`): the part that draws tells them what
+  `shower.js`, `idle.js`, `input.js`, `layout.js`): the part that draws tells them what
   happened and does what they say. Drawing parts are tested here too, on a
   pretend page and clock: `load(…, { dom: true, globals })`, then
   `await page.advance(ms)` runs the timers and animation frames due (all
@@ -182,7 +182,8 @@ before a commit.
 | `weather.js` / `shower.js` | `"drops or shakeOff or puddle or snail"` |
 | `day.js` / `sky.js` / the end | `"TestWholePlay"` |
 | `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay"` |
-| `layout.js`, input, anything shared | the whole suite |
+| `input.js`, taps and keys | `"TestRealInput"` |
+| `layout.js`, anything shared | the whole suite |
 
 **Adding a gag:** add its tests (tables in `test_game_browser.py`), run the
 browser tests for it (`-k name`), look at it: a timed-screenshot contact sheet
