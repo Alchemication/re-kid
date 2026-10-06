@@ -12,7 +12,7 @@
 // Everything here lives inside the tree's own group, in the coordinates it
 // is drawn in (index.html); Layout.x('tree') moves the lot.
 
-/* global Clock, Debug, Layout, Sound, Music, Reksio */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio */
 /* exported Tree */
 const Tree = (() => {
   const TRUNK_X = 1660 // drawn
@@ -199,17 +199,16 @@ const Tree = (() => {
     const g = el('g', { class: 'fallen' }, layer)
     el('use', { href: `#fruit-${Layout.fruit}` }, g)
     const fall = Math.max(200, (toY - f.y) * 1.3)
-    await g.animate(
+    await Motion.endAt(
+      g,
       [
         { transform: at(f.x, f.y), easing: 'ease-in' },
         { transform: at((f.x + toX) / 2, toY), offset: 0.7, easing: 'ease-out' },
         { transform: at((f.x + toX * 3) / 4, toY - 18), offset: 0.85, easing: 'ease-in' },
         { transform: at(toX, toY) },
       ],
-      { duration: fall + 350, fill: 'forwards' },
-    ).finished
-    g.getAnimations().forEach((a) => a.cancel())
-    g.style.transform = at(toX, toY)
+      { duration: fall + 350 },
+    )
     if (toY >= FRUIT_REST_Y - 1) {
       if (nut()) Sound.tok()
       else Sound.plop()
@@ -225,9 +224,7 @@ const Tree = (() => {
     Sound.bonk()
     Music.react.sneeze()
     const rest = hx + Reksio.facing * 70
-    await g.animate([{ transform: at(hx, head.y - 40) }, { transform: at((hx + rest) / 2, head.y - 90) }, { transform: at(rest, FRUIT_REST_Y) }], { duration: 600, easing: 'ease-in', fill: 'forwards' }).finished
-    g.getAnimations().forEach((a) => a.cancel())
-    g.style.transform = at(rest, FRUIT_REST_Y)
+    await Motion.endAt(g, [{ transform: at(hx, head.y - 40) }, { transform: at((hx + rest) / 2, head.y - 90) }, { transform: at(rest, FRUIT_REST_Y) }], { duration: 600, easing: 'ease-in' })
     fallen.push({ el: g, x: rest, bites: 0, eater: null })
     for (let i = 0; i < 3; i++) Clock.after(i * 220, () => fx.twinkle(head.x + rnd(-50, 30), head.y - 70 + rnd(-20, 20)))
     await Reksio.sit(1300)
@@ -320,7 +317,7 @@ const Tree = (() => {
     }
     f.masks?.forEach((m) => m.remove())
     await wait(3000)
-    await f.el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' }).finished
+    await Motion.endAt(f.el, [{ opacity: 1 }, { opacity: 0 }], { duration: 600 })
     f.el.remove()
   }
 
@@ -413,9 +410,7 @@ const Tree = (() => {
     // off up the trunk, into the leaves
     await scamper(TRUNK_X + 10, GROUND)
     await scamper(TRUNK_X + 10, 480)
-    await q.g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' }).finished
-    q.g.getAnimations().forEach((a) => a.cancel())
-    q.g.style.opacity = '0'
+    await Motion.endAt(q.g, [{ opacity: 1 }, { opacity: 0 }], { duration: 300 })
     q.up = true
     q.busy = false
   }

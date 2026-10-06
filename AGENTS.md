@@ -128,9 +128,11 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     that must always hold becomes a `Debug.check` rule in `checkRules`;
   - Reksio is drawn from his state: `draw()` in reksio.js paints every body
     part each frame from his pose, a gesture's `held` position, or walking
-    motion. Animations only move a part between those; never freeze a body
-    part with `fill: 'forwards'` (use `holdAt`): a frozen animation is a
-    second source of truth that outlives the state;
+    motion. Animations only move a part between those. Nothing in the
+    game is frozen with `fill: 'forwards'`: a frozen animation is a second
+    source of truth that a cut-short gag leaves behind. Set the end on the
+    element and animate to it (`Motion.endAt`, debug.js; for Reksio's body,
+    `holdAt` or a pose); a new gag follows the same rule;
   - a new page-address flag goes in layout.js, makes its random draw either
     way (so seeded plays don't shift), and is listed in README.
 - **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build

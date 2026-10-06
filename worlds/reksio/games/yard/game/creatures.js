@@ -11,7 +11,7 @@
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Clock, Debug, Sound, Reksio, Layout, Weather */
+/* global Clock, Debug, Motion, Sound, Reksio, Layout, Weather */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -110,7 +110,7 @@ const Creatures = (() => {
     /** Reveal strand i over ms (the spider spinning it). */
     spin(i, ms) {
       const s = this.strands[i]
-      return s.path.animate([{ strokeDashoffset: s.len }, { strokeDashoffset: 0 }], { duration: ms, fill: 'forwards' }).finished
+      return Motion.endAt(s.path, [{ strokeDashoffset: s.len }, { strokeDashoffset: 0 }], { duration: ms })
     },
     /** Tremble when something lands in it. */
     shiver() {
@@ -583,9 +583,10 @@ const Creatures = (() => {
     tuck(on) {
       if (this.tucked === on) return
       this.tucked = on
-      this.body.animate(
+      Motion.endAt(
+        this.body,
         on ? [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }] : [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
-        { duration: on ? 250 : 1600, easing: 'ease-out', fill: 'forwards' },
+        { duration: on ? 250 : 1600, easing: 'ease-out' },
       )
       if (on) {
         this.peekAt = world.t + rnd(3, 6)

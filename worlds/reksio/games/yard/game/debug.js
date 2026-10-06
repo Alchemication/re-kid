@@ -7,6 +7,9 @@
 //   pauses rather than running on unseen; its animations and sound pause too.
 //   Everything that plays out over time uses it, never setTimeout or
 //   performance.now (sound's own audio clock aside).
+// - Motion.endAt: animate something to where it ends up, setting the end on
+//   the element first, so the drawing never depends on an animation frozen on
+//   its last frame (fill: 'forwards'), which a cut-short gag can leave behind.
 //
 // - Random numbers: every part of the game draws from its own stream, made
 //   from one seed. `?seed=N` in the page address replays a play: the layout
@@ -31,7 +34,7 @@
 //   on its own.
 
 /* global Layout */
-/* exported Clock, Debug */
+/* exported Clock, Motion, Debug */
 const Clock = (() => {
   const MAX_STEP_MS = 100 // a longer frame (the page was hidden, or very busy) counts as this: the game pauses, it doesn't jump
   let now = 0
@@ -108,6 +111,29 @@ const Clock = (() => {
       listeners.push(fn)
     },
   }
+})()
+
+const Motion = (() => {
+  const NOT_STYLE = new Set(['offset', 'easing', 'composite'])
+
+  /**
+   * Animate `el` through `keyframes` and leave it where they end: the end is
+   * set on the element first (its style), so the animation only covers the
+   * move; whether it finishes or is cut short, the element shows the end.
+   * With a delay, it keeps the first keyframe until it starts. Resolves when
+   * it gets there; rejects if cut short (callers that await it decide).
+   */
+  function endAt(el, keyframes, opts = {}) {
+    for (const [k, v] of Object.entries(keyframes[keyframes.length - 1])) {
+      if (!NOT_STYLE.has(k)) el.style[k] = v
+    }
+    const anim = el.animate(keyframes, { ...opts, fill: opts.delay ? 'backwards' : 'none' })
+    const done = anim.finished
+    done.catch(() => 'cut short: the element already shows its end') // whoever awaits it hears; nobody else need
+    return done
+  }
+
+  return { endAt }
 })()
 
 const Debug = (() => {

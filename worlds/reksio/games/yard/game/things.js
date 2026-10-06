@@ -11,7 +11,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Layout, Sound, Music, Reksio, Tree */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -248,8 +248,7 @@ const Things = (() => {
       await scurry(CHEESE.x + 50)
       if (mouse !== 'wanting') return
       // reaching for the cheese… and the trap: no!
-      await $('mouse-head').animate([{ transform: 'rotate(0)' }, { transform: 'translateX(5px) rotate(10deg)' }], { duration: 400, fill: 'forwards' }).finished
-      $('mouse-head').getAnimations().forEach((a) => a.cancel())
+      await $('mouse-head').animate([{ transform: 'rotate(0)' }, { transform: 'translateX(5px) rotate(10deg)' }], { duration: 400 }).finished
       Sound.from(Math.abs(mousePos.x + X('trap') - Reksio.x), Sound.mouse)
       if (mouse !== 'wanting') return
       await scurry(MOUSE_WAITS + rnd(0, 30))
@@ -292,19 +291,20 @@ const Things = (() => {
       burst(Reksio.x + PAW_REACH, GROUND, 5, 'dust', { height: 22, reach: 40, size: 3.5 })
       // the thump sets the trap off: SNAP, it jumps, and the cheese flies
       Sound.trap()
-      bar.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(180deg)' }], { duration: 90, easing: 'ease-in', fill: 'forwards' })
+      Motion.endAt(bar, [{ transform: 'rotate(0)' }, { transform: 'rotate(180deg)' }], { duration: 90, easing: 'ease-in' })
       trapBody.animate(
         [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-46px) rotate(-14deg)', offset: 0.45 }, { transform: 'translateY(0) rotate(0)' }],
         { duration: 520, easing: 'ease-out' },
       )
       const dx = CHEESE_LANDS - CHEESE.x
-      cheese.animate(
+      Motion.endAt(
+        cheese,
         [
           { transform: 'translate(0, 0) rotate(0)' },
           { transform: `translate(${dx * 0.5}px, -90px) rotate(200deg)`, offset: 0.5 },
           { transform: `translate(${dx}px, ${GROUND - CHEESE.y - 4}px) rotate(360deg)` },
         ],
-        { duration: 700, easing: 'ease-in-out', fill: 'forwards' },
+        { duration: 700, easing: 'ease-in-out' },
       )
     })
     await Reksio.startle()
@@ -336,10 +336,11 @@ const Things = (() => {
       Reksio.face(1)
       Reksio.nod(16, 600)
       Sound.scrape()
-      await $('trap-body').animate(
+      await Motion.endAt(
+        $('trap-body'),
         [{ transform: 'translateX(0) rotate(0)', opacity: 1 }, { transform: 'translateX(70px) rotate(8deg)', opacity: 1, offset: 0.5 }, { transform: 'translateX(120px) rotate(20deg)', opacity: 0 }],
-        { duration: 1000, easing: 'ease-out', fill: 'forwards' },
-      ).finished
+        { duration: 1000, easing: 'ease-out' },
+      )
     }
     await home
     mouse = 'fed'
@@ -438,11 +439,11 @@ const Things = (() => {
     Sound.toss()
     const catchY = m.y - CATCH_HOP * 1.3
     if (!extra) {
-      const flight = berry.animate(
+      const flightDone = Motion.endAt(
+        berry,
         [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x + 12, m.y - TOSS_UP), offset: 0.55, easing: 'ease-in' }, at(m.x + 4, catchY)],
-        { duration: 1100, fill: 'forwards' },
+        { duration: 1100 },
       )
-      const flightDone = flight.finished // taken now: see Reksio's ending()
       await wait(1100 - (480 + CATCH_HOP * 3) * 0.55) // jump so he's at the top as it comes down
       const jump = Reksio.hop(CATCH_HOP, 1)
       await flightDone
@@ -453,11 +454,11 @@ const Things = (() => {
     } else {
       // too far: it sails over his head and lands behind him
       const lands = m.x - Reksio.facing * 170
-      const flight = berry.animate(
+      const flightDone = Motion.endAt(
+        berry,
         [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x - Reksio.facing * 60, m.y - TOSS_UP), offset: 0.5, easing: 'ease-in' }, at(lands, 806)],
-        { duration: 1300, fill: 'forwards' },
+        { duration: 1300 },
       )
-      const flightDone = flight.finished // taken now: see Reksio's ending()
       await wait(500)
       await Reksio.hop(CATCH_HOP, 1)
       Sound.snap() // snaps at nothing
@@ -492,8 +493,7 @@ const Things = (() => {
         await Reksio.duck(true)
         const nap = $('nap')
         const head = $('nap-head')
-        await nap.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, fill: 'forwards' }).finished
-        nap.style.opacity = '1'
+        await Motion.endAt(nap, [{ opacity: 0 }, { opacity: 1 }], { duration: 350 })
         // the extra: he dreams of a bone, paws twitching
         const dream = $('dream')
         if (extra) dream.animate([{ opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }], { duration: 5200 })
@@ -525,8 +525,7 @@ const Things = (() => {
         }
         Sound.yawn()
         await wait(500)
-        await nap.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' }).finished
-        nap.style.opacity = '0'
+        await Motion.endAt(nap, [{ opacity: 1 }, { opacity: 0 }], { duration: 250 })
         await Reksio.duck(false)
       },
     },
@@ -546,10 +545,9 @@ const Things = (() => {
           Sound.scrape()
           const body = $('bowl-body')
           Reksio.nod(14, 500)
-          await body.animate([{ transform: `translateX(${bowlPushed}px)` }, { transform: `translateX(${bowlPushed + push}px)` }], { duration: 500, easing: 'ease-out', fill: 'forwards' }).finished
-          bowlPushed += push
-          body.getAnimations().forEach((a) => a.cancel())
-          body.style.transform = `translateX(${bowlPushed}px)`
+          const from = bowlPushed
+          bowlPushed += push // the state first: the animation only covers the move
+          await Motion.endAt(body, [{ transform: `translateX(${from}px)` }, { transform: `translateX(${bowlPushed}px)` }], { duration: 500, easing: 'ease-out' })
           await Reksio.lick()
           foodLeft = 1
           food.style.transform = 'scaleY(1)'
@@ -574,7 +572,7 @@ const Things = (() => {
         const handle = $('tap-handle')
         const water = $('water')
         Sound.squeak()
-        handle.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(90deg)' }], { duration: 300, fill: 'forwards' })
+        Motion.endAt(handle, [{ transform: 'rotate(0)' }, { transform: 'rotate(90deg)' }], { duration: 300 })
         await wait(300)
         water.style.opacity = '1'
         const flow = water.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -80 }], { duration: 400, iterations: Infinity })
@@ -592,7 +590,7 @@ const Things = (() => {
         await drinking
         flow.cancel()
         water.style.opacity = '0'
-        handle.animate([{ transform: 'rotate(90deg)' }, { transform: 'rotate(0)' }], { duration: 300, fill: 'forwards' })
+        Motion.endAt(handle, [{ transform: 'rotate(90deg)' }, { transform: 'rotate(0)' }], { duration: 300 })
         if (extra) await Reksio.startle()
         await wait(250)
         for (let i = 0; i < (extra ? 2 : 1); i++) {
@@ -664,7 +662,7 @@ const Things = (() => {
           if (extra) {
             // the extra: the reel rolls off and he chases it, then noses it back
             const roll = (from, to, ms) =>
-              reel.animate([{ transform: `translateX(${from}px) rotate(${from * 2.4}deg)` }, { transform: `translateX(${to}px) rotate(${to * 2.4}deg)` }], { duration: ms, easing: 'ease-out', fill: 'forwards' }).finished
+              Motion.endAt(reel, [{ transform: `translateX(${from}px) rotate(${from * 2.4}deg)` }, { transform: `translateX(${to}px) rotate(${to * 2.4}deg)` }], { duration: ms, easing: 'ease-out' })
             Sound.reel()
             const away = roll(0, -170, 1300)
             await wait(200)
@@ -677,7 +675,6 @@ const Things = (() => {
             Reksio.nod(12, 500)
             Sound.reel()
             await roll(-170, 0, 1100)
-            reel.getAnimations().forEach((a) => a.cancel())
             await Reksio.bark()
             return
           }
@@ -719,7 +716,7 @@ const Things = (() => {
         const reel = $('reel')
         reel.setAttribute('opacity', '1')
         reel.animate([{ transform: 'scale(0.2) rotate(0)' }, { transform: 'scale(1) rotate(900deg)' }], { duration: 900, easing: 'ease-out' })
-        await strip.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 900, easing: 'ease-in', fill: 'forwards' }).finished
+        await Motion.endAt(strip, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 900, easing: 'ease-in' })
         strip.style.visibility = 'hidden'
         await Reksio.hop(50, 2)
       },
@@ -761,10 +758,11 @@ const Things = (() => {
           await digFor(1000, 4)
           Reksio.holdBone(false)
           bone.style.opacity = '1'
-          await bone.animate(
+          await Motion.endAt(
+            bone,
             [{ transform: 'translateY(-30px) scale(1)', opacity: 1 }, { transform: 'translateY(26px) scale(0.6)', opacity: 0 }],
-            { duration: 500, easing: 'ease-in', fill: 'forwards' },
-          ).finished
+            { duration: 500, easing: 'ease-in' },
+          )
           bone.style.opacity = '0'
           for (let i = 0; i < 3; i++) {
             Sound.from(150, Sound.dig)
@@ -786,13 +784,14 @@ const Things = (() => {
           await digFor(1500, 9)
         }
         bone.style.opacity = '1'
-        await bone.animate(
+        await Motion.endAt(
+          bone,
           [{ transform: 'translateY(30px) scale(0.4)' }, { transform: 'translateY(-50px) scale(1.2)' }, { transform: 'translateY(-30px) scale(1)' }],
-          { duration: 600, easing: 'ease-out', fill: 'forwards' },
-        ).finished
+          { duration: 600, easing: 'ease-out' },
+        )
         Music.react.wish()
         await wait(500)
-        bone.getAnimations().forEach((a) => a.cancel())
+        bone.style.transform = ''
         bone.style.opacity = '0'
         Reksio.holdBone(true)
         Sound.original('bark') // easter egg: his original quick barks, if the clip exists

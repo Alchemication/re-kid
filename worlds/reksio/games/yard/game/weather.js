@@ -12,7 +12,7 @@
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
 
-/* global Debug, Layout, Painting, Shower, Sound, Music */
+/* global Debug, Layout, Motion, Painting, Shower, Sound, Music */
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -181,9 +181,9 @@ const Weather = (() => {
     if (!Layout.flowers) return
     document.querySelectorAll('#flowers .sway').forEach((stem, i) => {
       const grow = stem.querySelector('.grow') || wrapForGrowth(stem)
-      grow.animate([{ transform: 'scaleY(1)' }, { transform: `scaleY(${1.15 + i * 0.05})` }], { duration: 5000, delay: i * 600, easing: 'ease-out', fill: 'forwards' })
+      Motion.endAt(grow, [{ transform: 'scaleY(1)' }, { transform: `scaleY(${1.15 + i * 0.05})` }], { duration: 5000, delay: i * 600, easing: 'ease-out' })
       const bloom = stem.querySelector('.bloom')
-      bloom.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.3)' }], { duration: 3000, delay: 2500 + i * 600, easing: 'ease-out', fill: 'forwards' })
+      Motion.endAt(bloom, [{ transform: 'scale(1)' }, { transform: 'scale(1.3)' }], { duration: 3000, delay: 2500 + i * 600, easing: 'ease-out' })
     })
   }
 

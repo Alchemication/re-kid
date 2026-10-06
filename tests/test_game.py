@@ -92,20 +92,21 @@ class TestConventions:
         ]
         assert not big, f"split these: {big}"
 
-    def test_no_body_part_is_frozen_in_a_pose(self) -> None:
-        """Reksio's drawing comes from his state, painted every frame (reksio.js
-        draw()). An animation that freezes a body part on its last frame
-        (fill: 'forwards') is a second source of truth that can outlive the
-        state: he stayed drawn sitting while the game thought he stood (Adam's
-        reports, 2026-10-06). Only the whole-dog scaler (the doghouse duck) may."""
-        reksio = ROOT / "worlds/reksio/games/yard/game/reksio.js"
+    @pytest.mark.parametrize("game", GAMES, ids=GAME_IDS)
+    def test_nothing_is_frozen_on_its_last_frame(self, game: Path) -> None:
+        """What is drawn comes from the game's state: an animation frozen on its
+        last frame (fill: 'forwards') is a second source of truth that a cut-short
+        gag leaves behind. Reksio stayed drawn sitting while the game thought he
+        stood (Adam's reports, 2026-10-06). Use Motion.endAt (debug.js), or for
+        Reksio's body holdAt / a pose (reksio.js)."""
         bad = [
-            f"reksio.js:{i}"
-            for i, line in enumerate(reksio.read_text().splitlines(), 1)
-            if "fill: 'forwards'" in line and "scaler.animate" not in line
+            f"{p.name}:{i}"
+            for p in scripts(game)
+            for i, line in enumerate(p.read_text().splitlines(), 1)
+            if "fill: 'forwards'" in line and not line.lstrip().startswith("//")
         ]
         assert not bad, (
-            f"hold it in `held` (holdAt) or a pose, not a frozen animation: {bad}"
+            f"set the end on the element (Motion.endAt), don't freeze it: {bad}"
         )
 
     @pytest.mark.parametrize("game", GAMES, ids=GAME_IDS)

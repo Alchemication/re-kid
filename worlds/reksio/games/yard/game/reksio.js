@@ -3,7 +3,7 @@
 // dachshund stretch, and his small moves (bark, nod, shake, hop, sniff,
 // scratch, ducking into the doghouse). Drawn in index.html.
 
-/* global Clock, Debug, Sound, Music, Creatures, Layout */
+/* global Clock, Debug, Motion, Sound, Music, Creatures, Layout */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
@@ -754,23 +754,10 @@ const Reksio = (() => {
   }
 
   /** Shrink into (or grow out of) the doghouse door. */
-  let ducked = null // the "inside" animation, held while he is in the doghouse
-
   async function duck(into) {
     const out = { transform: `scale(${SCALE})`, opacity: 1 }
     const inside = { transform: `translate(0, -70px) scale(${SCALE * 0.55})`, opacity: 0 }
-    if (into) {
-      ducked = scaler.animate([out, inside], { duration: 420, easing: 'ease-in-out', fill: 'forwards' })
-      await ducked.finished
-      return
-    }
-    const back = scaler.animate([inside, out], { duration: 420, easing: 'ease-in-out', fill: 'forwards' })
-    await back.finished
-    // Cancel both: if the held "inside" animation outlived this one, he
-    // would stay invisible while still walking around.
-    back.cancel()
-    if (ducked) ducked.cancel()
-    ducked = null
+    await Motion.endAt(scaler, into ? [out, inside] : [inside, out], { duration: 420, easing: 'ease-in-out' })
   }
 
   /** Carry a bone in his mouth (or not). */
