@@ -188,8 +188,9 @@ wake Reksio at home.
 
 ## Next steps
 
-1. **Adam: try the yard** (`uv run python main.py play reksio`), alone and
-   then with Eliot. What is in it, part by part and what each is based on, is
+1. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
+   device at https://alchemication.github.io/re-kid/, with the synthesised
+   bark), alone and then with Eliot. What is in it, part by part and what each is based on, is
    in `games/yard/brief.yaml`; the testing flags and console helpers are in
    README ("Debugging the yard"). In short: a wide, wordless yard where every
    tap gets an answer; each play counts the doghouse plus three of eight other

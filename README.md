@@ -32,6 +32,7 @@ worlds/<id>/
   games/<game>/tests/   the game's JS unit tests (node:test)
   media/intro/          intro video clips (downloaded, gitignored)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
+.github/workflows/pages.yml  publishes the games to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)
 ```
 
@@ -66,6 +67,16 @@ uv run python main.py schema world|sources|episodes|intro|brief
 Development: `uv run ruff check . && uv run ruff format . && uv run pytest`,
 `npx --yes eslint@10.12.0 worlds` for the game scripts, and
 `uv run pytest -m browser -n 4` (a few minutes) after changing a game.
+
+## The site
+
+Every push to `main` that changes a game publishes it to GitHub Pages
+(`.github/workflows/pages.yml`): https://alchemication.github.io/re-kid/
+(forwards to the yard; each game is at `<site>/<world>/<game>/`). Only the
+game folders go out. The original barks are local only, so the site plays the
+synthesised bark; on an iPhone or iPad the sound plays even with the ringer
+switch on silent (Safari 17+). Bug reports saved on the site replay locally:
+`main.py replay` maps them to this repository's copy of the game.
 
 ## Debugging the yard
 

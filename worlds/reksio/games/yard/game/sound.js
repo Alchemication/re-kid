@@ -24,6 +24,9 @@ const Sound = (() => {
   /** Create the audio context on the first tap (browsers require a gesture). */
   function ensure() {
     if (!ctx) {
+      // iPhone and iPad mute web audio when the ringer switch is on silent;
+      // "playback" (Safari 17+) makes the game sound like a video does
+      if (navigator.audioSession) navigator.audioSession.type = 'playback'
       ctx = new (window.AudioContext || window.webkitAudioContext)()
       master = ctx.createGain()
       master.gain.value = VOLUME

@@ -16,14 +16,17 @@ import shutil
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
 from config import (
     BUG_REPORT_DIR,
     BUG_REPORT_GLOB,
     BUG_REPORT_VERSION,
+    GAME_PAGE,
+    GAMES_DIR,
     REPLAY_SHEET_COLUMNS,
     REPLAY_SHEET_WIDTH,
+    WORLDS_DIR,
 )
 
 logger = logging.getLogger(__name__)
@@ -78,20 +81,39 @@ def load_report(path: Path) -> dict:
             raise ReplayError(
                 f"{path} has no {key!r}. Save a new report from the current game."
             )
-    page = Path(urlsplit(report["replayUrl"]).path)
+    page = local_page(report["replayUrl"])
     if not page.is_file():
         raise ReplayError(
-            f"The report's game page {page} isn't here. Replay it on the machine that saved it."
+            f"The report's game page {page} isn't here. Replay it in the repository "
+            "it came from (a file:// report: on the machine that saved it)."
         )
     return report
 
 
+def local_page(url: str) -> Path:
+    """This repository's copy of the game page a report was saved on.
+
+    A report saved from disk has the page's own path. One saved on the
+    published site (``<site>/<world>/<game>/``, see ``.github/workflows/pages.yml``)
+    maps to that world's game here, so replays run on the local copy.
+    """
+    parts = urlsplit(url)
+    if parts.scheme == "file":
+        return Path(unquote(parts.path))
+    segments = [s for s in parts.path.split("/") if s and s != "index.html"]
+    if len(segments) < 2:
+        raise ReplayError(
+            f"Can't tell which game {url} is: expected <site>/<world>/<game>/."
+        )
+    world, game = segments[-2:]
+    return WORLDS_DIR / world / GAMES_DIR / game / GAME_PAGE
+
+
 def replay_url(report: dict) -> str:
-    """The report's play, seeded, with the debug overlay on."""
-    parts = urlsplit(report["replayUrl"])
-    query = dict(parse_qsl(parts.query, keep_blank_values=True))
+    """The report's play on the local game page, seeded, with the debug overlay on."""
+    query = dict(parse_qsl(urlsplit(report["replayUrl"]).query, keep_blank_values=True))
     query["debug"] = ""
-    return urlunsplit(parts._replace(query=urlencode(query)))
+    return f"{local_page(report['replayUrl']).resolve().as_uri()}?{urlencode(query)}"
 
 
 def differences(recorded: dict, replayed: dict) -> dict:

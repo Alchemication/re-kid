@@ -60,6 +60,15 @@ class TestLoadReport:
         with pytest.raises(ReplayError, match="Can't read"):
             replay.load_report(path)
 
+    def test_loads_a_report_saved_on_the_site(self, tmp_path: Path) -> None:
+        url = "https://alchemication.github.io/re-kid/reksio/yard/?seed=3"
+        assert replay.load_report(write(tmp_path, report(replayUrl=url)))["seed"] == 3
+
+    def test_rejects_a_site_game_this_repo_lacks(self, tmp_path: Path) -> None:
+        url = "https://example.org/re-kid/reksio/nosuchgame/?seed=3"
+        with pytest.raises(ReplayError, match="isn't here"):
+            replay.load_report(write(tmp_path, report(replayUrl=url)))
+
     def test_rejects_a_game_page_from_another_machine(self, tmp_path: Path) -> None:
         data = report(replayUrl="file:///elsewhere/index.html?seed=3")
         with pytest.raises(ReplayError, match="machine that saved it"):
@@ -79,10 +88,36 @@ class TestLatestReport:
             replay.latest_report(tmp_path)
 
 
+class TestLocalPage:
+    def test_a_file_report_keeps_its_page(self) -> None:
+        assert replay.local_page(GAME.as_uri() + "?seed=1") == GAME
+
+    def test_a_file_path_with_spaces(self) -> None:
+        assert replay.local_page("file:///a%20b/index.html") == Path("/a b/index.html")
+
+    def test_a_site_report_maps_to_this_repo(self) -> None:
+        for url in [
+            "https://alchemication.github.io/re-kid/reksio/yard/?seed=1",
+            "https://alchemication.github.io/re-kid/reksio/yard/index.html?seed=1",
+            "http://localhost:8000/reksio/yard/",
+        ]:
+            assert replay.local_page(url) == GAME, url
+
+    def test_a_site_address_without_a_game(self) -> None:
+        with pytest.raises(ReplayError, match="which game"):
+            replay.local_page("https://alchemication.github.io/")
+
+
 class TestReplayHelpers:
     def test_url_keeps_the_flags_and_adds_debug(self) -> None:
         url = replay.replay_url(report())
         assert "mains=trap" in url and "seed=3" in url and "debug=" in url
+
+    def test_url_of_a_site_report_is_the_local_page(self) -> None:
+        site = "https://alchemication.github.io/re-kid/reksio/yard/?seed=3&rain=1"
+        url = replay.replay_url(report(replayUrl=site))
+        assert url.startswith(GAME.as_uri() + "?")
+        assert "seed=3" in url and "rain=1" in url
 
     def test_differences_skip_what_always_drifts(self) -> None:
         recorded = {"busy": False, "camX": 10, "done": ["bowl"]}

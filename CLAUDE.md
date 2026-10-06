@@ -107,7 +107,9 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   (generated: don't edit it, rebuild it). Original audio only as easter eggs,
   plus the bark: `main.py barks` packs the original barks into the world's
   gitignored `audio/barks.js`, and the game falls back to a synthesised bark
-  without it. Never commit original audio.
+  without it. Never commit original audio. Every push to `main` that touches
+  a game folder publishes it to GitHub Pages (`.github/workflows/pages.yml`,
+  `<site>/<world>/<game>/`): only what is committed in `game/` goes out.
 - **Game debuggability (`debug.js`, loaded first):** every bug must be
   replayable, so:
   - randomness comes from `Debug.random('<part>')`, never `Math.random`
