@@ -42,6 +42,9 @@ Research happens in Claude Code sessions (web search/fetch, reading frames), not
 through API calls from `main.py`. Write results straight into the YAML files and
 run `uv run python main.py validate <world>` before reporting done.
 
+Procedures live in skills (`.claude/skills/`): `new-episode` breaks down an
+episode. Each run ends with a retro that proposes edits to its skill.
+
 Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`):
 
 - `verified` — two independent credible sources, or one primary (`studio`, `archive`).

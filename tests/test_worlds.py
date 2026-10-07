@@ -174,6 +174,78 @@ class TestValidateIntro:
         assert report.warnings == []
 
 
+class TestValidateEpisodeBreakdown:
+    def _write(self, root: Path, breakdown: dict | str, name: str = "ep-1") -> None:
+        base = root / "demo" / "episodes"
+        base.mkdir(exist_ok=True)
+        (base / "index.yaml").write_text(yaml.safe_dump({"episodes": [episode()]}))
+        text = breakdown if isinstance(breakdown, str) else yaml.safe_dump(breakdown)
+        (base / f"{name}.yaml").write_text(text)
+
+    def _breakdown(self, **extra: str) -> dict:
+        return {**minimal_breakdown(), "id": "ep-1", **extra}
+
+    def test_valid_breakdown(self, worlds_root: Path) -> None:
+        self._write(worlds_root, self._breakdown())
+        report = validate_world("demo", worlds_root)
+        assert report.errors == []
+        assert list(report.breakdowns) == ["ep-1"]
+
+    def test_index_is_not_a_breakdown(self, worlds_root: Path) -> None:
+        self._write(worlds_root, self._breakdown())
+        report = validate_world("demo", worlds_root)
+        assert "index" not in report.breakdowns
+
+    def test_claims_prefixed_with_file(self, worlds_root: Path) -> None:
+        self._write(worlds_root, self._breakdown())
+        report = validate_world("demo", worlds_root)
+        paths = [p for f, p, _ in report.iter_all_claims() if f == "episodes/ep-1.yaml"]
+        assert "episodes/ep-1.overview" in paths
+        assert "episodes/ep-1.beats[b1].sound" in paths
+
+    def test_claims_counted_and_sources_checked(self, worlds_root: Path) -> None:
+        breakdown = self._breakdown()
+        breakdown["overview"] = claim(sources=["nope"])
+        self._write(worlds_root, breakdown)
+        report = validate_world("demo", worlds_root)
+        assert any(
+            e.startswith("episodes/ep-1.yaml: episodes/ep-1.overview: cites unknown")
+            for e in report.errors
+        )
+
+    def test_id_must_match_file(self, worlds_root: Path) -> None:
+        self._write(worlds_root, self._breakdown(id="other"))
+        report = validate_world("demo", worlds_root)
+        assert any("differs from its file name 'ep-1'" in e for e in report.errors)
+
+    def test_file_must_name_a_catalogued_episode(self, worlds_root: Path) -> None:
+        self._write(worlds_root, self._breakdown(id="ep-9"), name="ep-9")
+        report = validate_world("demo", worlds_root)
+        assert any("'ep-9' is not an episode in" in e for e in report.errors)
+
+    def test_unknown_reference_episode(self, worlds_root: Path) -> None:
+        self._write(worlds_root, self._breakdown(reference_episode="nope"))
+        report = validate_world("demo", worlds_root)
+        assert any(
+            e.startswith("episodes/ep-1.yaml: reference_episode 'nope'")
+            for e in report.errors
+        )
+
+    def test_invalid_breakdown_skips_unused_warnings(self, worlds_root: Path) -> None:
+        sources = minimal_sources()
+        sources["sources"].append({**sources["sources"][0], "id": "src-b"})
+        _write(worlds_root, minimal_dossier(), sources)
+        self._write(worlds_root, {"id": "ep-1"})
+        report = validate_world("demo", worlds_root)
+        assert any(e.startswith("episodes/ep-1.yaml:") for e in report.errors)
+        assert report.warnings == []
+
+    def test_invalid_yaml_reported(self, worlds_root: Path) -> None:
+        self._write(worlds_root, "id: [unclosed")
+        report = validate_world("demo", worlds_root)
+        assert any("episodes/ep-1.yaml: not valid YAML" in e for e in report.errors)
+
+
 class TestIterClaims:
     def test_paths_use_ids_for_lists(self) -> None:
         dossier = minimal_dossier()

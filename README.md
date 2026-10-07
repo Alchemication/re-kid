@@ -23,6 +23,7 @@ worlds/<id>/
   world.yaml            series dossier (schema.world.WorldDossier)
   sources.yaml          every source the world's files cite
   episodes/index.yaml   episode catalogue (schema.episode.EpisodeCatalogue)
+  episodes/<id>.yaml    one episode, beat by beat (schema.breakdown.Breakdown)
   intro.yaml            title sequence, beat by beat (schema.breakdown.Breakdown)
   audio/intro/          measurements, spectrograms, mark clips (generated, gitignored)
   audio/barks.js        the original barks, packed for the games (generated, gitignored)
@@ -31,6 +32,7 @@ worlds/<id>/
   games/<game>/game/    the game: static HTML, CSS and plain scripts
   games/<game>/tests/   the game's JS unit tests (node:test)
   media/intro/          intro video clips (downloaded, gitignored)
+.claude/skills/         procedures for Claude Code sessions (new-episode)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
 .github/workflows/pages.yml  publishes the games to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)

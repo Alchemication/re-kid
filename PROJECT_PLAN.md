@@ -75,6 +75,22 @@ Update the **Status** and **Next steps** sections as work lands.
   still an open research question: `rights` (unknown) in
   `worlds/reksio/world.yaml`.
 
+- **Every world has a home, and episodes open off it** (Adam, 2026-10-07).
+  Eliot enjoyed the yard's encounters with other animals most, and found them
+  too short. Most Reksio episodes are exactly that, Reksio and one other
+  animal over several steps, so the next game is an episode. The world's home
+  (the yard, for Reksio) stays the place where a child learns how the game
+  works, and each episode is entered through a doorway taken from its own
+  opening (a door, the gate, a hole, a toy rocket). A cartoon without a home
+  of its own gets an invented one. Doorways are found, never unlocked. No hub
+  system until there are three episodes.
+- **Procedures become skills, improved by every run** (Adam, 2026-10-07).
+  Research and build steps are written up as Claude Code skills in
+  `.claude/skills/`, so someone other than Adam (first, his wife) can run
+  them; each run ends with a retro that edits its skill or the schema.
+  `new-episode` is drafted; `new-world` waits until a second cartoon is
+  wanted; an audio skill waits until an episode's sounds force it.
+
 ## Flow
 
 One validated file per stage, under `worlds/<id>/`:
@@ -188,7 +204,16 @@ wake Reksio at home.
 
 ## Next steps
 
-1. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
+1. **Next game: an episode, entered from the yard.** First pick: *Reksio
+   poliglota* (1967), in which Reksio learns to cluck, honk and squeal to talk
+   to the yard animals. It is set in a yard, wordless by premise, and built
+   from encounters. Steps, each a run of the `new-episode` skill:
+   - Claude: frame pass and breakdown, `episodes/reksio-poliglota.yaml`.
+   - Extend `main.py mark` to episode breakdowns (it handles the intro
+     only), then Adam's (or his wife's) listening pass.
+   - Retro on the skill; then a brief for the episode game and its doorway.
+   Kosmonauta comes after: it is the biggest build (rocket, space, robots).
+2. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
    device at https://alchemication.github.io/re-kid/, with the synthesised
    bark), alone and then with Eliot. What is in it, part by part and what each is based on, is
    in `games/yard/brief.yaml`; the testing flags and console helpers are in
@@ -217,6 +242,9 @@ wake Reksio at home.
 
    **Next ideas for a living yard** (pick and order with Adam; each should
    teach a small cause and effect a toddler can see):
+   *Deepen before widening:* Eliot wanted the encounters to last, so a
+   creature with several steps and a memory (as the mouse has) beats a new
+   one-beat creature. Each step is short and started by a tap.
    - *More on the tree:* wasps at fallen fruit; a gust of wind shaking a
      fruit down on its own; Eliot giving an apple to a snail directly.
    - *Butterfly:* only in sunshine; flutters from flower to flower, sometimes
@@ -232,9 +260,9 @@ wake Reksio at home.
    **Each new gag** comes with its browser tests and a look at it (CLAUDE.md,
    "Adding a gag"). Known complexity hotspot to split when next touched
    (ESLint warning): `Music.scheduleStep`.
-2. **Iterate on what Eliot does with it**: which things he goes for, whether
+3. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
-3. **Later:** the yard becomes the home screen, and new things in it lead
+4. **Later:** the yard becomes the home screen, and new things in it lead
    into episode games (a toy rocket for Kosmonauta). Parked ideas are listed
    in the yard brief's open questions and the intro brief.
 
