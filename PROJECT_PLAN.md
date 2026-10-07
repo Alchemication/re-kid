@@ -206,29 +206,42 @@ wake Reksio at home.
 
 1. **Bring Reksio to life in the yard** (before any episode). In the
    cartoon he stands up on his hind legs, trots about sniffing, runs, grins,
-   and acts like a small funny person; in the game he is stiff. Why
-   (Claude, from the code): every part is one rigid piece (a straight body,
-   one-piece legs), nothing moves on its own after he stops (no ears or tail
-   that lag and settle), moves start and stop without wind-up or overshoot,
-   and his face swaps whole shapes on and off rather than changing. Steps,
-   each looked at before the next:
-   - *Study first.* Claude reads frames of Reksio's acting in 3–4 uploaded
-     episodes and writes what he does and how (gaits, standing up, sniffing,
-     the grin, ears, takes) as observed claims under his character in
-     `world.yaml`, with a contact sheet per move. The game brief cites them.
-   - *Follow-through:* ears, tail and head on springs driven by his body's
-     motion, so they lag, overshoot and settle. One small spring in
-     `draw()`; little risk, the biggest gain for the cost.
-   - *A face that acts:* a few expressions (happy, curious, surprised,
-     proud, sheepish) as a mood that gestures set and the face blends to:
-     eyes, lids, brows, mouth.
-   - *New ways to move:* standing up on his hind legs (and walking a few
-     steps upright), a nose-down sniffing trot, a proud strut, begging;
-     wind-up and overshoot on hops, starts and stops.
-   - *A body that bends:* the body drawn from a spine each frame, with knees
-     and elbows, so he can squash and stretch. The biggest change, and it
-     touches every gag; only if the steps above still look stiff.
-   Each step runs the gesture browser tests and the perf suite.
+   and acts like a small funny person; in the game he is stiff.
+
+   **Study done (2026-10-07):** frames of Sportowiec, Aktor (1972),
+   Pocieszyciel (1975) and Kompan (1976), recorded as eleven observed
+   `moves` under Reksio in `world.yaml`, each with episode times. Local
+   sheets: `frames/acting/reksio-moves-reference.jpg` (24 key frames) and
+   `game-vs-cartoon.jpg`. What it shows (Claude's reading):
+   - *He is drawn off-model, not only animated stiffly.* The game's Reksio
+     has a long pointed snout seen only side-on, a dot eye and a cap-like
+     ear. The cartoon's has a tall rounded head, short muzzle, big nose, a
+     standing white ear and a flopped orange one, eyebrows, and turns to
+     face the viewer when he acts.
+   - *Upright is his everyday stance;* he drops to all fours to trot, sniff
+     and run. The game has him on all fours always.
+   - *His acting is gesture:* hands on hips, paw on chin, finger up for an
+     idea, arms flung wide, flexing, a shrug, and a grin that opens into a
+     huge red mouth. Expressions change fast (several in 3 s in close-up).
+   - *Limbs are plain tubes* that bend and stretch, so a rig of rigid
+     pieces can't reach these poses.
+
+   **Proposed steps** (each looked at by Adam before the next):
+   - *A lab page first:* the new Reksio drawn on a page of his own, beside
+     the reference frames, posed and animated there until he looks right.
+     Nothing in the yard changes yet.
+   - *Redraw him on-model,* with limbs drawn each frame as tubes between
+     joints (shoulder, elbow, paw), so knees, elbows and stretching come
+     free; a head with a side view and a front view, eyebrows and a set of
+     mouths.
+   - *Two stances:* upright by default, on all fours to trot, sniff and run,
+     with getting up and dropping down between them.
+   - *Acting:* turning to face the child, moods that gestures set, the grin.
+   - *Follow-through:* ears and tail on springs; long stretched leaps.
+   - *Swap him into the yard,* re-posing every gesture and gag; the browser
+     tests (every gesture ends with him free and standing) and the perf
+     suite guard it. This is the large step; it touches everything that
+     moves him.
 2. **Better sounds: an experiment, judged by ear.** The theme is good; many
    effects are weak. Adam's idea: generate new sounds from short original
    clips used as a style reference (MusicGen-Style or a newer model), and

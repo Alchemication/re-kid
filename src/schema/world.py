@@ -40,6 +40,15 @@ class Relationship(Model):
     claim: Claim
 
 
+class Move(Model):
+    """Something a character typically does on screen: a stance, a gait, a
+    gesture, an expression. The claim says what it looks like and where to
+    see it (episode and time), so an animator can check it."""
+
+    id: str = Field(pattern=SLUG_PATTERN)
+    claim: Claim
+
+
 class Character(Model):
     """A recurring character (episodic one-offs belong in episode breakdowns)."""
 
@@ -55,6 +64,9 @@ class Character(Model):
         default=None, description="Voice, bark, musical motif, if any."
     )
     relationships: list[Relationship] = Field(default_factory=list)
+    moves: list[Move] = Field(
+        default_factory=list, description="How they move and act, from the frames."
+    )
 
 
 class Place(Model):
@@ -139,7 +151,8 @@ class WorldDossier(Model):
 
     @model_validator(mode="after")
     def _check_internal_refs(self) -> WorldDossier:
-        """Unique ids, valid relationship targets, design notes kept honest."""
+        """Unique ids (characters, places, each character's moves), valid
+        relationship targets, design notes kept honest."""
         ids = [c.id for c in self.characters]
         if len(ids) != len(set(ids)):
             raise ValueError("duplicate character ids")
@@ -147,6 +160,9 @@ class WorldDossier(Model):
         if len(place_ids) != len(set(place_ids)):
             raise ValueError("duplicate place ids")
         for character in self.characters:
+            move_ids = [m.id for m in character.moves]
+            if len(move_ids) != len(set(move_ids)):
+                raise ValueError(f"{character.id}: duplicate move ids")
             for rel in character.relationships:
                 if rel.to not in ids:
                     raise ValueError(

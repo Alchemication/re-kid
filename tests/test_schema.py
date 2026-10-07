@@ -69,6 +69,37 @@ class TestWorldDossier:
         with pytest.raises(ValidationError, match="unknown character 'nobody'"):
             WorldDossier.model_validate(data)
 
+    def _with_moves(self, *ids: str) -> dict:
+        data = minimal_dossier()
+        c = claim()
+        data["characters"] = [
+            {
+                "id": "reksio",
+                "name": "Reksio",
+                "kind": "dog",
+                "role": "protagonist",
+                "description": c,
+                "personality": c,
+                "visual_signature": c,
+                "moves": [{"id": i, "claim": c} for i in ids],
+            }
+        ]
+        return data
+
+    def test_moves_are_valid(self) -> None:
+        dossier = WorldDossier.model_validate(self._with_moves("upright", "grin"))
+        assert [m.id for m in dossier.characters[0].moves] == ["upright", "grin"]
+
+    def test_duplicate_move_ids_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="reksio: duplicate move ids"):
+            WorldDossier.model_validate(self._with_moves("grin", "grin"))
+
+    def test_move_claim_provenance_enforced(self) -> None:
+        data = self._with_moves("grin")
+        data["characters"][0]["moves"][0]["claim"] = claim(status="observed", observed_by=None)
+        with pytest.raises(ValidationError, match="observed_by"):
+            WorldDossier.model_validate(data)
+
     def test_bad_slug_rejected(self) -> None:
         data = minimal_dossier()
         data["id"] = "Demo World"

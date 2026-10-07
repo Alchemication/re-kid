@@ -223,6 +223,84 @@ characters:
       status: sourced
       sources:
       - en-wikipedia-reksio
+  moves:
+  - id: upright
+    claim:
+      text: 'Upright is his everyday stance. He stands and walks on his hind legs much of the time and uses his front legs as arms: hands on hips, pointing, shrugging, carrying, reaching for a door handle on tiptoe. Seen in all four episodes checked, most of all Sportowiec and Aktor, where he is upright in nearly every shot. Examples (times into the studio uploads, good to a few seconds): Sportowiec 162 s (standing in the flowers), 166 s (shrugging), 218 s (hand on hip, scratching his head); Aktor 54 s (hands on hips), 58 s (pointing); Kompan 78 s (on tiptoe at the door).'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: on-all-fours
+    claim:
+      text: 'He drops to all fours to trot, to sniff, and to run, and gets up again for anything that needs his hands. Nose-down sniffing with his rump up: Kompan 54 s. A trot with his head forward: Pocieszyciel 94 s, Kompan 214 s. Running from the ram, ears flying back: Sportowiec 182 s.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: stretched-run-and-leap
+    claim:
+      text: 'Running fast and leaping, his body goes flat and long, front legs flung forward and back legs back, almost a straight line in the air. A leap can stretch him far beyond his size. Aktor 62 s (galloping off), Pocieszyciel 58 s (flying flat over the doghouse roof) and 226 s (stretched out over the fence), Kompan 226 s (leaping at the cow''s tail).'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: squash-and-stretch
+    claim:
+      text: 'His limbs and body stretch and squash for effort and comedy. Lifting the barbell in Sportowiec (about 234–236 s) his legs grow long and thin under the weight; in the title sequence he stretches along a whole credit card. The rest of the time his shapes stay solid and simple.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: grin
+    claim:
+      text: 'His biggest expression is the grin. At rest his mouth is a thin smiling line; it opens into a huge red mouth with a tongue, often with his eyes squeezed shut, and sometimes a wide grin full of teeth. Sportowiec 142 s (a close-up: a smug closed-eye smile, then a wide open grin and a shrug, within about 3 s), 318 s (wide open, heart-shaped tongue); Aktor 150 s (laughing, tongue out), 166 s (toothy grin in the armchair); Kompan 250 s.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: thinking
+    claim:
+      text: 'Thinking is played with the whole body, like a person: paw on chin with a frown, scratching his head, and a raised finger when the idea comes. Kompan 70 s (paw to mouth) then 74 s (finger up), Pocieszyciel 190 s (paw on chin, frowning), Sportowiec 218 s (scratching his head, other paw on hip).'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: big-feelings
+    claim:
+      text: 'Feelings are big and full-body. Waking or greeting the day he flings both arms wide and opens his mouth wide, a yawn-and-stretch or a shout: Aktor 50 s, Pocieszyciel 50 s, Kompan 50 s, all just after coming out of the doghouse. Cheering with both arms up, jumping, then in close-up: Sportowiec 362 s and 365 s. Worried, eyebrows up, in close-up: Sportowiec 190 s. Cross, eyebrows down: Pocieszyciel 254 s. Surprised, mouth a small O: Aktor 246 s.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: showing-off
+    claim:
+      text: 'He poses and struts: a high-stepping walk, flexing his arms like a strongman, a hand behind his head with one leg kicked out. Sportowiec 246 s (flexing, in close-up) and 262 s (both arms), 298 s (high-stepping); Aktor 230 s.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: sitting-and-lying
+    claim:
+      text: 'He sits up on his haunches like a person, front paws free, and lies flat on his back with his legs in the air when worn out or tickled. Sitting up: Sportowiec 58 s, Kompan 274 s (barking up at the boy). On his back: Sportowiec 94 s and 170 s (sniffing a flower), 266 s (flat out after exercise).'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: facing-the-viewer
+    claim:
+      text: 'Walking and running are seen side-on, but when he acts (grins, thinks, shows off) he turns his head, and often his whole body, towards the viewer: front or three-quarter view, frequently in close-up. All four episodes do this; the close-ups at Sportowiec 142 s and 246 s and Kompan 70–74 s are clear examples.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: his-shapes
+    claim:
+      text: 'In these episodes (1972–1976): a tall rounded head, wider at the top, with a short rounded muzzle and a big black nose; small dark eyes under eyebrow lines that move; one ear white and standing up, the other brown-orange and flopped over at the tip (Sportowiec 142 s and 318 s, Kompan 70 s); an orange patch around one eye and one on his back. The body is a short white bean, the limbs plain tubes with rounded ends and no toes, the tail a short thin stroke.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
 - id: boy
   name: The boy (unnamed)
   kind: human child
