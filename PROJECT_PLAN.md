@@ -204,7 +204,56 @@ wake Reksio at home.
 
 ## Next steps
 
-1. **Next game: an episode, entered from the yard.** First pick: *Reksio
+1. **Bring Reksio to life in the yard** (before any episode). In the
+   cartoon he stands up on his hind legs, trots about sniffing, runs, grins,
+   and acts like a small funny person; in the game he is stiff. Why
+   (Claude, from the code): every part is one rigid piece (a straight body,
+   one-piece legs), nothing moves on its own after he stops (no ears or tail
+   that lag and settle), moves start and stop without wind-up or overshoot,
+   and his face swaps whole shapes on and off rather than changing. Steps,
+   each looked at before the next:
+   - *Study first.* Claude reads frames of Reksio's acting in 3–4 uploaded
+     episodes and writes what he does and how (gaits, standing up, sniffing,
+     the grin, ears, takes) as observed claims under his character in
+     `world.yaml`, with a contact sheet per move. The game brief cites them.
+   - *Follow-through:* ears, tail and head on springs driven by his body's
+     motion, so they lag, overshoot and settle. One small spring in
+     `draw()`; little risk, the biggest gain for the cost.
+   - *A face that acts:* a few expressions (happy, curious, surprised,
+     proud, sheepish) as a mood that gestures set and the face blends to:
+     eyes, lids, brows, mouth.
+   - *New ways to move:* standing up on his hind legs (and walking a few
+     steps upright), a nose-down sniffing trot, a proud strut, begging;
+     wind-up and overshoot on hops, starts and stops.
+   - *A body that bends:* the body drawn from a spine each frame, with knees
+     and elbows, so he can squash and stretch. The biggest change, and it
+     touches every gag; only if the steps above still look stiff.
+   Each step runs the gesture browser tests and the perf suite.
+2. **Better sounds: an experiment, judged by ear.** The theme is good; many
+   effects are weak. Adam's idea: generate new sounds from short original
+   clips used as a style reference (MusicGen-Style or a newer model), and
+   compare reference-guided, text-only and melody-guided versions by ear.
+   What to keep in mind (Claude):
+   - *First, a sound audit.* Adam lists the five worst sounds in the game,
+     by ear. They become the experiment's test cases.
+   - *Add a cheap control.* Recorded CC0 sound libraries, and sounds Adam
+     and Eliot make themselves, may beat both the synth and a model for
+     splashes, bumps and footsteps. Compare against them too.
+   - *Time-box the models.* Whether MusicGen-Style runs well on this Mac,
+     and how good it is on 2–5 s clips, is unchecked: one evening to get it
+     working, else the next model.
+   - *Keep it apart.* A throwaway folder (`experiments/sound/`) with its
+     own dependencies, so PyTorch stays out of the main project; files
+     only, seeds saved, ratings in JSON, a plain HTML page to listen and
+     rate.
+   - *Licences.* Model weights may be non-commercial only, and sounds
+     derived from original clips raise the same rights question as the
+     barks and the hook (to check: each model's licence). Fine for the
+     private build; noted for the licensing talk.
+   - *Keep variety.* A chosen sound plays a little differently each time
+     (pitch and speed), as the barks do, so a file doesn't sound canned.
+   Easter-egg originals stay as they are: local, optional, never committed.
+3. **Next game: an episode, entered from the yard.** First pick: *Reksio
    poliglota* (1967), in which Reksio learns to cluck, honk and squeal to talk
    to the yard animals. It is set in a yard, wordless by premise, and built
    from encounters. Steps, each a run of the `new-episode` skill:
@@ -213,7 +262,7 @@ wake Reksio at home.
      only), then Adam's (or his wife's) listening pass.
    - Retro on the skill; then a brief for the episode game and its doorway.
    Kosmonauta comes after: it is the biggest build (rocket, space, robots).
-2. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
+4. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
    device at https://alchemication.github.io/re-kid/, with the synthesised
    bark), alone and then with Eliot. What is in it, part by part and what each is based on, is
    in `games/yard/brief.yaml`; the testing flags and console helpers are in
@@ -260,9 +309,9 @@ wake Reksio at home.
    **Each new gag** comes with its browser tests and a look at it (CLAUDE.md,
    "Adding a gag"). Known complexity hotspot to split when next touched
    (ESLint warning): `Music.scheduleStep`.
-3. **Iterate on what Eliot does with it**: which things he goes for, whether
+5. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
-4. **Later:** the yard becomes the home screen, and new things in it lead
+6. **Later:** the yard becomes the home screen, and new things in it lead
    into episode games (a toy rocket for Kosmonauta). Parked ideas are listed
    in the yard brief's open questions and the intro brief.
 
