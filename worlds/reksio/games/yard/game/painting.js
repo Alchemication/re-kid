@@ -14,6 +14,7 @@
 /* exported Painting */
 const Painting = (() => {
   const H = 900 // the view's height, in scene units
+  const MAX_DPR = 2 // canvases are drawn at most this many pixels per CSS pixel: a phone's 3x looks the same for a sponged texture and costs 2.25x the pixels, every frame
   const VIEW_MIN_W = 1600 // the view's width at 16:9: all of it shows on any screen
   const VIEW_MAX_W = 2100 // and at most, at 21:9 (wider than that, black bars at the sides)
   const WORLD_W = Layout.WORLD_W // the whole yard (layout.js)
@@ -119,7 +120,7 @@ const Painting = (() => {
     viewW = viewFor(width, height)
     for (const svg of document.querySelectorAll('svg.view')) svg.setAttribute('viewBox', `0 0 ${viewW} ${H}`)
     for (const r of document.querySelectorAll('rect.view-wide')) r.setAttribute('width', viewW)
-    const dpr = window.devicePixelRatio || 1
+    const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1)
     canvas.width = Math.round(canvas.clientWidth * dpr)
     canvas.height = Math.round(canvas.clientHeight * dpr)
     scale = canvas.width / viewW
@@ -143,6 +144,7 @@ const Painting = (() => {
     WORLD_W,
     VIEW_MIN_W,
     VIEW_MAX_W,
+    MAX_DPR,
     WALL_TOP,
     GROUND_TOP,
     /** The view's width now, in scene units. */

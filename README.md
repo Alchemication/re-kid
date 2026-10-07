@@ -83,6 +83,19 @@ and it opens without Safari's bars; elsewhere the ⤢ corner button does it.
 Bug reports saved on the site replay locally:
 `main.py replay` maps them to this repository's copy of the game.
 
+## Performance
+
+`uv run pytest -m perf` checks the yard against a budget on a phone-sized
+screen with the CPU slowed 4x (run it alone: it times things). It prints
+what it measured, for example `idle: main thread 14% busy, 60 fps, frames
+p50 16.7 ms, p95 16.7 ms`.
+
+The phone's GPU, battery and heat can only be measured on the phone. On an
+iPhone: Settings → Safari → Advanced → Web Inspector on; connect it to the
+Mac; in Safari on the Mac, Develop → (the iPhone) → the yard's page;
+Timelines → record a few minutes of play. CPU usage and Energy Impact show
+what costs the most. On Android, Chrome's `chrome://inspect` does the same.
+
 ## Debugging the yard
 
 Flags in the page address (`main.py play` takes the first three):

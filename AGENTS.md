@@ -180,6 +180,14 @@ the edge cases that would let bad data pass silently.
   added there. Eight workers load the machine, which flushes out timing bugs:
   a test that fails only then is a real bug, not noise.
 
+- *Performance* (`tests/test_game_perf.py`, `uv run pytest -m perf`, about
+  35 s, alone on an idle machine): a phone-sized 3x screen with Chrome's CPU
+  slowed 4x; idle, walking and rain must keep the main thread under 25% busy
+  and 95% of frames under 20 ms. Run it after changing what happens every
+  frame (draw, tick, weather, painting, CSS animations) and before a commit
+  that does. It can't see the phone's GPU or heat: README says how to
+  measure on the iPhone.
+
 **Which tests while working.** Unit and convention tests always (seconds).
 Browser tests: only the slice for what changed, then the whole suite once
 before a commit.

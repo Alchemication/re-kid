@@ -72,7 +72,7 @@ const Weather = (() => {
   const canvas = $('rain')
   const drops = []
   function sizeCanvas() {
-    const dpr = window.devicePixelRatio || 1
+    const dpr = Math.min(Painting.MAX_DPR, window.devicePixelRatio || 1) // see painting.js
     canvas.width = Math.round(canvas.clientWidth * dpr)
     canvas.height = Math.round(canvas.clientHeight * dpr)
   }

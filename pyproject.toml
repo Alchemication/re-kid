@@ -23,8 +23,11 @@ dev = [
 testpaths = ["tests"]
 pythonpath = ["src", "."]
 # The browser tests play the game in real time (minutes); run them with -m browser.
-addopts = "-m 'not browser'"
-markers = ["browser: drives a game in the installed Chrome (slow: uv run pytest -m browser -n 8)"]
+addopts = "-m 'not browser and not perf'"
+markers = [
+  "browser: drives a game in the installed Chrome (slow: uv run pytest -m browser -n 8)",
+  "perf: performance budgets, one at a time on an idle machine (uv run pytest -m perf)",
+]
 
 [tool.ruff.lint]
 extend-select = ["I", "UP", "B"]
