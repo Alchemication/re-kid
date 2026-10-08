@@ -13,7 +13,7 @@ function reksio() {
   const { Sound, Music } = fakeSound()
   const noticed = [] // what the creatures were told he did
   const Creatures = { notice: (type, x, y) => noticed.push(type) }
-  const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
+  const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
   const R = page.get('Reksio')
   return {
     R,
@@ -148,7 +148,7 @@ describe('yawning', () => {
     const sizes = []
     const Sound = new Proxy({}, { get: (_t, name) => (name === 'yawn' ? (s) => sizes.push(s) : name === 'from' ? (_d, play) => play() : () => {}) })
     const { Music } = fakeSound()
-    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'reksio.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
     return { R: page.get('Reksio'), page, sizes }
   }
 
@@ -178,5 +178,49 @@ describe('yawning', () => {
     const passing = (await yawns('yawn')).map((s) => s[0])
     assert.ok(new Set(passing.map((s) => s.toFixed(2))).size > 3, 'always the same size')
     assert.ok(Math.min(...waking) > Math.max(...passing), `waking ${waking} vs passing ${passing}`)
+  })
+})
+
+describe('how he goes', () => {
+  it('at a sniffing trot, he sniffs as he goes, and gets there', async () => {
+    const { Sound, Music, played } = fakeSound()
+    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+    const R = page.get('Reksio')
+    let done = null
+    R.walkTo(R.x + 250, { sniffing: true }).then((ok) => (done = ok))
+    for (let i = 0; i < 400 && done === null; i++) {
+      R.tick(DT)
+      await page.advance(16)
+    }
+    assert.equal(done, true)
+    assert.ok(played.filter((p) => p === 'sniff').length >= 2, played.join())
+  })
+
+  it('at a gallop, he leaves the ground as he stretches', () => {
+    const r = reksio()
+    const bob = r.page.get('document').getElementById('rk-bob')
+    r.R.walkTo(r.R.x + 2000)
+    let highest = 0
+    for (let i = 0; i < 90; i++) {
+      r.R.tick(DT)
+      const dy = Number((bob.style.transform.match(/translateY\((-?[\d.]+)px\)/) || [0, 0])[1])
+      highest = Math.min(highest, dy)
+    }
+    assert.ok(highest < -8, `only rose ${highest}`)
+  })
+
+  it('runs some middling trips for joy, and walks others', () => {
+    const paces = []
+    for (let seed = 1; seed <= 16; seed++) {
+      const { Sound, Music } = fakeSound()
+      const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+      const R = page.get('Reksio')
+      const x0 = R.x
+      R.walkTo(x0 + 350)
+      for (let i = 0; i < 24; i++) R.tick(DT)
+      paces.push((R.x - x0) / (24 * DT))
+    }
+    const runs = paces.filter((v) => v > 260).length // still speeding up: a run is at about 310, a walk about 200
+    assert.ok(runs > 0 && runs < paces.length, paces.map(Math.round).join())
   })
 })

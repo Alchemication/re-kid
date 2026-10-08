@@ -230,6 +230,21 @@ const Figure = (() => {
       nearLeg: [[-48, -24], [-70, 0]], farLeg: [[-44, -24], [-64, 0]],
       tail: [-60, -60],
     }),
+    // the gallop, two poses in turn (world.yaml, moves[gallop]): gathered,
+    // legs bunched under him, rump high…
+    runGather: vary(ON_FOURS, {
+      pelvis: [-24, -60], chest: [12, -52], head: { x: 46, y: -98, tilt: -4 },
+      nearArm: [[16, -26], [0, -2]], farArm: [[10, -26], [-6, 0]],
+      nearLeg: [[-10, -30], [6, -2]], farLeg: [[-16, -30], [0, 0]],
+      tail: [-54, -92], face: { smile: 1 },
+    }),
+    // …and stretched flat and long, back legs flung out, front paws forward
+    runStretch: vary(ON_FOURS, {
+      pelvis: [-44, -50], chest: [24, -54], head: { x: 58, y: -96, tilt: -8 },
+      nearArm: [[46, -50], [66, -42]], farArm: [[42, -46], [62, -36]],
+      nearLeg: [[-66, -46], [-92, -40]], farLeg: [[-62, -42], [-88, -34]],
+      tail: [-78, -70], face: { smile: 1 },
+    }),
     leap: vary(ON_FOURS, {
       pelvis: [-44, -96], chest: [36, -104], head: { x: 80, y: -134, tilt: -10 },
       nearArm: [[64, -98], [94, -92]], farArm: [[58, -104], [88, -102]],

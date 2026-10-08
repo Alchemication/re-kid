@@ -42,6 +42,14 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 }
 
 #paint, #world { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* Until painting.js has painted the yard (the first frame or so), it shows in
+   its plain base colours, not black: sky to the wall's top (330 of 900 scene
+   units), wall to the ground's top (700), then ground (painting.js). */
+#paint { background: linear-gradient(#e7a464 0 36.7%, #8d9884 36.7% 77.8%, #e2cd9b 77.8%); }
+/* …and the drawing waits for this play's layout (yard.js lifts `starting`
+   once it is laid out), so the first frame never shows every prop at once */
+#world { transition: opacity 0.2s ease; }
+.stage.starting #world { opacity: 0; }
 
 /* ---- Reksio ---- */
 .ink { fill: var(--ink); stroke: var(--ink); stroke-width: 7; stroke-linejoin: round; }

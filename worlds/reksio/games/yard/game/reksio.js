@@ -19,18 +19,13 @@
 // awaits one hears an AbortError) and blends him back to standing from
 // exactly where he was drawn, so nothing is ever left frozen part-way.
 
-/* global Clock, Debug, Sound, Music, Creatures, Layout, Figure, Motion, Life */
+/* global Clock, Debug, Sound, Music, Creatures, Layout, Figure, Motion, Life, Gait */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
   const SCALE = 1.2 // upright, he stands about as tall as his doghouse, as in the cartoon
-  const GAITS = {
-    // speed in scene units/s; cadence in stride radians/s; stride, lift and
-    // arm swing in his own units; fours: upright (0) or on all fours (1)
-    walk: { speed: 250, cadence: 11, stride: 12, lift: 9, swing: 9, bob: 3, fours: 0 },
-    run: { speed: 600, cadence: 17, stride: 22, lift: 14, swing: 20, bob: 8, fours: 1 },
-  }
-  const RUN_FROM = 520 // trips longer than this are run, not walked
+  const GAITS = Gait.GAITS // walk, run, sniff: gait.js
+  const SNIFF_EVERY_MS = [380, 650] // on a sniffing trot, a sniff this often
   const ACCEL = 1500 // how quickly he speeds up and slows down (units/s²)
   const MAX_STRETCH = 230 // longest dachshund stretch, in his own units
   const STRETCH_RATE = 210 // how fast he stretches while held (units/s)
@@ -75,6 +70,7 @@ const Reksio = (() => {
   let alive = null // what life adds this frame
   let doing = 0 // gestures under way: while any is, he isn't free for life's ways of standing
   let flavour = { lift: 1, swing: 1, bob: 1, tilt: 0 } // this walk's: a strut when proud
+  let nextSniffAt = 0 // on a sniffing trot, the next sniff
 
   // ------------------------------------------------------------ blends
 
@@ -193,34 +189,6 @@ const Reksio = (() => {
     return Figure.vary(p, { nearArm: paw(p.nearArm, d), farArm: paw(p.farArm, -d) })
   }
 
-  /** Walking's stride, added to a pose: legs (and arms, or front legs) swing
-   * and lift in turn. amount: 0 standing still, 1 at full speed. */
-  function strideOf(p, amount) {
-    const g = gait
-    const lift0 = g.lift * flavour.lift
-    const limb = (pair, offset, lift, swing = g.stride) => {
-      const sw = Math.sin(phase + offset) * swing * amount
-      const up = Math.max(0, Math.cos(phase + offset)) * lift * amount
-      return [[pair[0][0] + sw * 0.6, pair[0][1] - up * 0.6], [pair[1][0] + sw, pair[1][1] - up]]
-    }
-    // going somewhere, he looks where he goes: his head turns side-on
-    p = Figure.vary(p, { head: { turn: p.head.turn + (0.85 - p.head.turn) * Math.min(1, amount * 1.5), tilt: p.head.tilt + flavour.tilt * amount } })
-    if (stance.fours < 0.5) {
-      // upright: legs in turn, arms swinging against them
-      return Figure.vary(p, {
-        nearLeg: limb(p.nearLeg, 0, lift0), farLeg: limb(p.farLeg, Math.PI, lift0),
-        nearArm: limb(p.nearArm, Math.PI, 0, g.swing * flavour.swing), farArm: limb(p.farArm, 0, 0, g.swing * flavour.swing),
-      })
-    }
-    // on all fours: a walk moves diagonal pairs together; a run bounds,
-    // front pair together, back pair together, out of step
-    const run = g === GAITS.run
-    return Figure.vary(p, {
-      nearLeg: limb(p.nearLeg, run ? Math.PI : 0, lift0), farLeg: limb(p.farLeg, run ? Math.PI + 0.4 : Math.PI, lift0),
-      nearArm: limb(p.nearArm, run ? 0 : Math.PI, lift0), farArm: limb(p.farArm, run ? 0.4 : 0, lift0),
-    })
-  }
-
   // ------------------------------------------------------------ drawing
 
   let drawnBob = ''
@@ -229,11 +197,12 @@ const Reksio = (() => {
   /** Paint him from his state: the end of every frame. */
   function draw(walkAmount = 0) {
     let p = compose()
-    if (walkAmount > 0) p = strideOf(p, walkAmount)
+    const going = { gait, phase, amount: walkAmount, fours: stance.fours >= 0.5, swagger: flavour }
+    if (walkAmount > 0) p = Gait.stride(p, going)
     last = p
     paint(p)
     const breathe = target === null && !stretching ? Math.sin(idleTime * 2.2) * 0.8 : 0
-    const hopping = walkAmount > 0 ? -Math.abs(Math.sin(phase)) * gait.bob * flavour.bob * walkAmount : 0
+    const hopping = Gait.rise(going)
     const t = `translateY(${(add.dy + breathe + hopping).toFixed(1)}px) rotate(${add.lean.toFixed(1)}deg)`
     if (t !== drawnBob) {
       drawnBob = t
@@ -294,19 +263,21 @@ const Reksio = (() => {
 
   // ------------------------------------------------------------ walking
 
-  /** Walk to x. Resolves true on arrival, false if another walk replaced it. */
-  function walkTo(tx) {
+  /** Walk to x (sniffing: at a sniffing trot). Resolves true on arrival,
+   * false if another walk replaced it. */
+  function walkTo(tx, { sniffing = false } = {}) {
     if (arrive) arrive(false)
     target = clamp(tx)
     if (Math.abs(target - x) > 2) facing = target > x ? 1 : -1
     // keep running if already running; otherwise pick by distance
     if (!(gait === GAITS.run && v > GAITS.walk.speed)) {
-      gait = Math.abs(target - x) > RUN_FROM ? GAITS.run : GAITS.walk
+      const was = gait
+      gait = Gait.choose(Math.abs(target - x), sniffing, gaitRandom)
+      // off at a run from standing: a little crouch, and a spring
+      if (gait === GAITS.run && was !== GAITS.run && v < 50) loose(blend(add, 'dy', 6, 70, EASE_OUT).then(() => blend(add, 'dy', 0, 110, EASE_IN)))
     }
     if (!act.moving) blend(stance, 'fours', gait.fours, STANCE_MS)
-    const proud = life.mood === 'proud' && gait === GAITS.walk
-    const r = () => 0.85 + gaitRandom() * 0.35
-    flavour = proud ? { lift: 1.7 * r(), swing: 1.5 * r(), bob: 1.4, tilt: -6 } : { lift: r(), swing: r(), bob: r(), tilt: 0 }
+    flavour = Gait.swagger(gait, life.mood === 'proud', gaitRandom)
     return new Promise((resolve) => (arrive = resolve))
   }
 
@@ -343,6 +314,10 @@ const Reksio = (() => {
     }
     const k = Math.min(1, v / gait.speed)
     phase += dt * gait.cadence * (0.45 + 0.55 * k)
+    if (gait === GAITS.sniff && Clock.now() >= nextSniffAt) {
+      Sound.sniff()
+      nextSniffAt = Clock.now() + SNIFF_EVERY_MS[0] + gaitRandom() * (SNIFF_EVERY_MS[1] - SNIFF_EVERY_MS[0])
+    }
     const sign = Math.sign(Math.sin(phase))
     if (sign !== lastStepSign) {
       lastStepSign = sign

@@ -530,12 +530,13 @@
 
   const ACTS = {
     wish: { weight: 2, ok: () => wishFor() && Clock.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
-    sniff: { weight: 3, run: () => Reksio.sniff() },
+    sniff: { weight: 5, run: () => Reksio.sniff() }, // he sniffs about a lot (Adam)
     wander: {
       weight: 3,
       async run() {
         const dir = random() < 0.5 ? -1 : 1
-        if (await Reksio.walkTo(Reksio.x + dir * rnd(80, 260)) && random() < 0.7) await Reksio.sniff()
+        // mostly nose down, sniffing as he goes (he sniffs about a lot: Adam)
+        if (await Reksio.walkTo(Reksio.x + dir * rnd(80, 260), { sniffing: random() < 0.6 }) && random() < 0.7) await Reksio.sniff()
       },
     },
     look: { weight: 2, run: () => Reksio.lookAround() },
@@ -801,6 +802,9 @@
     if (Layout.hidden.includes(name)) g.style.display = 'none'
     else if (X(name)) g.setAttribute('transform', `translate(${X(name)} 0)`)
   }
+
+  // laid out: show the drawing from the next frame (game.css, .starting)
+  Clock.after(0, () => $('stage').classList.remove('starting'))
 
   Things.init({ ended: () => day.ended })
   makeSpots()

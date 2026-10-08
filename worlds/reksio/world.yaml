@@ -245,6 +245,20 @@ characters:
       sources:
       - sfr-youtube
       observed_by: claude-frames
+  - id: gallop
+    claim:
+      text: 'His run, read every tenth of a second (Aktor 60.9–61.7 s): two poses in turn, about four or five times a second. Gathered: legs bunched under him, body short, rump high, on the ground. Stretched: body flat and long, back legs flung out behind, front paws tucked forward, off the ground. His big head stays high and level through it, chin up and smiling, while his body whips along underneath; his tail streams straight back.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: claude-frames
+  - id: energetic-and-sniffing
+    claim:
+      text: 'He is energetic: his running has a jump in it, and he sniffs about far more often than the game had him do (Adam, from watching the series). In the frames, a nose-down sniff with his rump up comes right after he runs off in Aktor (about 63 s), and at Kompan 54 s.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: adam
   - id: squash-and-stretch
     claim:
       text: 'His limbs and body stretch and squash for effort and comedy. Lifting the barbell in Sportowiec (about 234–236 s) his legs grow long and thin under the weight; in the title sequence he stretches along a whole credit card. The rest of the time his shapes stay solid and simple.'
