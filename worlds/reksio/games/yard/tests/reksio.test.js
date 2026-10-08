@@ -224,3 +224,32 @@ describe('how he goes', () => {
     assert.ok(runs > 0 && runs < paces.length, paces.map(Math.round).join())
   })
 })
+
+describe('cut short mid-gesture', () => {
+  it('never carries on after a tap: walking off, nothing poses him', async () => {
+    const bad = []
+    for (const [name, args] of Object.entries(GESTURES)) {
+      if (name === 'duck') continue // the doghouse: not a pose
+      for (const at of [150, 450, 900, 1600]) {
+        const r = reksio()
+        const root = r.page.get('document').getElementById('reksio')
+        r.R[name](...args).catch(() => 'cut short: rejecting is how a gesture hears it')
+        for (let t = 0; t < at; t += 50) {
+          r.R.tick(0.05)
+          await r.page.advance(50)
+        }
+        r.R.relax()
+        r.R.walkTo(r.R.x + 900)
+        for (let i = 0; i < 60; i++) {
+          r.R.tick(0.05)
+          await r.page.advance(50)
+          if (r.R.walking && root.getAttribute('data-posed') === '1') {
+            bad.push(`${name} cut at ${at} ms`)
+            break
+          }
+        }
+      }
+    }
+    assert.deepEqual(bad, [])
+  })
+})

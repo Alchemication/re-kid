@@ -14,6 +14,8 @@ const Sky = (() => {
   const DUSK_AFTER_MS = 1800 // the last step of the sunset is seen before the light goes
   const MOON_RISE_S = 40 // how long the moon takes to come up: slow enough to watch, and the time left to play at dusk
   const WALL_TOP = 334 // the moon comes up from behind the wall (and is clipped there)
+  const SUN_BELOW = 300 // at dawn the sun is this far down: behind the wall, glow and all
+  const DAWN_TINT = 0.45 // and the sky this much warmer and dimmer
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
   const $ = (id) => document.getElementById(id)
@@ -58,13 +60,55 @@ const Sky = (() => {
     moonG.setAttribute('transform', `translate(${m.x} ${(low + (m.y - low) * eased).toFixed(1)})`)
   }
 
+  let rising = false // the sunrise is under way (it gives way to setStep)
+
   /** The sun at `step` (0 high … STEPS set): lower, redder, the sky warmer, the music slower. */
   function setStep(step) {
+    rising = false
+    byFrame(false)
     $('sun').style.transform = `translateY(${step * SUN_STEP}px)`
     document.querySelector('#sun .sun').style.fill = SUN_COLORS[step]
     document.querySelector('#sun .sun-glow').style.fill = SUN_COLORS[step]
     $('sunset').style.opacity = String(step * SUNSET_TINT)
     Music.setDusk(step)
+  }
+
+  /** While the morning moves the sun and the light frame by frame, their
+   * slow transitions (for the sunset's steps) stand aside. */
+  function byFrame(on) {
+    $('sun').classList.toggle('by-frame', on)
+    $('sunset').classList.toggle('by-frame', on)
+  }
+
+  /** Dawn: the sun still behind the wall, the sky dim and warm. */
+  function dawn() {
+    byFrame(true)
+    $('sun').style.transform = `translateY(${SUN_BELOW}px)`
+    $('sunset').style.opacity = String(DAWN_TINT)
+  }
+
+  /** The sun comes up over ms, from dawn to the day's first step. Resolves
+   * once it is up. */
+  function sunrise(ms) {
+    const start = Clock.now()
+    Debug.trace('sunrise', { ms })
+    rising = true
+    return new Promise((resolve) => {
+      function rise() {
+        if (!rising) return resolve() // the day's first step came first: it placed the sun
+        const k = Math.min(1, (Clock.now() - start) / ms)
+        const up = 1 - (1 - k) * (1 - k) // fast at first, easing into place
+        $('sun').style.transform = `translateY(${(SUN_BELOW * (1 - up)).toFixed(1)}px)`
+        $('sunset').style.opacity = String((DAWN_TINT * (1 - up)).toFixed(3))
+        if (k < 1) Clock.after(0, rise)
+        else {
+          rising = false
+          byFrame(false)
+          resolve()
+        }
+      }
+      Clock.after(0, rise)
+    })
   }
 
   /** The sun has set: the light goes and the moon comes up. Resolves once it is up. */
@@ -99,5 +143,5 @@ const Sky = (() => {
     makeMoon()
   }
 
-  return { STEPS, moonPath, init, setStep, dusk, night, get moonUp() { return moonUp } }
+  return { STEPS, moonPath, init, setStep, dawn, sunrise, dusk, night, get moonUp() { return moonUp } }
 })()

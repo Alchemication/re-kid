@@ -198,6 +198,8 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .sun { fill: #fbe08a; stroke: #e7a23a; stroke-width: 4; transition: fill 3s ease, stroke 3s ease; }
 .sun-glow { fill: #fbe9b0; opacity: 0.35; transition: fill 3s ease; }
 #sun { transition: transform 3s ease-in-out; }
+/* the dawn and the sunrise move them frame by frame themselves (sky.js) */
+#sun.by-frame, .sunset.by-frame { transition: none; }
 
 /* The sky warms a step at a time as the sun goes down. */
 .sunset {

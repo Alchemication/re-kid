@@ -245,6 +245,16 @@ wake Reksio at home.
      walk (proud: a strut); ears and tail trail after him on springs.
      Gestures pick among a few faces and sizes.
    - *Acting:* moods that gestures set, reactions in each gag.
+   - *Running and the morning* (done, 2026-10-08): a run is the cartoon's
+     gallop (frames every 0.1 s, Aktor), more often, some just for joy;
+     a nose-down sniffing trot on wanders and short trips (Adam: energetic,
+     sniffs far more). Each play starts as the episodes do: asleep in the
+     doghouse at dawn; he wakes by himself after 6–9 s, or at a first tap,
+     which only wakes him; the sun comes up as he pops out and yawns two or
+     three times. Woken by a tap, a soft morning tune (one of three shapes,
+     flute or harp, its own pace) leads into the theme. *Adam to judge by
+     ear:* the morning tune and the louder waking yawn. Sounds asked for
+     before the first tap are now dropped, not played all at once on it.
    - *Swap him into the yard*, in three passes: (1) walking and the 27
      gestures in `reksio.js` on the new figure (done, 2026-10-08: upright
      walk, run on all fours, every gesture redrawn; all tests and the perf

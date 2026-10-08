@@ -60,7 +60,6 @@ const Reksio = (() => {
   let stretching = false
 
   const clamp = (v) => Math.max(MIN_X, Math.min(MAX_X, v))
-  const wait = Clock.wait
   const random = Debug.random('reksio') // this part's own random stream (debug.js)
   const rnd = (lo, hi) => lo + random() * (hi - lo)
   const rndInt = (lo, hi) => Math.floor(rnd(lo, hi + 1))
@@ -95,6 +94,11 @@ const Reksio = (() => {
       blends.push({ obj, key, from: obj[key], to, start: Clock.now(), ms: Math.max(1, ms), ease, resolve, reject })
     }))
   }
+
+  /** A gesture's pause: ms of game time that relax() cuts short like any
+   * blend, so a gesture never carries on after a tap (a plain Clock.wait
+   * would let it, and pose him as he walks off). */
+  const pause = (ms) => blend({ k: 0 }, 'k', 1, ms)
 
   /** A promise that may be cut short with nobody waiting on it: whoever
    * awaits it hears; nobody else need. */
@@ -452,14 +456,14 @@ const Reksio = (() => {
   /** Head down (positive) or up (negative) by deg, held for ms. */
   async function nod(deg, ms) {
     await blend(add, 'tilt', deg, ms * 0.2)
-    await wait(ms * 0.65)
+    await pause(ms * 0.65)
     await blend(add, 'tilt', 0, ms * 0.15)
   }
 
   /** Lick his lips: the tongue out over his chin and back. */
   async function lick() {
     await faceTo({ tongue: 1, open: 0.2 }, 160, EASE_OUT)
-    await wait(200)
+    await pause(200)
     await faceOff(160)
   }
 
@@ -518,7 +522,7 @@ const Reksio = (() => {
   async function lookAround(ms = rnd(600, 1400)) {
     const was = facing
     face_(-was)
-    await wait(ms)
+    await pause(ms)
     if (target === null && !stretching && facing === -was) face_(was)
   }
 
@@ -526,7 +530,7 @@ const Reksio = (() => {
   async function lookUp(ms = rnd(900, 1800)) {
     if (random() < 0.5) faceTo({ lift: 1, open: 0.3, o: 0.6, smile: 0 }, ms * 0.2) // wonder
     await blend(add, 'tilt', rnd(-28, -18), ms * 0.2)
-    await wait(ms * 0.6)
+    await pause(ms * 0.6)
     await blend(add, 'tilt', 0, ms * 0.2)
     await faceOff(150)
   }
@@ -550,7 +554,7 @@ const Reksio = (() => {
     const ms = rnd(900, 1500)
     await actTo(Figure.vary(F.bowStretch, { face: { eyes: 1, joy: 0, open: 0.3, smile: 1 } }), ms * 0.2)
     blend(add, 'wag', 1.5, ms * 0.1)
-    await wait(ms * 0.6)
+    await pause(ms * 0.6)
     await actOff(ms * 0.2)
     if (random() < 0.5) await bark()
   }
@@ -583,7 +587,7 @@ const Reksio = (() => {
     await actTo(up, rnd(200, 260), EASE_OUT)
     await actTo(down, 110, EASE_IN)
     onImpact()
-    await wait(80)
+    await pause(80)
     await actOff(200)
   }
 
@@ -591,12 +595,12 @@ const Reksio = (() => {
   async function snap(n = 1) {
     for (let i = 0; i < n; i++) {
       await faceTo({ open: 0.6, teeth: 1, smile: 0.2, brows: -0.6 }, 60)
-      await wait(30)
+      await pause(30)
       Sound.snap()
       const m = mouth()
       Creatures.notice('snap', m.x, m.y)
       await faceTo({ open: 0, teeth: 0 }, 50)
-      await wait(60)
+      await pause(60)
     }
     await faceOff(80)
   }
@@ -628,7 +632,7 @@ const Reksio = (() => {
     actTo(F.leap, 220, EASE_OUT, true)
     walkTo(x + leap)
     const up = loose(blend(add, 'dy', -42, 280, EASE_OUT).then(() => blend(add, 'dy', 0, 340, EASE_IN)))
-    await wait(200)
+    await pause(200)
     await snap(2)
     await up
     await actOff(200)
@@ -657,7 +661,7 @@ const Reksio = (() => {
     Sound.howl()
     const howling = Figure.vary(F.sitDog, { head: { tilt: -40, turn: 0.8 }, face: { eyes: 0, joy: -1, open: 0.6, o: 0.8, smile: 0 } })
     await actTo(howling, 320)
-    await wait(960)
+    await pause(960)
     await actOff(320)
   }
 
@@ -684,7 +688,7 @@ const Reksio = (() => {
   function glance(range) {
     const to = rnd(-range, range * 0.5)
     const ms = rnd(1400, 2400)
-    loose(blend(add, 'tilt', to, ms * 0.3).then(() => wait(ms * 0.45)).then(() => blend(add, 'tilt', 0, ms * 0.25)))
+    loose(blend(add, 'tilt', to, ms * 0.3).then(() => pause(ms * 0.45)).then(() => blend(add, 'tilt', 0, ms * 0.25)))
   }
 
   /** A wag of the tail, sitting. */
@@ -698,7 +702,7 @@ const Reksio = (() => {
     await settle('sit', 700)
     const end = Clock.now() + ms
     while (Clock.now() < end) {
-      await wait(rnd(1500, 3000))
+      await pause(rnd(1500, 3000))
       if (mine !== pose) return
       if (random() < 0.7) glance(16)
       else wag()
@@ -715,7 +719,7 @@ const Reksio = (() => {
     await settle('lie', 800)
     const end = Clock.now() + ms
     while (Clock.now() < end) {
-      await wait(rnd(1800, 3200))
+      await pause(rnd(1800, 3200))
       if (mine !== pose) return
       glance(22)
     }
@@ -736,7 +740,7 @@ const Reksio = (() => {
     const end = Clock.now() + ms
     let n = 0
     while (Clock.now() < end) {
-      await wait(1700)
+      await pause(1700)
       if (mine !== pose) return
       if (n++ % 2 === 0) Sound.from(250, Sound.snore)
       floatZ()
@@ -755,10 +759,10 @@ const Reksio = (() => {
    * legs stretched out behind. */
   async function dogStretch(mine) {
     await settle('bowStretch', 800)
-    await wait(900)
+    await pause(900)
     if (mine !== pose) return
     await settle('backStretch', 700)
-    await wait(700)
+    await pause(700)
     if (mine !== pose) return
     await rise(450)
   }
@@ -767,8 +771,9 @@ const Reksio = (() => {
     Sound.from(150, Sound.yawn)
   }
 
-  /** A Z drifting up from his head as he sleeps. */
-  function floatZ() {
+  /** A Z drifting up from his head as he sleeps (or from `at`, {x, y}: a
+   * doghouse door). */
+  function floatZ(at) {
     const fx = $('fx')
     const g = document.createElementNS('http://www.w3.org/2000/svg', 'g')
     g.setAttribute('class', 'zzz')
@@ -778,7 +783,7 @@ const Reksio = (() => {
     g.appendChild(z)
     fx.appendChild(g)
     const h = basePose().head
-    const { x: zx, y: zy } = toScene([h.x + 24, h.y - 24])
+    const { x: zx, y: zy } = at ?? toScene([h.x + 24, h.y - 24])
     g.animate(
       [{ transform: `translate(${zx}px, ${zy}px) scale(0.6)`, opacity: 0 }, { transform: `translate(${zx + 8}px, ${zy - 20}px) scale(0.9)`, opacity: 1, offset: 0.3 }, { transform: `translate(${zx + 18}px, ${zy - 60}px) scale(1.1)`, opacity: 0 }],
       { duration: 1800, easing: 'ease-out' },
@@ -804,7 +809,7 @@ const Reksio = (() => {
     await blend(add, 'tilt', -34, 300)
     await faceTo({ tongue: 1, open: 0.35, eyes: 0, joy: 1, smile: 0.8 }, 120)
     for (let i = 0; i < n; i++) {
-      await wait(rnd(250, 500))
+      await pause(rnd(250, 500))
       if (mine !== pose) return
       Sound.lap()
       loose(blend(add, 'tilt', -28, 80).then(() => blend(add, 'tilt', -34, 80)))
@@ -830,10 +835,10 @@ const Reksio = (() => {
     for (let i = 0; i < times; i++) {
       Sound.yawn(s)
       await actTo(yawnPose(s), 280 + 260 * s)
-      await wait(300 + 500 * s)
+      await pause(300 + 500 * s)
       if (i < times - 1) {
         await actTo(Figure.vary(yawnPose(s * 0.3), { face: { open: 0.1 } }), 220) // a breath
-        await wait(rnd(120, 320))
+        await pause(rnd(120, 320))
         s = Math.max(0.3, s * rnd(0.6, 0.95))
       }
     }
@@ -843,8 +848,17 @@ const Reksio = (() => {
   /** Waking up, he yawns wide and loud, sometimes more than once, arms
    * flung out: the cartoon's moment just out of the doghouse (Aktor,
    * Pocieszyciel, Kompan; world.yaml, characters[reksio].moves[waking-yawn]). */
-  function wakeUp() {
-    return yawn(pickOne([1, 2, 2, 3]), rnd(0.8, 1))
+  function wakeUp(times = pickOne([1, 2, 2, 3])) {
+    return yawn(times, rnd(0.8, 1))
+  }
+
+  /** Asleep in the doghouse at x: in out of sight, as duck(true) leaves him. */
+  function sleepIn(at) {
+    x = clamp(at)
+    facing = 1
+    scaler.style.transform = `translate(0, -70px) scale(${SCALE * 0.55})`
+    scaler.style.opacity = '0'
+    place()
   }
 
   /** A shake of the body, nose to tail. */
@@ -861,7 +875,7 @@ const Reksio = (() => {
       blend(add, 'wag', d / 4, 58)
       await blend(add, 'lean', d, 58)
     }
-    await wait(120)
+    await pause(120)
     for (const d of [3, -3, 2, -2, 0]) await blend(add, 'lean', d, 52)
     await upright()
   }
@@ -938,7 +952,7 @@ const Reksio = (() => {
     },
     mouth,
     get holdingBone() { return holding },
-    walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, beginStretch, endStretch,
+    walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, beginStretch, endStretch, sleepIn, floatZ,
     ...Object.fromEntries(Object.entries({
       shakeDry, bark, nod, lick, lap, shake, paddle, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
       stamp, snap, watch, pounce, biteTail, howl, sit, lieDown, nap, startle, catchDrops, wakeUp,

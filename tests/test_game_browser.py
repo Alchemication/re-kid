@@ -75,6 +75,8 @@ NOT_GESTURES = {
     "beginStretch",
     "endStretch",  # as "stretch" above
     "duck",  # the doghouse
+    "sleepIn",  # the morning (TestMorning)
+    "floatZ",  # as "nap", and the morning
 }
 
 ACTS = [
@@ -349,7 +351,7 @@ class TestWholePlay:
 
 class TestLeftAlone:
     def test_he_keeps_busy_on_his_own(self, yard: callable) -> None:
-        y = yard("seed=2&rain=0&creatures=")
+        y = yard("seed=2&rain=0&creatures=&morning=0")  # left alone, not the morning (TestMorning)
         y.page.wait_for_timeout(20_000)
         acts = [
             e["name"]
@@ -534,6 +536,44 @@ class TestRecorder:
         assert replayed["replayed"]["uses"] == report["state"]["uses"], replayed[
             "differences"
         ]
+
+
+MORNING = "seed=1&rain=0&creatures=&still&morning=1"
+DOOR_X = 560  # the doghouse door (things.js DOOR)
+
+
+class TestMorning:
+    """Each play starts with him asleep in his doghouse (?morning=1 asks for it
+    in a ?still play); he wakes by himself, or sooner when tapped, and that
+    first tap only wakes him."""
+
+    def trace(self, y: Yard) -> str:
+        return y.page.evaluate("yardGame.trace()")
+
+    def test_he_wakes_by_himself(self, yard: callable) -> None:
+        y = yard(MORNING)
+        assert not y.page.evaluate("yardGame.free()"), "awake from the start"
+        s = y.settled()
+        assert 'wake {"how":"by himself"}' in self.trace(y)
+        assert s["reksio"]["x"] == DOOR_X, "woke somewhere else"
+
+    def test_a_tap_wakes_him_and_does_nothing_else(self, yard: callable) -> None:
+        y = yard(MORNING)
+        y.page.wait_for_timeout(500)
+        y.page.mouse.click(1100, 600)  # far off: awake, he would go there
+        s = y.settled()
+        trace = self.trace(y)
+        assert 'wake {"how":"tap"}' in trace and "by himself" not in trace, trace
+        assert s["reksio"]["x"] == DOOR_X, "the waking tap also sent him off"
+
+    def test_a_tap_while_he_yawns_sends_him_off(self, yard: callable) -> None:
+        y = yard(MORNING)
+        y.page.wait_for_timeout(500)
+        y.page.mouse.click(1100, 600)  # wakes him
+        y.page.wait_for_timeout(1200)  # out, and yawning
+        y.page.mouse.click(1100, 600)  # off he goes, the yawn cut short
+        s = y.settled()
+        assert s["reksio"]["x"] > DOOR_X + 300, s["reksio"]
 
 
 class TestGettingUp:

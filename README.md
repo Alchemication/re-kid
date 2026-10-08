@@ -108,7 +108,8 @@ Flags in the page address (`main.py play` takes the first three):
 |------|------|
 | `?seed=N` | Seeds a play: with the layout flags below, the same yard every time, and what happens in it closely. Every play prints the address that replays it in the console. |
 | `?debug` | State overlay, every event in the console, a "report a bug" button. |
-| `?still` | Reksio moves only when asked: try one gesture or gag alone. |
+| `?still` | Reksio moves only when asked: try one gesture or gag alone. He starts up, not asleep in his doghouse. |
+| `?morning=1` / `0` | Start asleep in the doghouse at dawn (he wakes by himself after 6–9 s, or at the first tap), or start the day with him up. On unless `?still`. |
 | `?props=trap,bowl` | Which props are out (of bowl, dig, film, trap, tree, berries). |
 | `?moon-rise=S` | How long the moon takes to come up at dusk (40 s otherwise). |
 | `?creatures=fly,spider` | Which creatures come (`?creatures=` for none). |

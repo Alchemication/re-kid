@@ -33,6 +33,7 @@ const Layout = (() => {
   const MOON_R = [30, 44] // its size
   const MOON_PHASES = [0.2, 0.35, 0.5, 0.7, 0.85, 1] // how much of it is lit: a thin crescent to full
   const MOON_TINTS = ['#fbf3d2', '#f4f1e6', '#fde7b0'] // cream, silver, honey
+  const WAKE_S = [6, 9] // asleep in the doghouse at the start, he wakes by himself after this long
   const PUDDLES = 3 // at most; fewer when the gaps are tight
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
   // Each thing on the ground as drawn: from the left of its drawing or action
@@ -142,6 +143,14 @@ const Layout = (() => {
     marks: Array.from({ length: 3 }, () => ({ x: skyRnd(-0.55, 0.55), y: skyRnd(-0.55, 0.55), r: skyRnd(0.1, 0.22) })),
   }
 
+  // the morning (yard.js): each play starts with him asleep in his doghouse,
+  // as the cartoon's episodes start, and he wakes by himself after a while (a
+  // tap wakes him sooner). A ?still play starts with him up unless it asks
+  // for the morning (?morning=1); ?morning=0 skips it. Its own stream.
+  const dawn = Debug.random('morning')
+  const wakeAfter = WAKE_S[0] + dawn() * (WAKE_S[1] - WAKE_S[0])
+  const morning = params.has('morning') ? params.get('morning') !== '0' : !params.has('still')
+
   try {
     localStorage.setItem(MEMORY_KEY, JSON.stringify({ props, creatures, rain }))
   } catch {
@@ -149,7 +158,7 @@ const Layout = (() => {
   }
 
   return {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, moonRise, shift, hidden, puddles, perches, sun, moon,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, moonRise, shift, hidden, puddles, perches, sun, moon, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
 })()

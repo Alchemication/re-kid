@@ -204,6 +204,38 @@ const Music = (() => {
     timer = setInterval(tick, 25)
   }
 
+  // The morning tune, as Reksio wakes and the sun comes up: the hook's notes
+  // slowed and opened out, rising; one of a few shapes, on flute or harp, at
+  // its own pace each play, over slow harp chords. New, not the cartoon's.
+  const DAWN_TUNES = [
+    [58, 62, 65, 70, null, 69, 70, 74, 72, null, 70],
+    [65, 70, 72, 74, null, 77, 74, 72, 70],
+    [62, 65, 70, null, 72, 70, 74, null, 77, 82],
+  ]
+  const DAWN_CHORDS = [[46, 58, 62, 65], [51, 55, 58, 63], [53, 57, 60, 65], [46, 58, 62, 70]] // B-flat, E-flat, F, B-flat
+
+  /** Play the morning tune from t0; returns when it ends. */
+  function dawnTune(t0, random) {
+    const tune = DAWN_TUNES[Math.floor(random() * DAWN_TUNES.length)]
+    const inst = random() < 0.5 ? 'flute' : 'harp'
+    const beat = 0.42 + random() * 0.14
+    const span = tune.length * beat
+    DAWN_CHORDS.forEach((ch, i) => ch.forEach((n, k) => play('harp', n, t0 + (i * span) / DAWN_CHORDS.length + k * 0.12, 0.3)))
+    tune.forEach((n, k) => n != null && play(inst, n, t0 + k * beat + (random() - 0.5) * 0.04, 0.4))
+    play('glock', 82, t0 + span, 0.25)
+    return t0 + span + beat * 2
+  }
+
+  /** The morning (the first tap woke him): the morning tune, then the
+   * groove. random: the morning's own stream. */
+  async function startMorning(random) {
+    if (loading) return
+    await prepare()
+    running = true
+    nextTime = dawnTune(bus.ctx.currentTime + 0.15, random)
+    timer = setInterval(tick, 25)
+  }
+
   /** 0: just the bass · 1: oom-pah · 2: the tune · 3: woodblock too. */
   function setEnergy(level) {
     energy = Math.max(0, Math.min(3, level))
@@ -317,5 +349,5 @@ const Music = (() => {
     }
   }
 
-  return { start, audition, setEnergy, setDusk, setRain, react, evening, get ready() { return ready }, get buffers() { return buffers } }
+  return { start, startMorning, audition, setEnergy, setDusk, setRain, react, evening, get ready() { return ready }, get buffers() { return buffers } }
 })()

@@ -36,6 +36,12 @@
   const day = Day.start(Clock.now(), { things: Sky.STEPS })
   let endedAt = 0
   let lastTap = Clock.now()
+  // The morning: each play starts as the cartoon's episodes do, with Reksio
+  // in his doghouse (intro.yaml: he pops out of it as an episode starts). He
+  // sleeps at dawn and wakes by himself (Layout.wakeAfter), or sooner when
+  // tapped: that first tap is his wake-up call and nothing else.
+  let asleep = Layout.morning
+  if (asleep) Reksio.sleepIn(Things.DOOR.x)
   let camX = clampCam(Reksio.x - Painting.VIEW_W / 2)
 
   function clampCam(v) {
@@ -302,6 +308,7 @@
       return p ? command(() => jumpIn(p), m[0]) : command(() => Reksio.walkTo(Number(m[1])), m[0]) // dried up since
     }],
     [/^bark$/, () => command(() => Reksio.bark(), 'bark')],
+    [/^wake up$/, () => wake('tap')],
     [/^press$/, () => holdStart()],
     [/^release$/, () => holdEnd()],
     [/^stop$/, () => !busy && Reksio.stopWalking()],
@@ -340,6 +347,7 @@
     if (e.target.closest('#fullscreen')) return
     e.preventDefault()
     Sound.ensure()
+    if (asleep) return perform('wake up')
     Music.start()
     perform(tapIntent(e))
   })
@@ -405,6 +413,7 @@
     if (!Input.ownsKey(key)) return
     e.preventDefault()
     Sound.ensure()
+    if (asleep) return perform('wake up')
     Music.start()
     const intent = Input.keyDown(key, { nearest: nearest(), minX: Reksio.MIN_X, maxX: Reksio.MAX_X })
     if (!intent) return
@@ -818,6 +827,42 @@
     if (phase === 'clouding') Reksio.lookUp(1600)
     if (phase === 'after') Reksio.hop(40, 2)
   })
+  // ------------------------------------------------------------ the morning
+
+  const SUNRISE_MS = 4500 // the sun comes up as he wakes
+  const SNORE_MS = 1700 // asleep, a snore and a Z from the door this often
+  const morningRandom = Debug.random('morning-music') // the waking's own: the tune, how many yawns
+  let stopSnoring = () => {}
+
+  /** Dawn, and Reksio asleep in his doghouse, snoring, until he wakes. */
+  function beginMorning() {
+    acting = true // nothing left-alone happens while he sleeps or wakes
+    Sky.dawn()
+    const door = Things.DOOR
+    stopSnoring = Clock.every(SNORE_MS, () => {
+      Sound.snore() // silent until a tap lets sound play (sound.js)
+      Reksio.floatZ({ x: door.x + 26, y: door.y - 44 })
+    })
+    Clock.after(Layout.wakeAfter * 1000, () => wake('by himself'))
+  }
+
+  /** He wakes: the sun comes up, he pops out of the doghouse and yawns a few
+   * times, as he does in the cartoon (world.yaml, moves[waking-yawn]). Woken
+   * by a tap, sound can play: a soft morning tune, then the groove. */
+  async function wake(how) {
+    if (!asleep) return
+    asleep = false
+    stopSnoring()
+    Debug.trace('wake', { how })
+    if (Sound.heard) Music.startMorning(morningRandom)
+    Sky.sunrise(SUNRISE_MS)
+    await Debug.ignoreCut(Reksio.duck(false), 'out of the doghouse')
+    await Debug.ignoreCut(Reksio.wakeUp(morningRandom() < 0.5 ? 2 : 3), 'morning yawns')
+    acting = false
+    nextIdleAt = Clock.now() + Idle.gap(0, random)
+  }
+
+  if (asleep) beginMorning()
   requestAnimationFrame(frame)
   Debug.record(state)
   console.info(`[yard] replay this play: ${Debug.replayUrl()}`)
@@ -839,7 +884,7 @@
     things: Object.keys(SPOTS),
     critters: Object.keys(CRITTERS),
     /** Nothing going on: not busy, acting, walking or waiting to do something. */
-    free: () => !busy && !acting && !hold && !pending && !Reksio.walking,
+    free: () => !asleep && !busy && !acting && !hold && !pending && !Reksio.walking,
     pickAct,
     state,
     trace: () => Debug.dump(),

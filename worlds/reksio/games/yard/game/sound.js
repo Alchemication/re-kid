@@ -160,9 +160,29 @@ const Sound = (() => {
     }
   }
 
+  let heard = false // a tap or key has let sound play
+
+  /** The first tap or key (browsers need one before sound): from now on,
+   * sound is heard. What was asked for before it, the browser held back; it
+   * goes to an output that is let go of here, not played all at once. */
+  function unlock() {
+    if (!heard) {
+      heard = true
+      if (master) {
+        master.disconnect()
+        master = ctx.createGain()
+        master.gain.value = VOLUME
+        master.connect(ctx.destination)
+      }
+    }
+    return ensure()
+  }
+
   return {
-    ensure,
+    ensure: unlock,
     from,
+    /** A tap or key has let sound play. */
+    get heard() { return heard },
     /** Sound is on (after the first tap). */
     get running() { return !!ctx && ctx.state === 'running' },
     /** The shared audio context and output, for the music engine. */
