@@ -1,0 +1,42 @@
+:root {
+  --bg: #efe6d2;
+  --ink: #1d1914;
+  --card: #e3d5b6;
+}
+
+body {
+  margin: 0;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.4 system-ui, sans-serif;
+}
+
+h1 { margin: 0 0 4px; font-size: 20px; }
+header p { margin: 0 0 16px; }
+
+main {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(280px, 1.4fr);
+  gap: 16px;
+}
+
+.stage, .reference { background: var(--card); border-radius: 8px; padding: 8px; }
+.stage svg { width: 100%; height: auto; display: block; cursor: pointer; }
+.controls { display: flex; gap: 16px; justify-content: space-between; padding: 4px 8px; }
+.reference img { width: 100%; display: block; border-radius: 4px; }
+
+.grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.cell { background: var(--card); border-radius: 8px; padding: 4px 4px 8px; text-align: center; }
+.cell svg { width: 100%; height: auto; display: block; }
+.cell span { font-size: 13px; }
+
+@media (max-width: 700px) {
+  main { grid-template-columns: 1fr; }
+}

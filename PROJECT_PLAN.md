@@ -226,10 +226,12 @@ wake Reksio at home.
    - *Limbs are plain tubes* that bend and stretch, so a rig of rigid
      pieces can't reach these poses.
 
-   **Proposed steps** (each looked at by Adam before the next):
-   - *A lab page first:* the new Reksio drawn on a page of his own, beside
-     the reference frames, posed and animated there until he looks right.
-     Nothing in the yard changes yet.
+   **Steps** (each looked at by Adam before the next):
+   - *A lab page first* (done, 2026-10-08; Adam: "huge progress"):
+     `games/yard/lab/index.html` draws the new Reksio from poses
+     (`game/figure.js`), eighteen of them named after the moves, beside the
+     reference frames. Open: the ears are tubes where the cartoon's are
+     flaps; on his back is the weakest pose.
    - *Redraw him on-model,* with limbs drawn each frame as tubes between
      joints (shoulder, elbow, paw), so knees, elbows and stretching come
      free; a head with a side view and a front view, eyebrows and a set of
@@ -238,10 +240,13 @@ wake Reksio at home.
      with getting up and dropping down between them.
    - *Acting:* turning to face the child, moods that gestures set, the grin.
    - *Follow-through:* ears and tail on springs; long stretched leaps.
-   - *Swap him into the yard,* re-posing every gesture and gag; the browser
-     tests (every gesture ends with him free and standing) and the perf
-     suite guard it. This is the large step; it touches everything that
-     moves him.
+   - *Swap him into the yard*, in three passes: (1) walking and the 27
+     gestures in `reksio.js` on the new figure; (2) one look at each of the
+     35 gags (12 things, 20 left-alone moves, 3 creatures) as a contact
+     sheet, since the browser tests prove he ends free and standing but not
+     that it looks right (ducking into the doghouse, catching drops, his
+     size against the props); (3) acting: reactions in each gag from the
+     study, starting with the gags Eliot likes. The perf suite guards each.
 2. **Better sounds: an experiment, judged by ear.** The theme is good; many
    effects are weak. Adam's idea: generate new sounds from short original
    clips used as a style reference (MusicGen-Style or a newer model), and

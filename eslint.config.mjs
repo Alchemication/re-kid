@@ -55,6 +55,12 @@ export default [
     rules: { ...CORRECTNESS, ...COMPLEXITY },
   },
   {
+    // a game's lab: workbench pages beside the game, not shipped with it
+    files: ['worlds/*/games/*/lab/**/*.js'],
+    languageOptions: { ecmaVersion: 2024, sourceType: 'script', globals: BROWSER },
+    rules: CORRECTNESS,
+  },
+  {
     files: ['worlds/*/games/*/tests/**/*.js'],
     languageOptions: { ecmaVersion: 2024, sourceType: 'commonjs', globals: NODE },
     rules: CORRECTNESS,

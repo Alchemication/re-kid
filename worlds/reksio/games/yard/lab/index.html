@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reksio lab</title>
+<!-- A workbench for drawing Reksio (game/figure.js) before he goes into the
+     yard: every move from the study side by side, one Reksio acting through
+     them, and the cartoon's frames to compare (local only, gitignored). Not
+     part of the game and not published: open it straight from disk. -->
+<link rel="stylesheet" href="lab.css">
+</head>
+<body>
+  <header>
+    <h1>Reksio lab</h1>
+    <p>Each pose is named after a move in <code>world.yaml</code> (characters[reksio].moves).
+       Click the big one to pause; drag the slider to turn his head; add <code>?pose=grin</code> to the address to hold one pose.</p>
+  </header>
+  <main>
+    <section class="stage">
+      <svg id="stage" viewBox="-140 -230 300 250" aria-label="Reksio acting"></svg>
+      <div class="controls">
+        <span id="now">stand</span>
+        <label>turn <input id="turn" type="range" min="0" max="1" step="0.01" value="0.35"></label>
+      </div>
+    </section>
+    <section class="reference">
+      <img id="reference" src="../../../frames/acting/reksio-moves-reference.jpg" alt="The cartoon: 24 key frames of Reksio's moves">
+    </section>
+    <section id="grid" class="grid"></section>
+  </main>
+  <script src="../game/figure.js"></script>
+  <script src="lab.js"></script>
+</body>
+</html>

@@ -31,6 +31,8 @@ worlds/<id>/
   games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
   games/<game>/game/    the game: static HTML, CSS and plain scripts
   games/<game>/tests/   the game's JS unit tests (node:test)
+  games/<game>/lab/     workbench pages beside a game, opened from disk, not published
+                        (yard/lab: Reksio drawn from poses by game/figure.js)
   media/intro/          intro video clips (downloaded, gitignored)
 .claude/skills/         procedures for Claude Code sessions (new-episode)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
