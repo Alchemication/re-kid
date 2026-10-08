@@ -13,11 +13,13 @@
 // - act: a gesture's own pose for his whole body, over the rest, by weight;
 // - face: a gesture's face (a bark, a yawn, his tongue out), by weight;
 // - add: small things added on top: a head tilt, a hop, a lean, a kick.
-// Walking adds its stride as he goes. relax() cuts every blend short (whoever
+// Under the gestures, life.js keeps him alive when he is free (how he
+// stands, his glances and moods) and always (blinks, ears and tail swinging
+// after him). Walking adds its stride as he goes. relax() cuts every blend short (whoever
 // awaits one hears an AbortError) and blends him back to standing from
 // exactly where he was drawn, so nothing is ever left frozen part-way.
 
-/* global Clock, Debug, Sound, Music, Creatures, Layout, Figure, Motion */
+/* global Clock, Debug, Sound, Music, Creatures, Layout, Figure, Motion, Life */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
@@ -67,6 +69,12 @@ const Reksio = (() => {
   const random = Debug.random('reksio') // this part's own random stream (debug.js)
   const rnd = (lo, hi) => lo + random() * (hi - lo)
   const rndInt = (lo, hi) => Math.floor(rnd(lo, hi + 1))
+  const pickOne = (list) => list[Math.floor(random() * list.length)]
+  const life = Life.create(Debug.random('life')) // every frame: its own stream
+  const gaitRandom = Debug.random('gait') // each walk's own swagger
+  let alive = null // what life adds this frame
+  let doing = 0 // gestures under way: while any is, he isn't free for life's ways of standing
+  let flavour = { lift: 1, swing: 1, bob: 1, tilt: 0 } // this walk's: a strut when proud
 
   // ------------------------------------------------------------ blends
 
@@ -137,6 +145,7 @@ const Reksio = (() => {
   /** The pose to draw, from his state (without walking's stride). */
   function compose() {
     let p = basePose()
+    if (alive) p = lively(p, alive)
     if (act.w > 0) p = Figure.mix(p, Figure.mix(act.from, act.to, act.k), act.w)
     if (face.w > 0) p = { ...p, face: Figure.mix(p.face, Figure.mix(face.from, face.to, face.k), face.w) }
     p = Figure.vary(p, { head: { tilt: p.head.tilt + add.tilt } })
@@ -146,6 +155,27 @@ const Reksio = (() => {
     if (add.wag) p = Figure.vary(p, { tail: [p.tail[0] + add.wag * 6, p.tail[1] - Math.abs(add.wag) * 2] })
     if (holding) p = Figure.vary(p, { face: { bone: p.face.open < 0.15 && p.face.tongue < 0.1 ? 1 : 0 } })
     return p
+  }
+
+  /** What life adds: how he stands and looks about when free; blinks, eyes,
+   * and ears and tail swinging after him always. */
+  function lively(p, a) {
+    const changes = {}
+    if (a.standW > 0.01 && stance.fours < 0.5) {
+      const arms = Figure.mix(F[a.standFrom], F[a.stand], a.standK)
+      changes.nearArm = Figure.mix(p.nearArm, arms.nearArm, a.standW)
+      changes.farArm = Figure.mix(p.farArm, arms.farArm, a.standW)
+    }
+    const w = a.faceW
+    changes.head = { turn: p.head.turn + (a.turn - p.head.turn) * w, tilt: p.head.tilt + a.tilt * w }
+    const face = Figure.mix(p.face, { ...p.face, ...a.face }, w)
+    changes.face = { ...face, blink: Math.max(p.face.blink, a.blink), look: a.look }
+    changes.ears = {
+      near: [p.ears.near[0] + a.ears[0] * 0.4, p.ears.near[1] + a.ears[1] - a.ears[0] * 0.6],
+      far: [p.ears.far[0] + a.ears[0] * 0.3, p.ears.far[1] + a.ears[1] * 0.7 - a.ears[0] * 0.4],
+    }
+    changes.tail = [p.tail[0] + a.tail * 0.5, p.tail[1] - Math.abs(a.tail) * 0.2]
+    return Figure.vary(p, changes)
   }
 
   /** The dachshund stretch: his front half pulled forward by s. */
@@ -167,26 +197,27 @@ const Reksio = (() => {
    * and lift in turn. amount: 0 standing still, 1 at full speed. */
   function strideOf(p, amount) {
     const g = gait
+    const lift0 = g.lift * flavour.lift
     const limb = (pair, offset, lift, swing = g.stride) => {
       const sw = Math.sin(phase + offset) * swing * amount
       const up = Math.max(0, Math.cos(phase + offset)) * lift * amount
       return [[pair[0][0] + sw * 0.6, pair[0][1] - up * 0.6], [pair[1][0] + sw, pair[1][1] - up]]
     }
     // going somewhere, he looks where he goes: his head turns side-on
-    p = Figure.vary(p, { head: { turn: p.head.turn + (0.85 - p.head.turn) * Math.min(1, amount * 1.5) } })
+    p = Figure.vary(p, { head: { turn: p.head.turn + (0.85 - p.head.turn) * Math.min(1, amount * 1.5), tilt: p.head.tilt + flavour.tilt * amount } })
     if (stance.fours < 0.5) {
       // upright: legs in turn, arms swinging against them
       return Figure.vary(p, {
-        nearLeg: limb(p.nearLeg, 0, g.lift), farLeg: limb(p.farLeg, Math.PI, g.lift),
-        nearArm: limb(p.nearArm, Math.PI, 0, g.swing), farArm: limb(p.farArm, 0, 0, g.swing),
+        nearLeg: limb(p.nearLeg, 0, lift0), farLeg: limb(p.farLeg, Math.PI, lift0),
+        nearArm: limb(p.nearArm, Math.PI, 0, g.swing * flavour.swing), farArm: limb(p.farArm, 0, 0, g.swing * flavour.swing),
       })
     }
     // on all fours: a walk moves diagonal pairs together; a run bounds,
     // front pair together, back pair together, out of step
     const run = g === GAITS.run
     return Figure.vary(p, {
-      nearLeg: limb(p.nearLeg, run ? Math.PI : 0, g.lift), farLeg: limb(p.farLeg, run ? Math.PI + 0.4 : Math.PI, g.lift),
-      nearArm: limb(p.nearArm, run ? 0 : Math.PI, g.lift), farArm: limb(p.farArm, run ? 0.4 : 0, g.lift),
+      nearLeg: limb(p.nearLeg, run ? Math.PI : 0, lift0), farLeg: limb(p.farLeg, run ? Math.PI + 0.4 : Math.PI, lift0),
+      nearArm: limb(p.nearArm, run ? 0 : Math.PI, lift0), farArm: limb(p.farArm, run ? 0.4 : 0, lift0),
     })
   }
 
@@ -202,7 +233,7 @@ const Reksio = (() => {
     last = p
     paint(p)
     const breathe = target === null && !stretching ? Math.sin(idleTime * 2.2) * 0.8 : 0
-    const hopping = walkAmount > 0 ? -Math.abs(Math.sin(phase)) * gait.bob * walkAmount : 0
+    const hopping = walkAmount > 0 ? -Math.abs(Math.sin(phase)) * gait.bob * flavour.bob * walkAmount : 0
     const t = `translateY(${(add.dy + breathe + hopping).toFixed(1)}px) rotate(${add.lean.toFixed(1)}deg)`
     if (t !== drawnBob) {
       drawnBob = t
@@ -273,6 +304,9 @@ const Reksio = (() => {
       gait = Math.abs(target - x) > RUN_FROM ? GAITS.run : GAITS.walk
     }
     if (!act.moving) blend(stance, 'fours', gait.fours, STANCE_MS)
+    const proud = life.mood === 'proud' && gait === GAITS.walk
+    const r = () => 0.85 + gaitRandom() * 0.35
+    flavour = proud ? { lift: 1.7 * r(), swing: 1.5 * r(), bob: 1.4, tilt: -6 } : { lift: r(), swing: r(), bob: r(), tilt: 0 }
     return new Promise((resolve) => (arrive = resolve))
   }
 
@@ -318,6 +352,17 @@ const Reksio = (() => {
     return target === null ? 0 : 0.5 + 0.5 * k
   }
 
+  /** Life moves on: told whether he is free, and where his head is. */
+  function stepLife(dt) {
+    const before = last ?? compose()
+    alive = life.step(dt, Clock.now(), {
+      free: doing === 0 && target === null && !stretching && current === 'stand' && act.w < 0.05 && face.w < 0.05,
+      walking: target !== null,
+      fours: stance.fours > 0.5,
+      head: [(x * facing) / SCALE + before.head.x, before.head.y + add.dy],
+    })
+  }
+
   function tick(dt) {
     let walking = 0
     if (target !== null && !stretching) {
@@ -332,6 +377,7 @@ const Reksio = (() => {
     } else {
       idleTime += dt
     }
+    stepLife(dt)
     const wagFast = target !== null || stretching
     if (!blends.some((b) => b.key === 'wag')) add.wag = Math.sin(Clock.now() / (wagFast ? 80 : 260)) * (wagFast ? 1.2 : 0.8)
     place()
@@ -412,14 +458,18 @@ const Reksio = (() => {
 
   // ------------------------------------------------------------ small moves
 
+  // a bark is eager, cross or cheerful, never quite the same twice
+  const BARK_FACES = [{ open: 0.75, smile: 0.3, lift: 0.6 }, { open: 0.8, smile: -0.3, brows: -0.8 }, { open: 0.7, smile: 0.8, eyes: 0, joy: 1 }]
+
   async function bark() {
-    faceTo({ open: 0.75, smile: 0.3 }, 60)
+    const big = rnd(0.7, 1.3)
+    faceTo(pickOne(BARK_FACES), 60)
     Sound.bark()
     const m = mouth()
     Creatures.notice('bark', m.x, m.y)
-    await blend(add, 'tilt', -16, 110, EASE_OUT)
+    await blend(add, 'tilt', -16 * big, 110, EASE_OUT)
     await blend(add, 'tilt', 0, 110)
-    await blend(add, 'tilt', -12, 100, EASE_OUT)
+    await blend(add, 'tilt', -12 * big, 100, EASE_OUT)
     await blend(add, 'tilt', 0, 110)
     await faceOff(80)
   }
@@ -445,7 +495,7 @@ const Reksio = (() => {
   async function lap(n) {
     await onFours()
     await actTo(headDown(22), 220, EASE_OUT)
-    faceTo({ tongue: 0.8, open: 0.3 }, 120)
+    faceTo({ tongue: 0.8, open: 0.3, ...(random() < 0.5 ? { eyes: 0, joy: -1 } : {}) }, 120)
     for (let i = 0; i < n; i++) {
       Sound.lap()
       await blend(add, 'tilt', 8, 95)
@@ -458,7 +508,10 @@ const Reksio = (() => {
 
   /** A happy hop on the spot; height and count vary unless given. */
   async function hop(height = rnd(30, 56), times = random() < 0.3 ? 2 : 1) {
-    faceTo({ smile: 1, open: 0.5 }, 120)
+    faceTo(pickOne([{ smile: 1, open: 0.5 }, { smile: 1, open: 1, eyes: 0, joy: 1, teeth: 1 }, { smile: 1, open: 0.6, tongue: 0.7 }]), 120)
+    // sometimes both arms go up for joy, as he cheers in Sportowiec (362 s)
+    // (only his arms: his legs may go on walking, as when a sneeze blows him back)
+    if (stance.fours < 0.5 && random() < 0.5) actTo(Figure.vary(basePose(), { nearArm: F.armsWide.nearArm, farArm: F.armsWide.farArm }), 160, OVERSHOOT, true)
     for (let i = 0; i < times; i++) {
       Sound.hop()
       Music.react.hop()
@@ -469,12 +522,13 @@ const Reksio = (() => {
       await blend(add, 'dy', 0, 80)
     }
     await faceOff(150)
+    if (act.w > 0) await actOff(200)
   }
 
   /** Nose to the ground, a few sniffs (how many, and how low, varies). */
   async function sniff(times = rndInt(2, 5)) {
     await onFours()
-    await actTo(Figure.vary(F.sniff, { head: { tilt: rnd(20, 32) } }), 260)
+    await actTo(Figure.vary(F.sniff, { head: { tilt: rnd(20, 32) }, face: { eyes: rnd(0.4, 0.8), brows: rnd(0, 0.5) } }), 260)
     for (let i = 0; i < times; i++) {
       Sound.sniff()
       const ms = rnd(200, 320)
@@ -495,20 +549,24 @@ const Reksio = (() => {
 
   /** Look up at the sky (or the bird) for a moment. */
   async function lookUp(ms = rnd(900, 1800)) {
+    if (random() < 0.5) faceTo({ lift: 1, open: 0.3, o: 0.6, smile: 0 }, ms * 0.2) // wonder
     await blend(add, 'tilt', rnd(-28, -18), ms * 0.2)
     await wait(ms * 0.6)
     await blend(add, 'tilt', 0, ms * 0.2)
+    await faceOff(150)
   }
 
   /** Scratch behind the ear with a back leg, sitting, head tilted to meet it. */
   async function scratch(times = rndInt(4, 8)) {
     const sitting = Figure.vary(F.sitDog, { nearLeg: [[30, -46], [34, -82]], head: { tilt: 20 } })
     await actTo(sitting, 260)
+    faceTo({ eyes: 0, joy: -1, smile: 1, tongue: random() < 0.5 ? 0.6 : 0 }, 200) // bliss
     Sound.scratch()
     for (let i = 0; i < times; i++) {
       await blend(add, 'kick', 10, 70)
       await blend(add, 'kick', 0, 70)
     }
+    faceOff(200)
     await actOff(250)
   }
 
@@ -557,7 +615,7 @@ const Reksio = (() => {
   /** Snap the jaws shut, quick, n times. */
   async function snap(n = 1) {
     for (let i = 0; i < n; i++) {
-      await faceTo({ open: 0.6, teeth: 1, smile: 0.2 }, 60)
+      await faceTo({ open: 0.6, teeth: 1, smile: 0.2, brows: -0.6 }, 60)
       await wait(30)
       Sound.snap()
       const m = mouth()
@@ -712,15 +770,22 @@ const Reksio = (() => {
     await settle('lie', 700)
     await rise()
     if (mine !== pose) return
+    await wakeUp()
+    if (random() < 0.5) await dogStretch(mine)
+    if (mine !== pose) return
+    await shake()
+  }
+
+  /** The dog stretch: front legs reaching forward, rump up, then the back
+   * legs stretched out behind. */
+  async function dogStretch(mine) {
     await settle('bowStretch', 800)
     await wait(900)
     if (mine !== pose) return
-    yawnSound()
     await settle('backStretch', 700)
     await wait(700)
     if (mine !== pose) return
     await rise(450)
-    await shake()
   }
 
   function yawnSound() {
@@ -773,13 +838,38 @@ const Reksio = (() => {
     await blend(add, 'tilt', 0, 300)
   }
 
-  /** A big yawn: upright, arms flung wide, as he greets the day in the
-   * cartoon (Aktor, Pocieszyciel, Kompan, all just out of the doghouse). */
-  async function yawn() {
-    Sound.yawn()
-    await actTo(F.armsWide, 390)
-    await wait(520)
+  /** A yawn as wide as size (0 to 1): upright, mouth open, eyes squeezed,
+   * arms flung out wider the bigger it is. */
+  function yawnPose(size) {
+    const p = Figure.mix(F.stand, F.armsWide, 0.25 + 0.75 * size)
+    return Figure.vary(p, {
+      head: { tilt: -4 - 10 * size, turn: 0.1 },
+      face: { eyes: 0, joy: 1, open: 0.45 + 0.55 * size, smile: 0.1, teeth: 0, tongue: size > 0.8 ? 0.4 : 0 },
+    })
+  }
+
+  /** Yawn: how many times and how wide vary unless given. Each yawn after
+   * the first is a little smaller, with a breath between. */
+  async function yawn(times = random() < 0.3 ? 2 : 1, size = rnd(0.4, 0.75)) {
+    let s = size
+    for (let i = 0; i < times; i++) {
+      Sound.yawn(s)
+      await actTo(yawnPose(s), 280 + 260 * s)
+      await wait(300 + 500 * s)
+      if (i < times - 1) {
+        await actTo(Figure.vary(yawnPose(s * 0.3), { face: { open: 0.1 } }), 220) // a breath
+        await wait(rnd(120, 320))
+        s = Math.max(0.3, s * rnd(0.6, 0.95))
+      }
+    }
     await actOff(390)
+  }
+
+  /** Waking up, he yawns wide and loud, sometimes more than once, arms
+   * flung out: the cartoon's moment just out of the doghouse (Aktor,
+   * Pocieszyciel, Kompan; world.yaml, characters[reksio].moves[waking-yawn]). */
+  function wakeUp() {
+    return yawn(pickOne([1, 2, 2, 3]), rnd(0.8, 1))
   }
 
   /** A shake of the body, nose to tail. */
@@ -834,6 +924,19 @@ const Reksio = (() => {
     holding = on
   }
 
+  /** A gesture, counted while under way: he isn't free for life's ways of
+   * standing until every gesture is over (or cut short). */
+  function busyWith(fn) {
+    return async (...args) => {
+      doing += 1
+      try {
+        return await fn(...args)
+      } finally {
+        doing -= 1
+      }
+    }
+  }
+
   /** Mouth position in scene units, for effects. */
   function mouth() {
     return toScene(Figure.mouthAt(last ?? compose()))
@@ -860,9 +963,11 @@ const Reksio = (() => {
     },
     mouth,
     get holdingBone() { return holding },
-    walkTo, stopWalking, face: face_, tick, relax, shakeDry, setWet, setMuddy, bark, nod, lick, lap, shake, paddle, duck, holdBone,
-    beginStretch, endStretch, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
-    stamp, snap, watch, pounce, biteTail, howl, sit, lieDown, nap, startle, catchDrops,
+    walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, beginStretch, endStretch,
+    ...Object.fromEntries(Object.entries({
+      shakeDry, bark, nod, lick, lap, shake, paddle, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
+      stamp, snap, watch, pounce, biteTail, howl, sit, lieDown, nap, startle, catchDrops, wakeUp,
+    }).map(([name, fn]) => [name, busyWith(fn)])),
     MIN_X, MAX_X,
   }
 })()

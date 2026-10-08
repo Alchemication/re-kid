@@ -131,8 +131,9 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     that must always hold becomes a `Debug.check` rule in `checkRules`;
   - Reksio is drawn from his state: each frame, `compose()` in reksio.js
     builds a pose (plain numbers, figure.js) from his layers (rest pose,
-    stance, a gesture's pose and face, small additions) and walking's
-    stride, and figure.js draws it. Gestures move those numbers only with
+    stance, a gesture's pose and face, small additions), what life.js adds
+    (how he stands and looks about when free; blinks, ears and tail always)
+    and walking's stride, and figure.js draws it. Gestures move those numbers only with
     `blend()` on the Clock; `relax()` cuts every blend short. Nothing in the
     game is frozen with `fill: 'forwards'`: a frozen animation is a second
     source of truth that a cut-short gag leaves behind. Set the end on the
@@ -165,7 +166,7 @@ the edge cases that would let bad data pass silently.
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
-  `shower.js`, `idle.js`, `input.js`, `layout.js`): the part that draws tells them what
+  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`): the part that draws tells them what
   happened and does what they say. Drawing parts are tested here too, on a
   pretend page and clock: `load(…, { dom: true, globals })`, then
   `await page.advance(ms)` runs the timers and animation frames due (all
@@ -200,7 +201,7 @@ before a commit.
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
 | a thing in `things.js` / `tree.js` | `"TestThings and <name>"` (and its rules in `things.test.js` / `tree.test.js`) |
-| a gesture or pose in `reksio.js` or `figure.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
+| a gesture or pose in `reksio.js`, `figure.js` or `life.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |
 | `weather.js` / `shower.js` | `"drops or shakeOff or puddle or snail"` |

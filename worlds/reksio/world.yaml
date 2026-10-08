@@ -273,6 +273,13 @@ characters:
       sources:
       - sfr-youtube
       observed_by: claude-frames
+  - id: waking-yawn
+    claim:
+      text: 'Waking up, he yawns very wide and loud, and it is a running theme of the series (Adam, from watching it). In the frames it is the moment just out of the doghouse, standing up with both arms flung wide and his mouth wide open: Aktor 50 s, Pocieszyciel 50 s, Kompan 50 s (read from frames by Claude, who first took it for a yawn-and-stretch or a shout). How long and how loud, and whether it differs between episodes, has not been checked by ear yet.'
+      status: observed
+      sources:
+      - sfr-youtube
+      observed_by: adam
   - id: showing-off
     claim:
       text: 'He poses and struts: a high-stepping walk, flexing his arms like a strongman, a hand behind his head with one leg kicked out. Sportowiec 246 s (flexing, in close-up) and 262 s (both arms), 298 s (high-stepping); Aktor 230 s.'

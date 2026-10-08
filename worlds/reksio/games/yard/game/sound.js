@@ -233,7 +233,30 @@ const Sound = (() => {
       o.start(t + 0.75)
       o.stop(t + 1.65)
     },
-    yawn() { tone('sawtooth', 300, 170, 0, 0.08, 0.15, 0.5) },
+    /** A yawn: the voice opens, rises and falls away, and ends in a breath.
+     * size from 0 to 1: a bigger yawn is longer and louder (waking up, he
+     * yawns wide and loud: Adam, from the cartoon). */
+    yawn(size = 0.3) {
+      const c = ensure()
+      const t = c.currentTime
+      const d = 0.6 + 0.9 * size
+      const o = c.createOscillator()
+      o.type = 'sawtooth'
+      o.frequency.setValueAtTime(250, t)
+      o.frequency.exponentialRampToValueAtTime(360 + 90 * size, t + d * 0.3)
+      o.frequency.exponentialRampToValueAtTime(150, t + d)
+      const lp = c.createBiquadFilter()
+      lp.type = 'lowpass'
+      lp.frequency.setValueAtTime(700, t)
+      lp.frequency.linearRampToValueAtTime(1300 + 700 * size, t + d * 0.35)
+      lp.frequency.linearRampToValueAtTime(450, t + d)
+      const g = c.createGain()
+      env(g, t, 0.08 + 0.16 * size, d * 0.3, d * 0.7)
+      o.connect(lp).connect(g).connect(master)
+      o.start(t)
+      o.stop(t + d + 0.05)
+      hiss(d * 0.8, 0.03 + 0.05 * size, 0.05, 0.3, 'lowpass', 900) // the breath out
+    },
     sneeze() {
       hiss(0, 0.06, 0.25, 0.05, 'bandpass', 1800, 1)
       hiss(0.32, 0.4, 0.004, 0.12, 'highpass', 1500)

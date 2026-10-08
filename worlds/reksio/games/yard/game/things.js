@@ -523,10 +523,10 @@ const Things = (() => {
           }
           await wait(1750)
         }
-        Sound.yawn()
-        await wait(500)
+        await wait(300)
         await Motion.endAt(nap, [{ opacity: 1 }, { opacity: 0 }], { duration: 250 })
         await Reksio.duck(false)
+        await Reksio.wakeUp() // out of the doghouse, a big yawn, as in the cartoon
       },
     },
     bowl: {

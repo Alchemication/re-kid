@@ -47,6 +47,7 @@ GESTURES = {
     "playBow": "Reksio.playBow()",
     "chaseTail": "Reksio.chaseTail()",
     "yawn": "Reksio.yawn()",
+    "wakeUp": "Reksio.wakeUp()",
     "stamp": "Reksio.stamp(() => {})",
     "snap": "Reksio.snap(2)",
     "watch": "Reksio.watch(() => ({ x: Reksio.x + 200, y: 600 }), 800)",

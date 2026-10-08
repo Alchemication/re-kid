@@ -238,8 +238,13 @@ wake Reksio at home.
      mouths.
    - *Two stances:* upright by default, on all fours to trot, sniff and run,
      with getting up and dropping down between them.
-   - *Acting:* turning to face the child, moods that gestures set, the grin.
-   - *Follow-through:* ears and tail on springs; long stretched leaps.
+   - *Life* (done, 2026-10-08, `life.js`): left alone he blinks, his eyes
+     dart, he glances about and now and then turns to the child grinning,
+     shifts how he stands (hands on hips, paw on chin, scratching his head);
+     a mood (happy, curious, proud, dreamy) drifts and colours his face and
+     walk (proud: a strut); ears and tail trail after him on springs.
+     Gestures pick among a few faces and sizes.
+   - *Acting:* moods that gestures set, reactions in each gag.
    - *Swap him into the yard*, in three passes: (1) walking and the 27
      gestures in `reksio.js` on the new figure (done, 2026-10-08: upright
      walk, run on all fours, every gesture redrawn; all tests and the perf

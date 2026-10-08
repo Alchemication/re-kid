@@ -93,8 +93,10 @@ const Figure = (() => {
     return out
   }
 
-  // tongue: hanging out (0 to 1); bone: carried in his mouth (0 or 1)
-  const FACE = { eyes: 1, joy: 0, brows: 0, lift: 0, smile: 0.6, open: 0, teeth: 0, o: 0, tongue: 0, bone: 0 }
+  // tongue: hanging out (0 to 1); bone: carried in his mouth (0 or 1); blink: lids
+  // closing (0 to 1) whatever the eyes are doing; look: his eyes turned back
+  // (-1) or forward (1)
+  const FACE = { eyes: 1, joy: 0, brows: 0, lift: 0, smile: 0.6, open: 0, teeth: 0, o: 0, tongue: 0, bone: 0, blink: 0, look: 0 }
   const EARS = { near: [-20, -75], far: [14, 40] } // [angle from upright, bend at the middle], degrees
 
   const STAND = {
@@ -135,6 +137,13 @@ const Figure = (() => {
       nearArm: [[42, -88], [62, -116]], farArm: [[-34, -88], [-54, -116]],
       nearLeg: [[13, -36], [17, 0]], farLeg: [[-10, -36], [-15, 0]],
       head: { tilt: -10, turn: 0.1 }, face: { eyes: 0, joy: 1, open: 1, smile: 0.2 },
+    }),
+    handOnHip: vary(STAND, {
+      nearArm: [[32, -88], [15, -74]], head: { turn: 0.3 },
+    }),
+    scratchHead: vary(STAND, {
+      nearArm: [[40, -128], [26, -170]], farArm: [[-28, -90], [-10, -76]],
+      head: { tilt: 8, turn: 0.4 }, face: { brows: 0.4, smile: 0.2 },
     }),
     flex: vary(STAND, {
       nearArm: [[48, -98], [46, -130]], farArm: [[-28, -90], [-10, -76]],
@@ -279,13 +288,14 @@ const Figure = (() => {
   }
 
   function eyes(L, f) {
+    const eyesOpen = f.eyes * (1 - clamp01(f.blink))
     return L.eyes.map((e, i) => {
       const show = i === 0 ? 1 : L.farEye
-      const shutness = clamp01((0.45 - f.eyes) / 0.3)
+      const shutness = clamp01((0.45 - eyesOpen) / 0.3)
       const inner = Math.sign(L.nose[0] - e[0]) || 1
       const browY = e[1] - 12 - 4 * f.lift
       return {
-        at: e, ry: 0.4 + 4.6 * f.eyes, open: show * (1 - shutness),
+        at: [e[0] + 2.4 * f.look, e[1]], ry: 0.4 + 4.6 * eyesOpen, open: show * (1 - shutness),
         shut: `M${pt([e[0] - 5, e[1]])} Q${pt([e[0], e[1] - 6 * f.joy])} ${pt([e[0] + 5, e[1]])}`,
         shutShow: show * shutness,
         brow: `M${pt([e[0] - 5 * inner, browY])} Q${pt([e[0], browY - 3])} ${pt([e[0] + 5 * inner, browY - 5 * f.brows])}`,

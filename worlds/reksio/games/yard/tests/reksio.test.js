@@ -13,7 +13,7 @@ function reksio() {
   const { Sound, Music } = fakeSound()
   const noticed = [] // what the creatures were told he did
   const Creatures = { notice: (type, x, y) => noticed.push(type) }
-  const page = load(['debug.js', 'layout.js', 'figure.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
+  const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
   const R = page.get('Reksio')
   return {
     R,
@@ -103,7 +103,7 @@ describe('walking', () => {
 const GESTURES = {
   bark: [], nod: [12, 400], lick: [], lap: [3], shake: [], shakeDry: [], paddle: [800], hop: [], sniff: [],
   lookAround: [], lookUp: [], scratch: [], playBow: [], chaseTail: [], yawn: [], snap: [2], pounce: [1700],
-  biteTail: [], howl: [], sit: [1500], lieDown: [1500], nap: [2000], startle: [], catchDrops: [2], duck: [true],
+  biteTail: [], howl: [], sit: [1500], lieDown: [1500], nap: [2000], startle: [], catchDrops: [2], wakeUp: [], duck: [true],
 }
 
 describe('every gesture', () => {
@@ -139,5 +139,44 @@ describe('every gesture', () => {
       assert.equal(r.R.pose, 'stand', name)
       assert.equal(await r.walk(r.R.x + 200), true, `${name}: could not walk off`)
     }
+  })
+})
+
+describe('yawning', () => {
+  /** A Reksio whose yawns note how big each was. */
+  function yawner(seed) {
+    const sizes = []
+    const Sound = new Proxy({}, { get: (_t, name) => (name === 'yawn' ? (s) => sizes.push(s) : name === 'from' ? (_d, play) => play() : () => {}) })
+    const { Music } = fakeSound()
+    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'reksio.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+    return { R: page.get('Reksio'), page, sizes }
+  }
+
+  /** Every yawn's size, gesture by gesture, over several seeds. */
+  async function yawns(gesture) {
+    const all = []
+    for (let seed = 1; seed <= 12; seed++) {
+      const y = yawner(seed)
+      let over = false
+      y.R[gesture]().then(() => (over = true))
+      for (let i = 0; i < 200 && !over; i++) await y.page.advance(100)
+      assert.ok(over, `${gesture} still going`)
+      all.push(y.sizes)
+    }
+    return all
+  }
+
+  it('waking up: a big yawn, one to three times, and how many varies', async () => {
+    const all = await yawns('wakeUp')
+    assert.ok(all.every((s) => s.length >= 1 && s.length <= 3), JSON.stringify(all))
+    assert.ok(new Set(all.map((s) => s.length)).size > 1, 'always the same number of yawns')
+    assert.ok(all.every((s) => s[0] >= 0.8), 'the first waking yawn is a big one')
+  })
+
+  it('how wide varies, and a waking yawn is bigger than one in passing', async () => {
+    const waking = (await yawns('wakeUp')).map((s) => s[0])
+    const passing = (await yawns('yawn')).map((s) => s[0])
+    assert.ok(new Set(passing.map((s) => s.toFixed(2))).size > 3, 'always the same size')
+    assert.ok(Math.min(...waking) > Math.max(...passing), `waking ${waking} vs passing ${passing}`)
   })
 })
