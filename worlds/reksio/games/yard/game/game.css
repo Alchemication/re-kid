@@ -276,10 +276,12 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 
 /* ---- Reksio muddy (paws, after a puddle) and soaked (fur a touch darker,
    until he shakes himself dry) ---- */
-#reksio .white, #reksio .leg-white, #reksio .ochre { transition: fill 1.2s ease, stroke 1.2s ease; }
-#reksio.muddy .leg-white { stroke: #cdbf9f; }
-#reksio.wet .white { fill: #e4e2da; }
-#reksio.wet .ochre { fill: #cf9030; }
+#reksio .fig-white, #reksio .fig-tube, #reksio .fig-ochre, #reksio .fig-tube-ochre { transition: fill 1.2s ease, stroke 1.2s ease; }
+#reksio.wet .fig-white { fill: #e4e2da; }
+#reksio.wet .fig-tube { stroke: #e4e2da; }
+#reksio.wet .fig-ochre { fill: #cf9030; }
+#reksio.wet .fig-tube-ochre { stroke: #cf9030; }
+#reksio.muddy .fig-leg { stroke: #cdbf9f; }
 /* the puddle's near edge, in front of his paws, so he stands in the water */
 .paw-water { fill: #8fb3c9; stroke: #5d7e94; stroke-width: 2.5; opacity: 0; transition: opacity 0.25s ease; pointer-events: none; }
 .paw-water.on { opacity: 0.85; }

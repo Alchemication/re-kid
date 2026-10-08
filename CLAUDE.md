@@ -129,13 +129,15 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     recorder captures it and replays reuse it; new input = new `INTENTS` entry;
   - new behaviour notes itself with `Debug.trace(kind, data)`, and anything
     that must always hold becomes a `Debug.check` rule in `checkRules`;
-  - Reksio is drawn from his state: `draw()` in reksio.js paints every body
-    part each frame from his pose, a gesture's `held` position, or walking
-    motion. Animations only move a part between those. Nothing in the
+  - Reksio is drawn from his state: each frame, `compose()` in reksio.js
+    builds a pose (plain numbers, figure.js) from his layers (rest pose,
+    stance, a gesture's pose and face, small additions) and walking's
+    stride, and figure.js draws it. Gestures move those numbers only with
+    `blend()` on the Clock; `relax()` cuts every blend short. Nothing in the
     game is frozen with `fill: 'forwards'`: a frozen animation is a second
     source of truth that a cut-short gag leaves behind. Set the end on the
-    element and animate to it (`Motion.endAt`, debug.js; for Reksio's body,
-    `holdAt` or a pose); a new gag follows the same rule;
+    element and animate to it (`Motion.endAt`, debug.js; for Reksio, a
+    blend or a pose); a new gag follows the same rule;
   - a new page-address flag goes in layout.js, makes its random draw either
     way (so seeded plays don't shift), and is listed in README.
 - **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build
@@ -198,7 +200,7 @@ before a commit.
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
 | a thing in `things.js` / `tree.js` | `"TestThings and <name>"` (and its rules in `things.test.js` / `tree.test.js`) |
-| a gesture or pose in `reksio.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
+| a gesture or pose in `reksio.js` or `figure.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |
 | `weather.js` / `shower.js` | `"drops or shakeOff or puddle or snail"` |

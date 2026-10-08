@@ -98,7 +98,7 @@ class TestConventions:
         last frame (fill: 'forwards') is a second source of truth that a cut-short
         gag leaves behind. Reksio stayed drawn sitting while the game thought he
         stood (Adam's reports, 2026-10-06). Use Motion.endAt (debug.js), or for
-        Reksio's body holdAt / a pose (reksio.js)."""
+        Reksio a blend or a pose (reksio.js)."""
         bad = [
             f"{p.name}:{i}"
             for p in scripts(game)

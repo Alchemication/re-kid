@@ -93,7 +93,8 @@ const Figure = (() => {
     return out
   }
 
-  const FACE = { eyes: 1, joy: 0, brows: 0, lift: 0, smile: 0.6, open: 0, teeth: 0, o: 0 }
+  // tongue: hanging out (0 to 1); bone: carried in his mouth (0 or 1)
+  const FACE = { eyes: 1, joy: 0, brows: 0, lift: 0, smile: 0.6, open: 0, teeth: 0, o: 0, tongue: 0, bone: 0 }
   const EARS = { near: [-20, -75], far: [14, 40] } // [angle from upright, bend at the middle], degrees
 
   const STAND = {
@@ -176,6 +177,49 @@ const Figure = (() => {
       pelvis: [-32, -58], chest: [14, -44], head: { x: 56, y: -52, tilt: 26 },
       nearArm: [[20, -20], [22, 0]], farArm: [[10, -20], [10, 0]],
       tail: [-52, -100], face: { eyes: 0.6 },
+    }),
+    // resting, as a dog does: these replace the yard's old resting poses
+    sitDog: vary(ON_FOURS, {
+      pelvis: [-8, -24], chest: [6, -60], head: { x: 18, y: -104, turn: 0.6 },
+      nearArm: [[14, -32], [16, 0]], farArm: [[8, -32], [8, 0]],
+      nearLeg: [[12, -16], [16, 0]], farLeg: [[6, -16], [10, 0]],
+      tail: [-40, -12], ears: EARS,
+    }),
+    lie: vary(ON_FOURS, {
+      pelvis: [-34, -22], chest: [10, -26], head: { x: 40, y: -66, turn: 0.9 },
+      nearArm: [[26, -10], [48, -2]], farArm: [[20, -10], [42, -2]],
+      nearLeg: [[-30, -12], [-8, -2]], farLeg: [[-36, -12], [-14, -2]],
+      tail: [-68, -10],
+    }),
+    nap: vary(ON_FOURS, {
+      pelvis: [-34, -22], chest: [10, -24], head: { x: 44, y: -46, tilt: 18, turn: 0.9 },
+      nearArm: [[26, -10], [48, -2]], farArm: [[20, -10], [42, -2]],
+      nearLeg: [[-30, -12], [-8, -2]], farLeg: [[-36, -12], [-14, -2]],
+      tail: [-68, -8], face: { eyes: 0, joy: -1, smile: 0.4 },
+    }),
+    curl: vary(ON_FOURS, {
+      pelvis: [-20, -22], chest: [12, -24], head: { x: 26, y: -42, tilt: 40, turn: 0.7 },
+      nearArm: [[10, -8], [28, -4]], farArm: [[4, -8], [22, -4]],
+      nearLeg: [[-8, -10], [6, -4]], farLeg: [[-14, -10], [0, -4]],
+      tail: [-30, -4], face: { eyes: 0, joy: -1, smile: 0.4 },
+    }),
+    sprawl: vary(ON_FOURS, {
+      pelvis: [-30, -20], chest: [16, -20], head: { x: 52, y: -38, tilt: 12, turn: 1 },
+      nearArm: [[38, -12], [62, -6]], farArm: [[32, -12], [56, -6]],
+      nearLeg: [[-56, -12], [-82, -6]], farLeg: [[-52, -12], [-78, -6]],
+      tail: [-64, -24], face: { eyes: 0, joy: -1, smile: 0.4 },
+    }),
+    bowStretch: vary(ON_FOURS, {
+      pelvis: [-30, -56], chest: [12, -26], head: { x: 44, y: -58, tilt: -14 },
+      nearArm: [[34, -10], [58, 0]], farArm: [[28, -10], [52, 0]],
+      nearLeg: [[-34, -28], [-36, 0]], farLeg: [[-28, -28], [-28, 0]],
+      tail: [-56, -98], face: { eyes: 0, joy: 1, open: 0.6, smile: 0.2 },
+    }),
+    backStretch: vary(ON_FOURS, {
+      pelvis: [-26, -44], chest: [16, -56], head: { x: 52, y: -96, tilt: -6 },
+      nearArm: [[18, -28], [18, 0]], farArm: [[10, -28], [10, 0]],
+      nearLeg: [[-48, -24], [-70, 0]], farLeg: [[-44, -24], [-64, 0]],
+      tail: [-60, -60],
     }),
     leap: vary(ON_FOURS, {
       pelvis: [-44, -96], chest: [36, -104], head: { x: 80, y: -134, tilt: -10 },
@@ -285,7 +329,20 @@ const Figure = (() => {
       d: `M${pt(left)} Q${pt(top)} ${pt(right)} Q${pt([mx, lower])} ${pt(left)} Z`,
       tongue: { c: [mx + 2, lerp(mid, lower, 0.62)], rx: w * 0.45, ry: 8 * f.open },
       teeth: { ...teeth(left, top, right, 6 + 3 * f.open), show: f.teeth },
+      // hanging out over his chin: lapping, catching drops, panting
+      tongueOut: { c: [mx + w * 0.3, mid + 4 + 7 * f.tongue], rx: 6 + 2 * f.tongue, ry: 1 + 8 * f.tongue, show: f.tongue > 0.02 ? 1 : 0 },
+      bone: { at: [mx + w * 0.2, mid + 1], show: f.bone },
     }
+  }
+
+  /** Where his mouth is, in the figure's own units (feet on y = 0, facing
+   * right): for effects that come from it (a bark, crumbs, a snap). */
+  function mouthAt(p) {
+    const L = layout(p.head.turn)
+    const local = [L.mouth[0], L.mouth[1] + 6]
+    const a = (p.head.tilt * Math.PI) / 180
+    const turned = [local[0] * Math.cos(a) - local[1] * Math.sin(a), local[0] * Math.sin(a) + local[1] * Math.cos(a)]
+    return add([p.head.x, p.head.y], turned)
   }
 
   function head(h, f, ears) {
@@ -324,6 +381,18 @@ const Figure = (() => {
 
   let mounted = 0 // each figure on a page needs its own clip-path ids
 
+  // The attributes last written to each node: drawing every frame only
+  // touches what changed, so a still Reksio costs the page nothing.
+  const written = new WeakMap()
+  function set(node, k, v) {
+    let m = written.get(node)
+    if (!m) written.set(node, (m = new Map()))
+    const value = typeof v === 'number' ? fmt(v) : v
+    if (m.get(k) === value) return
+    m.set(k, value)
+    node.setAttribute(k, value)
+  }
+
   function el(parent, tag, attrs = {}) {
     const node = document.createElementNS(SVG_NS, tag)
     for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v)
@@ -331,15 +400,17 @@ const Figure = (() => {
     return node
   }
 
-  const tubeStyle = ([outer, inner], fill = COLOURS.white) => [
+  const tubeStyle = ([outer, inner], fill, cls) => [
     { fill: 'none', stroke: COLOURS.ink, 'stroke-width': outer, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
-    { fill: 'none', stroke: fill, 'stroke-width': inner, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' },
+    { fill: 'none', stroke: fill, 'stroke-width': inner, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', class: cls },
   ]
 
-  function tube(parent, size, fill) {
-    const [a, b] = tubeStyle(size, fill)
+  /** A limb: an outline tube under a coloured one. cls lets the page restyle
+   * it (fig-leg: muddy paws). */
+  function tube(parent, size, fill = COLOURS.white, cls = fill === COLOURS.white ? 'fig-tube' : 'fig-tube-ochre') {
+    const [a, b] = tubeStyle(size, fill, cls)
     const paths = [el(parent, 'path', a), el(parent, 'path', b)]
-    return (d) => paths.forEach((p) => p.setAttribute('d', d))
+    return (d) => paths.forEach((p) => set(p, 'd', d))
   }
 
   /** Two shapes merged into one outlined shape: the outline of both, under
@@ -347,20 +418,23 @@ const Figure = (() => {
   function merged(parent, fill, clipId) {
     const ink = el(parent, 'path', { fill: COLOURS.ink, stroke: COLOURS.ink, 'stroke-width': OUTLINE * 2, 'stroke-linejoin': 'round' })
     const clip = el(el(parent, 'clipPath', { id: clipId }), 'path')
-    const white = el(parent, 'path', { fill })
-    return (d) => [ink, clip, white].forEach((p) => p.setAttribute('d', d))
+    const white = el(parent, 'path', { fill, class: 'fig-white' })
+    return (d) => [ink, clip, white].forEach((p) => set(p, 'd', d))
   }
 
   function setEllipse(node, { c, rx, ry, angle = 0 }) {
-    node.setAttribute('cx', fmt(c[0]))
-    node.setAttribute('cy', fmt(c[1]))
-    node.setAttribute('rx', fmt(Math.max(rx, 0.01)))
-    node.setAttribute('ry', fmt(Math.max(ry, 0.01)))
-    node.setAttribute('transform', `rotate(${fmt(angle)} ${fmt(c[0])} ${fmt(c[1])})`)
+    set(node, 'cx', c[0])
+    set(node, 'cy', c[1])
+    set(node, 'rx', Math.max(rx, 0.01))
+    set(node, 'ry', Math.max(ry, 0.01))
+    set(node, 'transform', `rotate(${fmt(angle)} ${fmt(c[0])} ${fmt(c[1])})`)
   }
 
+  /** A bone held level in his teeth. */
+  const BONE = (x, y) => `M${pt([x - 13, y])} H${fmt(x + 13)} M${pt([x - 17, y - 5])} a5 5 0 1 0 0 10 M${pt([x + 17, y - 5])} a5 5 0 1 1 0 10`
+
   function mountFace(g, clips) {
-    const patch = el(g, 'ellipse', { fill: COLOURS.ochre, 'clip-path': `url(#${clips.head})` })
+    const patch = el(g, 'ellipse', { fill: COLOURS.ochre, class: 'fig-ochre', 'clip-path': `url(#${clips.head})` })
     const eyes = [0, 1].map(() => ({
       open: el(g, 'ellipse', { fill: COLOURS.ink, rx: 3.4 }),
       shut: el(g, 'path', { fill: 'none', stroke: COLOURS.ink, 'stroke-width': 2.6, 'stroke-linecap': 'round' }),
@@ -374,26 +448,34 @@ const Figure = (() => {
     const teethBand = el(inside, 'path', { fill: COLOURS.white })
     const teethLines = el(inside, 'path', { fill: 'none', stroke: COLOURS.ink, 'stroke-width': 1.6 })
     const lips = el(g, 'path', { fill: 'none', stroke: COLOURS.ink, 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' })
+    const tongueOut = el(g, 'ellipse', { fill: COLOURS.tongue, stroke: COLOURS.ink, 'stroke-width': 1.8 })
+    const bone = [11, 5].map((w, i) => el(g, 'path', { fill: 'none', stroke: i ? COLOURS.white : COLOURS.ink, 'stroke-width': w, 'stroke-linecap': 'round' }))
     return (s) => {
       setEllipse(patch, s.patch)
       s.eyes.forEach((e, i) => {
         const v = eyes[i]
-        v.open.setAttribute('cx', fmt(e.at[0]))
-        v.open.setAttribute('cy', fmt(e.at[1]))
-        v.open.setAttribute('ry', fmt(e.ry))
-        v.open.setAttribute('opacity', fmt(e.open))
-        v.shut.setAttribute('d', e.shut)
-        v.shut.setAttribute('opacity', fmt(e.shutShow))
-        v.brow.setAttribute('d', e.brow)
-        v.brow.setAttribute('opacity', fmt(e.browShow))
+        set(v.open, 'cx', e.at[0])
+        set(v.open, 'cy', e.at[1])
+        set(v.open, 'ry', Math.max(e.ry, 0.01))
+        set(v.open, 'opacity', e.open)
+        set(v.shut, 'd', e.shut)
+        set(v.shut, 'opacity', e.shutShow)
+        set(v.brow, 'd', e.brow)
+        set(v.brow, 'opacity', e.browShow)
       })
-      nose.setAttribute('d', s.nose)
-      for (const p of [mouthClip, mouthShape, lips]) p.setAttribute('d', s.mouth.d)
+      set(nose, 'd', s.nose)
+      for (const p of [mouthClip, mouthShape, lips]) set(p, 'd', s.mouth.d)
       const t = s.mouth.teeth
-      teethBand.setAttribute('d', t.band)
-      teethLines.setAttribute('d', t.lines)
-      for (const node of [teethBand, teethLines]) node.setAttribute('opacity', fmt(t.show))
+      set(teethBand, 'd', t.band)
+      set(teethLines, 'd', t.lines)
+      for (const node of [teethBand, teethLines]) set(node, 'opacity', t.show)
       setEllipse(tongue, s.mouth.tongue)
+      setEllipse(tongueOut, s.mouth.tongueOut)
+      set(tongueOut, 'opacity', s.mouth.tongueOut.show)
+      for (const b of bone) {
+        set(b, 'd', BONE(...s.mouth.bone.at))
+        set(b, 'opacity', s.mouth.bone.show)
+      }
     }
   }
 
@@ -402,12 +484,12 @@ const Figure = (() => {
     const id = `fig${++mounted}`
     const clips = { body: `${id}-body`, head: `${id}-head`, mouth: `${id}-mouth` }
     const root = el(parent, 'g', { class: 'figure' })
-    const farLeg = tube(root, LEG)
+    const farLeg = tube(root, LEG, COLOURS.white, 'fig-tube fig-leg')
     const farArm = tube(root, ARM)
     const tail = tube(root, TAIL)
     const body = merged(root, COLOURS.white, clips.body)
-    const bodyPatch = el(root, 'ellipse', { fill: COLOURS.ochre, 'clip-path': `url(#${clips.body})` })
-    const nearLeg = tube(root, LEG)
+    const bodyPatch = el(root, 'ellipse', { fill: COLOURS.ochre, class: 'fig-ochre', 'clip-path': `url(#${clips.body})` })
+    const nearLeg = tube(root, LEG, COLOURS.white, 'fig-tube fig-leg')
     const headG = el(root, 'g')
     const farEar = tube(headG, EAR)
     const nearEar = tube(headG, EAR, COLOURS.ochre)
@@ -422,7 +504,7 @@ const Figure = (() => {
       body(s.body)
       setEllipse(bodyPatch, s.bodyPatch)
       nearLeg(s.nearLeg)
-      headG.setAttribute('transform', s.head.transform)
+      set(headG, 'transform', s.head.transform)
       nearEar(s.head.ears[0])
       farEar(s.head.ears[1])
       skull(s.head.skull)
@@ -431,5 +513,5 @@ const Figure = (() => {
     }
   }
 
-  return { POSES, mix, vary, shape, mount, capsule }
+  return { POSES, mix, vary, shape, mouthAt, mount, capsule }
 })()

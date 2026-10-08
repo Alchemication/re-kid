@@ -241,11 +241,15 @@ wake Reksio at home.
    - *Acting:* turning to face the child, moods that gestures set, the grin.
    - *Follow-through:* ears and tail on springs; long stretched leaps.
    - *Swap him into the yard*, in three passes: (1) walking and the 27
-     gestures in `reksio.js` on the new figure; (2) one look at each of the
+     gestures in `reksio.js` on the new figure (done, 2026-10-08: upright
+     walk, run on all fours, every gesture redrawn; all tests and the perf
+     budget pass); (2) one look at each of the
      35 gags (12 things, 20 left-alone moves, 3 creatures) as a contact
      sheet, since the browser tests prove he ends free and standing but not
      that it looks right (ducking into the doghouse, catching drops, his
-     size against the props); (3) acting: reactions in each gag from the
+     size against the props; known so far: his old-style drawing asleep
+     in the doghouse doorway, `#nap`, and where his mouth meets the bowl,
+     the film and falling fruit); (3) acting: reactions in each gag from the
      study, starting with the gags Eliot likes. The perf suite guards each.
 2. **Better sounds: an experiment, judged by ear.** The theme is good; many
    effects are weak. Adam's idea: generate new sounds from short original

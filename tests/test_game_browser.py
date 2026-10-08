@@ -568,13 +568,10 @@ class TestGettingUp:
 
 
 DRAWN = """() => {
-    const at = (id) => {
-        const m = new DOMMatrix(getComputedStyle(document.getElementById(id)).transform)
-        const deg = Math.atan2(m.b, m.a) * 180 / Math.PI
-        return { deg: Math.round(deg), dy: Math.round(m.f), up: Math.abs(deg) < 15 && m.f < 12 }
-    }
-    return { x: Reksio.x, bob: at('rk-bob'), anims: ['leg-1', 'leg-2', 'leg-3', 'leg-4']
-        .some((id) => document.getElementById(id).getAnimations().length > 0) }
+    // reksio.js notes on him, every frame, how he was drawn: standing (not
+    // resting) and whether a gesture is still posing him
+    const r = document.getElementById('reksio')
+    return { x: Reksio.x, bob: { up: r.dataset.up === '1' }, anims: r.dataset.posed === '1' }
 }"""
 
 

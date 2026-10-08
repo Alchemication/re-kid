@@ -13,7 +13,7 @@ function reksio() {
   const { Sound, Music } = fakeSound()
   const noticed = [] // what the creatures were told he did
   const Creatures = { notice: (type, x, y) => noticed.push(type) }
-  const page = load(['debug.js', 'layout.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
+  const page = load(['debug.js', 'layout.js', 'figure.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
   const R = page.get('Reksio')
   return {
     R,
