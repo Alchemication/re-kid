@@ -27,6 +27,7 @@ const Figure = (() => {
   // jaw, with no neck. The muzzle grows out of it as he turns side-on.
   const JAW_DROP = 16 // how far his jaw drops with his mouth wide open
   const GRIN_WIDEN = 14 // how much wider a wide-open grin is than a closed smile (the cartoon's spans his face)
+  const MOUTH_MARGIN = 7 // …but its corners stay this far inside his head
   const TEETH = 5 // teeth in a row
   const egg = (open) => {
     const b = 42 + JAW_DROP * open
@@ -348,24 +349,47 @@ const Figure = (() => {
     }
   }
 
+  /** How far his head reaches either side at height y (head units): the egg,
+   * its jaw dropped by `open`, and on the right his muzzle as he turns. */
+  function headSpan(y, L, open) {
+    const bottom = 42 + JAW_DROP * open
+    const across = (dy, r) => Math.sqrt(Math.max(0, 1 - (dy / r) ** 2))
+    const egg = 34 * (y > 4 ? across(y - 4, bottom - 4) : across(y - 4, 46))
+    const m = L.muzzle
+    const muzzle = m.c[0] + m.rx * across(y - m.c[1], m.ry)
+    return [-egg, Math.max(egg, muzzle)]
+  }
+
   function mouth(L, f) {
     const [mx, my] = L.mouth
-    const w = lerp(13 + 5 * Math.max(f.smile, 0) + GRIN_WIDEN * f.open, 5, f.o)
+    const wide = lerp(13 + 5 * Math.max(f.smile, 0) + GRIN_WIDEN * f.open, 5, f.o)
     const corner = my - 3 * f.smile * (1 - f.o)
     const mid = my + 7 * f.smile * (1 - f.o)
     const depth = lerp((14 + JAW_DROP / 2) * f.open, 7 * f.open, f.o)
-    const left = [mx - w, corner]
-    const right = [mx + w, corner]
+    // however wide the grin, its corners stay inside his head
+    const [edgeL, edgeR] = headSpan(corner, L, f.open)
+    const left = [Math.max(mx - wide, edgeL + MOUTH_MARGIN), corner]
+    const right = [Math.min(mx + wide, edgeR - MOUTH_MARGIN), corner]
+    const w = (right[0] - left[0]) / 2
     const top = [mx, mid]
     const lower = mid + 2 * depth
     return {
-      d: `M${pt(left)} Q${pt(top)} ${pt(right)} Q${pt([mx, lower])} ${pt(left)} Z`,
+      d: `M${pt(left)} Q${pt(top)} ${pt(right)} Q${pt([(left[0] + right[0]) / 2, lower])} ${pt(left)} Z`,
       tongue: { c: [mx + 2, lerp(mid, lower, 0.62)], rx: w * 0.45, ry: 8 * f.open },
       teeth: { ...teeth(left, top, right, 6 + 3 * f.open), show: f.teeth },
       // hanging out over his chin: lapping, catching drops, panting
-      tongueOut: { c: [mx + w * 0.3, mid + 4 + 7 * f.tongue], rx: 6 + 2 * f.tongue, ry: 1 + 8 * f.tongue, show: f.tongue > 0.02 ? 1 : 0 },
+      tongueOut: tongueFrom([mx + w * 0.25, (corner + lower) / 2 - 3], f.tongue),
       bone: { at: [mx + w * 0.2, mid + 1], show: f.bone },
     }
+  }
+
+  /** A tongue hanging from under his lower lip at `from` (its root), as far
+   * out as `out` (0 to 1): a rounded tip, a crease down the middle. */
+  function tongueFrom([x, y], out) {
+    const r = 4.5 + 1.5 * out // half its width
+    const tip = y + 4 + 11 * out // the bottom of its rounded tip
+    const body = `M${pt([x - r, y])} L${pt([x - r, tip - r])} A${fmt(r)} ${fmt(r)} 0 0 0 ${pt([x + r, tip - r])} L${pt([x + r, y])} Z`
+    return { d: body, crease: `M${pt([x, y + 2])} L${pt([x, tip - r * 0.8])}`, show: out > 0.02 ? 1 : 0 }
   }
 
   /** Where his mouth is, in the figure's own units (feet on y = 0, facing
@@ -480,8 +504,9 @@ const Figure = (() => {
     const tongue = el(inside, 'ellipse', { fill: COLOURS.tongue })
     const teethBand = el(inside, 'path', { fill: COLOURS.white })
     const teethLines = el(inside, 'path', { fill: 'none', stroke: COLOURS.ink, 'stroke-width': 1.6 })
+    const tongueOut = el(g, 'path', { fill: COLOURS.tongue, stroke: COLOURS.ink, 'stroke-width': 1.8, 'stroke-linejoin': 'round' })
+    const crease = el(g, 'path', { fill: 'none', stroke: '#c96a5d', 'stroke-width': 1.4, 'stroke-linecap': 'round' })
     const lips = el(g, 'path', { fill: 'none', stroke: COLOURS.ink, 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' })
-    const tongueOut = el(g, 'ellipse', { fill: COLOURS.tongue, stroke: COLOURS.ink, 'stroke-width': 1.8 })
     const bone = [11, 5].map((w, i) => el(g, 'path', { fill: 'none', stroke: i ? COLOURS.white : COLOURS.ink, 'stroke-width': w, 'stroke-linecap': 'round' }))
     return (s) => {
       setEllipse(patch, s.patch)
@@ -503,8 +528,10 @@ const Figure = (() => {
       set(teethLines, 'd', t.lines)
       for (const node of [teethBand, teethLines]) set(node, 'opacity', t.show)
       setEllipse(tongue, s.mouth.tongue)
-      setEllipse(tongueOut, s.mouth.tongueOut)
-      set(tongueOut, 'opacity', s.mouth.tongueOut.show)
+      const out = s.mouth.tongueOut
+      set(tongueOut, 'd', out.d)
+      set(crease, 'd', out.crease)
+      for (const node of [tongueOut, crease]) set(node, 'opacity', out.show)
       for (const b of bone) {
         set(b, 'd', BONE(...s.mouth.bone.at))
         set(b, 'opacity', s.mouth.bone.show)
