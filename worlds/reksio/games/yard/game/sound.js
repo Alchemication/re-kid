@@ -160,6 +160,13 @@ const Sound = (() => {
     }
   }
 
+  // His voice, made up in code (yawn, snore, sneeze, yelp, howl, lapping,
+  // slurping, munching, sniffing), is silent for now: to Adam's ear every
+  // one of them sounded awful, and silence beats a bad sound. They come back
+  // as real recordings (his original sounds, as the barks; real dogs; or
+  // voices), from the sound rethink in PROJECT_PLAN. The barks stay.
+  const HIS_VOICE = ['munch', 'slurp', 'lap', 'snore', 'yawn', 'sneeze', 'sniff', 'yelp', 'howl']
+
   let heard = false // a tap or key has let sound play
 
   /** The first tap or key (browsers need one before sound): from now on,
@@ -178,7 +185,7 @@ const Sound = (() => {
     return ensure()
   }
 
-  return {
+  const sounds = {
     ensure: unlock,
     from,
     /** A tap or key has let sound play. */
@@ -497,4 +504,6 @@ const Sound = (() => {
       audio.play().catch(() => {}) // clip not here (it is never committed) or play refused: the egg stays silent
     },
   }
+  for (const name of HIS_VOICE) sounds[name] = () => {} // silent for now (above)
+  return sounds
 })()

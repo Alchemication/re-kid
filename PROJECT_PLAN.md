@@ -290,6 +290,13 @@ wake Reksio at home.
    - *Keep variety.* A chosen sound plays a little differently each time
      (pitch and speed), as the barks do, so a file doesn't sound canned.
    Easter-egg originals stay as they are: local, optional, never committed.
+   *Done meanwhile (2026-10-09):* his made-up voice sounds (yawn, snore,
+   sneeze, yelp, howl, lapping, slurping, munching, sniffing) are silent:
+   to Adam's ear they all sounded awful. They come back as recordings: his
+   original sounds for the home build, marked in episodes and packed
+   locally like the barks (needs `main.py mark` to work on episodes); real
+   dogs (CC0) or the family's voices for a public one; or what the
+   experiment above makes. One list in `sound.js` (`HIS_VOICE`).
 3. **Next game: an episode, entered from the yard.** First pick: *Reksio
    poliglota* (1967), in which Reksio learns to cluck, honk and squeal to talk
    to the yard animals. It is set in a yard, wordless by premise, and built

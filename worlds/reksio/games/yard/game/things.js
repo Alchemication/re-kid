@@ -11,7 +11,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree, Figure */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -478,6 +478,46 @@ const Things = (() => {
     await Reksio.lick()
   }
 
+  // ------------------------------------------------------------ asleep in the doorway
+
+  // Reksio asleep inside his doghouse, just seen: his head on his paws in
+  // the doorway, front view, clipped to the dark door. Drawn by figure.js.
+  const DOOR_R = [44, 50] // the door's half-width and half-height, as drawn (index.html)
+  const DOOR_NAP_SCALE = 0.62 // his head fills the lower part of the door
+  let doorNap = null
+
+  function makeDoorNap() {
+    const house = $('doghouse')
+    const clip = document.createElementNS(SVG_NS, 'clipPath')
+    clip.setAttribute('id', 'door-clip')
+    const shape = document.createElementNS(SVG_NS, 'ellipse')
+    for (const [k, v] of Object.entries({ cx: DOOR.x, cy: DOOR.y, rx: DOOR_R[0], ry: DOOR_R[1] })) shape.setAttribute(k, v)
+    clip.appendChild(shape)
+    house.appendChild(clip)
+    const g = document.createElementNS(SVG_NS, 'g')
+    g.setAttribute('clip-path', 'url(#door-clip)')
+    g.setAttribute('pointer-events', 'none')
+    house.appendChild(g)
+    const inner = document.createElementNS(SVG_NS, 'g')
+    inner.setAttribute('transform', `translate(${DOOR.x} ${DOOR.y + DOOR_R[1]}) scale(${DOOR_NAP_SCALE})`)
+    g.appendChild(inner)
+    return { g, draw: Figure.mount(inner) }
+  }
+
+  /** Show him asleep in the doorway (breath: 0 to 1, how far his slow
+   * breath has risen; a snore lifts his head and parts his lips), or not. */
+  function napInDoor(on, breath = 0) {
+    doorNap = doorNap || makeDoorNap()
+    doorNap.g.style.display = on ? '' : 'none'
+    if (!on) return
+    const p = Figure.POSES.doorNap
+    doorNap.draw(Figure.vary(p, {
+      head: { y: p.head.y - 3 * breath, tilt: -3 * breath },
+      chest: [p.chest[0], p.chest[1] - 2 * breath],
+      face: { open: 0.15 * breath },
+    }))
+  }
+
   // ------------------------------------------------------------ things
 
   const food = $('food')
@@ -831,7 +871,7 @@ const Things = (() => {
   }
 
   return {
-    THINGS, DOOR, PERCHES, burst, twinkle, flyAway, birdHunt, ready, init,
+    THINGS, DOOR, PERCHES, burst, twinkle, flyAway, birdHunt, ready, init, napInDoor,
     get perch() { return PERCHES[perch] },
     get flying() { return flying },
     get stamped() { return stamped },

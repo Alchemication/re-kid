@@ -21,6 +21,7 @@ const Music = (() => {
   const LOOKAHEAD_S = 0.12 // schedule notes this far ahead
   const VOLUME = 0.42 // music under the sound effects
   const STEPS = 32 // eighth notes in the loop: 8 bars of 2/4
+  const PHRASE = 16 // eighth notes in a phrase of the tune: the tune comes and goes only between phrases
 
   // Pitches (MIDI numbers).
   const Bb1 = 34
@@ -87,6 +88,7 @@ const Music = (() => {
   let nextTime = 0
   let loopCount = 0
   let energy = 1
+  let tuneOn = false // the tune is playing this phrase
   let dusk = 0
   let timer = null
 
@@ -149,7 +151,11 @@ const Music = (() => {
       chord.pah.forEach((n, k) => play('pizz', n, t + k * 0.008, 0.32))
     }
     if (beat === 3 && e >= 2 && bar % 2 === 1) play('pizz', chord.pah[2], t, 0.22)
-    if (e >= 2) {
+    // The tune comes in (or drops out) only at the start of a phrase, so it is
+    // never heard from half-way; and the first time round it plays whatever
+    // the energy, so the theme is heard from its beginning.
+    if (i % PHRASE === 0) tuneOn = e >= 2 || loopCount === 0
+    if (tuneOn) {
       // the tune; each theme comes round twice, voiced differently the second time
       const note = th.tune[i]
       if (note != null) {

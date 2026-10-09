@@ -839,10 +839,21 @@
     acting = true // nothing left-alone happens while he sleeps or wakes
     Sky.dawn()
     const door = Things.DOOR
-    stopSnoring = Clock.every(SNORE_MS, () => {
+    const fellAsleep = Clock.now()
+    // a slow breath, every frame, and a snore with a Z at the top of each
+    const stopBreathing = Clock.every(0, () => {
+      const t = (Clock.now() - fellAsleep) / SNORE_MS
+      Things.napInDoor(true, (1 - Math.cos(2 * Math.PI * t)) / 2)
+    })
+    const stopZs = Clock.every(SNORE_MS, () => {
       Sound.snore() // silent until a tap lets sound play (sound.js)
       Reksio.floatZ({ x: door.x + 26, y: door.y - 44 })
     })
+    stopSnoring = () => {
+      stopBreathing()
+      stopZs()
+      Things.napInDoor(false)
+    }
     Clock.after(Layout.wakeAfter * 1000, () => wake('by himself'))
   }
 

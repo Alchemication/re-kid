@@ -188,6 +188,14 @@ const Figure = (() => {
       tail: [-52, -100], face: { eyes: 0.6 },
     }),
     // resting, as a dog does: these replace the yard's old resting poses
+    // asleep in his doghouse's doorway, seen from the front: head down on
+    // his front paws, eyes shut (things.js clips him to the door)
+    doorNap: vary(STAND, {
+      pelvis: [0, -4], chest: [0, -12], head: { x: 0, y: -50, tilt: 0, turn: 0 },
+      nearArm: [[-14, -4], [-26, -3]], farArm: [[14, -4], [26, -3]],
+      nearLeg: [[6, -6], [10, -2]], farLeg: [[-6, -6], [-10, -2]],
+      tail: [18, -24], face: { eyes: 0, joy: -1, smile: 0.3 },
+    }),
     sitDog: vary(ON_FOURS, {
       pelvis: [-8, -24], chest: [6, -60], head: { x: 18, y: -104, turn: 0.6 },
       nearArm: [[14, -32], [16, 0]], farArm: [[8, -32], [8, 0]],
