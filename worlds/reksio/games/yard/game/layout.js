@@ -25,9 +25,9 @@ const Layout = (() => {
   // what each prop can offer a play: something to find out about (discover),
   // someone Reksio can help (help), someone who helps him (helped). The
   // doghouse, house, tap, bird and gate are always there and only discover.
-  // A kind is listed only once a gag gives it: the bramble becomes `helped`
-  // when his tail gets caught in it; until then the bowl is out every play.
-  const OFFERS = { bowl: ['discover', 'helped'], dig: ['discover'], film: ['discover'], trap: ['help'], tree: ['help'], berries: ['discover'] }
+  // A kind is listed only once a gag gives it (helped: the bowl on his head,
+  // his tail caught in the bramble).
+  const OFFERS = { bowl: ['discover', 'helped'], dig: ['discover'], film: ['discover'], trap: ['help'], tree: ['help'], berries: ['discover', 'helped'] }
   const PROP_POOL = Object.keys(OFFERS)
   const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do: more than a day takes (yard.js DAY_THINGS)
   const CREATURE_POOL = ['fly', 'bee', 'spider']
@@ -175,7 +175,7 @@ const Layout = (() => {
   }
 
   return {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, moonRise, shift, hidden, puddles, perches, sun, moon, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, moonRise, shift, hidden, puddles, perches, sun, moon, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
 })()

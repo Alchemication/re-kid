@@ -49,6 +49,7 @@ const Reksio = (() => {
   let x = 1000
   let holding = false // carrying a bone
   let bowled = false // his bowl stuck over his head
+  let pinned = null // the tip of his tail caught at a point in the scene (a thorn), or null
   let facing = 1
   let target = null
   let arrive = null // resolves the current walk: true if he got there
@@ -130,7 +131,7 @@ const Reksio = (() => {
   const rest = { from: null, k: 1 } // blending from the pose `from` into `current`
   const act = { from: null, to: null, k: 1, w: 0, moving: false } // a gesture's pose, by weight w
   const face = { from: null, to: null, k: 1, w: 0 } // a gesture's face, by weight w
-  const add = { tilt: 0, dy: 0, lean: 0, kick: 0, dig: 0, wag: 0 }
+  const add = { tilt: 0, dy: 0, dx: 0, lean: 0, kick: 0, dig: 0, wag: 0 } // dx: his whole body pulled forward, feet and all
   let rising = false // springing up from a rest: he stays put until he's up
   let last = null // the pose drawn last frame
 
@@ -156,6 +157,7 @@ const Reksio = (() => {
     if (add.wag) p = Figure.vary(p, { tail: [p.tail[0] + add.wag * 6, p.tail[1] - Math.abs(add.wag) * 2] })
     if (holding) p = Figure.vary(p, { face: { bone: p.face.open < 0.15 && p.face.tongue < 0.1 ? 1 : 0 } })
     if (bowled) p = Figure.vary(p, { face: { bowl: 1 } })
+    if (pinned) p = Figure.vary(p, { tail: [(pinned.x - x) * facing / SCALE - add.dx, (pinned.y - GROUND) / SCALE - add.dy] }) // stretched to it
     return p
   }
 
@@ -209,7 +211,7 @@ const Reksio = (() => {
     paint(p)
     const breathe = target === null && !stretching ? Math.sin(idleTime * 2.2) * 0.8 : 0
     const hopping = Gait.rise(going)
-    const t = `translateY(${(add.dy + breathe + hopping).toFixed(1)}px) rotate(${add.lean.toFixed(1)}deg)`
+    const t = `translate(${add.dx.toFixed(1)}px, ${(add.dy + breathe + hopping).toFixed(1)}px) rotate(${add.lean.toFixed(1)}deg)`
     if (t !== drawnBob) {
       drawnBob = t
       bob.style.transform = t
@@ -231,7 +233,7 @@ const Reksio = (() => {
   }
 
   /** Where a point of his (figure units) is in the scene. */
-  const toScene = ([fx, fy]) => ({ x: x + facing * SCALE * fx, y: GROUND + SCALE * (fy + add.dy) })
+  const toScene = ([fx, fy]) => ({ x: x + facing * SCALE * (fx + add.dx), y: GROUND + SCALE * (fy + add.dy) })
 
   // ------------------------------------------------------------ layers
 
@@ -972,6 +974,9 @@ const Reksio = (() => {
     /** The top of the bowl on his head, in the scene (where the bird lands). */
     bowlTop: () => toScene(Figure.bowlTopAt(last ?? compose())),
     walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, wearBowl, beginStretch, endStretch, sleepIn, floatZ,
+    /** Hold the tip of his tail at {x, y} in the scene (caught on a thorn), or let it go (null). */
+    pinTail: (at) => (pinned = at),
+    get tailPinned() { return !!pinned },
     ...Object.fromEntries(Object.entries({
       shakeDry, bark, nod, lick, lap, shake, paddle, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
       stamp, snap, watch, pounce, biteTail, howl, sit, lieDown, nap, startle, catchDrops, wakeUp,

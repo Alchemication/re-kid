@@ -28,8 +28,15 @@ describe('a play', () => {
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}`)
       assert.ok(L.props.some((n) => ['trap', 'tree'].includes(n)), `seed ${seed}: ${L.props}`)
-      assert.ok(L.props.includes('bowl'), `seed ${seed}: ${L.props}`) // the only one who helps him, so far (layout.js OFFERS)
+      assert.ok(L.props.some((n) => ['bowl', 'berries'].includes(n)), `seed ${seed}: ${L.props}`)
+      for (const n of L.props) assert.ok(L.OFFERS[n], n)
     }
+  })
+
+  it('takes turns between the fixes someone helps him out of: not the bowl every play', () => {
+    const plays = SEEDS.map((seed) => layout(`?seed=${seed}`).props)
+    assert.ok(plays.some((p) => !p.includes('bowl')), 'the bowl is out every play')
+    assert.ok(plays.some((p) => !p.includes('berries')), 'the bramble is out every play')
   })
 
   it('still brings every prop out now and then', () => {

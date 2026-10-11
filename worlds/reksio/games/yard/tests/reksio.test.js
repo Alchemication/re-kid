@@ -203,7 +203,7 @@ describe('how he goes', () => {
     let highest = 0
     for (let i = 0; i < 90; i++) {
       r.R.tick(DT)
-      const dy = Number((bob.style.transform.match(/translateY\((-?[\d.]+)px\)/) || [0, 0])[1])
+      const dy = Number((bob.style.transform.match(/translate\(-?[\d.]+px, (-?[\d.]+)px\)/) || [0, 0])[1])
       highest = Math.min(highest, dy)
     }
     assert.ok(highest < -8, `only rose ${highest}`)

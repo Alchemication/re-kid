@@ -1,7 +1,9 @@
 // The small life of the yard: creatures that go about their own business,
 // notice Reksio, and meet each other — a fly that wanders, lands and dodges;
 // a bumblebee that works the flowers; a spider that builds a web in the
-// corner by the house, dangles on its thread, and catches the fly.
+// corner by the house, dangles on its thread, and catches the fly. A gag may
+// send the bee on an errand (beeTo: the bramble's flower by Reksio's caught
+// tail); it comes even if it isn't out this play, and goes home after.
 //
 // Each creature is a small state machine stepped every frame, with cartoon
 // physics: steering with momentum, damped pendulums for threads, quick
@@ -65,6 +67,8 @@ const Creatures = (() => {
   const BEE_FIRST_S = [15, 60]
   const BEE_STAY_S = [35, 90]
   const BEE_GONE_S = [30, 80]
+  const ERRAND_SPEED = 260 // sent on an errand, it comes straight and quick: a slow bee across the yard keeps the gag waiting
+  const ERRAND_HUM_S = 0.8 // and hums as it comes, so Reksio (and the child) hear it coming
   const stormy = () => Weather.phase === 'clouding' || Weather.raining
 
   /** Is a point inside the web's triangle (where things get stuck)? */
@@ -301,6 +305,8 @@ const Creatures = (() => {
     stateUntil: rnd(...BEE_FIRST_S),
     leaveAt: 0,
     leaving: false,
+    errand: null, // {x, y, arrived}: sent somewhere by a gag, it goes there and stays, whatever else it would do
+    guest: false, // not out this play: came only for an errand, and doesn't come back
     FLOWERS: [{ x: 1604, y: 668 }, { x: 1648, y: 640 }, { x: 1706, y: 680 }].map((f) => ({ x: f.x + Layout.x('flowers'), y: f.y })),
     g: null,
     make() {
@@ -317,6 +323,7 @@ const Creatures = (() => {
     },
     update(dt) {
       const now = world.t
+      if (this.errand) return this.onErrand(dt, now)
       if (this.state === 'away') return this.arrive(now)
       this.moods(now)
       const to = this.heading(now)
@@ -327,19 +334,49 @@ const Creatures = (() => {
         this.state = 'hover'
         this.stateUntil = now + rnd(2, 4)
       }
+      this.draw()
+    },
+    draw() {
       this.body.setAttribute('transform', this.vx < -5 ? 'scale(-1 1)' : '')
       this.g.setAttribute('transform', `translate(${this.x} ${this.y}) scale(1.3)`)
     },
     /** Away: after a while (and not in the rain), over the wall to the flowers. */
     arrive(now) {
-      if (now <= this.stateUntil || stormy()) return
+      if (now <= this.stateUntil || stormy() || this.guest) return
+      this.appear(now, this.FLOWERS[0].x)
+    },
+    /** Over the wall, somewhere near x. */
+    appear(now, x) {
       this.state = 'fly'
       this.leaving = false
       this.leaveAt = now + rnd(...BEE_STAY_S)
-      this.x = this.FLOWERS[0].x + (random() < 0.5 ? -1 : 1) * rnd(300, 600)
+      this.x = x + (random() < 0.5 ? -1 : 1) * rnd(300, 600)
       this.y = 240
       this.vx = this.vy = 0
       this.g.style.display = ''
+    },
+    /** On an errand: straight there (from over the wall, if it was away), a
+     * hum as it comes, and it hovers there, bobbing, until let go. */
+    onErrand(dt, now) {
+      const e = this.errand
+      if (this.state === 'away') this.appear(now, e.x)
+      this.state = 'errand'
+      const d = this.steer(dt, now, { x: e.x, y: e.y + Math.sin(now * 6) * 4 })
+      if (d > 60 && random() < dt / ERRAND_HUM_S) hear(this.x, () => Sound.buzz(0.5))
+      if (d < 12 && e.arrived) {
+        e.arrived()
+        e.arrived = null
+      }
+      this.draw()
+    },
+    /** Let go of its errand: back to its flowers, or home if it was a guest. */
+    letGo() {
+      const e = this.errand
+      this.errand = null
+      if (e?.arrived) e.arrived() // nobody waits on an errand that's over
+      if (this.state === 'away') return
+      this.state = 'fly'
+      if (this.guest) this.leaveAt = 0
     },
     /** Time to go home (or the rain is coming); huffy if Reksio puts his nose in. */
     moods(now) {
@@ -385,7 +422,7 @@ const Creatures = (() => {
       const dx = to.x - this.x
       const dy = to.y - this.y
       const d = Math.hypot(dx, dy) || 1
-      const speed = this.state === 'huff' ? 220 : 120
+      const speed = this.state === 'huff' ? 220 : this.state === 'errand' ? ERRAND_SPEED : 120
       this.vx += ((dx / d) * Math.min(speed, d * 3) - this.vx) * Math.min(1, dt * 2.5)
       this.vy += ((dy / d) * Math.min(speed, d * 3) - this.vy) * Math.min(1, dt * 2.5)
       this.x += this.vx * dt
@@ -712,6 +749,20 @@ const Creatures = (() => {
       const w = worms.up
       return w && { x: w.x, y: w.y, eat() { w.eaten = true; w.g.remove() } }
     },
+    /** Send the bee to (x, y) and keep it hovering there until beeFree(): it
+     * comes whether or not it is out this play, rain or not. Resolves when it
+     * is there (or when let go first). */
+    beeTo(x, y) {
+      if (!active(bee)) {
+        if (!bee.g) bee.make()
+        bee.guest = true
+        all.push(bee)
+      }
+      bee.letGo()
+      return new Promise((arrived) => (bee.errand = { x, y, arrived }))
+    },
+    /** The errand is over: the bee goes back to its own business. */
+    beeFree() { bee.letGo() },
     /** Where the bee feeds: the flowers' heads. */
     get flowers() { return bee.FLOWERS },
     /** Where the bee is. */

@@ -10,12 +10,12 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Bird */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Bramble, Bird */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
-  const BOWL_AFTER_S = 8 // left alone this long, he goes back to his bowl (and gets stuck): long enough that the child is watching him, not busy tapping
-  const BOWL_FROM_S = 25 // …but not before this far into the play: the morning and a first look round come first
+  const HELPED_AFTER_S = 8 // left alone this long, he gets into a fix someone helps him out of (the bowl, the bramble): long enough that the child is watching him, not busy tapping
+  const HELPED_FROM_S = 25 // …but not before this far into the play: the morning and a first look round come first
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
@@ -122,7 +122,7 @@
   let hold = null
 
   function holdStart() {
-    if (day.ended || busy || hold) return command(() => Reksio.bark(), 'bark')
+    if (day.ended || busy || hold || Things.holding) return command(() => Reksio.bark(), 'bark') // held by a gag: no stretch, the gag answers
     lastTap = Clock.now()
     hold = { stretching: false, stopSound: null }
     const mine = hold
@@ -268,7 +268,7 @@
    * once he's done with what he's busy with (a newer ask replaces an older). */
   function command(fn, what) {
     lastTap = Clock.now()
-    if (Things.stuckTap()) return Debug.trace('stuck tap', { what }) // the bowl on his head: every tap is a bark in it
+    if (Things.stuckTap()) return Debug.trace('stuck tap', { what }) // a gag holds him (the bowl on his head, his tail caught): it answers every tap
     Debug.trace('ask', { what, busy, acting })
     if (acting && !busy) {
       Debug.trace('relax', { from: lastAct })
@@ -610,14 +610,41 @@
       // bird help him (things.js)
       weight: 0,
       due: true,
-      ok: () => !!spotEls.bowl && !Things.stuckTimes && !day.dusk && idleFor() > BOWL_AFTER_S && Clock.now() > BOWL_FROM_S * 1000,
+      ok: () => helpedDue('bowl'),
       async run() {
         if (!(await Reksio.walkTo(THINGS.bowl.at()))) return
         Reksio.face(THINGS.bowl.face)
         await Things.lickBowlClean()
       },
     },
+    bramble: {
+      // his tail caught in the bramble, and a bee frees it: as the bowl,
+      // once a play, so a child who never taps the bramble twice sees it too
+      // (bramble.js); not in the rain, when no bee comes out
+      weight: 0,
+      due: true,
+      ok: () => helpedDue('berries'),
+      async run() {
+        if (!(await Reksio.walkTo(THINGS.berries.at()))) return
+        Reksio.face(THINGS.berries.face)
+        await Bramble.sniffAndCatch()
+      },
+    },
   }
+
+  /** Is it time for `prop`'s fix that someone helps him out of, left alone?
+   * Once a play, and only one of them: if no one has helped him yet, the
+   * first one out this play that can happen now (so the bowl and the bramble
+   * take turns across plays, and rain, when no bee comes, leaves the bowl). */
+  function helpedDue(prop) {
+    const canNow = (n) => Layout.OFFERS[n].includes('helped') && !!spotEls[n] && (n !== 'berries' || Bramble.canCatch())
+    const first = Layout.props.find(canNow)
+    return first === prop && !Things.stuckTimes && !Bramble.caughtTimes && !day.dusk &&
+      idleFor() > HELPED_AFTER_S && Clock.now() > HELPED_FROM_S * 1000
+  }
+
+  /** Free: not asleep, busy, doing a left-alone move, held, waiting or walking. */
+  const free = () => !asleep && !busy && !acting && !hold && !pending && !Reksio.walking
 
   const actOk = (name) => !ACTS[name].ok || !!ACTS[name].ok()
   const pickAct = () => Idle.pick(ACTS, { ok: actOk, last: lastAct, firstWish, random })
@@ -760,6 +787,7 @@
     Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
     Debug.check('a waiting ask runs once he is free', !pending || busy || day.ended)
     Debug.check('no bowl on his head once the gag is over', !Reksio.wearingBowl || busy || acting)
+    Debug.check('his tail is caught only during the gag, and never as he walks', !Reksio.tailPinned || ((busy || acting) && !Reksio.walking))
     Debug.check('the bird is in front of him only while it is busy', !Bird.front || Bird.flying)
   }
 
@@ -859,7 +887,7 @@
   Weather.on((phase) => {
     Debug.trace('weather', { phase })
     // Reksio notices the weather turn (unless he's in the middle of something)
-    if (busy || day.ended || Reksio.walking) return
+    if (day.ended || !free()) return
     if (phase === 'clouding') Reksio.lookUp(1600)
     if (phase === 'after') Reksio.hop(40, 2)
   })
@@ -931,7 +959,7 @@
     things: Object.keys(SPOTS),
     critters: Object.keys(CRITTERS),
     /** Nothing going on: not busy, acting, walking or waiting to do something. */
-    free: () => !asleep && !busy && !acting && !hold && !pending && !Reksio.walking,
+    free,
     pickAct,
     state,
     trace: () => Debug.dump(),

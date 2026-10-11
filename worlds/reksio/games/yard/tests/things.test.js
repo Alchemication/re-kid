@@ -1,5 +1,6 @@
 // Unit tests for things.js: the rules of the things in the yard (the mouse
-// and her trap, the bird (bird.js), the bowl, the film), run on a pretend page and clock with a
+// and her trap, the bird (bird.js), the bowl, the film, the bramble
+// (bramble.js)), run on a pretend page and clock with a
 // stand-in Reksio whose gestures end at once. Seeded, so every run is the same.
 
 const { describe, it } = require('node:test')
@@ -19,21 +20,35 @@ function cutStamp(reksio, n) {
   return () => (reksio.stamp = stamp)
 }
 
+/** Let the clock run until ok() holds, or ms have passed. */
+const until = async (y, ok, ms) => {
+  for (let t = 0; t < ms && !ok(); t += 50) await y.advance(50)
+}
+
+/** What a gesture cut short by relax() throws. */
+const cutShort = () => Object.assign(new Error('cut short'), { name: 'AbortError' })
+
 /** A yard with things in it; `query` adds layout.js flags. */
 function yard(query = '') {
   const reksio = fakeReksio()
   const { Sound, Music, played } = fakeSound()
   let ended = false
-  const page = load(['debug.js', 'layout.js', 'bird.js', 'things.js'], {
+  const bee = [] // where the bee was sent, and 'free' when let go
+  const Creatures = { async beeTo(x, y) { bee.push({ x, y }) }, beeFree() { bee.push('free') } }
+  const Weather = { raining: false }
+  const page = load(['debug.js', 'layout.js', 'bird.js', 'bramble.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
-    globals: { Reksio: reksio, Sound, Music, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
+    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
   })
   const Things = page.get('Things')
   Things.init({ ended: () => ended })
   return {
     Things,
     Bird: page.get('Bird'),
+    Bramble: page.get('Bramble'),
+    bee,
+    Weather,
     Clock: page.get('Clock'),
     reksio,
     played,
@@ -220,10 +235,6 @@ describe('the bowl on his head', () => {
     assert.ok(y.reksio.calls.includes('slump'), 'he never sat down stuck')
   }
 
-  const until = async (y, ok, ms) => {
-    for (let t = 0; t < ms && !ok(); t += 50) await y.advance(50)
-  }
-
   it('sticks the first time he licks it empty, and the bird pulls it off', async () => {
     const y = yard('props=bowl')
     await y.use('bowl')
@@ -271,7 +282,7 @@ describe('the bowl on his head', () => {
   it('cut short, the bowl is back in its place and the bird on its perch', async () => {
     const y = yard('props=bowl')
     y.reksio.tugged = async () => {
-      throw Object.assign(new Error('cut short'), { name: 'AbortError' })
+      throw cutShort()
     }
     const gag = await stuck(y)
     await until(y, gag.isOver, 30000)
@@ -308,5 +319,126 @@ describe('back to the bowl, left alone', () => {
     assert.equal(y.Things.stuckTimes, 1)
     for (const extra of [false, true]) await y.use('bowl', extra)
     assert.equal(y.Things.stuckTimes, 1, 'the next empty bowl is nosed along')
+  })
+})
+
+describe('his tail caught in the bramble', () => {
+  /** Start the gag (the bramble's first variation) without waiting for it. */
+  function caught(y) {
+    let over = false
+    y.Things.THINGS.berries.run({ extra: true }).then(
+      () => (over = true),
+      () => (over = true),
+    )
+    return { isOver: () => over }
+  }
+  const count = (y, name) => y.reksio.calls.filter((n) => n === name).length
+
+  it('the first variation: caught, his own tries, glum, and the bee by his tail frightens him free', async () => {
+    const y = yard('props=berries')
+    await y.use('berries', true)
+    const c = y.reksio.calls
+    const order = ['swish', 'tail caught', 'yanked', 'strain', 'sulk', 'hearsBee', 'tail free', 'leapFright', 'freed', 'chaseTail']
+    const at = order.map((n) => c.indexOf(n))
+    assert.ok(at.every((i, k) => i >= 0 && (k === 0 || i > at[k - 1])), `${order} in ${c.join(' ')}`)
+    assert.equal(y.reksio.tailPinned, false)
+    assert.equal(y.Bramble.caughtTimes, 1)
+    assert.equal(y.bee.length, 4, 'to the flower, to his bottom, back to the flower, let go')
+    assert.equal(y.bee.at(-1), 'free')
+    assert.equal(y.Things.stuckTap(), false, 'taps are ordinary again')
+  })
+
+  it('then takes turns with the missed berry', async () => {
+    const y = yard('props=berries')
+    for (const extra of [true, true, true]) await y.use('berries', extra)
+    assert.equal(y.Bramble.caughtTimes, 2)
+    assert.equal(count(y, 'pounce'), 1, 'the one in between is the miss')
+  })
+
+  it('not in the rain (no bee comes out), and the next dry variation still catches it', async () => {
+    const y = yard('props=berries')
+    y.Weather.raining = true
+    await y.use('berries', true)
+    assert.equal(y.Bramble.caughtTimes, 0)
+    y.Weather.raining = false
+    await y.use('berries', true)
+    assert.equal(y.Bramble.caughtTimes, 1)
+  })
+
+  it('the bee comes 4.5 to 6.5 s after he sits glum', async () => {
+    const y = yard('props=berries')
+    caught(y)
+    await until(y, () => y.reksio.calls.includes('sulk'), 20000)
+    const sat = y.Clock.now()
+    await until(y, () => y.bee.length > 0, 9000)
+    const after = y.Clock.now() - sat
+    assert.ok(after >= 4500 && after <= 6600, `came after ${after} ms`)
+  })
+
+  it('a tap while stuck is another try; a burst of taps is one try', async () => {
+    const y = yard('props=berries')
+    const gag = caught(y)
+    await until(y, () => y.reksio.calls.includes('sulk'), 20000)
+    const before = count(y, 'strain')
+    assert.equal(y.Things.stuckTap(), true)
+    for (let i = 0; i < 5; i++) y.Things.stuckTap()
+    await y.advance(50)
+    assert.equal(count(y, 'strain') - before, 1)
+    await until(y, gag.isOver, 30000)
+    assert.ok(gag.isOver())
+    assert.equal(y.reksio.tailPinned, false)
+  })
+
+  it('a tap during his own tries is answered with one more try after them', async () => {
+    const y = yard('props=berries')
+    const gag = caught(y)
+    await until(y, () => y.reksio.tailPinned, 20000)
+    y.Things.stuckTap()
+    await until(y, gag.isOver, 30000)
+    assert.equal(count(y, 'strain'), 2, 'his own try, and the asked-for one')
+  })
+
+  it('frozen at the hum, a tap is not a try', async () => {
+    const y = yard('props=berries')
+    const gag = caught(y)
+    await until(y, () => y.bee.length > 0, 30000)
+    const before = count(y, 'strain')
+    assert.equal(y.Things.stuckTap(), true, 'still held: the tap is his')
+    await until(y, gag.isOver, 30000)
+    assert.equal(count(y, 'strain'), before)
+  })
+
+  it('cut short while caught, his tail is let go, taps are ordinary, and the bee goes about its business', async () => {
+    const y = yard('props=berries')
+    y.reksio.hearsBee = async () => {
+      throw cutShort()
+    }
+    const gag = caught(y)
+    await until(y, gag.isOver, 30000)
+    assert.ok(gag.isOver())
+    assert.equal(y.reksio.tailPinned, false)
+    assert.equal(y.Things.stuckTap(), false)
+    assert.equal(y.bee.at(-1), 'free')
+  })
+
+  it('left alone, he sniffs round the bush and gets caught, with no berry tossed (a toss runs on Clock time a tap could not cut)', async () => {
+    const y = yard('props=berries')
+    let over = false
+    y.Bramble.sniffAndCatch().then(() => (over = true))
+    for (let i = 0; i < 600 && !over; i++) await y.advance(100)
+    const c = y.reksio.calls
+    assert.ok(c.indexOf('sniff') < c.indexOf('tail caught'), c.join(' '))
+    assert.ok(!c.slice(0, c.indexOf('tail caught')).includes('hop'), c.join(' '))
+    assert.ok(!y.played.includes('toss'), 'a berry was tossed')
+  })
+
+  it('cut short before it catches (a tap, left alone), nothing is caught and the bee is never sent', async () => {
+    const y = yard('props=berries')
+    y.reksio.swish = async () => {
+      throw cutShort()
+    }
+    await y.use('berries', true)
+    assert.equal(y.Bramble.caughtTimes, 0)
+    assert.equal(y.bee.length, 0)
   })
 })

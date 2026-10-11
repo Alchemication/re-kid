@@ -135,6 +135,54 @@ describe('the bee', () => {
   })
 })
 
+describe('the bee on an errand (the bramble)', () => {
+  const FLOWER = { x: 2440, y: 668 }
+
+  it('comes even when it is not out this play, hovers there, and once let go goes home for good', async () => {
+    const y = yard('creatures=fly&rain=0')
+    let there = false
+    y.Creatures.beeTo(FLOWER.x, FLOWER.y).then(() => (there = true))
+    const took = y.until(() => y.Creatures.bee && near(y.Creatures.bee, FLOWER, 12), 10)
+    assert.ok(took != null && took < 5, `took ${took} s`)
+    y.run(3)
+    await Promise.resolve()
+    assert.ok(there, 'beeTo resolves once it is there')
+    assert.ok(near(y.Creatures.bee, FLOWER, 20), 'it stays, hovering')
+    y.Creatures.beeFree()
+    assert.ok(y.until(() => !y.Creatures.bee, 30) != null, 'never went home')
+    assert.equal(y.until(() => y.Creatures.bee, 200), null, 'a guest does not come back')
+  })
+
+  it('comes in the rain too, and is not huffy with Reksio right by it', () => {
+    const y = yard('creatures=bee&rain=0&flowers=1')
+    y.rain()
+    y.Creatures.beeTo(FLOWER.x, FLOWER.y)
+    y.reksio.nose = { ...FLOWER }
+    y.until(() => y.Creatures.bee && near(y.Creatures.bee, FLOWER, 12), 10)
+    y.run(3)
+    assert.ok(near(y.Creatures.bee, FLOWER, 20))
+  })
+
+  it('let go before it got there, whoever waited on it hears', async () => {
+    const y = yard('creatures=bee&rain=0&flowers=1')
+    let done = false
+    y.Creatures.beeTo(FLOWER.x, FLOWER.y).then(() => (done = true))
+    y.Creatures.beeFree()
+    await Promise.resolve()
+    assert.ok(done)
+  })
+
+  it('back to its flowers after, when it is out this play', () => {
+    const y = yard('creatures=bee&rain=0&flowers=1')
+    y.until(() => y.Creatures.bee, 61)
+    y.Creatures.beeTo(FLOWER.x, FLOWER.y)
+    y.until(() => near(y.Creatures.bee, FLOWER, 12), 10)
+    y.Creatures.beeFree()
+    const flowers = y.Creatures.flowers
+    assert.ok(y.until(() => y.Creatures.bee && flowers.some((f) => near(y.Creatures.bee, { x: f.x, y: f.y - 26 }, 12)), 30) != null)
+  })
+})
+
 describe('the spider', () => {
   it('hides when Reksio barks near its web', () => {
     const y = yard('creatures=spider&rain=0')

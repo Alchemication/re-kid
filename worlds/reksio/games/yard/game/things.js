@@ -1,5 +1,6 @@
 // What Reksio does with each thing in the yard, the bird he chases, the mouse
 // he helps, and the small effects they share (flung crumbs, twinkles, hearts).
+// The tree and the bramble have files of their own (tree.js, bramble.js).
 //
 // Each thing's run({ extra }) plays its action; `extra` asks for its
 // variation. A toddler loves exact repetition, so a repeat keeps the same core
@@ -18,7 +19,7 @@
 // bowl's variation), or he goes back for the last bits on his own, once a
 // play, when left alone (yard.js ACTS, lickBowlClean).
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree, Figure, Bird */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree, Bramble, Figure, Bird */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -324,91 +325,6 @@ const Things = (() => {
     Clock.after((Layout.mouseAt ?? rnd(...MOUSE_AT_S)) * 1000, mouseComesOut)
   }
 
-  // ------------------------------------------------------------ blackberries
-
-  // Berries on the bramble, as drawn; the ones nearest Reksio (on the left,
-  // where he stands) go first.
-  const ON_BUSH = [[2418, 758], [2436, 718], [2462, 686], [2500, 676], [2470, 744], [2540, 668], [2512, 728], [2582, 684], [2556, 742], [2612, 722], [2628, 760]]
-  const BERRY_SCALE = 1.7 // on the bush
-  const FLYING_BERRY = 2.2 // bigger in the air, so the child can follow it
-  const TOSS_UP = 300 // how high he flicks a berry above his nose
-  const CATCH_HOP = 60 // and how high he jumps to catch it
-  let onBush = []
-
-  function makeBerries() {
-    if (Layout.hidden.includes('berries')) return
-    const bush = $('berry-bush')
-    onBush = ON_BUSH.map(([x, y]) => {
-      const u = document.createElementNS(SVG_NS, 'use')
-      u.setAttribute('href', '#berry')
-      u.setAttribute('transform', `translate(${x} ${y}) scale(${BERRY_SCALE})`)
-      bush.appendChild(u)
-      return { x, y, el: u }
-    })
-  }
-
-  /** Nip a berry off, flick it up high, jump and catch it (or, the extra,
-   * miss, and gobble it off the ground), then lick his lips. */
-  async function berryToss(extra) {
-    if (!onBush.length) {
-      // all eaten: a puzzled sniff
-      await Reksio.sniff(3)
-      await Reksio.lookAround(700)
-      return
-    }
-    await Reksio.sniff(2)
-    const b = onBush.shift()
-    await Reksio.nod(16, 320)
-    b.el.remove()
-    Sound.snap()
-    const m = Reksio.mouth()
-    const berry = document.createElementNS(SVG_NS, 'use')
-    berry.setAttribute('href', '#berry')
-    fx.appendChild(berry)
-    const at = (x, y) => ({ transform: `translate(${x}px, ${y}px) scale(${FLYING_BERRY})` })
-    Reksio.nod(-30, 380) // the flick
-    Sound.toss()
-    const catchY = m.y - CATCH_HOP * 1.3
-    if (!extra) {
-      const flightDone = Motion.endAt(
-        berry,
-        [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x + 12, m.y - TOSS_UP), offset: 0.55, easing: 'ease-in' }, at(m.x + 4, catchY)],
-        { duration: 1100 },
-      )
-      await wait(1100 - (480 + CATCH_HOP * 3) * 0.55) // jump so he's at the top as it comes down
-      const jump = Reksio.hop(CATCH_HOP, 1)
-      await flightDone
-      berry.remove()
-      Sound.snap()
-      Music.react.wish()
-      await jump
-    } else {
-      // too far: it sails over his head and lands behind him
-      const lands = m.x - Reksio.facing * 170
-      const flightDone = Motion.endAt(
-        berry,
-        [{ ...at(m.x, m.y), easing: 'ease-out' }, { ...at(m.x - Reksio.facing * 60, m.y - TOSS_UP), offset: 0.5, easing: 'ease-in' }, at(lands, 806)],
-        { duration: 1300 },
-      )
-      await wait(500)
-      await Reksio.hop(CATCH_HOP, 1)
-      Sound.snap() // snaps at nothing
-      await flightDone
-      Sound.plop()
-      await Reksio.lookAround(500)
-      Reksio.face(-Reksio.facing)
-      await Reksio.pounce(lands)
-      berry.remove()
-    }
-    for (let i = 0; i < 3; i++) {
-      Sound.munch()
-      await Reksio.nod(6, 220)
-    }
-    await Reksio.lick()
-    await wait(150)
-    await Reksio.lick()
-  }
-
   // ------------------------------------------------------------ asleep in the doorway
 
   // Reksio asleep inside his doghouse, just seen: his head on his paws in
@@ -456,7 +372,7 @@ const Things = (() => {
   let bowlPushed = 0 // how far his nose has pushed the bowl
   let emptyLicks = 0 // empty bowls licked: the first gets stuck on his head, then every other one
   let stuckTimes = 0 // how often the bowl has stuck on his head this play
-  let callBird = null // while the bowl is stuck on his head: a tap's answer (yard.js stuckTap)
+  let held = null // while a gag holds him (the bowl on his head, his tail caught): a tap's answer (yard.js stuckTap)
   let lastBowlBark = -Infinity
   let stamped = 0 // film frames stamped so far
 
@@ -492,7 +408,7 @@ const Things = (() => {
       Reksio.wearBowl(true)
       stuckTimes += 1
       Debug.trace('bowl stuck')
-      callBird = () => {
+      held = () => {
         call()
         if (Clock.now() - lastBowlBark < BOWL_BARK_GAP_MS) return
         lastBowlBark = Clock.now()
@@ -508,7 +424,7 @@ const Things = (() => {
       birdCame = true
       const land = await Bird.rescue((top) => {
         Reksio.wearBowl(false)
-        callBird = null // off: taps wait for him again
+        held = null // off: taps wait for him again
         Sound.pop()
         Sound.clang()
         return bowlHome(body, top)
@@ -525,7 +441,7 @@ const Things = (() => {
       birdCame = false
     } finally {
       // however it ends, the bowl is back in its place and the bird free
-      callBird = null
+      held = null
       up()
       if (Reksio.wearingBowl) Reksio.wearBowl(false)
       if (birdCame) Bird.home() // cut short on its way: back on its perch
@@ -558,11 +474,12 @@ const Things = (() => {
     return stuckInBowl()
   }
 
-  /** A tap while the bowl is stuck on his head: he barks in it and the bird
-   * hears. False if it isn't stuck (the tap is an ordinary one). */
+  /** A tap while a gag holds him answers inside it (the bowl on his head: a
+   * bark in it, the bird hears; his tail caught: another try). False if
+   * nothing holds him (the tap is an ordinary one). */
   function stuckTap() {
-    if (!callBird) return false
-    callBird()
+    if (!held) return false
+    held()
     return true
   }
 
@@ -875,11 +792,7 @@ const Things = (() => {
       },
     },
     tree: Tree.thing,
-    berries: {
-      at: () => 2310 + X('berries'),
-      face: 1,
-      run: ({ extra }) => berryToss(extra),
-    },
+    berries: Bramble.thing,
     trap: {
       // before: stand so his paws land just short of the trap; after: nose at her hole
       at: () => (mouse === 'fed' ? HOLE.x - 210 : TRAP_X - 60 - PAW_REACH) + X('trap'),
@@ -900,7 +813,7 @@ const Things = (() => {
     isEnded = ended
     Bird.init({ ended })
     startMouse()
-    makeBerries()
+    Bramble.init({ effects: { burst }, hold: (answer) => (held = answer) })
     Tree.init({ ended, effects: { burst, twinkle } })
     document.querySelectorAll('.icon-fruit').forEach((u) => u.setAttribute('href', `#fruit-${Layout.fruit}`))
   }
@@ -909,6 +822,8 @@ const Things = (() => {
     THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap, lickBowlClean,
     /** How often the bowl has stuck on his head this play. */
     get stuckTimes() { return stuckTimes },
+    /** A gag holds him (the bowl on his head, his tail caught): it answers every tap. */
+    get holding() { return !!held },
     get stamped() { return stamped },
     get mouse() { return mouse },
   }

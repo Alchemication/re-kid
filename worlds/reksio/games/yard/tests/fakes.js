@@ -21,6 +21,11 @@ function fakeReksio(x = 1500) {
       r.wearingBowl = on
     },
     bowlTop: () => ({ x: r.x + 10 * r.facing, y: 600 }),
+    tailPinned: false,
+    pinTail(at) {
+      if (!!at !== r.tailPinned) calls.push(at ? 'tail caught' : 'tail free')
+      r.tailPinned = !!at
+    },
     async walkTo(to) {
       calls.push('walkTo')
       if (r.cut) return false

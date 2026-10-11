@@ -87,6 +87,21 @@
                 <use href="#berry" transform="translate(64 -264) scale(1.4)" />
                 <use href="#berry" transform="translate(58 -246) scale(1.4)" />
         </g>
+        <!-- a bramble flower: five white petals, round (0, 0) -->
+        <g id="blossom">
+          <circle class="blossom" cx="0" cy="-6" r="5.5" />
+          <circle class="blossom" cx="5.7" cy="-1.9" r="5.5" />
+          <circle class="blossom" cx="3.5" cy="4.9" r="5.5" />
+          <circle class="blossom" cx="-3.5" cy="4.9" r="5.5" />
+          <circle class="blossom" cx="-5.7" cy="-1.9" r="5.5" />
+          <circle class="blossom-eye" cx="0" cy="0" r="3.2" />
+        </g>
+        <!-- the thorny tip of the bramble's cane (#snag), round its tip at (0, 0):
+             drawn over his caught tail (bramble.js) -->
+        <g id="snag-tip">
+          <path class="cane" d="M12 14 Q-2 4 -6 -8" />
+          <path class="thorns" d="M1 5 l-7 2 M-5 -3 l-6 -3" />
+        </g>
         <!-- a blackberry: a cluster of little drupelets, round (0, 0) -->
         <g id="berry">
           <circle class="berry" cx="-3" cy="-1" r="3.4" />
@@ -310,6 +325,15 @@
             <circle class="bramble-dab" cx="2560" cy="730" r="14" />
             <circle class="bramble-dab" cx="2470" cy="770" r="12" />
             <circle class="bramble-dab" cx="2600" cy="760" r="12" />
+            <use href="#blossom" transform="translate(2534 694) scale(1.3)" />
+            <use href="#blossom" transform="translate(2606 738) scale(1.2)" />
+            <!-- a cane reaching out low on the left, with a flower: it catches his tail (bramble.js) -->
+            <g id="snag" style="transform-origin: 2470px 752px">
+              <path class="cane" d="M2470 752 Q2430 742 2418 700" />
+              <path class="thorns" d="M2448 742 l-2 7 M2430 728 l-7 1 M2421 712 l6 -3" />
+              <path class="cane" d="M2433 730 Q2436 712 2440 692" />
+              <use href="#blossom" transform="translate(2440 688) scale(1.4)" />
+            </g>
             <g id="berry-bush"></g>
           </g>
 
@@ -526,6 +550,7 @@
   <script src="shower.js"></script>
   <script src="weather.js"></script>
   <script src="tree.js"></script>
+  <script src="bramble.js"></script>
   <script src="bird.js"></script>
   <script src="things.js"></script>
   <script src="yard.js"></script>

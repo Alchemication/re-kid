@@ -36,15 +36,30 @@ beat many):
   abilities.
 - **Fun to repeat.** The core stays the same each time (small children love
   exact repetition); something small is added on top now and then.
-- **New to the place.** It adds what the game doesn't have yet.
+- **New to the place.** It adds what the game doesn't have yet. First list
+  the gags of the same kind already in the game (who helps or is helped, how,
+  what the comic moment is, how it ends) and make this one differ in the
+  helper *and* the shape of the resolution. A gag that retells the last one
+  with new props is a copy: the bowl and the bramble both ending with the bird
+  tugging him free was rejected (Adam: the game must feel creative and
+  dynamic). The same character again only as a deliberate callback.
+- **A surprise.** Something the child won't predict the first time: help
+  that comes by accident, an unexpected helper, a fix that makes it worse
+  before better, or an outcome that depends on who is about this play. The
+  core repeats; the surprise is what makes the first time land.
 - **Built from what exists.** Reuse his moves, the creatures and the sounds
-  before inventing new ones.
+  before inventing new ones. Reuse parts, not the story: borrowing the bowl's
+  `freed` face is fine; borrowing its plot is not.
 - **Inspired, not copied.** New drawings, sounds and music; original audio
   only as an occasional easter egg (`CLAUDE.md`).
 
 ## 2. Design on paper, then check with Adam
 
-Write down, briefly:
+Sketch two or three designs that differ in who acts and how it resolves
+(not one design with variants), each with its surprise, and recommend one.
+The plan's idea for the gag is a starting point, not the design: if it
+repeats an existing gag's shape, say so and offer alternatives. Then, for the
+chosen one, write down briefly:
 
 - **Beats:** setup, trigger, the comic moment, how it resolves, the aftermath.
   Who acts in each (Reksio, a creature, the yard).
@@ -68,8 +83,8 @@ Write down, briefly:
   creature busy elsewhere (the bird after a worm), the gag cut short at every
   `await`, the same thing used again.
 
-**Checkpoint:** show Adam the beats, the trigger and the tap behaviour; build
-once he agrees.
+**Checkpoint:** show Adam the designs side by side, then the chosen one's
+beats, trigger and tap behaviour; build once he agrees.
 
 ## 3. Where each piece goes
 
@@ -78,8 +93,8 @@ here when it gets its first gag):
 
 | Piece | Where |
 |---|---|
-| The sequence for a thing | its entry in `THINGS`, `things.js` (the tree: `tree.js`) |
-| A creature's part | its own file (`bird.js`); things call it (`Bird.rescue`) |
+| The sequence for a thing | its entry in `THINGS`, `things.js`; a thing with a lot going on gets its own file (`tree.js`, `bramble.js`) |
+| A creature's part | its own file (`bird.js`); things call it (`Bird.rescue`). A creature that already wanders (`creatures.js`) is sent with an errand (`Creatures.beeTo`) |
 | Reksio's own moves for this gag | `antics.js`, made from `Reksio.kit` (`blend`, `pause`, `faceTo`/`faceOff`, `actTo`/`actOff`, `settle`/`rise`, the `add` layer), added with `Reksio.addGestures`. Not `reksio.js` |
 | Something on his body (bone, bowl) | a face field in `figure.js` (`FACE`, drawn in `mount`), switched on in `reksio.js` `compose()` |
 | Sounds | `sound.js`; reuse first (`grep -no "^    [a-zA-Z]*(" sound.js`) |
@@ -89,7 +104,7 @@ here when it gets its first gag):
 | Words | the scene in `brief.yaml`, marked `original`, `inspired` or `invented` with refs to what it is based on; status in `PROJECT_PLAN.md` |
 
 A file over 1000 lines fails `test_files_stay_small`: split by what it is
-for (precedents: `bird.js` out of `things.js`, `antics.js` out of
+for (precedents: `bird.js` and `bramble.js` out of `things.js`, `antics.js` out of
 `reksio.js`), and update every caller, no shims.
 
 ## 4. Traps already hit
@@ -104,6 +119,15 @@ for (precedents: `bird.js` out of `things.js`, `antics.js` out of
   make it unable to reject).
 - Moving an element elsewhere in the page breaks the selectors that find it:
   check hit tests and hover.
+- A left-alone gag must only wait in ways a tap can cut short: his gestures
+  or `Reksio.kit.pause`, never `Clock.wait` or a `Motion` animation, until
+  the gag holds him. Otherwise it plays on as he walks off (the berry toss
+  hopped and snapped after a tap). Before he's held, keep it to gestures; a
+  thing's own run (busy, taps wait) may use any wait.
+- A gag that holds him must cover every input path, not just taps: a press
+  held on him (`holdStart`, the stretch) and the weather's reactions leaked
+  into the bramble. Check `Things.holding` or `free()` wherever input or the
+  yard acts on him outside `command`.
 - Brief text: an unquoted `: ` inside a YAML string breaks the file. Use a
   full stop.
 

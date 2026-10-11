@@ -201,7 +201,7 @@ before a commit.
 
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
-| a thing in `things.js` / `tree.js` / `bird.js` | `"TestThings and <name>"`, the bowl `"TestBowl"` (and its rules in `things.test.js` / `tree.test.js`) |
+| a thing in `things.js` / `tree.js` / `bramble.js` / `bird.js` | `"TestThings and <name>"`, the bowl `"TestBowl"`, the bramble `"TestBramble"` (and its rules in `things.test.js` / `tree.test.js`) |
 | a gesture or pose in `reksio.js`, `antics.js`, `figure.js`, `life.js` or `gait.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |
@@ -220,8 +220,10 @@ and `/simplify` for needless complexity. No tool checks judgement; these
 reviews are the step for it. A gag's own moves for Reksio go in `antics.js`
 (made from `Reksio.kit`, added with `Reksio.add`), not in `reksio.js`; a
 creature with a part to play gets its own file, as `bird.js`. A gag that
-holds him while the child keeps tapping (the bowl on his head) answers each
-tap itself (`Things.stuckTap`) rather than queueing it for after.
+holds him while the child keeps tapping (the bowl on his head, his tail
+caught in the bramble) answers each tap itself (`Things.stuckTap`; a gag
+outside things.js sets its answer with the `hold` it is handed) rather than
+queueing it for after.
 
 **Bugs Adam reports:** he saves a report in the game (Ctrl+Shift+B, with a
 description). `main.py replay` replays it and photographs the run-up; read the

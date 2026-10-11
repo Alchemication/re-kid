@@ -456,6 +456,8 @@ const Sound = (() => {
     chitter() { for (let i = 0; i < 5; i++) tone('square', 2600 + (i % 2) * 300, 2300, i * 0.05, 0.025, 0.002, 0.03) },
     /** A berry flicked up into the air. */
     toss() { tone('sine', 420, 1100, 0, 0.1, 0.01, 0.18) },
+    /** A tail stretched like elastic, letting go: boing. */
+    boing() { tone('sine', 150, 420, 0, 0.16, 0.004, 0.09); tone('triangle', 430, 170, 0.07, 0.14, 0.004, 0.32); tone('sine', 220, 300, 0.12, 0.05, 0.01, 0.25) },
     /** Fruit on the head: bonk. */
     bonk() { tone('triangle', 520, 190, 0, 0.25, 0.002, 0.16); hiss(0, 0.06, 0.002, 0.04, 'bandpass', 1400) },
     /** Paws in a puddle. */

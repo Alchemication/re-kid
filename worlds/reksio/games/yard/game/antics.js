@@ -6,11 +6,21 @@
 //
 // The bowl on his head (things.js): he shakes it, sits glum under it, barks
 // inside it, is tugged at by the bird, and is delighted when it comes off.
+//
+// His tail caught in the bramble (bramble.js): a proud wag, yanked back as he
+// sets off, a double take, straining to pull free and snapped back onto his
+// bottom, glum; frozen at a bee's hum by his tail, and a leap of fright.
 
 /* global Reksio, Sound, Figure */
 (() => {
   const DROOP = 14 // his head hanging, glum, the bowl stuck on it (degrees)
   const GLUM = { smile: -0.7, open: 0 } // what shows of his face under the bowl
+  const STEP_OFF = 24 // setting off, he gets this far before his tail yanks him back (his units)
+  const STRAIN = 46 // straining hard, this far: the tail stretches like elastic
+  const EFFORT = { eyes: 0, joy: -1, brows: -0.9, smile: -0.4, teeth: 1, open: 0.2 } // eyes screwed shut, teeth gritted
+  const STARTLED = { lift: 1, brows: 0.6, o: 1, open: 0.3, smile: 0 }
+  const FRIGHT = { lift: 1, brows: 1, open: 0.8, o: 1, smile: 0, eyes: 1, joy: 0 }
+  const LOOK_BACK = { turn: 0 } // his head turned to us, the eyes looking back over his shoulder (face.look)
   const k = Reksio.kit
   const { blend, pause, faceTo, faceOff, actTo, actOff, add, rnd, rndInt } = k
 
@@ -84,7 +94,86 @@
     await faceOff(200)
   }
 
-  const gestures = { bowlShake, slump, mope, bowlBark, tugged, freed, squint }
+  /** Pleased with himself, a big swishing wag (where the tail goes is his
+   * business: the bramble's catches it). */
+  async function swish(times = 4) {
+    faceTo({ smile: 1, eyes: 0, joy: 1 }, 150)
+    for (let i = 0; i < times; i++) await blend(add, 'wag', i % 2 ? -2 : 2.5, 150)
+    await blend(add, 'wag', 0, 150)
+  }
+
+  /** The turn of the head to look back over his shoulder, or forward again. */
+  const lookBack = (back, ms, face = {}) => Promise.all([
+    back ? actTo(Figure.vary(k.basePose(), { head: LOOK_BACK }), ms) : actOff(ms),
+    faceTo({ look: back ? -1 : 0, ...face }, ms),
+  ])
+
+  /** Off he goes… and is yanked back, boing. A blink, a glance back, away,
+   * and the double take: what has got him? */
+  async function yanked() {
+    await faceOff(100)
+    blend(add, 'dy', -5, 120)
+    await blend(add, 'dx', STEP_OFF, 200, k.EASE_OUT)
+    Sound.boing()
+    blend(add, 'dy', 0, 120)
+    await blend(add, 'dx', 0, 300, k.OVERSHOOT)
+    await faceTo(STARTLED, 80)
+    await pause(rnd(350, 500))
+    await lookBack(true, 140)
+    await pause(200)
+    await lookBack(false, 120)
+    await pause(rnd(200, 300))
+    await lookBack(true, 70, { lift: 1, brows: 1, open: 0.6, o: 1 }) // the double take
+    await pause(rnd(600, 800))
+    await lookBack(false, 200)
+    await faceOff(150)
+  }
+
+  /** Down on all fours, teeth gritted, pulling for all he's worth: the tail
+   * stretches… and snaps him back, boing, onto his bottom. `hard`, 0 to 1. */
+  async function strain(hard = 1) {
+    faceTo(EFFORT, 150)
+    await actTo(Figure.vary(k.POSES.onFours, { head: { tilt: -8 }, face: EFFORT }), 200)
+    await blend(add, 'dx', STRAIN * hard, 500 + 300 * hard, k.EASE_OUT)
+    await blend(add, 'dx', STRAIN * hard * 0.85, 110) // a scrabble
+    await blend(add, 'dx', STRAIN * hard, 110)
+    Sound.boing()
+    faceTo({ ...STARTLED, open: 0.5, eyes: 1, joy: 0, teeth: 0 }, 60)
+    actOff(220)
+    await Promise.all([k.settle('sit', 220), blend(add, 'dx', 0, 360, k.OVERSHOOT)])
+    await pause(rnd(250, 400))
+  }
+
+  /** Sitting glum, looking back at his caught tail, until `freed` resolves
+   * (a tap's strain may come and go meanwhile: he goes back to it after). */
+  async function sulk() {
+    await lookBack(true, 400, { ...GLUM, eyes: 0.7 })
+  }
+
+  /** A hum, right behind him: he freezes, eyes wide, and slowly looks round. */
+  async function hearsBee() {
+    await Promise.all([actOff(150), faceTo({ ...FRIGHT, open: 0.15, look: 0 }, 90)])
+    blend(add, 'tilt', -6, 150)
+    await pause(rnd(700, 900)) // frozen
+    await lookBack(true, 700, FRIGHT) // slowly…
+    await pause(rnd(300, 450))
+  }
+
+  /** A leap of fright, straight up and forward, arms flung wide, landing
+   * `far` ahead on his feet. */
+  async function leapFright(far = 150) {
+    faceTo({ ...FRIGHT, look: 0 }, 60)
+    await Promise.all([k.settle('stand', 140), actTo(Figure.vary(k.POSES.armsWide, { face: FRIGHT }), 140, k.OVERSHOOT, true)])
+    Sound.hop()
+    const going = Reksio.walkTo(Reksio.x + Reksio.facing * far)
+    await blend(add, 'dy', -95, 300, k.EASE_OUT)
+    await blend(add, 'dy', 0, 320, k.EASE_IN)
+    await going
+    blend(add, 'tilt', 0, 200)
+    await actOff(200)
+  }
+
+  const gestures = { bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright }
   Reksio.addGestures(gestures)
 
 })()

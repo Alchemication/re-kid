@@ -103,8 +103,8 @@ Update the **Status** and **Next steps** sections as work lands.
   more until a second user of the tags (an episode) needs it. The tags exist
   now: `OFFERS` in `layout.js` gives each prop its kinds, and `pickProps`
   makes every play offer someone Reksio can help (the trap or tree) and
-  a chance for someone to help him (the bowl, until the bramble's gag
-  exists), then fills the rest as before. Help mostly
+  a chance for someone to help him (the bowl or the bramble), then fills
+  the rest as before. Help mostly
   comes from creatures Reksio hasn't helped; a helped one returning the
   favour is a rare treat.
 - **Phones: frame, don't fly a camera.** Measured 2026-10-11 (Reksio upright,
@@ -346,18 +346,34 @@ wake Reksio at home.
      it off, and the bird is his friend after (`bird.js`, `antics.js`). It
      comes on the second tap of the bowl, or, once a play, on his own the
      first time he's left alone 8 s (from 25 s in): a `due` left-alone move.
-   - *Next:* Adam watches the bowl gag and tunes its timing; then Eliot plays
+     His tail caught in the bramble (2026-10-11, `bramble.js`): the second
+     "receive help" gag, and the first where help comes by accident. A wag
+     catches it on a thorny cane; he is yanked back (boing), strains and is
+     snapped onto his bottom, and sits glum (a tap is another try); a bee
+     comes for the cane's flower, he freezes at the hum and leaps up in
+     fright, which tears it free; the bee never noticed. The bramble's
+     variation (first, then every other; not in the rain), or the `due`
+     left-alone move when the bramble comes before the bowl in the play's
+     props (one of the two a play). The bee is sent on an errand
+     (`Creatures.beeTo`) and comes even when not out this play.
+     *Adam's call (2026-10-11):* the bird freeing him again was rejected:
+     each helped gag needs a different helper and a different way out, and
+     a surprise (the `new-gag` skill now asks for two or three designs).
+   - *Next:* Adam watches the bowl and bramble gags and tunes their timing
+     (bramble: `BEE_COMES_MS`, `LEAP` in bramble.js; `STEP_OFF`, `STRAIN`
+     in antics.js; the `boing` sound); then Eliot plays
      it on the iPad (does he tap to call the bird? does he laugh?) before
      more. Then, if it works, more gags where someone helps him, each a run
      of the `new-gag` skill (in a fresh session, to test the skill), so the
      bowl needn't be out every play and the bird isn't the only helper:
-     1. his tail caught in the bramble, freed by the mouse if she is out
-        and fed (her return favour, rare), else the bird; tags `berries`
-        as `helped`;
+     1. more helpers for the bramble, by who is about this play: the fed
+        mouse gnaws the cane (her return favour, rare; she needs a fast
+        dash across the yard), the squirrel scrabbling for berries shakes
+        him loose;
      2. the pesky fly on his nose, which the spider catches (the fly and the
         spider together: a small layout rule for creatures);
-     3. the bone flung onto the doghouse roof, knocked down by the bird or
-        brought by the squirrel; tags `dig` as `helped`.
+     3. the bone flung onto the doghouse roof, brought down by the squirrel
+        (not the bird: it already has the bowl); tags `dig` as `helped`.
      Later: the reel rolling into the mouse hole, pushed back by the mouse
      (film and trap both out). Then the bird's twig to fetch (help, every
      play), and acting in the mouse and tree encounters.
