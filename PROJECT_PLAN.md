@@ -329,6 +329,12 @@ wake Reksio at home.
    - Extend `main.py mark` to episode breakdowns (it handles the intro
      only), then Adam's (or his wife's) listening pass.
    - Retro on the skill; then a brief for the episode game and its doorway.
+   - First step of building it: move what every Reksio game shares (Reksio
+     himself: `figure.js`, `reksio.js`, `antics.js`, `life.js`, `gait.js`;
+     the creatures; `debug.js`; sound and music) out of the yard's folder
+     into a world-level one both games load, and publish it with them
+     (`.github/workflows/pages.yml`). Not before: the episode shows what is
+     really shared, and two copies would drift apart.
    Kosmonauta comes after: it is the biggest build (rocket, space, robots).
 4. **The yard on phones, and helping** (order agreed 2026-10-11):
    - *Done:* measure the sizes on phones and tablets; cut the sky on short
@@ -342,9 +348,19 @@ wake Reksio at home.
      first time he's left alone 8 s (from 25 s in): a `due` left-alone move.
    - *Next:* Adam watches the bowl gag and tunes its timing; then Eliot plays
      it on the iPad (does he tap to call the bird? does he laugh?) before
-     more. Then, if it works: the bird's twig to fetch (help, every play),
-     his tail caught in the bramble (helped; tags `berries` as `helped`);
-     acting in the mouse and tree encounters.
+     more. Then, if it works, more gags where someone helps him, each a run
+     of the `new-gag` skill (in a fresh session, to test the skill), so the
+     bowl needn't be out every play and the bird isn't the only helper:
+     1. his tail caught in the bramble, freed by the mouse if she is out
+        and fed (her return favour, rare), else the bird; tags `berries`
+        as `helped`;
+     2. the pesky fly on his nose, which the spider catches (the fly and the
+        spider together: a small layout rule for creatures);
+     3. the bone flung onto the doghouse roof, knocked down by the bird or
+        brought by the squirrel; tags `dig` as `helped`.
+     Later: the reel rolling into the mouse hole, pushed back by the mouse
+     (film and trap both out). Then the bird's twig to fetch (help, every
+     play), and acting in the mouse and tree encounters.
    - *Workflow note:* the layout rule went to a Haiku 5.5 subagent in a
      worktree. One round of its own fixes; one problem found in review: it
      tagged the bramble before its gag existed. The gag itself was written by
