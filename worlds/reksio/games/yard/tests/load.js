@@ -60,6 +60,7 @@ function fakeDocument() {
     querySelector: () => fakeElement(),
     querySelectorAll: () => Array.from({ length: 12 }, () => fakeElement()), // enough for any row of things (the film's five prints)
     addEventListener() {},
+    getAnimations: () => [],
   }
 }
 

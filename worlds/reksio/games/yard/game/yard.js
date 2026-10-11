@@ -246,7 +246,7 @@
     await wait(700)
     const iris = $('iris')
     iris.style.setProperty('--x', `${((DOOR.x - camX) / Painting.VIEW_W) * 100}%`)
-    iris.style.setProperty('--y', `${(DOOR.y / 900) * 100}%`)
+    iris.style.setProperty('--y', `${((DOOR.y - Painting.VIEW_TOP) / Painting.VIEW_H) * 100}%`)
     const start = Clock.now()
     await new Promise((resolve) => {
       function close() {
@@ -800,6 +800,19 @@
   const paint = () => {
     Painting.setup($('paint'))
     Painting.render(camX)
+    turnMe(Painting.tooSmall)
+  }
+
+  /** A phone held upright: ask for it on its side, and wait meanwhile (the
+   * game holds before the picture shows, so the picture's own turning isn't
+   * paused with the game). */
+  function turnMe(on) {
+    const picture = $('turn')
+    if (picture.hidden !== on) return
+    Debug.trace('turn me', { on })
+    if (on) Clock.hold('turned', true)
+    picture.hidden = !on
+    if (!on) Clock.hold('turned', false)
   }
   new ResizeObserver(paint).observe($('paint'))
   paint()

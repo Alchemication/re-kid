@@ -28,6 +28,43 @@ describe('game time', () => {
   })
 })
 
+describe('holding the game', () => {
+  it('stands time still while held, and plays on once let go', async () => {
+    const { Clock, page } = clock()
+    await page.advance(100)
+    const heard = []
+    Clock.onHold((held) => heard.push(held))
+    let ran = false
+    Clock.after(200, () => (ran = true))
+    Clock.hold('turned', true)
+    const before = Clock.now()
+    await page.advance(1000) // frames go on: a phone held upright still draws
+    assert.equal(Clock.now(), before)
+    assert.equal(ran, false, 'a timer ran while held')
+    assert.ok(Clock.held)
+    Clock.hold('turned', false)
+    await page.advance(300)
+    assert.equal(ran, true)
+    assert.deepEqual(heard, [true, false])
+  })
+
+  it('plays on only once nothing holds it', async () => {
+    const { Clock, page } = clock()
+    const heard = []
+    Clock.onHold((held) => heard.push(held))
+    Clock.hold('turned', true)
+    Clock.hold('hidden', true)
+    Clock.hold('hidden', false) // shown again, but still upright
+    assert.ok(Clock.held)
+    const before = Clock.now()
+    await page.advance(500)
+    assert.equal(Clock.now(), before)
+    Clock.hold('turned', false)
+    assert.ok(!Clock.held)
+    assert.deepEqual(heard, [true, false], 'heard every hold, not just the last')
+  })
+})
+
 describe('timers on game time', () => {
   it('run in order, after their time', async () => {
     const { Clock, page } = clock()

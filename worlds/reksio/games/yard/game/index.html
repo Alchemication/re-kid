@@ -17,7 +17,8 @@
     <canvas id="paint" aria-hidden="true"></canvas>
 
     <!-- The view is 900 scene units high and 1600 to 2100 wide (16:9 to
-         21:9: painting.js fits it to the screen); the yard is 4000 wide and the
+         21:9), or on a phone a little less high, the top of the sky cut
+         (painting.js fits it to the screen); the yard is 4000 wide and the
          camera (#cam) follows Reksio. Solid things never move; only things
          that would really move do (flowers and grass in the breeze, the bird,
          the curtain, the gate). -->
@@ -119,19 +120,23 @@
         </g>
       </defs>
 
-      <!-- The sun, far away: it sinks a step with each new thing done and sets
-           behind the wall (clipped at the wall's top). sky.js places it. -->
-      <clipPath id="sky-clip"><rect class="view-wide" x="0" y="0" width="1600" height="334" /></clipPath>
-      <g clip-path="url(#sky-clip)">
-        <g id="sun" style="transform: translateY(0)">
-          <circle class="sun-glow" cx="1240" cy="120" r="74" />
-          <circle class="sun" cx="1240" cy="120" r="46" />
+      <!-- The sky's things, fixed to the screen (smaller on a phone, where
+           less sky shows: painting.js). -->
+      <g class="far-sky">
+        <!-- The sun, far away: it sinks a step with each new thing done and sets
+             behind the wall (clipped at the wall's top). sky.js places it. -->
+        <clipPath id="sky-clip"><rect class="view-wide" x="0" y="0" width="1600" height="334" /></clipPath>
+        <g clip-path="url(#sky-clip)">
+          <g id="sun" style="transform: translateY(0)">
+            <circle class="sun-glow" cx="1240" cy="120" r="74" />
+            <circle class="sun" cx="1240" cy="120" r="46" />
+          </g>
         </g>
-      </g>
 
-      <!-- weather in the sky, fixed to the screen: a rainbow, clouds -->
-      <g id="rainbow" opacity="0"></g>
-      <g id="clouds"></g>
+        <!-- weather in the sky: a rainbow, clouds -->
+        <g id="rainbow" opacity="0"></g>
+        <g id="clouds"></g>
+      </g>
 
       <g id="cam">
         <!-- puddles after rain, on the ground under everything (weather.js) -->
@@ -471,11 +476,33 @@
     <div id="night-blue" class="night-blue" aria-hidden="true"></div>
     <!-- the moon, above the evening shade so it shines at night (sky.js) -->
     <svg id="night" class="view" viewBox="0 0 1600 900" aria-hidden="true">
-      <clipPath id="night-clip"><rect class="view-wide" x="0" y="0" width="1600" height="334" /></clipPath>
-      <g id="moon-sky" clip-path="url(#night-clip)"></g>
+      <g class="far-sky">
+        <clipPath id="night-clip"><rect class="view-wide" x="0" y="0" width="1600" height="334" /></clipPath>
+        <g id="moon-sky" clip-path="url(#night-clip)"></g>
+      </g>
     </svg>
     <div id="iris" class="iris" aria-hidden="true"></div>
     <button id="fullscreen" class="corner" type="button" title="Full screen (for the grown-up)" aria-label="Full screen">⤢</button>
+  </div>
+
+  <!-- A phone held upright shows the yard too small to play: instead, a
+       picture asks (without words) to turn it on its side, and the game
+       waits (yard.js). The little yard in the phone is upright once the
+       phone is turned. -->
+  <div id="turn" class="turn" hidden>
+    <svg viewBox="30 20 140 150" role="img" aria-label="Turn the phone on its side">
+      <path class="turn-arrow" d="M150 58 A62 62 0 0 0 58 46" />
+      <path class="turn-arrow-head" d="M66 34 L54 47 L71 54 Z" />
+      <g class="turn-phone">
+        <rect class="turn-body" x="68" y="48" width="64" height="112" rx="10" />
+        <g transform="rotate(90 100 104)">
+          <rect class="turn-sky" x="54" y="80" width="92" height="48" />
+          <rect class="turn-wall" x="54" y="92" width="92" height="20" />
+          <rect class="turn-ground" x="54" y="112" width="92" height="16" />
+          <use href="#mini-reksio" transform="translate(96 106) scale(0.7)" />
+        </g>
+      </g>
+    </svg>
   </div>
 
   <script src="debug.js"></script>

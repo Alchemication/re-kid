@@ -21,11 +21,12 @@ const Sound = (() => {
   let scale = 1 // loudness of what is being played now (see from())
   let barks = [] // decoded original barks, if the local file is there
 
-  // the page hidden: all sound pauses with the game (debug.js Clock), and
-  // the phone saves its battery; shown again, it plays on
-  Clock.onHidden((hidden) => {
+  // the game paused (the page hidden, a phone held upright): all sound
+  // pauses with it (debug.js Clock), and the phone saves its battery; then
+  // it plays on
+  Clock.onHold((held) => {
     if (!ctx) return
-    if (hidden) ctx.suspend()
+    if (held) ctx.suspend()
     else ctx.resume()
   })
 
@@ -49,7 +50,7 @@ const Sound = (() => {
         }
       }
     }
-    if (ctx.state === 'suspended' && !document.hidden) ctx.resume()
+    if (ctx.state === 'suspended' && !Clock.held) ctx.resume()
     return ctx
   }
 

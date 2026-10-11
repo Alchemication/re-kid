@@ -39,13 +39,19 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   overflow: hidden;
   cursor: pointer;
   touch-action: none; /* every touch is the game's: no panning or zooming the page, no cut-short holds */
+  /* The view's top and height in scene units: on a phone the top of the sky
+     is cut (painting.js sets them). Gradients over the yard place their stops
+     in scene units, so they stay on the wall's top wherever the
+     view starts. */
+  --view-top: 0;
+  --view-h: 900;
 }
 
 #paint, #world { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* Until painting.js has painted the yard (the first frame or so), it shows in
-   its plain base colours, not black: sky to the wall's top (330 of 900 scene
-   units), wall to the ground's top (700), then ground (painting.js). */
-#paint { background: linear-gradient(#e7a464 0 36.7%, #8d9884 36.7% 77.8%, #e2cd9b 77.8%); }
+   its plain base colours, not black: sky to the wall's top (330 scene units),
+   wall to the ground's top (700), then ground (painting.js). */
+#paint { background: linear-gradient(#e7a464 0 calc((330 - var(--view-top)) * 100% / var(--view-h)), #8d9884 calc((330 - var(--view-top)) * 100% / var(--view-h)) calc((700 - var(--view-top)) * 100% / var(--view-h)), #e2cd9b calc((700 - var(--view-top)) * 100% / var(--view-h))); }
 /* …and the drawing waits for this play's layout (yard.js lifts `starting`
    once it is laid out), so the first frame never shows every prop at once */
 #world { transition: opacity 0.2s ease; }
@@ -183,7 +189,7 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(#5d6a7a 0%, #7d8790 40%, #8a8f8c 100%);
+  background: linear-gradient(#5d6a7a calc((0 - var(--view-top)) * 100% / var(--view-h)), #7d8790 calc((360 - var(--view-top)) * 100% / var(--view-h)), #8a8f8c 100%);
   mix-blend-mode: multiply;
   opacity: 0;
 }
@@ -206,7 +212,7 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(#c8402e 0%, #d9653a 30%, rgba(217, 101, 58, 0) 55%);
+  background: linear-gradient(#c8402e calc((0 - var(--view-top)) * 100% / var(--view-h)), #d9653a calc((270 - var(--view-top)) * 100% / var(--view-h)), rgba(217, 101, 58, 0) calc((495 - var(--view-top)) * 100% / var(--view-h)));
   mix-blend-mode: multiply;
   opacity: 0;
   transition: opacity 3s ease;
@@ -217,7 +223,7 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(#2b2a5c 0%, #4a3d70 45%, #2a2440 100%);
+  background: linear-gradient(#2b2a5c calc((0 - var(--view-top)) * 100% / var(--view-h)), #4a3d70 calc((405 - var(--view-top)) * 100% / var(--view-h)), #2a2440 100%);
   mix-blend-mode: multiply;
   opacity: 0;
   transition: opacity 3.5s ease;
@@ -226,7 +232,7 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .evening.on { opacity: 0.75; }
 /* night: the warm sunset goes out of the sky, leaving it deep blue */
 .sunset.night { opacity: 0 !important; transition: opacity 4s ease; }
-.night-blue { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#1d2556 0%, #2a3468 34%, rgba(42, 52, 104, 0) 40%); mix-blend-mode: color; opacity: 0; transition: opacity 4s ease; }
+.night-blue { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#1d2556 calc((0 - var(--view-top)) * 100% / var(--view-h)), #2a3468 calc((306 - var(--view-top)) * 100% / var(--view-h)), rgba(42, 52, 104, 0) calc((360 - var(--view-top)) * 100% / var(--view-h))); mix-blend-mode: color; opacity: 0; transition: opacity 4s ease; }
 .night-blue.on { opacity: 0.85; }
 
 /* the moon: up through the dusk, still bright at night */
@@ -348,4 +354,21 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 #bug-button {
   position: fixed; bottom: 10px; left: 10px; z-index: 100; padding: 8px 12px;
   font: 13px ui-monospace, Menlo, monospace; color: #fff; background: #b3261e; border: 0; border-radius: 6px; cursor: pointer;
+}
+
+/* ---- a phone held upright: turn it on its side (yard.js) ---- */
+.turn { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--letterbox); }
+.turn[hidden] { display: none; }
+.turn svg { width: min(70vw, 50vh); }
+.turn-body { fill: none; stroke: #e2cd9b; stroke-width: 5; }
+.turn-sky { fill: #e7a464; }
+.turn-wall { fill: #8d9884; }
+.turn-ground { fill: #e2cd9b; }
+.turn-arrow { fill: none; stroke: #e1a23a; stroke-width: 6; stroke-linecap: round; }
+.turn-arrow-head { fill: #e1a23a; }
+.turn-phone { transform-origin: 100px 104px; animation: turn-phone 3s ease-in-out infinite; }
+@keyframes turn-phone {
+  0%, 25% { transform: rotate(0); }
+  50%, 85% { transform: rotate(-90deg); }
+  100% { transform: rotate(0); }
 }

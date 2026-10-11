@@ -5,6 +5,8 @@
 //   frames are drawn, a frame counting for at most MAX_STEP_MS, so when the
 //   page is hidden (another tab, a covered window, a locked phone) the game
 //   pauses rather than running on unseen; its animations and sound pause too.
+//   Clock.hold pauses it the same way for other reasons (a phone held
+//   upright, yard.js).
 //   Everything that plays out over time uses it, never setTimeout or
 //   performance.now (sound's own audio clock aside).
 // - Motion.endAt: animate something to where it ends up, setting the end on
@@ -42,10 +44,11 @@ const Clock = (() => {
   let seq = 0
   const due = [] // {at, seq, fn}, soonest first
   const listeners = []
-  const paused = new Set() // animations the clock paused when the page was hidden
+  const paused = new Set() // animations the clock paused while it was held
+  const holds = new Set() // why the game is paused now: 'hidden' (the page), or a reason given to hold()
 
   function frame(t) {
-    if (last !== null) now += Math.max(0, Math.min(MAX_STEP_MS, t - last))
+    if (last !== null && !holds.size) now += Math.max(0, Math.min(MAX_STEP_MS, t - last))
     last = t
     const before = seq // timers set during this frame wait for the next one
     while (due.length && due[0].at <= now && due[0].seq < before) due.shift().fn()
@@ -66,24 +69,31 @@ const Clock = (() => {
     return timer
   }
 
-  // Hidden: pause what is playing; shown again: play it on, and tell the
-  // listeners (sound) either way.
-  if (typeof document !== 'undefined' && document.addEventListener) {
-    document.addEventListener('visibilitychange', () => {
-      const hidden = document.hidden
-      if (hidden) {
-        for (const a of document.getAnimations()) {
-          if (a.playState === 'running') {
-            a.pause()
-            paused.add(a)
-          }
+  /** Pause the game for `why` (on) or stop doing so (off): game time stands
+   * still and what is playing pauses; once nothing holds it, it plays on.
+   * The listeners (sound) hear when it pauses and plays on. */
+  function hold(why, on) {
+    const was = holds.size > 0
+    if (on) holds.add(why)
+    else holds.delete(why)
+    const held = holds.size > 0
+    if (held === was) return
+    if (held) {
+      for (const a of document.getAnimations()) {
+        if (a.playState === 'running') {
+          a.pause()
+          paused.add(a)
         }
-      } else {
-        paused.forEach((a) => a.playState === 'paused' && a.play())
-        paused.clear()
       }
-      listeners.forEach((fn) => fn(hidden))
-    })
+    } else {
+      paused.forEach((a) => a.playState === 'paused' && a.play())
+      paused.clear()
+    }
+    listeners.forEach((fn) => fn(held))
+  }
+
+  if (typeof document !== 'undefined' && document.addEventListener) {
+    document.addEventListener('visibilitychange', () => hold('hidden', document.hidden))
   }
 
   return {
@@ -106,8 +116,11 @@ const Clock = (() => {
     wait: (ms) => new Promise((resolve) => after(ms, resolve)),
     /** A promise that resolves at the next frame. */
     frame: () => new Promise((resolve) => after(0, resolve)),
-    /** fn(hidden) whenever the page is hidden or shown again. */
-    onHidden(fn) {
+    hold,
+    /** Is the game paused now (the page hidden, or held)? */
+    get held() { return holds.size > 0 },
+    /** fn(held) whenever the game pauses or plays on. */
+    onHold(fn) {
       listeners.push(fn)
     },
   }

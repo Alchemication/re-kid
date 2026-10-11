@@ -2,9 +2,13 @@
 // sponged, mottled sky, stone wall and sandy ground — thousands of small dabs
 // clustered into blotches, from a fixed seed so the yard is the same every time.
 //
-// The view is 900 scene units high and as wide as the screen's shape allows,
-// from 16:9 (1600) to 21:9 (2100): a phone on its side sees more of the yard,
-// not black bars. setup() fits it, on load and whenever the stage is resized.
+// The scene is 900 units high, and on a big enough screen all of it shows, as
+// wide as the screen's shape allows, from 16:9 (1600) to 21:9 (2100): a phone
+// on its side sees more of the yard, not black bars. On a short screen (a
+// phone) the top of the sky is cut instead, so the yard and everyone in it
+// show bigger; the sky's own things (sun, moon, clouds, rainbow: the
+// `.far-sky` groups) are drawn smaller to fit the strip of sky that is left.
+// setup() fits it, on load and whenever the stage is resized.
 //
 // The yard is wider than the view. Two layers are painted once, off screen:
 // the sky (which moves at half speed, for depth) and the wall with the ground.
@@ -13,14 +17,20 @@
 /* global Layout */
 /* exported Painting */
 const Painting = (() => {
-  const H = 900 // the view's height, in scene units
+  const H = 900 // the scene's height, in scene units
+  const FULL_SCALE = 0.6 // CSS px per scene unit at which all of the scene shows; below it (a phone) the sky is cut, so Reksio stays over 110 px tall and the mouse finger-sized
+  const VIEW_MIN_H = 740 // but at most this much is cut: 174 units of sky stay above the wall, room for the sun and the moon at half size, and the bird's wall in view
+  const MIN_PLAY_PX = 260 // a stage shorter than this, on a screen held upright (a phone: about 220), is too small to play: yard.js asks for it on its side
+  const SKY_FLOOR = 334 // the sky's things are clipped at the wall's top (index.html #sky-clip), and shrink towards it
   const MAX_DPR = 2 // canvases are drawn at most this many pixels per CSS pixel: a phone's 3x looks the same for a sponged texture and costs 2.25x the pixels, every frame
-  const VIEW_MIN_W = 1600 // the view's width at 16:9: all of it shows on any screen
-  const VIEW_MAX_W = 2100 // and at most, at 21:9 (wider than that, black bars at the sides)
+  const VIEW_MAX_W = 2100 // the widest view: all of the scene at 21:9 (game.css keeps the stage between 16:9 and 21:9)
   const WORLD_W = Layout.WORLD_W // the whole yard (layout.js)
   const SKY_SPEED = 0.5 // the sky scrolls this much slower than the ground
   const SKY_W = WORLD_W * SKY_SPEED + VIEW_MAX_W * (1 - SKY_SPEED) // enough sky for the widest view at the far end
-  let viewW = VIEW_MIN_W
+  let fit = { top: 0, w: 1600, h: H, k: 1 }
+  let skyLeft = 0 // the view's edges in the sky's own units (its things are drawn k times smaller)
+  let skyRight = fit.w
+  let tooSmall = false
   const WALL_TOP = 330
   const GROUND_TOP = 700
 
@@ -109,21 +119,43 @@ const Painting = (() => {
     ctx.globalAlpha = 1
   }
 
-  /** How wide the view is (scene units) on a stage of this shape. */
-  const viewFor = (w, h) => Math.max(VIEW_MIN_W, Math.min(VIEW_MAX_W, Math.round((H * w) / (h || 1))))
+  /**
+   * The view for a stage of w × h CSS px: its top and height (the sky is cut
+   * on a short stage), its width (the stage's shape), and k, how much smaller
+   * the sky's things are drawn to fit what is left of the sky.
+   */
+  function viewFor(w, h) {
+    const top = Math.round(H - Math.min(H, Math.max(VIEW_MIN_H, (h || 1) / FULL_SCALE)))
+    const viewH = H - top
+    const viewW = Math.min(VIEW_MAX_W, Math.round((viewH * w) / (h || 1)))
+    return { top, w: viewW, h: viewH, k: (SKY_FLOOR - top) / SKY_FLOOR }
+  }
 
   /** Fit the view to the stage, size the visible canvas and repaint the
    * layers (on load and resize). */
   function setup(el) {
     canvas = el
     const { width, height } = canvas.getBoundingClientRect() // exact: whole pixels would round the shape
-    viewW = viewFor(width, height)
-    for (const svg of document.querySelectorAll('svg.view')) svg.setAttribute('viewBox', `0 0 ${viewW} ${H}`)
-    for (const r of document.querySelectorAll('rect.view-wide')) r.setAttribute('width', viewW)
+    fit = viewFor(width, height)
+    tooSmall = height < MIN_PLAY_PX && window.innerHeight > window.innerWidth
+    const stage = canvas.parentElement // its gradients follow the view (game.css)
+    stage.style.setProperty('--view-top', fit.top)
+    stage.style.setProperty('--view-h', fit.h)
+    for (const svg of document.querySelectorAll('svg.view')) svg.setAttribute('viewBox', `0 ${fit.top} ${fit.w} ${fit.h}`)
+    // the sky's things shrink towards the middle of the wall's top
+    const mid = fit.w / 2
+    const shrink = fit.k === 1 ? '' : `translate(${mid} ${SKY_FLOOR}) scale(${fit.k}) translate(${-mid} ${-SKY_FLOOR})`
+    for (const g of document.querySelectorAll('.far-sky')) g.setAttribute('transform', shrink)
+    skyLeft = mid - mid / fit.k
+    skyRight = mid + mid / fit.k
+    for (const r of document.querySelectorAll('rect.view-wide')) {
+      r.setAttribute('x', skyLeft)
+      r.setAttribute('width', skyRight - skyLeft)
+    }
     const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1)
     canvas.width = Math.round(canvas.clientWidth * dpr)
     canvas.height = Math.round(canvas.clientHeight * dpr)
-    scale = canvas.width / viewW
+    scale = canvas.width / fit.w
     paintLayers() // at this screen's resolution
   }
 
@@ -131,10 +163,11 @@ const Painting = (() => {
   function render(camX) {
     if (!canvas || !sky) return
     const ctx = canvas.getContext('2d')
-    const sw = viewW * scale
-    const sh = H * scale
-    ctx.drawImage(sky, camX * SKY_SPEED * scale, 0, sw, sh, 0, 0, canvas.width, canvas.height)
-    ctx.drawImage(near, camX * scale, 0, sw, sh, 0, 0, canvas.width, canvas.height)
+    const sw = fit.w * scale
+    const sh = fit.h * scale
+    const sy = fit.top * scale
+    ctx.drawImage(sky, camX * SKY_SPEED * scale, sy, sw, sh, 0, 0, canvas.width, canvas.height)
+    ctx.drawImage(near, camX * scale, sy, sw, sh, 0, 0, canvas.width, canvas.height)
   }
 
   return {
@@ -142,12 +175,19 @@ const Painting = (() => {
     render,
     viewFor,
     WORLD_W,
-    VIEW_MIN_W,
     VIEW_MAX_W,
     MAX_DPR,
     WALL_TOP,
     GROUND_TOP,
     /** The view's width now, in scene units. */
-    get VIEW_W() { return viewW },
+    get VIEW_W() { return fit.w },
+    /** The view's top (above it, the sky is cut) and height, in scene units. */
+    get VIEW_TOP() { return fit.top },
+    get VIEW_H() { return fit.h },
+    /** The view's left and right edges in the sky's units (clouds come and go past them). */
+    get SKY_LEFT() { return skyLeft },
+    get SKY_RIGHT() { return skyRight },
+    /** Is the stage too small to play, on a screen held upright? */
+    get tooSmall() { return tooSmall },
   }
 })()

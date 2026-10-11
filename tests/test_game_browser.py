@@ -351,7 +351,9 @@ class TestWholePlay:
 
 class TestLeftAlone:
     def test_he_keeps_busy_on_his_own(self, yard: callable) -> None:
-        y = yard("seed=2&rain=0&creatures=&morning=0")  # left alone, not the morning (TestMorning)
+        y = yard(
+            "seed=2&rain=0&creatures=&morning=0"
+        )  # left alone, not the morning (TestMorning)
         y.page.wait_for_timeout(20_000)
         acts = [
             e["name"]
@@ -412,14 +414,15 @@ class TestRealInput:
 
 
 class TestScreens:
-    """The view fits the screen: all of the 16:9 view on any screen, and a
-    wider one (a phone on its side) sees more of the yard, not black bars."""
+    """The view fits the screen: all of the 16:9 view on a big screen, and a
+    wider one sees more of the yard, not black bars. On a phone the top of the
+    sky is cut so the yard shows bigger, and the sky's things shrink to fit."""
 
     @staticmethod
     def fit(y: Yard) -> dict:
         return y.page.evaluate("""() => {
             const s = document.getElementById('stage').getBoundingClientRect()
-            return { w: s.width, h: s.height, view: Painting.VIEW_W,
+            return { w: s.width, h: s.height, view: Painting.VIEW_W, top: Painting.VIEW_TOP,
                      box: document.getElementById('world').getAttribute('viewBox') }
         }""")
 
@@ -427,9 +430,23 @@ class TestScreens:
         y = yard(STILL, size=(844, 390))
         f = self.fit(y)
         assert (f["w"], f["h"]) == (844, 390), f
-        assert (
-            f["view"] == round(900 * 844 / 390) and f["box"] == f"0 0 {f['view']} 900"
-        )
+        assert f["top"] == 160 and f["box"] == f"0 160 {f['view']} 740", f
+        assert f["view"] == round(740 * 844 / 390), f
+
+    def test_on_a_phone_the_yard_shows_bigger_and_the_sun_still_shows(
+        self, yard: callable
+    ) -> None:
+        y = yard(
+            f"{STILL}&morning=0", size=(750, 340)
+        )  # a phone in Safari, bars showing
+        got = y.page.evaluate("""() => {
+            const box = (q) => document.querySelector(q).getBoundingClientRect()
+            const stage = box('#stage'), sun = box('#sun .sun'), rk = box('#rk-bob')
+            return { reksio: rk.height, sunTop: sun.top - stage.top, sunBottom: sun.bottom - stage.top,
+                     wallTop: (334 - Painting.VIEW_TOP) / Painting.VIEW_H * stage.height }
+        }""")
+        assert got["reksio"] > 115, got  # 98 px with all of the sky showing
+        assert 0 <= got["sunTop"] and got["sunBottom"] < got["wallTop"], got
 
     def test_he_can_go_anywhere_on_a_phone(self, yard: callable) -> None:
         y = yard(STILL, size=(844, 390))
@@ -443,22 +460,44 @@ class TestScreens:
 
     def test_a_16_9_screen_shows_the_view_as_it_was(self, yard: callable) -> None:
         f = self.fit(yard(STILL))
-        assert (f["w"], f["h"], f["view"]) == (1280, 720, 1600)
+        assert (f["w"], f["h"], f["view"], f["box"]) == (
+            1280,
+            720,
+            1600,
+            "0 0 1600 900",
+        )
 
     def test_wider_than_21_9_gets_bars_at_the_sides(self, yard: callable) -> None:
-        f = self.fit(yard(STILL, size=(1200, 400)))
+        f = self.fit(yard(STILL, size=(1600, 600)))
         assert (
-            f["view"] == 2100 and f["h"] == 400 and round(f["w"]) == round(400 * 21 / 9)
+            f["view"] == 2100 and f["h"] == 600 and round(f["w"]) == round(600 * 21 / 9)
         )
+
+    def test_a_phone_held_upright_asks_to_be_turned_and_waits(
+        self, yard: callable
+    ) -> None:
+        y = yard("seed=1&rain=0", size=(393, 660))  # the morning: he wakes after 6-9 s
+        turn = "!document.getElementById('turn').hidden"
+        assert y.page.evaluate(turn)
+        t0 = y.page.evaluate("Clock.now()")
+        y.page.wait_for_timeout(1000)
+        assert y.page.evaluate("Clock.now()") == t0  # the game waits
+        y.page.set_viewport_size({"width": 660, "height": 393})
+        y.page.wait_for_function(f"!({turn})", timeout=2000)
+        y.page.wait_for_function(f"Clock.now() > {t0} + 500", timeout=3000)
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_an_upright_tablet_plays_without_asking(self, yard: callable) -> None:
+        y = yard(STILL, size=(820, 1180))
+        assert y.page.evaluate("document.getElementById('turn').hidden")
 
     def test_turning_the_phone_refits_it(self, yard: callable) -> None:
         y = yard(STILL, size=(390, 844))
-        assert (
-            self.fit(y)["view"] == 1600
-        )  # upright: all of the 16:9 view, bars above and below
+        # upright: a 16:9 stage, bars above and below, the sky cut
+        assert self.fit(y)["view"] == round(740 * 16 / 9)
         y.page.set_viewport_size({"width": 844, "height": 390})
         y.page.wait_for_timeout(300)
-        assert self.fit(y)["view"] == round(900 * 844 / 390)
+        assert self.fit(y)["view"] == round(740 * 844 / 390)
         assert not y.errors, "\n---\n".join(y.errors)
 
 

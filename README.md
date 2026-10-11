@@ -81,7 +81,9 @@ game folders go out. The original barks are local only, so the site plays the
 synthesised bark; on an iPhone or iPad the sound plays even with the ringer
 switch on silent (Safari 17+). The game pauses, sound and all, while its page is hidden (another tab, a
 covered window, a locked phone) and plays on when it is back. On a phone, play it on its side: a screen
-wider than 16:9 shows more of the yard (up to 21:9). An iPhone can't make a
+wider than 16:9 shows more of the yard (up to 21:9), and on a short screen
+the top of the sky is cut, so the yard shows bigger (`painting.js`). Held
+upright, a phone shows a picture asking to turn it, and the game waits. An iPhone can't make a
 page full screen, so add it to the home screen (Share → Add to Home Screen)
 and it opens without Safari's bars; elsewhere the ⤢ corner button does it.
 Bug reports saved on the site replay locally:

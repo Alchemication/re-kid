@@ -16,7 +16,6 @@
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
-  const VIEW_H = 900
   const GROUND_Y = 812
   const START_S = [25, 55] // the shower starts this long into the play
   const RAIN_S = [22, 30] // and lasts this long
@@ -63,7 +62,7 @@ const Weather = (() => {
         el('circle', { cx, cy: rnd(-12, 6), r: Math.max(30, r), class: 'cloud-puff' }, g)
       }
       el('rect', { x: -w * 0.42, y: 0, width: w * 0.84, height: 34, rx: 17, class: 'cloud-puff' }, g)
-      clouds.push({ g, x: -400 - i * 360, home: 80 + i * 340 + rnd(-40, 40), y: rnd(70, 200), drift: rnd(4, 10) })
+      clouds.push({ g, x: null, from: -400 - i * 360, home: 80 + i * 340 + rnd(-40, 40), y: rnd(70, 200), drift: rnd(4, 10) })
     }
   }
 
@@ -77,16 +76,17 @@ const Weather = (() => {
     canvas.height = Math.round(canvas.clientHeight * dpr)
   }
   function newDrop(top = false) {
-    return { x: fxRnd(-100, Painting.VIEW_W + 100), y: top ? fxRnd(-200, 0) : fxRnd(-200, VIEW_H), v: fxRnd(900, 1300), len: fxRnd(18, 30) }
+    const y0 = Painting.VIEW_TOP - 200 // from above the view (whose top is cut on a phone)
+    return { x: fxRnd(-100, Painting.VIEW_W + 100), y: top ? fxRnd(y0, y0 + 200) : fxRnd(y0, 900), v: fxRnd(900, 1300), len: fxRnd(18, 30) }
   }
   const splashes = []
 
   function drawRain(dt) {
     const ctx = canvas.getContext('2d')
     const sx = canvas.width / Painting.VIEW_W
-    const sy = canvas.height / VIEW_H
-    ctx.setTransform(sx, 0, 0, sy, 0, 0)
-    ctx.clearRect(0, 0, Painting.VIEW_W, VIEW_H)
+    const sy = canvas.height / Painting.VIEW_H
+    ctx.setTransform(sx, 0, 0, sy, 0, -Painting.VIEW_TOP * sy)
+    ctx.clearRect(0, Painting.VIEW_TOP, Painting.VIEW_W, Painting.VIEW_H)
     if (shower.intensity <= 0.01 && !splashes.length) return
     const wanted = Math.round(DROPS * shower.intensity)
     while (drops.length < wanted) drops.push(newDrop(true))
@@ -248,7 +248,8 @@ const Weather = (() => {
     // clouds: in while clouding/raining, out after
     const cover = shower.cover
     for (const c of clouds) {
-      const target = cover > 0 ? c.home + Math.sin(t / c.drift) * 30 : Painting.VIEW_W + 500
+      c.x ??= Painting.SKY_LEFT + c.from // waiting off the left edge (in the sky's units: painting.js)
+      const target = cover > 0 ? c.home + Math.sin(t / c.drift) * 30 : Painting.SKY_RIGHT + 500
       const from = c.x
       c.x = from + (target - from) * Math.min(1, dt * (cover > 0 ? 0.9 : 0.35))
       c.g.setAttribute('transform', `translate(${c.x} ${c.y})`)

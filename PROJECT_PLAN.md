@@ -91,6 +91,26 @@ Update the **Status** and **Next steps** sections as work lands.
   `new-episode` is drafted; `new-world` waits until a second cartoon is
   wanted; an audio skill waits until an episode's sounds force it.
 
+- **Helping is the yard's theme, built from what is there** (Adam,
+  2026-10-11). Every play should offer something to discover, someone to
+  help, and a moment when someone helps Reksio, without making any of them a
+  task. No encounter registry and no session director: `layout.js` already
+  decides who is in a play, `Things.ready` gates each step, `Idle.wish` points
+  at what is left and `Day` keeps count. Behaviour stays in code (each gag's
+  `run()` does more than a config could say). When a play must offer a kind
+  of encounter, each prop in `layout.js` gets the kinds it can offer
+  (`discover`, `help`, `receive-help`) and the pick guarantees one; nothing
+  more until a second user of the tags (an episode) needs it. Help mostly
+  comes from creatures Reksio hasn't helped; a helped one returning the
+  favour is a rare treat.
+- **Phones: frame, don't fly a camera.** Measured 2026-10-11 (Reksio upright,
+  Safari on an iPhone on its side, 750×340): 98 px tall, the mouse 45×18 px,
+  the ground spots 23 px high; iPads were fine (Reksio 133–192 px). Instead of
+  a camera that zooms on each encounter, a short screen now cuts the top of
+  the sky and draws the sky's things smaller (`painting.js`): Reksio 119 px,
+  the mouse 55×22, spots 28 px. Upright, a phone would show a thin strip, so
+  it shows a wordless "turn me" picture instead: no portrait yard.
+
 ## Flow
 
 One validated file per stage, under `worlds/<id>/`:
@@ -306,7 +326,18 @@ wake Reksio at home.
      only), then Adam's (or his wife's) listening pass.
    - Retro on the skill; then a brief for the episode game and its doorway.
    Kosmonauta comes after: it is the biggest build (rocket, space, robots).
-4. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
+4. **The yard on phones, and helping** (order agreed 2026-10-11):
+   - *Done:* measure the sizes on phones and tablets; cut the sky on short
+     screens (above); held upright, a phone shows a wordless picture (a
+     phone turning, the little yard in it coming upright) and the game waits
+     (`Clock.hold`), so the morning isn't missed.
+   - *Next:* Adam and Eliot try
+     the phone build (the recorder shows whether he misses taps, before any
+     tap forgiveness is built); every play has someone to help (one of the
+     trap or the tree: today 1 play in 5 has neither); acting in the mouse
+     and tree encounters; one "receive help" gag (his head stuck in the bowl,
+     the bird pulls it off), looked at with Eliot before more.
+5. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
    device at https://alchemication.github.io/re-kid/, with the synthesised
    bark), alone and then with Eliot. What is in it, part by part and what each is based on, is
    in `games/yard/brief.yaml`; the testing flags and console helpers are in
@@ -353,9 +384,9 @@ wake Reksio at home.
    **Each new gag** comes with its browser tests and a look at it (CLAUDE.md,
    "Adding a gag"). Known complexity hotspot to split when next touched
    (ESLint warning): `Music.scheduleStep`.
-5. **Iterate on what Eliot does with it**: which things he goes for, whether
+6. **Iterate on what Eliot does with it**: which things he goes for, whether
    he finds them unaided, whether the ending lands.
-6. **Later:** the yard becomes the home screen, and new things in it lead
+7. **Later:** the yard becomes the home screen, and new things in it lead
    into episode games (a toy rocket for Kosmonauta). Parked ideas are listed
    in the yard brief's open questions and the intro brief.
 
