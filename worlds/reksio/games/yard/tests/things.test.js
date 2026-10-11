@@ -294,3 +294,19 @@ describe('the bowl on his head', () => {
     assert.equal(y.Bird.flying, false)
   })
 })
+
+describe('back to the bowl, left alone', () => {
+  it('eats what is left, gets stuck, and the bird pulls it off; the next empty bowl is nosed along', async () => {
+    const y = yard('props=bowl')
+    const run = y.Things.lickBowlClean()
+    let over = false
+    run.then(() => (over = true), () => (over = true))
+    for (let i = 0; i < 600 && !over; i++) await y.advance(100)
+    assert.ok(over)
+    const c = y.reksio.calls
+    assert.ok(c.indexOf('lap') < c.indexOf('bowl on') && c.indexOf('bowl on') < c.indexOf('bowl off'), c.join(' '))
+    assert.equal(y.Things.stuckTimes, 1)
+    for (const extra of [false, true]) await y.use('bowl', extra)
+    assert.equal(y.Things.stuckTimes, 1, 'the next empty bowl is nosed along')
+  })
+})

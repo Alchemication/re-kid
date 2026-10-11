@@ -23,13 +23,16 @@ const Idle = (() => {
   }
 
   /**
-   * Which move: a thought bubble first (if one can show), then any move that
+   * Which move: a thought bubble first (if one can show), then a move that
+   * is due (one marked `due` happens as soon as it can), then any move that
    * can happen now, weighted, never the one just done.
-   * @param {Object<string, {weight: number}>} acts
+   * @param {Object<string, {weight: number, due?: boolean}>} acts
    * @param {{ok: (name: string) => boolean, last: string|null, firstWish: boolean, random: () => number}} o
    */
   function pick(acts, { ok, last, firstWish, random }) {
     if (firstWish && acts.wish && ok('wish')) return 'wish'
+    const due = Object.keys(acts).find((n) => acts[n].due && ok(n))
+    if (due) return due
     const names = Object.keys(acts).filter((n) => n !== last && ok(n))
     let r = random() * names.reduce((sum, n) => sum + acts[n].weight, 0)
     for (const n of names) if ((r -= acts[n].weight) < 0) return n

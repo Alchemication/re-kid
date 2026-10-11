@@ -14,7 +14,9 @@
 // The bowl on his head: licking an empty bowl clean, he pushes his nose right
 // in and it sticks. He shakes, stumbles about blind, and sits down glum until
 // the bird (bird.js) comes and pulls it off, sooner if the child taps: he
-// barks inside the bowl and the bird hears.
+// barks inside the bowl and the bird hears. It comes on the second use (the
+// bowl's variation), or he goes back for the last bits on his own, once a
+// play, when left alone (yard.js ACTS, lickBowlClean).
 
 /* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree, Figure, Bird */
 /* exported Things */
@@ -453,6 +455,7 @@ const Things = (() => {
   let foodLeft = 1
   let bowlPushed = 0 // how far his nose has pushed the bowl
   let emptyLicks = 0 // empty bowls licked: the first gets stuck on his head, then every other one
+  let stuckTimes = 0 // how often the bowl has stuck on his head this play
   let callBird = null // while the bowl is stuck on his head: a tap's answer (yard.js stuckTap)
   let lastBowlBark = -Infinity
   let stamped = 0 // film frames stamped so far
@@ -487,6 +490,7 @@ const Things = (() => {
       Sound.clang()
       body.style.visibility = 'hidden'
       Reksio.wearBowl(true)
+      stuckTimes += 1
       Debug.trace('bowl stuck')
       callBird = () => {
         call()
@@ -529,6 +533,29 @@ const Things = (() => {
       foodLeft = 1
       food.style.transform = 'scaleY(1)'
     }
+  }
+
+  /** Lap the bowl empty, bits flying. */
+  async function eat() {
+    const lapping = Reksio.lap(10)
+    for (let i = 0; i < 5; i++) {
+      await wait(380)
+      burst(880 + X('bowl') + bowlPushed, 760, 3, 'crumb', { height: 34, reach: 36, size: 3 })
+      foodLeft -= 0.16
+      food.style.transform = `scaleY(${Math.max(foodLeft, 0.15)})`
+    }
+    await lapping
+    Sound.slurp()
+  }
+
+  /** Left alone by his bowl (yard.js walks him there): he eats what is
+   * left, licks the bottom, and gets stuck. A tap before it sticks cuts it
+   * short, as any left-alone move; once it's on, a tap is a bark in it. */
+  async function lickBowlClean() {
+    if (foodLeft > 0.2) await eat()
+    await Reksio.lap(4)
+    emptyLicks += 1 // this empty bowl stuck: the next one is nosed along
+    return stuckInBowl()
   }
 
   /** A tap while the bowl is stuck on his head: he barks in it and the bird
@@ -609,15 +636,7 @@ const Things = (() => {
           food.style.transform = 'scaleY(1)'
           return
         }
-        const lapping = Reksio.lap(10)
-        for (let i = 0; i < 5; i++) {
-          await wait(380)
-          burst(880 + X('bowl') + bowlPushed, 760, 3, 'crumb', { height: 34, reach: 36, size: 3 })
-          foodLeft -= 0.16
-          food.style.transform = `scaleY(${Math.max(foodLeft, 0.15)})`
-        }
-        await lapping
-        Sound.slurp()
+        await eat()
         await Reksio.lick()
       },
     },
@@ -887,7 +906,9 @@ const Things = (() => {
   }
 
   return {
-    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap,
+    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap, lickBowlClean,
+    /** How often the bowl has stuck on his head this play. */
+    get stuckTimes() { return stuckTimes },
     get stamped() { return stamped },
     get mouse() { return mouse },
   }

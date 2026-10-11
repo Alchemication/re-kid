@@ -14,6 +14,8 @@
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
+  const BOWL_AFTER_S = 8 // left alone this long, he goes back to his bowl (and gets stuck): long enough that the child is watching him, not busy tapping
+  const BOWL_FROM_S = 25 // …but not before this far into the play: the morning and a first look round come first
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
@@ -601,6 +603,20 @@
       },
     },
     yawn: { get weight() { return day.dusk ? 6 : 1 }, ok: () => day.count >= 2, run: () => Reksio.yawn() }, // sleepy at dusk
+    bowl: {
+      // back to his bowl for the last bits, and it sticks on his head: once a
+      // play, the first time he's left alone a while, if no tap has got it
+      // stuck yet, so a child who never taps the bowl twice still sees the
+      // bird help him (things.js)
+      weight: 0,
+      due: true,
+      ok: () => !!spotEls.bowl && !Things.stuckTimes && !day.dusk && idleFor() > BOWL_AFTER_S && Clock.now() > BOWL_FROM_S * 1000,
+      async run() {
+        if (!(await Reksio.walkTo(THINGS.bowl.at()))) return
+        Reksio.face(THINGS.bowl.face)
+        await Things.lickBowlClean()
+      },
+    },
   }
 
   const actOk = (name) => !ACTS[name].ok || !!ACTS[name].ok()
@@ -743,7 +759,7 @@
     Debug.check('walks only standing up', !Reksio.walking || (Reksio.pose === 'stand' && !Reksio.sliding), { pose: Reksio.pose, sliding: Reksio.sliding })
     Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
     Debug.check('a waiting ask runs once he is free', !pending || busy || day.ended)
-    Debug.check('no bowl on his head once the gag is over', !Reksio.wearingBowl || busy)
+    Debug.check('no bowl on his head once the gag is over', !Reksio.wearingBowl || busy || acting)
     Debug.check('the bird is in front of him only while it is busy', !Bird.front || Bird.flying)
   }
 

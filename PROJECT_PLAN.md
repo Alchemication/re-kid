@@ -337,7 +337,9 @@ wake Reksio at home.
      (`Clock.hold`), so the morning isn't missed. Every play has someone to
      help (the trap or the tree) and the bowl (layout.js `OFFERS`). The bowl
      on his head (2026-10-11): the first "receive help" gag, the bird pulls
-     it off, and the bird is his friend after (`bird.js`, `antics.js`).
+     it off, and the bird is his friend after (`bird.js`, `antics.js`). It
+     comes on the second tap of the bowl, or, once a play, on his own the
+     first time he's left alone 8 s (from 25 s in): a `due` left-alone move.
    - *Next:* Adam watches the bowl gag and tunes its timing; then Eliot plays
      it on the iPad (does he tap to call the bird? does he laugh?) before
      more. Then, if it works: the bird's twig to fetch (help, every play),

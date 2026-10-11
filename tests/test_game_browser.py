@@ -111,6 +111,7 @@ ACTS = [
     "howl",
     "fly",
     "yawn",
+    "bowl",
 ]
 # Moves that need something in the yard this test can't quickly bring: skipped
 # (and shown as skipped) when it isn't there.
@@ -380,6 +381,20 @@ class TestBowl:
             "yardGame.events().some((e) => e.kind === 'bird visits')", timeout=DONE_MS
         )
         y.settled()
+
+    def test_left_alone_he_gets_stuck_by_himself_and_a_tap_is_a_bark(
+        self, yard: callable
+    ) -> None:
+        y = yard(f"{STILL}&props=bowl")  # a full bowl: he eats it first
+        y.start("yardGame.act('bowl')")
+        y.page.wait_for_function("Reksio.wearingBowl", timeout=20_000)
+        x = y.page.evaluate("Reksio.x")
+        y.page.evaluate("yardGame.perform('walk to 3000')")  # doesn't cut it short now
+        s = y.settled()
+        assert self.events(y, "stuck tap") and self.events(y, "bowl off")
+        assert abs(s["reksio"]["x"] - x) < 200
+        assert y.page.evaluate("Things.stuckTimes") == 1
+        assert not y.page.evaluate("yardGame.actOk('bowl')"), "only once a play"
 
     def test_once_friends_the_bird_comes_down_to_him(self, yard: callable) -> None:
         y = self.stuck(yard)

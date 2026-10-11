@@ -40,6 +40,14 @@ describe('which move', () => {
     assert.notEqual(Idle.pick(ACTS, { ok: noWish, last: null, firstWish: true, random: seq(0) }), 'wish')
   })
 
+  it('does a move that is due as soon as it can, after a first bubble', () => {
+    const acts = { ...ACTS, bowl: { weight: 0, due: true } }
+    const pick = (ok, firstWish = false) => Idle.pick(acts, { ok, last: null, firstWish, random: seq(0.5) })
+    assert.equal(pick(always), 'bowl')
+    assert.equal(pick(always, true), 'wish')
+    assert.notEqual(pick((n) => n !== 'bowl'), 'bowl', 'not when it cannot happen')
+  })
+
   it('picks by weight', () => {
     // weights wish 2, sniff 3, hop 1 (total 6): 0–2 wish, 2–5 sniff, 5–6 hop
     const at = (r) => Idle.pick(ACTS, { ok: always, last: null, firstWish: false, random: seq(r) })
