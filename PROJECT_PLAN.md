@@ -99,8 +99,12 @@ Update the **Status** and **Next steps** sections as work lands.
   at what is left and `Day` keeps count. Behaviour stays in code (each gag's
   `run()` does more than a config could say). When a play must offer a kind
   of encounter, each prop in `layout.js` gets the kinds it can offer
-  (`discover`, `help`, `receive-help`) and the pick guarantees one; nothing
-  more until a second user of the tags (an episode) needs it. Help mostly
+  (`discover`, `help`, `helped`) and the pick guarantees one; nothing
+  more until a second user of the tags (an episode) needs it. The tags exist
+  now: `OFFERS` in `layout.js` gives each prop its kinds, and `pickProps`
+  makes every play offer someone Reksio can help (the trap or tree) and
+  a chance for someone to help him (the bowl, until the bramble's gag
+  exists), then fills the rest as before. Help mostly
   comes from creatures Reksio hasn't helped; a helped one returning the
   favour is a rare treat.
 - **Phones: frame, don't fly a camera.** Measured 2026-10-11 (Reksio upright,
@@ -330,13 +334,19 @@ wake Reksio at home.
    - *Done:* measure the sizes on phones and tablets; cut the sky on short
      screens (above); held upright, a phone shows a wordless picture (a
      phone turning, the little yard in it coming upright) and the game waits
-     (`Clock.hold`), so the morning isn't missed.
-   - *Next:* Adam and Eliot try
-     the phone build (the recorder shows whether he misses taps, before any
-     tap forgiveness is built); every play has someone to help (one of the
-     trap or the tree: today 1 play in 5 has neither); acting in the mouse
-     and tree encounters; one "receive help" gag (his head stuck in the bowl,
-     the bird pulls it off), looked at with Eliot before more.
+     (`Clock.hold`), so the morning isn't missed. Every play has someone to
+     help (the trap or the tree) and the bowl (layout.js `OFFERS`). The bowl
+     on his head (2026-10-11): the first "receive help" gag, the bird pulls
+     it off, and the bird is his friend after (`bird.js`, `antics.js`).
+   - *Next:* Adam watches the bowl gag and tunes its timing; then Eliot plays
+     it on the iPad (does he tap to call the bird? does he laugh?) before
+     more. Then, if it works: the bird's twig to fetch (help, every play),
+     his tail caught in the bramble (helped; tags `berries` as `helped`);
+     acting in the mouse and tree encounters.
+   - *Workflow note:* the layout rule went to a Haiku 5.5 subagent in a
+     worktree. One round of its own fixes; one problem found in review: it
+     tagged the bramble before its gag existed. The gag itself was written by
+     Opus, which sets the pattern for the next ones.
 5. **Adam: try the yard** (`uv run python main.py play reksio`, or on any
    device at https://alchemication.github.io/re-kid/, with the synthesised
    bark), alone and then with Eliot. What is in it, part by part and what each is based on, is

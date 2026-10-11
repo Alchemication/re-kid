@@ -94,10 +94,11 @@ const Figure = (() => {
     return out
   }
 
-  // tongue: hanging out (0 to 1); bone: carried in his mouth (0 or 1); blink: lids
+  // tongue: hanging out (0 to 1); bone: carried in his mouth (0 or 1); bowl:
+  // his bowl stuck upside down over his head, eyes and all (0 or 1); blink: lids
   // closing (0 to 1) whatever the eyes are doing; look: his eyes turned back
   // (-1) or forward (1)
-  const FACE = { eyes: 1, joy: 0, brows: 0, lift: 0, smile: 0.6, open: 0, teeth: 0, o: 0, tongue: 0, bone: 0, blink: 0, look: 0 }
+  const FACE = { eyes: 1, joy: 0, brows: 0, lift: 0, smile: 0.6, open: 0, teeth: 0, o: 0, tongue: 0, bone: 0, bowl: 0, blink: 0, look: 0 }
   const EARS = { near: [-20, -75], far: [14, 40] } // [angle from upright, bend at the middle], degrees
 
   const STAND = {
@@ -401,11 +402,32 @@ const Figure = (() => {
    * right): for effects that come from it (a bark, crumbs, a snap). */
   function mouthAt(p) {
     const L = layout(p.head.turn)
-    const local = [L.mouth[0], L.mouth[1] + 6]
+    return onHead(p, [L.mouth[0], L.mouth[1] + 6])
+  }
+
+  /** A point given in head units (about its centre, before the tilt) in his own units. */
+  function onHead(p, local) {
     const a = (p.head.tilt * Math.PI) / 180
     const turned = [local[0] * Math.cos(a) - local[1] * Math.sin(a), local[0] * Math.sin(a) + local[1] * Math.cos(a)]
     return add([p.head.x, p.head.y], turned)
   }
+
+  // The bowl stuck over his head, upside down, in head units: its rim at his
+  // nose, so his eyes are hidden and only his nose and mouth show under it.
+  const BOWL = { rim: 8, top: -46, half: 48, base: 36 }
+
+  /** The upside-down bowl, centred over his face as it turns. */
+  function bowlOver(turn) {
+    const c = 10 * clamp01(turn)
+    const { rim, top, half, base } = BOWL
+    return {
+      body: `M${pt([c - half, rim])} L${pt([c - base, top])} H${fmt(c + base)} L${pt([c + half, rim])} Z`,
+      rim: `M${pt([c - half - 2, rim])} H${fmt(c + half + 2)}`,
+    }
+  }
+
+  /** The top of the bowl stuck on his head, in his own units (where the bird lands). */
+  const bowlTopAt = (p) => onHead(p, [10 * clamp01(p.head.turn), BOWL.top])
 
   function head(h, f, ears) {
     const L = layout(h.turn)
@@ -418,6 +440,7 @@ const Figure = (() => {
       nose: noseAt(L.nose, h.turn),
       eyes: eyes(L, f),
       mouth: mouth(L, f),
+      bowl: { ...bowlOver(h.turn), show: f.bowl >= 0.5 ? 1 : 0 },
     }
   }
 
@@ -560,6 +583,7 @@ const Figure = (() => {
     const nearEar = tube(headG, EAR, COLOURS.ochre)
     const skull = merged(headG, COLOURS.white, clips.head)
     const face = mountFace(headG, clips)
+    const bowl = [el(headG, 'path', { class: 'bowl' }), el(headG, 'path', { class: 'bowl-rim' })]
     const nearArm = tube(root, ARM)
     return function draw(pose) {
       const s = shape(pose)
@@ -574,9 +598,12 @@ const Figure = (() => {
       farEar(s.head.ears[1])
       skull(s.head.skull)
       face(s.head)
+      set(bowl[0], 'd', s.head.bowl.body)
+      set(bowl[1], 'd', s.head.bowl.rim)
+      for (const b of bowl) set(b, 'display', s.head.bowl.show ? 'inline' : 'none')
       nearArm(s.nearArm)
     }
   }
 
-  return { POSES, mix, vary, shape, mouthAt, mount, capsule }
+  return { POSES, mix, vary, shape, mouthAt, bowlTopAt, mount, capsule }
 })()

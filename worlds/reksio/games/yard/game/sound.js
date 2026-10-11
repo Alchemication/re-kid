@@ -14,6 +14,8 @@ const Sound = (() => {
   const BARK_VOLUME = 0.8
   const CRITTER_VOLUME = 0.55 // the yard's creatures, even right by Reksio: quiet
   const HEARING = 900 // creatures further from Reksio than this are not heard
+  const MUFFLE_HZ = 520 // a bark inside the bowl on his head: only its boom gets out
+  const BOWL_RING = [880, 2210] // the bowl's own ring when it's knocked: a hollow note and a bright partial
   let ctx = null
   let master = null
   let noise = null
@@ -117,20 +119,22 @@ const Sound = (() => {
     wobble.stop(t + 0.2)
   }
 
-  /** One of the original barks, played at a random speed (and so pitch). */
-  function realBark(at) {
+  /** One of the original barks, played at a random speed (and so pitch), to
+   * `out` (the speakers, unless muffled). */
+  function realBark(at, out = null) {
     const c = ensure()
     const src = c.createBufferSource()
     src.buffer = barks[Math.floor(Math.random() * barks.length)]
     src.playbackRate.value = BARK_RATE[0] + Math.random() * (BARK_RATE[1] - BARK_RATE[0])
     const g = c.createGain()
     g.gain.value = BARK_VOLUME
-    src.connect(g).connect(master)
+    src.connect(g).connect(out ?? master)
     src.start(c.currentTime + at)
   }
 
-  /** A cartoon "woof": a short voiced burst that drops in pitch. */
-  function woof(at = 0) {
+  /** A cartoon "woof": a short voiced burst that drops in pitch, to `out`
+   * (the speakers; muffled, without its breath). */
+  function woof(at = 0, out = null) {
     const c = ensure()
     const t = c.currentTime + at
     const o = c.createOscillator()
@@ -143,10 +147,10 @@ const Sound = (() => {
     formant.Q.value = 1.4
     const g = c.createGain()
     env(g, t, 0.55, 0.012, 0.17)
-    o.connect(formant).connect(g).connect(master)
+    o.connect(formant).connect(g).connect(out ?? master)
     o.start(t)
     o.stop(t + 0.25)
-    hiss(at, 0.12, 0.005, 0.08, 'bandpass', 1500, 0.8)
+    if (!out) hiss(at, 0.12, 0.005, 0.08, 'bandpass', 1500, 0.8)
   }
 
   /** Play a creature's sound as heard by Reksio, `distance` away: quiet up
@@ -204,6 +208,23 @@ const Sound = (() => {
         woof(0)
         woof(0.2)
       }
+    },
+    /** "Hau" inside the bowl stuck on his head: muffled and boomy, and the bowl rings. */
+    bowlBark() {
+      const c = ensure()
+      const muffle = c.createBiquadFilter()
+      muffle.type = 'lowpass'
+      muffle.frequency.value = MUFFLE_HZ
+      muffle.Q.value = 8 // resonant: a boom
+      muffle.connect(master)
+      if (barks.length) realBark(0, muffle)
+      else woof(0, muffle)
+      sounds.clang(0.03, 0.5)
+    },
+    /** The bowl rings, knocked (at: seconds from now; loud: 0 to 1). */
+    clang(at = 0, loud = 1) {
+      tone('triangle', BOWL_RING[0], BOWL_RING[0] * 0.98, at, 0.22 * loud, 0.003, 0.7)
+      tone('sine', BOWL_RING[1], BOWL_RING[1] * 0.99, at, 0.06 * loud, 0.002, 0.45)
     },
     step() { hiss(0, 0.05, 0.002, 0.04, 'bandpass', 2400, 2) },
     knock() { tone('sine', 220, 160, 0, 0.3, 0.003, 0.12); tone('sine', 220, 160, 0.14, 0.25, 0.003, 0.12) },

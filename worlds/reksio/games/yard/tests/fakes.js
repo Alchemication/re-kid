@@ -14,6 +14,13 @@ function fakeReksio(x = 1500) {
     MIN_X: 380,
     MAX_X: 3650,
     holdingBone: false,
+    wearingBowl: false,
+    pose: 'stand',
+    wearBowl(on) {
+      calls.push(on ? 'bowl on' : 'bowl off')
+      r.wearingBowl = on
+    },
+    bowlTop: () => ({ x: r.x + 10 * r.facing, y: 600 }),
     async walkTo(to) {
       calls.push('walkTo')
       if (r.cut) return false

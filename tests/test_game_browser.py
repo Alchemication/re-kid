@@ -59,6 +59,14 @@ GESTURES = {
     "nap": "Reksio.nap(2000)",
     "startle": "Reksio.startle()",
     "catchDrops": "Reksio.catchDrops(2)",
+    # the bowl on his head (antics.js): sitting ones get up again with freed()
+    "bowlShake": "Reksio.bowlShake()",
+    "slump": "Reksio.slump().then(() => Reksio.freed())",
+    "mope": "Reksio.slump().then(() => Reksio.mope(Clock.wait(600))).then(() => Reksio.freed())",
+    "bowlBark": "Reksio.bowlBark()",
+    "tugged": "Reksio.tugged()",
+    "freed": "Reksio.freed()",
+    "squint": "Reksio.squint()",
     "stretch": "(async () => { Reksio.beginStretch(); await new Promise((r) => setTimeout(r, 600)); await Reksio.endStretch() })()",
 }
 # Reksio's other functions: state, not gestures, or tested through a thing.
@@ -71,6 +79,9 @@ NOT_GESTURES = {
     "setWet",
     "setMuddy",
     "holdBone",
+    "wearBowl",  # the bowl (TestBowl)
+    "bowlTop",
+    "addGestures",  # how antics.js adds its own
     "mouth",
     "beginStretch",
     "endStretch",  # as "stretch" above
@@ -294,6 +305,103 @@ class TestThings:
         assert abs(s["reksio"]["x"] - y.page.evaluate("Reksio.MIN_X + 100")) < 5, (
             "the waiting walk never ran"
         )
+
+
+class TestBowl:
+    """The empty bowl sticks on his head, and the bird pulls it off."""
+
+    @staticmethod
+    def stuck(yard: callable, extra: str = "") -> Yard:
+        y = yard(f"seed=1&still&creatures=&props=bowl&{extra or 'rain=0'}")
+        y.run("yardGame.use('bowl', false)")  # he eats it all
+        return y
+
+    @staticmethod
+    def events(y: Yard, kind: str) -> list[dict]:
+        return [e for e in y.page.evaluate("yardGame.events()") if e["kind"] == kind]
+
+    def test_stuck_and_pulled_off_and_friends_after(self, yard: callable) -> None:
+        y = self.stuck(yard)
+        y.run("yardGame.use('bowl', true)")
+        y.settled()
+        assert self.events(y, "bowl stuck") and self.events(y, "bird to the rescue")
+        got = y.page.evaluate("""() => ({
+            wearing: Reksio.wearingBowl, flying: Bird.flying, friend: Bird.friend,
+            bowl: getComputedStyle(document.getElementById('bowl-body')).visibility })""")
+        assert got == {
+            "wearing": False,
+            "flying": False,
+            "friend": True,
+            "bowl": "visible",
+        }
+
+    def test_taps_while_stuck_are_barks_and_nothing_waits_for_after(
+        self, yard: callable
+    ) -> None:
+        y = self.stuck(yard)
+        y.start("yardGame.use('bowl', true)")
+        y.page.wait_for_function("Reksio.wearingBowl", timeout=10_000)
+        x = y.page.evaluate("Reksio.x")
+        for intent in ["press", "release", "walk to 3000", "go to gate"]:
+            y.page.evaluate(f"yardGame.perform('{intent}')")
+            y.page.wait_for_timeout(200)
+        s = y.settled()
+        assert len(self.events(y, "stuck tap")) == 3  # the release isn't a tap
+        assert abs(s["reksio"]["x"] - x) < 200, "a tap while stuck was kept for after"
+        assert "gate" not in s["uses"]
+
+    def test_taps_all_through_the_tugs_dont_cut_them_short(
+        self, yard: callable
+    ) -> None:
+        y = self.stuck(yard)
+        y.start("yardGame.use('bowl', true)")
+        y.page.wait_for_function("Reksio.wearingBowl", timeout=10_000)
+        while y.page.evaluate("Reksio.wearingBowl"):  # a child tapping away
+            y.page.evaluate("yardGame.perform('press')")
+            y.page.evaluate("yardGame.perform('release')")
+            y.page.wait_for_timeout(300)
+        y.settled()
+        on = self.events(y, "bird on the bowl")[0]["t"]
+        off = self.events(y, "bowl off")[0]["t"]
+        assert off - on > 2500, (
+            f"the tugs took only {off - on} ms"
+        )  # two pecks, three tugs
+
+    def test_the_bird_beside_him_can_be_tapped(self, yard: callable) -> None:
+        y = self.stuck(yard)
+        y.start("yardGame.use('bowl', true)")
+        y.page.wait_for_function(
+            "yardGame.events().some((e) => e.kind === 'bowl off')", timeout=30_000
+        )
+        y.page.wait_for_timeout(900)  # landed beside him
+        y.page.tap("#bird .bird >> nth=0")
+        y.settled()  # the gag, then the tap's turn
+        y.page.wait_for_function(
+            "yardGame.events().some((e) => e.kind === 'bird visits')", timeout=DONE_MS
+        )
+        y.settled()
+
+    def test_once_friends_the_bird_comes_down_to_him(self, yard: callable) -> None:
+        y = self.stuck(yard)
+        y.run("yardGame.use('bowl', true)")
+        y.settled()
+        perch = y.page.evaluate("Bird.perch.x")
+        y.run("yardGame.use('bird')")
+        y.settled()
+        assert self.events(y, "bird visits")
+        assert y.page.evaluate("Bird.perch.x") == perch
+
+    def test_rain_coming_on_while_he_is_stuck(self, yard: callable) -> None:
+        y = self.stuck(yard, "rain=1&rain-at=3")
+        y.run("yardGame.use('bowl', true)")
+        y.settled()
+        assert y.page.evaluate("Weather.phase") in (
+            "clouding",
+            "raining",
+            "clearing",
+            "after",
+        )
+        assert not y.page.evaluate("Reksio.wearingBowl")
 
 
 class TestCritters:

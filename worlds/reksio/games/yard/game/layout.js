@@ -1,6 +1,7 @@
 // What this play of the yard holds, decided once at load: which props are out
-// (three of six: the rest come another time), which creatures are about (two
-// of them), whether the flowers are out, whether it rains, where everything
+// (three of six: the rest come another time, and always one Reksio can help
+// and one that helps him, see OFFERS), which creatures are about (two of
+// them), whether the flowers are out, whether it rains, where everything
 // stands, and where the sun and the moon are in the sky. Not everything at
 // once, so the next play has something new; the last play is remembered and
 // things not seen then are preferred.
@@ -21,7 +22,13 @@ const Layout = (() => {
   const ROW_FROM = 725 // the doghouse's right edge
   const ROW_TO = MAX_X - 70 // the gate's action spot starts here
   const MIN_GAP = 140 // at least a dog's length between two things
-  const PROP_POOL = ['bowl', 'dig', 'film', 'trap', 'tree', 'berries'] // the doghouse, house, tap, bird and gate are always there
+  // what each prop can offer a play: something to find out about (discover),
+  // someone Reksio can help (help), someone who helps him (helped). The
+  // doghouse, house, tap, bird and gate are always there and only discover.
+  // A kind is listed only once a gag gives it: the bramble becomes `helped`
+  // when his tail gets caught in it; until then the bowl is out every play.
+  const OFFERS = { bowl: ['discover', 'helped'], dig: ['discover'], film: ['discover'], trap: ['help'], tree: ['help'], berries: ['discover'] }
+  const PROP_POOL = Object.keys(OFFERS)
   const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do: more than a day takes (yard.js DAY_THINGS)
   const CREATURE_POOL = ['fly', 'bee', 'spider']
   const CREATURES_PER_PLAY = 2
@@ -68,6 +75,16 @@ const Layout = (() => {
 
   const shuffled = (list) => pick(list, list.length)
 
+  /** The play's props: one that offers help, one that helps (unless the first already does), then the rest. */
+  function pickProps(seenBefore) {
+    const chosen = []
+    for (const kind of ['help', 'helped']) {
+      if (chosen.some((n) => OFFERS[n].includes(kind))) continue
+      chosen.push(...pick(PROP_POOL.filter((n) => OFFERS[n].includes(kind)), 1, seenBefore))
+    }
+    return [...chosen, ...pick(PROP_POOL.filter((n) => !chosen.includes(n)), PROPS_PER_PLAY - chosen.length, seenBefore)]
+  }
+
   // Flags in the page address force parts of a play, for trying them out and
   // for tests (README lists them all). Every draw is made either way, so a
   // flag doesn't shift the rest of a seeded play.
@@ -75,7 +92,7 @@ const Layout = (() => {
   const listed = (name, pool) => (params.get(name) || '').split(',').filter((n) => pool.includes(n))
 
   const last = remembered()
-  const props = pick(PROP_POOL, PROPS_PER_PLAY, last.props)
+  const props = pickProps(last.props)
   const creatures = pick(CREATURE_POOL, CREATURES_PER_PLAY, last.creatures)
   // ?creatures=fly,spider picks the creatures
   if (params.has('creatures')) creatures.splice(0, creatures.length, ...listed('creatures', CREATURE_POOL))

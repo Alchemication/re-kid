@@ -48,6 +48,7 @@ const Reksio = (() => {
 
   let x = 1000
   let holding = false // carrying a bone
+  let bowled = false // his bowl stuck over his head
   let facing = 1
   let target = null
   let arrive = null // resolves the current walk: true if he got there
@@ -154,6 +155,7 @@ const Reksio = (() => {
     if (add.dig) p = digging(p, add.dig)
     if (add.wag) p = Figure.vary(p, { tail: [p.tail[0] + add.wag * 6, p.tail[1] - Math.abs(add.wag) * 2] })
     if (holding) p = Figure.vary(p, { face: { bone: p.face.open < 0.15 && p.face.tongue < 0.1 ? 1 : 0 } })
+    if (bowled) p = Figure.vary(p, { face: { bowl: 1 } })
     return p
   }
 
@@ -913,6 +915,12 @@ const Reksio = (() => {
     holding = on
   }
 
+  /** His bowl stuck over his head (or not). */
+  function wearBowl(on) {
+    bowled = on
+    draw()
+  }
+
   /** A gesture, counted while under way: he isn't free for life's ways of
    * standing until every gesture is over (or cut short). */
   function busyWith(fn) {
@@ -935,7 +943,15 @@ const Reksio = (() => {
   place()
   draw()
 
-  return {
+  // What a gesture is made of, for the gestures kept in antics.js (a bigger
+  // gag's own moves): they move his layers only through these, as the ones
+  // here do, so relax() cuts them short the same way.
+  const kit = {
+    blend, pause, faceTo, faceOff, actTo, actOff, settle, rise, basePose, add, POSES: F,
+    EASE, EASE_OUT, EASE_IN, OVERSHOOT, rnd, rndInt,
+  }
+
+  const api = {
     get x() { return x },
     get facing() { return facing },
     get walking() { return target !== null },
@@ -952,11 +968,24 @@ const Reksio = (() => {
     },
     mouth,
     get holdingBone() { return holding },
-    walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, beginStretch, endStretch, sleepIn, floatZ,
+    get wearingBowl() { return bowled },
+    /** The top of the bowl on his head, in the scene (where the bird lands). */
+    bowlTop: () => toScene(Figure.bowlTopAt(last ?? compose())),
+    walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, wearBowl, beginStretch, endStretch, sleepIn, floatZ,
     ...Object.fromEntries(Object.entries({
       shakeDry, bark, nod, lick, lap, shake, paddle, hop, sniff, lookAround, lookUp, scratch, playBow, chaseTail, yawn,
       stamp, snap, watch, pounce, biteTail, howl, sit, lieDown, nap, startle, catchDrops, wakeUp,
     }).map(([name, fn]) => [name, busyWith(fn)])),
     MIN_X, MAX_X,
+    kit,
+    /** Add gestures made from the kit (antics.js): each counted while under
+     * way, as his own. A name he has already is a mistake, not a replacement. */
+    addGestures(gestures) {
+      for (const [name, fn] of Object.entries(gestures)) {
+        if (name in api) throw new Error(`Reksio already has ${name}: name the gesture something else`)
+        api[name] = busyWith(fn)
+      }
+    },
   }
+  return api
 })()

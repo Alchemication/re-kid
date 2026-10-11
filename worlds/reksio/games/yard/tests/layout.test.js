@@ -24,6 +24,20 @@ describe('a play', () => {
     }
   })
 
+  it('always has someone Reksio can help and someone who helps him', () => {
+    for (const seed of SEEDS) {
+      const L = layout(`?seed=${seed}`)
+      assert.ok(L.props.some((n) => ['trap', 'tree'].includes(n)), `seed ${seed}: ${L.props}`)
+      assert.ok(L.props.includes('bowl'), `seed ${seed}: ${L.props}`) // the only one who helps him, so far (layout.js OFFERS)
+    }
+  })
+
+  it('still brings every prop out now and then', () => {
+    const seen = new Set()
+    for (const seed of SEEDS) for (const n of layout(`?seed=${seed}`).props) seen.add(n)
+    assert.deepEqual([...seen].sort(), ['berries', 'bowl', 'dig', 'film', 'trap', 'tree'])
+  })
+
   it('shows a prop only when it is out (the tap always, the flowers sometimes)', () => {
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}`)
@@ -105,14 +119,18 @@ describe('replays and memory', () => {
     const page = load(['debug.js', 'layout.js'])
     const memory = JSON.parse(page.store.get('reksio-yard-last-play'))
     assert.deepEqual(memory.props, page.json('Layout.props'))
-    // over many unseeded plays after the same one, its things come up less
-    const last = { props: ['bowl', 'trap', 'tree'], creatures: ['fly', 'bee'], rain: false }
-    let again = 0
-    for (let i = 0; i < 300; i++) {
-      const L = layout('', { storage: { 'reksio-yard-last-play': JSON.stringify(last) } })
-      again += L.props.filter((n) => last.props.includes(n)).length
+    // over many unseeded plays after the same one, its things come up less than
+    // with no memory: about 0.5 a play against 0.75. A last play of props the
+    // helper rule doesn't bring back anyway, so only the preference counts.
+    const last = { props: ['dig', 'film', 'berries'], creatures: ['fly', 'bee'], rain: false }
+    const seenAgain = (storage) => {
+      let again = 0
+      for (let i = 0; i < 300; i++) again += layout('', { storage }).props.filter((n) => last.props.includes(n)).length
+      return again / 300
     }
-    assert.ok(again / 300 < 0.9 * 3 * (3 / 6), `seen-before props came up ${again / 300} a play`)
+    const after = seenAgain({ 'reksio-yard-last-play': JSON.stringify(last) })
+    const fresh = seenAgain({})
+    assert.ok(after < fresh - 0.1, `seen-before props came up ${after} a play, ${fresh} with no memory`)
   })
 
   it('still makes a play when storage is blocked', () => {
@@ -137,6 +155,10 @@ describe('flags in the page address', () => {
     assert.deepEqual({ ...quick, moonRise: null }, plain)
   })
 
+  it('picks exactly the props asked for, two or three of them', () => {
+    assert.deepEqual([...layout('?seed=3&props=dig,film').props].sort(), ['dig', 'film'])
+  })
+
   it('picks the creatures', () => {
     assert.deepEqual(layout('?seed=3&creatures=spider').creatures, ['spider'])
     assert.deepEqual(layout('?seed=3&creatures=').creatures, [])
@@ -157,6 +179,14 @@ describe('flags in the page address', () => {
       const forced = layout(`?seed=${seed}&rain=1&fruit=nut&flowers=${plain.flowers ? 1 : 0}`)
       assert.deepEqual(forced.shift, plain.shift, `seed ${seed}`)
       assert.deepEqual(forced.puddles, plain.puddles, `seed ${seed}`)
+    }
+  })
+
+  it("doesn't shift the creatures, weather or sky when the props are picked", () => {
+    for (const seed of SEEDS.slice(0, 50)) {
+      const plain = layout(`?seed=${seed}`)
+      const forced = layout(`?seed=${seed}&props=dig,film`)
+      for (const k of ['creatures', 'flowers', 'rain', 'fruit', 'sun', 'moon', 'wakeAfter']) assert.deepEqual(forced[k], plain[k], `seed ${seed}: ${k}`)
     }
   })
 

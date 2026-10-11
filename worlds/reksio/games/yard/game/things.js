@@ -10,8 +10,13 @@
 // can't get it past the trap. Reksio stamps beside the trap: it snaps shut on
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
+//
+// The bowl on his head: licking an empty bowl clean, he pushes his nose right
+// in and it sticks. He shakes, stumbles about blind, and sits down glum until
+// the bird (bird.js) comes and pulls it off, sooner if the child taps: he
+// barks inside the bowl and the bird hears.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree, Figure */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree, Figure, Bird */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -28,6 +33,9 @@ const Things = (() => {
   const CHEESE = { x: 1100, y: 798 } // cheese on the trap's trigger
   const CHEESE_LANDS = 1175 // where the snap flings it, by the mouse
   const MOUSE_WAITS = 1195 // where she sits looking at the cheese she can't have
+  const BOWL_MIDDLE = { x: 880, y: 784 } // the bowl as drawn, before its per-play offset: it turns about here
+  const BIRD_COMES_MS = [5000, 7000] // left alone, the bird comes this long after he sits down stuck: long enough to see him glum, short enough not to worry
+  const BOWL_BARK_GAP_MS = 350 // taps faster than this while he's stuck don't each bark: a din, not a joke
   const GROUND = 812
 
   const $ = (id) => document.getElementById(id)
@@ -89,85 +97,6 @@ const Things = (() => {
   /** A small twinkle above a thing: "you can tap me". Nothing solid moves. */
   const twinkle = (x, y) => floatUp('twinkle-shape', 'twinkle', x, y)
   const heart = (x, y) => floatUp('heart-shape', 'heart', x, y, { rise: 60, spin: false, ms: 1600 })
-
-  // ------------------------------------------------------------ the bird
-
-  const bird = $('bird')
-  const wing = $('bird-wing')
-  const PERCHES = [
-    { x: Layout.perches[0], y: 330 }, // on the wall, over open ground (layout.js)
-    { x: 560, y: 552 }, // on the doghouse roof
-    { x: Layout.perches[1], y: 330 }, // further along the wall
-    { x: 2880 + X('gate'), y: 602 }, // on the fence rail
-  ]
-  let perch = 0
-  let flying = false
-
-  function birdAt(p) {
-    bird.style.transform = `translate(${p.x}px, ${p.y}px)`
-  }
-
-  /** Fly from one point to another in an arc, wings flapping. */
-  async function flyBetween(from, to) {
-    const flap = wing.animate(
-      [{ transform: 'rotate(0)' }, { transform: 'rotate(-55deg)' }, { transform: 'rotate(0)' }],
-      { duration: 160, iterations: Infinity },
-    )
-    Sound.flutter()
-    const top = Math.min(from.y, to.y) - 180
-    const mid = { x: (from.x + to.x) / 2, y: top }
-    const facing = to.x < from.x ? -1 : 1
-    await bird.animate(
-      [
-        { transform: `translate(${from.x}px, ${from.y}px) scaleX(${facing})` },
-        { transform: `translate(${mid.x}px, ${mid.y}px) scaleX(${facing})` },
-        { transform: `translate(${to.x}px, ${to.y}px) scaleX(${facing})` },
-      ],
-      { duration: 1200 + Math.abs(to.x - from.x) * 0.5, easing: 'ease-in-out' },
-    ).finished
-    flap.cancel()
-    return facing
-  }
-
-  /** Off to the perch furthest from Reksio, so the chase can go on. */
-  async function flyAway(from = PERCHES[perch]) {
-    flying = true
-    const choices = PERCHES.map((p, i) => i).filter((i) => i !== perch)
-    perch = choices.sort((a, b) => Math.abs(PERCHES[b].x - Reksio.x) - Math.abs(PERCHES[a].x - Reksio.x))[Math.floor(random() * 2)]
-    const to = PERCHES[perch]
-    Music.react.bird()
-    await flyBetween(from, to)
-    birdAt(to)
-    Sound.chirp()
-    flying = false
-  }
-
-  /** After rain: down to a worm, a few pecks, and back up to a perch. */
-  async function birdHunt(worm) {
-    if (flying) return
-    flying = true
-    const land = { x: worm.x + 30, y: worm.y + 6 }
-    await flyBetween(PERCHES[perch], land)
-    bird.style.transform = `translate(${land.x}px, ${land.y}px) scaleX(-1)`
-    for (let i = 0; i < 3; i++) {
-      await $('bird-body').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-30deg)' }, { transform: 'rotate(0)' }], { duration: 260 }).finished
-    }
-    worm.eat()
-    Sound.chirp()
-    await wait(500)
-    await flyAway(land)
-  }
-
-  function birdIdle() {
-    if (!flying && !isEnded()) {
-      $('bird-body').animate(
-        [{ transform: 'translateY(0)' }, { transform: 'translateY(-10px)' }, { transform: 'translateY(0)' }],
-        { duration: 300 },
-      )
-      if (random() < 0.6) Sound.from(Math.abs(PERCHES[perch].x - Reksio.x), Sound.chirp)
-    }
-    Clock.after(4000 + random() * 4000, birdIdle)
-  }
 
   // ------------------------------------------------------------ the mouse
 
@@ -523,7 +452,92 @@ const Things = (() => {
   const food = $('food')
   let foodLeft = 1
   let bowlPushed = 0 // how far his nose has pushed the bowl
+  let emptyLicks = 0 // empty bowls licked: the first gets stuck on his head, then every other one
+  let callBird = null // while the bowl is stuck on his head: a tap's answer (yard.js stuckTap)
+  let lastBowlBark = -Infinity
   let stamped = 0 // film frames stamped so far
+
+  /** The bowl, off his head, spins through the air and lands back in its place. */
+  async function bowlHome(body, from) {
+    const x0 = from.x - (BOWL_MIDDLE.x + X('bowl'))
+    const y0 = from.y + 30 - BOWL_MIDDLE.y // its middle, under the top
+    body.style.transformOrigin = `${BOWL_MIDDLE.x}px ${BOWL_MIDDLE.y}px`
+    body.style.visibility = ''
+    await Motion.endAt(body, [
+      { transform: `translate(${x0}px, ${y0}px) rotate(180deg)` },
+      { transform: `translate(${(x0 + bowlPushed) / 2}px, ${y0 - 160}px) rotate(270deg)`, offset: 0.45 },
+      { transform: `translate(${bowlPushed}px, 0px) rotate(360deg)` },
+    ], { duration: 750, easing: 'ease-in-out' })
+    Sound.clang(0, 0.7)
+  }
+
+  /** Licking the empty bowl, he pushes his nose right in, and it sticks on
+   * his head. He shakes, takes a few blind steps, and sits down glum until
+   * the bird pulls it off (sooner if he barks for it, at a tap); then he is
+   * delighted, thanks the bird, and eyes the bowl with suspicion. */
+  async function stuckInBowl() {
+    const body = $('bowl-body')
+    let call
+    const called = new Promise((resolve) => (call = resolve))
+    let up
+    const freed = new Promise((resolve) => (up = resolve))
+    let birdCame = false
+    try {
+      await Reksio.nod(26, 450) // right in, to lick the bottom
+      Sound.clang()
+      body.style.visibility = 'hidden'
+      Reksio.wearBowl(true)
+      Debug.trace('bowl stuck')
+      callBird = () => {
+        call()
+        if (Clock.now() - lastBowlBark < BOWL_BARK_GAP_MS) return
+        lastBowlBark = Clock.now()
+        Debug.ignoreCut(Reksio.bowlBark(), 'bark in the bowl')
+      }
+      await Reksio.bowlShake()
+      await Reksio.walkTo(Reksio.x - rnd(70, 110)) // blind steps, the wrong way
+      await Reksio.lookAround(rnd(500, 800))
+      await Reksio.walkTo(Reksio.x + rnd(30, 60))
+      await Reksio.slump()
+      const moping = Reksio.mope(freed)
+      await Promise.race([wait(rnd(...BIRD_COMES_MS)), called])
+      birdCame = true
+      const land = await Bird.rescue((top) => {
+        Reksio.wearBowl(false)
+        callBird = null // off: taps wait for him again
+        Sound.pop()
+        Sound.clang()
+        return bowlHome(body, top)
+      })
+      up()
+      await moping
+      await Reksio.freed()
+      Reksio.face(land.x > Reksio.x ? 1 : -1)
+      Sound.chirp()
+      await Reksio.playBow()
+      Reksio.face(-Reksio.facing) // the bowl: and you stay there
+      await Reksio.squint()
+      await Bird.flyAway(land)
+      birdCame = false
+    } finally {
+      // however it ends, the bowl is back in its place and the bird free
+      callBird = null
+      up()
+      if (Reksio.wearingBowl) Reksio.wearBowl(false)
+      if (birdCame) Bird.home() // cut short on its way: back on its perch
+      body.style.visibility = ''
+      foodLeft = 1
+      food.style.transform = 'scaleY(1)'
+    }
+  }
+
+  /** A tap while the bowl is stuck on his head: he barks in it and the bird
+   * hears. False if it isn't stuck (the tap is an ordinary one). */
+  function stuckTap() {
+    if (!callBird) return false
+    callBird()
+    return true
+  }
 
   const THINGS = {
     doghouse: {
@@ -579,8 +593,10 @@ const Things = (() => {
           await wait(200)
         }
         if (foodLeft <= 0.2) {
-          // the extra: an empty bowl — he licks it clean and noses it along
+          // the extra: an empty bowl — he licks it clean and noses it along,
+          // or pushes his nose right in, and it sticks
           await Reksio.lap(4)
+          if (emptyLicks++ % 2 === 0) return stuckInBowl()
           const push = bowlPushed ? -bowlPushed : 28
           Sound.scrape()
           const body = $('bowl-body')
@@ -762,13 +778,14 @@ const Things = (() => {
       },
     },
     bird: {
-      at: () => PERCHES[perch].x - 70,
+      at: () => Bird.perch.x - 70,
       face: 1,
       async run() {
-        if (flying) return
+        if (Bird.flying) return
+        if (Bird.friend) return Bird.visit()
         await Reksio.nod(-22, 300)
         await Reksio.bark()
-        await flyAway()
+        await Bird.flyAway()
       },
     },
     dig: {
@@ -858,12 +875,11 @@ const Things = (() => {
   /** Can it be used now? The trap only once the mouse is out, the tree once
    * someone hungry is under it, the bird only while it sits somewhere. */
   const ready = (name) =>
-    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !flying : name === 'tree' ? Tree.ready : true
+    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !Bird.flying : name === 'tree' ? Tree.ready : true
 
   function init({ ended }) {
     isEnded = ended
-    birdAt(PERCHES[0])
-    Clock.after(3000, birdIdle)
+    Bird.init({ ended })
     startMouse()
     makeBerries()
     Tree.init({ ended, effects: { burst, twinkle } })
@@ -871,9 +887,7 @@ const Things = (() => {
   }
 
   return {
-    THINGS, DOOR, PERCHES, burst, twinkle, flyAway, birdHunt, ready, init, napInDoor,
-    get perch() { return PERCHES[perch] },
-    get flying() { return flying },
+    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap,
     get stamped() { return stamped },
     get mouse() { return mouse },
   }

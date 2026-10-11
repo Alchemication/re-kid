@@ -34,13 +34,13 @@ principles:
   origin: invented
 - text: It is always clear what can be tapped. Every usable thing has an action spot — a wide, faint oval on the ground — that glows when Reksio stands in it; tapping the spot works like tapping the thing, and it is a big, low target for small fingers (the bird's spot is on the ground under its perch). Every spot looks the same, done or not; nothing floats over the things themselves or sits in a corner, to keep the picture clean.
   origin: invented
-- text: Not everything at once. Each play has the doghouse, the house, the tap, the bird and the gate, puts out three of six props (the bowl, mound, film strip, mouse trap, tree and bramble), brings two of the creatures, and only sometimes the flowers. That is eight or nine things, more than one day takes, so the child never runs out. The sun stands somewhere new each play. The doghouse stays by the house and the gate at the far end, so the child always knows where home and the way out are; everything between comes in a new order each play, with wide, uneven gaps and nothing overlapping, so each play is a small new walk to explore. Puddles and the bird's perches fall in the open stretches. The last play is remembered so the next one prefers what wasn't seen.
+- text: Not everything at once. Each play has the doghouse, the house, the tap, the bird and the gate, puts out three of six props (the bowl, mound, film strip, mouse trap, tree and bramble), always with someone he can help (the trap or tree) and a chance for someone to help him (the bowl, for now), brings two of the creatures, and only sometimes the flowers. That is eight or nine things, more than one day takes, so the child never runs out. The sun stands somewhere new each play. The doghouse stays by the house and the gate at the far end, so the child always knows where home and the way out are; everything between comes in a new order each play, with wide, uneven gaps and nothing overlapping, so each play is a small new walk to explore. Puddles and the bird's perches fall in the open stretches. The last play is remembered so the next one prefers what wasn't seen.
   origin: invented
 - text: The yard is quietly alive. Small creatures go about their own business and meet each other — a fly wanders, lands on the bowl and dodges Reksio's snaps; a bumblebee works the flowers and huffs off if he comes close; a spider builds a web in the corner by the house, dangles on its swinging thread, catches the fly and wraps it, and hides when Reksio barks. Cartoon physics (momentum, pendulums, startled darts), small and mostly quiet, never in the way.
   origin: invented
 - text: Most plays bring a shower, and each step of it is something a toddler can watch cause the next. Clouds roll in and the yard dims; rain falls, Reksio snaps at drops and shakes himself off, puddles form and ring where drops land, and he splashes through them. Then the clouds drift off, a rainbow shows for a while, the flowers grow a little taller, a snail comes out and leaves a shiny trail (and pulls into its shell if he sniffs it), worms come up by the puddles, and the bird may hop down and catch one. The puddles dry, and the music goes quieter while it rains.
   origin: invented
-- text: Doing a thing again does the same thing again — small children love exact repetition — and the second time, then about every other time after, something small is added on top. Asleep in the doghouse he dreams of a bone, paws twitching; the empty bowl gets licked clean and nosed along; the tap sprays sideways and soaks him; a second, bigger sneeze blows him back from the flowers; the mound needs digging twice before the bone turns up, and the bone gets buried after a sly look round; the film reel rolls off and he chases it back; the mouse brings him a crumb, or a baby mouse comes out too.
+- text: Doing a thing again does the same thing again — small children love exact repetition — and the second time, then about every other time after, something small is added on top. Asleep in the doghouse he dreams of a bone, paws twitching; the empty bowl gets licked clean and nosed along, or stuck on his head (below); the tap sprays sideways and soaks him; a second, bigger sneeze blows him back from the flowers; the mound needs digging twice before the bone turns up, and the bone gets buried after a sly look round; the film reel rolls off and he chases it back; the mouse brings him a crumb, or a baby mouse comes out too.
   origin: invented
 controls:
   text: 'Tap or click: on the ground, Reksio walks there; on a thing, he walks over and uses it, and if there is nothing to do there yet he sniffs round and looks about; on a puddle, he runs over and jumps in; on a creature, he goes to see it. Small creatures answer to a tap a finger''s width off; on Reksio himself, a quick tap barks and pressing and holding stretches him. Keyboard for the grown-up or an older child: arrows walk, space uses whatever is nearest, any other key barks (hold it to stretch).'
@@ -93,7 +93,7 @@ scenes:
   moment: bowl
   action: {text: Tap the bowl., origin: invented}
   result:
-    text: Reksio laps from his bowl like a real dog — quick little dips with his tongue, bits flying — then licks his lips.
+    text: Reksio laps from his bowl like a real dog — quick little dips with his tongue, bits flying — then licks his lips. The first time he licks it empty, he pushes his nose right in and the bowl sticks on his head, over his eyes. He freezes, shakes his head (the bowl clangs), takes a few blind steps the wrong way, and sits down glum, his frown showing under the rim. After a few seconds the bird comes by itself; a tap makes him bark inside the bowl, a muffled boom, and brings the bird at once. It lands on the bowl, pecks it, tugs twice and fails, and on the third tug the bowl pops off and spins back to its place while the bird tumbles backwards onto the ground. Reksio is delighted, play-bows to the bird, and gives the bowl a suspicious look. Every other empty bowl after that sticks again; the ones between are nosed along.
     origin: inspired
     refs: [intro:bowl]
   sound:
@@ -151,7 +151,7 @@ scenes:
 - id: bird
   action: {text: Tap the bird on the wall., origin: invented}
   result:
-    text: Reksio barks at the bird; it flutters up, circles, and lands somewhere else in the yard.
+    text: Reksio barks at the bird; it flutters up, circles, and lands somewhere else in the yard. Once it has pulled the bowl off his head they are friends, though he barked it away before. A tap brings it down beside him for a hop and a chirp, he play-bows, and it flies back up. No more chasing.
     origin: invented
   sound: {text: 'A bark, a chirp and a flutter.', origin: invented}
 - id: dig

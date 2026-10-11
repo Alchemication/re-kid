@@ -26,10 +26,22 @@ function fakeElement(tag = 'g') {
       return child
     },
     insertBefore(child, before) {
+      if (child.parent) child.remove() // moved, as on a page
       child.parent = node
       const i = node.children.indexOf(before)
       node.children.splice(i < 0 ? node.children.length : i, 0, child)
       return child
+    },
+    /** Its parent; an element made on its own gets one, as every element on a page has. */
+    get parentNode() {
+      if (!node.parent) fakeElement().appendChild(node)
+      return node.parent
+    },
+    get nextSibling() {
+      return node.parentNode.children[node.parent.children.indexOf(node) + 1] ?? null
+    },
+    before(other) {
+      node.parentNode.insertBefore(other, node)
     },
     replaceChildren(...kids) {
       node.children.length = 0

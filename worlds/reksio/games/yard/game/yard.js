@@ -10,7 +10,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Bird */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -48,7 +48,7 @@
     return Math.max(0, Math.min(Painting.WORLD_W - Painting.VIEW_W, v))
   }
 
-  const { THINGS, DOOR, PERCHES, burst, twinkle } = Things
+  const { THINGS, DOOR, burst, twinkle } = Things
 
   // ------------------------------------------------------------ doing things
 
@@ -266,6 +266,7 @@
    * once he's done with what he's busy with (a newer ask replaces an older). */
   function command(fn, what) {
     lastTap = Clock.now()
+    if (Things.stuckTap()) return Debug.trace('stuck tap', { what }) // the bowl on his head: every tap is a bark in it
     Debug.trace('ask', { what, busy, acting })
     if (acting && !busy) {
       Debug.trace('relax', { from: lastAct })
@@ -323,6 +324,10 @@
     Debug.check(`known intent: ${intent}`, false)
   }
 
+  /** The thing an element is part of: among the things, or the bird when it
+   * is drawn in front of him (bird.js); never an action spot. */
+  const thingAt = (el) => el?.closest('#things [data-thing], #bird')
+
   /** What is under the pointer (input.js decides what the tap means). */
   function hitAt(e) {
     const critter = e.target.closest('[data-critter]')
@@ -332,7 +337,7 @@
       critter: critter ? critter.dataset.critter : null,
       nearMiddle: !!critter && onCritter(critter, e),
       under: {
-        thing: below?.closest('#things [data-thing]')?.dataset.thing,
+        thing: thingAt(below)?.dataset.thing,
         reksio: !!below?.closest('#reksio'),
         spot: below?.closest('#spots [data-thing]')?.dataset.thing,
       },
@@ -366,7 +371,7 @@
     dig: () => ({ x: 2060 + X('dig'), r: 130 }),
     film: () => ({ x: 2430 + X('film'), r: 220 }),
     gate: () => ({ x: Reksio.MAX_X + 20, r: 90 }),
-    bird: () => ({ x: Things.perch.x - 30, r: 130 }), // on the ground, under the bird
+    bird: () => ({ x: Bird.perch.x - 30, r: 130 }), // on the ground, under the bird
     trap: () => ({ x: (Things.mouse === 'fed' ? 960 : 1000) + X('trap'), r: 110 }),
     tree: () => ({ x: 1600 + X('tree'), r: 120 }),
     berries: () => ({ x: 2330 + X('berries'), r: 110 }),
@@ -434,11 +439,11 @@
 
   // the mouse over a thing lights up its spot
   $('stage').addEventListener('pointerover', (e) => {
-    const thing = e.target.closest('#things [data-thing]')
+    const thing = thingAt(e.target)
     if (thing && spotEls[thing.dataset.thing]) spotEls[thing.dataset.thing].classList.add('hover')
   })
   $('stage').addEventListener('pointerout', (e) => {
-    const thing = e.target.closest('#things [data-thing]')
+    const thing = thingAt(e.target)
     if (thing && spotEls[thing.dataset.thing]) spotEls[thing.dataset.thing].classList.remove('hover')
   })
 
@@ -465,7 +470,7 @@
   let lastWishAt = -Infinity
 
   function thingCenter(name) {
-    if (name === 'bird') return { x: Things.perch.x, y: Things.perch.y - 80 }
+    if (name === 'bird') return { x: Bird.perch.x, y: Bird.perch.y - 80 }
     const el = document.querySelector(`#things [data-thing="${name}"]`)
     const box = el.querySelector('.hit').getBBox()
     return { x: box.x + box.width / 2 + X(name), y: Number(el.dataset.hintY) || box.y }
@@ -526,12 +531,12 @@
     return Idle.wish(WISHABLE.filter((n) => spotEls[n]), {
       wants: day.wants,
       ready: Things.ready,
-      distance: (n) => Math.abs((n === 'bird' ? Things.perch.x : THINGS[n].at()) - Reksio.x),
+      distance: (n) => Math.abs((n === 'bird' ? Bird.perch.x : THINGS[n].at()) - Reksio.x),
     })
   }
 
   function birdOnScreen() {
-    const x = Things.perch.x
+    const x = Bird.perch.x
     return x > camX && x < camX + Painting.VIEW_W
   }
 
@@ -552,7 +557,7 @@
     lookUp: {
       weight: 2,
       async run() {
-        if (birdOnScreen()) Reksio.face(Things.perch.x > Reksio.x ? 1 : -1)
+        if (birdOnScreen()) Reksio.face(Bird.perch.x > Reksio.x ? 1 : -1)
         await Reksio.lookUp()
       },
     },
@@ -702,7 +707,7 @@
   /** The bird may go after a worm; a thought bubble follows him, and goes when it's done its job. */
   function birdAndWish(now) {
     const worm = Creatures.worm
-    if (worm && !Things.flying && !day.ended && !Debug.still && huntRandom() < 0.02) Things.birdHunt(worm)
+    if (worm && !Bird.flying && !day.ended && !Debug.still && huntRandom() < 0.02) Bird.hunt(worm)
     if (!wishing) return
     placeWish()
     if (busy || day.ended || !day.wants(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
@@ -738,6 +743,8 @@
     Debug.check('walks only standing up', !Reksio.walking || (Reksio.pose === 'stand' && !Reksio.sliding), { pose: Reksio.pose, sliding: Reksio.sliding })
     Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
     Debug.check('a waiting ask runs once he is free', !pending || busy || day.ended)
+    Debug.check('no bowl on his head once the gag is over', !Reksio.wearingBowl || busy)
+    Debug.check('the bird is in front of him only while it is busy', !Bird.front || Bird.flying)
   }
 
   /** The game's state, for tests and the ?debug overlay. */
@@ -783,7 +790,7 @@
     }
     if (spotEls.bird) {
       spotEls.bird.setAttribute('cx', SPOTS.bird().x)
-      spotEls.bird.style.opacity = Things.flying ? '0' : ''
+      spotEls.bird.style.opacity = Bird.flying ? '0' : ''
     }
     if (spotEls.trap) spotEls.trap.setAttribute('cx', SPOTS.trap().x)
     for (const n of ['trap', 'tree']) if (spotEls[n]) spotEls[n].style.opacity = Things.ready(n) ? '' : '0'

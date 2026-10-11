@@ -1,5 +1,5 @@
 // Unit tests for things.js: the rules of the things in the yard (the mouse
-// and her trap, the bird, the film), run on a pretend page and clock with a
+// and her trap, the bird (bird.js), the bowl, the film), run on a pretend page and clock with a
 // stand-in Reksio whose gestures end at once. Seeded, so every run is the same.
 
 const { describe, it } = require('node:test')
@@ -24,7 +24,7 @@ function yard(query = '') {
   const reksio = fakeReksio()
   const { Sound, Music, played } = fakeSound()
   let ended = false
-  const page = load(['debug.js', 'layout.js', 'things.js'], {
+  const page = load(['debug.js', 'layout.js', 'bird.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
     globals: { Reksio: reksio, Sound, Music, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
@@ -33,6 +33,8 @@ function yard(query = '') {
   Things.init({ ended: () => ended })
   return {
     Things,
+    Bird: page.get('Bird'),
+    Clock: page.get('Clock'),
     reksio,
     played,
     advance: page.advance,
@@ -112,13 +114,13 @@ describe('the bird', () => {
   it('cannot be chased while it flies, and settles on a perch after', async () => {
     const y = yard()
     assert.equal(y.Things.ready('bird'), true)
-    const flight = y.Things.flyAway()
+    const flight = y.Bird.flyAway()
     assert.equal(y.Things.ready('bird'), false)
-    assert.equal(y.Things.flying, true)
+    assert.equal(y.Bird.flying, true)
     await y.advance(5000)
     await flight
-    assert.equal(y.Things.flying, false)
-    assert.ok(y.Things.PERCHES.includes(y.Things.perch))
+    assert.equal(y.Bird.flying, false)
+    assert.ok(y.Bird.PERCHES.includes(y.Bird.perch))
   })
 
   it('flies off to one of the two perches furthest from Reksio, never the same one', async () => {
@@ -126,15 +128,15 @@ describe('the bird', () => {
       const y = yard()
       y.reksio.x = rx
       for (let i = 0; i < 6; i++) {
-        const from = y.Things.perch
-        const far = y.Things.PERCHES.filter((p) => p !== from)
+        const from = y.Bird.perch
+        const far = y.Bird.PERCHES.filter((p) => p !== from)
           .sort((a, b) => Math.abs(b.x - rx) - Math.abs(a.x - rx))
           .slice(0, 2)
-        const done = y.Things.flyAway()
+        const done = y.Bird.flyAway()
         await y.advance(5000)
         await done
-        assert.notEqual(y.Things.perch, from)
-        assert.ok(far.includes(y.Things.perch), `Reksio at ${rx}: went to ${y.Things.perch.x}`)
+        assert.notEqual(y.Bird.perch, from)
+        assert.ok(far.includes(y.Bird.perch), `Reksio at ${rx}: went to ${y.Bird.perch.x}`)
       }
     }
   })
@@ -142,18 +144,18 @@ describe('the bird', () => {
   it('takes a worm, and is back on a perch after', async () => {
     const y = yard()
     let eaten = false
-    const hunt = y.Things.birdHunt({ x: 1800, y: 820, eat: () => (eaten = true) })
+    const hunt = y.Bird.hunt({ x: 1800, y: 820, eat: () => (eaten = true) })
     await y.advance(10000)
     await hunt
     assert.equal(eaten, true)
-    assert.equal(y.Things.flying, false)
+    assert.equal(y.Bird.flying, false)
   })
 
   it('leaves a worm be while it is flying already', async () => {
     const y = yard()
-    const flight = y.Things.flyAway()
+    const flight = y.Bird.flyAway()
     let eaten = false
-    await y.Things.birdHunt({ x: 1800, y: 820, eat: () => (eaten = true) })
+    await y.Bird.hunt({ x: 1800, y: 820, eat: () => (eaten = true) })
     await y.advance(5000)
     await flight
     assert.equal(eaten, false)
@@ -197,5 +199,98 @@ describe('the film', () => {
     await y.use('film', true)
     assert.equal(y.reksio.calls.filter((c) => c === 'stamp').length, 5)
     assert.ok(y.reksio.calls.includes('pounce'), 'chased the rolling reel')
+  })
+})
+
+describe('the bowl on his head', () => {
+  /** Empty the bowl, then start the stuck gag without waiting for it. */
+  async function stuck(y) {
+    await y.use('bowl') // he eats it all
+    const run = y.Things.THINGS.bowl.run({ extra: true }) // licking the empty bowl: it sticks
+    let over = false
+    run.then(
+      () => (over = true),
+      () => (over = true),
+    )
+    return { isOver: () => over }
+  }
+
+  const sitsDown = async (y) => {
+    for (let i = 0; i < 100 && !y.reksio.calls.includes('slump'); i++) await y.advance(50)
+    assert.ok(y.reksio.calls.includes('slump'), 'he never sat down stuck')
+  }
+
+  const until = async (y, ok, ms) => {
+    for (let t = 0; t < ms && !ok(); t += 50) await y.advance(50)
+  }
+
+  it('sticks the first time he licks it empty, and the bird pulls it off', async () => {
+    const y = yard('props=bowl')
+    await y.use('bowl')
+    await y.use('bowl', true)
+    const c = y.reksio.calls
+    assert.ok(c.indexOf('bowl on') < c.indexOf('tugged') && c.indexOf('tugged') < c.indexOf('bowl off'), c.join(' '))
+    assert.equal(y.reksio.wearingBowl, false)
+    assert.equal(y.Bird.flying, false, 'the bird is back on a perch')
+    assert.equal(y.Bird.friend, true)
+    assert.equal(y.Things.stuckTap(), false, 'taps are ordinary again')
+  })
+
+  it('the next empty bowl is nosed along, not stuck', async () => {
+    const y = yard('props=bowl')
+    for (const extra of [false, true, false]) await y.use('bowl', extra)
+    const before = y.reksio.calls.length
+    await y.use('bowl', true)
+    assert.ok(!y.reksio.calls.slice(before).includes('bowl on'))
+  })
+
+  it('left alone, the bird comes 5 to 7 s after he sits down', async () => {
+    const y = yard('props=bowl')
+    await stuck(y)
+    await sitsDown(y)
+    const sat = y.Clock.now()
+    await until(y, () => y.Bird.flying, 9000)
+    const after = y.Clock.now() - sat
+    assert.ok(after >= 5000 && after <= 7100, `came after ${after} ms`)
+  })
+
+  it('a tap while he is stuck is a bark in the bowl, and brings the bird at once', async () => {
+    const y = yard('props=bowl')
+    const gag = await stuck(y)
+    await until(y, () => y.reksio.calls.includes('bowl on'), 3000)
+    assert.equal(y.Things.stuckTap(), true)
+    for (let i = 0; i < 5; i++) y.Things.stuckTap() // a burst of taps
+    assert.equal(y.reksio.calls.filter((n) => n === 'bowlBark').length, 1, 'one bark for a burst, not a din')
+    await sitsDown(y)
+    await until(y, () => y.Bird.flying, 500)
+    assert.equal(y.Bird.flying, true, 'the bird should come as soon as he sits')
+    await until(y, gag.isOver, 30000)
+    assert.ok(gag.isOver())
+  })
+
+  it('cut short, the bowl is back in its place and the bird on its perch', async () => {
+    const y = yard('props=bowl')
+    y.reksio.tugged = async () => {
+      throw Object.assign(new Error('cut short'), { name: 'AbortError' })
+    }
+    const gag = await stuck(y)
+    await until(y, gag.isOver, 30000)
+    assert.ok(gag.isOver())
+    assert.equal(y.reksio.wearingBowl, false)
+    assert.equal(y.Bird.flying, false)
+    assert.equal(y.Things.stuckTap(), false)
+  })
+
+  it('once friends, a tap on the bird brings it down to him: no bark, no chase', async () => {
+    const y = yard('props=bowl')
+    await y.use('bowl')
+    await y.use('bowl', true)
+    const perch = y.Bird.perch
+    const before = y.reksio.calls.length
+    await y.use('bird')
+    const c = y.reksio.calls.slice(before)
+    assert.ok(c.includes('playBow') && !c.includes('bark'), c.join(' '))
+    assert.equal(y.Bird.perch, perch, 'it stays on its perch')
+    assert.equal(y.Bird.flying, false)
   })
 })
