@@ -96,7 +96,9 @@ class TestWorldDossier:
 
     def test_move_claim_provenance_enforced(self) -> None:
         data = self._with_moves("grin")
-        data["characters"][0]["moves"][0]["claim"] = claim(status="observed", observed_by=None)
+        data["characters"][0]["moves"][0]["claim"] = claim(
+            status="observed", observed_by=None
+        )
         with pytest.raises(ValidationError, match="observed_by"):
             WorldDossier.model_validate(data)
 

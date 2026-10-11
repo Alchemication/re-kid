@@ -376,12 +376,17 @@ const Figure = (() => {
     return {
       d: `M${pt(left)} Q${pt(top)} ${pt(right)} Q${pt([(left[0] + right[0]) / 2, lower])} ${pt(left)} Z`,
       tongue: { c: [mx + 2, lerp(mid, lower, 0.62)], rx: w * 0.45, ry: 8 * f.open },
-      teeth: { ...teeth(left, top, right, 6 + 3 * f.open), show: f.teeth },
+      teeth: { ...teeth(left, top, right, 6 + 3 * f.open), show: Math.max(f.teeth, smiling(f)) },
       // hanging out over his chin: lapping, catching drops, panting
       tongueOut: tongueFrom([mx + w * 0.25, (corner + lower) / 2 - 3], f.tongue),
       bone: { at: [mx + w * 0.2, mid + 1], show: f.bone },
     }
   }
+
+  /** How much a smiling open mouth shows his top teeth, as the cartoon's
+   * nearly always does (Sportowiec 318 s, Aktor 166 s): not a yawn, a shout
+   * or a cross face, which smile little or not at all. */
+  const smiling = (f) => clamp01((f.open - 0.25) / 0.2) * clamp01((f.smile - 0.45) / 0.3) * (1 - f.o)
 
   /** A tongue hanging from under his lower lip at `from` (its root), as far
    * out as `out` (0 to 1): a rounded tip, a crease down the middle. */
