@@ -134,7 +134,9 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     builds a pose (plain numbers, figure.js) from his layers (rest pose,
     stance, a gesture's pose and face, small additions), what life.js adds
     (how he stands and looks about when free; blinks, ears and tail always)
-    and walking's stride (gait.js), and figure.js draws it. Gestures move those numbers only with
+    and walking's stride (gait.js), then what a gag has put on him
+    (`Reksio.wear`: the bowl, his caught tail), and figure.js draws it.
+    Gestures (gestures.js, antics.js, made from `Reksio.kit`) move those numbers only with
     `blend()` on the Clock; `relax()` cuts every blend short. Nothing in the
     game is frozen with `fill: 'forwards'`: a frozen animation is a second
     source of truth that a cut-short gag leaves behind. Set the end on the
@@ -201,11 +203,11 @@ before a commit.
 
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
-| a thing in `things.js` / `tree.js` / `bramble.js` / `bird.js` | `"TestThings and <name>"`, the bowl `"TestBowl"`, the bramble `"TestBramble"` (and its rules in `things.test.js` / `tree.test.js`) |
-| a gesture or pose in `reksio.js`, `antics.js`, `figure.js`, `life.js` or `gait.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
+| a thing in `things.js` / `bowl.js` / `tree.js` / `bramble.js` / `bird.js` | `"TestThings and <name>"`, the bowl `"TestBowl"`, the bramble `"TestBramble"` (and its rules in `things.test.js` / `tree.test.js`) |
+| a gesture or pose in `reksio.js`, `gestures.js`, `antics.js`, `figure.js`, `life.js` or `gait.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |
-| `weather.js` / `shower.js` | `"drops or shakeOff or puddle or snail"` |
+| `weather.js` / `shower.js` / `wet.js` | `"drops or shakeOff or puddle or snail"` |
 | `day.js` / `sky.js` / the end | `"TestWholePlay"` |
 | `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay"` |
 | `input.js`, taps and keys | `"TestRealInput"` |
@@ -218,12 +220,15 @@ before a commit.
 and interleavings (what if a tap lands mid-gag, it rains, the evening comes)
 and `/simplify` for needless complexity. No tool checks judgement; these
 reviews are the step for it. A gag's own moves for Reksio go in `antics.js`
-(made from `Reksio.kit`, added with `Reksio.add`), not in `reksio.js`; a
-creature with a part to play gets its own file, as `bird.js`. A gag that
-holds him while the child keeps tapping (the bowl on his head, his tail
-caught in the bramble) answers each tap itself (`Things.stuckTap`; a gag
-outside things.js sets its answer with the `hold` it is handed) rather than
-queueing it for after.
+(made from `Reksio.kit`, added with `Reksio.addGestures`), not in `reksio.js`
+(the engine) or `gestures.js` (his everyday ones); what it puts on him goes
+on with `Reksio.wear`. A creature with a part to play gets its own file, as
+`bird.js`. A gag that holds him while the child keeps tapping (the bowl on
+his head, his tail caught in the bramble) answers each tap itself
+(`Things.stuckTap`; a gag outside things.js sets its answer with the `hold`
+it is handed) rather than queueing it for after. A fix someone helps him
+out of declares `helped` on its thing (`bowl.js`, `bramble.js`); yard.js
+makes its once-a-play left-alone move from that.
 
 **Bugs Adam reports:** he saves a report in the game (Ctrl+Shift+B, with a
 description). `main.py replay` replays it and photographs the run-up; read the

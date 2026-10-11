@@ -14,18 +14,17 @@ function fakeReksio(x = 1500) {
     MIN_X: 380,
     MAX_X: 3650,
     holdingBone: false,
-    wearingBowl: false,
     pose: 'stand',
-    wearBowl(on) {
-      calls.push(on ? 'bowl on' : 'bowl off')
-      r.wearingBowl = on
+    worn: [],
+    /** What a gag puts on him: noted as '<name> on' and '<name> off'. */
+    wear(name, change) {
+      if (!!change === r.wearing(name)) return
+      calls.push(`${name} ${change ? 'on' : 'off'}`)
+      r.worn = change ? [...r.worn, name] : r.worn.filter((n) => n !== name)
     },
-    bowlTop: () => ({ x: r.x + 10 * r.facing, y: 600 }),
-    tailPinned: false,
-    pinTail(at) {
-      if (!!at !== r.tailPinned) calls.push(at ? 'tail caught' : 'tail free')
-      r.tailPinned = !!at
-    },
+    wearing: (name) => r.worn.includes(name),
+    /** Any point of his (the bowl's top, where the bird lands): above his head. */
+    pointAt: () => ({ x: r.x + 10 * r.facing, y: 600 }),
     async walkTo(to) {
       calls.push('walkTo')
       if (r.cut) return false

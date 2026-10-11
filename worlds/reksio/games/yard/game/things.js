@@ -1,6 +1,7 @@
 // What Reksio does with each thing in the yard, the bird he chases, the mouse
 // he helps, and the small effects they share (flung crumbs, twinkles, hearts).
-// The tree and the bramble have files of their own (tree.js, bramble.js).
+// The bowl, the tree and the bramble have files of their own (bowl.js,
+// tree.js, bramble.js).
 //
 // Each thing's run({ extra }) plays its action; `extra` asks for its
 // variation. A toddler loves exact repetition, so a repeat keeps the same core
@@ -11,15 +12,8 @@
 // can't get it past the trap. Reksio stamps beside the trap: it snaps shut on
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
-//
-// The bowl on his head: licking an empty bowl clean, he pushes his nose right
-// in and it sticks. He shakes, stumbles about blind, and sits down glum until
-// the bird (bird.js) comes and pulls it off, sooner if the child taps: he
-// barks inside the bowl and the bird hears. It comes on the second use (the
-// bowl's variation), or he goes back for the last bits on his own, once a
-// play, when left alone (yard.js ACTS, lickBowlClean).
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Tree, Bramble, Figure, Bird */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Figure, Bird */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -36,9 +30,6 @@ const Things = (() => {
   const CHEESE = { x: 1100, y: 798 } // cheese on the trap's trigger
   const CHEESE_LANDS = 1175 // where the snap flings it, by the mouse
   const MOUSE_WAITS = 1195 // where she sits looking at the cheese she can't have
-  const BOWL_MIDDLE = { x: 880, y: 784 } // the bowl as drawn, before its per-play offset: it turns about here
-  const BIRD_COMES_MS = [5000, 7000] // left alone, the bird comes this long after he sits down stuck: long enough to see him glum, short enough not to worry
-  const BOWL_BARK_GAP_MS = 350 // taps faster than this while he's stuck don't each bark: a din, not a joke
   const GROUND = 812
 
   const $ = (id) => document.getElementById(id)
@@ -367,112 +358,8 @@ const Things = (() => {
 
   // ------------------------------------------------------------ things
 
-  const food = $('food')
-  let foodLeft = 1
-  let bowlPushed = 0 // how far his nose has pushed the bowl
-  let emptyLicks = 0 // empty bowls licked: the first gets stuck on his head, then every other one
-  let stuckTimes = 0 // how often the bowl has stuck on his head this play
   let held = null // while a gag holds him (the bowl on his head, his tail caught): a tap's answer (yard.js stuckTap)
-  let lastBowlBark = -Infinity
   let stamped = 0 // film frames stamped so far
-
-  /** The bowl, off his head, spins through the air and lands back in its place. */
-  async function bowlHome(body, from) {
-    const x0 = from.x - (BOWL_MIDDLE.x + X('bowl'))
-    const y0 = from.y + 30 - BOWL_MIDDLE.y // its middle, under the top
-    body.style.transformOrigin = `${BOWL_MIDDLE.x}px ${BOWL_MIDDLE.y}px`
-    body.style.visibility = ''
-    await Motion.endAt(body, [
-      { transform: `translate(${x0}px, ${y0}px) rotate(180deg)` },
-      { transform: `translate(${(x0 + bowlPushed) / 2}px, ${y0 - 160}px) rotate(270deg)`, offset: 0.45 },
-      { transform: `translate(${bowlPushed}px, 0px) rotate(360deg)` },
-    ], { duration: 750, easing: 'ease-in-out' })
-    Sound.clang(0, 0.7)
-  }
-
-  /** Licking the empty bowl, he pushes his nose right in, and it sticks on
-   * his head. He shakes, takes a few blind steps, and sits down glum until
-   * the bird pulls it off (sooner if he barks for it, at a tap); then he is
-   * delighted, thanks the bird, and eyes the bowl with suspicion. */
-  async function stuckInBowl() {
-    const body = $('bowl-body')
-    let call
-    const called = new Promise((resolve) => (call = resolve))
-    let up
-    const freed = new Promise((resolve) => (up = resolve))
-    let birdCame = false
-    try {
-      await Reksio.nod(26, 450) // right in, to lick the bottom
-      Sound.clang()
-      body.style.visibility = 'hidden'
-      Reksio.wearBowl(true)
-      stuckTimes += 1
-      Debug.trace('bowl stuck')
-      held = () => {
-        call()
-        if (Clock.now() - lastBowlBark < BOWL_BARK_GAP_MS) return
-        lastBowlBark = Clock.now()
-        Debug.ignoreCut(Reksio.bowlBark(), 'bark in the bowl')
-      }
-      await Reksio.bowlShake()
-      await Reksio.walkTo(Reksio.x - rnd(70, 110)) // blind steps, the wrong way
-      await Reksio.lookAround(rnd(500, 800))
-      await Reksio.walkTo(Reksio.x + rnd(30, 60))
-      await Reksio.slump()
-      const moping = Reksio.mope(freed)
-      await Promise.race([wait(rnd(...BIRD_COMES_MS)), called])
-      birdCame = true
-      const land = await Bird.rescue((top) => {
-        Reksio.wearBowl(false)
-        held = null // off: taps wait for him again
-        Sound.pop()
-        Sound.clang()
-        return bowlHome(body, top)
-      })
-      up()
-      await moping
-      await Reksio.freed()
-      Reksio.face(land.x > Reksio.x ? 1 : -1)
-      Sound.chirp()
-      await Reksio.playBow()
-      Reksio.face(-Reksio.facing) // the bowl: and you stay there
-      await Reksio.squint()
-      await Bird.flyAway(land)
-      birdCame = false
-    } finally {
-      // however it ends, the bowl is back in its place and the bird free
-      held = null
-      up()
-      if (Reksio.wearingBowl) Reksio.wearBowl(false)
-      if (birdCame) Bird.home() // cut short on its way: back on its perch
-      body.style.visibility = ''
-      foodLeft = 1
-      food.style.transform = 'scaleY(1)'
-    }
-  }
-
-  /** Lap the bowl empty, bits flying. */
-  async function eat() {
-    const lapping = Reksio.lap(10)
-    for (let i = 0; i < 5; i++) {
-      await wait(380)
-      burst(880 + X('bowl') + bowlPushed, 760, 3, 'crumb', { height: 34, reach: 36, size: 3 })
-      foodLeft -= 0.16
-      food.style.transform = `scaleY(${Math.max(foodLeft, 0.15)})`
-    }
-    await lapping
-    Sound.slurp()
-  }
-
-  /** Left alone by his bowl (yard.js walks him there): he eats what is
-   * left, licks the bottom, and gets stuck. A tap before it sticks cuts it
-   * short, as any left-alone move; once it's on, a tap is a bark in it. */
-  async function lickBowlClean() {
-    if (foodLeft > 0.2) await eat()
-    await Reksio.lap(4)
-    emptyLicks += 1 // this empty bowl stuck: the next one is nosed along
-    return stuckInBowl()
-  }
 
   /** A tap while a gag holds him answers inside it (the bowl on his head: a
    * bark in it, the bird hears; his tail caught: another try). False if
@@ -527,36 +414,7 @@ const Things = (() => {
         await Reksio.wakeUp() // out of the doghouse, a big yawn, as in the cartoon
       },
     },
-    bowl: {
-      at: () => 764 + X('bowl') + bowlPushed,
-      face: 1,
-      async run({ extra }) {
-        if (foodLeft <= 0.2 && !extra) {
-          foodLeft = 1
-          food.style.transform = 'scaleY(1)'
-          await wait(200)
-        }
-        if (foodLeft <= 0.2) {
-          // the extra: an empty bowl — he licks it clean and noses it along,
-          // or pushes his nose right in, and it sticks
-          await Reksio.lap(4)
-          if (emptyLicks++ % 2 === 0) return stuckInBowl()
-          const push = bowlPushed ? -bowlPushed : 28
-          Sound.scrape()
-          const body = $('bowl-body')
-          Reksio.nod(14, 500)
-          const from = bowlPushed
-          bowlPushed += push // the state first: the animation only covers the move
-          await Motion.endAt(body, [{ transform: `translateX(${from}px)` }, { transform: `translateX(${bowlPushed}px)` }], { duration: 500, easing: 'ease-out' })
-          await Reksio.lick()
-          foodLeft = 1
-          food.style.transform = 'scaleY(1)'
-          return
-        }
-        await eat()
-        await Reksio.lick()
-      },
-    },
+    bowl: Bowl.thing,
     tap: {
       at: () => 1201 + X('tap'),
       face: 1,
@@ -813,15 +671,15 @@ const Things = (() => {
     isEnded = ended
     Bird.init({ ended })
     startMouse()
-    Bramble.init({ effects: { burst }, hold: (answer) => (held = answer) })
+    const hold = (answer) => (held = answer)
+    Bowl.init({ effects: { burst }, hold })
+    Bramble.init({ effects: { burst }, hold })
     Tree.init({ ended, effects: { burst, twinkle } })
     document.querySelectorAll('.icon-fruit').forEach((u) => u.setAttribute('href', `#fruit-${Layout.fruit}`))
   }
 
   return {
-    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap, lickBowlClean,
-    /** How often the bowl has stuck on his head this play. */
-    get stuckTimes() { return stuckTimes },
+    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap,
     /** A gag holds him (the bowl on his head, his tail caught): it answers every tap. */
     get holding() { return !!held },
     get stamped() { return stamped },

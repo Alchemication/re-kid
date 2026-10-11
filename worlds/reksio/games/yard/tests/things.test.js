@@ -1,5 +1,5 @@
 // Unit tests for things.js: the rules of the things in the yard (the mouse
-// and her trap, the bird (bird.js), the bowl, the film, the bramble
+// and her trap, the bird (bird.js), the bowl (bowl.js), the film, the bramble
 // (bramble.js)), run on a pretend page and clock with a
 // stand-in Reksio whose gestures end at once. Seeded, so every run is the same.
 
@@ -36,10 +36,10 @@ function yard(query = '') {
   const bee = [] // where the bee was sent, and 'free' when let go
   const Creatures = { async beeTo(x, y) { bee.push({ x, y }) }, beeFree() { bee.push('free') } }
   const Weather = { raining: false }
-  const page = load(['debug.js', 'layout.js', 'bird.js', 'bramble.js', 'things.js'], {
+  const page = load(['debug.js', 'layout.js', 'bird.js', 'bramble.js', 'bowl.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
-    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
+    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {} }, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
   })
   const Things = page.get('Things')
   Things.init({ ended: () => ended })
@@ -47,6 +47,7 @@ function yard(query = '') {
     Things,
     Bird: page.get('Bird'),
     Bramble: page.get('Bramble'),
+    Bowl: page.get('Bowl'),
     bee,
     Weather,
     Clock: page.get('Clock'),
@@ -241,7 +242,7 @@ describe('the bowl on his head', () => {
     await y.use('bowl', true)
     const c = y.reksio.calls
     assert.ok(c.indexOf('bowl on') < c.indexOf('tugged') && c.indexOf('tugged') < c.indexOf('bowl off'), c.join(' '))
-    assert.equal(y.reksio.wearingBowl, false)
+    assert.equal(y.reksio.wearing('bowl'), false)
     assert.equal(y.Bird.flying, false, 'the bird is back on a perch')
     assert.equal(y.Bird.friend, true)
     assert.equal(y.Things.stuckTap(), false, 'taps are ordinary again')
@@ -287,7 +288,7 @@ describe('the bowl on his head', () => {
     const gag = await stuck(y)
     await until(y, gag.isOver, 30000)
     assert.ok(gag.isOver())
-    assert.equal(y.reksio.wearingBowl, false)
+    assert.equal(y.reksio.wearing('bowl'), false)
     assert.equal(y.Bird.flying, false)
     assert.equal(y.Things.stuckTap(), false)
   })
@@ -309,16 +310,16 @@ describe('the bowl on his head', () => {
 describe('back to the bowl, left alone', () => {
   it('eats what is left, gets stuck, and the bird pulls it off; the next empty bowl is nosed along', async () => {
     const y = yard('props=bowl')
-    const run = y.Things.lickBowlClean()
+    const run = y.Bowl.thing.helped.alone()
     let over = false
     run.then(() => (over = true), () => (over = true))
     for (let i = 0; i < 600 && !over; i++) await y.advance(100)
     assert.ok(over)
     const c = y.reksio.calls
     assert.ok(c.indexOf('lap') < c.indexOf('bowl on') && c.indexOf('bowl on') < c.indexOf('bowl off'), c.join(' '))
-    assert.equal(y.Things.stuckTimes, 1)
+    assert.equal(y.Bowl.stuckTimes, 1)
     for (const extra of [false, true]) await y.use('bowl', extra)
-    assert.equal(y.Things.stuckTimes, 1, 'the next empty bowl is nosed along')
+    assert.equal(y.Bowl.stuckTimes, 1, 'the next empty bowl is nosed along')
   })
 })
 
@@ -338,10 +339,10 @@ describe('his tail caught in the bramble', () => {
     const y = yard('props=berries')
     await y.use('berries', true)
     const c = y.reksio.calls
-    const order = ['swish', 'tail caught', 'yanked', 'strain', 'sulk', 'hearsBee', 'tail free', 'leapFright', 'freed', 'chaseTail']
+    const order = ['swish', 'tail on', 'yanked', 'strain', 'sulk', 'hearsBee', 'tail off', 'leapFright', 'freed', 'chaseTail']
     const at = order.map((n) => c.indexOf(n))
     assert.ok(at.every((i, k) => i >= 0 && (k === 0 || i > at[k - 1])), `${order} in ${c.join(' ')}`)
-    assert.equal(y.reksio.tailPinned, false)
+    assert.equal(y.reksio.wearing('tail'), false)
     assert.equal(y.Bramble.caughtTimes, 1)
     assert.equal(y.bee.length, 4, 'to the flower, to his bottom, back to the flower, let go')
     assert.equal(y.bee.at(-1), 'free')
@@ -386,13 +387,13 @@ describe('his tail caught in the bramble', () => {
     assert.equal(count(y, 'strain') - before, 1)
     await until(y, gag.isOver, 30000)
     assert.ok(gag.isOver())
-    assert.equal(y.reksio.tailPinned, false)
+    assert.equal(y.reksio.wearing('tail'), false)
   })
 
   it('a tap during his own tries is answered with one more try after them', async () => {
     const y = yard('props=berries')
     const gag = caught(y)
-    await until(y, () => y.reksio.tailPinned, 20000)
+    await until(y, () => y.reksio.wearing('tail'), 20000)
     y.Things.stuckTap()
     await until(y, gag.isOver, 30000)
     assert.equal(count(y, 'strain'), 2, 'his own try, and the asked-for one')
@@ -416,7 +417,7 @@ describe('his tail caught in the bramble', () => {
     const gag = caught(y)
     await until(y, gag.isOver, 30000)
     assert.ok(gag.isOver())
-    assert.equal(y.reksio.tailPinned, false)
+    assert.equal(y.reksio.wearing('tail'), false)
     assert.equal(y.Things.stuckTap(), false)
     assert.equal(y.bee.at(-1), 'free')
   })
@@ -424,11 +425,11 @@ describe('his tail caught in the bramble', () => {
   it('left alone, he sniffs round the bush and gets caught, with no berry tossed (a toss runs on Clock time a tap could not cut)', async () => {
     const y = yard('props=berries')
     let over = false
-    y.Bramble.sniffAndCatch().then(() => (over = true))
+    y.Bramble.thing.helped.alone().then(() => (over = true))
     for (let i = 0; i < 600 && !over; i++) await y.advance(100)
     const c = y.reksio.calls
-    assert.ok(c.indexOf('sniff') < c.indexOf('tail caught'), c.join(' '))
-    assert.ok(!c.slice(0, c.indexOf('tail caught')).includes('hop'), c.join(' '))
+    assert.ok(c.indexOf('sniff') < c.indexOf('tail on'), c.join(' '))
+    assert.ok(!c.slice(0, c.indexOf('tail on')).includes('hop'), c.join(' '))
     assert.ok(!y.played.includes('toss'), 'a berry was tossed')
   })
 

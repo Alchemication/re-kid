@@ -10,11 +10,11 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Bramble, Bird */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
-  const HELPED_AFTER_S = 8 // left alone this long, he gets into a fix someone helps him out of (the bowl, the bramble): long enough that the child is watching him, not busy tapping
+  const HELPED_AFTER_S = 8 // left alone this long, he gets into a fix someone helps him out of (a thing's `helped`): long enough that the child is watching him, not busy tapping
   const HELPED_FROM_S = 25 // …but not before this far into the play: the morning and a first look round come first
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
@@ -576,8 +576,8 @@
       async run() {
         const p = Weather.puddles.reduce((a, b) => (Math.abs(a.x - Reksio.x) < Math.abs(b.x - Reksio.x) ? a : b))
         if (await Reksio.walkTo(p.x - Math.sign(p.x - Reksio.x || 1) * 90)) {
-          await splashIn(p)
-          await stepOut(p)
+          await Wet.splashIn(p)
+          await Wet.stepOut(p)
         }
       },
     },
@@ -603,43 +603,36 @@
       },
     },
     yawn: { get weight() { return day.dusk ? 6 : 1 }, ok: () => day.count >= 2, run: () => Reksio.yawn() }, // sleepy at dusk
-    bowl: {
-      // back to his bowl for the last bits, and it sticks on his head: once a
-      // play, the first time he's left alone a while, if no tap has got it
-      // stuck yet, so a child who never taps the bowl twice still sees the
-      // bird help him (things.js)
-      weight: 0,
-      due: true,
-      ok: () => helpedDue('bowl'),
-      async run() {
-        if (!(await Reksio.walkTo(THINGS.bowl.at()))) return
-        Reksio.face(THINGS.bowl.face)
-        await Things.lickBowlClean()
-      },
-    },
-    bramble: {
-      // his tail caught in the bramble, and a bee frees it: as the bowl,
-      // once a play, so a child who never taps the bramble twice sees it too
-      // (bramble.js); not in the rain, when no bee comes out
-      weight: 0,
-      due: true,
-      ok: () => helpedDue('berries'),
-      async run() {
-        if (!(await Reksio.walkTo(THINGS.berries.at()))) return
-        Reksio.face(THINGS.berries.face)
-        await Bramble.sniffAndCatch()
-      },
-    },
   }
 
-  /** Is it time for `prop`'s fix that someone helps him out of, left alone?
+  // A thing with a fix someone helps him out of (its `helped`: the bowl on
+  // his head, his tail in the bramble) gets a left-alone move of its own: he
+  // goes over and gets into it himself, once a play, so a child who never
+  // taps the thing twice still sees it.
+  const HELPED = Object.keys(THINGS).filter((n) => THINGS[n].helped)
+  for (const name of HELPED) {
+    const thing = THINGS[name]
+    ACTS[thing.helped.act] = {
+      weight: 0,
+      due: true,
+      ok: () => helpedDue(name),
+      async run() {
+        if (!(await Reksio.walkTo(thing.at()))) return
+        Reksio.face(thing.face)
+        await thing.helped.alone()
+      },
+    }
+  }
+
+  /** Is it time for `name`'s fix that someone helps him out of, left alone?
    * Once a play, and only one of them: if no one has helped him yet, the
-   * first one out this play that can happen now (so the bowl and the bramble
-   * take turns across plays, and rain, when no bee comes, leaves the bowl). */
-  function helpedDue(prop) {
-    const canNow = (n) => Layout.OFFERS[n].includes('helped') && !!spotEls[n] && (n !== 'berries' || Bramble.canCatch())
+   * first one out this play that can happen now (so they take turns across
+   * plays, and one that can't happen now, the bramble in the rain when no bee
+   * comes, leaves it to the next). */
+  function helpedDue(name) {
+    const canNow = (n) => HELPED.includes(n) && !!spotEls[n] && THINGS[n].helped.can()
     const first = Layout.props.find(canNow)
-    return first === prop && !Things.stuckTimes && !Bramble.caughtTimes && !day.dusk &&
+    return first === name && HELPED.every((n) => !THINGS[n].helped.times) && !day.dusk &&
       idleFor() > HELPED_AFTER_S && Clock.now() > HELPED_FROM_S * 1000
   }
 
@@ -654,84 +647,19 @@
     return Idle.energy({ busy: busy || !!hold || Reksio.stretching, walking: Reksio.walking, sinceTap: now - lastTap })
   }
 
-  // ------------------------------------------------------------ wet
-
-  // Puddles muddy his paws (it fades after a while). Rain, a jump into a
-  // puddle, or splashing through plenty of water soaks him: fur a touch
-  // darker, drips. Soaked, as soon as he stops out of the rain, he shakes
-  // himself dry, like every dog. While he stands in a puddle, its near edge
-  // is drawn in front of his paws.
-  const SOAK_PER_SPLASH = 0.15 // each splashing step through a puddle (about 3 per puddle)
-  const SOAKED = 0.7 // soaked from here on: drips, and a shake when he stops
-  const DRY_S = 40 // without a shake, the wet slowly dries off over this long
-  const MUDDY_S = 10 // muddy paws last this long after the last puddle
-  const DRIP_EVERY_MS = 350
-  let soak = 0 // 0 dry … 1 soaked through
-  let muddyUntil = 0
-  let lastDrip = 0
-  let lastWetFrame = 0
-  const pawWater = document.createElementNS(SVG_NS, 'path')
-  pawWater.setAttribute('class', 'paw-water')
-  pawWater.setAttribute('d', 'M-44 814 A44 10 0 0 0 44 814 Z')
-  $('fx').appendChild(pawWater)
-
-  const soaked = () => soak >= SOAKED
-
-  /** Wetter by `amount` (1 = soaked through at once). */
-  /** Pounce into a puddle: splish, splash. He'll shake once he steps out. */
-  async function splashIn(p) {
-    await Reksio.pounce(p.x)
-    Weather.splash(p.x)
-    Sound.splash()
-    wetten(1)
-    await Reksio.hop(30, 2)
-  }
-
-  const stepOut = (p) => Reksio.walkTo(p.x + Math.sign(p.x - Reksio.x || 1) * (p.rx + 50))
+  // ------------------------------------------------------------ puddles
 
   /** A tapped puddle: run over and jump in. */
   async function jumpIn(p) {
     if (!(await Reksio.walkTo(p.x - Math.sign(p.x - Reksio.x || 1) * 90))) return
     busy = true
     try {
-      await splashIn(p)
+      await Wet.splashIn(p)
     } finally {
       busy = false
     }
     if (pending) runPending()
-    else await stepOut(p)
-  }
-
-  function wetten(amount) {
-    soak = Math.min(1, soak + amount)
-    muddyUntil = Clock.now() + MUDDY_S * 1000
-  }
-
-  async function shakeDry() {
-    Sound.shake()
-    const stopSpray = Clock.every(120, () => burst(Reksio.x, 740, 8, 'drop', { height: 60, reach: 110, size: 3.5 }))
-    try {
-      await Reksio.shakeDry()
-    } finally {
-      stopSpray()
-    }
-    soak = 0
-  }
-
-  function wetFrame(t) {
-    const dt = Math.min(0.1, (t - lastWetFrame) / 1000)
-    lastWetFrame = t
-    if (Weather.raining) soak = 1
-    else soak = Math.max(0, soak - dt / DRY_S)
-    const inPuddle = Weather.puddleAt(Reksio.x)
-    pawWater.classList.toggle('on', !!inPuddle)
-    pawWater.setAttribute('transform', `translate(${Reksio.x} 0)`)
-    Reksio.setWet(soaked())
-    Reksio.setMuddy(t < muddyUntil)
-    if (soaked() && !Weather.raining && t - lastDrip > DRIP_EVERY_MS) {
-      lastDrip = t
-      burst(Reksio.x + rnd(-40, 40), 770, 1, 'drop', { height: 4, reach: 6, size: 2.5 })
-    }
+    else await Wet.stepOut(p)
   }
 
   function idleLoop() {
@@ -767,12 +695,12 @@
 
   /** Nothing going on: what he does next on his own, if anything. */
   function leftAlone(now) {
-    const what = Idle.next({ soaked: soaked(), raining: Weather.raining, inPuddle: !!Weather.puddleAt(Reksio.x), sinceTap: now - lastTap, now, nextAt: nextIdleAt })
+    const what = Idle.next({ soaked: Wet.soaked, raining: Weather.raining, inPuddle: !!Weather.puddleAt(Reksio.x), sinceTap: now - lastTap, now, nextAt: nextIdleAt })
     if (what === 'shake') {
       // stopped, wet, and out of the rain: shake it off, straight away
       acting = true
       Debug.trace('shake dry')
-      Debug.ignoreCut(shakeDry(), 'shake dry') // cut short by a tap: still wet, he'll shake later
+      Debug.ignoreCut(Wet.shakeDry(), 'shake dry') // cut short by a tap: still wet, he'll shake later
         .finally(() => (acting = false))
     } else if (what === 'act') {
       startAct(pickAct())
@@ -786,8 +714,8 @@
     Debug.check('walks only standing up', !Reksio.walking || (Reksio.pose === 'stand' && !Reksio.sliding), { pose: Reksio.pose, sliding: Reksio.sliding })
     Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
     Debug.check('a waiting ask runs once he is free', !pending || busy || day.ended)
-    Debug.check('no bowl on his head once the gag is over', !Reksio.wearingBowl || busy || acting)
-    Debug.check('his tail is caught only during the gag, and never as he walks', !Reksio.tailPinned || ((busy || acting) && !Reksio.walking))
+    Debug.check('nothing a gag put on him outlasts it', !Reksio.worn.length || busy || acting, { worn: Reksio.worn })
+    Debug.check('never walks with his tail caught', !Reksio.wearing('tail') || !Reksio.walking)
     Debug.check('the bird is in front of him only while it is busy', !Bird.front || Bird.flying)
   }
 
@@ -797,7 +725,7 @@
       seed: Debug.seed, busy, day: day.phase, dusk: day.dusk, ended: day.ended, acting, holding: !!hold, pending: !!pending, lastAct,
       done: day.done, props: Layout.props, uses: { ...uses }, bedtime: day.bedtime, moonUp: Number(Sky.moonUp.toFixed(2)),
       reksio: { x: Math.round(Reksio.x), pose: Reksio.pose, walking: Reksio.walking },
-      soak: Number(soak.toFixed(2)), weather: Weather.phase, camX: Math.round(camX),
+      soak: Number(Wet.soak.toFixed(2)), weather: Weather.phase, camX: Math.round(camX),
       stamped: Things.stamped, mouse: Things.mouse,
     }
   }
@@ -816,7 +744,6 @@
   }
 
   let last = Clock.now()
-  let lastSplash = 0
   let shownCam = -1
   function frame() {
     const t = Clock.now() // game time: stands still while the page is hidden
@@ -825,13 +752,7 @@
     Reksio.tick(dt)
     Creatures.tick(dt)
     Weather.tick(dt, camX)
-    wetFrame(t)
-    if (Reksio.walking && t - lastSplash > 280 && Weather.splash(Reksio.x)) {
-      lastSplash = t
-      wetten(SOAK_PER_SPLASH)
-      Sound.splash()
-      burst(Reksio.x, 830, 4, 'drop', { height: 34, reach: 50, size: 3 })
-    }
+    Wet.frame(t)
     if (spotEls.bird) {
       spotEls.bird.setAttribute('cx', SPOTS.bird().x)
       spotEls.bird.style.opacity = Bird.flying ? '0' : ''

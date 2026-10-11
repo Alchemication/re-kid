@@ -87,10 +87,10 @@ NOT_GESTURES = {
     "setWet",
     "setMuddy",
     "holdBone",
-    "wearBowl",  # the bowl (TestBowl)
-    "bowlTop",
-    "pinTail",  # his tail caught (TestBramble)
-    "addGestures",  # how antics.js adds its own
+    "wear",  # what a gag puts on him: the bowl (TestBowl), his tail caught (TestBramble)
+    "wearing",
+    "pointAt",
+    "addGestures",  # how gestures.js and antics.js add theirs
     "mouth",
     "beginStretch",
     "endStretch",  # as "stretch" above
@@ -337,7 +337,7 @@ class TestBowl:
         y.settled()
         assert y.events("bowl stuck") and y.events("bird to the rescue")
         got = y.page.evaluate("""() => ({
-            wearing: Reksio.wearingBowl, flying: Bird.flying, friend: Bird.friend,
+            wearing: Reksio.wearing('bowl'), flying: Bird.flying, friend: Bird.friend,
             bowl: getComputedStyle(document.getElementById('bowl-body')).visibility })""")
         assert got == {
             "wearing": False,
@@ -351,7 +351,7 @@ class TestBowl:
     ) -> None:
         y = self.stuck(yard)
         y.start("yardGame.use('bowl', true)")
-        y.page.wait_for_function("Reksio.wearingBowl", timeout=10_000)
+        y.page.wait_for_function("Reksio.wearing('bowl')", timeout=10_000)
         x = y.page.evaluate("Reksio.x")
         for intent in ["press", "release", "walk to 3000", "go to gate"]:
             y.page.evaluate(f"yardGame.perform('{intent}')")
@@ -366,8 +366,8 @@ class TestBowl:
     ) -> None:
         y = self.stuck(yard)
         y.start("yardGame.use('bowl', true)")
-        y.page.wait_for_function("Reksio.wearingBowl", timeout=10_000)
-        while y.page.evaluate("Reksio.wearingBowl"):  # a child tapping away
+        y.page.wait_for_function("Reksio.wearing('bowl')", timeout=10_000)
+        while y.page.evaluate("Reksio.wearing('bowl')"):  # a child tapping away
             y.page.evaluate("yardGame.perform('press')")
             y.page.evaluate("yardGame.perform('release')")
             y.page.wait_for_timeout(300)
@@ -397,13 +397,13 @@ class TestBowl:
     ) -> None:
         y = yard(f"{STILL}&props=bowl")  # a full bowl: he eats it first
         y.start("yardGame.act('bowl')")
-        y.page.wait_for_function("Reksio.wearingBowl", timeout=20_000)
+        y.page.wait_for_function("Reksio.wearing('bowl')", timeout=20_000)
         x = y.page.evaluate("Reksio.x")
         y.page.evaluate("yardGame.perform('walk to 3000')")  # doesn't cut it short now
         s = y.settled()
         assert y.events("stuck tap") and y.events("bowl off")
         assert abs(s["reksio"]["x"] - x) < 200
-        assert y.page.evaluate("Things.stuckTimes") == 1
+        assert y.page.evaluate("Bowl.stuckTimes") == 1
         assert not y.page.evaluate("yardGame.actOk('bowl')"), "only once a play"
 
     def test_once_friends_the_bird_comes_down_to_him(self, yard: callable) -> None:
@@ -426,7 +426,7 @@ class TestBowl:
             "clearing",
             "after",
         )
-        assert not y.page.evaluate("Reksio.wearingBowl")
+        assert not y.page.evaluate("Reksio.wearing('bowl')")
 
 
 class TestBramble:
@@ -436,7 +436,7 @@ class TestBramble:
         s = y.settled()
         assert y.events("tail caught") and y.events("tail free")
         got = y.page.evaluate("""() => ({
-            pinned: Reksio.tailPinned, hook: !!document.getElementById('snag-hook'),
+            pinned: Reksio.wearing('tail'), hook: !!document.getElementById('snag-hook'),
             caught: Bramble.caughtTimes })""")
         assert got == {"pinned": False, "hook": False, "caught": 1}
         return s
@@ -453,9 +453,9 @@ class TestBramble:
     ) -> None:
         y = yard(f"{STILL}&props=berries")
         y.start("yardGame.use('berries', true)")
-        y.page.wait_for_function("Reksio.tailPinned", timeout=20_000)
+        y.page.wait_for_function("Reksio.wearing('tail')", timeout=20_000)
         x = y.page.evaluate("Reksio.x")
-        while y.page.evaluate("Reksio.tailPinned"):  # a child tapping away
+        while y.page.evaluate("Reksio.wearing('tail')"):  # a child tapping away
             y.page.evaluate("yardGame.perform('walk to 3000')")
             y.page.wait_for_timeout(400)
         s = self.freed(y)
@@ -468,7 +468,7 @@ class TestBramble:
     ) -> None:
         y = yard(f"{STILL}&props=berries")
         y.start("yardGame.act('bramble')")
-        y.page.wait_for_function("Reksio.tailPinned", timeout=30_000)
+        y.page.wait_for_function("Reksio.wearing('tail')", timeout=30_000)
         y.page.evaluate("yardGame.perform('walk to 3000')")  # doesn't cut it short now
         self.freed(y)
         assert y.events("stuck tap")
@@ -479,7 +479,7 @@ class TestBramble:
     ) -> None:
         y = yard(f"{STILL}&props=berries")
         y.start("yardGame.act('bramble')")
-        y.page.wait_for_function("Reksio.tailPinned", timeout=30_000)
+        y.page.wait_for_function("Reksio.wearing('tail')", timeout=30_000)
         y.page.evaluate("yardGame.perform('press')")
         y.page.wait_for_timeout(600)  # longer than a press takes to become a stretch
         assert not y.page.evaluate("Reksio.stretching")
@@ -494,7 +494,7 @@ class TestBramble:
         y.page.evaluate("""() => {
             window.__noticed = []
             const lookUp = Reksio.lookUp
-            Reksio.lookUp = (...a) => { window.__noticed.push(Reksio.tailPinned); return lookUp(...a) }
+            Reksio.lookUp = (...a) => { window.__noticed.push(Reksio.wearing('tail')); return lookUp(...a) }
         }""")
         y.run("yardGame.act('bramble')")
         self.freed(y)

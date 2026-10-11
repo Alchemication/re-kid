@@ -9,7 +9,7 @@ The procedure for one gag in a game, from idea to a reviewed, tested commit.
 The rules it relies on are in `CLAUDE.md` ("Code Style", game debuggability,
 "Testing", "Adding a gag"); this skill is the order to do things in and the
 traps already found. The worked example is the bowl stuck on his head
-(`things.js` `stuckInBowl`, `bird.js` `rescue`, `antics.js`, `TestBowl`).
+(`bowl.js` `stuckInBowl`, `bird.js` `rescue`, `antics.js`, `TestBowl`).
 
 A gag is choreography: several characters, any tap at any moment, nothing
 ever left stuck. That care is the job; what this skill cuts is the time spent
@@ -93,19 +93,19 @@ here when it gets its first gag):
 
 | Piece | Where |
 |---|---|
-| The sequence for a thing | its entry in `THINGS`, `things.js`; a thing with a lot going on gets its own file (`tree.js`, `bramble.js`) |
+| The sequence for a thing | its entry in `THINGS`, `things.js`; a thing with a lot going on gets its own file (`bowl.js`, `tree.js`, `bramble.js`) |
 | A creature's part | its own file (`bird.js`); things call it (`Bird.rescue`). A creature that already wanders (`creatures.js`) is sent with an errand (`Creatures.beeTo`) |
-| Reksio's own moves for this gag | `antics.js`, made from `Reksio.kit` (`blend`, `pause`, `faceTo`/`faceOff`, `actTo`/`actOff`, `settle`/`rise`, the `add` layer), added with `Reksio.addGestures`. Not `reksio.js` |
-| Something on his body (bone, bowl) | a face field in `figure.js` (`FACE`, drawn in `mount`), switched on in `reksio.js` `compose()` |
+| Reksio's own moves for this gag | `antics.js`, made from `Reksio.kit` (`blend`, `pause`, `faceTo`/`faceOff`, `actTo`/`actOff`, `settle`/`rise`, the `add` layer), added with `Reksio.addGestures`. Not `reksio.js` (the engine) or `gestures.js` (everyday moves) |
+| Something on his body (bowl, caught tail) | `Reksio.wear(name, change)` from the gag's file: `change(pose, toFigure)` returns his pose with it, drawn last; `Reksio.wear(name, null)` in the gag's `finally`. A new shape to draw on him (the bowl) is a face field in `figure.js` (`FACE`, drawn in `mount`). Points on him: `Reksio.pointAt(Figure.bowlTopAt)` |
 | Sounds | `sound.js`; reuse first (`grep -no "^    [a-zA-Z]*(" sound.js`) |
-| A left-alone trigger | `yard.js` `ACTS` |
+| A left-alone trigger | `yard.js` `ACTS`; a fix someone helps him out of: a `helped` field on its thing (`{ act, can, alone, times }`, as `bowl.js`), and yard.js makes the once-a-play move |
 | Tunables | named constants at the top of the module, each with why |
 | What must always hold | a `Debug.check` in `yard.js` `checkRules` |
 | Words | the scene in `brief.yaml`, marked `original`, `inspired` or `invented` with refs to what it is based on; status in `PROJECT_PLAN.md` |
 
 A file over 1000 lines fails `test_files_stay_small`: split by what it is
-for (precedents: `bird.js` and `bramble.js` out of `things.js`, `antics.js` out of
-`reksio.js`), and update every caller, no shims.
+for (precedents: `bird.js`, `bowl.js` and `bramble.js` out of `things.js`,
+`gestures.js` and `antics.js` out of `reksio.js`, `wet.js` out of `yard.js`), and update every caller, no shims.
 
 ## 4. Traps already hit
 
@@ -148,7 +148,7 @@ timing or sound: name the constants Adam should tune by watching
 
 - **Unit** (`tests/things.test.js` and friends, fake page and clock): the
   rules. The fake Reksio (`tests/fakes.js`) answers any gesture, but a
-  property or getter the gag reads (`wearingBowl`, `bowlTop`) must be added
+  property or getter the gag reads (`wearing`, `pointAt`) must be added
   to it, or it reads as a function.
 - **Browser** (`tests/test_game_browser.py`): add new gestures to `GESTURES`
   (or `NOT_GESTURES`), moves to `ACTS`, things to `THINGS`; the coverage tests

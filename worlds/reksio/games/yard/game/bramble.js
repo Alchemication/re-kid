@@ -4,7 +4,7 @@
 //
 // His tail caught in it: the variation, the first time and then every other
 // one (not in the rain: no bee would come), or once a play when left alone
-// (yard.js ACTS). Pleased after a berry, he turns his back to the bush and
+// (`helped`, yard.js). Pleased after a berry, he turns his back to the bush and
 // wags, and a cane sticking out with a flower on it catches his tail. He sets
 // off and is yanked back, strains and is snapped back onto his bottom, and
 // sits glum; a tap is another try. Then a bumblebee comes for the flower by
@@ -12,7 +12,7 @@
 // tears his tail free. The bee never noticed: it is busy with its flower. He
 // checks his tail is all there, and wags.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Creatures, Weather */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Creatures, Weather, Figure */
 /* exported Bramble */
 const Bramble = (() => {
   // Berries on the bramble, as drawn; the ones nearest Reksio (on the left,
@@ -127,10 +127,13 @@ const Bramble = (() => {
     $('fx').appendChild(u)
   }
 
+  /** His tail's tip held at the snag, stretched to it as he moves. */
+  const pinned = (p, toFigure) => Figure.vary(p, { tail: toFigure({ x: SNAG.x + X(), y: SNAG.y }) })
+
   /** His tail let go: taps are ordinary again. */
   function letGo() {
     hold(null)
-    Reksio.pinTail(null)
+    Reksio.wear('tail', null)
     hook(false)
   }
 
@@ -163,7 +166,7 @@ const Bramble = (() => {
       if (!(await Reksio.walkTo(STANDS + X()))) return
       Reksio.face(-1) // his back to the bush
       await Reksio.swish(2) // a tap now still cuts a left-alone go short, before anything is caught
-      Reksio.pinTail({ x: SNAG.x + X(), y: SNAG.y })
+      Reksio.wear('tail', pinned)
       hook(true)
       caughtTimes += 1
       Debug.trace('tail caught')
@@ -213,6 +216,14 @@ const Bramble = (() => {
   /** Can his tail get caught now? Not in the rain: no bee would come out. */
   const canCatch = () => !Weather.raining
 
+  /** Left alone by the bramble (yard.js walks him there): a sniff round
+   * it, and his tail gets caught. A tap before then cuts it short, as any
+   * left-alone move; once it's caught, a tap is another try. */
+  async function sniffAndCatch() {
+    await Reksio.sniff(2)
+    await caught()
+  }
+
   const thing = {
     at: () => 2310 + X(),
     face: 1,
@@ -223,6 +234,8 @@ const Bramble = (() => {
       await berryToss(false)
       await caught()
     },
+    // someone helps him out of it: left alone, a sniff round the bush
+    helped: { act: 'bramble', can: canCatch, alone: sniffAndCatch, get times() { return caughtTimes } },
   }
 
   function init({ effects, hold: holdTaps }) {
@@ -231,19 +244,9 @@ const Bramble = (() => {
     if (!Layout.hidden.includes('berries')) makeBerries()
   }
 
-  /** Left alone by the bramble (yard.js walks him there): a sniff round
-   * it, and his tail gets caught. A tap before then cuts it short, as any
-   * left-alone move; once it's caught, a tap is another try. */
-  async function sniffAndCatch() {
-    await Reksio.sniff(2)
-    await caught()
-  }
-
   return {
     thing,
     init,
-    sniffAndCatch,
-    canCatch,
     /** How often his tail has been caught this play. */
     get caughtTimes() { return caughtTimes },
   }

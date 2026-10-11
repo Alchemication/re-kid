@@ -330,11 +330,18 @@ wake Reksio at home.
      only), then Adam's (or his wife's) listening pass.
    - Retro on the skill; then a brief for the episode game and its doorway.
    - First step of building it: move what every Reksio game shares (Reksio
-     himself: `figure.js`, `reksio.js`, `antics.js`, `life.js`, `gait.js`;
-     the creatures; `debug.js`; sound and music) out of the yard's folder
-     into a world-level one both games load, and publish it with them
+     himself: `figure.js`, `reksio.js`, `gestures.js`, `life.js`, `gait.js`,
+     and the gag moves in `antics.js` that the episode uses; the creatures;
+     `debug.js`; sound and music) out of the yard's folder into a
+     world-level one both games load, and publish it with them
      (`.github/workflows/pages.yml`). Not before: the episode shows what is
-     really shared, and two copies would drift apart.
+     really shared, and two copies would drift apart. Made ready
+     (2026-10-11): `reksio.js` holds no gag's state any more (gags put
+     things on him with `Reksio.wear`), his everyday gestures are in
+     `gestures.js`, and the bowl, its once-a-play left-alone move and the
+     wet/puddle handling have their own files (`bowl.js`, a thing's
+     `helped`, `wet.js`), so the yard's last few gags add files, not
+     special cases in `yard.js`.
    Kosmonauta comes after: it is the biggest build (rocket, space, robots).
 4. **The yard on phones, and helping** (order agreed 2026-10-11):
    - *Done:* measure the sizes on phones and tablets; cut the sky on short

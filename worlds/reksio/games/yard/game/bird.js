@@ -3,7 +3,7 @@
 // bowl gets stuck on his head, it comes and pulls it off; from then on it is
 // his friend, and a tap brings it down to say hello instead of a chase.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Figure */
 /* exported Bird */
 const Bird = (() => {
   const GROUND = 812 // where feet stand
@@ -27,6 +27,8 @@ const Bird = (() => {
   let flying = false
   let friend = false // it has pulled the bowl off his head: friends since
   let isEnded = () => false
+  /** The top of the bowl stuck on his head, in the scene (where it lands). */
+  const bowlTop = () => Reksio.pointAt(Figure.bowlTopAt)
   // where it is drawn among the things: behind Reksio, as on the wall
   const place = { parent: bird.parentNode, next: bird.nextSibling }
 
@@ -103,7 +105,7 @@ const Bird = (() => {
 
   /** Keep it standing on the bowl on his head as his head moves, until stop(). */
   function ride(facing) {
-    const stay = () => at(Reksio.bowlTop(), facing)
+    const stay = () => at(bowlTop(), facing)
     stay()
     return Clock.every(0, stay)
   }
@@ -147,7 +149,7 @@ const Bird = (() => {
     flying = true
     inFront(true)
     Debug.trace('bird to the rescue')
-    const facing = await flyBetween(PERCHES[perch], Reksio.bowlTop())
+    const facing = await flyBetween(PERCHES[perch], bowlTop())
     const stop = ride(facing)
     Debug.trace('bird on the bowl')
     try {
@@ -155,7 +157,7 @@ const Bird = (() => {
     } finally {
       stop()
     }
-    const top = Reksio.bowlTop()
+    const top = bowlTop()
     const land = { x: top.x - facing * TUMBLE, y: GROUND }
     friend = true
     Debug.trace('bowl off')

@@ -13,7 +13,7 @@ function reksio() {
   const { Sound, Music } = fakeSound()
   const noticed = [] // what the creatures were told he did
   const Creatures = { notice: (type, x, y) => noticed.push(type) }
-  const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
+  const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
   const R = page.get('Reksio')
   return {
     R,
@@ -106,6 +106,25 @@ const GESTURES = {
   biteTail: [], howl: [], sit: [1500], lieDown: [1500], nap: [2000], startle: [], catchDrops: [2], wakeUp: [], duck: [true],
 }
 
+describe('what a gag puts on him', () => {
+  it('draws it over everything else until it is taken off', () => {
+    const r = reksio()
+    const at = { x: r.R.x - 120, y: 700 } // a thorn behind him
+    r.R.wear('tail', (p, toFigure) => ({ ...p, tail: toFigure(at) }))
+    for (const facing of [1, -1]) {
+      r.R.face(facing)
+      r.step(0.1)
+      const tip = r.R.pointAt((p) => p.tail)
+      assert.ok(Math.abs(tip.x - at.x) < 0.01 && Math.abs(tip.y - at.y) < 0.01, `tail tip at ${JSON.stringify(tip)}, facing ${facing}`)
+    }
+    assert.deepEqual([...r.R.worn], ['tail'])
+    r.R.wear('tail', null)
+    r.step(0.1)
+    assert.equal(r.R.wearing('tail'), false)
+    assert.ok(Math.abs(r.R.pointAt((p) => p.tail).x - at.x) > 20, 'his tail is his own again')
+  })
+})
+
 describe('every gesture', () => {
   for (const [name, args] of Object.entries(GESTURES)) {
     it(`${name} ends, with him standing`, async () => {
@@ -148,7 +167,7 @@ describe('yawning', () => {
     const sizes = []
     const Sound = new Proxy({}, { get: (_t, name) => (name === 'yawn' ? (s) => sizes.push(s) : name === 'from' ? (_d, play) => play() : () => {}) })
     const { Music } = fakeSound()
-    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
     return { R: page.get('Reksio'), page, sizes }
   }
 
@@ -184,7 +203,7 @@ describe('yawning', () => {
 describe('how he goes', () => {
   it('at a sniffing trot, he sniffs as he goes, and gets there', async () => {
     const { Sound, Music, played } = fakeSound()
-    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
     const R = page.get('Reksio')
     let done = null
     R.walkTo(R.x + 250, { sniffing: true }).then((ok) => (done = ok))
@@ -213,7 +232,7 @@ describe('how he goes', () => {
     const paces = []
     for (let seed = 1; seed <= 16; seed++) {
       const { Sound, Music } = fakeSound()
-      const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+      const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
       const R = page.get('Reksio')
       const x0 = R.x
       R.walkTo(x0 + 350)
