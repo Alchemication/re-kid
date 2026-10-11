@@ -194,3 +194,29 @@ REPLAY_SHEET_COLUMNS = 5
 REPLAY_SHEET_WIDTH = 384
 """Each frame's width on the contact sheet, in pixels: small enough for a whole
 sheet to be read at once, big enough to see Reksio's pose."""
+
+LOOK_DIR = REPO_ROOT / "looks"
+"""Where ``main.py look`` saves its frames, unless told otherwise: in the
+repository (gitignored), so a session can read them straight back."""
+
+LOOK_FLAGS = {"seed": "1", "still": "", "rain": "0", "creatures": ""}
+"""The play a look opens unless its flags say otherwise: seeded, Reksio moving
+only when asked, dry, no creatures. The same play every time, nothing else
+going on, so only the gag being looked at moves."""
+
+LOOK_EVERY_MS = 350
+"""One look screenshot this often: a gag's beats (a freeze, a tug, a pop) are
+a few hundred ms each, and a replay's 500 ms steps over some of them."""
+
+LOOK_MAX_S = 90
+"""A look stops photographing after this long even if what it watches hasn't
+ended: longer than any gag (the bowl takes about 25 s), and a hung one shows."""
+
+LOOK_SIZE = (1280, 720)
+"""The page a look opens, in CSS pixels: a laptop's window, the size the
+game's browser tests use."""
+
+LOOK_CLOSE = (480, 320)
+"""With ``--close``, each frame is cut to this much around Reksio (CSS px, at
+the default size): he, the bird on his head and what he holds or eyes fill
+it, as a zoomed-in still would; 640x400 left him small on the sheet."""

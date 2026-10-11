@@ -43,7 +43,8 @@ through API calls from `main.py`. Write results straight into the YAML files and
 run `uv run python main.py validate <world>` before reporting done.
 
 Procedures live in skills (`.claude/skills/`): `new-episode` breaks down an
-episode. Each run ends with a retro that proposes edits to its skill.
+episode; `new-gag` adds a gag or encounter to a game. Each run ends with a
+retro that proposes edits to its skill.
 
 Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`):
 
@@ -211,9 +212,9 @@ before a commit.
 | screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
 
-**Adding a gag:** add its tests (tables in `test_game_browser.py`), run the
-browser tests for it (`-k name`), look at it: a timed-screenshot contact sheet
-or `main.py replay` frames. Then `/code-review` the diff for missed error cases
+**Adding a gag** (the `new-gag` skill has the steps): add its tests (tables in
+`test_game_browser.py`), run the browser tests for it (`-k name`), look at it:
+`main.py look` photographs it as it runs (frames and a contact sheet). Then `/code-review` the diff for missed error cases
 and interleavings (what if a tap lands mid-gag, it rains, the evening comes)
 and `/simplify` for needless complexity. No tool checks judgement; these
 reviews are the step for it. A gag's own moves for Reksio go in `antics.js`

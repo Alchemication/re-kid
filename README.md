@@ -14,6 +14,7 @@ src/
   worlds.py             load/save YAML, cross-file validation
   commands.py           subcommand handlers
   replay.py             replays a game's bug report in Chrome and photographs it
+  look.py               plays a gag in Chrome and photographs it as it runs
   audio.py              audio measurements, clips, spectrograms (ffmpeg, librosa)
   samples.py            downloads, measures and packs a game's instrument samples
   barks.py              cuts the marked original barks into a local script for the games
@@ -63,6 +64,8 @@ uv run python main.py episodes WORLD [--online]
 uv run python main.py mark WORLD [MEDIA] [--by NAME] [--no-open]
 uv run python main.py play WORLD [GAME] [--debug] [--seed N] [--still]
 uv run python main.py replay [REPORT] [--last S] [--every MS] [--out DIR]
+uv run python main.py look WORLD [GAME] [--flags Q] [--before JS]... [--watch JS]
+                          [--for S] [--every MS] [--size WxH] [--close] [--out DIR]
 uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
 uv run python main.py barks WORLD             # packs the marked barks (local only)
 uv run python main.py schema world|sources|episodes|intro|brief
@@ -131,3 +134,12 @@ is timed from the key press. `main.py replay` replays the newest one in
 screenshot every 0.5 s of the last 10 s (`--last 60` for more), a contact
 sheet, and `replay.json` (recorded vs replayed state, trace). The game runs on the real clock, so a replay is close, not exact; the
 command says when it ended differently.
+
+**Looking at a gag.** `main.py look` opens a seeded, still play (only what you
+ask moves; `--flags` adds or replaces page flags), awaits each `--before`
+step, then photographs `--watch` every 350 ms until it ends. It saves the
+frames, a contact sheet and `look.json` (each frame's time, the trace, events,
+end state, errors) to `looks/latest/` (gitignored). `--close` cuts each frame
+around Reksio; `--size 844x390` is a phone on its side. For example, the bowl
+stuck on his head:
+`main.py look reksio --flags props=bowl --close --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"`.

@@ -8,6 +8,7 @@ Subcommands:
     mark      Open the local tool for marking sounds in the intro.
     play      Open a game in the browser (default: the yard).
     replay    Replay a game's bug report and photograph the run-up to it.
+    look      Play a gag and photograph it as it runs (frames, contact sheet).
     samples   Download and pack a game's instrument samples into samples.js.
     barks     Cut the marked original barks into a local script for the games.
     schema    Print the JSON Schema for a research file type.
@@ -57,6 +58,15 @@ Examples:
         same inputs at the same times. Saves a screenshot every 0.5 s of the
         last 10 s, a contact sheet, and how the replayed state compares.
 
+    uv run python main.py look reksio --flags props=bowl --close \
+            --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"
+        Opens a seeded, still play (only what you ask moves), eats the bowl
+        empty, then photographs the next use (the bowl stuck on his head)
+        every 350 ms until it ends, cut close around Reksio. Saves frames,
+        a contact sheet and look.json (frame times, trace, events) in
+        looks/latest/. --for 20 without --watch photographs the play as it
+        goes; --size 844x390 is a phone on its side.
+
     uv run python main.py samples reksio yard
         Downloads the samples listed in games/yard/samples.yaml (CC0
         libraries), measures their pitch and packs them into samples.js.
@@ -84,6 +94,7 @@ from commands import (
     cmd_barks,
     cmd_episodes,
     cmd_list,
+    cmd_look,
     cmd_mark,
     cmd_play,
     cmd_replay,
@@ -92,7 +103,14 @@ from commands import (
     cmd_show,
     cmd_validate,
 )
-from config import DEFAULT_GAME, OBSERVER, REPLAY_EVERY_MS, REPLAY_LAST_S
+from config import (
+    DEFAULT_GAME,
+    LOOK_EVERY_MS,
+    LOOK_SIZE,
+    OBSERVER,
+    REPLAY_EVERY_MS,
+    REPLAY_LAST_S,
+)
 from schema.common import Status
 
 
@@ -185,6 +203,52 @@ def main() -> int:
         "--out", help="Folder for the frames (default: next to the report)"
     )
 
+    p_look = sub.add_parser("look", help="Photograph a gag as it runs")
+    p_look.add_argument("world", metavar="WORLD")
+    p_look.add_argument(
+        "game",
+        metavar="GAME",
+        nargs="?",
+        default=DEFAULT_GAME,
+        help=f"Game folder under games/ (default: {DEFAULT_GAME})",
+    )
+    p_look.add_argument(
+        "--flags",
+        default="",
+        help="Page flags over the default seeded still play, e.g. 'props=bowl&rain=1'",
+    )
+    p_look.add_argument(
+        "--before",
+        action="append",
+        default=[],
+        metavar="JS",
+        help="Set-up step to await first (repeatable), e.g. \"yardGame.use('bowl')\"",
+    )
+    p_look.add_argument(
+        "--watch", metavar="JS", help="What to photograph until it ends"
+    )
+    p_look.add_argument(
+        "--for",
+        dest="seconds",
+        type=float,
+        help="Seconds to photograph (the most, with --watch)",
+    )
+    p_look.add_argument(
+        "--every",
+        type=int,
+        default=LOOK_EVERY_MS,
+        help=f"ms between frames (default: {LOOK_EVERY_MS})",
+    )
+    p_look.add_argument(
+        "--size",
+        default=f"{LOOK_SIZE[0]}x{LOOK_SIZE[1]}",
+        help="Page size WIDTHxHEIGHT in CSS px (default: %(default)s)",
+    )
+    p_look.add_argument(
+        "--close", action="store_true", help="Cut each frame close around Reksio"
+    )
+    p_look.add_argument("--out", help="Folder for the frames (default: looks/latest)")
+
     p_samples = sub.add_parser("samples", help="Pack a game's instrument samples")
     p_samples.add_argument("world", metavar="WORLD")
     p_samples.add_argument(
@@ -212,6 +276,7 @@ def main() -> int:
         "mark": cmd_mark,
         "play": cmd_play,
         "replay": cmd_replay,
+        "look": cmd_look,
         "samples": cmd_samples,
         "barks": cmd_barks,
         "schema": cmd_schema,

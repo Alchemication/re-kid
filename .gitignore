@@ -23,3 +23,6 @@ worlds/*/media/
 
 # Generated audio analysis: WAVs, loop cuts, spectrograms (main.py audio)
 worlds/*/audio/
+
+# Frames from main.py look
+looks/

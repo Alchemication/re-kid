@@ -23,6 +23,8 @@ from config import (
     GAMES_DIR,
     INTRO_FILE,
     INTRO_MEDIA_DIR,
+    LOOK_DIR,
+    LOOK_MAX_S,
     MARK_CLIPS_DIR,
     MARK_HOST,
     MARK_PORT,
@@ -390,6 +392,50 @@ def cmd_replay(args: argparse.Namespace) -> int:
         print(f"  error during replay: {e.splitlines()[0]}")
     print(f"  details: {out / 'replay.json'}")
     return 0
+
+
+def cmd_look(args: argparse.Namespace) -> int:
+    """Play a gag in Chrome and photograph it as it runs."""
+    from look import LookError, look, look_url, parse_size
+
+    if not args.watch and args.seconds is None:
+        logger.error(
+            "Nothing to look at: give --watch JS (a gag to photograph until it ends) "
+            "or --for SECONDS (to photograph the play as it goes)."
+        )
+        return 1
+    try:
+        url = look_url(args.world, args.game, args.flags)
+        size = parse_size(args.size)
+        out = Path(args.out) if args.out else LOOK_DIR / "latest"
+        print(f"Looking at {args.watch or f'the play for {args.seconds:g} s'} in {url}")
+        result = look(
+            url,
+            out,
+            before=args.before,
+            watch=args.watch,
+            seconds=args.seconds if args.seconds is not None else LOOK_MAX_S,
+            every_ms=args.every,
+            size=size,
+            close=args.close,
+        )
+    except LookError as e:
+        logger.error("%s", e)
+        return 1
+    span = result.times[-1] / 1000 if result.times else 0
+    print(f"  {len(result.frames)} frames over {span:.1f} s in {out / 'frames'}")
+    if result.sheet:
+        print(f"  contact sheet: {result.sheet}")
+    else:
+        print("  no contact sheet (install ffmpeg for one)")
+    if result.failed:
+        print(f"  it ended with an error: {result.failed}")
+    elif not result.ended:
+        print("  still going when the photos stopped: raise --for, or it never ends")
+    for e in result.errors:
+        print(f"  error in the page: {e.splitlines()[0]}")
+    print(f"  details (frame times, trace, events, state): {out / 'look.json'}")
+    return 1 if result.errors or result.failed else 0
 
 
 def cmd_samples(args: argparse.Namespace) -> int:
