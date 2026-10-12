@@ -290,13 +290,55 @@ wake Reksio at home.
      in the doghouse doorway, `#nap`, and where his mouth meets the bowl,
      the film and falling fruit); (3) acting: reactions in each gag from the
      study, starting with the gags Eliot likes. The perf suite guards each.
-2. **Better sounds: an experiment, judged by ear.** The theme is good; many
-   effects are weak. Adam's idea: generate new sounds from short original
-   clips used as a style reference (MusicGen-Style or a newer model), and
-   compare reference-guided, text-only and melody-guided versions by ear.
-   What to keep in mind (Claude):
-   - *First, a sound audit.* Adam lists the five worst sounds in the game,
-     by ear. They become the experiment's test cases.
+2. **Sound and music: a big pass, the next build track** (Adam,
+   2026-10-12: to tweak and improve significantly). What there is: about 40
+   effects synthesised in `sound.js` (Web Audio tones and noise), his voice
+   silent (below), the original barks (local only), and music played note
+   by note from CC0 samples (`samples.yaml`, `music.js`): the hook, themes
+   B and C, the morning tune and the stretch run. Steps, in order:
+   1. *A sound board* (Claude): one page that plays every effect (a few
+      times each, to hear its variation), the barks, each tune on its own,
+      and a short scene with music and effects together, to judge the mix.
+      No board exists yet; auditing by playing the game is slow and misses
+      what is rare.
+   2. *Adam's audit on it, of everything*, not just the five worst: each
+      effect keep, fix or replace; each tune (does it sound like Reksio?
+      what is too busy, sad or annoying?); the mix (levels, does the music
+      drown the gags?). Claude records the verdicts here.
+   3. *Candidates from three sources, picked by Adam on the board*
+      (Adam, 2026-10-12): synth variants, CC0 recordings, and AI models
+      that generate many versions of each sound. The board plays the
+      current sound beside its candidates; each verdict is saved with the
+      candidate's source, prompt and seed. Plus the mix fixed (levels,
+      music ducking under a gag) and variety kept (pitch and speed, as the
+      barks).
+   4. *Later, automation from the picks:* once a few hundred verdicts
+      exist, a cheap model pre-ranks new candidates (e.g. audio embeddings
+      near the kept ones), so Adam hears the top few, not twenty. The final
+      pick stays a person's: no model we tried hears reliably (above). If
+      it works, it becomes a skill, and the picking moves into the
+      `main.py mark` page, styled after each cartoon.
+   5. *Music reworked* from the audit: new tunes or new voicings.
+   6. *His voice back* as recordings (below), with the episode work (it
+      needs `main.py mark` to work on episodes).
+
+   **First, a quick proof of concept** (2026-10-12): does generating
+   candidates and picking by ear give better sounds than the synth, fast
+   enough to be worth it? A handful of effects, a batch each from one
+   local model, on a bare board page, in `experiments/sound/` (own
+   dependencies, outputs not committed).
+   - *Model:* MOSS-SoundEffect (OpenMOSS), text to sound effects, Apache
+     2.0 per its model card, in a 4-bit MLX build that runs natively on
+     Apple Silicon (`mlx-speech`). Text only, no reference clip. Meta's
+     AudioGen is the obvious alternative, but its weights are reported as
+     non-commercial and its stock install fails on Apple Silicon.
+
+   **Reference-guided generation** (Adam's earlier idea): generate new
+   sounds from short original clips used as a style reference
+   (MusicGen-Style or a newer model), and compare reference-guided,
+   text-only and melody-guided versions by ear. What to keep in mind
+   (Claude):
+   - *Its test cases* come from the audit (step 2).
    - *Add a cheap control.* Recorded CC0 sound libraries, and sounds Adam
      and Eliot make themselves, may beat both the synth and a model for
      splashes, bumps and footsteps. Compare against them too.
