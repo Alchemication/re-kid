@@ -369,21 +369,27 @@ wake Reksio at home.
    - *Next:* Adam watches the bowl and bramble gags and tunes their timing
      (bramble: `BEE_COMES_MS`, `LEAP` in bramble.js; `STEP_OFF`, `STRAIN`
      in antics.js; the `boing` sound); then Eliot plays
-     it on the iPad (does he tap to call the bird? does he laugh?) before
-     more. Then, if it works, more gags where someone helps him, each a run
-     of the `new-gag` skill (in a fresh session, to test the skill), so the
-     bowl needn't be out every play and the bird isn't the only helper:
-     1. more helpers for the bramble, by who is about this play: the fed
-        mouse gnaws the cane (her return favour, rare; she needs a fast
-        dash across the yard), the squirrel scrabbling for berries shakes
-        him loose;
-     2. the pesky fly on his nose, which the spider catches (the fly and the
-        spider together: a small layout rule for creatures);
-     3. the bone flung onto the doghouse roof, brought down by the squirrel
-        (not the bird: it already has the bowl); tags `dig` as `helped`.
-     Later: the reel rolling into the mouse hole, pushed back by the mouse
-     (film and trap both out). Then the bird's twig to fetch (help, every
-     play), and acting in the mouse and tree encounters.
+     the bowl and the bramble on the iPad (does he tap to call for help?
+     does he laugh at the leap?) before more: if helping gags don't land,
+     more of them would be built on a guess. Then, if they work, one gag of
+     each kind, each a run of the `new-gag` skill in a fresh session (to test
+     the skill). The count is even (two helped, two help); what's thin is
+     variety within each kind, so each brings a new pairing and needs no new
+     prop (agreed 2026-10-12):
+     1. *Helped:* the pesky fly on his nose, which the spider catches: a new
+        helper, the help almost by accident, from two creatures already in
+        the yard (needs a small layout rule: the fly and the spider out
+        together);
+     2. *Help:* the bird's twig. The bird is building a nest and drops a
+        twig, and Reksio fetches it back up to the wall: the bird as a
+        neighbour, not only his rescuer (help, every play).
+     Later: more helpers for the bramble, by who is about this play (the fed
+     mouse gnaws the cane, her return favour, rare, and needs a fast dash
+     across the yard; the squirrel scrabbling for berries shakes him loose);
+     the bone flung onto the doghouse roof, brought down by the squirrel
+     (tags `dig` as `helped`); the reel rolling into the mouse hole, pushed
+     back by the mouse (film and trap both out); acting in the mouse and
+     tree encounters.
    - *Workflow note:* the layout rule went to a Haiku 5.5 subagent in a
      worktree. One round of its own fixes; one problem found in review: it
      tagged the bramble before its gag existed. The gag itself was written by
