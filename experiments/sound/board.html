@@ -30,6 +30,7 @@
   .verdict button.on[data-v=no] { background: var(--no); color: #fff; }
   textarea { width: 100%; margin-top: 6px; font: inherit; font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 4px; min-height: 30px; resize: vertical; background: #fff; }
   .playing { outline: 3px solid #e5a33a; }
+  .card.hidden { display: none; }
   body.unmarked .card.keep, body.unmarked .card.maybe, body.unmarked .card.no { display: none; }
   button:disabled { opacity: 0.4; cursor: default; }
 </style>
@@ -41,6 +42,7 @@
   <label>Candidate volume <input id="vol" type="range" min="0" max="1" step="0.05" value="0.6"></label>
   <span id="count"></span>
   <label><input id="unmarked" type="checkbox"> Only unmarked</label>
+  <label>Source <select id="source"><option value="">all</option></select></label>
   <button id="save">Save picks</button>
 </div>
 <main id="board"></main>
@@ -76,6 +78,7 @@
     const id = c.file
     const el = document.createElement('div')
     el.className = 'card'
+    el.dataset.source = c.source
     const mine = picks[id] || {}
     el.innerHTML = `<div class="top"><button class="play" title="Play">▶</button><span>${c.source} · wording ${c.wording} · seed ${c.seed}</span></div>
       <div class="meta">${c.prompt}</div>
@@ -117,6 +120,10 @@
   }
   if (!board.children.length) board.textContent = 'No candidates yet: run generate_moss.py.'
   count()
+  const source = document.getElementById('source')
+  for (const s of [...new Set([...document.querySelectorAll('.card')].map((c) => c.dataset.source))]) source.add(new Option(s, s))
+  source.onchange = () => document.querySelectorAll('.card').forEach((c) => c.classList.toggle('hidden', !!source.value && c.dataset.source !== source.value && !(source.value === 'clean+retro' && ['clean', 'retro'].includes(c.dataset.source))))
+  source.add(new Option('clean + retro', 'clean+retro'))
   document.getElementById('unmarked').onchange = (e) => document.body.classList.toggle('unmarked', e.target.checked)
 
   document.getElementById('save').onclick = () => {

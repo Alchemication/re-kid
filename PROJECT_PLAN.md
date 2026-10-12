@@ -346,6 +346,12 @@ wake Reksio at home.
        sounds, none for real ones.
      - Not tried: Meta's AudioGen (reported below commercial tools; no
        newer Meta sound model found), Stable Audio 3 Small-SFX.
+   - *Retro, not clean* (Adam, 2026-10-12: "too clean doesn't sound
+     authentic" for Reksio). One kept take per sound was made in two
+     versions, both trimmed at the start and brought to the same loudness;
+     retro won all 13: mono, 22 kHz, lows under 120 Hz and highs over
+     6.5 kHz rolled off, a touch of saturation (`process.py`). Picks are
+     kept in `experiments/sound/picks.json`.
    - *Next:* bring the kept takes into the game: a list of chosen files
      per sound, packed like the samples, played one of the kept takes at
      random each time (variety for free) with a little pitch and speed

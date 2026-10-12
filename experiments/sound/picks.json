@@ -1,0 +1,968 @@
+{
+ "saved": "2026-10-12T20:20:44.222Z",
+ "picks": [
+  {
+   "file": "moss/buzz/08.wav",
+   "source": "moss",
+   "prompt": "a bumblebee hovering by a flower, gentle buzz",
+   "wording": 3,
+   "seed": 2,
+   "sound": "buzz",
+   "verdict": "keep"
+  },
+  {
+   "file": "moss/buzz/07.wav",
+   "source": "moss",
+   "prompt": "a bumblebee hovering by a flower, gentle buzz",
+   "wording": 3,
+   "seed": 1,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/buzz/09.wav",
+   "source": "moss",
+   "prompt": "a bumblebee hovering by a flower, gentle buzz",
+   "wording": 3,
+   "seed": 3,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/buzz/01.wav",
+   "source": "moss",
+   "prompt": "a fat bumblebee buzzing past, low and lazy",
+   "wording": 1,
+   "seed": 1,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/buzz/02.wav",
+   "source": "moss",
+   "prompt": "a fat bumblebee buzzing past, low and lazy",
+   "wording": 1,
+   "seed": 2,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/buzz/03.wav",
+   "source": "moss",
+   "prompt": "a fat bumblebee buzzing past, low and lazy",
+   "wording": 1,
+   "seed": 3,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/buzz/04.wav",
+   "source": "moss",
+   "prompt": "a cartoon bumblebee humming, friendly and soft",
+   "wording": 2,
+   "seed": 1,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/buzz/05.wav",
+   "source": "moss",
+   "prompt": "a cartoon bumblebee humming, friendly and soft",
+   "wording": 2,
+   "seed": 2,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/buzz/06.wav",
+   "source": "moss",
+   "prompt": "a cartoon bumblebee humming, friendly and soft",
+   "wording": 2,
+   "seed": 3,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/01.wav",
+   "source": "moss",
+   "prompt": "a cartoon boing, a springy twang of a stretched rubber band snapping back",
+   "wording": 1,
+   "seed": 1,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/02.wav",
+   "source": "moss",
+   "prompt": "a cartoon boing, a springy twang of a stretched rubber band snapping back",
+   "wording": 1,
+   "seed": 2,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/03.wav",
+   "source": "moss",
+   "prompt": "a cartoon boing, a springy twang of a stretched rubber band snapping back",
+   "wording": 1,
+   "seed": 3,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/04.wav",
+   "source": "moss",
+   "prompt": "comic spring boing sound effect, bouncy and playful, children's cartoon",
+   "wording": 2,
+   "seed": 1,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/05.wav",
+   "source": "moss",
+   "prompt": "comic spring boing sound effect, bouncy and playful, children's cartoon",
+   "wording": 2,
+   "seed": 2,
+   "sound": "boing",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/boing/06.wav",
+   "source": "moss",
+   "prompt": "comic spring boing sound effect, bouncy and playful, children's cartoon",
+   "wording": 2,
+   "seed": 3,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/07.wav",
+   "source": "moss",
+   "prompt": "a short wobbly jaw harp twang, cartoon slapstick",
+   "wording": 3,
+   "seed": 1,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/08.wav",
+   "source": "moss",
+   "prompt": "a short wobbly jaw harp twang, cartoon slapstick",
+   "wording": 3,
+   "seed": 2,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/boing/09.wav",
+   "source": "moss",
+   "prompt": "a short wobbly jaw harp twang, cartoon slapstick",
+   "wording": 3,
+   "seed": 3,
+   "sound": "boing",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/splash/02.wav",
+   "source": "moss",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash",
+   "wording": 1,
+   "seed": 2,
+   "sound": "splash",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/splash/03.wav",
+   "source": "moss",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash",
+   "wording": 1,
+   "seed": 3,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "moss/splash/04.wav",
+   "source": "moss",
+   "prompt": "cartoon splash of paws in a rain puddle, short",
+   "wording": 2,
+   "seed": 1,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/splash/01.wav",
+   "source": "moss",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash",
+   "wording": 1,
+   "seed": 1,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/splash/05.wav",
+   "source": "moss",
+   "prompt": "cartoon splash of paws in a rain puddle, short",
+   "wording": 2,
+   "seed": 2,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/splash/06.wav",
+   "source": "moss",
+   "prompt": "cartoon splash of paws in a rain puddle, short",
+   "wording": 2,
+   "seed": 3,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/splash/07.wav",
+   "source": "moss",
+   "prompt": "a gentle splash in shallow water, close up",
+   "wording": 3,
+   "seed": 1,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/splash/08.wav",
+   "source": "moss",
+   "prompt": "a gentle splash in shallow water, close up",
+   "wording": 3,
+   "seed": 2,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "moss/splash/09.wav",
+   "source": "moss",
+   "prompt": "a gentle splash in shallow water, close up",
+   "wording": 3,
+   "seed": 3,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "moss/bonk/01.wav",
+   "source": "moss",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft",
+   "wording": 1,
+   "seed": 1,
+   "sound": "bonk",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/bonk/02.wav",
+   "source": "moss",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft",
+   "wording": 1,
+   "seed": 2,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/bonk/03.wav",
+   "source": "moss",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft",
+   "wording": 1,
+   "seed": 3,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/bonk/04.wav",
+   "source": "moss",
+   "prompt": "a hollow wooden bonk sound effect, children's cartoon",
+   "wording": 2,
+   "seed": 1,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/bonk/06.wav",
+   "source": "moss",
+   "prompt": "a hollow wooden bonk sound effect, children's cartoon",
+   "wording": 2,
+   "seed": 3,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/bonk/05.wav",
+   "source": "moss",
+   "prompt": "a hollow wooden bonk sound effect, children's cartoon",
+   "wording": 2,
+   "seed": 2,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/bonk/09.wav",
+   "source": "moss",
+   "prompt": "a light fruit dropping on a head, a short funny thud",
+   "wording": 3,
+   "seed": 3,
+   "sound": "bonk",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/bonk/08.wav",
+   "source": "moss",
+   "prompt": "a light fruit dropping on a head, a short funny thud",
+   "wording": 3,
+   "seed": 2,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/bonk/07.wav",
+   "source": "moss",
+   "prompt": "a light fruit dropping on a head, a short funny thud",
+   "wording": 3,
+   "seed": 1,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/rustle/01.wav",
+   "source": "moss",
+   "prompt": "leaves of a bush rustling as something brushes through it",
+   "wording": 1,
+   "seed": 1,
+   "sound": "rustle",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/rustle/02.wav",
+   "source": "moss",
+   "prompt": "leaves of a bush rustling as something brushes through it",
+   "wording": 1,
+   "seed": 2,
+   "sound": "rustle",
+   "verdict": "keep"
+  },
+  {
+   "file": "moss/rustle/03.wav",
+   "source": "moss",
+   "prompt": "leaves of a bush rustling as something brushes through it",
+   "wording": 1,
+   "seed": 3,
+   "sound": "rustle",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/rustle/04.wav",
+   "source": "moss",
+   "prompt": "a short rustle of a shaken leafy branch",
+   "wording": 2,
+   "seed": 1,
+   "sound": "rustle",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/rustle/05.wav",
+   "source": "moss",
+   "prompt": "a short rustle of a shaken leafy branch",
+   "wording": 2,
+   "seed": 2,
+   "sound": "rustle",
+   "verdict": "keep"
+  },
+  {
+   "file": "moss/rustle/06.wav",
+   "source": "moss",
+   "prompt": "a short rustle of a shaken leafy branch",
+   "wording": 2,
+   "seed": 3,
+   "sound": "rustle",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/rustle/07.wav",
+   "source": "moss",
+   "prompt": "dry leaves and twigs rustling, close, brief",
+   "wording": 3,
+   "seed": 1,
+   "sound": "rustle",
+   "verdict": "maybe"
+  },
+  {
+   "file": "moss/rustle/08.wav",
+   "source": "moss",
+   "prompt": "dry leaves and twigs rustling, close, brief",
+   "wording": 3,
+   "seed": 2,
+   "sound": "rustle",
+   "verdict": "no"
+  },
+  {
+   "file": "moss/rustle/09.wav",
+   "source": "moss",
+   "prompt": "dry leaves and twigs rustling, close, brief",
+   "wording": 3,
+   "seed": 3,
+   "sound": "rustle",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/boing/19.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon boing, a springy twang of a stretched rubber band snapping back, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 1,
+   "sound": "boing",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/splash/01.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash",
+   "wording": 1,
+   "seed": 1,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/splash/02.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash",
+   "wording": 1,
+   "seed": 2,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/splash/03.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash",
+   "wording": 1,
+   "seed": 3,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/splash/04.mp3",
+   "source": "eleven",
+   "prompt": "cartoon splash of paws in a rain puddle, short",
+   "wording": 2,
+   "seed": 1,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/splash/05.mp3",
+   "source": "eleven",
+   "prompt": "cartoon splash of paws in a rain puddle, short",
+   "wording": 2,
+   "seed": 2,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/splash/10.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 1,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/splash/11.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 2,
+   "sound": "splash",
+   "verdict": "maybe"
+  },
+  {
+   "file": "eleven/splash/12.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 3,
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/splash/13.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 1,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/splash/14.mp3",
+   "source": "eleven",
+   "prompt": "a small dog jumps into a shallow puddle, a light playful splash, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 2,
+   "sound": "splash",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/bonk/01.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft",
+   "wording": 1,
+   "seed": 1,
+   "sound": "bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bonk/02.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft",
+   "wording": 1,
+   "seed": 2,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/bonk/03.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft",
+   "wording": 1,
+   "seed": 3,
+   "sound": "bonk",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/bonk/22.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 1,
+   "sound": "bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bonk/23.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 2,
+   "sound": "bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bonk/24.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 3,
+   "sound": "bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bonk/20.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 3,
+   "sound": "bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rustle/03.mp3",
+   "source": "eleven",
+   "prompt": "leaves of a bush rustling as something brushes through it",
+   "wording": 1,
+   "seed": 3,
+   "sound": "rustle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rustle/09.mp3",
+   "source": "eleven",
+   "prompt": "dry leaves and twigs rustling, close, brief",
+   "wording": 3,
+   "seed": 3,
+   "sound": "rustle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rustle/06.mp3",
+   "source": "eleven",
+   "prompt": "a short rustle of a shaken leafy branch",
+   "wording": 2,
+   "seed": 3,
+   "sound": "rustle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/buzz/01.mp3",
+   "source": "eleven",
+   "prompt": "a fat bumblebee buzzing past, low and lazy",
+   "wording": 1,
+   "seed": 1,
+   "sound": "buzz",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/buzz/02.mp3",
+   "source": "eleven",
+   "prompt": "a fat bumblebee buzzing past, low and lazy",
+   "wording": 1,
+   "seed": 2,
+   "sound": "buzz",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/buzz/04.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bumblebee humming, friendly and soft",
+   "wording": 2,
+   "seed": 1,
+   "sound": "buzz",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/yawn/02.mp3",
+   "source": "eleven",
+   "prompt": "a small dog yawning, a long squeaky yawn",
+   "wording": 1,
+   "seed": 2,
+   "sound": "yawn",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yawn/05.mp3",
+   "source": "eleven",
+   "prompt": "a puppy yawns widely and smacks its lips",
+   "wording": 2,
+   "seed": 2,
+   "sound": "yawn",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yawn/10.mp3",
+   "source": "eleven",
+   "prompt": "a small dog yawning, a long squeaky yawn, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 1,
+   "sound": "yawn",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yawn/08.mp3",
+   "source": "eleven",
+   "prompt": "a sleepy little dog's yawn with a soft whine at the end",
+   "wording": 3,
+   "seed": 2,
+   "sound": "yawn",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yawn/13.mp3",
+   "source": "eleven",
+   "prompt": "a small dog yawning, a long squeaky yawn, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 1,
+   "sound": "yawn",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yawn/14.mp3",
+   "source": "eleven",
+   "prompt": "a small dog yawning, a long squeaky yawn, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 2,
+   "sound": "yawn",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yawn/15.mp3",
+   "source": "eleven",
+   "prompt": "a small dog yawning, a long squeaky yawn, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound",
+   "wording": "1970s",
+   "seed": 3,
+   "sound": "yawn",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/snore/03.mp3",
+   "source": "eleven",
+   "prompt": "a small dog snoring softly, one slow breath in and out",
+   "wording": 1,
+   "seed": 3,
+   "sound": "snore",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/snore/02.mp3",
+   "source": "eleven",
+   "prompt": "a small dog snoring softly, one slow breath in and out",
+   "wording": 1,
+   "seed": 2,
+   "sound": "snore",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/snore/01.mp3",
+   "source": "eleven",
+   "prompt": "a small dog snoring softly, one slow breath in and out",
+   "wording": 1,
+   "seed": 1,
+   "sound": "snore",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sneeze/08.mp3",
+   "source": "eleven",
+   "prompt": "a dog sniffs a flower and sneezes",
+   "wording": 3,
+   "seed": 2,
+   "sound": "sneeze",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/munch/04.mp3",
+   "source": "eleven",
+   "prompt": "a dog munching food, a few quick chews",
+   "wording": 2,
+   "seed": 1,
+   "sound": "munch",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/munch/09.mp3",
+   "source": "eleven",
+   "prompt": "a puppy chewing a berry, wet little chews",
+   "wording": 3,
+   "seed": 3,
+   "sound": "munch",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/munch/08.mp3",
+   "source": "eleven",
+   "prompt": "a puppy chewing a berry, wet little chews",
+   "wording": 3,
+   "seed": 2,
+   "sound": "munch",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/munch/07.mp3",
+   "source": "eleven",
+   "prompt": "a puppy chewing a berry, wet little chews",
+   "wording": 3,
+   "seed": 1,
+   "sound": "munch",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/lap/06.mp3",
+   "source": "eleven",
+   "prompt": "a dog drinking, quick wet laps of the tongue",
+   "wording": 2,
+   "seed": 3,
+   "sound": "lap",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/lap/08.mp3",
+   "source": "eleven",
+   "prompt": "a puppy lapping food from a metal bowl",
+   "wording": 3,
+   "seed": 2,
+   "sound": "lap",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sniff/03.mp3",
+   "source": "eleven",
+   "prompt": "a small dog sniffing the ground, quick short sniffs",
+   "wording": 1,
+   "seed": 3,
+   "sound": "sniff",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sniff/06.mp3",
+   "source": "eleven",
+   "prompt": "a dog's nose sniffing close up, several sniffs",
+   "wording": 2,
+   "seed": 3,
+   "sound": "sniff",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sniff/12.mp3",
+   "source": "eleven",
+   "prompt": "a small dog sniffing the ground, quick short sniffs, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 3,
+   "sound": "sniff",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sniff/11.mp3",
+   "source": "eleven",
+   "prompt": "a small dog sniffing the ground, quick short sniffs, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 2,
+   "sound": "sniff",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sniff/10.mp3",
+   "source": "eleven",
+   "prompt": "a small dog sniffing the ground, quick short sniffs, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 1,
+   "sound": "sniff",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/yelp/07.mp3",
+   "source": "eleven",
+   "prompt": "a little dog's quick high yip of surprise",
+   "wording": 3,
+   "seed": 1,
+   "sound": "yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/howl/07.mp3",
+   "source": "eleven",
+   "prompt": "a small dog's soft mournful howl",
+   "wording": 3,
+   "seed": 1,
+   "sound": "howl",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/howl/08.mp3",
+   "source": "eleven",
+   "prompt": "a small dog's soft mournful howl",
+   "wording": 3,
+   "seed": 2,
+   "sound": "howl",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/boing/19.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/boing/19.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "boing",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/splash/01.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/splash/01.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "splash",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/bonk/22.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/bonk/22.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/rustle/03.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/rustle/03.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "rustle",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/buzz/01.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/buzz/01.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "buzz",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/yawn/02.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/yawn/02.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "yawn",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/snore/03.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/snore/03.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "snore",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/sneeze/08.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/sneeze/08.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "sneeze",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/munch/04.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/munch/04.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "munch",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/lap/06.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/lap/06.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "lap",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/sniff/03.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/sniff/03.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "sniff",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/yelp/07.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/yelp/07.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "retro/howl/07.mp3",
+   "source": "retro",
+   "prompt": "retro version of eleven/howl/07.mp3",
+   "wording": "-",
+   "seed": "-",
+   "sound": "howl",
+   "verdict": "keep"
+  }
+ ]
+}
