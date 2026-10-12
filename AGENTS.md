@@ -114,6 +114,18 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   without it. Never commit original audio. Every push to `main` that touches
   a game folder publishes it to GitHub Pages (`.github/workflows/pages.yml`,
   `<site>/<world>/<game>/`): only what is committed in `game/` goes out.
+- **Shared parts:** what every game of a world will use (its characters,
+  `debug.js`, sound and music) says so in its header (`// Shared by every
+  game`) and uses only other shared parts. It never holds a game's things,
+  state or layout: the game reaches in through hooks it sets (for Reksio,
+  `kit`/`addGestures`, `wear`, `pointAt`, `keepBetween`, `listen`;
+  `Debug.pin`), and a gag's state stays in the gag's file. A character is
+  split the same way: an engine (state, drawing, the kit), its everyday
+  gestures, and each game's gag moves kept with that game. A part that
+  needs a game-side name gets a hook, not an exception.
+  `test_shared_parts_know_no_game` checks what they depend on; whether one
+  is shaped around a single game is for review. They stay in the first
+  game's folder until a second game needs them.
 - **Game debuggability (`debug.js`, loaded first):** every bug must be
   replayable, so:
   - randomness comes from `Debug.random('<part>')`, never `Math.random`

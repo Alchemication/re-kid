@@ -19,6 +19,11 @@ MAX_LINES = 1000  # CLAUDE.md: keep source files under ~1000 lines
 UNSEEDED_OK = {"debug.js", "sound.js"}
 # Generated files, not ours to check.
 GENERATED = {"samples.js"}
+# A shared part says so in its header (CLAUDE.md, "Shared parts").
+SHARED_MARK = "// Shared by every game"
+# Data a game packs for its shared parts (samples.js, the world's barks.js):
+# the only game-side names a shared part may use.
+PACKED_DATA = {"SAMPLES", "BARKS"}
 
 
 def scripts(game: Path) -> list[Path]:
@@ -82,6 +87,30 @@ class TestConventions:
         assert local[0] == "debug.js", "debug.js must load first: the others use it"
         missing = [p.name for p in game.glob("*.js") if p.name not in local]
         assert not missing, f"not loaded by index.html: {missing}"
+
+    @pytest.mark.parametrize("game", GAMES, ids=GAME_IDS)
+    def test_shared_parts_know_no_game(self, game: Path) -> None:
+        """A shared part (a character, the debug tools, sound) uses only other
+        shared parts: the game reaches it through hooks it sets (Reksio.wear,
+        keepBetween, listen; Debug.pin), never the other way round. Reksio's
+        file once held the bowl's and the bramble's state, and debug.js read
+        the yard's layout."""
+        texts = {p.name: p.read_text() for p in scripts(game)}
+
+        def names(text: str, kind: str) -> set[str]:
+            found = re.search(rf"/\* {kind} ([^*]+)\*/", text)
+            return {n.strip() for n in found.group(1).split(",")} if found else set()
+
+        shared = {n for n, t in texts.items() if SHARED_MARK in t}
+        allowed = PACKED_DATA.union(*(names(texts[n], "exported") for n in shared))
+        bad = {
+            n: sorted(names(texts[n], "global") - allowed)
+            for n in sorted(shared)
+            if names(texts[n], "global") - allowed
+        }
+        assert not bad, (
+            f"shared parts using a game's own parts (give them a hook): {bad}"
+        )
 
     @pytest.mark.parametrize("game", GAMES, ids=GAME_IDS)
     def test_files_stay_small(self, game: Path) -> None:

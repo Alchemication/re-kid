@@ -11,8 +11,6 @@ function fakeReksio(x = 1500) {
     cut: false,
     x,
     facing: 1,
-    MIN_X: 380,
-    MAX_X: 3650,
     holdingBone: false,
     pose: 'stand',
     worn: [],

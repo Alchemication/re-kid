@@ -6,7 +6,8 @@
 // and it counts as a gesture under way. reksio.js holds what they are made
 // of; antics.js holds the bigger gags' own moves.
 
-/* global Clock, Sound, Music, Creatures, Figure, Reksio */
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
+/* global Clock, Sound, Music, Figure, Reksio */
 (() => {
   const NAPS = ['nap', 'curl', 'sprawl']
   // a bark is eager, cross or cheerful, never quite the same twice
@@ -22,8 +23,7 @@
     const big = rnd(0.7, 1.3)
     faceTo(pickOne(BARK_FACES), 60)
     Sound.bark()
-    const m = Reksio.mouth()
-    Creatures.notice('bark', m.x, m.y)
+    k.tell('bark', Reksio.mouth())
     await blend(add, 'tilt', -16 * big, 110, EASE_OUT)
     await blend(add, 'tilt', 0, 110)
     await blend(add, 'tilt', -12 * big, 100, EASE_OUT)
@@ -175,8 +175,7 @@
       await faceTo({ open: 0.6, teeth: 1, smile: 0.2, brows: -0.6 }, 60)
       await pause(30)
       Sound.snap()
-      const m = Reksio.mouth()
-      Creatures.notice('snap', m.x, m.y)
+      k.tell('snap', Reksio.mouth())
       await faceTo({ open: 0, teeth: 0 }, 50)
       await pause(60)
     }

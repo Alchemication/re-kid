@@ -5,6 +5,7 @@
 // a little higher and quicker by a random amount each time. Without it, he
 // has a synthesised woof.
 
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
 /* global BARKS, Clock */
 /* exported Sound */
 const Sound = (() => {

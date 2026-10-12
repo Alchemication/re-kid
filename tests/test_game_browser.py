@@ -91,6 +91,8 @@ NOT_GESTURES = {
     "wearing",
     "pointAt",
     "addGestures",  # how gestures.js and antics.js add theirs
+    "keepBetween",  # set once by the game
+    "listen",
     "mouth",
     "beginStretch",
     "endStretch",  # as "stretch" above
@@ -314,10 +316,10 @@ class TestThings:
         y.page.evaluate(f"yardGame.tap('{name}')")
         y.page.wait_for_function("yardGame.state().busy", timeout=DONE_MS)
         y.page.wait_for_timeout(CUT_AFTER_MS)
-        y.page.evaluate("yardGame.walk(Reksio.MIN_X + 100)")
+        y.page.evaluate("yardGame.walk(Layout.MIN_X + 100)")
         s = y.settled()
         assert s["uses"].get(name) == 1
-        assert abs(s["reksio"]["x"] - y.page.evaluate("Reksio.MIN_X + 100")) < 5, (
+        assert abs(s["reksio"]["x"] - y.page.evaluate("Layout.MIN_X + 100")) < 5, (
             "the waiting walk never ran"
         )
 

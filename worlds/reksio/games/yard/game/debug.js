@@ -35,7 +35,7 @@
 //   bubbles, no bird hunting), so one gesture or gag can be tried, or tested,
 //   on its own.
 
-/* global Layout */
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
 /* exported Clock, Motion, Debug */
 const Clock = (() => {
   const MAX_STEP_MS = 100 // a longer frame (the page was hidden, or very busy) counts as this: the game pauses, it doesn't jump
@@ -193,7 +193,7 @@ const Debug = (() => {
   function trace(kind, data = {}) {
     events.push({ t: Math.round(Clock.now()), kind, ...data })
     if (events.length > TRACE_SIZE) events.shift()
-    if (on) console.debug('[yard]', kind, data)
+    if (on) console.debug('[game]', kind, data)
   }
 
   /** The trace as text, one event a line, oldest first. */
@@ -237,7 +237,7 @@ const Debug = (() => {
       replayUrl: replayUrl(),
       viewport: { width: window.innerWidth, height: window.innerHeight },
       userAgent: navigator.userAgent,
-      layout: typeof Layout === 'undefined' ? null : Layout,
+      layout: pinned.layout,
       state: moment.state,
       inputs,
       snapshots,
@@ -270,20 +270,25 @@ const Debug = (() => {
     })
   }
 
-  /** This play's address: seeded, with its layout pinned. An unseeded play
-   * picks its things partly from the browser's memory of the last play, which
-   * a replay won't have, so the seed alone wouldn't build the same yard.
-   * (Forced flags still make their random draws: the rest is unchanged.) */
+  // What the game pinned about this play (pin()): the page-address flags
+  // that rebuild it, and its layout, for the bug report.
+  let pinned = { flags: {}, layout: null }
+
+  /** The game says what this play is, once it is decided: `flags`, the
+   * page-address flags that build the same play again (an unseeded play may
+   * pick its things partly from the browser's memory of the last one, which a
+   * replay won't have, so the seed alone wouldn't), and `layout`, kept in a
+   * bug report. */
+  function pin({ flags = {}, layout = null }) {
+    pinned = { flags, layout }
+  }
+
+  /** This play's address: seeded, with what the game pinned. (Forced flags
+   * still make their random draws: the rest is unchanged.) */
   function replayUrl() {
     const url = new URL(location.href)
     url.searchParams.set('seed', String(seed))
-    if (typeof Layout !== 'undefined') {
-      url.searchParams.set('props', Layout.props.join(','))
-      url.searchParams.set('creatures', Layout.creatures.join(','))
-      url.searchParams.set('flowers', Layout.flowers ? '1' : '0')
-      url.searchParams.set('rain', Layout.rain ? '1' : '0')
-      url.searchParams.set('fruit', Layout.fruit)
-    }
+    for (const [k, v] of Object.entries(pinned.flags)) url.searchParams.set(k, String(v))
     return url.href
   }
 
@@ -293,7 +298,7 @@ const Debug = (() => {
 
   function report(where, e) {
     trace('error', { where, message: String(e?.message || e) })
-    console.error(`[yard] ${where}:`, e, `\nreplay: ${replayUrl()}\ntrace:\n${dump()}`)
+    console.error(`[game] ${where}:`, e, `\nreplay: ${replayUrl()}\ntrace:\n${dump()}`)
   }
 
   /** Await a gesture that a tap may cut short: a cut is fine (noted in the
@@ -345,10 +350,10 @@ const Debug = (() => {
     overlay.textContent = `seed ${seed}${broken.size ? `\nBROKEN: ${[...broken].join(', ')}` : ''}\n${lines.join('\n')}\n\n${dump(events.slice(-OVERLAY_EVENTS))}`
   }
 
-  console.info(`[yard] seed ${seed}`)
+  console.info(`[game] seed ${seed}`)
 
   /** Game time (Clock), the clock of the trace, inputs and snapshots. */
   const now = () => Math.round(Clock.now())
 
-  return { on, still, seed, seeded, now, random, trace, dump, replayUrl, ignoreCut, check, show, events, input, inputs, record, snapshots, bugReport, saveBugReport }
+  return { on, still, seed, seeded, now, random, trace, dump, pin, replayUrl, ignoreCut, check, show, events, input, inputs, record, snapshots, bugReport, saveBugReport }
 })()

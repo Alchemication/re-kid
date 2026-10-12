@@ -23,7 +23,8 @@
 // blends him back to standing from exactly where he was drawn, so nothing is
 // ever left frozen part-way.
 
-/* global Clock, Debug, Sound, Layout, Figure, Motion, Life, Gait */
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
+/* global Clock, Debug, Sound, Figure, Motion, Life, Gait */
 /* exported Reksio */
 const Reksio = (() => {
   const GROUND = 812 // y of his feet, in scene units
@@ -35,8 +36,6 @@ const Reksio = (() => {
   const STRETCH_RATE = 210 // how fast he stretches while held (units/s)
   const RELAX_MS = 220 // how fast he springs up from a rest when asked to do something
   const STANCE_MS = 260 // dropping to all fours, or standing up
-  const MIN_X = Layout.MIN_X // the house wall is the yard's left end
-  const MAX_X = Layout.MAX_X // the fence is its right end
   const F = Figure.POSES
   // the resting poses, by the names the yard knows them by
   const REST = { sit: F.sitDog, lie: F.lie, nap: F.nap, curl: F.curl, sprawl: F.sprawl, bowStretch: F.bowStretch, backStretch: F.backStretch }
@@ -50,6 +49,8 @@ const Reksio = (() => {
   const paint = Figure.mount(bob)
 
   let x = 1000
+  let minX = -Infinity // the ends of the scene he may walk to: the game says (keepBetween)
+  let maxX = Infinity
   let holding = false // carrying a bone
   const worn = new Map() // what gags have put on him, by name: change(pose, toFigure) → the pose with it
   let facing = 1
@@ -63,7 +64,7 @@ const Reksio = (() => {
   let stretch = 0 // how far his front half is pulled forward
   let stretching = false
 
-  const clamp = (v) => Math.max(MIN_X, Math.min(MAX_X, v))
+  const clamp = (v) => Math.max(minX, Math.min(maxX, v))
   const random = Debug.random('reksio') // this part's own random stream (debug.js)
   const rnd = (lo, hi) => lo + random() * (hi - lo)
   const rndInt = (lo, hi) => Math.floor(rnd(lo, hi + 1))
@@ -378,7 +379,7 @@ const Reksio = (() => {
 
   /** How far he can stretch before his nose reaches the end of the yard. */
   function maxStretch() {
-    const room = facing > 0 ? MAX_X + 130 - x : x - (MIN_X - 130)
+    const room = facing > 0 ? maxX + 130 - x : x - (minX - 130)
     return Math.max(0, Math.min(MAX_STRETCH, room / SCALE))
   }
 
@@ -537,6 +538,12 @@ const Reksio = (() => {
     }
   }
 
+  const listeners = [] // who hears what he does (listen)
+
+  /** Let the game know he did something others may notice (a bark, a snap)
+   * at `at`, a point in the scene. */
+  const tell = (what, at) => listeners.forEach((fn) => fn(what, at))
+
   /** Where a point of his, as drawn, is in the scene: at(pose) finds it in
    * his own units (Figure.mouthAt, Figure.bowlTopAt). */
   const pointAt = (at) => toScene(at(last ?? compose()))
@@ -549,7 +556,7 @@ const Reksio = (() => {
   // and a bigger gag's own moves in antics.js): they move his layers only
   // through these, so relax() cuts them short the same way.
   const kit = {
-    blend, pause, loose, faceTo, faceOff, actTo, actOff, onFours, upright, settle, rise, basePose, toScene, add, POSES: F, SCALE,
+    blend, pause, loose, tell, faceTo, faceOff, actTo, actOff, onFours, upright, settle, rise, basePose, toScene, add, POSES: F, SCALE,
     EASE, EASE_OUT, EASE_IN, OVERSHOOT, random, rnd, rndInt, pickOne,
     /** How far he is down on all fours (0 upright, 1 on all fours). */
     get fours() { return stance.fours },
@@ -587,7 +594,16 @@ const Reksio = (() => {
     /** The names of everything gags have put on him. */
     get worn() { return [...worn.keys()] },
     walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, wear, beginStretch, endStretch, sleepIn, floatZ,
-    MIN_X, MAX_X,
+    /** The ends of the scene he may walk to (the yard's house wall and fence). */
+    keepBetween(min, max) {
+      minX = min
+      maxX = max
+      x = clamp(x)
+      place()
+    },
+    /** fn(what, at) hears what he does that others may notice: a bark, a
+     * snap, at his mouth (the yard's creatures). */
+    listen: (fn) => listeners.push(fn),
     kit,
     /** Add gestures made from the kit (gestures.js, antics.js): each counted
      * while under way. A name he has already is a mistake, not a replacement. */

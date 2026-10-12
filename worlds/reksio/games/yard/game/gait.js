@@ -7,6 +7,7 @@
 // Pure: given a pose and where he is in his stride, returns the pose to
 // draw; reksio.js keeps the stride's phase and speed.
 
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
 /* global Figure */
 /* exported Gait */
 const Gait = (() => {

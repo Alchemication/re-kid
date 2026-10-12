@@ -10,6 +10,7 @@
 // random stream (how often it draws depends on time, so it must not shift
 // the rest of a seeded play).
 
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
 /* exported Life */
 const Life = (() => {
   // Moods drift every so often; each colours his face, how he stands and how

@@ -42,6 +42,8 @@
   // in his doghouse (intro.yaml: he pops out of it as an episode starts). He
   // sleeps at dawn and wakes by himself (Layout.wakeAfter), or sooner when
   // tapped: that first tap is his wake-up call and nothing else.
+  Reksio.keepBetween(Layout.MIN_X, Layout.MAX_X) // from the house wall to the fence
+  Reksio.listen((what, at) => Creatures.notice(what, at.x, at.y)) // a bark, a snap: the creatures hear
   let asleep = Layout.morning
   if (asleep) Reksio.sleepIn(Things.DOOR.x)
   let camX = clampCam(Reksio.x - Painting.VIEW_W / 2)
@@ -372,7 +374,7 @@
     flowers: () => ({ x: 1570 + X('flowers'), r: 130 }),
     dig: () => ({ x: 2060 + X('dig'), r: 130 }),
     film: () => ({ x: 2430 + X('film'), r: 220 }),
-    gate: () => ({ x: Reksio.MAX_X + 20, r: 90 }),
+    gate: () => ({ x: Layout.MAX_X + 20, r: 90 }),
     bird: () => ({ x: Bird.perch.x - 30, r: 130 }), // on the ground, under the bird
     trap: () => ({ x: (Things.mouse === 'fed' ? 960 : 1000) + X('trap'), r: 110 }),
     tree: () => ({ x: 1600 + X('tree'), r: 120 }),
@@ -422,7 +424,7 @@
     Sound.ensure()
     if (asleep) return perform('wake up')
     Music.start()
-    const intent = Input.keyDown(key, { nearest: nearest(), minX: Reksio.MIN_X, maxX: Reksio.MAX_X })
+    const intent = Input.keyDown(key, { nearest: nearest(), minX: Layout.MIN_X, maxX: Layout.MAX_X })
     if (!intent) return
     if (intent === 'press') holdKey = e.key // any other key: tap to bark, hold to stretch
     perform(intent)

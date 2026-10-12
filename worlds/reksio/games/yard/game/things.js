@@ -478,7 +478,7 @@ const Things = (() => {
       },
     },
     house: {
-      at: () => Reksio.MIN_X,
+      at: () => Layout.MIN_X,
       face: -1,
       async run() {
         await Reksio.nod(-20, 300)
@@ -491,7 +491,7 @@ const Things = (() => {
       },
     },
     gate: {
-      at: () => Reksio.MAX_X,
+      at: () => Layout.MAX_X,
       face: 1,
       async run() {
         Sound.rattle()

@@ -14,6 +14,7 @@
 //
 // Real instrument samples (CC0) come from samples.js, played note by note.
 
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
 /* global Sound, SAMPLES */
 /* exported Music */
 const Music = (() => {

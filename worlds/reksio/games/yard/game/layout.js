@@ -174,8 +174,12 @@ const Layout = (() => {
     // private window or storage blocked: the next play just won't remember
   }
 
-  return {
+  const layout = {
     WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, moonRise, shift, hidden, puddles, perches, sun, moon, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
+  /** The page-address flags that build this same yard again. */
+  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit })
+  Debug.pin({ flags: replayFlags(), layout }) // a replay builds this same yard (debug.js)
+  return layout
 })()

@@ -9,6 +9,7 @@
 // is pure: the same pose always gives the same drawing, testable without a
 // page. mount() makes the SVG once; its draw(pose) only sets attributes.
 
+// Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
 /* exported Figure */
 const Figure = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'

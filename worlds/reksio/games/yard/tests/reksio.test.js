@@ -11,10 +11,11 @@ const DT = 1 / 60
 
 function reksio() {
   const { Sound, Music } = fakeSound()
-  const noticed = [] // what the creatures were told he did
-  const Creatures = { notice: (type, x, y) => noticed.push(type) }
-  const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures } })
+  const noticed = [] // what the game heard he did
+  const page = load(['debug.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: '?seed=1', dom: true, globals: { Sound, Music } })
   const R = page.get('Reksio')
+  R.keepBetween(380, 3650)
+  R.listen((what) => noticed.push(what))
   return {
     R,
     page,
@@ -48,9 +49,9 @@ describe('walking', () => {
   it('never takes him past the ends of the yard', async () => {
     const r = reksio()
     await r.walk(-500)
-    assert.equal(r.R.x, r.R.MIN_X)
+    assert.equal(r.R.x, 380)
     await r.walk(99999)
-    assert.equal(r.R.x, r.R.MAX_X)
+    assert.equal(r.R.x, 3650)
   })
 
   it('faces the way he goes', async () => {
@@ -167,7 +168,7 @@ describe('yawning', () => {
     const sizes = []
     const Sound = new Proxy({}, { get: (_t, name) => (name === 'yawn' ? (s) => sizes.push(s) : name === 'from' ? (_d, play) => play() : () => {}) })
     const { Music } = fakeSound()
-    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+    const page = load(['debug.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music } })
     return { R: page.get('Reksio'), page, sizes }
   }
 
@@ -203,7 +204,7 @@ describe('yawning', () => {
 describe('how he goes', () => {
   it('at a sniffing trot, he sniffs as he goes, and gets there', async () => {
     const { Sound, Music, played } = fakeSound()
-    const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: '?seed=1', dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+    const page = load(['debug.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: '?seed=1', dom: true, globals: { Sound, Music } })
     const R = page.get('Reksio')
     let done = null
     R.walkTo(R.x + 250, { sniffing: true }).then((ok) => (done = ok))
@@ -232,7 +233,7 @@ describe('how he goes', () => {
     const paces = []
     for (let seed = 1; seed <= 16; seed++) {
       const { Sound, Music } = fakeSound()
-      const page = load(['debug.js', 'layout.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music, Creatures: { notice() {} } } })
+      const page = load(['debug.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: `?seed=${seed}`, dom: true, globals: { Sound, Music } })
       const R = page.get('Reksio')
       const x0 = R.x
       R.walkTo(x0 + 350)
