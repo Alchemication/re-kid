@@ -234,8 +234,23 @@ wake Reksio at home.
    things (first uses only, the bird and gate included) or 10 minutes; the
    moon then rises for about 40 s with everything still working; then he
    goes to bed by himself, or at a tap on the doghouse. Adam: "very messy, I
-   don't ever know even myself when it will end". Options discussed, one
-   chosen and built.
+   don't ever know even myself when it will end". Options discussed,
+   Adam sleeping on them (2026-10-12):
+   - A: a fixed-length day (about 6 min), the sun visibly crossing the sky;
+   - B: Reksio gets sleepy and the child puts him to bed (a tap on the
+     glowing doghouse), with a long cap;
+   - C: an evening ritual from the cartoon: at sunset the boy whistles off
+     screen, the bowl fills with steaming food, he eats, goes in, the
+     picture closes (*Kosmonauta*'s ending); no 40 s limbo;
+   - D: a grown-up can call the evening early (a long press on the sun).
+   Claude's recommendation: A + C + D, with B's yawns as the sun gets low.
+   To decide: the trigger (time, the child, or things done made visible),
+   the day's length, the ritual, the parent's gesture.
+   Also open (Adam, 2026-10-12): are episodes entered from the yard, or
+   from a main screen that leads to the yard and the episodes? The
+   decision of 2026-10-07 (above) is the yard as home, doorways found in
+   it, no hub until three episodes; a main screen would revisit it. To be
+   simple, cool, novel and funny: its own discussion.
 2. *Wrap up the music* (step 2 of "Sound and music" below): its direction,
    then the work.
 3. *Eliot plays the yard* (the bowl, the bramble, the new sounds, the new
