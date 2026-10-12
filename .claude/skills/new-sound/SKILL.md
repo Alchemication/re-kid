@@ -24,7 +24,16 @@ the tools and reads what the files measure, but every keep is Adam's.
 
 ## 1. Which sounds, and what for
 
-- From a gag, the audit, or Adam's complaint. Each sound is a name in
+- From a gag, the audit, or Adam's complaint. For an episode game, start
+  from Adam's marks on the episode (`main.py mark`, saved as `observed`
+  sound claims in its breakdown): they say which sounds the original has.
+  Make our own version of each, inspired, never copied; a mark's note ("a
+  short dry creak, high") goes into the wording. The mark page is research
+  on the original; this skill makes the game's sounds.
+- The tools are set up for Reksio's yard (`adopt.py --game`, one
+  `sounds.py`, the board playing the yard's `sound.js`). The first run for
+  another game makes them take a game, and its retro updates this skill.
+- Each sound is a name in
   `sound.js` (`Sound.<name>`). A new name needs a function there first (a
   synth version, or `() => {}` silent until it has takes): `test_effects`
   fails on an id `sound.js` lacks.
