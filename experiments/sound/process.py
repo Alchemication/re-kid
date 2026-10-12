@@ -44,7 +44,11 @@ RECIPES = {
     "clean": {"filters": [], "rate": 44100, "bitrate": "64k"},
     "retro": {
         # tape-ish: lows and highs rolled off, a little warmth, lower rate
-        "filters": ["highpass=f=120", "lowpass=f=6500", "asoftclip=type=tanh:param=0.6"],
+        "filters": [
+            "highpass=f=120",
+            "lowpass=f=6500",
+            "asoftclip=type=tanh:param=0.6",
+        ],
         "rate": 22050,
         "bitrate": "48k",
     },
@@ -52,7 +56,12 @@ RECIPES = {
 
 
 def ffmpeg(*args: str) -> str:
-    done = subprocess.run(["ffmpeg", "-hide_banner", "-y", *args], capture_output=True, text=True, check=True)
+    done = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-y", *args],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
     return done.stderr
 
 
@@ -65,7 +74,13 @@ def mean_db(filters: str, src: Path) -> tuple[float, float]:
 
 
 def main() -> None:
-    found = json.loads((OUT / "manifest.js").read_text().removeprefix("window.CANDIDATES = ").rstrip().removesuffix(";"))
+    found = json.loads(
+        (OUT / "manifest.js")
+        .read_text()
+        .removeprefix("window.CANDIDATES = ")
+        .rstrip()
+        .removesuffix(";")
+    )
     for recipe, r in RECIPES.items():
         for sound, src in KEPT.items():
             chain = ",".join([TRIM, "aformat=channel_layouts=mono", *r["filters"]])
@@ -73,18 +88,34 @@ def main() -> None:
             gain = min(TARGET_DB - mean, PEAK_DB - peak)
             dst = OUT / recipe / sound / Path(src).name
             dst.parent.mkdir(parents=True, exist_ok=True)
-            ffmpeg("-i", str(OUT / src), "-af", f"{chain},volume={gain:.2f}dB", "-ar", str(r["rate"]), "-b:a", r["bitrate"], str(dst))
+            ffmpeg(
+                "-i",
+                str(OUT / src),
+                "-af",
+                f"{chain},volume={gain:.2f}dB",
+                "-ar",
+                str(r["rate"]),
+                "-b:a",
+                r["bitrate"],
+                str(dst),
+            )
             entry = found[sound]
-            entry["candidates"] = [c for c in entry["candidates"] if c["file"] != str(dst.relative_to(OUT))]
-            entry["candidates"].append({
-                "file": str(dst.relative_to(OUT)),
-                "source": recipe,
-                "prompt": f"{recipe} version of {src}",
-                "wording": "-",
-                "seed": "-",
-            })
+            entry["candidates"] = [
+                c for c in entry["candidates"] if c["file"] != str(dst.relative_to(OUT))
+            ]
+            entry["candidates"].append(
+                {
+                    "file": str(dst.relative_to(OUT)),
+                    "source": recipe,
+                    "prompt": f"{recipe} version of {src}",
+                    "wording": "-",
+                    "seed": "-",
+                }
+            )
             print(f"{recipe} {sound}: {dst.stat().st_size // 1024} KB, {gain:+.1f} dB")
-    (OUT / "manifest.js").write_text(f"window.CANDIDATES = {json.dumps(found, indent=1)};\n")
+    (OUT / "manifest.js").write_text(
+        f"window.CANDIDATES = {json.dumps(found, indent=1)};\n"
+    )
 
 
 if __name__ == "__main__":

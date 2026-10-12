@@ -125,6 +125,49 @@ SAMPLE_BITRATE = "64k"
 """MP3 bitrate of packed samples, mono. Short plucked and struck notes stay
 clean at this rate, and fifty of them pack into well under 1 MB."""
 
+EFFECTS_NAME = "effects.yaml"
+"""A game's recorded sound effects inside its folder (``schema.effects.EffectSet``):
+the takes picked by ear for each sound, and what each was made from."""
+
+EFFECTS_DIR = "effects"
+"""Where the picked takes are kept, as made, inside a game folder (committed):
+the packing recipe can change without making them again."""
+
+EFFECTS_JS = "game/effects.js"
+"""Where ``main.py effects`` writes the packed effects inside a game folder (a
+script, as ``SAMPLES_JS``, so a ``file://`` page can load them)."""
+
+EFFECT_OUT_RATE = 22_050
+"""Sample rate of packed effects. Part of the retro recipe Adam picked by ear
+over a clean one (2026-10-12): a lower rate softens the top, as old film sound."""
+
+EFFECT_BITRATE = "48k"
+"""MP3 bitrate of packed effects, mono: about 7 KB a take at this rate."""
+
+EFFECT_HIGHPASS_HZ = 120
+"""Lows below this are rolled off (the retro recipe: thin, like a 1970s
+soundtrack; small speakers can't play them anyway)."""
+
+EFFECT_LOWPASS_HZ = 6_500
+"""Highs above this are rolled off (the retro recipe)."""
+
+EFFECT_SATURATION = 0.6
+"""How hard the takes are softly clipped (ffmpeg asoftclip tanh), 0 to 1: a
+touch of tape warmth (the retro recipe)."""
+
+EFFECT_LOUDNESS_DB = -18.0
+"""Mean loudness every take is brought to, so takes of one sound match and the
+game sets each sound's level once (``gain``). Measured as a mean, not with
+loudnorm: that needs about 3 s of sound, and most takes are under 2."""
+
+EFFECT_PEAK_DB = -1.0
+"""A take is never made louder than this at its peak: a sharp one (a bonk)
+ends quieter than its mean target rather than clipping."""
+
+EFFECT_MAX_SECONDS = 4.0
+"""Longer takes are cut, with a short fade: no effect in the game needs more,
+and a long tail would overlap the next."""
+
 PITCH_TOLERANCE_CENTS = 60
 """How far a sample's measured pitch may sit from the nearest semitone before
 it is reported. Plucked and struck notes drift a little; more than this

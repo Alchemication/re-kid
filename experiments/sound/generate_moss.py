@@ -17,7 +17,6 @@ from pathlib import Path
 import mlx.core as mx
 import mlx_speech
 from mlx_speech.audio import write_wav
-
 from sounds import SOUNDS
 
 OUT = Path(__file__).parent / "out"
@@ -28,16 +27,22 @@ def manifest() -> dict:
     path = OUT / "manifest.js"
     if not path.exists():
         return {}
-    text = path.read_text().removeprefix("window.CANDIDATES = ").rstrip().removesuffix(";")
+    text = (
+        path.read_text().removeprefix("window.CANDIDATES = ").rstrip().removesuffix(";")
+    )
     return json.loads(text)
 
 
 def save(found: dict) -> None:
-    (OUT / "manifest.js").write_text(f"window.CANDIDATES = {json.dumps(found, indent=1)};\n")
+    (OUT / "manifest.js").write_text(
+        f"window.CANDIDATES = {json.dumps(found, indent=1)};\n"
+    )
 
 
 def main(names: list[str]) -> None:
-    lock = OUT / "generating.lock"  # one run at a time: two would each hold the model (7 GB) and write over each other
+    lock = (
+        OUT / "generating.lock"
+    )  # one run at a time: two would each hold the model (7 GB) and write over each other
     try:
         lock.parent.mkdir(exist_ok=True)
         lock.touch(exist_ok=False)
@@ -61,8 +66,10 @@ def run(names: list[str]) -> None:
         entry = found.setdefault(name, {"for": sound["for"], "candidates": []})
         entry["for"] = sound["for"]
         done = {(c["prompt"], c["seed"]) for c in entry["candidates"]}
-        n = len(list(folder.glob("*.wav")))  # new takes are added after the ones already picked from
-        for p, prompt in enumerate(sound["prompts"]):
+        n = len(
+            list(folder.glob("*.wav"))
+        )  # new takes are added after the ones already picked from
+        for prompt in sound["prompts"]:
             for seed in SEEDS:
                 if (prompt, seed) in done:
                     continue
@@ -72,14 +79,19 @@ def run(names: list[str]) -> None:
                 out = model.generate(prompt, duration_seconds=sound["seconds"])
                 file = folder / f"{n:02d}.wav"
                 write_wav(str(file), out.waveform, sample_rate=out.sample_rate)
-                entry["candidates"].append({
-                    "file": str(file.relative_to(OUT)),
-                    "source": "moss",
-                    "prompt": prompt,
-                    "wording": sound["prompts"].index(prompt) + 1,
-                    "seed": seed,
-                })
-                print(f"{name} {n:02d} ({time.time() - t:.1f} s): {prompt[:50]}", flush=True)
+                entry["candidates"].append(
+                    {
+                        "file": str(file.relative_to(OUT)),
+                        "source": "moss",
+                        "prompt": prompt,
+                        "wording": sound["prompts"].index(prompt) + 1,
+                        "seed": seed,
+                    }
+                )
+                print(
+                    f"{name} {n:02d} ({time.time() - t:.1f} s): {prompt[:50]}",
+                    flush=True,
+                )
         save(found)
     print(f"done in {(time.time() - started) / 60:.1f} min")
 

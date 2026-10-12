@@ -50,7 +50,7 @@ const COMPLEXITY = {
 export default [
   {
     files: ['worlds/*/games/*/game/**/*.js'],
-    ignores: ['**/samples.js'], // generated
+    ignores: ['**/samples.js', '**/effects.js'], // generated
     languageOptions: { ecmaVersion: 2024, sourceType: 'script', globals: BROWSER },
     rules: { ...CORRECTNESS, ...COMPLEXITY },
   },

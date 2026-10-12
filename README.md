@@ -17,6 +17,7 @@ src/
   look.py               plays a gag in Chrome and photographs it as it runs
   audio.py              audio measurements, clips, spectrograms (ffmpeg, librosa)
   samples.py            downloads, measures and packs a game's instrument samples
+  effects.py            trims, levels and packs a game's picked sound effects (the retro recipe)
   barks.py              cuts the marked original barks into a local script for the games
   mark.py               local server for the sound-marking tool
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
@@ -30,10 +31,14 @@ worlds/<id>/
   audio/barks.js        the original barks, packed for the games (generated, gitignored)
   games/<game>/brief.yaml  game brief (schema.brief.GameBrief)
   games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
+  games/<game>/effects.yaml  recorded sound effects picked by ear (schema.effects.EffectSet)
+  games/<game>/effects/      the picked takes, as made (packed into game/effects.js)
   games/<game>/game/    the game: static HTML, CSS and plain scripts
   games/<game>/tests/   the game's JS unit tests (node:test)
   games/<game>/lab/     workbench pages beside a game, opened from disk, not published
                         (yard/lab: Reksio drawn from poses by game/figure.js)
+experiments/sound/      making sound effects with a model and picking them by ear on a
+                        board page (scripts committed; audio and the API key in .env not)
   media/intro/          intro video clips (downloaded, gitignored)
 .claude/skills/         procedures for Claude Code sessions (new-episode)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
@@ -67,6 +72,7 @@ uv run python main.py replay [REPORT] [--last S] [--every MS] [--out DIR]
 uv run python main.py look WORLD [GAME] [--flags Q] [--before JS]... [--watch JS]
                           [--for S] [--every MS] [--size WxH] [--close] [--out DIR]
 uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
+uv run python main.py effects WORLD [GAME]    # rebuilds the game's effects.js
 uv run python main.py barks WORLD             # packs the marked barks (local only)
 uv run python main.py schema world|sources|episodes|intro|brief
 ```

@@ -10,6 +10,7 @@ Subcommands:
     replay    Replay a game's bug report and photograph the run-up to it.
     look      Play a gag and photograph it as it runs (frames, contact sheet).
     samples   Download and pack a game's instrument samples into samples.js.
+    effects   Trim, level and pack a game's picked sound effects into effects.js.
     barks     Cut the marked original barks into a local script for the games.
     schema    Print the JSON Schema for a research file type.
 
@@ -71,6 +72,13 @@ Examples:
         Downloads the samples listed in games/yard/samples.yaml (CC0
         libraries), measures their pitch and packs them into samples.js.
 
+    uv run python main.py effects reksio yard
+        Takes the sound effects picked by ear (games/yard/effects.yaml, the
+        takes in games/yard/effects/), trims the silence at their start,
+        levels them, rolls off lows and highs with a touch of saturation
+        (the retro recipe) and packs them into effects.js. The game plays a
+        random take of a sound each time, instead of its synthesised one.
+
     uv run python main.py barks reksio
         Cuts the barks Adam marked (audio/intro/marks/bark.wav) apart and
         packs them into audio/barks.js. The games play them a little higher
@@ -92,6 +100,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
 
 from commands import (
     cmd_barks,
+    cmd_effects,
     cmd_episodes,
     cmd_list,
     cmd_look,
@@ -259,6 +268,16 @@ def main() -> int:
         help=f"Game folder under games/ (default: {DEFAULT_GAME})",
     )
 
+    p_effects = sub.add_parser("effects", help="Pack a game's picked sound effects")
+    p_effects.add_argument("world", metavar="WORLD")
+    p_effects.add_argument(
+        "game",
+        metavar="GAME",
+        nargs="?",
+        default=DEFAULT_GAME,
+        help=f"Game folder under games/ (default: {DEFAULT_GAME})",
+    )
+
     p_barks = sub.add_parser("barks", help="Pack the marked barks for the games")
     p_barks.add_argument("world", metavar="WORLD")
 
@@ -278,6 +297,7 @@ def main() -> int:
         "replay": cmd_replay,
         "look": cmd_look,
         "samples": cmd_samples,
+        "effects": cmd_effects,
         "barks": cmd_barks,
         "schema": cmd_schema,
     }

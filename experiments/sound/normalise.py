@@ -20,9 +20,14 @@ for f in sorted(OUT.glob("moss/*/*.wav")):
         shutil.copy(f, raw)
     with wave.open(str(raw)) as w:
         params = w.getparams()
-        d = np.frombuffer(w.readframes(params.nframes), dtype=np.int16).astype(float) / 32768
+        d = (
+            np.frombuffer(w.readframes(params.nframes), dtype=np.int16).astype(float)
+            / 32768
+        )
     rms = np.sqrt((d**2).mean()) or 1e-9
-    gain = min(10 ** (TARGET_DB / 20) / rms, 10 ** (PEAK_DB / 20) / (abs(d).max() or 1e-9))
+    gain = min(
+        10 ** (TARGET_DB / 20) / rms, 10 ** (PEAK_DB / 20) / (abs(d).max() or 1e-9)
+    )
     with wave.open(str(f), "wb") as w:
         w.setparams(params)
         w.writeframes((np.clip(d * gain, -1, 1) * 32767).astype(np.int16).tobytes())

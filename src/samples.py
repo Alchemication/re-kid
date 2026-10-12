@@ -80,7 +80,7 @@ def fetch(library: str, path: str, cache: Path) -> Path:
     return target
 
 
-def _ffmpeg(args: list[str]) -> None:
+def run_ffmpeg(args: list[str]) -> None:
     exe = shutil.which("ffmpeg")
     if exe is None:
         raise SampleError("ffmpeg not found — install it with `brew install ffmpeg`.")
@@ -107,7 +107,7 @@ def prepare(src: Path, inst: Instrument, workdir: Path) -> tuple[Path, Path]:
     )
     wav = workdir / f"{src.stem}.prepared.wav"  # never the source's own name
     mp3 = workdir / f"{src.stem}.prepared.mp3"
-    _ffmpeg(
+    run_ffmpeg(
         [
             "-i",
             str(src),
@@ -120,7 +120,7 @@ def prepare(src: Path, inst: Instrument, workdir: Path) -> tuple[Path, Path]:
             str(wav),
         ]
     )
-    _ffmpeg(["-i", str(wav), "-ac", "1", "-b:a", SAMPLE_BITRATE, str(mp3)])
+    run_ffmpeg(["-i", str(wav), "-ac", "1", "-b:a", SAMPLE_BITRATE, str(mp3)])
     return wav, mp3
 
 

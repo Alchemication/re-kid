@@ -352,10 +352,23 @@ wake Reksio at home.
      retro won all 13: mono, 22 kHz, lows under 120 Hz and highs over
      6.5 kHz rolled off, a touch of saturation (`process.py`). Picks are
      kept in `experiments/sound/picks.json`.
-   - *Next:* bring the kept takes into the game: a list of chosen files
-     per sound, packed like the samples, played one of the kept takes at
-     random each time (variety for free) with a little pitch and speed
-     jitter, as the barks. His voice comes back this way.
+   - *In the game* (2026-10-12): the 40 ElevenLabs takes Adam kept, for 13
+     sounds, are in `games/yard/effects/` (as made, 1 MB) and listed in
+     `effects.yaml` with their prompts; `main.py effects` trims, levels and
+     roughens them (the retro recipe, `config.EFFECT_*`) into `effects.js`
+     (464 KB). Each sound plays a random take, never the same twice running,
+     0.94–1.06 speed, one take at a time (a call while one plays lets it
+     play on: munching is called a chew at a time). His voice is back where
+     it has takes (all but slurp); the synth plays until the takes are
+     decoded, after the first tap. *Adam to judge by ear:* each sound's
+     level against the synth ones (`EFFECT_VOLUME` in sound.js, `gain` per
+     sound in effects.yaml), and whether the snore (2.5 s) fits the
+     doghouse's snore every 1.7 s.
+   - *Next:* Adam picks more takes for boing, sneeze and yelp (one keep
+     each; 36 more are on the board); then the skill, written from this
+     run (`new-sound`): find the sounds, word them by the rules above,
+     generate, pick on the board, process, pack, play, test, retro. Music
+     stays out of it until its direction is decided.
 
    **Reference-guided generation** (Adam's earlier idea): generate new
    sounds from short original clips used as a style reference

@@ -28,7 +28,9 @@ from sounds import SOUNDS
 OUT = Path(__file__).parent / "out"
 ENV = Path(__file__).parents[2] / ".env"
 API = "https://api.elevenlabs.io"
-TAKES = 3  # three takes of each wording, as for MOSS: enough to hear the spread
+TAKES = int(
+    os.environ.get("TAKES", "3")
+)  # takes of each wording (3, as for MOSS, is enough to hear the spread)
 PROMPT_INFLUENCE = 0.5  # 0 to 1: higher follows the wording more closely, with less variety (API default 0.3)
 PARALLEL = 4  # calls at once: the plan caps concurrent requests, and a 429 is retried
 RETRIES = 5
@@ -62,10 +64,14 @@ def call(path: str, body: dict | None = None) -> bytes:
             with urllib.request.urlopen(req, timeout=120) as r:
                 return r.read()
         except urllib.error.HTTPError as e:
-            if e.code == 429 and attempt < RETRIES - 1:  # too many at once: wait and try again
+            if (
+                e.code == 429 and attempt < RETRIES - 1
+            ):  # too many at once: wait and try again
                 time.sleep(2 * (attempt + 1))
                 continue
-            raise RuntimeError(f"ElevenLabs said {e.code}: {e.read().decode()[:500]}") from None
+            raise RuntimeError(
+                f"ElevenLabs said {e.code}: {e.read().decode()[:500]}"
+            ) from None
     raise RuntimeError("unreachable")
 
 
@@ -79,17 +85,25 @@ def manifest() -> dict:
     path = OUT / "manifest.js"
     if not path.exists():
         return {}
-    return json.loads(path.read_text().removeprefix("window.CANDIDATES = ").rstrip().removesuffix(";"))
+    return json.loads(
+        path.read_text().removeprefix("window.CANDIDATES = ").rstrip().removesuffix(";")
+    )
 
 
 def save(found: dict) -> None:
-    (OUT / "manifest.js").write_text(f"window.CANDIDATES = {json.dumps(found, indent=1)};\n")
+    (OUT / "manifest.js").write_text(
+        f"window.CANDIDATES = {json.dumps(found, indent=1)};\n"
+    )
 
 
 def generate(prompt: str, seconds: float) -> bytes:
     return call(
         "/v1/sound-generation?output_format=mp3_44100_128",
-        {"text": prompt, "duration_seconds": max(0.5, seconds), "prompt_influence": PROMPT_INFLUENCE},
+        {
+            "text": prompt,
+            "duration_seconds": max(0.5, seconds),
+            "prompt_influence": PROMPT_INFLUENCE,
+        },
     )
 
 
@@ -109,13 +123,34 @@ def main(args: list[str]) -> None:
         sound = SOUNDS[name]
         entry = found.setdefault(name, {"for": sound["for"], "candidates": []})
         entry["for"] = sound["for"]
-        done = {(c["prompt"], c["seed"]) for c in entry["candidates"] if c["source"] == "eleven"}
-        wordings = [(style, sound["prompts"][0] + STYLES[style])] if style else list(enumerate(sound["prompts"], 1))
-        jobs += [(name, w, prompt, take) for w, prompt in wordings for take in range(1, TAKES + 1) if (prompt, take) not in done]
+        done = {
+            (c["prompt"], c["seed"])
+            for c in entry["candidates"]
+            if c["source"] == "eleven"
+        }
+        wordings = (
+            [(style, sound["prompts"][0] + STYLES[style])]
+            if style
+            else list(enumerate(sound["prompts"], 1))
+        )
+        jobs += [
+            (name, w, prompt, take)
+            for w, prompt in wordings
+            for take in range(1, TAKES + 1)
+            if (prompt, take) not in done
+        ]
     print(f"{len(jobs)} to make, {PARALLEL} at a time", flush=True)
     started = time.time()
     with ThreadPoolExecutor(PARALLEL) as pool:
-        running = {pool.submit(generate, prompt, SOUNDS[name]["seconds"]): (name, w, prompt, take) for name, w, prompt, take in jobs}
+        running = {
+            pool.submit(generate, prompt, SOUNDS[name]["seconds"]): (
+                name,
+                w,
+                prompt,
+                take,
+            )
+            for name, w, prompt, take in jobs
+        }
         for future in as_completed(running):
             name, w, prompt, take = running[future]
             try:
@@ -127,16 +162,20 @@ def main(args: list[str]) -> None:
             folder.mkdir(parents=True, exist_ok=True)
             file = folder / f"{len(list(folder.glob('*.mp3'))) + 1:02d}.mp3"
             file.write_bytes(audio)
-            found[name]["candidates"].append({
-                "file": str(file.relative_to(OUT)),
-                "source": "eleven",
-                "prompt": prompt,
-                "wording": w,
-                "seed": take,  # no seed in the API: the take's number
-            })
+            found[name]["candidates"].append(
+                {
+                    "file": str(file.relative_to(OUT)),
+                    "source": "eleven",
+                    "prompt": prompt,
+                    "wording": w,
+                    "seed": take,  # no seed in the API: the take's number
+                }
+            )
             save(found)  # after each, so a stop loses nothing
             print(f"{name} {file.stem}: {prompt[:60]}", flush=True)
-    print(f"done in {time.time() - started:.0f} s; credits used {before} -> {credits_used()}")
+    print(
+        f"done in {time.time() - started:.0f} s; credits used {before} -> {credits_used()}"
+    )
 
 
 if __name__ == "__main__":

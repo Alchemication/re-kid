@@ -4,15 +4,22 @@
 // barks Adam marked (a local file, never committed), Reksio barks with those,
 // a little higher and quicker by a random amount each time. Without it, he
 // has a synthesised woof.
+//
+// Recorded effects: where `main.py effects` has packed takes for a sound
+// (effects.js: made by a model, picked by ear), the sound plays one of them
+// at random instead of its synthesised version, never the same take twice
+// running, a little higher or lower each time.
 
 // Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
-/* global BARKS, Clock */
+/* global BARKS, EFFECTS, Clock */
 /* exported Sound */
 const Sound = (() => {
   const VOLUME = 0.5
   const BARK_RATE = [1.06, 1.2] // the original barks, sped up (and so higher) by this much
   const BARK_GAP_S = [0.2, 0.26] // between the two barks of a "hau hau"
   const BARK_VOLUME = 0.8
+  const EFFECT_VOLUME = 0.7 // recorded effects, against the synthesised ones (each sound's own gain is in effects.yaml)
+  const EFFECT_RATE = [0.94, 1.06] // each play a little slower and lower, or quicker and higher: never quite the same twice
   const CRITTER_VOLUME = 0.55 // the yard's creatures, even right by Reksio: quiet
   const HEARING = 900 // creatures further from Reksio than this are not heard
   const MUFFLE_HZ = 520 // a bark inside the bowl on his head: only its boom gets out
@@ -23,6 +30,7 @@ const Sound = (() => {
   let original = null // easter-egg clips, if present (see play())
   let scale = 1 // loudness of what is being played now (see from())
   let barks = [] // decoded original barks, if the local file is there
+  const effects = {} // decoded recorded takes, by sound: {gain, buffers, last, until}
 
   // the game paused (the page hidden, a phone held upright): all sound
   // pauses with it (debug.js Clock), and the phone saves its battery; then
@@ -47,14 +55,45 @@ const Sound = (() => {
       const data = noise.getChannelData(0)
       for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
       if (typeof BARKS !== 'undefined') {
-        for (const b64 of BARKS) {
-          const bytes = Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0))
-          ctx.decodeAudioData(bytes.buffer).then((buffer) => barks.push(buffer))
+        for (const b64 of BARKS) ctx.decodeAudioData(bytes(b64)).then((buffer) => barks.push(buffer))
+      }
+      if (typeof EFFECTS !== 'undefined') {
+        for (const [name, e] of Object.entries(EFFECTS)) {
+          const mine = (effects[name] = { gain: e.gain, buffers: [], last: -1, until: 0 })
+          for (const b64 of e.takes) {
+            ctx.decodeAudioData(bytes(b64)).then((buffer) => mine.buffers.push(buffer), () => {}) // a take that won't decode is left out: the others (or the synth) play
+          }
         }
       }
     }
     if (ctx.state === 'suspended' && !Clock.held) ctx.resume()
     return ctx
+  }
+
+  /** A packed clip's bytes, for decodeAudioData. */
+  const bytes = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer
+
+  /** Play one of a sound's recorded takes, if any are decoded: a random one,
+   * not the last one played, a little higher or lower. One take of a sound at
+   * a time: asked again while one plays (munching, a chew at a time), it lets
+   * that one play on. False if it has none: the synthesised sound plays. */
+  function recorded(name) {
+    const e = effects[name]
+    if (!e || !e.buffers.length) return false
+    const c = ensure()
+    if (c.currentTime < e.until) return true
+    let i = Math.floor(Math.random() * e.buffers.length)
+    if (i === e.last && e.buffers.length > 1) i = (i + 1) % e.buffers.length
+    e.last = i
+    const src = c.createBufferSource()
+    src.buffer = e.buffers[i]
+    src.playbackRate.value = EFFECT_RATE[0] + Math.random() * (EFFECT_RATE[1] - EFFECT_RATE[0])
+    const g = c.createGain()
+    g.gain.value = EFFECT_VOLUME * e.gain * scale
+    src.connect(g).connect(master)
+    src.start()
+    e.until = c.currentTime + src.buffer.duration / src.playbackRate.value
+    return true
   }
 
   function env(gain, t, peak, attack, decay) {
@@ -167,10 +206,9 @@ const Sound = (() => {
   }
 
   // His voice, made up in code (yawn, snore, sneeze, yelp, howl, lapping,
-  // slurping, munching, sniffing), is silent for now: to Adam's ear every
-  // one of them sounded awful, and silence beats a bad sound. They come back
-  // as real recordings (his original sounds, as the barks; real dogs; or
-  // voices), from the sound rethink in PROJECT_PLAN. The barks stay.
+  // slurping, munching, sniffing), is silent: to Adam's ear every one of
+  // them sounded awful, and silence beats a bad sound. Where a sound has
+  // recorded takes (effects.js) they play instead; the rest stay silent.
   const HIS_VOICE = ['munch', 'slurp', 'lap', 'snore', 'yawn', 'sneeze', 'sniff', 'yelp', 'howl']
 
   let heard = false // a tap or key has let sound play
@@ -529,6 +567,14 @@ const Sound = (() => {
       audio.play().catch(() => {}) // clip not here (it is never committed) or play refused: the egg stays silent
     },
   }
-  for (const name of HIS_VOICE) sounds[name] = () => {} // silent for now (above)
+  for (const name of HIS_VOICE) sounds[name] = () => {} // silent (above)
+  // recorded takes, where a sound has them, in place of its synthesised one
+  // (until they're decoded, after the first tap, the synth plays)
+  for (const name of Object.keys(typeof EFFECTS !== 'undefined' ? EFFECTS : {})) {
+    const synth = sounds[name] || (() => {})
+    sounds[name] = (...args) => {
+      if (!recorded(name)) synth(...args)
+    }
+  }
   return sounds
 })()

@@ -18,12 +18,12 @@ MAX_LINES = 1000  # CLAUDE.md: keep source files under ~1000 lines
 # which never changes what happens in a play.
 UNSEEDED_OK = {"debug.js", "sound.js"}
 # Generated files, not ours to check.
-GENERATED = {"samples.js"}
+GENERATED = {"samples.js", "effects.js"}
 # A shared part says so in its header (CLAUDE.md, "Shared parts").
 SHARED_MARK = "// Shared by every game"
-# Data a game packs for its shared parts (samples.js, the world's barks.js):
+# Data a game packs for its shared parts (samples.js, effects.js, the world's barks.js):
 # the only game-side names a shared part may use.
-PACKED_DATA = {"SAMPLES", "BARKS"}
+PACKED_DATA = {"SAMPLES", "BARKS", "EFFECTS"}
 
 
 def scripts(game: Path) -> list[Path]:

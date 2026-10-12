@@ -18,6 +18,9 @@ from config import (
     BARK_CLIP,
     BARKS_JS,
     BUG_REPORT_DIR,
+    EFFECTS_DIR,
+    EFFECTS_JS,
+    EFFECTS_NAME,
     EPISODES_FILE,
     GAME_PAGE,
     GAMES_DIR,
@@ -477,6 +480,42 @@ def cmd_samples(args: argparse.Namespace) -> int:
     print(f"Wrote {out} ({out.stat().st_size // 1024} KB, {len(packed)} samples).")
     for problem in problems(packed):
         logger.warning("Pitch far from a semitone: %s", problem)
+    return 0
+
+
+def cmd_effects(args: argparse.Namespace) -> int:
+    """Trim, level and roughen a game's picked sound effects into effects.js."""
+    from pydantic import ValidationError
+
+    from effects import build, write_js
+    from samples import SampleError
+    from schema.effects import EffectSet
+    from worlds import load_model
+
+    game = world_dir(args.world) / GAMES_DIR / args.game
+    path = game / EFFECTS_NAME
+    if not path.is_file():
+        logger.error(
+            "No %s in %s. List the game's picked takes there first.", EFFECTS_NAME, game
+        )
+        return 1
+    try:
+        effect_set = load_model(path, EffectSet)
+    except ValidationError as exc:
+        logger.error("%s is not valid: %s", path, exc)
+        return 1
+    print("Trimming, levelling and packing effects…")
+    try:
+        packed = build(effect_set, game / EFFECTS_DIR)
+    except SampleError as exc:
+        logger.error("%s", exc)
+        return 1
+    for p in packed:
+        print(
+            f"  {p.effect:8} {p.gain_db:+6.1f} dB  {len(p.data) // 1024:>3} KB  {p.file}"
+        )
+    out = write_js(packed, effect_set, game / EFFECTS_JS)
+    print(f"Wrote {out} ({out.stat().st_size // 1024} KB, {len(packed)} takes).")
     return 0
 
 
