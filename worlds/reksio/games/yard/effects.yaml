@@ -8,10 +8,18 @@ effects:
   takes:
   - file: boing/19.mp3
     prompt: 'a cartoon boing, a springy twang of a stretched rubber band snapping back, in the style of the Polish cartoon Reksio (1970s)'
+  - file: boing/30.mp3
+    prompt: 'a short wobbly jaw harp twang, cartoon slapstick'
+  - file: boing/31.mp3
+    prompt: 'a short wobbly jaw harp twang, cartoon slapstick'
+  - file: boing/32.mp3
+    prompt: 'comic spring boing sound effect, bouncy and playful, children''s cartoon'
 - id: bonk
   takes:
   - file: bonk/01.mp3
     prompt: 'a cartoon bonk, an apple bouncing off a head, comic and soft'
+  - file: bonk/19.mp3
+    prompt: 'a cartoon bonk, an apple bouncing off a head, comic and soft, in the style of the Polish cartoon Reksio (1970s)'
   - file: bonk/20.mp3
     prompt: 'a cartoon bonk, an apple bouncing off a head, comic and soft, in the style of the Polish cartoon Reksio (1970s)'
   - file: bonk/22.mp3
@@ -72,7 +80,13 @@ effects:
     prompt: 'a small dog snoring softly, one slow breath in and out'
 - id: sneeze
   takes:
+  - file: sneeze/03.mp3
+    prompt: 'a small dog sneezes once'
+  - file: sneeze/05.mp3
+    prompt: 'a puppy''s quick little sneeze'
   - file: sneeze/08.mp3
+    prompt: 'a dog sniffs a flower and sneezes'
+  - file: sneeze/15.mp3
     prompt: 'a dog sniffs a flower and sneezes'
 - id: munch
   takes:
@@ -103,6 +117,12 @@ effects:
 - id: yelp
   takes:
   - file: yelp/07.mp3
+    prompt: 'a little dog''s quick high yip of surprise'
+  - file: yelp/11.mp3
+    prompt: 'a small dog''s short surprised yelp'
+  - file: yelp/12.mp3
+    prompt: 'a small dog''s short surprised yelp'
+  - file: yelp/18.mp3
     prompt: 'a little dog''s quick high yip of surprise'
 - id: howl
   takes:

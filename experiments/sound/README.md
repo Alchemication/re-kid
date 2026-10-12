@@ -10,5 +10,7 @@ board, keep the picks. Outputs (`out/`) and model caches are not committed.
   Needs its own env: `uv venv --python 3.13 .venv-moss && uv pip install --python .venv-moss/bin/python mlx-speech`.
 - `normalise.py` — evens out the MOSS takes' loudness.
 - `board.html` — open from disk; play, mark keep/maybe/no, Save picks.
+- `adopt.py` — copies the kept takes from `picks.json` into the game (`effects/`,
+  `effects.yaml`); then `main.py effects reksio` packs them.
 
 Findings are in `PROJECT_PLAN.md` (Sound and music, the proof of concept).

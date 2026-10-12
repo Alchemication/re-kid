@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-12T20:20:44.222Z",
+ "saved": "2026-10-12T20:52:59.489Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -962,6 +962,123 @@
    "wording": "-",
    "seed": "-",
    "sound": "howl",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/boing/30.mp3",
+   "source": "eleven",
+   "prompt": "a short wobbly jaw harp twang, cartoon slapstick",
+   "wording": 3,
+   "seed": 5,
+   "sound": "boing",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/boing/31.mp3",
+   "source": "eleven",
+   "prompt": "a short wobbly jaw harp twang, cartoon slapstick",
+   "wording": 3,
+   "seed": 4,
+   "sound": "boing",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/boing/32.mp3",
+   "source": "eleven",
+   "prompt": "comic spring boing sound effect, bouncy and playful, children's cartoon",
+   "wording": 2,
+   "seed": 6,
+   "sound": "boing",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/boing/33.mp3",
+   "source": "eleven",
+   "prompt": "a short wobbly jaw harp twang, cartoon slapstick",
+   "wording": 3,
+   "seed": 6,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/boing/34.mp3",
+   "source": "eleven",
+   "prompt": "a door spring stopper flicked, a wobbling metal twang that fades",
+   "wording": 4,
+   "seed": 4,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/boing/35.mp3",
+   "source": "eleven",
+   "prompt": "a door spring stopper flicked, a wobbling metal twang that fades",
+   "wording": 4,
+   "seed": 5,
+   "sound": "boing",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/bonk/19.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon bonk, an apple bouncing off a head, comic and soft, in the style of the Polish cartoon Reksio (1970s)",
+   "wording": "Reksio",
+   "seed": 1,
+   "sound": "bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sneeze/15.mp3",
+   "source": "eleven",
+   "prompt": "a dog sniffs a flower and sneezes",
+   "wording": 3,
+   "seed": 4,
+   "sound": "sneeze",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sneeze/05.mp3",
+   "source": "eleven",
+   "prompt": "a puppy's quick little sneeze",
+   "wording": 2,
+   "seed": 2,
+   "sound": "sneeze",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/sneeze/03.mp3",
+   "source": "eleven",
+   "prompt": "a small dog sneezes once",
+   "wording": 1,
+   "seed": 3,
+   "sound": "sneeze",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yelp/18.mp3",
+   "source": "eleven",
+   "prompt": "a little dog's quick high yip of surprise",
+   "wording": 3,
+   "seed": 6,
+   "sound": "yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yelp/12.mp3",
+   "source": "eleven",
+   "prompt": "a small dog's short surprised yelp",
+   "wording": 1,
+   "seed": 6,
+   "sound": "yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/yelp/11.mp3",
+   "source": "eleven",
+   "prompt": "a small dog's short surprised yelp",
+   "wording": 1,
+   "seed": 5,
+   "sound": "yelp",
    "verdict": "keep"
   }
  ]

@@ -364,8 +364,10 @@ wake Reksio at home.
      level against the synth ones (`EFFECT_VOLUME` in sound.js, `gain` per
      sound in effects.yaml), and whether the snore (2.5 s) fits the
      doghouse's snore every 1.7 s.
-   - *Next:* Adam picks more takes for boing, sneeze and yelp (one keep
-     each; 36 more are on the board); then the skill, written from this
+   - More takes picked for boing, sneeze and yelp: 50 takes in all, 2 to
+     6 a sound (547 KB packed). `experiments/sound/adopt.py` brings the
+     keeps from `picks.json` into the game.
+   - *Next:* the skill, written from this
      run (`new-sound`): find the sounds, word them by the rules above,
      generate, pick on the board, process, pack, play, test, retro. Music
      stays out of it until its direction is decided.
