@@ -228,6 +228,21 @@ wake Reksio at home.
 
 ## Next steps
 
+**Order agreed 2026-10-12** (Adam), before the numbered list below:
+
+1. *Decide how the yard's day ends.* Now: the sun sets after six different
+   things (first uses only, the bird and gate included) or 10 minutes; the
+   moon then rises for about 40 s with everything still working; then he
+   goes to bed by himself, or at a tap on the doghouse. Adam: "very messy, I
+   don't ever know even myself when it will end". Options discussed, one
+   chosen and built.
+2. *Wrap up the music* (step 2 of "Sound and music" below): its direction,
+   then the work.
+3. *Eliot plays the yard* (the bowl, the bramble, the new sounds, the new
+   ending).
+4. *The episode* (*Reksio poliglota*, step 3 below).
+
+
 1. **Bring Reksio to life in the yard** (before any episode). In the
    cartoon he stands up on his hind legs, trots about sniffing, runs, grins,
    and acts like a small funny person; in the game he is stiff.
