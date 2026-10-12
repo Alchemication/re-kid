@@ -327,11 +327,29 @@ wake Reksio at home.
    enough to be worth it? A handful of effects, a batch each from one
    local model, on a bare board page, in `experiments/sound/` (own
    dependencies, outputs not committed).
-   - *Model:* MOSS-SoundEffect (OpenMOSS), text to sound effects, Apache
-     2.0 per its model card, in a 4-bit MLX build that runs natively on
-     Apple Silicon (`mlx-speech`). Text only, no reference clip. Meta's
-     AudioGen is the obvious alternative, but its weights are reported as
-     non-commercial and its stock install fails on Apple Silicon.
+   - *Result (2026-10-12): it works, with ElevenLabs.* Two models, the
+     same 13 sounds and wordings, picked on the board
+     (`experiments/sound/`):
+     - MOSS-SoundEffect, local (MLX on the M2): 45 rated, keeps for 3 of 5
+       sounds (splash, rustle, bee), none for boing or bonk; about 3.5 s a
+       sound, but the Mac ran hot and needed 7 GB.
+     - ElevenLabs sound effects (API, Adam's Starter plan): keeps for all
+       13, 43 kept, including every voice sound silent in the game now
+       (yawn, snore, sneeze, munch, lap, sniff, yelp, howl). Adam: "day and
+       night, 100x better". 159 takes for under 5% of a month's credits;
+       15 takes in about 7 s, calls in parallel.
+     - Wording: plain physical wording beats "cartoon". The era ("1970s
+       Eastern European hand-drawn cartoon…, orchestral instruments") or
+       the name ("…the Polish cartoon Reksio") helped the cartoon sounds
+       (bonk 3 of 3 with the era; the only boing keep named Reksio) and
+       spoiled natural ones (splash). Rule so far: style for cartoon
+       sounds, none for real ones.
+     - Not tried: Meta's AudioGen (reported below commercial tools; no
+       newer Meta sound model found), Stable Audio 3 Small-SFX.
+   - *Next:* bring the kept takes into the game: a list of chosen files
+     per sound, packed like the samples, played one of the kept takes at
+     random each time (variety for free) with a little pitch and speed
+     jitter, as the barks. His voice comes back this way.
 
    **Reference-guided generation** (Adam's earlier idea): generate new
    sounds from short original clips used as a style reference

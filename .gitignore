@@ -30,3 +30,6 @@ looks/
 # Experiments: generated audio and model caches (experiments/sound)
 experiments/*/out/
 experiments/*/models/
+
+# Secrets (API keys)
+.env
