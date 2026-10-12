@@ -367,10 +367,10 @@ wake Reksio at home.
    - More takes picked for boing, sneeze and yelp: 50 takes in all, 2 to
      6 a sound (547 KB packed). `experiments/sound/adopt.py` brings the
      keeps from `picks.json` into the game.
-   - *Next:* the skill, written from this
-     run (`new-sound`): find the sounds, word them by the rules above,
-     generate, pick on the board, process, pack, play, test, retro. Music
+   - *The skill:* `new-sound` (2026-10-12), written from this run. Music
      stays out of it until its direction is decided.
+   - *Next:* the rest of the audit (step 2): the other ~30 synth effects
+     through `new-sound`, worst first, and the music's direction.
 
    **Reference-guided generation** (Adam's earlier idea): generate new
    sounds from short original clips used as a style reference

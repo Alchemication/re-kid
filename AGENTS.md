@@ -43,7 +43,8 @@ through API calls from `main.py`. Write results straight into the YAML files and
 run `uv run python main.py validate <world>` before reporting done.
 
 Procedures live in skills (`.claude/skills/`): `new-episode` breaks down an
-episode; `new-gag` adds a gag or encounter to a game. Each run ends with a
+episode; `new-gag` adds a gag or encounter to a game; `new-sound` makes a
+game's sound effects (generated, picked by Adam's ear). Each run ends with a
 retro that proposes edits to its skill.
 
 Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`):
