@@ -1,8 +1,42 @@
 # Project plan
 
 Where re-kid stands and what comes next. Read this first in a new session;
-`PROJECT_IDEA.md` has the original brief, `CLAUDE.md` the working rules.
+the original brief is below, `DESIGN_PRINCIPLES.md` has how the games should
+feel, `CLAUDE.md` the working rules.
 Update the **Status** and **Next steps** sections as work lands.
+
+## Background: the original brief
+
+Adam's brief that started the project, as written, except its creative
+principles, which are in `DESIGN_PRINCIPLES.md`.
+
+I want to explore an idea for an AI-native collection of small games inspired by nostalgic cartoons from different countries. Please act as a research and product-thinking partner. The idea is early; help me investigate and shape it before building a platform.
+
+### How it started
+
+I made a simple game called Muddy Puddles to teach my three-year-old the keyboard arrow keys. Agentic coding let me make it quickly, and we had a lot of fun playing together. I then developed a more elaborate version: https://alchemication.github.io/muddy-puddles/models/claude-opus-5-5/index.html
+
+That made me wonder what else becomes possible when a person can turn a particular character, learning goal, and childhood memory into a playable experience.
+
+### The idea
+
+Start with one well-known or quirky Polish cartoon world—perhaps Reksio, Kot Filemon, Pampalini, or the world of Smok Wawelski and Baltazar Gąbka—and create a short game that feels true to it. Research the original cartoons and episodes, including material available on YouTube, before deciding what the game should be.
+
+The game could have versions for different ages, including adults. It might teach a practical skill, explore the cartoon’s story and universe, or support an age-appropriate educational goal. A child should enjoy it as a game; a parent might rediscover something from their childhood and share it with their child.
+
+Each world should also have a researched, accessible introduction: who the characters are, how they relate, what the story is about, and which details come from the original versus our own game. For example, someone may remember Don Pedro without remembering his role in *Porwanie Baltazara Gąbki*. Children could discover that context through play, while parents could read a short guide and find the relevant episode.
+
+Poland would be the starting point, not the limit. I’ve spoken with friends from Spain and India, and they immediately thought of cartoons they feel nostalgic about. Over time, the collection might be organised by country, language, and generation, with people from each culture helping identify and interpret the worlds that matter to them.
+
+I also wonder whether these games could connect people across cultures. Childhood cartoons are rarely the subject of cross-cultural conversations, yet they may offer a personal, playful way to ask someone: *What did you grow up watching? What did you love about it?* The collection could let people share those memories and discover the worlds that shaped someone else’s childhood.
+
+### What I wanted to find out first
+
+Help me research a few candidate Polish cartoons and choose **one very small MVP**: one world, one short game, one initial audience, and one reason to play it. Look at the original material and credible sources; distinguish verified details from interpretations or invented game ideas. Suggest game mechanics that emerge from the character and story, rather than attaching a generic quiz to familiar artwork.
+
+Explore what AI could usefully do in the creation process: researching source material, mapping characters and stories, proposing mechanics, developing age variants, generating assets and code, and helping iterate after playtesting. I am not assuming that the finished game needs live AI.
+
+I want to test whether families enjoy playing together, whether children connect with a character they may not know yet, whether the result feels authentic to people who grew up with the cartoon, and whether they would welcome another playable episode. Please challenge weak assumptions and propose a practical first experiment. Set trademark and licensing questions aside for the initial creative exploration, but identify them as a question to resolve before any broader release.
 
 ## Decisions so far
 
@@ -260,7 +294,8 @@ wake Reksio at home.
      the ending unchanged; (2) the clock and cuckoo (sound via `new-sound`);
      (3) evening, the ritual, the parent controls.
    - The design principles in Adam's brief for this (a world to inhabit, a
-     calm accepted ending, no engagement tricks) go into `PROJECT_IDEA.md`.
+     calm accepted ending, no engagement tricks) are in `DESIGN_PRINCIPLES.md`,
+     with research on whether a few minutes a day suits a toddler.
    Still open: are episodes entered from the yard, or from a main screen?
    (The 2026-10-07 decision is the yard as home, no hub until three
    episodes.) Its own discussion.

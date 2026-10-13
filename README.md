@@ -2,7 +2,8 @@
 
 Small, faithful games made from nostalgic childhood cartoons — starting with
 one Polish world, Reksio, and one short game for a parent and a young child.
-Background: [PROJECT_IDEA.md](PROJECT_IDEA.md). Plan and status: [PROJECT_PLAN.md](PROJECT_PLAN.md).
+Background, plan and status: [PROJECT_PLAN.md](PROJECT_PLAN.md). How the games
+should feel: [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md).
 
 ## Layout
 
@@ -97,6 +98,11 @@ page full screen, so add it to the home screen (Share → Add to Home Screen)
 and it opens without Safari's bars; elsewhere the ⤢ corner button does it.
 Bug reports saved on the site replay locally:
 `main.py replay` maps them to this repository's copy of the game.
+
+For parents: the yard is made to be played together, a few minutes in the
+daytime. Reksio's bedtime is the end of his day, not a way to settle a child
+before bed; doctors advise no screens in the hour before sleep
+(`DESIGN_PRINCIPLES.md` has the research).
 
 ## Performance
 

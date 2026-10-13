@@ -12,9 +12,10 @@ Work on `main`. Commit only when asked, and only with lint and tests green.
 
 ## Project
 
-Small, faithful games made from nostalgic childhood cartoons. Background and
-goals: `PROJECT_IDEA.md`. Decisions, status and next steps: `PROJECT_PLAN.md` —
-read it at the start of a session and update it as work lands. Current scope is
+Small, faithful games made from nostalgic childhood cartoons. Background,
+decisions, status and next steps: `PROJECT_PLAN.md` — read it at the start of a
+session and update it as work lands. How the games should feel, and what they
+must never do: `DESIGN_PRINCIPLES.md`. Current scope is
 one world (Reksio) and one MVP game; resist building platform features ahead of
 that.
 
