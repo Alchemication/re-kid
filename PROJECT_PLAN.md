@@ -317,11 +317,11 @@ wake Reksio at home.
      pendulum, the cuckoo calling once each hour and eight slow times at
      20:00; near the house he looks up at it. Tapped: he barks back at each
      call, turns away smug, is caught by one call more, barks too late, the
-     door snaps shut; the variation, he howls first. The call: 3 ElevenLabs
-     takes Adam kept of 9 (2026-10-13; the synth until they decode), one of
-     them all play (`steady`: Adam, a clock sounds the same each time), each
-     0.8 s with its notes about 0.18 s apart, so a call lasts 850 ms and the
-     beak opens on both notes. The door's snap stays `Sound.tok` (the bird
+     door snaps shut; the variation, he howls first. The call: one ElevenLabs
+     take, `cuckoo/08` (Adam, 2026-10-13: "the best", and a clock sounds the
+     same each time: `steady`), 0.8 s with its notes at 0.09 and 0.23 s, so
+     a call lasts 850 ms and the beak opens on both notes; the synth plays
+     until it decodes. The door's snap stays `Sound.tok` (the bird
      and the nut share it). To judge: the call's loudness (`gain` in
      `effects.yaml`, and from across the yard), how often on the hour (25 s), his head
      only slightly up (`barkUp`, `glare` tilts in antics.js), the clock's

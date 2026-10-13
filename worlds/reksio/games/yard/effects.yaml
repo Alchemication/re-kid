@@ -1,6 +1,6 @@
 # Recorded sound effects for the yard (schema.effects.EffectSet), packed into
 # game/effects.js by `main.py effects`. Each sound plays one of its takes at
-# random (a steady one, the same take all play), in place of the synthesised
+# random (a steady one, its one take always as it is), in place of the synthesised
 # sound of the same name in sound.js.
 # The takes are in effects/, as they were made.
 source: 'Made with ElevenLabs sound effects (text to sound, Starter plan, which allows commercial use) and picked by ear by Adam on the sound board (experiments/sound), 2026-10-12.'
@@ -134,9 +134,5 @@ effects:
 - id: cuckoo
   steady: true # a clock sounds the same every hour
   takes:
-  - file: cuckoo/04.mp3
-    prompt: 'an old wooden cuckoo clock striking, a single cuckoo call from its little bellows pipes'
-  - file: cuckoo/07.mp3
-    prompt: 'an old wooden cuckoo clock striking, a single cuckoo call from its little bellows pipes'
-  - file: cuckoo/09.mp3
+  - file: cuckoo/08.mp3
     prompt: 'a gentle cuckoo call from a Black Forest cuckoo clock, two falling notes, warm and soft'

@@ -54,6 +54,15 @@ class TestSchema:
         with pytest.raises(ValidationError):
             Effect.model_validate(_effect(id="Splash-1"))
 
+    def test_steady_has_one_take(self) -> None:
+        two = [
+            {"file": "splash/01.mp3", "prompt": "a"},
+            {"file": "splash/02.mp3", "prompt": "b"},
+        ]
+        with pytest.raises(ValidationError, match="a steady sound plays one take"):
+            Effect.model_validate(_effect(steady=True, takes=two))
+        Effect.model_validate(_effect(steady=True))
+
     def test_gain_positive(self) -> None:
         with pytest.raises(ValidationError):
             Effect.model_validate(_effect(gain=0))

@@ -25,9 +25,9 @@ const Cuckoo = (() => {
   const OUT_MS = 170 // and the cuckoo pops out
   const IN_MS = 220 // and goes back in
   const SNAP_MS = 70 // the door snapping shut on him
-  const CALL_MS = 850 // one call, ku-ku, and the gap after it: longer than a take (0.8 s, effects/cuckoo), so none is swallowed by the one before
+  const CALL_MS = 850 // one call, ku-ku, and the gap after it: longer than its take (0.8 s), so none is swallowed by the one before
   const SLOW_CALL_MS = 1050 // …at bedtime
-  const NOTE_GAP = 180 // ms between "ku" and "ku", as in the kept takes (their notes start about 0.05 and 0.22 s in): the beak, and the synth before they're decoded
+  const NOTES_MS = [90, 230] // when "ku" and "ku" start in its take (effects/cuckoo/08.mp3): the beak opens on each, and the synth plays them then before the take is decoded
   const BEDTIME = 20 // the hour of the eight slow calls (day.js TO)
   const BEDTIME_CALLS = 8
   const FAR = 2600 // Reksio this far off (scene units) hears it quietest
@@ -131,11 +131,12 @@ const Cuckoo = (() => {
   /** One call, ku-ku, its beak opening on each note; quieter the further
    * off he is, but heard right across the yard: it tells the hour. */
   async function call(slow = false) {
-    Sound.scaled(1 - 0.75 * Math.min(1, Math.abs(Reksio.x - X) / FAR), () => Sound.cuckoo(slow, NOTE_GAP / 1000))
+    Sound.scaled(1 - 0.75 * Math.min(1, Math.abs(Reksio.x - X) / FAR), () => Sound.cuckoo(slow, NOTES_MS.map((ms) => ms / 1000)))
+    await wait(NOTES_MS[0])
     beak()
-    await wait(NOTE_GAP)
+    await wait(NOTES_MS[1] - NOTES_MS[0])
     beak()
-    await wait((slow ? SLOW_CALL_MS : CALL_MS) - NOTE_GAP)
+    await wait((slow ? SLOW_CALL_MS : CALL_MS) - NOTES_MS[1])
   }
 
   /** Have the cuckoo for `job` (async): once whatever has it now lets go;

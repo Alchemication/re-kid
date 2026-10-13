@@ -60,9 +60,7 @@ const Sound = (() => {
       if (typeof EFFECTS !== 'undefined') {
         for (const [name, e] of Object.entries(EFFECTS)) {
           const mine = (effects[name] = { gain: e.gain, steady: !!e.steady, buffers: [], last: -1, until: 0 })
-          // a steady sound (a clock's cuckoo) keeps one take, chosen now, all play
-          const takes = e.steady ? [e.takes[Math.floor(Math.random() * e.takes.length)]] : e.takes
-          for (const b64 of takes) {
+          for (const b64 of e.takes) {
             ctx.decodeAudioData(bytes(b64)).then((buffer) => mine.buffers.push(buffer), () => {}) // a take that won't decode is left out: the others (or the synth) play
           }
         }
@@ -77,7 +75,7 @@ const Sound = (() => {
 
   /** Play one of a sound's recorded takes, if any are decoded: a random one,
    * not the last one played, a little higher or lower (a steady sound: its
-   * one take, as it is). One take of a sound at
+   * one take, always as it is). One take of a sound at
    * a time: asked again while one plays (munching, a chew at a time), it lets
    * that one play on. False if it has none: the synthesised sound plays. */
   function recorded(name) {
@@ -565,15 +563,15 @@ const Sound = (() => {
     shake() { for (let i = 0; i < 5; i++) hiss(i * 0.07, 0.12, 0.004, 0.05, 'highpass', 3000) },
     chirp() { tone('sine', 2600, 3600, 0, 0.12, 0.01, 0.07); tone('sine', 2800, 3900, 0.11, 0.1, 0.01, 0.07) },
     /** A cuckoo clock's call, "ku-ku": two soft falling notes (a minor
-     * third, as from its two little pipes) `gap` seconds apart, a breath on
-     * each. slow: an evening's, longer and softer. */
-    cuckoo(slow = false, gap = 0.3) {
+     * third, as from its two little pipes) starting at `notes` (seconds), a
+     * breath on each. slow: an evening's, longer and softer. */
+    cuckoo(slow = false, notes = [0, 0.3]) {
       const decay = slow ? 0.32 : 0.2
       const peak = slow ? 0.13 : 0.16
-      tone('triangle', 784, 778, 0, peak, 0.025, decay)
-      hiss(0, 0.04, 0.01, 0.08, 'bandpass', 1600, 1)
-      tone('triangle', 659, 652, gap, peak, 0.025, decay * 1.2)
-      hiss(gap, 0.04, 0.01, 0.08, 'bandpass', 1400, 1)
+      tone('triangle', 784, 778, notes[0], peak, 0.025, decay)
+      hiss(notes[0], 0.04, 0.01, 0.08, 'bandpass', 1600, 1)
+      tone('triangle', 659, 652, notes[1], peak, 0.025, decay * 1.2)
+      hiss(notes[1], 0.04, 0.01, 0.08, 'bandpass', 1400, 1)
     },
     flutter() { for (let i = 0; i < 6; i++) hiss(i * 0.05, 0.08, 0.004, 0.035, 'bandpass', 900, 1) },
     dig() { for (let i = 0; i < 6; i++) hiss(i * 0.11, 0.2, 0.004, 0.06, 'bandpass', 700 + Math.random() * 500, 1.2) },

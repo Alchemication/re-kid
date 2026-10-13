@@ -1088,7 +1088,7 @@
    "wording": 2,
    "seed": 3,
    "sound": "cuckoo",
-   "verdict": "keep"
+   "verdict": "no"
   },
   {
    "file": "eleven/cuckoo/04.mp3",
@@ -1097,7 +1097,7 @@
    "wording": 2,
    "seed": 1,
    "sound": "cuckoo",
-   "verdict": "keep"
+   "verdict": "no"
   },
   {
    "file": "eleven/cuckoo/08.mp3",
@@ -1106,7 +1106,7 @@
    "wording": 3,
    "seed": 2,
    "sound": "cuckoo",
-   "verdict": "no"
+   "verdict": "keep"
   },
   {
    "file": "eleven/cuckoo/01.mp3",
@@ -1151,7 +1151,7 @@
    "wording": 3,
    "seed": 3,
    "sound": "cuckoo",
-   "verdict": "keep"
+   "verdict": "no"
   },
   {
    "file": "eleven/cuckoo/03.mp3",

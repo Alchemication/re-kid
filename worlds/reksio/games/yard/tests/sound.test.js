@@ -94,22 +94,15 @@ describe('recorded effects', () => {
     assert.ok(rates.every((r) => r >= 0.94 && r <= 1.06) && new Set(rates).size > 1, String(rates))
   })
 
-  it('a steady sound plays one take all play, at its own speed, and another play may pick another', async () => {
-    const picked = new Set()
-    for (let play = 0; play < 20; play++) {
-      const s = sound({ cuckoo: 3 }, ['cuckoo'])
-      await decoded()
-      for (let i = 0; i < 8; i++) {
-        s.clock.now += 2
-        s.Sound.cuckoo()
-      }
-      const order = s.made.takes.map((t) => t.buffer.take)
-      assert.equal(order.length, 8)
-      assert.equal(new Set(order).size, 1, `one take all play: ${order}`)
-      assert.ok(s.made.takes.every((t) => t.playbackRate.value === 1))
-      picked.add(order[0])
+  it('a steady sound plays its one take at its own speed, every time', async () => {
+    const s = sound({ cuckoo: 1 }, ['cuckoo'])
+    await decoded()
+    for (let i = 0; i < 8; i++) {
+      s.clock.now += 2
+      s.Sound.cuckoo()
     }
-    assert.ok(picked.size > 1, 'not always the same take')
+    assert.equal(s.made.takes.length, 8)
+    assert.ok(s.made.takes.every((t) => t.playbackRate.value === 1), 'never higher or lower')
   })
 
   it('play one take of a sound at a time: asked again while one plays, it lets that one play on', async () => {

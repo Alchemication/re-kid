@@ -40,8 +40,7 @@ class Effect(Model):
     steady: bool = Field(
         default=False,
         description=(
-            "Plays one take, chosen as the play starts, all play, at its own "
-            "speed: a thing that always sounds the same (a clock's cuckoo)."
+            "Always sounds the same: its one take, at its own speed (a clock's cuckoo)."
         ),
     )
     takes: list[Take] = Field(min_length=1)
@@ -53,6 +52,11 @@ class Effect(Model):
         dupes = {f for f in files if files.count(f) > 1}
         if dupes:
             raise ValueError(f"{self.id}: takes listed twice: {sorted(dupes)}")
+        if self.steady and len(self.takes) > 1:
+            raise ValueError(
+                f"{self.id}: a steady sound plays one take, not {len(self.takes)}: "
+                "keep one, or drop `steady` to play them at random"
+            )
         return self
 
 
