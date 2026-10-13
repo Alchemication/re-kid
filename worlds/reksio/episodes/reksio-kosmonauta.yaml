@@ -1,0 +1,130 @@
+id: reksio-kosmonauta
+title: Reksio kosmonauta
+reference_episode: reksio-kosmonauta
+overview:
+  text: A first pass from frames only, not yet a full breakdown. The episode runs 9:57. Frames were read every 4 s, more densely where it was unclear, so the times are approximate, good to a few seconds. Reksio sees a jet, flies a leashed rocket into space, lands on a planet of painted caves, befriends a mermaid princess and a three-headed dragon, rescues both from robot dogs, and wakes on the doghouse roof to his supper. The space adventure is framed by the doghouse at both ends.
+  status: observed
+  sources:
+  - sfr-youtube
+  observed_by: claude-frames
+beats:
+- id: credits
+  start_s: 0
+  end_s: 43
+  action:
+    text: The title sequence; `intro.yaml` breaks it down.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard; the intro's marks are in `intro.yaml`.
+    status: unknown
+    sources: []
+- id: jet
+  start_s: 44
+  end_s: 72
+  action:
+    text: Reksio comes out of the doghouse, sees a jet pass overhead, climbs onto the doghouse roof and stares up, wondering. Then a cut through black.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is the jet heard? Does music change at the cut through black?
+    status: unknown
+    sources: []
+- id: rocket
+  start_s: 74
+  end_s: 156
+  action:
+    text: A rocket stands in an orange field, wearing a red dog collar and tied to a stake by a leash. Reksio loads it with bones and a street lamp and puts on a spacesuit. On its first try the rocket only circles on the leash; he climbs out, unbuckles the collar and launches.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. What does the launch sound like, and the rocket circling on its leash?
+    status: unknown
+    sources: []
+- id: space
+  start_s: 160
+  end_s: 210
+  action:
+    text: In space a meteor passes, the rocket's nose is torn open, bones spill out, and Reksio tumbles out holding the lamp and lands on a planet of painted caves.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Does space have its own music?
+    status: unknown
+    sources: []
+- id: princess
+  start_s: 210
+  end_s: 300
+  action:
+    text: He takes off the suit, plants the lamp, and meets a crowned mermaid princess, dog-faced with long red ears. They float and dance together.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Is the dance set to a tune of its own?
+    status: unknown
+    sources: []
+- id: dragon
+  start_s: 300
+  end_s: 380
+  action:
+    text: A three-headed, dog-headed dragon comes out of a red cave door. It is frightening at first, then friendly; it licks Reksio, tickles him and plays.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. How does the dragon sound, and does the music turn from scary to playful?
+    status: unknown
+    sources: []
+- id: robots
+  start_s: 380
+  end_s: 480
+  action:
+    text: A flying saucer lands with boxy black-and-red robot dogs. They zap and tie up the dragon, knock Reksio flat, and lead the princess away on a leash. Reksio gets up, fights a robot and takes over its saucer.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. What do the robots and the zapping sound like?
+    status: unknown
+    sources: []
+- id: rescue
+  start_s: 480
+  end_s: 560
+  action:
+    text: He frees the dragon and gets the princess back; she kisses him. He flies off, the robots' saucer attacks him in space with a claw, and he smashes it and laughs.
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard.
+    status: unknown
+    sources: []
+- id: waking
+  start_s: 560
+  end_s: 597
+  action:
+    text: Wavy lines drift across the dome. At home, by day, the boy has set down a red bowl of steaming food. Reksio wakes on the doghouse roof, jumps down and eats by the doghouse; the boy laughs and hugs him, and Reksio licks his face (the order of these last moments is not certain at 4 s a frame). An iris closes on Reksio licking his chops, then KONIEC. No evening and no whistle are seen (checked again 2026-10-13, frames 9:28–9:40).
+    status: observed
+    sources:
+    - sfr-youtube
+    observed_by: claude-frames
+  sound:
+    text: Not yet heard. Does the dream have its own music, and what marks the waking?
+    status: unknown
+    sources: []
+open_questions:
+- Times are from frames every 4 s; a full pass every 0.5 s around each beat's edges would tighten them.
+- The whole episode still needs a listening pass (main.py mark handles the intro only so far).

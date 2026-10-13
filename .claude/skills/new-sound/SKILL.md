@@ -7,8 +7,8 @@ description: Make or replace a game's sound effects — word each sound, generat
 
 The procedure for one or more of a game's sound effects, from "this needs a
 sound" to takes playing in the game. Written from the first run (2026-10-12:
-13 sounds, 50 takes, his voice brought back); `PROJECT_PLAN.md` ("Sound and
-music") has the findings behind each rule. The pieces:
+13 sounds, 50 takes, his voice brought back); `experiments/sound/README.md`
+("Findings") has the findings behind each rule. The pieces:
 
 | Piece | Where |
 |---|---|

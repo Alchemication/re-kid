@@ -2,7 +2,7 @@
 // taps). Holding the house brings the evening now: the sun hurries down
 // (yard.js, day.js); a quick tap on it is still a tap, answered as the finger
 // lifts. After the end, holding the sun in the corner starts a new morning;
-// a tap there, or anywhere, does nothing (DESIGN_PRINCIPLES.md: a new play
+// a tap there, or anywhere, does nothing (docs/DESIGN_PRINCIPLES.md: a new play
 // only when a grown-up chooses). One press at a time, followed by its own
 // finger, so a second finger can't leave a timer running.
 

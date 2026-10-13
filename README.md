@@ -5,9 +5,10 @@ one Polish world, Reksio, and one short game for a parent and a young child.
 
 ## Docs
 
-- [PROJECT_PLAN.md](PROJECT_PLAN.md): the original brief, decisions, status
-  and next steps.
-- [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md): how the games should feel and
+- [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md): the next steps, in the agreed order.
+- [docs/DECISIONS.md](docs/DECISIONS.md): what has been decided and why, and the
+  original brief.
+- [docs/DESIGN_PRINCIPLES.md](docs/DESIGN_PRINCIPLES.md): how the games should feel and
   what they must never do, with research on short play for toddlers.
 - [CLAUDE.md](CLAUDE.md) (same as [AGENTS.md](AGENTS.md)): working rules for
   coding agents and people.
@@ -15,12 +16,14 @@ one Polish world, Reksio, and one short game for a parent and a young child.
   episode, adding a gag and making sounds.
 - [experiments/sound/README.md](experiments/sound/README.md): the
   sound-generation experiment.
-- This file: layout, commands, the site, performance, debugging the yard.
+- This file: layout, commands, the site, performance, debugging the yard,
+  reference media.
 
 ## Layout
 
 ```
 main.py                 CLI entry point (dispatch only)
+docs/                   the plan, decisions and design principles
 src/
   config.py             paths and tunables
   schema/               pydantic models for every research file
@@ -42,6 +45,7 @@ worlds/<id>/
   intro.yaml            title sequence, beat by beat (schema.breakdown.Breakdown)
   audio/intro/          measurements, spectrograms, mark clips (generated, gitignored)
   audio/barks.js        the original barks, packed for the games (generated, gitignored)
+  media/, frames/       downloaded video and contact sheets (gitignored)
   games/<game>/brief.yaml  game brief (schema.brief.GameBrief)
   games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
   games/<game>/effects.yaml  recorded sound effects picked by ear (schema.effects.EffectSet)
@@ -52,8 +56,7 @@ worlds/<id>/
                         (yard/lab: Reksio drawn from poses by game/figure.js)
 experiments/sound/      making sound effects with a model and picking them by ear on a
                         board page (scripts committed; audio and the API key in .env not)
-  media/intro/          intro video clips (downloaded, gitignored)
-.claude/skills/         procedures for Claude Code sessions (new-episode)
+.claude/skills/         procedures for Claude Code sessions (new-episode, new-gag, new-sound)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
 .github/workflows/pages.yml  publishes the games to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)
@@ -114,7 +117,10 @@ Bug reports saved on the site replay locally:
 For parents: the yard is made to be played together, a few minutes in the
 daytime. Reksio's bedtime is the end of his day, not a way to settle a child
 before bed; doctors advise no screens in the hour before sleep
-(`DESIGN_PRINCIPLES.md` has the research).
+(`docs/DESIGN_PRINCIPLES.md` has the research). Two things are for grown-ups:
+hold the house for 2 seconds and the sun goes down at once, so the evening
+comes early; after the end, taps do nothing, and holding the sun in the
+bottom-left corner for 2 seconds starts a new morning.
 
 ## Performance
 
@@ -168,3 +174,28 @@ end state, errors) to `looks/latest/` (gitignored). `--close` cuts each frame
 around Reksio; `--size 844x390` is a phone on its side. For example, the bowl
 stuck on his head:
 `main.py look reksio --flags props=bowl --close --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"`.
+
+## Reference media (not in git)
+
+Episode video, frames and generated audio are gitignored
+(`worlds/*/media/`, `worlds/*/frames/`, `worlds/*/audio/`). To recreate them
+on a new machine (`brew install yt-dlp ffmpeg`; builds without a JavaScript
+runtime, e.g. `uvx yt-dlp`, get "This video is not available" from YouTube):
+
+```sh
+mkdir -p worlds/reksio/media/intro worlds/reksio/frames/intro
+# Native 480p. Avoid the "-sr" AI-upscaled formats: they distort line and texture.
+yt-dlp -f "135+140/best[height<=480]" --merge-output-format mp4 \
+  -o "worlds/reksio/media/1972-kosmonauta.%(ext)s" https://www.youtube.com/watch?v=unuTG_vG0AI
+# Intro clip, what `main.py mark` plays: the first 46 s (the same in every episode from 1972 on)
+ffmpeg -i worlds/reksio/media/1972-kosmonauta.mp4 -t 46 -c copy \
+  worlds/reksio/media/intro/1972-kosmonauta.mp4
+# Contact sheets: every 0.5 s for the intro, every 4 s for a whole episode.
+# Homebrew's ffmpeg has no drawtext, so tiles carry no time codes; count them.
+ffmpeg -i worlds/reksio/media/intro/1972-kosmonauta.mp4 -t 22 \
+  -vf "fps=2,scale=320:-1,tile=6x8" -frames:v 1 \
+  worlds/reksio/frames/intro/1972-kosmonauta-0000-0022-halfsec.jpg
+```
+
+Contact sheet names give the year, episode, time range and step. Other
+episodes' uploads are in `episodes/index.yaml` (`watch_url`).

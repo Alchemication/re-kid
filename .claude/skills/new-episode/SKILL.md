@@ -16,7 +16,7 @@ Sound is never described by Claude, from frames, from memory or from a model.
 
 ## 0. Before starting
 
-- Read `PROJECT_PLAN.md` and `CLAUDE.md`.
+- Read `docs/PROJECT_PLAN.md` and `CLAUDE.md`.
 - First time on this machine: `brew install yt-dlp ffmpeg`, `uv sync`, and
   Google Chrome (for `main.py mark`). Use Homebrew's `yt-dlp`, not `uvx yt-dlp`:
   builds without a JavaScript runtime get "This video is not available".

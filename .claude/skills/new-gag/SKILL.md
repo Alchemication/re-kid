@@ -7,8 +7,8 @@ description: Add or rework a gag or encounter in a game (the yard first) — des
 
 The procedure for one gag in a game, from idea to a reviewed, tested commit.
 The rules it relies on are in `CLAUDE.md` ("Code Style", game debuggability,
-"Testing", "Adding a gag"); this skill is the order to do things in and the
-traps already found. The worked example is the bowl stuck on his head
+"Testing"); this skill is the order to do things in, where each piece goes,
+and the traps already found. The worked example is the bowl stuck on his head
 (`bowl.js` `stuckInBowl`, `bird.js` `rescue`, `antics.js`, `TestBowl`).
 
 A gag is choreography: several characters, any tap at any moment, nothing
@@ -17,7 +17,7 @@ finding where things go and re-running things.
 
 ## 0. Before starting
 
-- Read `PROJECT_PLAN.md` (what's next, open questions about Eliot) and the
+- Read `docs/PROJECT_PLAN.md` (what's next, open questions about Eliot) and the
   game's `brief.yaml` (principles, the scene it touches).
 - Skim the module heads only (each file's first comment block says what it is
   for); read code where the gag will hook in, not whole files.
@@ -76,8 +76,10 @@ chosen one, write down briefly:
 - **What a tap does at each beat.** Every tap gets an answer, and for each
   beat decide which: it waits for after (the default while he is busy with a
   thing), it is answered inside the gag (the child takes part), or it cuts the
-  gag short (left-alone moves). Answered inside: the bowl's `Things.stuckTap`
-  is the one example so far; make it general for the second.
+  gag short (left-alone moves). Answered inside, for a gag that holds him
+  while the child keeps tapping (the bowl on his head, his tail caught in the
+  bramble): the gag answers each tap itself rather than queueing it, with
+  `Things.stuckTap`, or, outside things.js, the `hold` it is handed.
 - **Interleavings to survive:** a tap mid-gag (queued, or answered), a tap
   during each beat that moves his head or body, rain starting, dusk, the
   creature busy elsewhere (the bird after a worm), the gag cut short at every
@@ -103,7 +105,7 @@ here when it gets its first gag):
 | Something a shared part (Reksio, `debug.js`, sound) must know about the game | a hook the game sets (`Reksio.listen`, `Debug.pin`), never the game's name in the shared file (`CLAUDE.md`, "Shared parts") |
 | Tunables | named constants at the top of the module, each with why |
 | What must always hold | a `Debug.check` in `yard.js` `checkRules` |
-| Words | the scene in `brief.yaml`, marked `original`, `inspired` or `invented` with refs to what it is based on; status in `PROJECT_PLAN.md` |
+| Words | the scene in `brief.yaml`, marked `original`, `inspired` or `invented` with refs to what it is based on; status in `docs/PROJECT_PLAN.md` |
 
 A file over 1000 lines fails `test_files_stay_small`: split by what it is
 for (precedents: `bird.js`, `bowl.js` and `bramble.js` out of `things.js`,
@@ -172,7 +174,7 @@ timing or sound: name the constants Adam should tune by watching
 - A browser test that fails now and then under `-n 8`: run the same slice a
   few times on the committed code (`git worktree add <scratch> HEAD`) to
   tell an old timing bug from a new one; either way it's a real bug, noted
-  in `PROJECT_PLAN.md` if not fixed then.
+  in `docs/PROJECT_PLAN.md` if not fixed then.
 
 ## 7. Review, then verify once
 

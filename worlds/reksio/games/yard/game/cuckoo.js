@@ -1,5 +1,5 @@
 // The cuckoo clock in the house, on the wall just inside its open window
-// (invented: Eliot's grandfather keeps wall clocks, DESIGN_PRINCIPLES.md; an
+// (invented: Eliot's grandfather keeps wall clocks, docs/DESIGN_PRINCIPLES.md; an
 // indoor clock, so it hangs indoors). A tap on the house is a tap on it. Its hands show the day's time (day.js:
 // the minute hand goes round once each hour of the day), its pendulum swings
 // without a sound, and on each hour the cuckoo comes out and calls once; at

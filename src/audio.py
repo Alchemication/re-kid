@@ -66,7 +66,7 @@ def extract_wav(media: Path, wav: Path) -> Path:
     """Write the media's audio as mono WAV at the analysis rate. Returns wav."""
     if not media.is_file():
         raise AudioError(
-            f"{media} not found — download the clip first (PROJECT_PLAN.md)."
+            f"{media} not found — download the clip first (README.md, Reference media)."
         )
     wav.parent.mkdir(parents=True, exist_ok=True)
     _ffmpeg(

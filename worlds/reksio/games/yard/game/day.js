@@ -2,7 +2,7 @@
 // (yard.js tells it the time): a day on a clock, from 08:00 to 20:00, that
 // starts when Reksio wakes and moves only with time, never with what he does,
 // so a child who watches the snail all day gets as long as one who tries
-// everything (DESIGN_PRINCIPLES.md). The sun sets at 19:00 (dusk), the moon
+// everything (docs/DESIGN_PRINCIPLES.md). The sun sets at 19:00 (dusk), the moon
 // comes up through the last hour, and at 20:00 it's bedtime; bed ends the
 // play (night). What he has done is kept only for his wishes. A grown-up
 // can hurry the sun down (holding the house): it sets within a few seconds,

@@ -214,7 +214,7 @@ def cmd_mark(args: argparse.Namespace) -> int:
     if media is None or not media.is_file():
         logger.error(
             "No intro clip found. Pass one, e.g. `main.py mark %s "
-            "worlds/%s/%s/1972-kosmonauta.mp4` (see PROJECT_PLAN.md to download it).",
+            "worlds/%s/%s/1972-kosmonauta.mp4` (README.md, Reference media, says how to download it).",
             args.world,
             args.world,
             INTRO_MEDIA_DIR,

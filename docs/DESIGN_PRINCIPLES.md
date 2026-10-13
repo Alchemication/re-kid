@@ -2,7 +2,7 @@
 
 How re-kid's games should feel and what they must never do. They apply to
 every world and game; a game brief may add its own. The research behind them
-is at the end. Status and next steps are in `PROJECT_PLAN.md`.
+is at the end. Status and next steps are in `docs/PROJECT_PLAN.md`.
 
 ## Faithful to the original
 
