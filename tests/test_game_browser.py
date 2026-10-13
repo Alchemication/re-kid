@@ -27,6 +27,10 @@ playwright = pytest.importorskip("playwright.sync_api")
 ROOT = Path(__file__).resolve().parent.parent
 YARD = ROOT / "worlds/reksio/games/yard/game/index.html"
 STILL = "seed=1&still&rain=0&creatures="
+HOUSE_WALL = (
+    290,
+    700,
+)  # the house, low on the right of its wall: in view from the start, clear of the clock
 DONE_MS = 60_000  # the longest thing (a full nap, the film) takes well under this
 CUT_AFTER_MS = 400  # a tap this soon after starting cuts a move short
 
@@ -75,6 +79,11 @@ GESTURES = {
     "sulk": "Reksio.sulk().then(() => Reksio.hearsBee()).then(() => Reksio.leapFright(80))",
     "hearsBee": "Reksio.hearsBee().then(() => Reksio.leapFright(80))",
     "leapFright": "Reksio.leapFright(80).then(() => Reksio.freed())",
+    # counting along with the cuckoo (antics.js): head up and proud until glare()
+    "barkUp": "Reksio.barkUp().then(() => Reksio.glare())",
+    "smugTurn": "Reksio.smugTurn().then(() => Reksio.glare())",
+    "spunRound": "Reksio.spunRound().then(() => Reksio.glare())",
+    "glare": "Reksio.glare()",
     "stretch": "(async () => { Reksio.beginStretch(); await new Promise((r) => setTimeout(r, 600)); await Reksio.endStretch() })()",
 }
 # Reksio's other functions: state, not gestures, or tested through a thing.
@@ -124,6 +133,7 @@ ACTS = [
     "yawn",
     "bowl",
     "bramble",
+    "cuckoo",
 ]
 # Moves that need something in the yard this test can't quickly bring: skipped
 # (and shown as skipped) when it isn't there.
@@ -134,6 +144,7 @@ ACT_QUERY = {"fly": "&creatures=fly", "bramble": "&props=berries"}
 THINGS = [
     "doghouse",
     "house",
+    "clock",
     "bowl",
     "tap",
     "flowers",
@@ -207,6 +218,19 @@ class Yard:
 
     def state(self) -> dict:
         return self.page.evaluate("yardGame.state()")
+
+    def on_screen(self, x: float, y: float) -> tuple[float, float]:
+        """Where a point of the yard (scene units) is on the screen now."""
+        return tuple(
+            self.page.evaluate(
+                """([x, y]) => {
+                const p = document.getElementById('world').createSVGPoint()
+                p.x = x; p.y = y
+                const s = p.matrixTransform(document.getElementById('cam').getScreenCTM())
+                return [s.x, s.y] }""",
+                [x, y],
+            )
+        )
 
     def settled(self) -> dict:
         """Wait until he's free, then check he's standing and nothing went wrong."""
@@ -598,6 +622,37 @@ class TestSky:
         assert not y.errors, "\n---\n".join(y.errors)
 
 
+class TestClock:
+    """The cuckoo clock on the house (cuckoo.js): its hands show the hour, and
+    the cuckoo calls each hour, eight slow times at bedtime."""
+
+    def test_the_hands_show_the_hour(self, yard: callable) -> None:
+        y = yard(f"{STILL}&hour=10.25&day=100000")
+        y.page.wait_for_timeout(500)
+        got = y.page.evaluate("""() => ['hour', 'minute'].map((h) => parseFloat(
+            document.getElementById(`clock-${h}`).style.transform.slice(7)))""")
+        assert got == pytest.approx([307.5, 90], abs=1)  # drawn to whole degrees
+
+    def test_it_calls_the_hour_and_he_looks_up_near_it(self, yard: callable) -> None:
+        y = yard("seed=1&rain=0&creatures=&morning=0&hour=8.95&day=120")  # 10 s an hour
+        y.page.wait_for_function(
+            "yardGame.events().filter((e) => e.kind === 'cuckoo').length >= 2",
+            timeout=30_000,
+        )
+        assert [e["calls"] for e in y.events("cuckoo")][:2] == [1, 1]
+        assert y.events("glance"), "near the house, he looked up at it"
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_eight_slow_calls_at_bedtime(self, yard: callable) -> None:
+        y = yard(
+            f"{DAY_PLAY}&hour=19.9&day=60"
+        )  # 5 s an hour: bedtime in half a second
+        y.page.wait_for_function("yardGame.state().ended", timeout=10_000)
+        assert [e["calls"] for e in y.events("cuckoo")] == [8]
+        y.page.wait_for_timeout(10_000)  # it calls on as he goes in
+        assert not y.errors, "\n---\n".join(y.errors)
+
+
 class TestLeftAlone:
     def test_he_keeps_busy_on_his_own(self, yard: callable) -> None:
         y = yard(
@@ -629,7 +684,7 @@ class TestRealInput:
 
     def test_a_tap_on_a_thing_uses_it(self, yard: callable) -> None:
         y = yard(STILL)
-        y.page.click("#things [data-thing='house']")  # in view from the start
+        y.page.mouse.click(*y.on_screen(*HOUSE_WALL))
         y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
         assert self.intents(y) == ["go to house"]
         y.settled()
@@ -699,7 +754,7 @@ class TestScreens:
 
     def test_he_can_go_anywhere_on_a_phone(self, yard: callable) -> None:
         y = yard(STILL, size=(844, 390))
-        y.page.tap("#things [data-thing='house']")
+        y.page.touchscreen.tap(*y.on_screen(*HOUSE_WALL))
         y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
         y.settled()
         y.page.evaluate("yardGame.walk(3650)")  # the far end of the yard

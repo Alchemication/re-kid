@@ -197,7 +197,12 @@ const Sound = (() => {
    * close, fading out with distance, nothing beyond HEARING. */
   function from(distance, play) {
     if (distance > HEARING) return
-    scale = CRITTER_VOLUME * (1 - distance / HEARING) ** 2
+    scaled(CRITTER_VOLUME * (1 - distance / HEARING) ** 2, play)
+  }
+
+  /** Play at `k` times the loudness. */
+  function scaled(k, play) {
+    scale = k
     try {
       play()
     } finally {
@@ -232,6 +237,7 @@ const Sound = (() => {
   const sounds = {
     ensure: unlock,
     from,
+    scaled,
     /** A tap or key has let sound play. */
     get heard() { return heard },
     /** Sound is on (after the first tap). */
@@ -555,6 +561,17 @@ const Sound = (() => {
     },
     shake() { for (let i = 0; i < 5; i++) hiss(i * 0.07, 0.12, 0.004, 0.05, 'highpass', 3000) },
     chirp() { tone('sine', 2600, 3600, 0, 0.12, 0.01, 0.07); tone('sine', 2800, 3900, 0.11, 0.1, 0.01, 0.07) },
+    /** A cuckoo clock's call, "ku-ku": two soft falling notes (a minor
+     * third, as from its two little pipes) `gap` seconds apart, a breath on
+     * each. slow: an evening's, longer and softer. */
+    cuckoo(slow = false, gap = 0.3) {
+      const decay = slow ? 0.32 : 0.2
+      const peak = slow ? 0.13 : 0.16
+      tone('triangle', 784, 778, 0, peak, 0.025, decay)
+      hiss(0, 0.04, 0.01, 0.08, 'bandpass', 1600, 1)
+      tone('triangle', 659, 652, gap, peak, 0.025, decay * 1.2)
+      hiss(gap, 0.04, 0.01, 0.08, 'bandpass', 1400, 1)
+    },
     flutter() { for (let i = 0; i < 6; i++) hiss(i * 0.05, 0.08, 0.004, 0.035, 'bandpass', 900, 1) },
     dig() { for (let i = 0; i < 6; i++) hiss(i * 0.11, 0.2, 0.004, 0.06, 'bandpass', 700 + Math.random() * 500, 1.2) },
     /** Play an original clip (an easter egg), if the file is there; silent otherwise. */

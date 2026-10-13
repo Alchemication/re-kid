@@ -173,13 +173,60 @@
             <rect class="hit" x="0" y="300" width="320" height="510" />
             <rect class="plaster" x="-20" y="250" width="330" height="560" />
             <path class="plaster-edge" d="M310 250 V810" />
-            <rect class="window" x="90" y="400" width="140" height="130" />
-            <path class="window-bars" d="M160 400 V530 M90 465 H230" />
-            <g id="curtain" style="transform-origin: 104px 406px">
-              <path class="curtain" d="M96 406 Q118 470 104 524 H96 Z" />
+            <rect class="window" x="25" y="400" width="120" height="130" />
+            <path class="window-bars" d="M85 400 V530 M25 465 H145" />
+            <g id="curtain" style="transform-origin: 39px 406px">
+              <path class="curtain" d="M31 406 Q53 470 39 524 H31 Z" />
             </g>
-            <path class="curtain" d="M224 406 Q202 470 216 524 H224 Z" />
+            <path class="curtain" d="M139 406 Q117 470 131 524 H139 Z" />
             <rect class="step" x="70" y="790" width="180" height="20" />
+          </g>
+
+          <!-- ============ the cuckoo clock on the house wall (cuckoo.js) ============ -->
+          <!-- drawn about (160, 331) and hung, 1.4 times bigger, on the wall's right, beside where he stands -->
+          <g id="clock" class="thing" data-thing="clock" data-hint-y="330">
+            <rect class="hit" x="146" y="306" width="179" height="235" /><!-- in scene units, clear of the window: that is the house's -->
+            <g transform="translate(6 -27) scale(1.4)">
+            <path class="clock-chain" d="M138 362 V381 M182 362 V377" />
+            <ellipse class="clock-cone" cx="138" cy="391" rx="7" ry="11" />
+            <ellipse class="clock-cone" cx="182" cy="387" rx="7" ry="11" />
+            <g id="cuckoo-pendulum" style="transform-origin: 160px 362px">
+              <path class="clock-rod" d="M160 362 V386" />
+              <circle class="clock-bob" cx="160" cy="391" r="8" />
+            </g>
+            <rect class="clock-wood" x="114" y="284" width="92" height="80" rx="4" />
+            <path class="clock-roof" d="M104 293 L160 255 L216 293" />
+            <path class="clock-roof-edge" d="M104 293 L160 255 L216 293" />
+            <rect class="clock-hole" x="148" y="289" width="24" height="18" />
+            <g id="cuckoo-bird" style="transform-origin: 160px 300px" opacity="0">
+              <path class="cuckoo-tail" d="M152 298 L141 293 L143 303 Z" />
+              <ellipse class="cuckoo-body" cx="158" cy="300" rx="9" ry="7" />
+              <path class="cuckoo-wing" d="M152 299 Q158 295 163 300 Q157 304 152 299 Z" />
+              <circle class="cuckoo-body" cx="166" cy="294" r="5.5" />
+              <circle class="eye" cx="168" cy="293" r="1.3" />
+              <path class="cuckoo-beak" d="M171 292 L178 293.5 L171 295 Z" />
+              <path id="cuckoo-beak-low" class="cuckoo-beak" d="M171 295 L177 296 L171 296.5 Z" style="transform-origin: 171px 295px" />
+            </g>
+            <rect id="cuckoo-door" class="clock-door" x="148" y="289" width="24" height="18" style="transform-origin: 148px 298px" />
+            <circle class="clock-face" cx="160" cy="331" r="25" />
+            <g id="clock-ticks">
+              <path class="clock-tick big" d="M160 309 V314" transform="rotate(0 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(30 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(60 160 331)" />
+              <path class="clock-tick big" d="M160 309 V314" transform="rotate(90 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(120 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(150 160 331)" />
+              <path class="clock-tick big" d="M160 309 V314" transform="rotate(180 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(210 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(240 160 331)" />
+              <path class="clock-tick big" d="M160 309 V314" transform="rotate(270 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(300 160 331)" />
+              <path class="clock-tick" d="M160 309 V312" transform="rotate(330 160 331)" />
+            </g>
+            <path id="clock-hour" class="clock-hand" d="M160 331 V318" style="transform-origin: 160px 331px" />
+            <path id="clock-minute" class="clock-hand thin" d="M160 331 V311" style="transform-origin: 160px 331px" />
+            <circle class="clock-pin" cx="160" cy="331" r="3" />
+            </g>
           </g>
 
           <!-- ============ doghouse ============ -->
@@ -555,6 +602,7 @@
   <script src="bramble.js"></script>
   <script src="bird.js"></script>
   <script src="bowl.js"></script>
+  <script src="cuckoo.js"></script>
   <script src="things.js"></script>
   <script src="wet.js"></script>
   <script src="yard.js"></script>

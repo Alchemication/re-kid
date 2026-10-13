@@ -44,12 +44,12 @@ function fakeReksio(x = 1500) {
   })
 }
 
-/** Sound and Music: every call is noted; Sound.from plays its sound. */
+/** Sound and Music: every call is noted; Sound.from and Sound.scaled play their sound. */
 function fakeSound() {
   const played = []
   const anything = () =>
     new Proxy(() => {}, {
-      get: (_t, name) => (name === 'from' ? (_d, play) => play() : (...a) => played.push(name) && undefined),
+      get: (_t, name) => (name === 'from' || name === 'scaled' ? (_d, play) => play() : (...a) => played.push(name) && undefined),
       apply: () => undefined,
     })
   return { Sound: anything(), Music: { react: anything(), setDusk() {}, setRain() {}, evening() {} }, played }

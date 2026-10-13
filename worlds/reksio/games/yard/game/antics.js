@@ -10,6 +10,10 @@
 // His tail caught in the bramble (bramble.js): a proud wag, yanked back as he
 // sets off, a double take, straining to pull free and snapped back onto his
 // bottom, glum; frozen at a bee's hum by his tail, and a leap of fright.
+//
+// The cuckoo clock (cuckoo.js): he barks back up at each call, very pleased;
+// turns his back on it, nose in the air; is spun round by one call more; and
+// gives the shut door a cross look.
 
 /* global Reksio, Sound, Figure */
 (() => {
@@ -20,6 +24,9 @@
   const EFFORT = { eyes: 0, joy: -1, brows: -0.9, smile: -0.4, teeth: 1, open: 0.2 } // eyes screwed shut, teeth gritted
   const STARTLED = { lift: 1, brows: 0.6, o: 1, open: 0.3, smile: 0 }
   const FRIGHT = { lift: 1, brows: 1, open: 0.8, o: 1, smile: 0, eyes: 1, joy: 0 }
+  const PROUD = { smile: 1, eyes: 0, joy: 1, lift: 0.3 } // eyes shut, beaming
+  const SMUG = { smile: 0.9, eyes: 0.35, joy: 0.3, brows: 0.4 } // eyes half shut, nose up
+  const CROSS = { brows: -1, smile: -0.5, open: 0, eyes: 1, joy: 0 }
   const LOOK_BACK = { turn: 0 } // his head turned to us, the eyes looking back over his shoulder (face.look)
   const k = Reksio.kit
   const { blend, pause, faceTo, faceOff, actTo, actOff, add, rnd, rndInt } = k
@@ -173,7 +180,46 @@
     await actOff(200)
   }
 
-  const gestures = { bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright }
+  /** A bark straight back up at the cuckoo: head well up, mouth wide, and
+   * then beaming, pleased with it. Leaves his head up and his face proud. */
+  async function barkUp() {
+    faceTo({ open: 0.8, smile: 0.5, lift: 0.7, eyes: 1, joy: 0 }, 60)
+    Sound.bark()
+    k.tell('bark', Reksio.mouth())
+    await blend(add, 'tilt', -32, 120, k.EASE_OUT)
+    await blend(add, 'tilt', -22, 140)
+    await faceTo(PROUD, 120)
+  }
+
+  /** That's that: he turns his back on the clock, nose in the air. */
+  async function smugTurn() {
+    faceTo(SMUG, 200)
+    blend(add, 'tilt', -12, 300)
+    await pause(rnd(150, 250))
+    Reksio.face(-Reksio.facing)
+    await pause(rnd(600, 900))
+  }
+
+  /** One call more, behind him: frozen, spun round with a hop, eyes wide. */
+  async function spunRound() {
+    faceTo(STARTLED, 60)
+    await blend(add, 'tilt', -4, 90)
+    Reksio.face(-Reksio.facing)
+    await blend(add, 'dy', -26, 180, k.EASE_OUT)
+    await blend(add, 'dy', 0, 180, k.EASE_IN)
+  }
+
+  /** A cross look up at the shut door, then he lets it go. Ends with his
+   * head and face back as they were. */
+  async function glare() {
+    faceTo(CROSS, 120)
+    await blend(add, 'tilt', -18, 200)
+    await pause(rnd(700, 1000))
+    blend(add, 'tilt', 0, 300)
+    await faceOff(300)
+  }
+
+  const gestures = { bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare }
   Reksio.addGestures(gestures)
 
 })()

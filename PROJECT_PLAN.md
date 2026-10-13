@@ -310,6 +310,19 @@ wake Reksio at home.
      sweep across the sky as a dry play starts. The perf suite now plays
      cloudy days. To judge: the kinds and how often each comes (3:4:2:2),
      the haze, the cloudy day's even row of clouds.
+   - *Slice 2, the cuckoo clock (2026-10-13), for Adam to look at and hear:*
+     `cuckoo.js`, on the house wall to the right of the window (moved left
+     for it), beside where he stands. Hands from the hour, a silent
+     pendulum, the cuckoo calling once each hour and eight slow times at
+     20:00; near the house he looks up at it. Tapped: he barks back at each
+     call, turns away smug, is caught by one call more, barks too late, the
+     door snaps shut; the variation, he howls first. The call is a
+     synthesised placeholder: real takes through `new-sound` next. To judge:
+     the call's sound and loudness, how often on the hour (25 s), his head
+     only slightly up (`barkUp`, `glare` tilts in antics.js), the clock's
+     size. Found on the way, not fixed: `TestRealInput::test_a_key_tap_barks`
+     fails about 1 run in 5 under 8 workers, on the committed code too (a
+     quick key tap can count as a hold when frames are slow).
    - The design principles in Adam's brief for this (a world to inhabit, a
      calm accepted ending, no engagement tricks) are in `DESIGN_PRINCIPLES.md`,
      with research on whether a few minutes a day suits a toddler.

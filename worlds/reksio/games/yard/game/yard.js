@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -20,6 +20,7 @@
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
+  const GLANCE_NEAR = 900 // on the hour, he looks up at the cuckoo only if he is this near the house (scene units) and free
   const CRITTER_CORE = 0.45 // where a critter's tap circle covers a thing or Reksio, the critter wins only this close to its middle (share of the circle): about its drawn size
   const X = Layout.x // per-play offset of a movable thing, scene units
 
@@ -224,6 +225,14 @@
     Sky.dusk()
   }
 
+  /** The cuckoo has called the hour: near the house and free, he looks up
+   * at it (ACTS.cuckoo, so a tap cuts it short). */
+  function glanceAtCuckoo(hour) {
+    if (day.ended || !free() || Debug.still || Reksio.x - Cuckoo.X > GLANCE_NEAR) return
+    Debug.trace('glance', { at: 'cuckoo', hour })
+    startAct('cuckoo')
+  }
+
   /** At dusk the doghouse means bed (tapped elsewhere on the way: not yet). */
   async function goToBed() {
     if (await Reksio.walkTo(THINGS.doghouse.at())) bed()
@@ -360,7 +369,8 @@
   // drawn faintly and lit up when he is in it. Generous on purpose.
   // x = centre, r = half-width, both scene units.
   const SPOTS = {
-    house: () => ({ x: 410, r: 70 }),
+    clock: () => ({ x: THINGS.clock.at() + 15, r: 45 }), // at the house wall, under the clock
+    house: () => ({ x: THINGS.house.at(), r: 45 }),
     doghouse: () => ({ x: 560, r: 130 }),
     bowl: () => ({ x: 830 + X('bowl'), r: 120 }),
     tap: () => ({ x: 1260 + X('tap'), r: 120 }),
@@ -551,6 +561,15 @@
       },
     },
     look: { weight: 2, run: () => Reksio.lookAround() },
+    // never picked: the cuckoo starts it on the hour (glanceAtCuckoo)
+    cuckoo: {
+      weight: 0,
+      ok: () => false,
+      async run() {
+        Reksio.face(-1)
+        await Reksio.lookUp(900)
+      },
+    },
     lookUp: {
       weight: 2,
       async run() {
@@ -796,6 +815,7 @@
   Things.init({ ended: () => day.ended })
   makeSpots()
   Sky.init()
+  Cuckoo.init({ hourAt: () => day.hour(Clock.now()), onHour: glanceAtCuckoo, inView: () => camX < Cuckoo.X + 150 })
   Sky.show(day.hour(Clock.now())) // ?hour: the sky for it from the start
   Creatures.init()
   Weather.init()
@@ -873,7 +893,7 @@
     actOk,
     chase,
     acts: Object.keys(ACTS),
-    things: Object.keys(SPOTS),
+    things: Object.keys(THINGS),
     critters: Object.keys(CRITTERS),
     /** Nothing going on: not busy, acting, walking or waiting to do something. */
     free,

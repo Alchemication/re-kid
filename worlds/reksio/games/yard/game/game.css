@@ -82,6 +82,25 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .window-bars { stroke: var(--ink); stroke-width: 6; }
 .curtain { fill: #e9e2cf; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
 .step { fill: #b8ab8f; stroke: var(--ink); stroke-width: 5; }
+/* the cuckoo clock (cuckoo.js) */
+.clock-wood { fill: #a8692f; stroke: var(--ink); stroke-width: 5; }
+.clock-roof { fill: none; stroke: var(--ink); stroke-width: 15; stroke-linecap: round; stroke-linejoin: round; }
+.clock-roof-edge { fill: none; stroke: #6d4a2b; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+.clock-hole { fill: #2a1c10; stroke: var(--ink); stroke-width: 3; }
+.clock-door { fill: #c98a4a; stroke: var(--ink); stroke-width: 3; }
+.clock-face { fill: #f3ead2; stroke: var(--ink); stroke-width: 4; }
+.clock-tick { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.clock-tick.big { stroke-width: 3.5; }
+.clock-hand { fill: none; stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
+.clock-hand.thin { stroke-width: 3.5; }
+.clock-pin { fill: var(--ink); }
+.clock-chain { fill: none; stroke: #5a4a36; stroke-width: 2; stroke-dasharray: 2 2; }
+.clock-cone { fill: #7a4b24; stroke: var(--ink); stroke-width: 3; }
+.clock-rod { stroke: var(--ink); stroke-width: 3; }
+.clock-bob { fill: #d9a441; stroke: var(--ink); stroke-width: 3; }
+.cuckoo-body { fill: #e9dcc0; stroke: var(--ink); stroke-width: 2.2; }
+.cuckoo-wing, .cuckoo-tail { fill: #8a5a32; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.cuckoo-beak { fill: var(--ochre); stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
 .plank { fill: #e3c27c; stroke: var(--ink); stroke-width: 6; }
 .plank-line { fill: none; stroke: #a9844a; stroke-width: 3; }
 .door { fill: #3b2a1a; stroke: var(--ink); stroke-width: 6; }

@@ -98,7 +98,8 @@ here when it gets its first gag):
 | Reksio's own moves for this gag | `antics.js`, made from `Reksio.kit` (`blend`, `pause`, `faceTo`/`faceOff`, `actTo`/`actOff`, `settle`/`rise`, the `add` layer), added with `Reksio.addGestures`. Not `reksio.js` (the engine) or `gestures.js` (everyday moves) |
 | Something on his body (bowl, caught tail) | `Reksio.wear(name, change)` from the gag's file: `change(pose, toFigure)` returns his pose with it, drawn last; `Reksio.wear(name, null)` in the gag's `finally`. A new shape to draw on him (the bowl) is a face field in `figure.js` (`FACE`, drawn in `mount`). Points on him: `Reksio.pointAt(Figure.bowlTopAt)` |
 | Sounds | `sound.js`; reuse first (`grep -no "^    [a-zA-Z]*(" sound.js`) |
-| A left-alone trigger | `yard.js` `ACTS`; a fix someone helps him out of: a `helped` field on its thing (`{ act, can, alone, times }`, as `bowl.js`), and yard.js makes the once-a-play move |
+| Its action spot | `yard.js` `SPOTS`: every usable thing has one (the brief says so), read from the thing's `at()`, and its centre nearer its own thing than any neighbour's (the clock and the house share the wall: the clock's at the wall, the house's a step off) |
+| A left-alone trigger | `yard.js` `ACTS`; a fix someone helps him out of: a `helped` field on its thing (`{ act, can, alone, times }`, as `bowl.js`), and yard.js makes the once-a-play move. A move an event starts (he looks up at the cuckoo on the hour) is an `ACTS` entry with `weight: 0, ok: () => false`, so it never picks itself, started with `startAct` from the event's hook (`glanceAtCuckoo`) |
 | Something a shared part (Reksio, `debug.js`, sound) must know about the game | a hook the game sets (`Reksio.listen`, `Debug.pin`), never the game's name in the shared file (`CLAUDE.md`, "Shared parts") |
 | Tunables | named constants at the top of the module, each with why |
 | What must always hold | a `Debug.check` in `yard.js` `checkRules` |
@@ -141,7 +142,10 @@ uv run python main.py look <world> --flags props=bowl --close \
 
 Read `looks/latest/sheet.jpg`, then single frames for detail
 (`looks/latest/frames/`, times in `look.json`). Check that each beat reads
-without words, at phone size too (`--size 844x390`). Stills can't judge
+without words, at phone size too (`--size 844x390`). `--close` crops
+round Reksio: for anything above or beside him (the cuckoo clock was cut
+off), look at the full view first. Check size and placement here, before
+writing tests: the first clock was too small to read and had to move. Stills can't judge
 timing or sound: name the constants Adam should tune by watching
 (`main.py play <world> --still`).
 
@@ -160,7 +164,15 @@ timing or sound: name the constants Adam should tune by watching
 - `page.evaluate` waits for a returned promise. To start a gag and watch it,
   wrap it: `"() => { yardGame.use('bowl', true) }"`.
 - Each bug a review finds gets a test that fails on the old code: put the old
-  code back, see it fail, restore.
+  code back, see it fail, restore. Check the test reaches the bug: one that
+  cut the gag at its first move never reached the stray call it was for.
+- Tapping a thing by its selector clicks the middle of its box, which may be
+  something drawn on top (the clock over the house). Tap a point the thing
+  owns: `y.on_screen(x, y)` gives a scene point's place on the screen.
+- A browser test that fails now and then under `-n 8`: run the same slice a
+  few times on the committed code (`git worktree add <scratch> HEAD`) to
+  tell an old timing bug from a new one; either way it's a real bug, noted
+  in `PROJECT_PLAN.md` if not fixed then.
 
 ## 7. Review, then verify once
 

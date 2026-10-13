@@ -1,7 +1,7 @@
 // What Reksio does with each thing in the yard, the bird he chases, the mouse
 // he helps, and the small effects they share (flung crumbs, twinkles, hearts).
-// The bowl, the tree and the bramble have files of their own (bowl.js,
-// tree.js, bramble.js).
+// The bowl, the tree, the bramble and the cuckoo clock have files of their
+// own (bowl.js, tree.js, bramble.js, cuckoo.js).
 //
 // Each thing's run({ extra }) plays its action; `extra` asks for its
 // variation. A toddler loves exact repetition, so a repeat keeps the same core
@@ -13,7 +13,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Figure, Bird */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Figure, Bird, Cuckoo */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -415,6 +415,7 @@ const Things = (() => {
       },
     },
     bowl: Bowl.thing,
+    clock: Cuckoo.thing,
     tap: {
       at: () => 1201 + X('tap'),
       face: 1,
@@ -478,7 +479,7 @@ const Things = (() => {
       },
     },
     house: {
-      at: () => Layout.MIN_X,
+      at: () => Layout.MIN_X + 90, // a step from the wall: the clock's spot is at the wall (yard.js SPOTS)
       face: -1,
       async run() {
         await Reksio.nod(-20, 300)
