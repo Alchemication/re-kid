@@ -230,27 +230,40 @@ wake Reksio at home.
 
 **Order agreed 2026-10-12** (Adam), before the numbered list below:
 
-1. *Decide how the yard's day ends.* Now: the sun sets after six different
-   things (first uses only, the bird and gate included) or 10 minutes; the
-   moon then rises for about 40 s with everything still working; then he
-   goes to bed by himself, or at a tap on the doghouse. Adam: "very messy, I
-   don't ever know even myself when it will end". Options discussed,
-   Adam sleeping on them (2026-10-12):
-   - A: a fixed-length day (about 6 min), the sun visibly crossing the sky;
-   - B: Reksio gets sleepy and the child puts him to bed (a tap on the
-     glowing doghouse), with a long cap;
-   - C: an evening ritual from the cartoon: at sunset the boy whistles off
-     screen, the bowl fills with steaming food, he eats, goes in, the
-     picture closes (*Kosmonauta*'s ending); no 40 s limbo;
-   - D: a grown-up can call the evening early (a long press on the sun).
-   Claude's recommendation: A + C + D, with B's yawns as the sun gets low.
-   To decide: the trigger (time, the child, or things done made visible),
-   the day's length, the ritual, the parent's gesture.
-   Also open (Adam, 2026-10-12): are episodes entered from the yard, or
-   from a main screen that leads to the yard and the episodes? The
-   decision of 2026-10-07 (above) is the yard as home, doorways found in
-   it, no hub until three episodes; a main screen would revisit it. To be
-   simple, cool, novel and funny: its own discussion.
+1. *The yard's day on a clock* (decided 2026-10-13, Adam and Claude). Why:
+   the sun now sets after six different things or 10 minutes, so a curious
+   child gets an earlier bedtime and nobody can tell when the day will end
+   (Adam: "very messy"). What works and must stay: Eliot (3) has learned
+   that when Reksio goes to sleep the play is over, and accepts it. So the
+   ending he knows stays (dusk, into the doghouse, the circle closes); only
+   what brings it on changes.
+   - *Time alone moves the day.* A fictional 08:00–20:00 in 5 minutes of
+     play (25 s an hour), from `Clock.now`, so it pauses with the game.
+     Nothing he does speeds, slows or resets it. The six sunset steps go;
+     the sky changes smoothly with the hour, the moon comes up in the last
+     hour (no 40 s wait after sunset). His wishes (things not done yet)
+     stay, apart from time.
+   - *One clock, a cuckoo clock, on the house's outside wall* above the
+     window (invented, for Eliot's grandfather's clocks; other clocks
+     later). Its hands show the day's time. The cuckoo comes out with one
+     call each hour, eight slow calls at 20:00 (bedtime), and at a tap.
+     No ticking. How often it calls is a setting, for Adam's ear.
+   - *Evening:* yawns from the second-to-last hour; no new left-alone moves
+     or creature visits after the last call, a running gag finishes (about
+     20 s at most). The doghouse glows: a tap sends him in, else he goes by
+     himself after about 20 s. The cartoon's ritual (*Kosmonauta*: the boy
+     whistles, the bowl fills, he eats, goes in) to try in slice 3.
+   - *Parents: hold 2 s.* Holding the clock in the day brings the evening
+     now. After the end taps do nothing; a small corner button, held 2 s
+     (a ring fills), starts a new morning. Replaces the tap-to-restart.
+   - *Slices, each looked at by Adam:* (1) time model and continuous sky,
+     the ending unchanged; (2) the clock and cuckoo (sound via `new-sound`);
+     (3) evening, the ritual, the parent controls.
+   - The design principles in Adam's brief for this (a world to inhabit, a
+     calm accepted ending, no engagement tricks) go into `PROJECT_IDEA.md`.
+   Still open: are episodes entered from the yard, or from a main screen?
+   (The 2026-10-07 decision is the yard as home, no hub until three
+   episodes.) Its own discussion.
 2. *Wrap up the music* (step 2 of "Sound and music" below): its direction,
    then the work.
 3. *Eliot plays the yard* (the bowl, the bramble, the new sounds, the new
