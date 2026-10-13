@@ -13,8 +13,8 @@ function clock(hour = 8) {
   const page = load(['debug.js', 'layout.js', 'cuckoo.js'], { query: '?seed=1', dom: true, globals: { Reksio: reksio, Sound } })
   const Cuckoo = page.get('Cuckoo')
   const hours = []
-  const now = { hour }
-  Cuckoo.init({ hourAt: () => now.hour, onHour: (h) => hours.push(h) })
+  const now = { hour, hushed: false }
+  Cuckoo.init({ hourAt: () => now.hour, onHour: (h) => hours.push(h), hushed: () => now.hushed })
   const calls = () => played.filter((n) => n === 'cuckoo').length
   return {
     Cuckoo,
@@ -23,6 +23,7 @@ function clock(hour = 8) {
     calls,
     played,
     advance: page.advance,
+    now,
     /** The day's clock moves to `h`; a few frames pass. */
     async at(h) {
       now.hour = h
@@ -80,6 +81,23 @@ describe('on the hour', () => {
     }
     assert.deepEqual(c.hours, [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20])
     assert.equal(c.calls(), 11 + c.Cuckoo.BEDTIME_CALLS)
+  })
+})
+
+describe('the sun hurried down', () => {
+  it('spins the hands without calling the hours it crosses, then calls the next as ever', async () => {
+    const c = clock(10.2)
+    await c.at(10.2)
+    c.now.hushed = true
+    for (let h = 10.2; h < 19; h += 0.3) await c.at(h)
+    await c.at(19)
+    c.now.hushed = false
+    await c.advance(3000)
+    assert.equal(c.calls(), 0)
+    assert.deepEqual(c.hours, [])
+    await c.at(20)
+    await c.advance(15_000)
+    assert.equal(c.calls(), c.Cuckoo.BEDTIME_CALLS)
   })
 })
 

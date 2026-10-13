@@ -13,10 +13,14 @@ const GAME = path.join(__dirname, '..', 'game')
  * tested without a browser. */
 function fakeElement(tag = 'g') {
   const attrs = new Map()
+  const listeners = {}
   const node = {
     tag,
-    style: {},
+    style: { setProperty(k, v) { this[k] = v } },
     children: [],
+    /** Its listeners, kept so a test can fire them (`fire`). */
+    addEventListener: (type, fn) => (listeners[type] ||= []).push(fn),
+    fire: (type, e = {}) => (listeners[type] || []).forEach((fn) => fn(e)),
     parent: null,
     setAttribute: (k, v) => attrs.set(k, String(v)),
     getAttribute: (k) => (attrs.has(k) ? attrs.get(k) : null),
@@ -130,7 +134,7 @@ function load(files, { query = '', storage = {}, storageThrows = false, dom = fa
     throw new Error('storage blocked')
   }
   const sandbox = {
-    location: { search: query, href: `file:///yard/index.html${query}` },
+    location: { search: query, href: `file:///yard/index.html${query}`, reloads: 0, reload() { this.reloads += 1 } },
     URL,
     URLSearchParams,
     performance: dom ? { now: clock.now } : performance,

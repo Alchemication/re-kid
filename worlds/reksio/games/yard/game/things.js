@@ -650,6 +650,38 @@ const Things = (() => {
     },
   }
 
+  // ------------------------------------------------------------ supper
+
+  // Supper at bedtime (yard.js), as Kosmonauta ends (observed, about 9:30): a
+  // red bowl of steaming food by the doghouse; he eats it and licks his chops.
+  const SUPPER_X = 645 // the dish's middle, as drawn (index.html #supper)
+  const SUPPER_REACH = 116 // he stands this far left of it to eat, as at his bowl
+
+  /** Where he stands to eat it. */
+  const supperAt = () => SUPPER_X - SUPPER_REACH
+
+  /** Supper is set down, steaming. */
+  function serveSupper() {
+    $('supper').classList.add('served')
+    Sound.clang(0, 0.4)
+  }
+
+  /** He eats it all up and licks his chops. */
+  async function eatSupper() {
+    const food = $('supper-food')
+    let left = 1
+    const lapping = Reksio.lap(8)
+    for (let i = 0; i < 4; i++) {
+      await wait(380)
+      burst(SUPPER_X, 762, 3, 'crumb', { height: 30, reach: 30, size: 3 })
+      left -= 0.22
+      food.style.transform = `scaleY(${Math.max(left, 0.1).toFixed(2)})`
+    }
+    await lapping
+    Sound.slurp()
+    await Reksio.lick()
+  }
+
   /** Can it be used now? The trap only once the mouse is out, the tree once
    * someone hungry is under it, the bird only while it sits somewhere. */
   const ready = (name) =>
@@ -667,7 +699,7 @@ const Things = (() => {
   }
 
   return {
-    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap,
+    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap, supperAt, serveSupper, eatSupper,
     /** A gag holds him (the bowl on his head, his tail caught): it answers every tap. */
     get holding() { return !!held },
     get stamped() { return stamped },

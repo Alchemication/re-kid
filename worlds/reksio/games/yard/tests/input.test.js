@@ -109,16 +109,15 @@ describe('a key', () => {
 })
 
 describe('an ask', () => {
-  const ask = (s) => Input.ask({ busy: false, ended: false, endedAt: 0, now: 10000, ...s })
+  const ask = (s) => Input.ask({ busy: false, ended: false, ...s })
 
   it('runs at once when he is free, and waits its turn while he is busy', () => {
     assert.equal(ask(), 'run')
     assert.equal(ask({ busy: true }), 'wait')
   })
 
-  it('after the end: ignored while the picture closes and a moment after, then restarts the play', () => {
-    assert.equal(ask({ ended: true, endedAt: 0 }), 'ignore')
-    assert.equal(ask({ ended: true, endedAt: 10000 - Input.RESTART_AFTER_MS }), 'ignore')
-    assert.equal(ask({ ended: true, endedAt: 10000 - Input.RESTART_AFTER_MS - 1 }), 'restart')
+  it('after the end: always ignored, however long after (a new play is the grown-up\'s button)', () => {
+    assert.equal(ask({ ended: true }), 'ignore')
+    assert.equal(ask({ ended: true, busy: true }), 'ignore')
   })
 })

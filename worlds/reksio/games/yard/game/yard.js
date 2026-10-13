@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -20,6 +20,9 @@
   const HOLD_MS = 230 // a press on Reksio longer than this stretches him; shorter barks
   const BUSY_STUCK_MS = 45000 // busy longer than this (no stretch held) is a bug: far longer than any one thing takes
   const CAMERA_EASE = 3.5 // how quickly the view catches up with Reksio (per second)
+  const BED_AFTER_MS = 12000 // after supper, if nobody sends him to bed, he goes by himself this long after (yawning, sitting, lying down meanwhile)
+  const BEDTIME_ACTS = ['yawn', 'sit', 'lie'] // at bedtime, all he does left alone: nothing new starts
+  const BED_TWINKLE_MS = 1400 // and till then the doghouse twinkles this often
   const GLANCE_NEAR = 900 // on the hour, he looks up at the cuckoo only if he is this near the house (scene units) and free
   const CRITTER_CORE = 0.45 // where a critter's tap circle covers a thing or Reksio, the critter wins only this close to its middle (share of the circle): about its drawn size
   const X = Layout.x // per-play offset of a movable thing, scene units
@@ -37,7 +40,6 @@
   let pending = null
   // the day (day.js): its clock starts when he wakes (or now, with no morning)
   const day = Day.start({ lengthMs: (Layout.dayS ?? Day.LENGTH_S) * 1000, from: Layout.hour ?? Day.FROM })
-  let endedAt = 0
   let lastTap = Clock.now()
   // The morning: each play starts as the cartoon's episodes do, with Reksio
   // in his doghouse (intro.yaml: he pops out of it as an episode starts). He
@@ -222,7 +224,43 @@
   function startDusk() {
     Debug.trace('dusk', { done: day.count })
     Weather.stop()
+    Creatures.evening()
     Sky.dusk()
+  }
+
+  let supperServed = false
+  let bedAt = null // after supper: when he goes to bed by himself, if nobody has sent him
+  let goingToBed = false // walking to the doghouse to bed (a tap on it): supper doesn't take over
+  let stopBedTwinkle = () => {}
+
+  /** Bedtime: supper by the doghouse, as Kosmonauta ends (things.js). Then
+   * the doghouse twinkles and he wishes for it: a tap sends him in, or he goes
+   * by himself after a while. */
+  async function supper() {
+    if (day.ended || supperServed) return
+    supperServed = true
+    Debug.trace('supper')
+    busy = true
+    try {
+      Things.serveSupper()
+      if (await Reksio.walkTo(Things.supperAt())) {
+        Reksio.face(1)
+        await Debug.ignoreCut(Things.eatSupper(), 'supper')
+      }
+    } finally {
+      busy = false
+    }
+    if (day.ended) return
+    const c = thingCenter('doghouse')
+    stopBedTwinkle = Clock.every(BED_TWINKLE_MS, () => twinkle(c.x, c.y))
+    showWish('doghouse')
+    bedAt = Clock.now() + BED_AFTER_MS // dayAndNight sends him then, once he's free
+    runPending()
+  }
+
+  /** A grown-up held the house: the sun hurries down (day.js). */
+  function hurryEvening() {
+    if (day.hurry(Clock.now())) Debug.trace('evening now')
   }
 
   /** The cuckoo has called the hour: near the house and free, he looks up
@@ -235,13 +273,19 @@
 
   /** At dusk the doghouse means bed (tapped elsewhere on the way: not yet). */
   async function goToBed() {
-    if (await Reksio.walkTo(THINGS.doghouse.at())) bed()
+    goingToBed = true
+    try {
+      if (await Reksio.walkTo(THINGS.doghouse.at())) bed()
+    } finally {
+      goingToBed = false
+    }
   }
 
   /** Off to bed: evening falls, he trots into the doghouse, the picture closes. */
   async function bed() {
     if (!day.bed()) return // not before the sun has set
     Debug.trace('bed')
+    stopBedTwinkle()
     Sky.night()
     Music.evening()
     await wait(1600)
@@ -263,7 +307,8 @@
       }
       Clock.after(0, close)
     })
-    endedAt = Clock.now()
+    $('supper').classList.remove('served') // behind the closed picture: no steam rising for nobody
+    $('again').hidden = false // for the grown-up: a new morning, held
   }
 
   // ------------------------------------------------------------ input
@@ -278,9 +323,8 @@
       Debug.trace('relax', { from: lastAct })
       Reksio.relax() // left alone, he was doing something: drop it
     }
-    const now = Input.ask({ busy, ended: day.ended, endedAt, now: Clock.now() })
-    if (now === 'restart') location.reload()
-    else if (now === 'wait') {
+    const now = Input.ask({ busy, ended: day.ended })
+    if (now === 'wait') {
       if (pending) Debug.trace('replaced', { by: what })
       pending = fn
     } else if (now === 'run') fn()
@@ -319,6 +363,7 @@
     [/^press$/, () => holdStart()],
     [/^release$/, () => holdEnd()],
     [/^stop$/, () => !busy && Reksio.stopWalking()],
+    [/^evening now$/, () => hurryEvening()],
   ]
 
   function perform(intent) {
@@ -355,13 +400,17 @@
   const tapIntent = (e) => Input.tap(hitAt(e), { groundTop: Painting.GROUND_TOP, puddles: Weather.puddles })
 
   $('stage').addEventListener('pointerdown', (e) => {
-    if (e.target.closest('#fullscreen')) return
+    if (e.target.closest('#fullscreen, #again')) return
     e.preventDefault()
     Sound.ensure()
     if (asleep) return perform('wake up')
     Music.start()
-    perform(tapIntent(e))
+    const intent = tapIntent(e)
+    if (intent === 'go to house') GrownUp.pressHouse(e) // a tap as the finger lifts; held, the evening now
+    else perform(intent)
   })
+
+  GrownUp.init({ perform })
 
   // ------------------------------------------------------------ action spots
 
@@ -439,9 +488,16 @@
   })
 
   const release = () => hold && perform('release')
-  window.addEventListener('pointerup', release)
-  window.addEventListener('pointercancel', release)
-  window.addEventListener('blur', release)
+  window.addEventListener('pointerup', (e) => {
+    release()
+    GrownUp.letGoOfHouse(e, true)
+  })
+  for (const ev of ['pointercancel', 'blur']) {
+    window.addEventListener(ev, (e) => {
+      release()
+      GrownUp.letGoOfHouse(e, false)
+    })
+  }
 
   // the mouse over a thing lights up its spot
   $('stage').addEventListener('pointerover', (e) => {
@@ -615,7 +671,7 @@
         if (f && random() < 0.6 && Math.abs(f.x - Reksio.x) < 380) await Reksio.pounce(f.x)
       },
     },
-    yawn: { get weight() { return day.dusk ? 6 : 1 }, ok: () => day.count >= 2, run: () => Reksio.yawn() }, // sleepy at dusk
+    yawn: { get weight() { return day.sleepy(Clock.now()) ? 6 : 1 }, ok: () => day.count >= 2 || day.sleepy(Clock.now()), run: () => Reksio.yawn() }, // sleepy from 18:00
   }
 
   // A thing with a fix someone helps him out of (its `helped`: the bowl on
@@ -652,7 +708,7 @@
   /** Free: not asleep, busy, doing a left-alone move, held, waiting or walking. */
   const free = () => !asleep && !busy && !acting && !hold && !pending && !Reksio.walking
 
-  const actOk = (name) => !ACTS[name].ok || !!ACTS[name].ok()
+  const actOk = (name) => (!day.bedtime || BEDTIME_ACTS.includes(name)) && (!ACTS[name].ok || !!ACTS[name].ok())
   const pickAct = () => Idle.pick(ACTS, { ok: actOk, last: lastAct, firstWish, random })
 
   /** How full the music is: busy or just tapped → fuller; left alone → sparser. */
@@ -701,7 +757,9 @@
   function dayAndNight(now) {
     Sky.show(day.hour(now))
     if (day.tick(now)) startDusk()
-    if (day.bedtime && !busy && !hold) command(() => bed(), 'bedtime')
+    const settled = !busy && !hold && !Things.holding && !pending && !Reksio.walking && !goingToBed // nothing of his to cut short or override
+    if (day.bedtime && !supperServed && settled) command(() => supper(), 'supper')
+    if (bedAt !== null && Clock.now() >= bedAt && !day.ended && settled) command(() => bed(), 'bedtime')
   }
 
   /** Nothing going on: what he does next on his own, if anything. */
@@ -761,6 +819,7 @@
     const dt = Math.min(0.05, (t - last) / 1000)
     last = t
     Reksio.tick(dt)
+    if (day.hurrying(t)) Sky.show(day.hour(t)) // the sun hurrying down: every frame, not every idle tick
     Creatures.tick(dt)
     Weather.tick(dt, camX)
     Wet.frame(t)
@@ -814,7 +873,7 @@
   Things.init({ ended: () => day.ended })
   makeSpots()
   Sky.init()
-  Cuckoo.init({ hourAt: () => day.hour(Clock.now()), onHour: glanceAtCuckoo, inView: () => camX < Cuckoo.X + 150 })
+  Cuckoo.init({ hourAt: () => day.hour(Clock.now()), onHour: glanceAtCuckoo, inView: () => camX < Cuckoo.X + 150, hushed: () => day.hurrying(Clock.now()) })
   Sky.show(day.hour(Clock.now())) // ?hour: the sky for it from the start
   Creatures.init()
   Weather.init()

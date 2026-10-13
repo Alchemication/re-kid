@@ -7,7 +7,6 @@
 /* exported Input */
 const Input = (() => {
   const PUDDLE_REACH = 40 // a ground tap this far past a puddle's edge (scene units) still means "jump in"
-  const RESTART_AFTER_MS = 2500 // at the end, taps are ignored this long, then one starts a new play
   const IGNORED_KEYS = ['Shift', 'Meta', 'Control', 'Alt', 'CapsLock', 'Tab', 'Escape']
 
   /**
@@ -60,14 +59,14 @@ const Input = (() => {
 
   /**
    * What an ask does: 'run' now, 'wait' its turn (replacing any ask already
-   * waiting), 'restart' the play, or 'ignore' it (just after the end).
-   * @param {{busy: boolean, ended: boolean, endedAt: number, now: number}} s
-   *   endedAt: when the end's closing circle finished (0 while it is closing).
+   * waiting), or 'ignore' it (after the end: a toddler's tap never starts a
+   * new play; the grown-up's button does, yard.js).
+   * @param {{busy: boolean, ended: boolean}} s
    */
-  function ask({ busy, ended, endedAt, now }) {
-    if (ended) return endedAt && now - endedAt > RESTART_AFTER_MS ? 'restart' : 'ignore'
+  function ask({ busy, ended }) {
+    if (ended) return 'ignore'
     return busy ? 'wait' : 'run'
   }
 
-  return { PUDDLE_REACH, RESTART_AFTER_MS, tap, puddleAt, ownsKey, keyDown, keyUp, ask }
+  return { PUDDLE_REACH, tap, puddleAt, ownsKey, keyDown, keyUp, ask }
 })()

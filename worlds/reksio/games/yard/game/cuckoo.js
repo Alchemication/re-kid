@@ -43,6 +43,7 @@ const Cuckoo = (() => {
   let hourAt = () => BEDTIME - 12
   let onHour = () => {}
   let inView = () => true
+  let hushed = () => false // the sun hurried down (day.js): the hands spin, the hours it crosses go uncalled
   let lastHour = null
   let owed = null // an hour that came while the cuckoo was busy: called once it's free
   let holder = null // while the hour's calls or the gag have the cuckoo: resolves once they let go
@@ -172,8 +173,10 @@ const Cuckoo = (() => {
     if (lastHour === null) lastHour = whole // the hour the play begins at: no call
     if (whole > lastHour) {
       lastHour = whole
-      owed = whole
-      onHour(whole)
+      if (!hushed()) {
+        owed = whole
+        onHour(whole)
+      }
     }
     if (owed !== null && !holder) {
       strike(owed === BEDTIME ? BEDTIME_CALLS : 1, owed === BEDTIME)
@@ -217,11 +220,13 @@ const Cuckoo = (() => {
   }
 
   /** Start the clock. hourAt: the day's hour now; onHour(h): the hour has
-   * come (yard.js: he may look up); inView: the clock is on screen. */
+   * come (yard.js: he may look up); inView: the clock is on screen; hushed:
+   * no calls now (the sun hurried down). */
   function init(hooks) {
     hourAt = hooks.hourAt
     onHour = hooks.onHour
     if (hooks.inView) inView = hooks.inView
+    if (hooks.hushed) hushed = hooks.hushed
     els = { hour: $('clock-hour'), minute: $('clock-minute'), pendulum: $('cuckoo-pendulum'), door: $('cuckoo-door'), bird: $('cuckoo-bird'), beak: $('cuckoo-beak-low') }
     Clock.every(0, tick)
   }

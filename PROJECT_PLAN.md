@@ -286,7 +286,11 @@ wake Reksio at home.
      or creature visits after the last call, a running gag finishes (about
      20 s at most). The doghouse glows: a tap sends him in, else he goes by
      himself after about 20 s. The cartoon's ritual (*Kosmonauta*: the boy
-     whistles, the bowl fills, he eats, goes in) to try in slice 3.
+     whistles, the bowl fills, he eats, goes in) to try in slice 3. Checked
+     against the episode (2026-10-13, frames 9:28–9:40): no evening and no
+     whistle seen; by day the boy laughs, sets down a red bowl of steaming
+     food, Reksio licks his face, eats by the doghouse and the picture
+     closes on him licking his chops. The claim above was a guess.
    - *Parents: hold 2 s.* Holding the clock in the day brings the evening
      now. After the end taps do nothing; a small corner button, held 2 s
      (a ring fills), starts a new morning. Replaces the tap-to-restart.
@@ -328,6 +332,17 @@ wake Reksio at home.
      size in the window. Found on the way, not fixed: `TestRealInput::test_a_key_tap_barks`
      fails about 1 run in 5 under 8 workers, on the committed code too (a
      quick key tap can count as a hold when frames are slow).
+   - *Slice 3 done (2026-10-13), for Adam to look at:* from 18:00 he yawns
+     more; at sunset the fly and the bee go home; at 20:00 (the eight
+     calls) supper is set by the doghouse in a red dish, steaming, and he
+     eats it and licks his chops (Kosmonauta, as observed above); then the
+     doghouse twinkles and he wishes for it, a tap sends him in, or he goes
+     by himself 12 s later; meanwhile only sleepy moves. Holding the house
+     2 s hurries the sun to sunset in 4 s; the last hour then runs as ever.
+     After the end taps do nothing; a sun button in the bottom-left corner,
+     held 2 s (a ring fills), starts a new morning. To judge: the supper,
+     the 12 s wait, whether a toddler ever holds the house that long, and
+     the sun button. `yard.js` is at 982 lines: split it before adding more.
    - The design principles in Adam's brief for this (a world to inhabit, a
      calm accepted ending, no engagement tricks) are in `DESIGN_PRINCIPLES.md`,
      with research on whether a few minutes a day suits a toddler.

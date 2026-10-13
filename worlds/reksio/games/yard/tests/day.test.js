@@ -58,6 +58,53 @@ describe('the clock', () => {
   })
 })
 
+describe('a grown-up hurrying the sun down', () => {
+  it('sets it within HURRY_MS, then lets the last hour run as ever', () => {
+    const day = newDay()
+    day.begin(0)
+    assert.equal(day.hurry(2 * HOUR), true) // at 10:00
+    assert.equal(day.hurrying(2 * HOUR + 1), true)
+    assert.ok(Math.abs(day.hour(2 * HOUR + Day.HURRY_MS / 2) - 14.5) < 1e-9, 'half way down')
+    assert.equal(day.hour(2 * HOUR + Day.HURRY_MS), 19)
+    assert.equal(day.hurrying(2 * HOUR + Day.HURRY_MS), false)
+    assert.equal(day.hour(2 * HOUR + Day.HURRY_MS + HOUR / 2), 19.5)
+    assert.equal(day.tick(2 * HOUR + Day.HURRY_MS), true, 'the sun sets')
+  })
+
+  it('only in the day, once he is up, and once', () => {
+    const asleep = newDay()
+    assert.equal(asleep.hurry(0), false)
+    const day = newDay()
+    day.begin(0)
+    assert.equal(day.hurry(0), true)
+    assert.equal(day.hurry(100), false)
+    const evening = newDay({ from: 19.5 })
+    evening.begin(0)
+    evening.tick(0)
+    assert.equal(evening.hurry(0), false)
+  })
+
+  it('never moves the hour backwards', () => {
+    const day = newDay()
+    day.begin(0)
+    day.hurry(3 * HOUR)
+    let last = 0
+    for (let t = 0; t < 6 * HOUR; t += 50) {
+      assert.ok(day.hour(t) >= last, `at ${t}`)
+      last = day.hour(t)
+    }
+  })
+})
+
+describe('sleepy', () => {
+  it('from 18:00', () => {
+    const day = newDay()
+    day.begin(0)
+    assert.equal(day.sleepy(10 * HOUR - 1), false)
+    assert.equal(day.sleepy(10 * HOUR), true)
+  })
+})
+
 describe('what he does', () => {
   it('never moves the day: a hundred things, the same hour', () => {
     const busy = newDay()

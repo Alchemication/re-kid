@@ -568,14 +568,115 @@ class TestWholePlay:
         y.page.wait_for_timeout(7000)  # night falls, he walks home, the picture closes
         assert not y.errors, "\n---\n".join(y.errors)
 
-    def test_at_bedtime_he_goes_to_bed(self, yard: callable) -> None:
-        y = yard(f"{DAY_PLAY}&hour=19.8&day=60")  # 5 s an hour: bedtime in 1 s
-        y.page.wait_for_function("yardGame.state().ended", timeout=10_000)
+    def test_at_bedtime_supper_then_bed_by_himself(self, yard: callable) -> None:
+        y = yard(
+            f"{DAY_PLAY}&hour=19.9&day=60"
+        )  # 5 s an hour: bedtime in half a second
+        y.page.wait_for_function(
+            "yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000
+        )
+        y.page.wait_for_function("yardGame.state().ended", timeout=40_000)
         assert y.state()["moonUp"] == 1 and y.state()["hour"] == 20
-        asks = [e for e in y.page.evaluate("yardGame.events()") if e["kind"] == "ask"]
-        assert [e["what"] for e in asks] == ["bedtime"], "nobody sent him: the hour did"
-        y.page.wait_for_timeout(7000)
+        asks = [e["what"] for e in y.events("ask")]
+        assert asks == ["supper", "bedtime"], "nobody sent him: the hour did"
+        y.page.wait_for_timeout(5000)
         assert not y.errors, "\n---\n".join(y.errors)
+
+
+class TestEvening:
+    """Supper, then bed; a grown-up's holds: the house for the evening now,
+    the corner sun for a new morning; after the end a tap does nothing."""
+
+    @staticmethod
+    def fed(yard: callable) -> Yard:
+        """A play at bedtime, past supper, the doghouse waiting for him."""
+        y = yard(f"{DAY_PLAY}&hour=19.95&day=60")
+        y.page.wait_for_function(
+            "yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000
+        )
+        y.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+        return y
+
+    def test_after_supper_a_tap_on_the_doghouse_sends_him_in(
+        self, yard: callable
+    ) -> None:
+        y = self.fed(yard)
+        assert y.page.evaluate(
+            "document.getElementById('supper').classList.contains('served')"
+        )
+        y.page.evaluate("yardGame.tap('doghouse')")
+        y.page.wait_for_function("yardGame.state().ended", timeout=15_000)
+        assert "bedtime" not in [e["what"] for e in y.events("ask")]
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_a_tap_on_the_doghouse_just_before_bedtime_is_not_overruled_by_supper(
+        self, yard: callable
+    ) -> None:
+        y = yard(
+            f"{DAY_PLAY}&hour=19.88&day=600"
+        )  # dusk: bedtime about half way back from the far end
+        y.page.evaluate("yardGame.walk(3000)")
+        y.settled()
+        y.page.evaluate(
+            "yardGame.tap('doghouse')"
+        )  # a long way back: bedtime comes on his way
+        y.page.wait_for_function(
+            "yardGame.state().bedtime || yardGame.state().ended", timeout=30_000
+        )
+        assert y.state()["reksio"]["walking"], (
+            "bedtime came before or after his walk: no race"
+        )
+        y.page.wait_for_function("yardGame.state().ended", timeout=30_000)
+        assert not y.events("supper"), "sent to bed: no supper on the way"
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_kept_busy_past_his_bedtime_he_still_goes_to_bed(
+        self, yard: callable
+    ) -> None:
+        y = self.fed(yard)
+        y.page.wait_for_timeout(10_500)  # just before he'd go by himself
+        y.page.evaluate("yardGame.tap('bowl')")
+        y.page.wait_for_function("yardGame.state().busy", timeout=DONE_MS)
+        y.page.evaluate("yardGame.tap('dig')")  # waits its turn, after the bowl
+        y.page.wait_for_function("yardGame.state().ended", timeout=60_000)
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_holding_the_house_brings_the_evening_and_a_tap_does_not(
+        self, yard: callable
+    ) -> None:
+        y = yard(f"{STILL}&day=600")
+        box = y.page.locator("#things [data-thing='house'] .plaster").bounding_box()
+        y.page.mouse.move(box["x"] + box["width"] * 0.7, box["y"] + box["height"] * 0.7)
+        y.page.mouse.down()
+        y.page.wait_for_timeout(2400)
+        y.page.mouse.up()
+        assert y.events("evening now")
+        y.page.wait_for_function("yardGame.state().dusk", timeout=8000)
+        assert not y.state()["uses"].get("house"), "a hold is not a tap"
+        assert 19 <= y.state()["hour"] < 19.5, "then the last hour as ever"
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_after_the_end_a_tap_does_nothing_and_the_sun_held_starts_a_new_morning(
+        self, yard: callable
+    ) -> None:
+        y = self.fed(yard)
+        y.page.evaluate("yardGame.tap('doghouse')")
+        y.page.wait_for_selector("#again:not([hidden])", timeout=20_000)
+        y.page.evaluate("window.__sameplay = true")
+        y.page.mouse.click(640, 300)
+        y.page.wait_for_timeout(3500)
+        assert y.page.evaluate("window.__sameplay === true"), "a tap started a new play"
+        box = y.page.locator("#again").bounding_box()
+        y.page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+        y.page.mouse.down()
+        y.page.wait_for_timeout(600)
+        y.page.mouse.up()  # let go too soon: nothing
+        y.page.wait_for_timeout(2500)
+        assert y.page.evaluate("window.__sameplay === true")
+        y.page.mouse.down()
+        with y.page.expect_navigation(timeout=5000):
+            y.page.wait_for_timeout(2400)
+        y.page.mouse.up()
 
 
 CLOUDS_IN_VIEW = """[...document.querySelectorAll('#clouds .cloud')]
@@ -629,9 +730,11 @@ class TestClock:
         y = yard(
             f"{DAY_PLAY}&hour=19.9&day=60"
         )  # 5 s an hour: bedtime in half a second
-        y.page.wait_for_function("yardGame.state().ended", timeout=10_000)
+        y.page.wait_for_function(
+            "yardGame.events().some((e) => e.kind === 'cuckoo')", timeout=10_000
+        )
         assert [e["calls"] for e in y.events("cuckoo")] == [8]
-        y.page.wait_for_timeout(10_000)  # it calls on as he goes in
+        y.page.wait_for_timeout(10_000)  # it calls on through supper
         assert not y.errors, "\n---\n".join(y.errors)
 
 

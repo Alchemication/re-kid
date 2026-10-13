@@ -267,6 +267,18 @@
             </g>
           </g>
 
+          <!-- ============ supper by the doghouse door, served at bedtime (things.js) ============ -->
+          <g id="supper" aria-hidden="true">
+            <path class="steam" d="M626 774 q-6 -10 0 -20 q6 -10 0 -20" />
+            <path class="steam" d="M645 770 q-6 -10 0 -20 q6 -10 0 -20" style="animation-delay: -0.8s" />
+            <path class="steam" d="M664 774 q-6 -10 0 -20 q6 -10 0 -20" style="animation-delay: -1.6s" />
+            <g id="supper-food" style="transform-origin: 645px 792px">
+              <path class="food" d="M612 792 Q620 778 630 786 Q638 774 648 784 Q658 774 666 786 Q676 780 680 792 Z" />
+            </g>
+            <path class="supper-dish" d="M605 790 H685 L674 816 H616 Z" />
+            <path class="bowl-rim" d="M605 790 H685" />
+          </g>
+
           <!-- ============ food bowl ============ -->
           <g id="bowl" class="thing" data-thing="bowl" data-hint-y="720">
             <rect class="hit" x="790" y="620" width="180" height="210" />
@@ -555,6 +567,14 @@
     </svg>
     <div id="iris" class="iris" aria-hidden="true"></div>
     <button id="fullscreen" class="corner" type="button" title="Full screen (for the grown-up)" aria-label="Full screen">⤢</button>
+    <!-- after the end, for the grown-up: held, a new morning (yard.js); a tap does nothing -->
+    <button id="again" class="again" type="button" hidden title="A new morning: hold (for the grown-up)" aria-label="A new morning: hold">
+      <svg viewBox="0 0 48 48" aria-hidden="true">
+        <circle class="again-sun" cx="24" cy="24" r="8" />
+        <path class="again-rays" d="M24 9 V13 M24 35 V39 M9 24 H13 M35 24 H39 M13.4 13.4 L16.2 16.2 M31.8 31.8 L34.6 34.6 M13.4 34.6 L16.2 31.8 M31.8 16.2 L34.6 13.4" />
+        <circle class="again-ring" cx="24" cy="24" r="21" />
+      </svg>
+    </button>
   </div>
 
   <!-- A phone held upright shows the yard too small to play: instead, a
@@ -606,6 +626,7 @@
   <script src="cuckoo.js"></script>
   <script src="things.js"></script>
   <script src="wet.js"></script>
+  <script src="grownup.js"></script>
   <script src="yard.js"></script>
 </body>
 </html>

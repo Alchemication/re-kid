@@ -4,15 +4,19 @@
 // so a child who watches the snail all day gets as long as one who tries
 // everything (DESIGN_PRINCIPLES.md). The sun sets at 19:00 (dusk), the moon
 // comes up through the last hour, and at 20:00 it's bedtime; bed ends the
-// play (night). What he has done is kept only for his wishes.
+// play (night). What he has done is kept only for his wishes. A grown-up
+// can hurry the sun down (holding the house): it sets within a few seconds,
+// and the last hour then runs as it always does.
 
 /* exported Day */
 const Day = (() => {
   const LENGTH_S = 300 // the whole day, 08:00 to 20:00, in seconds of play: 25 s an hour (Adam, 2026-10-13: 5 minutes to start with)
   const FROM = 8 // the hour he wakes
+  const SLEEPY = 18 // from here he yawns more
   const SUNSET = 19 // the sun is behind the wall: dusk, and the moon comes up
   const TO = 20 // bedtime
   const BED = 'doghouse' // what he wants at dusk
+  const HURRY_MS = 4000 // hurried, the sun sets this fast, from whatever hour: quick for a grown-up, still seen going down
 
   /**
    * A new day, not begun yet: the clock stands at `from` until begin().
@@ -21,13 +25,19 @@ const Day = (() => {
    */
   function start({ lengthMs = LENGTH_S * 1000, from = FROM } = {}) {
     const done = new Set()
+    const perMs = (TO - FROM) / lengthMs // hours a millisecond
     let begunAt = null
+    let hurried = null // { at, from }: when the sun was hurried down, and from which hour
     let phase = 'day' // day → dusk → bedtime → night
 
     /** The hour at `now` (ms, the caller's clock), from `from` to TO. */
     function hour(now) {
       if (begunAt === null) return from
-      return Math.min(TO, from + ((now - begunAt) * (TO - FROM)) / lengthMs)
+      const steady = from + (now - begunAt) * perMs
+      if (!hurried || now < hurried.at) return Math.min(TO, steady)
+      const k = (now - hurried.at) / HURRY_MS
+      if (k < 1) return hurried.from + (SUNSET - hurried.from) * k
+      return Math.min(TO, SUNSET + (now - hurried.at - HURRY_MS) * perMs) // set: the last hour as ever
     }
 
     return {
@@ -36,6 +46,17 @@ const Day = (() => {
         if (begunAt === null) begunAt = now
       },
       hour,
+      /** A grown-up hurries the sun down: true if it is now setting faster
+       * (only in the day, once, and once he's up). */
+      hurry(now) {
+        if (begunAt === null || hurried || phase !== 'day' || hour(now) >= SUNSET) return false
+        hurried = { at: now, from: hour(now) }
+        return true
+      },
+      /** Is the sun hurrying down at `now`? */
+      hurrying: (now) => !!hurried && now >= hurried.at && now < hurried.at + HURRY_MS,
+      /** Is he sleepy at `now` (the evening coming)? */
+      sleepy: (now) => hour(now) >= SLEEPY,
       /** He did `name`; first: never before. It doesn't move the day. */
       did(name) {
         const first = !done.has(name)
@@ -72,5 +93,5 @@ const Day = (() => {
     }
   }
 
-  return { LENGTH_S, FROM, SUNSET, TO, BED, start }
+  return { LENGTH_S, FROM, SLEEPY, SUNSET, TO, BED, HURRY_MS, start }
 })()

@@ -60,7 +60,8 @@ const Creatures = (() => {
   const WHINE_EVERY_S = 9 // on average, a passing fly whines this often
   const HUM_EVERY_S = 7 // …and a bee hums between flowers this often
   // The fly and the bee are visitors: they turn up a while into the play,
-  // stay a while, fly off, and may come back later. Neither comes in the rain.
+  // stay a while, fly off, and may come back later. Neither comes in the rain,
+  // and both go home at sunset (evening()).
   const FLY_FIRST_S = [10, 60] // the fly first turns up this long into the play
   const FLY_STAY_S = [30, 80] // stays this long
   const FLY_GONE_S = [25, 70] // and is away this long before it may come back
@@ -69,7 +70,8 @@ const Creatures = (() => {
   const BEE_GONE_S = [30, 80]
   const ERRAND_SPEED = 260 // sent on an errand, it comes straight and quick: a slow bee across the yard keeps the gag waiting
   const ERRAND_HUM_S = 0.8 // and hums as it comes, so Reksio (and the child) hear it coming
-  const stormy = () => Weather.phase === 'clouding' || Weather.raining
+  let dusk = false // the sun has set: the visitors go home
+  const staysAway = () => dusk || Weather.phase === 'clouding' || Weather.raining
 
   /** Is a point inside the web's triangle (where things get stuck)? */
   function inWeb(x, y) {
@@ -199,7 +201,7 @@ const Creatures = (() => {
       const now = world.t
       if (this.state === 'away') return this.arrive(now)
       if (this.state === 'wrapped') return
-      if (!this.leaving && (this.state === 'fly' || this.state === 'land') && (now > this.leaveAt || stormy())) this.leave()
+      if (!this.leaving && (this.state === 'fly' || this.state === 'land') && (now > this.leaveAt || staysAway())) this.leave()
       if (this.state === 'stuck') {
         // struggles, buzzing its wings, until the spider comes
         this.body.setAttribute('transform', `rotate(${Math.sin(now * 40) * 18})`)
@@ -210,7 +212,7 @@ const Creatures = (() => {
     },
     /** Away: after a while (and not in the rain), it arrives from the side of the screen. */
     arrive(now) {
-      if (now <= this.stateUntil || stormy()) return
+      if (now <= this.stateUntil || staysAway()) return
       this.state = 'fly'
       this.leaveAt = now + rnd(...FLY_STAY_S)
       this.x = world.reksio.x + (random() < 0.5 ? -900 : 900)
@@ -342,7 +344,7 @@ const Creatures = (() => {
     },
     /** Away: after a while (and not in the rain), over the wall to the flowers. */
     arrive(now) {
-      if (now <= this.stateUntil || stormy() || this.guest) return
+      if (now <= this.stateUntil || staysAway() || this.guest) return
       this.appear(now, this.FLOWERS[0].x)
     },
     /** Over the wall, somewhere near x. */
@@ -380,7 +382,7 @@ const Creatures = (() => {
     },
     /** Time to go home (or the rain is coming); huffy if Reksio puts his nose in. */
     moods(now) {
-      if (!this.leaving && (now > this.leaveAt || stormy())) {
+      if (!this.leaving && (now > this.leaveAt || staysAway())) {
         // off home, back over the wall
         this.leaving = true
         this.state = 'fly'
@@ -742,6 +744,8 @@ const Creatures = (() => {
     tick,
     /** Tell the creatures what Reksio just did: 'bark' or 'snap', where. */
     notice(type, x, y) { world.events.push({ type, x, y }) },
+    /** The sun has set: the fly and the bee go home, and don't come back. */
+    evening() { dusk = true },
     /** Where the snail is, once it's out. */
     get snail() { return snail.out ? { x: snail.x, y: snail.y } : null },
     /** A worm that's up out of the ground (for the bird): {x, y, eat()}. */
