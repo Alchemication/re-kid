@@ -140,7 +140,7 @@ Flags in the page address (`main.py play` takes the first three):
 | `?still` | Reksio moves only when asked: try one gesture or gag alone. He starts up, not asleep in his doghouse. |
 | `?morning=1` / `0` | Start asleep in the doghouse at dawn (he wakes by himself after 6–9 s, or at the first tap), or start the day with him up. On unless `?still`. |
 | `?props=trap,bowl` | Which props are out (of bowl, dig, film, trap, tree, berries). |
-| `?moon-rise=S` | How long the moon takes to come up at dusk (40 s otherwise). |
+| `?day=S`, `?hour=H` | How long the whole day lasts (08:00 to 20:00, 300 s otherwise), and the hour it begins at (8 to 20): `?hour=18.5` to see the evening soon. |
 | `?creatures=fly,spider` | Which creatures come (`?creatures=` for none). |
 | `?flowers=1` / `0` | Flowers out or not. |
 | `?rain=1` / `0`, `?rain-at=S` | Force the shower, and when it starts. |

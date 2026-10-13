@@ -201,13 +201,11 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .ripple { fill: none; stroke: #e9f3f8; stroke-width: 1.6; }
 
 /* ---- the setting sun and the evening ---- */
-.sun { fill: #fbe08a; stroke: #e7a23a; stroke-width: 4; transition: fill 3s ease, stroke 3s ease; }
-.sun-glow { fill: #fbe9b0; opacity: 0.35; transition: fill 3s ease; }
-#sun { transition: transform 3s ease-in-out; }
-/* the dawn and the sunrise move them frame by frame themselves (sky.js) */
-#sun.by-frame, .sunset.by-frame { transition: none; }
+/* sky.js moves the sun and warms the sky with the hour, a little at a time */
+.sun { fill: #fbe08a; stroke: #e7a23a; stroke-width: 4; }
+.sun-glow { fill: #fbe9b0; opacity: 0.35; }
 
-/* The sky warms a step at a time as the sun goes down. */
+/* The sky warms as the sun goes down. */
 .sunset {
   position: absolute;
   inset: 0;
@@ -215,7 +213,6 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   background: linear-gradient(#c8402e calc((0 - var(--view-top)) * 100% / var(--view-h)), #d9653a calc((270 - var(--view-top)) * 100% / var(--view-h)), rgba(217, 101, 58, 0) calc((495 - var(--view-top)) * 100% / var(--view-h)));
   mix-blend-mode: multiply;
   opacity: 0;
-  transition: opacity 3s ease;
 }
 
 /* ---- evening and the closing circle ---- */

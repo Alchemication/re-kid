@@ -2,10 +2,10 @@ id: yard
 title: Reksio's yard (working title)
 status: draft
 audience: Eliot, about 3, playing with a parent who remembers Reksio.
-length: As long as he likes, usually a few minutes; it ends when he goes to bed at dusk.
+length: One day, 08:00 to 20:00 on the yard's clock, in five minutes of play; it ends when he goes to bed.
 
 pitch:
-  text: The child is Reksio in his own yard, which is wider than the screen; the view follows him from the house wall at one end to the fence and gate at the other. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — naps and snores in his doghouse, laps from his bowl, drinks from the tap, sniffs the flowers and sneezes, barks at the bird, digs up a bone, stamps a film strip. The day passes as he plays — each new thing he does sinks the sun a little. When it has set, the moon comes up, slowly, and then he goes to sleep in his doghouse.
+  text: The child is Reksio in his own yard, which is wider than the screen; the view follows him from the house wall at one end to the fence and gate at the other. Tap anywhere and Reksio trots there; tap a thing and he goes over and does something with it — naps and snores in his doghouse, laps from his bowl, drinks from the tap, sniffs the flowers and sneezes, barks at the bird, digs up a bone, stamps a film strip. The day passes on its own — the sun crosses the sky whatever he does. When it has set, the moon comes up, and then he goes to sleep in his doghouse.
   origin: inspired
   refs: ['world:places[yard].description', 'world:places[doghouse].description', world:premise]
 
@@ -17,7 +17,7 @@ principles:
   origin: invented
 - text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs. One exception, for now — the bark.
   origin: invented
-- text: Nothing is a goal, and the end never comes as a surprise. Every thing in the yard counts the same; the sun sinks a step and the sky warms with each new thing he does, six in all (or after ten minutes, whatever he does). At sunset nothing is taken away — the yard stays open while the moon comes up, and he goes to bed once it is up, or sooner if the child taps the doghouse. No goals, no counter, no text.
+- text: Nothing is a goal, and the end never comes as a surprise. The day is the same length whatever the child does — a child who watches the snail all day gets as long as one who tries everything. The sun comes up over the wall in the morning, climbs, and goes down through the afternoon as the sky warms, setting at 19:00 on the day's clock (five minutes of play from 08:00 to 20:00). At sunset nothing is taken away — the yard stays open while the moon comes up through the last hour, and at 20:00 he goes to bed, or sooner if the child taps the doghouse. No goals, no counter, no text.
   origin: inspired
   refs: ['world:places[doghouse].description']
 - text: The yard is built to grow. Later it becomes the game's home screen, and new things in it lead into episode games — say, a toy rocket by the doghouse that starts Kosmonauta.
@@ -78,7 +78,7 @@ sound:
   origin: invented
 - text: Creatures sound like what they are, quietly, and fade with distance from Reksio — flies whine now and then and bees hum, the bird chirps, the mouse squeaks. Spiders, snails and worms are silent, except for small cartoon noises when they do something (a plink as the spider drops, a schlup as the snail hides, a pop as a worm comes up).
   origin: invented
-- text: Each sunset step slows the music a little and makes it softer; at evening it gives way to a harp lullaby built on the same hook, slowed right down.
+- text: Through the afternoon, as the sun goes down, the music slows a little and gets softer; at evening it gives way to a harp lullaby built on the same hook, slowed right down.
   origin: invented
 
 scenes:

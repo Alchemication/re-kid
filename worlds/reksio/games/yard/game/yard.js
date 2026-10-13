@@ -1,11 +1,12 @@
 // Reksio's yard: tap the ground and he walks there; tap a thing and he goes
 // over and does something with it. The yard is wider than the screen and the
 // view follows him, from the house wall on the left to the fence on the right.
-// Pressing and holding on Reksio stretches him like a dachshund. The day
-// passes as he plays: each new thing he does sinks the sun a step (sky.js),
-// nothing is a goal and nothing is counted on screen. When the sun has set the
-// yard stays open while the moon comes up; then, or sooner if the doghouse is
-// tapped, he goes to bed. Every usable thing has an action spot on the
+// Pressing and holding on Reksio stretches him like a dachshund. The day is
+// on a clock (day.js): it starts when he wakes and moves only with time, the
+// sun crossing the sky with the hour (sky.js), whatever he does; nothing is a
+// goal and nothing is counted on screen. When the sun has set the yard stays
+// open while the moon comes up; then, or sooner if the doghouse is tapped, he
+// goes to bed. Every usable thing has an action spot on the
 // ground: stand in it and space uses the thing; tap it and Reksio goes there.
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
@@ -33,9 +34,8 @@
 
   let busy = false
   let pending = null
-  // the day (day.js): one sunset step per new thing, so the sun sets after as
-  // many new things as the sunset has steps, a few of the eight or nine short
-  const day = Day.start(Clock.now(), { things: Sky.STEPS })
+  // the day (day.js): its clock starts when he wakes (or now, with no morning)
+  const day = Day.start({ lengthMs: (Layout.dayS ?? Day.LENGTH_S) * 1000, from: Layout.hour ?? Day.FROM })
   let endedAt = 0
   let lastTap = Clock.now()
   // The morning: each play starts as the cartoon's episodes do, with Reksio
@@ -77,12 +77,8 @@
       const extra = forceExtra ?? drawn
       Debug.trace('use', { name, n, extra })
       await Debug.ignoreCut(thing.run({ extra }), `use ${name}`) // cut short: still counts
-      const { first, step, dusk } = day.did(name)
-      if (step) {
-        Music.react.done()
-        Sky.setStep(step)
-      }
-      if (dusk) startDusk()
+      const { first } = day.did(name)
+      if (first) Music.react.done()
       if (first && !pending) await Debug.ignoreCut(Reksio.hop(), 'hop of joy')
     } finally {
       busy = false
@@ -219,16 +215,13 @@
 
   // ------------------------------------------------------------ the end
 
-  /** The sun has set: the rain stops, the light goes and the moon comes up.
-   * Everything still works; he yawns more and wishes for his doghouse. Once
-   * the moon is up it's bedtime. */
+  /** The sun has set: the rain stops and the light goes; the moon comes up
+   * through the last hour. Everything still works; he yawns more and wishes
+   * for his doghouse. At the end of the hour it's bedtime. */
   function startDusk() {
     Debug.trace('dusk', { done: day.count })
     Weather.stop()
-    Sky.dusk().then(() => {
-      Debug.trace('moon up')
-      day.moonUp()
-    })
+    Sky.dusk()
   }
 
   /** At dusk the doghouse means bed (tapped elsewhere on the way: not yet). */
@@ -686,12 +679,10 @@
     if (busy || day.ended || !day.wants(wishing) || now - wishShownAt > WISH_SHOW_MS) hideWish()
   }
 
-  /** The sun sets anyway after a long play; once the moon is up, bed as soon as he's free. */
+  /** The hour moves the sky; the sun sets at dusk; at bedtime, bed as soon as he's free. */
   function dayAndNight(now) {
-    if (day.tick(now)) {
-      Sky.setStep(Sky.STEPS)
-      startDusk()
-    }
+    Sky.show(day.hour(now))
+    if (day.tick(now)) startDusk()
     if (day.bedtime && !busy && !hold) command(() => bed(), 'bedtime')
   }
 
@@ -724,7 +715,7 @@
   /** The game's state, for tests and the ?debug overlay. */
   function state() {
     return {
-      seed: Debug.seed, busy, day: day.phase, dusk: day.dusk, ended: day.ended, acting, holding: !!hold, pending: !!pending, lastAct,
+      seed: Debug.seed, busy, day: day.phase, hour: Number(day.hour(Clock.now()).toFixed(2)), dusk: day.dusk, ended: day.ended, acting, holding: !!hold, pending: !!pending, lastAct,
       done: day.done, props: Layout.props, uses: { ...uses }, bedtime: day.bedtime, moonUp: Number(Sky.moonUp.toFixed(2)),
       reksio: { x: Math.round(Reksio.x), pose: Reksio.pose, walking: Reksio.walking },
       soak: Number(Wet.soak.toFixed(2)), weather: Weather.phase, camX: Math.round(camX),
@@ -805,6 +796,7 @@
   Things.init({ ended: () => day.ended })
   makeSpots()
   Sky.init()
+  Sky.show(day.hour(Clock.now())) // ?hour: the sky for it from the start
   Creatures.init()
   Weather.init()
   Weather.on((phase) => {
@@ -853,6 +845,7 @@
     stopSnoring()
     Debug.trace('wake', { how })
     if (Sound.heard) Music.startMorning(morningRandom)
+    day.begin(Clock.now())
     Sky.sunrise(SUNRISE_MS)
     await Debug.ignoreCut(Reksio.duck(false), 'out of the doghouse')
     await Debug.ignoreCut(Reksio.wakeUp(morningRandom() < 0.5 ? 2 : 3), 'morning yawns')
@@ -861,6 +854,7 @@
   }
 
   if (asleep) beginMorning()
+  else day.begin(Clock.now())
   requestAnimationFrame(frame)
   Debug.record(state)
   console.info(`[yard] replay this play: ${Debug.replayUrl()}`)

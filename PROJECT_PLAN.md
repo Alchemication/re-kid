@@ -293,6 +293,16 @@ wake Reksio at home.
    - *Slices, each looked at by Adam:* (1) time model and continuous sky,
      the ending unchanged; (2) the clock and cuckoo (sound via `new-sound`);
      (3) evening, the ritual, the parent controls.
+   - *Slice 1 done (2026-10-13), for Adam to look at:* `day.js` is a clock
+     (starts when he wakes; sunset 19:00, bedtime 20:00); `sky.js` draws the
+     sun's arc (up over the wall on the left at 08:00, highest about 12:30,
+     behind the wall on the right at 19:00), its colour and the sky's warmth
+     from the hour, and the moon rising 19:00–20:00. The music slows from
+     15:00 as before, now smoothly. `?hour=18.5` shows the evening soon,
+     `?day=S` changes the length. Adam (2026-10-13): the sun's pace and the
+     evening's are good. Open: vary a bit how the sky looks from play to
+     play (the sun now takes the same path each day; only its noon height
+     varies).
    - The design principles in Adam's brief for this (a world to inhabit, a
      calm accepted ending, no engagement tricks) are in `DESIGN_PRINCIPLES.md`,
      with research on whether a few minutes a day suits a toddler.

@@ -9,8 +9,8 @@
 //   new thing is done, glockenspiel for a thought bubble, a flute trill for
 //   the bird, a rising bassoon as Reksio stretches and a falling run (the
 //   shape of the marked stretching melody) as he snaps back.
-// - Each sunset step slows it a little and makes it softer; at evening it
-//   gives way to a harp lullaby.
+// - Through the afternoon it slows a little and gets softer as the sun goes
+//   down (sky.js); at evening it gives way to a harp lullaby.
 //
 // Real instrument samples (CC0) come from samples.js, played note by note.
 
@@ -248,7 +248,7 @@ const Music = (() => {
     energy = Math.max(0, Math.min(3, level))
   }
 
-  /** Sunset step (0-6): a little slower and softer each step. */
+  /** How far the sun is down (0 midday … 6 set, in between too): slower and softer the further. */
   function setDusk(level) {
     dusk = level
     if (out) out.gain.setTargetAtTime(VOLUME * (1 - level * 0.07) * (raining ? 0.6 : 1), bus.ctx.currentTime, 1.5)

@@ -1,21 +1,34 @@
-// The sky over the yard: the sun sinks a step with each new thing Reksio does,
-// and at dusk the moon comes up, slowly, behind the wall. Both stand somewhere
-// new each play, and the moon is a different one every evening (layout.js
-// draws it). The sun is under the evening shade; the moon is on a layer of
-// its own above it, so it still shines when night falls.
+// The sky over the yard, drawn from the hour (day.js): the sun comes up over
+// the wall in the morning, climbs, and goes down in the afternoon, yellow
+// turning orange and red as the sky warms, until it sets behind the wall at
+// 19:00; the moon comes up through the last hour. Each play starts at dawn
+// (the sun still behind the wall), and the sunrise lifts it to where the
+// hour puts it. The moon is a different one every evening (layout.js draws
+// it). The sun is under the evening shade; the moon is on a layer of its own
+// above it, so it still shines when night falls.
 
-/* global Clock, Debug, Layout, Music */
+/* global Clock, Day, Debug, Layout, Music */
 /* exported Sky */
 const Sky = (() => {
-  const STEPS = 6 // the sunset, from high afternoon to the sun behind the wall
-  const SUN_COLORS = ['#fbe08a', '#fbd57a', '#f9c05a', '#f6a64a', '#ef8a3e', '#e46c34', '#d9542e'] // per step: yellow, through orange, to red
-  const SUN_STEP = 44 // how far the sun sinks per step, scene units
-  const SUNSET_TINT = 0.095 // how much warmer the sky gets per step
-  const DUSK_AFTER_MS = 1800 // the last step of the sunset is seen before the light goes
-  const MOON_RISE_S = 40 // how long the moon takes to come up: slow enough to watch, and the time left to play at dusk
+  const RISE_H = 6 // the hour the sun would clear the wall: at 08:00 it is already a little up
+  const X_RISE = 160 // where the sun comes up and goes down across the sky (screen units, the sky stays put)
+  const X_SET = 1440
+  const HORIZON = 408 // the sun's centre here is behind the wall (its top at 334), glow and all
+  const BELOW = 420 // and at dawn, a little further down still
+  // the sun's colour and how warm the sky is, through the day; in between, a blend
+  const LIGHT = [
+    [8, '#fbd57a', 0.12], // the morning: a little warm
+    [10, '#fbe08a', 0],
+    [15, '#fbe08a', 0],
+    [16, '#fbd57a', 0.1],
+    [17, '#f6a64a', 0.25],
+    [18, '#ef8a3e', 0.4],
+    [18.6, '#e46c34', 0.5],
+    [19, '#d9542e', 0.57], // set: red, the sky at its warmest
+  ]
+  const DUSK_FROM = 15 // from here to the sunset the music slows and softens, up to level 6 (music.js)
+  const DAWN_TINT = 0.45 // at dawn the sky is this much warmer and dimmer
   const WALL_TOP = 334 // the moon comes up from behind the wall (and is clipped there)
-  const SUN_BELOW = 300 // at dawn the sun is this far down: behind the wall, glow and all
-  const DAWN_TINT = 0.45 // and the sky this much warmer and dimmer
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
   const $ = (id) => document.getElementById(id)
@@ -53,6 +66,10 @@ const Sky = (() => {
     placeMoon()
   }
 
+  let hour = Day.FROM
+  let dawnK = 0 // 1 at dawn … 0 once the sun is up
+  let musicDusk = -1
+
   function placeMoon() {
     const m = Layout.moon
     const low = WALL_TOP + m.r * 1.8 // wholly behind the wall, glow and all
@@ -60,75 +77,74 @@ const Sky = (() => {
     moonG.setAttribute('transform', `translate(${m.x} ${(low + (m.y - low) * eased).toFixed(1)})`)
   }
 
-  let rising = false // the sunrise is under way (it gives way to setStep)
+  const clamp01 = (v) => Math.max(0, Math.min(1, v))
+  const mix = (a, b, k) => a + (b - a) * k
+  const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
 
-  /** The sun at `step` (0 high … STEPS set): lower, redder, the sky warmer, the music slower. */
-  function setStep(step) {
-    rising = false
-    byFrame(false)
-    $('sun').style.transform = `translateY(${step * SUN_STEP}px)`
-    document.querySelector('#sun .sun').style.fill = SUN_COLORS[step]
-    document.querySelector('#sun .sun-glow').style.fill = SUN_COLORS[step]
-    $('sunset').style.opacity = String(step * SUNSET_TINT)
-    Music.setDusk(step)
+  /** The sky at hour `h`, as plain numbers: where the sun is (x, y), its
+   * colour, how warm the sky is (tint, 0–1), how far up the moon is (0–1). */
+  function look(h) {
+    const k = clamp01((h - RISE_H) / (Day.SUNSET - RISE_H))
+    const up = 1 - (2 * k - 1) ** 2 // 0 at the wall, 1 at noon
+    const y = HORIZON - up * (HORIZON - Layout.sun.noon)
+    const next = LIGHT.findIndex(([at]) => at > h)
+    const i = next === -1 ? LIGHT.length - 1 : Math.max(0, next - 1) // past the last: as at the last
+    const [h0, c0, t0] = LIGHT[i]
+    const [h1, c1, t1] = LIGHT[Math.min(i + 1, LIGHT.length - 1)]
+    const f = h1 > h0 ? clamp01((h - h0) / (h1 - h0)) : 0
+    const [a, b] = [rgb(c0), rgb(c1)]
+    const color = `rgb(${a.map((v, j) => Math.round(mix(v, b[j], f))).join(' ')})`
+    return { x: mix(X_RISE, X_SET, k), y, color, tint: mix(t0, t1, f), moonUp: clamp01((h - Day.SUNSET) / (Day.TO - Day.SUNSET)) }
   }
 
-  /** While the morning moves the sun and the light frame by frame, their
-   * slow transitions (for the sunset's steps) stand aside. */
-  function byFrame(on) {
-    $('sun').classList.toggle('by-frame', on)
-    $('sunset').classList.toggle('by-frame', on)
+  /** Draw the sky for the hour, with what's left of the dawn on top. */
+  function render() {
+    const l = look(hour)
+    const y = mix(l.y, BELOW, dawnK)
+    for (const c of document.querySelectorAll('#sun circle')) {
+      c.setAttribute('cx', l.x.toFixed(1))
+      c.setAttribute('cy', y.toFixed(1))
+      c.style.fill = l.color
+    }
+    $('sunset').style.opacity = mix(l.tint, Math.max(l.tint, DAWN_TINT), dawnK).toFixed(3)
+    moonUp = l.moonUp
+    placeMoon()
+    const level = Math.round(6 * clamp01((hour - DUSK_FROM) / (Day.SUNSET - DUSK_FROM)) * 10) / 10
+    if (level !== musicDusk) Music.setDusk((musicDusk = level))
+  }
+
+  /** The sky at hour `h` (yard.js, as the day goes on). */
+  function show(h) {
+    hour = h
+    render()
   }
 
   /** Dawn: the sun still behind the wall, the sky dim and warm. */
   function dawn() {
-    byFrame(true)
-    $('sun').style.transform = `translateY(${SUN_BELOW}px)`
-    $('sunset').style.opacity = String(DAWN_TINT)
+    dawnK = 1
+    render()
   }
 
-  /** The sun comes up over ms, from dawn to the day's first step. Resolves
+  /** The sun comes up over ms, from dawn to where the hour puts it. Resolves
    * once it is up. */
   function sunrise(ms) {
     const start = Clock.now()
     Debug.trace('sunrise', { ms })
-    rising = true
     return new Promise((resolve) => {
       function rise() {
-        if (!rising) return resolve() // the day's first step came first: it placed the sun
         const k = Math.min(1, (Clock.now() - start) / ms)
-        const up = 1 - (1 - k) * (1 - k) // fast at first, easing into place
-        $('sun').style.transform = `translateY(${(SUN_BELOW * (1 - up)).toFixed(1)}px)`
-        $('sunset').style.opacity = String((DAWN_TINT * (1 - up)).toFixed(3))
+        dawnK = (1 - k) * (1 - k) // fast at first, easing into place
+        render()
         if (k < 1) Clock.after(0, rise)
-        else {
-          rising = false
-          byFrame(false)
-          resolve()
-        }
+        else resolve()
       }
       Clock.after(0, rise)
     })
   }
 
-  /** The sun has set: the light goes and the moon comes up. Resolves once it is up. */
+  /** The sun has set: the light goes (the moon comes up with the hour). */
   function dusk() {
-    setStep(STEPS)
-    const riseMs = (Layout.moonRise ?? MOON_RISE_S) * 1000
-    return new Promise((resolve) => {
-      Clock.after(DUSK_AFTER_MS, () => {
-        $('evening').classList.add('dusk')
-        Debug.trace('moon rising', { ms: riseMs })
-        const start = Clock.now()
-        function rise() {
-          moonUp = Math.min(1, Math.max(0, (Clock.now() - start) / riseMs))
-          placeMoon()
-          if (moonUp < 1) Clock.after(0, rise)
-          else resolve()
-        }
-        Clock.after(0, rise)
-      })
-    })
+    $('evening').classList.add('dusk')
   }
 
   /** Night: the yard goes dark under the moon. */
@@ -139,9 +155,9 @@ const Sky = (() => {
   }
 
   function init() {
-    for (const c of document.querySelectorAll('#sun circle')) c.setAttribute('cx', Layout.sun.x)
     makeMoon()
+    render()
   }
 
-  return { STEPS, moonPath, init, setStep, dawn, sunrise, dusk, night, get moonUp() { return moonUp } }
+  return { look, moonPath, init, show, dawn, sunrise, dusk, night, get moonUp() { return moonUp } }
 })()

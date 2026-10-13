@@ -68,11 +68,11 @@ describe('a play', () => {
     }
   })
 
-  it('puts the sun and a moon somewhere in the sky, a different moon each play', () => {
+  it('lets the sun climb a little higher some days, and puts a different moon in the sky each play', () => {
     const moons = new Set()
     for (const seed of SEEDS) {
       const { sun, moon } = layout(`?seed=${seed}`)
-      assert.ok(sun.x >= 380 && sun.x <= 1300, `seed ${seed}: sun at ${sun.x}`)
+      assert.ok(sun.noon >= 105 && sun.noon <= 140, `seed ${seed}: sun at noon at ${sun.noon}`)
       assert.ok(moon.x >= 200 && moon.x <= 1400 && moon.y >= 80 && moon.y <= 190, `seed ${seed}`)
       assert.ok(moon.lit > 0 && moon.lit <= 1, `seed ${seed}`)
       moons.add(JSON.stringify(moon))
@@ -154,12 +154,19 @@ describe('flags in the page address', () => {
     assert.deepEqual([...layout('?seed=3&props=trap,nonsense,bowl').props].sort(), ['bowl', 'trap'])
   })
 
-  it('sets how long the moon takes to rise, without shifting the play', () => {
+  it('sets how long the day is and the hour it begins, without shifting the play', () => {
     const plain = layout('?seed=3')
-    const quick = layout('?seed=3&moon-rise=2')
-    assert.equal(quick.moonRise, 2)
-    assert.equal(plain.moonRise, null)
-    assert.deepEqual({ ...quick, moonRise: null }, plain)
+    const evening = layout('?seed=3&day=60&hour=18.5')
+    assert.equal(evening.dayS, 60)
+    assert.equal(evening.hour, 18.5)
+    assert.equal(plain.dayS, null)
+    assert.equal(plain.hour, null)
+    assert.deepEqual({ ...evening, dayS: null, hour: null }, plain)
+  })
+
+  it('keeps the hour within the day', () => {
+    assert.equal(layout('?seed=3&hour=3').hour, 8)
+    assert.equal(layout('?seed=3&hour=23').hour, 20)
   })
 
   it('picks exactly the props asked for, two or three of them', () => {

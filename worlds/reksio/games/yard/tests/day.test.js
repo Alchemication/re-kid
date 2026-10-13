@@ -1,97 +1,141 @@
-// Unit tests for day.js: how the day passes, from the first thing to bed.
+// Unit tests for day.js: the day on a clock, from waking to bed.
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 const { load } = require('./load')
 
 const Day = load(['day.js']).get('Day')
-const newDay = (options = {}) => Day.start(0, { things: 3, ...options })
+const HOUR = 1000 // a 12 s day: a second an hour
+const newDay = (options = {}) => Day.start({ lengthMs: 12 * HOUR, ...options })
 
-describe('the day', () => {
-  it('brings a sunset step with each new thing, and the sun sets on the last', () => {
+/** A day begun at 0 and run to `ms`, ticking every 100 ms as yard.js does. */
+function runTo(day, ms, from = 0) {
+  for (let t = from; t <= ms; t += 100) day.tick(t)
+}
+
+describe('the clock', () => {
+  it('stands at 08:00 until he wakes, then starts', () => {
     const day = newDay()
-    assert.deepEqual({ ...day.did('bowl') }, { first: true, step: 1, dusk: false })
-    assert.deepEqual({ ...day.did('tap') }, { first: true, step: 2, dusk: false })
-    assert.equal(day.phase, 'day')
-    assert.deepEqual({ ...day.did('gate') }, { first: true, step: 3, dusk: true })
-    assert.equal(day.phase, 'dusk')
+    assert.equal(day.hour(50_000), 8)
+    assert.equal(day.begun, false)
+    day.begin(1000)
+    assert.equal(day.hour(1000), 8)
+    assert.equal(day.hour(1000 + 3 * HOUR), 11)
   })
 
-  it('counts a repeat once: no step, no sunset', () => {
+  it('moves at the same pace all day', () => {
     const day = newDay()
-    day.did('bowl')
-    for (let i = 0; i < 10; i++) assert.deepEqual({ ...day.did('bowl') }, { first: false, step: null, dusk: false })
+    day.begin(0)
+    const hours = [0, 1, 2, 3, 4, 5].map((n) => day.hour(n * 2 * HOUR))
+    assert.deepEqual(hours, [8, 10, 12, 14, 16, 18])
+  })
+
+  it('begins once: a second begin moves nothing', () => {
+    const day = newDay()
+    day.begin(0)
+    day.begin(5 * HOUR)
+    assert.equal(day.hour(5 * HOUR), 13)
+  })
+
+  it('stops at 20:00', () => {
+    const day = newDay()
+    day.begin(0)
+    assert.equal(day.hour(100 * HOUR), 20)
+  })
+
+  it('lasts five minutes by default, 25 s an hour', () => {
+    const day = Day.start()
+    day.begin(0)
+    assert.equal(day.hour(25_000), 9)
+    assert.equal(day.hour(5 * 60_000), 20)
+  })
+
+  it('can begin later in the day (?hour), at the same pace', () => {
+    const day = newDay({ from: 18 })
+    day.begin(0)
+    assert.equal(day.hour(0), 18)
+    assert.equal(day.hour(HOUR), 19)
+  })
+})
+
+describe('what he does', () => {
+  it('never moves the day: a hundred things, the same hour', () => {
+    const busy = newDay()
+    const idle = newDay()
+    busy.begin(0)
+    idle.begin(0)
+    for (let i = 0; i < 100; i++) busy.did(`thing ${i}`)
+    runTo(busy, 6 * HOUR)
+    runTo(idle, 6 * HOUR)
+    assert.equal(busy.hour(6 * HOUR), idle.hour(6 * HOUR))
+    assert.equal(busy.phase, 'day')
+  })
+
+  it('says whether it was the first time', () => {
+    const day = newDay()
+    assert.deepEqual({ ...day.did('bowl') }, { first: true })
+    assert.deepEqual({ ...day.did('bowl') }, { first: false })
     assert.equal(day.count, 1)
-    assert.equal(day.dusk, false)
   })
+})
 
-  it('counts every thing the same, the doghouse too', () => {
+describe('the evening', () => {
+  it('the sun sets at 19:00, once', () => {
     const day = newDay()
-    for (const n of ['doghouse', 'house', 'gate']) day.did(n)
-    assert.equal(day.dusk, true)
+    day.begin(0)
+    assert.equal(day.tick(11 * HOUR - 1), false)
+    assert.equal(day.tick(11 * HOUR), true)
+    assert.equal(day.phase, 'dusk')
+    assert.equal(day.tick(11.5 * HOUR), false)
   })
 
-  it('sets the sun only once: new things at dusk are still new, but bring no step', () => {
+  it('is bedtime at 20:00', () => {
     const day = newDay()
-    for (const n of ['a', 'b', 'c']) day.did(n)
-    assert.deepEqual({ ...day.did('d') }, { first: true, step: null, dusk: false })
-    assert.equal(day.phase, 'dusk')
-    assert.deepEqual([...day.done], ['a', 'b', 'c', 'd'])
+    day.begin(0)
+    runTo(day, 12 * HOUR - 100)
+    assert.equal(day.bedtime, false)
+    day.tick(12 * HOUR)
+    assert.equal(day.bedtime, true)
   })
 
-  it('sets the sun after a long day, whatever was done, and only once', () => {
-    const day = newDay({ maxMs: 1000 })
-    day.did('bowl')
-    assert.equal(day.tick(999), false)
-    assert.equal(day.tick(1000), true)
-    assert.equal(day.phase, 'dusk')
-    assert.equal(day.tick(5000), false)
+  it('a day begun at 20:00 sets the sun and is bedtime on its first tick', () => {
+    const day = newDay({ from: 20 })
+    day.begin(0)
+    assert.equal(day.tick(0), true)
+    assert.equal(day.phase, 'bedtime')
   })
 
-  it('lets a long day pass once the sun has set on things', () => {
-    const day = newDay({ maxMs: 1000 })
-    for (const n of ['a', 'b', 'c']) day.did(n)
-    assert.equal(day.tick(2000), false)
-  })
-
-  it('lasts ten minutes at most by default', () => {
-    const day = Day.start(500, { things: 3 })
-    assert.equal(day.tick(500 + 10 * 60000 - 1), false)
-    assert.equal(day.tick(500 + 10 * 60000), true)
+  it('never comes while he is still asleep', () => {
+    const day = newDay()
+    runTo(day, 100 * HOUR)
+    assert.equal(day.phase, 'day')
   })
 })
 
 describe('bed', () => {
   it('is never before the sun has set', () => {
     const day = newDay()
-    day.moonUp() // a moon in the day changes nothing
-    assert.equal(day.bedtime, false)
+    day.begin(0)
+    runTo(day, 10 * HOUR)
     assert.equal(day.bed(), false)
     assert.equal(day.phase, 'day')
   })
 
-  it('is bedtime once the moon is up', () => {
+  it('can come at dusk, before bedtime (the doghouse tapped)', () => {
     const day = newDay()
-    for (const n of ['a', 'b', 'c']) day.did(n)
-    day.moonUp()
-    assert.equal(day.phase, 'bedtime')
+    day.begin(0)
+    runTo(day, 11 * HOUR)
     assert.equal(day.bed(), true)
     assert.equal(day.ended, true)
   })
 
-  it('can come at dusk, before the moon is up (the doghouse tapped)', () => {
+  it('happens once: night stays night as the clock runs on', () => {
     const day = newDay()
-    for (const n of ['a', 'b', 'c']) day.did(n)
-    assert.equal(day.bed(), true)
-    assert.equal(day.phase, 'night')
-  })
-
-  it('happens once: night stays night', () => {
-    const day = newDay()
-    for (const n of ['a', 'b', 'c']) day.did(n)
+    day.begin(0)
+    runTo(day, 11 * HOUR)
     day.bed()
     assert.equal(day.bed(), false)
-    day.moonUp() // the moon finishing its rise after an early bed
+    runTo(day, 13 * HOUR, 11 * HOUR)
     assert.equal(day.phase, 'night')
     assert.equal(day.bedtime, false)
   })
@@ -107,16 +151,18 @@ describe('what he wants', () => {
 
   it('from dusk to bedtime: only his bed', () => {
     const day = newDay()
-    for (const n of ['a', 'b', 'c']) day.did(n)
+    day.begin(0)
+    runTo(day, 11 * HOUR)
     assert.equal(day.wants('tap'), false)
     assert.equal(day.wants(Day.BED), true)
-    day.moonUp()
+    runTo(day, 12 * HOUR, 11 * HOUR)
     assert.equal(day.wants(Day.BED), true)
   })
 
   it('at night: nothing', () => {
     const day = newDay()
-    for (const n of ['a', 'b', 'c']) day.did(n)
+    day.begin(0)
+    runTo(day, 11 * HOUR)
     day.bed()
     assert.equal(day.wants(Day.BED), false)
   })

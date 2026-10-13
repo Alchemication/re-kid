@@ -1,44 +1,54 @@
 // The day in the yard, as plain rules with no drawing and no clock of its own
-// (yard.js tells it what happened and when): each new thing Reksio does is a
-// step of the sunset; after enough of them, or after a long play, the sun has
-// set (dusk); once the moon is up it's bedtime; bed ends the play (night).
-// Nothing is a goal: every thing counts the same, and only the first time.
+// (yard.js tells it the time): a day on a clock, from 08:00 to 20:00, that
+// starts when Reksio wakes and moves only with time, never with what he does,
+// so a child who watches the snail all day gets as long as one who tries
+// everything (DESIGN_PRINCIPLES.md). The sun sets at 19:00 (dusk), the moon
+// comes up through the last hour, and at 20:00 it's bedtime; bed ends the
+// play (night). What he has done is kept only for his wishes.
 
 /* exported Day */
 const Day = (() => {
-  const MAX_MS = 10 * 60000 // the sun sets anyway after this long, so a play that keeps to one thing still ends
+  const LENGTH_S = 300 // the whole day, 08:00 to 20:00, in seconds of play: 25 s an hour (Adam, 2026-10-13: 5 minutes to start with)
+  const FROM = 8 // the hour he wakes
+  const SUNSET = 19 // the sun is behind the wall: dusk, and the moon comes up
+  const TO = 20 // bedtime
   const BED = 'doghouse' // what he wants at dusk
 
   /**
-   * A new day, begun at `startedAt` (ms, the caller's clock).
-   * @param {number} startedAt
-   * @param {{things: number, maxMs?: number}} options things: new things done
-   *   before the sun sets (one sunset step each); maxMs: how long a day lasts at most.
+   * A new day, not begun yet: the clock stands at `from` until begin().
+   * @param {{lengthMs?: number, from?: number}} options lengthMs: how long the
+   *   whole day (FROM to TO) lasts; from: the hour it begins at (tests, ?hour).
    */
-  function start(startedAt, { things, maxMs = MAX_MS }) {
+  function start({ lengthMs = LENGTH_S * 1000, from = FROM } = {}) {
     const done = new Set()
+    let begunAt = null
     let phase = 'day' // day → dusk → bedtime → night
 
+    /** The hour at `now` (ms, the caller's clock), from `from` to TO. */
+    function hour(now) {
+      if (begunAt === null) return from
+      return Math.min(TO, from + ((now - begunAt) * (TO - FROM)) / lengthMs)
+    }
+
     return {
-      /** He did `name`. first: never before; step: the sunset step it brings
-       * (null once the sun has set); dusk: the sun sets now. */
+      /** He's up: the clock starts. Only the first call counts. */
+      begin(now) {
+        if (begunAt === null) begunAt = now
+      },
+      hour,
+      /** He did `name`; first: never before. It doesn't move the day. */
       did(name) {
         const first = !done.has(name)
         done.add(name)
-        if (!first || phase !== 'day') return { first, step: null, dusk: false }
-        const dusk = done.size >= things
-        if (dusk) phase = 'dusk'
-        return { first, step: Math.min(done.size, things), dusk }
+        return { first }
       },
-      /** Time passing: true if the sun sets now because the day has run long. */
+      /** Time passing: true if the sun sets now. From TO on, it's bedtime. */
       tick(now) {
-        if (phase !== 'day' || now - startedAt < maxMs) return false
-        phase = 'dusk'
-        return true
-      },
-      /** The moon is up: bedtime. */
-      moonUp() {
-        if (phase === 'dusk') phase = 'bedtime'
+        const h = hour(now)
+        const sets = phase === 'day' && h >= SUNSET
+        if (sets) phase = 'dusk'
+        if (phase === 'dusk' && h >= TO) phase = 'bedtime'
+        return sets
       },
       /** Off to bed; false (and nothing changes) unless the sun has set. */
       bed() {
@@ -52,6 +62,7 @@ const Day = (() => {
         if (phase === 'day') return !done.has(name)
         return phase !== 'night' && name === BED
       },
+      get begun() { return begunAt !== null },
       get phase() { return phase },
       get dusk() { return phase !== 'day' },
       get bedtime() { return phase === 'bedtime' },
@@ -61,5 +72,5 @@ const Day = (() => {
     }
   }
 
-  return { MAX_MS, BED, start }
+  return { LENGTH_S, FROM, SUNSET, TO, BED, start }
 })()

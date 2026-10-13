@@ -29,12 +29,12 @@ const Layout = (() => {
   // his tail caught in the bramble).
   const OFFERS = { bowl: ['discover', 'helped'], dig: ['discover'], film: ['discover'], trap: ['help'], tree: ['help'], berries: ['discover', 'helped'] }
   const PROP_POOL = Object.keys(OFFERS)
-  const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do: more than a day takes (yard.js DAY_THINGS)
+  const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do
   const CREATURE_POOL = ['fly', 'bee', 'spider']
   const CREATURES_PER_PLAY = 2
   const MEMORY_KEY = 'reksio-yard-last-play'
   const RAIN_CHANCE = 0.6 // most plays have a shower; after one, the next leans dry
-  const SUN_X = [380, 1300] // where the sun stands across the sky (screen units, the sky stays put)
+  const SUN_NOON = [105, 140] // how high the sun climbs at noon (its centre; sky.js): a little higher some days
   const MOON_X = [200, 1400] // where the moon comes up
   const MOON_Y = [80, 190] // how high it climbs (its centre; the wall top is at 334)
   const MOON_R = [30, 44] // its size
@@ -50,6 +50,14 @@ const Layout = (() => {
   const random = Debug.random('layout') // this part's own random stream (debug.js)
 
   const rnd = (lo, hi) => lo + random() * (hi - lo)
+
+  /** ?day=SECONDS: how long the whole day lasts; ?hour=H: the hour it begins
+   * at (day.js: 8 to 20), to see the evening without waiting for it. */
+  function dayFlags(params) {
+    const dayS = Number(params.get('day')) || null
+    const hour = params.has('hour') ? Math.max(8, Math.min(20, Number(params.get('hour')) || 8)) : null
+    return { dayS, hour }
+  }
 
   function remembered() {
     if (Debug.seeded) return {} // a replay: the same play whatever came before
@@ -113,8 +121,7 @@ const Layout = (() => {
   const fruitDrawn = FRUITS[Math.floor(random() * FRUITS.length)]
   const fruit = FRUITS.includes(params.get('fruit')) ? params.get('fruit') : fruitDrawn
   const visitorAt = params.has('visitor-at') ? Number(params.get('visitor-at')) : null
-  // ?moon-rise=SECONDS: how long the moon takes to come up at dusk
-  const moonRise = params.has('moon-rise') ? Number(params.get('moon-rise')) : null
+  const { dayS, hour } = dayFlags(params)
 
   // props that aren't out this time
   const hidden = PROP_POOL.filter((n) => !props.includes(n))
@@ -143,12 +150,12 @@ const Layout = (() => {
   // two perches on the wall, over the two widest gaps, left one first
   const perches = widest.slice(0, 2).map(mid).sort((a, b) => a - b)
 
-  // the sky, from its own stream so a seeded play's yard doesn't shift: where
-  // the sun stands, and a different moon every evening (how full, which way
-  // it faces, where it comes up, its size, tilt, colour and marks)
+  // the sky, from its own stream so a seeded play's yard doesn't shift: how
+  // high the sun climbs, and a different moon every evening (how full, which
+  // way it faces, where it comes up, its size, tilt, colour and marks)
   const sky = Debug.random('sky')
   const skyRnd = (lo, hi) => lo + sky() * (hi - lo)
-  const sun = { x: Math.round(skyRnd(...SUN_X)) }
+  const sun = { noon: Math.round(skyRnd(...SUN_NOON)) }
   const moon = {
     x: Math.round(skyRnd(...MOON_X)),
     y: Math.round(skyRnd(...MOON_Y)),
@@ -175,11 +182,11 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, moonRise, shift, hidden, puddles, perches, sun, moon, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */
-  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit })
+  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit, ...(dayS ? { day: dayS } : {}), ...(hour !== null ? { hour } : {}) })
   Debug.pin({ flags: replayFlags(), layout }) // a replay builds this same yard (debug.js)
   return layout
 })()

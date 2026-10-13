@@ -530,35 +530,44 @@ class TestDebugOverlay:
         assert "busy: false" in text
 
 
-DAY = ["house", "tap", "bowl", "dig", "gate", "flowers"]  # six new things: the sun sets
+DAY = ["house", "tap", "bowl", "dig", "gate", "flowers"]  # six new things
 DAY_PLAY = f"{STILL}&props=bowl,dig,film&flowers=1"
+SUN_X = "Number(document.querySelector('#sun .sun').getAttribute('cx'))"
 
 
 class TestWholePlay:
-    def test_six_new_things_bring_dusk_and_the_doghouse_brings_bed(
-        self, yard: callable
-    ) -> None:
+    """The day is on a clock (day.js): things done never bring the evening; the
+    hour does (?hour starts it late, ?day makes it short)."""
+
+    def test_things_done_never_bring_the_evening(self, yard: callable) -> None:
         y = yard(DAY_PLAY)
+        x0 = y.page.evaluate(SUN_X)
         for name in DAY:
-            assert not y.state()["dusk"], name
             y.page.evaluate(f"yardGame.tap('{name}')")
             y.settled()
-        assert y.state()["dusk"]
+        assert not y.state()["dusk"]
+        assert y.page.evaluate(SUN_X) > x0, "the sun moves on with the hour"
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_the_hour_brings_dusk_and_the_doghouse_brings_bed(
+        self, yard: callable
+    ) -> None:
+        y = yard(f"{DAY_PLAY}&hour=18.9&day=600")  # dusk in 5 s, bedtime in 55
+        y.page.wait_for_function("yardGame.state().dusk", timeout=15_000)
         y.page.evaluate("yardGame.tap('bowl')")  # the yard is still open
         y.settled()
-        assert y.state()["uses"]["bowl"] == 2 and not y.state()["ended"]
+        assert y.state()["uses"]["bowl"] == 1 and not y.state()["ended"]
         y.page.evaluate("yardGame.tap('doghouse')")
         y.page.wait_for_function("yardGame.state().ended", timeout=DONE_MS)
         y.page.wait_for_timeout(7000)  # night falls, he walks home, the picture closes
         assert not y.errors, "\n---\n".join(y.errors)
 
-    def test_once_the_moon_is_up_he_goes_to_bed(self, yard: callable) -> None:
-        y = yard(f"{DAY_PLAY}&moon-rise=3")
-        for name in DAY:
-            y.run(f"yardGame.use('{name}')")
-        y.page.wait_for_function("yardGame.state().bedtime", timeout=10_000)
-        y.page.wait_for_function("yardGame.state().ended", timeout=5_000)
-        assert y.state()["moonUp"] == 1
+    def test_at_bedtime_he_goes_to_bed(self, yard: callable) -> None:
+        y = yard(f"{DAY_PLAY}&hour=19.8&day=60")  # 5 s an hour: bedtime in 1 s
+        y.page.wait_for_function("yardGame.state().ended", timeout=10_000)
+        assert y.state()["moonUp"] == 1 and y.state()["hour"] == 20
+        asks = [e for e in y.page.evaluate("yardGame.events()") if e["kind"] == "ask"]
+        assert [e["what"] for e in asks] == ["bedtime"], "nobody sent him: the hour did"
         y.page.wait_for_timeout(7000)
         assert not y.errors, "\n---\n".join(y.errors)
 
