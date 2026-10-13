@@ -8,6 +8,11 @@
 // Other parts listen: creatures (the snail and worms come out after rain),
 // Reksio (looks up, catches drops, jumps in puddles), the music (softer).
 //
+// The kind of day (layout.js) sets the sky between showers: a clear day has
+// no clouds, a fair one a few drifting slowly across all day, a cloudy one
+// more of them, a softer sun and a grey haze. The shower's clouds wait out of
+// sight until it calls them, and at evening the drifting ones move off.
+//
 // Wind blows in every play, quietly: mostly a light breeze that comes and
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
@@ -27,6 +32,7 @@ const Weather = (() => {
   const WIND_CHANGE_S = [3, 10] // the wind changes this often
   const STORMY = 0.25 // extra wind while the clouds are in
   const SWAY_DEG = [1, 6] // plants' sway at still and at a full gust
+  const DRIFT = 6 // a fair day's clouds drift across this fast (sky units a second), each a little faster or slower
 
   const $ = (id) => document.getElementById(id)
   const random = Debug.random('weather') // this part's own random stream (debug.js)
@@ -62,7 +68,7 @@ const Weather = (() => {
         el('circle', { cx, cy: rnd(-12, 6), r: Math.max(30, r), class: 'cloud-puff' }, g)
       }
       el('rect', { x: -w * 0.42, y: 0, width: w * 0.84, height: 34, rx: 17, class: 'cloud-puff' }, g)
-      clouds.push({ g, x: null, from: -400 - i * 360, home: 80 + i * 340 + rnd(-40, 40), y: rnd(70, 200), drift: rnd(4, 10) })
+      clouds.push({ g, x: null, size: null, from: -400 - i * 360, home: 80 + i * 340 + rnd(-40, 40), y: rnd(70, 200), drift: rnd(4, 10) })
     }
   }
 
@@ -241,23 +247,38 @@ const Weather = (() => {
     document.documentElement.style.setProperty('--sway', `${sway.toFixed(2)}deg`)
   }
 
+  /** A cloud's move this frame (x in the sky's units, painting.js): in over
+   * its home while the shower's clouds are in; else a fair day's drifts
+   * across and comes round again, smaller and slower the further off it
+   * looks, and the rest go off to the right once a shower has called them,
+   * or wait off the left until one does. At evening every cloud goes. */
+  function moveCloud(c, drifts, cover, dt) {
+    if (cover > 0) c.called = true
+    const drifting = drifts && !calm && cover === 0
+    const far = (c.drift - 4) / 6 // 0 the furthest off … 1 the nearest (drift is 4–10)
+    const size = drifts && cover === 0 ? 0.5 + 0.35 * far : 1
+    if (c.x === null) [c.x, c.size] = drifts ? [c.home, size] : [Painting.SKY_LEFT + c.from, 1]
+    c.size += (size - c.size) * Math.min(1, dt * 0.5)
+    if (drifting) {
+      c.x += DRIFT * (0.6 + 0.8 * far) * dt
+      if (c.x > Painting.SKY_RIGHT + 400) c.x = Painting.SKY_LEFT - 400
+    } else if (cover > 0 || c.called || drifts) {
+      const target = cover > 0 ? c.home + Math.sin(t / c.drift) * 30 : Painting.SKY_RIGHT + 500
+      c.x += (target - c.x) * Math.min(1, dt * (cover > 0 ? 0.9 : 0.35))
+    }
+    c.g.setAttribute('transform', `translate(${c.x.toFixed(1)} ${c.y}) scale(${c.size.toFixed(3)})`)
+  }
+
   function tick(dt, camX) {
     t += dt
     shower.step(dt).forEach(entered)
 
-    // clouds: in while clouding/raining, out after
     const cover = shower.cover
-    for (const c of clouds) {
-      c.x ??= Painting.SKY_LEFT + c.from // waiting off the left edge (in the sky's units: painting.js)
-      const target = cover > 0 ? c.home + Math.sin(t / c.drift) * 30 : Painting.SKY_RIGHT + 500
-      const from = c.x
-      c.x = from + (target - from) * Math.min(1, dt * (cover > 0 ? 0.9 : 0.35))
-      c.g.setAttribute('transform', `translate(${c.x} ${c.y})`)
-    }
-    $('overcast').style.opacity = String(cover * 0.42)
+    clouds.forEach((c, i) => moveCloud(c, (i * Layout.sky.clouds) % clouds.length < Layout.sky.clouds, cover, dt)) // spread out: 3 of 5 are the 1st, 3rd and 5th
+    $('overcast').style.opacity = String(Math.max(Layout.sky.haze, cover * 0.42))
     blow(dt, cover)
     const sun = document.querySelector('#sun')
-    if (sun) sun.style.opacity = String(1 - cover * 0.85)
+    if (sun) sun.style.opacity = String(Layout.sky.sun * (1 - cover * 0.85))
 
     drawRain(dt)
     drawPuddles(camX)

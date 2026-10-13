@@ -572,6 +572,32 @@ class TestWholePlay:
         assert not y.errors, "\n---\n".join(y.errors)
 
 
+CLOUDS_IN_VIEW = """[...document.querySelectorAll('#clouds .cloud')]
+    .map((g) => Number(g.getAttribute('transform').match(/translate\\(([-\\d.]+)/)[1]))
+    .filter((x) => x > Painting.SKY_LEFT - 150 && x < Painting.SKY_RIGHT + 150)"""
+
+
+class TestSky:
+    """The kind of day (layout.js ?sky=) sets the clouds between showers."""
+
+    def test_a_clear_day_has_no_clouds_in_the_sky(self, yard: callable) -> None:
+        y = yard(f"{STILL}&sky=clear")
+        for _ in range(6):  # none sweeps across as the play starts, either
+            y.page.wait_for_timeout(500)
+            assert y.page.evaluate(CLOUDS_IN_VIEW) == []
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_a_fair_day_has_clouds_drifting_across(self, yard: callable) -> None:
+        y = yard(f"{STILL}&sky=fair")
+        y.page.wait_for_timeout(1000)
+        before = y.page.evaluate(CLOUDS_IN_VIEW)
+        y.page.wait_for_timeout(2000)
+        after = y.page.evaluate(CLOUDS_IN_VIEW)
+        assert before and after, "clouds in the sky"
+        assert sum(after) > sum(before), "drifting to the right"
+        assert not y.errors, "\n---\n".join(y.errors)
+
+
 class TestLeftAlone:
     def test_he_keeps_busy_on_his_own(self, yard: callable) -> None:
         y = yard(

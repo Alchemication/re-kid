@@ -1,7 +1,8 @@
 // The sky over the yard, drawn from the hour (day.js): the sun comes up over
-// the wall in the morning, climbs, and goes down in the afternoon, yellow
-// turning orange and red as the sky warms, until it sets behind the wall at
-// 19:00; the moon comes up through the last hour. Each play starts at dawn
+// the wall in the morning (a little further left or right each play), climbs,
+// and goes down in the afternoon, yellow turning orange and red as the sky
+// warms (all day a little warmer on a golden day, layout.js), until it sets
+// behind the wall at 19:00; the moon comes up through the last hour. Each play starts at dawn
 // (the sun still behind the wall), and the sunrise lifts it to where the
 // hour puts it. The moon is a different one every evening (layout.js draws
 // it). The sun is under the evening shade; the moon is on a layer of its own
@@ -11,8 +12,6 @@
 /* exported Sky */
 const Sky = (() => {
   const RISE_H = 6 // the hour the sun would clear the wall: at 08:00 it is already a little up
-  const X_RISE = 160 // where the sun comes up and goes down across the sky (screen units, the sky stays put)
-  const X_SET = 1440
   const HORIZON = 408 // the sun's centre here is behind the wall (its top at 334), glow and all
   const BELOW = 420 // and at dawn, a little further down still
   // the sun's colour and how warm the sky is, through the day; in between, a blend
@@ -28,6 +27,7 @@ const Sky = (() => {
   ]
   const DUSK_FROM = 15 // from here to the sunset the music slows and softens, up to level 6 (music.js)
   const DAWN_TINT = 0.45 // at dawn the sky is this much warmer and dimmer
+  const MAX_TINT = 0.65 // a golden day's sunset is no warmer than this
   const WALL_TOP = 334 // the moon comes up from behind the wall (and is clipped there)
   const SVG_NS = 'http://www.w3.org/2000/svg'
 
@@ -94,7 +94,8 @@ const Sky = (() => {
     const f = h1 > h0 ? clamp01((h - h0) / (h1 - h0)) : 0
     const [a, b] = [rgb(c0), rgb(c1)]
     const color = `rgb(${a.map((v, j) => Math.round(mix(v, b[j], f))).join(' ')})`
-    return { x: mix(X_RISE, X_SET, k), y, color, tint: mix(t0, t1, f), moonUp: clamp01((h - Day.SUNSET) / (Day.TO - Day.SUNSET)) }
+    const tint = Math.min(MAX_TINT, mix(t0, t1, f) + Layout.sky.warmth)
+    return { x: mix(Layout.sun.rise, Layout.sun.set, k), y, color, tint, moonUp: clamp01((h - Day.SUNSET) / (Day.TO - Day.SUNSET)) }
   }
 
   /** Draw the sky for the hour, with what's left of the dawn on top. */

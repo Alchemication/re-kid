@@ -67,6 +67,8 @@ sound:
   refs: [mark:stretching-melody, world:sound.music_role]
 - text: Three tunes take turns over the oom-pah so it doesn't wear thin — the hook twice, a skipping flute tune twice, the hook again, then a tiptoeing tune in G minor that climbs back home to B-flat. The two new tunes are written for the game in the same bouncy spirit, not taken from the original.
   origin: invented
+- text: Each day looks a little different. It may be clear, fair with a few small clouds drifting across, cloudy with a softer sun and a grey haze, or golden with warmer light all day; and the sun comes up and goes down a little further left or right. The shape of the day stays the same.
+  origin: invented
 - text: A quiet wind is always there, changing like real wind — mostly a light breeze that comes and goes, now and then a gust, stronger when the clouds come, dropping at evening. The grass and flowers lean further in a gust, so the child can see what they hear. Rain is a soft hush under everything.
   origin: invented
 - text: Reksio barks with the original barks from the intro, played a little higher and quicker by a random amount each time, so he sounds like himself but never twice the same. (A private-play choice, to be replaced before any public release.)

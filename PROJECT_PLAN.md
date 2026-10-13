@@ -300,9 +300,16 @@ wake Reksio at home.
      from the hour, and the moon rising 19:00–20:00. The music slows from
      15:00 as before, now smoothly. `?hour=18.5` shows the evening soon,
      `?day=S` changes the length. Adam (2026-10-13): the sun's pace and the
-     evening's are good. Open: vary a bit how the sky looks from play to
-     play (the sun now takes the same path each day; only its noon height
-     varies).
+     evening's are good.
+   - *The sky varied (2026-10-13), for Adam to look at:* each play is a
+     clear, fair, cloudy or golden day (`?sky=` forces one; layout.js
+     `DAYS`): fair days have two or three small clouds drifting across,
+     smaller and slower the further off; cloudy days five, a softer sun and
+     a grey haze; golden days warmer light. The sun comes up and goes down
+     a little further left or right each play. The shower's clouds no longer
+     sweep across the sky as a dry play starts. The perf suite now plays
+     cloudy days. To judge: the kinds and how often each comes (3:4:2:2),
+     the haze, the cloudy day's even row of clouds.
    - The design principles in Adam's brief for this (a world to inhabit, a
      calm accepted ending, no engagement tricks) are in `DESIGN_PRINCIPLES.md`,
      with research on whether a few minutes a day suits a toddler.

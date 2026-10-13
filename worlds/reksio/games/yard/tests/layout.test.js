@@ -164,6 +164,28 @@ describe('flags in the page address', () => {
     assert.deepEqual({ ...evening, dayS: null, hour: null }, plain)
   })
 
+  it('forces the kind of day, ignoring unknown kinds, without shifting the play', () => {
+    const plain = layout('?seed=3')
+    const cloudy = layout('?seed=3&sky=cloudy')
+    assert.equal(cloudy.sky.kind, 'cloudy')
+    assert.ok(cloudy.sky.clouds > 0 && cloudy.sky.haze > 0 && cloudy.sky.sun < 1)
+    assert.deepEqual({ ...cloudy, sky: plain.sky }, plain)
+    assert.equal(layout('?seed=3&sky=stormy').sky.kind, plain.sky.kind)
+  })
+
+  it('has every kind of day come up, and the sun come up and go down somewhere new', () => {
+    const kinds = new Set()
+    const paths = new Set()
+    for (let seed = 1; seed <= 60; seed++) {
+      const { sky, sun } = layout(`?seed=${seed}`)
+      kinds.add(sky.kind)
+      paths.add(`${sun.rise} ${sun.set}`)
+      assert.ok(sun.rise >= 100 && sun.rise <= 320 && sun.set >= 1280 && sun.set <= 1500, `seed ${seed}`)
+    }
+    assert.deepEqual([...kinds].sort(), ['clear', 'cloudy', 'fair', 'golden'])
+    assert.ok(paths.size > 50)
+  })
+
   it('keeps the hour within the day', () => {
     assert.equal(layout('?seed=3&hour=3').hour, 8)
     assert.equal(layout('?seed=3&hour=23').hour, 20)

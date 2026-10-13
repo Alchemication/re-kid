@@ -40,6 +40,18 @@ const Layout = (() => {
   const MOON_R = [30, 44] // its size
   const MOON_PHASES = [0.2, 0.35, 0.5, 0.7, 0.85, 1] // how much of it is lit: a thin crescent to full
   const MOON_TINTS = ['#fbf3d2', '#f4f1e6', '#fde7b0'] // cream, silver, honey
+  // what kind of day it is, drawn each play (?sky= forces one): clouds, how
+  // many drift across all day (weather.js; a shower brings them all); haze,
+  // a grey over the sky; sun, how bright it shines; warmth, how much warmer
+  // the light is all day (sky.js)
+  const DAYS = {
+    clear: { chance: 3, clouds: 0, haze: 0, sun: 1, warmth: 0 },
+    fair: { chance: 4, clouds: 3, haze: 0, sun: 1, warmth: 0 },
+    cloudy: { chance: 2, clouds: 5, haze: 0.16, sun: 0.65, warmth: 0 },
+    golden: { chance: 2, clouds: 1, haze: 0, sun: 1, warmth: 0.1 },
+  }
+  const SUN_RISE_X = [100, 320] // where the sun comes up over the wall (screen units)
+  const SUN_SET_X = [1280, 1500] // and where it goes down
   const WAKE_S = [6, 9] // asleep in the doghouse at the start, he wakes by himself after this long
   const PUDDLES = 3 // at most; fewer when the gaps are tight
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
@@ -57,6 +69,18 @@ const Layout = (() => {
     const dayS = Number(params.get('day')) || null
     const hour = params.has('hour') ? Math.max(8, Math.min(20, Number(params.get('hour')) || 8)) : null
     return { dayS, hour }
+  }
+
+  /** The kind of day for a draw `u` (0–1), by each kind's chance, unless
+   * `asked` names one. */
+  function pickDay(u, asked) {
+    const kinds = Object.keys(DAYS)
+    const total = kinds.reduce((n, k) => n + DAYS[k].chance, 0)
+    let left = u * total
+    let kind = kinds.find((k) => (left -= DAYS[k].chance) < 0) ?? kinds[kinds.length - 1]
+    if (kinds.includes(asked)) kind = asked
+    const { clouds, haze, sun, warmth } = DAYS[kind]
+    return { kind, clouds, haze, sun, warmth }
   }
 
   function remembered() {
@@ -153,19 +177,24 @@ const Layout = (() => {
   // the sky, from its own stream so a seeded play's yard doesn't shift: how
   // high the sun climbs, and a different moon every evening (how full, which
   // way it faces, where it comes up, its size, tilt, colour and marks)
-  const sky = Debug.random('sky')
-  const skyRnd = (lo, hi) => lo + sky() * (hi - lo)
+  const skyDraw = Debug.random('sky')
+  const skyRnd = (lo, hi) => lo + skyDraw() * (hi - lo)
   const sun = { noon: Math.round(skyRnd(...SUN_NOON)) }
   const moon = {
     x: Math.round(skyRnd(...MOON_X)),
     y: Math.round(skyRnd(...MOON_Y)),
     r: Math.round(skyRnd(...MOON_R)),
-    lit: MOON_PHASES[Math.floor(sky() * MOON_PHASES.length)],
-    waning: sky() < 0.5,
+    lit: MOON_PHASES[Math.floor(skyDraw() * MOON_PHASES.length)],
+    waning: skyDraw() < 0.5,
     tilt: Math.round(skyRnd(-25, 25)),
-    tint: MOON_TINTS[Math.floor(sky() * MOON_TINTS.length)],
+    tint: MOON_TINTS[Math.floor(skyDraw() * MOON_TINTS.length)],
     marks: Array.from({ length: 3 }, () => ({ x: skyRnd(-0.55, 0.55), y: skyRnd(-0.55, 0.55), r: skyRnd(0.1, 0.22) })),
   }
+  // the sun's path, and the kind of day: drawn after the moon, so the moon of
+  // a seeded play is as it was
+  sun.rise = Math.round(skyRnd(...SUN_RISE_X))
+  sun.set = Math.round(skyRnd(...SUN_SET_X))
+  const sky = pickDay(skyDraw(), params.get('sky'))
 
   // the morning (yard.js): each play starts with him asleep in his doghouse,
   // as the cartoon's episodes start, and he wakes by himself after a while (a
@@ -182,7 +211,7 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */

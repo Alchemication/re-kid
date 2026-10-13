@@ -4,7 +4,8 @@ const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 const { load } = require('./load')
 
-const Sky = load(['debug.js', 'layout.js', 'day.js', 'sky.js']).get('Sky')
+const Sky = load(['debug.js', 'layout.js', 'day.js', 'sky.js'], { query: '?seed=1&sky=clear' }).get('Sky')
+const golden = load(['debug.js', 'layout.js', 'day.js', 'sky.js'], { query: '?seed=1&sky=golden' }).get('Sky')
 
 /** The terminator's half-width and which way it bulges, from a moon path. */
 function terminator(d) {
@@ -57,6 +58,11 @@ describe('the sky through the day', () => {
     assert.equal(Sky.look(19).color, 'rgb(217 84 46)')
     assert.ok(Sky.look(19).tint > 0.5)
     assert.equal(Sky.look(13).tint, 0)
+  })
+
+  it('is warmer all day on a golden day, but no warmer than a red sunset allows', () => {
+    for (const h of [9, 13, 17]) assert.ok(golden.look(h).tint > Sky.look(h).tint + 0.05, `${h}:00`)
+    assert.ok(golden.look(19).tint <= 0.65)
   })
 
   it('brings the moon up through the last hour', () => {

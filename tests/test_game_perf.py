@@ -34,9 +34,10 @@ FRAME_P95_BUDGET_MS = (
 )
 
 SCENARIOS = {
-    "idle": ("rain=0", None),  # left alone: he keeps busy on his own
+    # a cloudy day: the most sky to draw between showers (clouds, haze)
+    "idle": ("rain=0&sky=cloudy", None),  # left alone: he keeps busy on his own
     "walking": (
-        "rain=0",
+        "rain=0&sky=cloudy",
         "setInterval(() => yardGame.walk(Reksio.x < 2000 ? 3400 : 600), 4000); yardGame.walk(3400)",
     ),
     "rain": ("rain=1&rain-at=0", None),  # rain, splashes, puddles: the busiest drawing
