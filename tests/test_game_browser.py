@@ -27,10 +27,6 @@ playwright = pytest.importorskip("playwright.sync_api")
 ROOT = Path(__file__).resolve().parent.parent
 YARD = ROOT / "worlds/reksio/games/yard/game/index.html"
 STILL = "seed=1&still&rain=0&creatures="
-HOUSE_WALL = (
-    290,
-    700,
-)  # the house, low on the right of its wall: in view from the start, clear of the clock
 DONE_MS = 60_000  # the longest thing (a full nap, the film) takes well under this
 CUT_AFTER_MS = 400  # a tap this soon after starting cuts a move short
 
@@ -144,7 +140,6 @@ ACT_QUERY = {"fly": "&creatures=fly", "bramble": "&props=berries"}
 THINGS = [
     "doghouse",
     "house",
-    "clock",
     "bowl",
     "tap",
     "flowers",
@@ -218,19 +213,6 @@ class Yard:
 
     def state(self) -> dict:
         return self.page.evaluate("yardGame.state()")
-
-    def on_screen(self, x: float, y: float) -> tuple[float, float]:
-        """Where a point of the yard (scene units) is on the screen now."""
-        return tuple(
-            self.page.evaluate(
-                """([x, y]) => {
-                const p = document.getElementById('world').createSVGPoint()
-                p.x = x; p.y = y
-                const s = p.matrixTransform(document.getElementById('cam').getScreenCTM())
-                return [s.x, s.y] }""",
-                [x, y],
-            )
-        )
 
     def settled(self) -> dict:
         """Wait until he's free, then check he's standing and nothing went wrong."""
@@ -684,7 +666,7 @@ class TestRealInput:
 
     def test_a_tap_on_a_thing_uses_it(self, yard: callable) -> None:
         y = yard(STILL)
-        y.page.mouse.click(*y.on_screen(*HOUSE_WALL))
+        y.page.click("#things [data-thing='house']")  # in view from the start
         y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
         assert self.intents(y) == ["go to house"]
         y.settled()
@@ -754,7 +736,7 @@ class TestScreens:
 
     def test_he_can_go_anywhere_on_a_phone(self, yard: callable) -> None:
         y = yard(STILL, size=(844, 390))
-        y.page.touchscreen.tap(*y.on_screen(*HOUSE_WALL))
+        y.page.tap("#things [data-thing='house']")
         y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
         y.settled()
         y.page.evaluate("yardGame.walk(3650)")  # the far end of the yard

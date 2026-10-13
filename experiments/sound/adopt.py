@@ -35,7 +35,10 @@ def main(args: list[str]) -> None:
     yaml_path = game / "effects.yaml"
     text = yaml_path.read_text()
     head = text.split("\neffects:", 1)[0] + "\neffects:\n"
-    gains = dict(re.findall(r"- id: (\w+)\n  gain: ([\d.]+)", text))
+    # each sound's own settings (gain, steady), kept as they are
+    settings = dict(
+        re.findall(r"- id: (\w+)\n((?:  (?!takes:)\w+: [^\n]*\n)*)  takes:", text)
+    )
     order = re.findall(
         r"- id: (\w+)", text
     )  # keep the sounds in the order they are listed
@@ -53,8 +56,8 @@ def main(args: list[str]) -> None:
         if not takes:
             continue
         lines.append(f"- id: {sound}")
-        if sound in gains:
-            lines.append(f"  gain: {gains[sound]}")
+        if settings.get(sound):
+            lines.append(settings[sound].rstrip("\n"))
         lines.append("  takes:")
         for p in takes:
             name = Path(p["file"]).name

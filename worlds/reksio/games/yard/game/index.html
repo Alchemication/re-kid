@@ -169,24 +169,16 @@
           <path class="grass sway" style="transform-origin: 2212px 812px" d="M2200 812 l6 -22 l4 18 l6 -26 l4 26 l6 -18 l4 22" />
 
           <!-- ============ the family house: the left end of the yard ============ -->
-          <g id="house" class="thing" data-thing="house" data-hint-y="380">
+          <!-- its window open, and through it the room, the cuckoo clock on its wall (cuckoo.js):
+               a tap on the house is a tap on the clock -->
+          <g id="house" class="thing" data-thing="house" data-hint-y="320">
             <rect class="hit" x="0" y="300" width="320" height="510" />
             <rect class="plaster" x="-20" y="250" width="330" height="560" />
             <path class="plaster-edge" d="M310 250 V810" />
-            <rect class="window" x="25" y="400" width="120" height="130" />
-            <path class="window-bars" d="M85 400 V530 M25 465 H145" />
-            <g id="curtain" style="transform-origin: 39px 406px">
-              <path class="curtain" d="M31 406 Q53 470 39 524 H31 Z" />
-            </g>
-            <path class="curtain" d="M139 406 Q117 470 131 524 H139 Z" />
-            <rect class="step" x="70" y="790" width="180" height="20" />
-          </g>
-
-          <!-- ============ the cuckoo clock on the house wall (cuckoo.js) ============ -->
-          <!-- drawn about (160, 331) and hung, 1.4 times bigger, on the wall's right, beside where he stands -->
-          <g id="clock" class="thing" data-thing="clock" data-hint-y="330">
-            <rect class="hit" x="146" y="306" width="179" height="235" /><!-- in scene units, clear of the window: that is the house's -->
-            <g transform="translate(6 -27) scale(1.4)">
+            <rect class="room" x="60" y="330" width="190" height="210" />
+            <path class="room-stripes" d="M82 330 V540 M112 330 V540 M142 330 V540 M172 330 V540 M202 330 V540 M232 330 V540" />
+            <!-- the clock as drawn about (160, 331), hung on the room's wall -->
+            <g id="clock" transform="translate(-5 90)">
             <path class="clock-chain" d="M138 362 V381 M182 362 V377" />
             <ellipse class="clock-cone" cx="138" cy="391" rx="7" ry="11" />
             <ellipse class="clock-cone" cx="182" cy="387" rx="7" ry="11" />
@@ -227,6 +219,15 @@
             <path id="clock-minute" class="clock-hand thin" d="M160 331 V311" style="transform-origin: 160px 331px" />
             <circle class="clock-pin" cx="160" cy="331" r="3" />
             </g>
+            <g id="curtain" style="transform-origin: 64px 336px">
+              <path class="curtain" d="M62 334 Q90 430 72 534 H62 Z" />
+            </g>
+            <path class="curtain" d="M248 334 Q220 430 238 534 H248 Z" />
+            <rect class="window-frame" x="60" y="330" width="190" height="210" />
+            <path class="pane" d="M60 334 L30 350 V520 L60 536 Z" />
+            <path class="pane" d="M250 334 L280 350 V520 L250 536 Z" />
+            <rect class="sill" x="46" y="540" width="218" height="14" />
+            <rect class="step" x="70" y="790" width="180" height="20" />
           </g>
 
           <!-- ============ doghouse ============ -->

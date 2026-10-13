@@ -37,6 +37,13 @@ class Effect(Model):
     gain: float = Field(
         default=1.0, gt=0, description="Its level in the game, after levelling."
     )
+    steady: bool = Field(
+        default=False,
+        description=(
+            "Plays one take, chosen as the play starts, all play, at its own "
+            "speed: a thing that always sounds the same (a clock's cuckoo)."
+        ),
+    )
     takes: list[Take] = Field(min_length=1)
 
     @model_validator(mode="after")

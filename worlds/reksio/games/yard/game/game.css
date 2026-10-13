@@ -78,8 +78,11 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .hit { fill: transparent; }
 .plaster { fill: #ddd2b6; stroke: var(--ink); stroke-width: 6; }
 .plaster-edge { stroke: #b9ad8f; stroke-width: 12; }
-.window { fill: #9cc4dc; stroke: var(--ink); stroke-width: 7; }
-.window-bars { stroke: var(--ink); stroke-width: 6; }
+.room { fill: #e7d4a4; } /* the room through the open window */
+.room-stripes { fill: none; stroke: #d8c08a; stroke-width: 7; }
+.window-frame { fill: none; stroke: var(--ink); stroke-width: 7; }
+.pane { fill: #9cc4dc; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; } /* the casements, swung open */
+.sill { fill: #b8ab8f; stroke: var(--ink); stroke-width: 5; }
 .curtain { fill: #e9e2cf; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
 .step { fill: #b8ab8f; stroke: var(--ink); stroke-width: 5; }
 /* the cuckoo clock (cuckoo.js) */

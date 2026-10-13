@@ -311,16 +311,21 @@ wake Reksio at home.
      cloudy days. To judge: the kinds and how often each comes (3:4:2:2),
      the haze, the cloudy day's even row of clouds.
    - *Slice 2, the cuckoo clock (2026-10-13), for Adam to look at and hear:*
-     `cuckoo.js`, on the house wall to the right of the window (moved left
-     for it), beside where he stands. Hands from the hour, a silent
+     `cuckoo.js`, inside the house on the wall by its open window (Adam: a
+     cuckoo clock is an indoor clock, and on the outside wall it was as big
+     as the window); a tap on the house is a tap on it. Hands from the hour, a silent
      pendulum, the cuckoo calling once each hour and eight slow times at
      20:00; near the house he looks up at it. Tapped: he barks back at each
      call, turns away smug, is caught by one call more, barks too late, the
-     door snaps shut; the variation, he howls first. The call is a
-     synthesised placeholder: real takes through `new-sound` next. To judge:
-     the call's sound and loudness, how often on the hour (25 s), his head
+     door snaps shut; the variation, he howls first. The call: 3 ElevenLabs
+     takes Adam kept of 9 (2026-10-13; the synth until they decode), one of
+     them all play (`steady`: Adam, a clock sounds the same each time), each
+     0.8 s with its notes about 0.18 s apart, so a call lasts 850 ms and the
+     beak opens on both notes. The door's snap stays `Sound.tok` (the bird
+     and the nut share it). To judge: the call's loudness (`gain` in
+     `effects.yaml`, and from across the yard), how often on the hour (25 s), his head
      only slightly up (`barkUp`, `glare` tilts in antics.js), the clock's
-     size. Found on the way, not fixed: `TestRealInput::test_a_key_tap_barks`
+     size in the window. Found on the way, not fixed: `TestRealInput::test_a_key_tap_barks`
      fails about 1 run in 5 under 8 workers, on the committed code too (a
      quick key tap can count as a hold when frames are slow).
    - The design principles in Adam's brief for this (a world to inhabit, a

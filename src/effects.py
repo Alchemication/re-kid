@@ -145,11 +145,16 @@ def build(effect_set: EffectSet, folder: Path) -> list[Packed]:
 
 
 def write_js(packed: list[Packed], effect_set: EffectSet, out: Path) -> Path:
-    """Write ``effects.js``: a global EFFECTS of {sound: {gain, takes: [base64 mp3]}}."""
-    gains = {e.id: e.gain for e in effect_set.effects}
+    """Write ``effects.js``: a global EFFECTS of {sound: {gain, steady?, takes:
+    [base64 mp3]}} (steady only where it is set)."""
+    effects = {e.id: e for e in effect_set.effects}
     table: dict[str, dict[str, object]] = {}
     for p in packed:
-        entry = table.setdefault(p.effect, {"gain": gains[p.effect], "takes": []})
+        e = effects[p.effect]
+        entry = table.setdefault(
+            p.effect,
+            {"gain": e.gain, **({"steady": True} if e.steady else {}), "takes": []},
+        )
         entry["takes"].append(base64.b64encode(p.data).decode("ascii"))
     out.parent.mkdir(parents=True, exist_ok=True)
     header = (

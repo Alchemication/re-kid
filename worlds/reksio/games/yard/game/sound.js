@@ -59,8 +59,10 @@ const Sound = (() => {
       }
       if (typeof EFFECTS !== 'undefined') {
         for (const [name, e] of Object.entries(EFFECTS)) {
-          const mine = (effects[name] = { gain: e.gain, buffers: [], last: -1, until: 0 })
-          for (const b64 of e.takes) {
+          const mine = (effects[name] = { gain: e.gain, steady: !!e.steady, buffers: [], last: -1, until: 0 })
+          // a steady sound (a clock's cuckoo) keeps one take, chosen now, all play
+          const takes = e.steady ? [e.takes[Math.floor(Math.random() * e.takes.length)]] : e.takes
+          for (const b64 of takes) {
             ctx.decodeAudioData(bytes(b64)).then((buffer) => mine.buffers.push(buffer), () => {}) // a take that won't decode is left out: the others (or the synth) play
           }
         }
@@ -74,7 +76,8 @@ const Sound = (() => {
   const bytes = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer
 
   /** Play one of a sound's recorded takes, if any are decoded: a random one,
-   * not the last one played, a little higher or lower. One take of a sound at
+   * not the last one played, a little higher or lower (a steady sound: its
+   * one take, as it is). One take of a sound at
    * a time: asked again while one plays (munching, a chew at a time), it lets
    * that one play on. False if it has none: the synthesised sound plays. */
   function recorded(name) {
@@ -87,7 +90,7 @@ const Sound = (() => {
     e.last = i
     const src = c.createBufferSource()
     src.buffer = e.buffers[i]
-    src.playbackRate.value = EFFECT_RATE[0] + Math.random() * (EFFECT_RATE[1] - EFFECT_RATE[0])
+    src.playbackRate.value = e.steady ? 1 : EFFECT_RATE[0] + Math.random() * (EFFECT_RATE[1] - EFFECT_RATE[0])
     const g = c.createGain()
     g.gain.value = EFFECT_VOLUME * e.gain * scale
     src.connect(g).connect(master)

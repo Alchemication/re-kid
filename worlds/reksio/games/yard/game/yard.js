@@ -369,8 +369,7 @@
   // drawn faintly and lit up when he is in it. Generous on purpose.
   // x = centre, r = half-width, both scene units.
   const SPOTS = {
-    clock: () => ({ x: THINGS.clock.at() + 15, r: 45 }), // at the house wall, under the clock
-    house: () => ({ x: THINGS.house.at(), r: 45 }),
+    house: () => ({ x: 410, r: 70 }),
     doghouse: () => ({ x: 560, r: 130 }),
     bowl: () => ({ x: 830 + X('bowl'), r: 120 }),
     tap: () => ({ x: 1260 + X('tap'), r: 120 }),

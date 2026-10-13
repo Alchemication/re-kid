@@ -44,11 +44,12 @@ function fakeAudio() {
   return { AudioContext, made, clock }
 }
 
-/** sound.js with these EFFECTS ({name: number of takes}), on a stand-in context. */
-function sound(takes) {
+/** sound.js with these EFFECTS ({name: number of takes}; `steady` names the
+ * steady ones), on a stand-in context. */
+function sound(takes, steady = []) {
   const audio = fakeAudio()
   const EFFECTS = Object.fromEntries(Object.entries(takes).map(([name, n]) => [
-    name, { gain: 1, takes: Array.from({ length: n }, (_, i) => btoa(String.fromCharCode(i + 1))) },
+    name, { gain: 1, ...(steady.includes(name) ? { steady: true } : {}), takes: Array.from({ length: n }, (_, i) => btoa(String.fromCharCode(i + 1))) },
   ]))
   const page = load(['debug.js', 'sound.js'], {
     dom: true,
@@ -91,6 +92,24 @@ describe('recorded effects', () => {
     assert.equal(new Set(order).size, 3, 'every take gets its turn')
     const rates = s.made.takes.map((t) => t.playbackRate.value)
     assert.ok(rates.every((r) => r >= 0.94 && r <= 1.06) && new Set(rates).size > 1, String(rates))
+  })
+
+  it('a steady sound plays one take all play, at its own speed, and another play may pick another', async () => {
+    const picked = new Set()
+    for (let play = 0; play < 20; play++) {
+      const s = sound({ cuckoo: 3 }, ['cuckoo'])
+      await decoded()
+      for (let i = 0; i < 8; i++) {
+        s.clock.now += 2
+        s.Sound.cuckoo()
+      }
+      const order = s.made.takes.map((t) => t.buffer.take)
+      assert.equal(order.length, 8)
+      assert.equal(new Set(order).size, 1, `one take all play: ${order}`)
+      assert.ok(s.made.takes.every((t) => t.playbackRate.value === 1))
+      picked.add(order[0])
+    }
+    assert.ok(picked.size > 1, 'not always the same take')
   })
 
   it('play one take of a sound at a time: asked again while one plays, it lets that one play on', async () => {

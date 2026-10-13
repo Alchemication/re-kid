@@ -17,7 +17,7 @@ music") has the findings behind each rule. The pieces:
 | Pick by ear | `experiments/sound/board.html` (Adam); his verdicts end in `picks.json` |
 | Bring the keeps into the game | `experiments/sound/adopt.py` → `games/<game>/effects/`, `effects.yaml` |
 | The retro recipe, pack | `main.py effects <world> [game]` → `game/effects.js` (`config.EFFECT_*`) |
-| How the game plays them | `sound.js` `recorded()`: a random take, never twice running, 0.94–1.06 speed, one take of a sound at a time |
+| How the game plays them | `sound.js` `recorded()`: a random take, never twice running, 0.94–1.06 speed, one take of a sound at a time; a sound marked `steady: true` in `effects.yaml` (a thing that always sounds the same: the cuckoo clock) keeps one take, chosen as the play starts, at its own speed |
 
 Sound needs a person's ears (`CLAUDE.md`): Claude writes wordings, runs
 the tools and reads what the files measure, but every keep is Adam's.
@@ -42,6 +42,11 @@ the tools and reads what the files measure, but every keep is Adam's.
   take of a sound plays at a time, so a take longer than its call gap
   swallows calls (the snore: 2.5 s takes, called every 1.7 s). Keep takes
   shorter than the gap, or say so to Adam.
+- Where the game paces itself around a sound (the cuckoo's beak opens on
+  each note, its calls are spaced), measure the keeps once picked: their
+  length and where their notes start (`librosa` onsets, a lead) and fit
+  that code to them. Takes come padded to the length asked for, and only
+  their start is trimmed, so a 0.8 s take blocks the next call for 0.8 s.
 - Original audio is never used or committed (the barks are the one
   exception). Generated takes are ours and are committed.
 

@@ -1,5 +1,6 @@
-// The cuckoo clock on the house wall (invented: Eliot's grandfather keeps
-// wall clocks, DESIGN_PRINCIPLES.md). Its hands show the day's time (day.js:
+// The cuckoo clock in the house, on the wall just inside its open window
+// (invented: Eliot's grandfather keeps wall clocks, DESIGN_PRINCIPLES.md; an
+// indoor clock, so it hangs indoors). A tap on the house is a tap on it. Its hands show the day's time (day.js:
 // the minute hand goes round once each hour of the day), its pendulum swings
 // without a sound, and on each hour the cuckoo comes out and calls once; at
 // 20:00, bedtime, eight slow times. No ticking.
@@ -7,7 +8,7 @@
 // Tapped, Reksio counts along: the cuckoo calls, he barks back up at it each
 // time, very pleased, and turns his back on it, nose in the air. Then it
 // calls once more, behind him: he spins round and barks too late, and the
-// door snaps shut on him. He gives it a cross look. The variation: he goes
+// door snaps shut on him, the curtain fluttering. He gives it a cross look. The variation: he goes
 // first, with a little howl, and it answers.
 //
 // The clock is drawn from its own state each frame (the door, how far the
@@ -17,16 +18,16 @@
 /* global Clock, Debug, Sound, Reksio, Layout */
 /* exported Cuckoo */
 const Cuckoo = (() => {
-  const X = 230 // where the clock hangs (index.html), scene units
+  const X = 155 // where the clock hangs (index.html), scene units
   const SWING_MS = 1700 // the pendulum, there and back: a slow, calm beat
   const SWING_DEG = 9
   const DOOR_MS = 110 // the door flies open this fast
   const OUT_MS = 170 // and the cuckoo pops out
   const IN_MS = 220 // and goes back in
   const SNAP_MS = 70 // the door snapping shut on him
-  const CALL_MS = 650 // one call, ku-ku, and the gap after it
+  const CALL_MS = 850 // one call, ku-ku, and the gap after it: longer than a take (0.8 s, effects/cuckoo), so none is swallowed by the one before
   const SLOW_CALL_MS = 1050 // …at bedtime
-  const NOTE_GAP = { fast: 300, slow: 420 } // ms between "ku" and "ku": the sound and the beak keep to it
+  const NOTE_GAP = 180 // ms between "ku" and "ku", as in the kept takes (their notes start about 0.05 and 0.22 s in): the beak, and the synth before they're decoded
   const BEDTIME = 20 // the hour of the eight slow calls (day.js TO)
   const BEDTIME_CALLS = 8
   const FAR = 2600 // Reksio this far off (scene units) hears it quietest
@@ -116,22 +117,25 @@ const Cuckoo = (() => {
   async function goIn(snap = false) {
     await to('out', 0, snap ? SNAP_MS : IN_MS)
     await to('door', 0, snap ? SNAP_MS : DOOR_MS)
-    if (snap) Sound.tok()
+    if (snap) {
+      Sound.tok()
+      Sound.curtain()
+      $('curtain').animate([0, -8, 4, 0].map((d) => ({ transform: `skewX(${d}deg)` })), { duration: 900, easing: 'ease-in-out' }) // ends where it began
+    }
   }
 
   function beak() {
-    to('beak', 1, 60).then(() => to('beak', 0, 140))
+    to('beak', 1, 60).then(() => to('beak', 0, 100)) // shut again before the next note
   }
 
   /** One call, ku-ku, its beak opening on each note; quieter the further
    * off he is, but heard right across the yard: it tells the hour. */
   async function call(slow = false) {
-    const gap = slow ? NOTE_GAP.slow : NOTE_GAP.fast
-    Sound.scaled(1 - 0.75 * Math.min(1, Math.abs(Reksio.x - X) / FAR), () => Sound.cuckoo(slow, gap / 1000))
+    Sound.scaled(1 - 0.75 * Math.min(1, Math.abs(Reksio.x - X) / FAR), () => Sound.cuckoo(slow, NOTE_GAP / 1000))
     beak()
-    await wait(gap)
+    await wait(NOTE_GAP)
     beak()
-    await wait((slow ? SLOW_CALL_MS : CALL_MS) - gap)
+    await wait((slow ? SLOW_CALL_MS : CALL_MS) - NOTE_GAP)
   }
 
   /** Have the cuckoo for `job` (async): once whatever has it now lets go;

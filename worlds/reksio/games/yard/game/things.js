@@ -415,7 +415,6 @@ const Things = (() => {
       },
     },
     bowl: Bowl.thing,
-    clock: Cuckoo.thing,
     tap: {
       at: () => 1201 + X('tap'),
       face: 1,
@@ -478,19 +477,7 @@ const Things = (() => {
         await wait(500)
       },
     },
-    house: {
-      at: () => Layout.MIN_X + 90, // a step from the wall: the clock's spot is at the wall (yard.js SPOTS)
-      face: -1,
-      async run() {
-        await Reksio.nod(-20, 300)
-        await Reksio.bark()
-        Sound.curtain()
-        await $('curtain').animate(
-          [{ transform: 'skewX(0)' }, { transform: 'skewX(-8deg)' }, { transform: 'skewX(4deg)' }, { transform: 'skewX(0)' }],
-          { duration: 900, easing: 'ease-in-out' },
-        ).finished
-      },
-    },
+    house: Cuckoo.thing, // the cuckoo clock, through its open window
     gate: {
       at: () => Layout.MAX_X,
       face: 1,

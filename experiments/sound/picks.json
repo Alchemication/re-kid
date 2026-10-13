@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-12T20:52:59.489Z",
+ "saved": "2026-10-13T13:23:40.664Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1080,6 +1080,87 @@
    "seed": 5,
    "sound": "yelp",
    "verdict": "keep"
+  },
+  {
+   "file": "eleven/cuckoo/07.mp3",
+   "source": "eleven",
+   "prompt": "an old wooden cuckoo clock striking, a single cuckoo call from its little bellows pipes",
+   "wording": 2,
+   "seed": 3,
+   "sound": "cuckoo",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cuckoo/04.mp3",
+   "source": "eleven",
+   "prompt": "an old wooden cuckoo clock striking, a single cuckoo call from its little bellows pipes",
+   "wording": 2,
+   "seed": 1,
+   "sound": "cuckoo",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cuckoo/08.mp3",
+   "source": "eleven",
+   "prompt": "a gentle cuckoo call from a Black Forest cuckoo clock, two falling notes, warm and soft",
+   "wording": 3,
+   "seed": 2,
+   "sound": "cuckoo",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/cuckoo/01.mp3",
+   "source": "eleven",
+   "prompt": "a cuckoo clock calling once, two soft wooden whistle notes, ku-ku, close up",
+   "wording": 1,
+   "seed": 2,
+   "sound": "cuckoo",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/cuckoo/02.mp3",
+   "source": "eleven",
+   "prompt": "a cuckoo clock calling once, two soft wooden whistle notes, ku-ku, close up",
+   "wording": 1,
+   "seed": 1,
+   "sound": "cuckoo",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/cuckoo/05.mp3",
+   "source": "eleven",
+   "prompt": "a gentle cuckoo call from a Black Forest cuckoo clock, two falling notes, warm and soft",
+   "wording": 3,
+   "seed": 1,
+   "sound": "cuckoo",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/cuckoo/06.mp3",
+   "source": "eleven",
+   "prompt": "an old wooden cuckoo clock striking, a single cuckoo call from its little bellows pipes",
+   "wording": 2,
+   "seed": 2,
+   "sound": "cuckoo",
+   "verdict": "no"
+  },
+  {
+   "file": "eleven/cuckoo/09.mp3",
+   "source": "eleven",
+   "prompt": "a gentle cuckoo call from a Black Forest cuckoo clock, two falling notes, warm and soft",
+   "wording": 3,
+   "seed": 3,
+   "sound": "cuckoo",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cuckoo/03.mp3",
+   "source": "eleven",
+   "prompt": "a cuckoo clock calling once, two soft wooden whistle notes, ku-ku, close up",
+   "wording": 1,
+   "seed": 3,
+   "sound": "cuckoo",
+   "verdict": "no"
   }
  ]
 }

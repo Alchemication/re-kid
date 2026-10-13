@@ -19,6 +19,15 @@ SOUNDS: dict[str, dict] = {
             "a slack rubber band plucked, a low wobbly twang",
         ],
     },
+    "cuckoo": {
+        "for": "The cuckoo clock on the house wall: one call each hour, eight slow ones at bedtime, and Reksio barking back at it (cuckoo.js). Called every 0.65 s at most.",
+        "seconds": 0.8,
+        "prompts": [
+            "a cuckoo clock calling once, two soft wooden whistle notes, ku-ku, close up",
+            "an old wooden cuckoo clock striking, a single cuckoo call from its little bellows pipes",
+            "a gentle cuckoo call from a Black Forest cuckoo clock, two falling notes, warm and soft",
+        ],
+    },
     "splash": {
         "for": "Paws landing in a puddle.",
         "seconds": 1.0,
