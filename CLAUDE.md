@@ -12,12 +12,10 @@ Work on `main`. Commit only when asked, and only with lint and tests green.
 
 ## Project
 
-Small, faithful games made from nostalgic childhood cartoons. Background,
-decisions, status and next steps: `PROJECT_PLAN.md` — read it at the start of a
-session and update it as work lands. How the games should feel, and what they
-must never do: `DESIGN_PRINCIPLES.md`. Current scope is
+Small, faithful games made from nostalgic childhood cartoons. Current scope is
 one world (Reksio) and one MVP game; resist building platform features ahead of
-that.
+that. Read `PROJECT_PLAN.md` at the start of a session; the docs table under
+Documentation says where everything else is.
 
 Flow, one validated file per stage, under `worlds/<id>/`:
 
@@ -86,7 +84,18 @@ and fix what you find before reporting done.
 
 ## Documentation
 
+| File | What it holds |
+|---|---|
+| `PROJECT_PLAN.md` | The original brief, decisions, status, next steps. Update it as work lands. |
+| `DESIGN_PRINCIPLES.md` | How the games should feel and what they must never do, with the research on short play for toddlers. Check a new gag, ending or feature against it. |
+| `README.md` | Layout, commands, the site, performance, debugging the yard, a note for parents. |
+| `CLAUDE.md` / `AGENTS.md` | Working rules (this file). |
+| `.claude/skills/*/SKILL.md` | Procedures: `new-episode`, `new-gag`, `new-sound`. |
+| `experiments/sound/README.md` | The sound-generation experiment and its board. |
+| `worlds/<id>/games/<game>/brief.yaml` | A game's parts, each `original`, `inspired` or `invented`. |
+
 Keep `AGENTS.md` and `CLAUDE.md` identical. When editing either, update both.
+Adding, renaming or removing a doc updates this table and README's.
 
 Docs describe current behavior, not history or plans. Changes to commands or
 file layout update `README.md` and the `main.py` docstring in the same change.

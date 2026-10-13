@@ -2,8 +2,20 @@
 
 Small, faithful games made from nostalgic childhood cartoons — starting with
 one Polish world, Reksio, and one short game for a parent and a young child.
-Background, plan and status: [PROJECT_PLAN.md](PROJECT_PLAN.md). How the games
-should feel: [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md).
+
+## Docs
+
+- [PROJECT_PLAN.md](PROJECT_PLAN.md): the original brief, decisions, status
+  and next steps.
+- [DESIGN_PRINCIPLES.md](DESIGN_PRINCIPLES.md): how the games should feel and
+  what they must never do, with research on short play for toddlers.
+- [CLAUDE.md](CLAUDE.md) (same as [AGENTS.md](AGENTS.md)): working rules for
+  coding agents and people.
+- [`.claude/skills/`](.claude/skills/): procedures for breaking down an
+  episode, adding a gag and making sounds.
+- [experiments/sound/README.md](experiments/sound/README.md): the
+  sound-generation experiment.
+- This file: layout, commands, the site, performance, debugging the yard.
 
 ## Layout
 
