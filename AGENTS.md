@@ -13,8 +13,8 @@ Work on `main`. Commit only when asked, and only with lint and tests green.
 ## Project
 
 Small, faithful games made from nostalgic childhood cartoons. Current scope is
-one world (Reksio) and one MVP game; resist building platform features ahead of
-that. Read `docs/PROJECT_PLAN.md` at the start of a session, and
+one rich home scene per cartoon (Reksio's yard, then a second cartoon's), not a
+game per episode; resist building platform features ahead of that. Read `docs/PROJECT_PLAN.md` at the start of a session, and
 `docs/DECISIONS.md` before reopening anything settled; the docs table under
 Documentation says where everything else is.
 

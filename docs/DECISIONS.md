@@ -6,7 +6,7 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
 
 ## Scope
 
-- **One world: Reksio.** It is wordless, so a 3-year-old can play without
+- **First world: Reksio.** It is wordless, so a 3-year-old can play without
   reading and non-Polish families can play without translation. One small
   game then tests three things at once: do families play together, does a
   child connect with a character they don't know, does it feel authentic to
@@ -15,7 +15,13 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
 - **One audience: a parent and a child of about 3, together**, the parent
   being the one who remembers the cartoon. Adult versions, age variants and
   the cross-cultural collection wait until this works.
-- **No platform yet.** One game and a short parent card. No catalogue,
+- **One scene per cartoon, deepened, not a game per episode** (Adam,
+  2026-10-14). A cartoon's game is one rich home scene, like Reksio's yard:
+  a day in its place, with more and more to see and do. That drops episode
+  breakdowns per game, doors into episodes and moving between games, and
+  frees the work for more cartoons: next, a second cartoon with its own
+  scene; later, perhaps a mish-mash scene with characters from several.
+- **No platform yet.** One scene per cartoon and a short parent card. No catalogue,
   country map or memory sharing.
 - **No live AI in the finished game.** AI is for research, design and
   building.
@@ -26,22 +32,16 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   (press to do each credit gag) was built and dropped: one gag alone is thin
   to play, and credit cards are text a toddler can't read. The yard has no
   text and answers every tap. The intro brief is kept, parked.
-- **Every world has a home, and episodes open off it** (2026-10-07). Eliot
-  liked the yard's encounters with other animals most and found them too
-  short; most Reksio episodes are exactly that, Reksio and one animal over
-  several steps. So the next game is an episode, entered through a doorway
-  taken from its own opening (a door, the gate, a hole, a toy rocket).
-  Doorways are found, never unlocked. A cartoon without a home gets an
-  invented one. No hub until there are three episodes. Still open: entered
-  from the yard, or from a main screen.
-- **First episode: *Reksio poliglota* (1967).** Set in a yard, wordless by
-  premise, built from encounters. *Reksio kosmonauta* (Adam's favourite) is
-  parked as the biggest build (rocket, space, robots); its frame pass is in
-  `worlds/reksio/episodes/reksio-kosmonauta.yaml`. For when it comes back
-  (interpretation): the doghouse frames the dream at both ends and food
-  brings him home; the warmest beat for a toddler is the scary dragon
-  turning friendly; the robots, the zapping and Reksio knocked flat need
-  softening or leaving out.
+- **Every world has a home, and the encounters live in it** (2026-10-07;
+  reshaped 2026-10-14). Eliot liked the yard's encounters with other
+  animals most and found them too short; most Reksio episodes are exactly
+  that, Reksio and one animal over several steps. That once led to episode
+  games entered through doorways off the home; now (Scope: one scene per
+  cartoon) such encounters are built in the home itself, over several steps.
+  A cartoon without a home gets an invented one. *Reksio poliglota* (1967)
+  and *Reksio kosmonauta* stay as research: the supper at bedtime comes from
+  Kosmonauta's ending (its frame pass is in
+  `worlds/reksio/episodes/reksio-kosmonauta.yaml`).
 - **Helping is the yard's theme, built from what is there** (2026-10-11).
   Every play offers something to discover, someone to help, and a moment
   when someone helps Reksio, none of them a task. No encounter registry or
