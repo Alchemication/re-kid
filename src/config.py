@@ -205,11 +205,12 @@ BARK_CLIP = "audio/intro/marks/bark.wav"
 """Adam's bark mark, cut by ``main.py mark``, inside a world directory: the
 original barks the game's bark is made from."""
 
-BARKS_JS = "audio/barks.js"
-"""Where ``main.py barks`` writes the cut barks inside a world directory. Under
-the gitignored ``audio/`` folder, because they are the original recording: they
-stay on this machine and never reach the repository. Games load it with a
-relative script tag and fall back to a synthesised bark without it."""
+BARKS_JS = f"games/{DEFAULT_GAME}/game/barks.js"
+"""Where ``main.py barks`` writes the cut barks inside a world directory: in
+the first game's folder, as every shared part until a second game needs it.
+The original recording, committed and published with the game (Adam's call,
+2026-10-14: a private POC for one child; generated barks didn't come close).
+Games fall back to a synthesised bark without it."""
 
 BARK_THRESHOLD = 0.15
 """A bark is where the loudness (RMS) is above this fraction of the clip's

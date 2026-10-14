@@ -45,8 +45,9 @@ function fakeAudio() {
 }
 
 /** sound.js with these EFFECTS ({name: number of takes}; `steady` names the
- * steady ones), on a stand-in context. */
-function sound(takes, steady = []) {
+ * steady ones), and `originals` original barks (BARKS, their bytes from 100
+ * up), on a stand-in context. */
+function sound(takes, steady = [], originals = 0) {
   const audio = fakeAudio()
   const EFFECTS = Object.fromEntries(Object.entries(takes).map(([name, n]) => [
     name, { gain: 1, ...(steady.includes(name) ? { steady: true } : {}), takes: Array.from({ length: n }, (_, i) => btoa(String.fromCharCode(i + 1))) },
@@ -55,6 +56,7 @@ function sound(takes, steady = []) {
     dom: true,
     globals: {
       atob, EFFECTS,
+      ...(originals ? { BARKS: Array.from({ length: originals }, (_, i) => btoa(String.fromCharCode(100 + i))) } : {}),
       window: { AudioContext: audio.AudioContext, addEventListener() {}, innerWidth: 1280, innerHeight: 720 },
     },
   })
@@ -135,5 +137,25 @@ describe('recorded effects', () => {
     s.Sound.from(600, () => s.Sound.buzz())
     const far = s.made.gains.at(-1).gain.value
     assert.ok(far < near / 2, `${far} vs ${near}`)
+  })
+
+  it('bark with a take on the public site, where the original barks are missing', async () => {
+    const s = sound({ bark: 2 })
+    await decoded()
+    s.Sound.bark()
+    assert.equal(s.made.takes.length, 1, 'one take: the whole "hau hau"')
+    assert.equal(s.made.oscillators, 0, 'no synthesised woof')
+    s.clock.now = 5
+    s.Sound.bowlBark() // muffled in the bowl: still a take
+    assert.equal(s.made.takes.length, 2)
+  })
+
+  it('bark with the originals where they are here, never a take over them', async () => {
+    const s = sound({ bark: 2 }, [], 3)
+    await decoded()
+    s.Sound.bark()
+    const played = s.made.takes.map((t) => t.buffer.take)
+    assert.equal(played.length, 2, 'two original barks: "hau hau"')
+    assert.ok(played.every((b) => b >= 100), `a take played: ${played}`)
   })
 })

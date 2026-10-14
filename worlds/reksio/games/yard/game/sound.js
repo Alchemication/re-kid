@@ -1,9 +1,9 @@
 // Sounds made in the browser, new for the game. All gentle: small ears.
 //
-// The one exception is the bark: if `main.py barks` has packed the original
-// barks Adam marked (a local file, never committed), Reksio barks with those,
-// a little higher and quicker by a random amount each time. Without it, he
-// has a synthesised woof.
+// The one exception is the bark: `main.py barks` packs the original barks
+// Adam marked (barks.js), and Reksio barks with those, a little higher and
+// quicker by a random amount each time. Without them, he barks with takes
+// picked by ear (effects.js), if there are any, or a synthesised woof.
 //
 // Recorded effects: where `main.py effects` has packed takes for a sound
 // (effects.js: made by a model, picked by ear), the sound plays one of them
@@ -78,7 +78,7 @@ const Sound = (() => {
    * one take, always as it is). One take of a sound at
    * a time: asked again while one plays (munching, a chew at a time), it lets
    * that one play on. False if it has none: the synthesised sound plays. */
-  function recorded(name) {
+  function recorded(name, out = null) {
     const e = effects[name]
     if (!e || !e.buffers.length) return false
     const c = ensure()
@@ -91,7 +91,7 @@ const Sound = (() => {
     src.playbackRate.value = e.steady ? 1 : EFFECT_RATE[0] + Math.random() * (EFFECT_RATE[1] - EFFECT_RATE[0])
     const g = c.createGain()
     g.gain.value = EFFECT_VOLUME * e.gain * scale
-    src.connect(g).connect(master)
+    src.connect(g).connect(out ?? master)
     src.start()
     e.until = c.currentTime + src.buffer.duration / src.playbackRate.value
     return true
@@ -245,12 +245,13 @@ const Sound = (() => {
     get running() { return !!ctx && ctx.state === 'running' },
     /** The shared audio context and output, for the music engine. */
     bus() { ensure(); return { ctx, master } },
-    /** "Hau hau": two barks, the originals if they're here, else synthesised. */
+    /** "Hau hau": two barks, the originals if they're here, else a take
+     * picked by ear (effects.js), else synthesised. */
     bark() {
       if (barks.length) {
         realBark(0)
         realBark(BARK_GAP_S[0] + Math.random() * (BARK_GAP_S[1] - BARK_GAP_S[0]))
-      } else {
+      } else if (!recorded('bark')) {
         woof(0)
         woof(0.2)
       }
@@ -264,7 +265,7 @@ const Sound = (() => {
       muffle.Q.value = 8 // resonant: a boom
       muffle.connect(master)
       if (barks.length) realBark(0, muffle)
-      else woof(0, muffle)
+      else if (!recorded('bark', muffle)) woof(0, muffle)
       sounds.clang(0.03, 0.5)
     },
     /** The bowl rings, knocked (at: seconds from now; loud: 0 to 1). */
@@ -588,7 +589,9 @@ const Sound = (() => {
   for (const name of HIS_VOICE) sounds[name] = () => {} // silent (above)
   // recorded takes, where a sound has them, in place of its synthesised one
   // (until they're decoded, after the first tap, the synth plays)
+  // (the bark keeps its own order: the originals, then takes, then the synth)
   for (const name of Object.keys(typeof EFFECTS !== 'undefined' ? EFFECTS : {})) {
+    if (name === 'bark') continue
     const synth = sounds[name] || (() => {})
     sounds[name] = (...args) => {
       if (!recorded(name)) synth(...args)

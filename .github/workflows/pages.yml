@@ -27,8 +27,8 @@ jobs:
         # The games are plain static pages, so "building" is copying each
         # worlds/<world>/games/<game>/game/ to _site/<world>/<game>/ (main.py
         # replay maps a report saved on the site back to that folder). Only
-        # the game folders go out: no research, media or original audio (the
-        # original barks are gitignored, so the site plays the synthesised bark).
+        # the game folders go out: no research or media. The one original
+        # recording is the bark (game/barks.js), Adam's call for the POC.
         run: |
           mkdir -p _site
           for game in worlds/*/games/*/game; do

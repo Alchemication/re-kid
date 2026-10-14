@@ -124,6 +124,15 @@ SOUNDS: dict[str, dict] = {
             "a curious puppy sniffing around",
         ],
     },
+    "bark": {
+        "for": 'His "hau hau" (a tap on him, at the bird, back at the cuckoo): two quick barks in one take. Where the original barks (barks.js) are missing, instead of the synth. Tried 2026-10-14: Adam kept none ("all crap once we know original sound"), so the originals ship.',
+        "seconds": 0.9,
+        "prompts": [
+            "a small dog barks twice, two short friendly barks, close up",
+            "a little terrier puppy gives two quick high yappy barks",
+            "a small dog's two sharp barks in a row, woof woof, cheerful",
+        ],
+    },
     "yelp": {
         "for": "Startled (the tap's spray, a fright). Silent in the game now.",
         "seconds": 0.8,

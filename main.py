@@ -12,7 +12,7 @@ Subcommands:
     samples   Download and pack a game's instrument samples into samples.js.
     effects   Trim, level and pack a game's picked sound effects into effects.js.
     tunes     Level and pack a game's picked music takes into tunes.js.
-    barks     Cut the marked original barks into a local script for the games.
+    barks     Cut the marked original barks into barks.js for the games.
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -89,9 +89,9 @@ Examples:
 
     uv run python main.py barks reksio
         Cuts the barks Adam marked (audio/intro/marks/bark.wav) apart and
-        packs them into audio/barks.js. The games play them a little higher
-        and quicker each time; without the file they use a synthesised bark.
-        The file is the original recording, so it stays local (gitignored).
+        packs them into games/yard/game/barks.js. The games play them a
+        little higher and quicker each time; without the file they use a
+        synthesised bark. The original recording, shipped with the game.
 
     uv run python main.py schema world
         JSON Schema for world.yaml (also: sources, episodes, intro, brief).

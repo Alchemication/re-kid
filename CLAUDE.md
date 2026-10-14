@@ -34,7 +34,7 @@ Research files hold research only. Game ideas go in a game brief; the one bridge
 is `design_notes`, which must be `interpretation` claims. The game is inspired
 by the original, not copied from it: original sounds or melodies only as
 occasional easter eggs. One exception, Adam's call: Reksio barks with the
-original barks, varied each time — packed locally, never committed.
+original barks, varied each time — shipped with the game for this POC.
 
 ## Research
 
@@ -134,8 +134,8 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     (`samples.yaml`, packed into `samples.js` by `main.py samples`).
   - `effects.js`, `tunes.js` and `samples.js` are generated: rebuild them,
     don't edit.
-  - Original audio: never committed. The bark (see Project) is packed by
-    `main.py barks` into the world's gitignored `audio/barks.js`; without it
+  - Original audio: never committed, except the bark (see Project), packed
+    by `main.py barks` into the game's `barks.js`; without it
     the game falls back to a synthesised bark.
   - Every push to `main` that touches a game folder publishes it to GitHub
     Pages (`.github/workflows/pages.yml`, `<site>/<world>/<game>/`): only

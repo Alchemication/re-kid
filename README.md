@@ -37,7 +37,7 @@ src/
   samples.py            downloads, measures and packs a game's instrument samples
   effects.py            trims, levels and packs a game's picked sound effects (the retro recipe)
   tunes.py              levels and packs a game's picked music takes (the same recipe)
-  barks.py              cuts the marked original barks into a local script for the games
+  barks.py              cuts the marked original barks into a script for the games
   mark.py               local server for the sound-marking tool
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
 worlds/<id>/
@@ -47,7 +47,6 @@ worlds/<id>/
   episodes/<id>.yaml    one episode, beat by beat (schema.breakdown.Breakdown)
   intro.yaml            title sequence, beat by beat (schema.breakdown.Breakdown)
   audio/intro/          measurements, spectrograms, mark clips (generated, gitignored)
-  audio/barks.js        the original barks, packed for the games (generated, gitignored)
   media/, frames/       downloaded video and contact sheets (gitignored)
   games/<game>/brief.yaml  game brief (schema.brief.GameBrief)
   games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
@@ -96,7 +95,7 @@ uv run python main.py look WORLD [GAME] [--flags Q] [--before JS]... [--watch JS
 uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
 uv run python main.py effects WORLD [GAME]    # rebuilds the game's effects.js
 uv run python main.py tunes WORLD [GAME]      # rebuilds the game's tunes.js
-uv run python main.py barks WORLD             # packs the marked barks (local only)
+uv run python main.py barks WORLD             # packs the marked barks into barks.js
 uv run python main.py schema world|sources|episodes|intro|brief
 ```
 
@@ -109,8 +108,7 @@ Development: `uv run ruff check . && uv run ruff format . && uv run pytest`,
 Every push to `main` that changes a game publishes it to GitHub Pages
 (`.github/workflows/pages.yml`): https://alchemication.github.io/re-kid/
 (forwards to the yard; each game is at `<site>/<world>/<game>/`). Only the
-game folders go out. The original barks are local only, so the site plays the
-synthesised bark; on an iPhone or iPad the sound plays even with the ringer
+game folders go out, the original barks with them (`barks.js`); on an iPhone or iPad the sound plays even with the ringer
 switch on silent (Safari 17+). The game pauses, sound and all, while its page is hidden (another tab, a
 covered window, a locked phone) and plays on when it is back. On a phone, play it on its side: a screen
 wider than 16:9 shows more of the yard (up to 21:9), and on a short screen

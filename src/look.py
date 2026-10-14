@@ -119,7 +119,6 @@ def look(
             "console",
             lambda m: (
                 m.type == "error"
-                and "barks.js" not in m.text
                 and "ERR_FILE_NOT_FOUND" not in m.text
                 and result.errors.append(m.text)
             ),

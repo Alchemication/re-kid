@@ -195,11 +195,7 @@ def replay(
         page = browser.new_page(viewport=report["viewport"])
         page.on(
             "console",
-            lambda m: (
-                m.type == "error"
-                and "barks.js" not in m.text
-                and result.errors.append(m.text)
-            ),
+            lambda m: m.type == "error" and result.errors.append(m.text),
         )
         page.on("pageerror", lambda e: result.errors.append(f"uncaught: {e}"))
         page.goto(replay_url(report))

@@ -63,7 +63,8 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
 - **Inspire, don't copy.** Drawings, sounds and music are new, in the spirit
   of the original; original sounds and melodies only as occasional easter
   eggs. Exception (Adam, after the synthesised bark fell flat): the original
-  barks, local only. Characters are drawn in code, never with image models
+  barks; since 2026-10-14 shipped with the site too (Adam: generated barks
+  "are all crap once we know original sound"; a POC for one child). Characters are drawn in code, never with image models
   imitating the artwork.
 - **Licensing: Adam contacts the rights holders before the game leaves his
   home** (2026-10-06). Until then it is a private build and may aim for a

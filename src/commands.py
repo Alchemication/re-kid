@@ -567,7 +567,7 @@ def cmd_schema(args: argparse.Namespace) -> int:
 
 
 def cmd_barks(args: argparse.Namespace) -> int:
-    """Cut the marked original barks into a local script the games play from."""
+    """Cut the marked original barks into a script the games play from."""
     from barks import BarkError, build
 
     root = world_dir(args.world)
@@ -576,8 +576,5 @@ def cmd_barks(args: argparse.Namespace) -> int:
     except BarkError as exc:
         logger.error("%s", exc)
         return 1
-    print(
-        f"Wrote {root / BARKS_JS} ({count} barks). It is the original recording: "
-        "it stays on this machine (audio/ is gitignored)."
-    )
+    print(f"Wrote {root / BARKS_JS} ({count} barks).")
     return 0
