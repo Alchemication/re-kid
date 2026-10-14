@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Music board</title>
+<style>
+  :root { --ink: #2b2420; --paper: #f6efe2; --card: #fffaf0; --keep: #3f8f4a; --maybe: #c99a2e; --no: #b5483c; --line: #e0d4bd; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: var(--paper); color: var(--ink); font: 15px/1.4 system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .lead { margin: 0 0 16px; color: #6b5d50; max-width: 70ch; }
+  .bar { position: sticky; top: 0; background: var(--paper); padding: 8px 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--line); z-index: 1; }
+  button { font: inherit; border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+  button:hover { border-color: var(--ink); }
+  section { margin: 20px 0 28px; }
+  h2 { font-size: 17px; margin: 0; }
+  .for { color: #6b5d50; margin: 2px 0 10px; }
+  .current { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 10px; padding: 10px; }
+  .card.keep { border-color: var(--keep); } .card.maybe { border-color: var(--maybe); } .card.no { border-color: var(--no); opacity: 0.55; }
+  .card .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .top span { margin-left: auto; }
+  .play { font-size: 18px; width: 44px; height: 44px; border-radius: 50%; }
+  .meta { font-size: 12px; color: #6b5d50; margin: 6px 0; min-height: 32px; }
+  .verdict { display: flex; gap: 6px; }
+  .verdict button { flex: 1; padding: 4px; }
+  .verdict button.on[data-v=keep] { background: var(--keep); color: #fff; }
+  .verdict button.on[data-v=maybe] { background: var(--maybe); color: #fff; }
+  .verdict button.on[data-v=no] { background: var(--no); color: #fff; }
+  textarea { width: 100%; margin-top: 6px; font: inherit; font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 4px; min-height: 30px; resize: vertical; background: #fff; }
+  .playing { outline: 3px solid #e5a33a; }
+  body.unmarked .card.keep, body.unmarked .card.maybe, body.unmarked .card.no { display: none; }
+</style>
+</head>
+<body>
+<h1>Music board</h1>
+<p class="lead">What the game plays today (a random take of that part, as packed), and takes made by ElevenLabs Music, all levelled to the same loudness: ▶ plays a take as made, R through the retro recipe the sound effects use (mono, narrower, a little saturated). Play, then mark each: keep, maybe or no, and a note on what is right or wrong. Marks stay in this browser; <b>Save picks</b> downloads them for Claude.</p>
+<div class="bar">
+  <label>Takes <input id="vol" type="range" min="0" max="1" step="0.05" value="0.6"></label>
+  <label>Today's code <input id="codevol" type="range" min="0" max="2" step="0.05" value="1"></label>
+  <span id="count"></span>
+  <label><input id="unmarked" type="checkbox"> Only unmarked</label>
+  <button id="stop">Stop</button>
+  <button id="save">Save picks</button>
+</div>
+<main id="board"></main>
+
+<script src="../../worlds/reksio/games/yard/game/debug.js"></script>
+<script src="../../worlds/reksio/games/yard/game/sound.js"></script>
+<script src="../../worlds/reksio/games/yard/game/samples.js"></script>
+<script src="../../worlds/reksio/games/yard/game/tunes.js"></script>
+<script src="../../worlds/reksio/games/yard/game/music.js"></script>
+<script src="out/manifest.js"></script>
+<script>
+  const KEY = 'music-board-picks'
+  let picks = {}
+  try { picks = JSON.parse(localStorage.getItem(KEY)) || {} } catch { picks = {} } // no storage: marks last this visit only
+  const store = () => { try { localStorage.setItem(KEY, JSON.stringify(picks)) } catch { /* no storage: kept in memory */ } }
+  const vol = document.getElementById('vol')
+  const codevol = document.getElementById('codevol')
+  let playing = null
+
+  function stop() {
+    if (playing) { playing.audio.pause(); playing.card.classList.remove('playing') }
+    playing = null
+  }
+
+  function play(src, card) {
+    stop()
+    const audio = new Audio(src)
+    audio.volume = Number(vol.value)
+    card.classList.add('playing')
+    playing = { audio, card }
+    audio.onended = () => card.classList.remove('playing')
+    audio.play()
+  }
+
+  // Today's music, from the game's own music.js: master gain follows the slider
+  function code(part) {
+    stop()
+    const { master } = Sound.bus()
+    master.gain.value = Number(codevol.value)
+    Music.audition(part)
+  }
+
+  function count() {
+    const v = Object.values(picks)
+    const n = (k) => v.filter((p) => p.verdict === k).length
+    document.getElementById('count').textContent = `${n('keep')} keep · ${n('maybe')} maybe · ${n('no')} no`
+  }
+
+  function card(name, c) {
+    const id = c.file
+    const el = document.createElement('div')
+    el.className = 'card'
+    const mine = picks[id] || {}
+    el.innerHTML = `<div class="top"><button class="play" title="Play as made">▶</button><button class="play retro" title="Play retro">R</button><span>${c.file} · ${c.model || c.source}${c.from ? ` · from ${c.from}, ${c.strength}` : ``} · wording ${c.wording}</span></div>
+      <div class="meta">${c.prompt}</div>
+      <div class="verdict"><button data-v="keep">Keep</button><button data-v="maybe">Maybe</button><button data-v="no">No</button></div>
+      <textarea placeholder="Note (optional)"></textarea>`
+    const mark = () => {
+      el.classList.remove('keep', 'maybe', 'no')
+      if (mine.verdict) el.classList.add(mine.verdict)
+      el.querySelectorAll('.verdict button').forEach((b) => b.classList.toggle('on', b.dataset.v === mine.verdict))
+    }
+    const save = () => { picks[id] = { ...c, piece: name, verdict: mine.verdict, note: mine.note }; store() }
+    el.querySelector('.play').onclick = () => play(`out/${c.level || c.file}`, el)
+    el.querySelector('.play.retro').onclick = () => play(`out/${c.retro || c.file}`, el)
+    el.querySelectorAll('.verdict button').forEach((b) => (b.onclick = () => {
+      mine.verdict = mine.verdict === b.dataset.v ? undefined : b.dataset.v
+      save(); mark(); count()
+    }))
+    const note = el.querySelector('textarea')
+    note.value = mine.note || ''
+    note.oninput = () => { mine.note = note.value; save() }
+    mark()
+    return el
+  }
+
+  const NAMES = { morning: 'a morning take', phrase: 'a phrase', lullaby: 'a lullaby take' }
+  const board = document.getElementById('board')
+  for (const [name, p] of Object.entries(window.PIECES || {})) {
+    const sec = document.createElement('section')
+    sec.innerHTML = `<h2>${name}</h2><div class="for">${p.for}</div><div class="current"></div>`
+    const current = sec.querySelector('.current')
+    for (const part of p.now) {
+      const b = document.createElement('button')
+      b.textContent = `▶ Today: ${NAMES[part]}`
+      b.onclick = () => code(part)
+      current.appendChild(b)
+    }
+    const grid = document.createElement('div')
+    grid.className = 'grid'
+    for (const c of p.candidates) grid.appendChild(card(name, c))
+    sec.appendChild(grid)
+    board.appendChild(sec)
+  }
+  if (!board.children.length) board.textContent = 'No takes yet: run generate.py, then level.py.'
+  count()
+  document.getElementById('unmarked').onchange = (e) => document.body.classList.toggle('unmarked', e.target.checked)
+  document.getElementById('stop').onclick = stop
+
+  document.getElementById('save').onclick = () => {
+    const blob = new Blob([JSON.stringify({ saved: new Date().toISOString(), picks: Object.values(picks).filter((p) => p.verdict || p.note) }, null, 1)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'music-picks.json'
+    a.click()
+  }
+</script>
+</body>
+</html>

@@ -17,7 +17,7 @@ principles:
   origin: invented
 - text: Inspired, not copied. Drawings, sounds and music are new and made for the game; original sounds only now and then, as easter eggs. One exception, for now — the bark.
   origin: invented
-- text: Nothing is a goal, and the end never comes as a surprise. The day is the same length whatever the child does — a child who watches the snail all day gets as long as one who tries everything. The sun comes up over the wall in the morning, climbs, and goes down through the afternoon as the sky warms, setting at 19:00 on the day's clock (five minutes of play from 08:00 to 20:00). From 18:00 he yawns more; at sunset the fly and the bee go home, but nothing is taken away — the yard stays open while the moon comes up through the last hour. At 20:00 the cuckoo calls eight slow times and supper is set by the doghouse, steaming; he eats it up and licks his chops, as Reksio kosmonauta ends. Then the doghouse twinkles and he wishes for it. A tap sends him in, or he goes by himself a little later, and the picture closes. After that a tap does nothing. No goals, no counter, no text.
+- text: Nothing is a goal, and the end never comes as a surprise. The day is the same length whatever the child does — a child who watches the snail all day gets as long as one who tries everything. The sun comes up over the wall in the morning, climbs, and goes down through the afternoon as the sky warms, setting at 19:00 on the day's clock (five minutes of play from 08:00 to 20:00). From 18:00 he yawns more; at sunset the fly and the bee go home, but nothing is taken away — the yard stays open while the moon comes up through the last hour. At 20:00 the cuckoo calls eight slow times and supper is set out, steaming (in his own bowl if it is out this play, else in a dish by the doghouse); he eats it up and licks his chops, as Reksio kosmonauta ends. Then the doghouse twinkles and he wishes for it. A tap sends him in, or he goes by himself a little later, and the picture closes. After that a tap does nothing. No goals, no counter, no text.
   origin: inspired
   refs: ['world:places[doghouse].description']
 - text: The yard is built to grow. Later it becomes the game's home screen, and new things in it lead into episode games — say, a toy rocket by the doghouse that starts Kosmonauta.
@@ -59,14 +59,12 @@ look:
 sound:
 - text: "Every action has its own new, gentle sound, made in the browser: a bark, pattering steps, lapping, snoring, a running tap, a sneeze, a bird's chirp, digging."
   origin: invented
-- text: A light pizzicato "oom-pah" in B-flat runs under the yard, in the spirit of the Reksio theme — its key, its bouncing bass, and a clarinet hook echoing the main melody Adam marked (B-flat, B-flat, B-flat C B-flat C, D F, F, from a machine transcription he has not yet confirmed by ear). Played note by note from real instrument samples (CC0), so it can follow the game.
+- text: The music is short tunes made for the game in the spirit of 1970s Eastern European children's cartoons — catchy, very simple, humorous, played by a small acoustic band — generated (ElevenLabs Music) and picked by ear, then given the same old-film sound as the effects. Our own tunes; nothing is taken from the original.
   origin: inspired
-  refs: [mark:main-melody-part-1, world:sound.theme]
-- text: The music follows Reksio. It is fuller when the child is playing and thins to a bare bass line when left alone; actions play along in key and on the beat — a xylophone flourish for each new thing, glockenspiel for a thought bubble, a flute trill for the bird, timpani under each stamp, a rising bassoon as he stretches and a falling run (the shape of the marked stretching melody) as he snaps back.
+  refs: [world:sound.music_role]
+- text: The music follows the child, with quiet in between. A morning tune as he wakes; through the day, a short tune when something new is found (at most every 40 seconds, counting the morning tune, never in the rain), so a child who stops gets the yard's own sounds instead of a loop; a lullaby once supper is eaten and the cuckoo has called eight. Between tunes, actions play along on real instruments (CC0 samples) — a xylophone flourish for each new thing, glockenspiel for a thought bubble, a flute trill for the bird, timpani under each stamp, a rising bassoon as he stretches and a falling run (the shape of the marked stretching melody) as he snaps back.
   origin: inspired
   refs: [mark:stretching-melody, world:sound.music_role]
-- text: Three tunes take turns over the oom-pah so it doesn't wear thin — the hook twice, a skipping flute tune twice, the hook again, then a tiptoeing tune in G minor that climbs back home to B-flat. The two new tunes are written for the game in the same bouncy spirit, not taken from the original.
-  origin: invented
 - text: Each day looks a little different. It may be clear, fair with a few small clouds drifting across, cloudy with a softer sun and a grey haze, or golden with warmer light all day; and the sun comes up and goes down a little further left or right. The shape of the day stays the same.
   origin: invented
 - text: A quiet wind is always there, changing like real wind — mostly a light breeze that comes and goes, now and then a gust, stronger when the clouds come, dropping at evening. The grass and flowers lean further in a gust, so the child can see what they hear. Rain is a soft hush under everything.
@@ -80,7 +78,7 @@ sound:
   origin: invented
 - text: Creatures sound like what they are, quietly, and fade with distance from Reksio — flies whine now and then and bees hum, the bird chirps, the mouse squeaks. Spiders, snails and worms are silent, except for small cartoon noises when they do something (a plink as the spider drops, a schlup as the snail hides, a pop as a worm comes up).
   origin: invented
-- text: Through the afternoon, as the sun goes down, the music slows a little and gets softer; at evening it gives way to a harp lullaby built on the same hook, slowed right down.
+- text: Through the afternoon, as the sun goes down, the music gets softer.
   origin: invented
 
 scenes:

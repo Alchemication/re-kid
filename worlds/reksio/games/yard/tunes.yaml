@@ -1,0 +1,55 @@
+# Recorded music for the yard (schema.tunes.TuneSet), packed into
+# game/tunes.js by `main.py tunes`. music.js plays a random take of a part
+# when it comes: the morning as he wakes, a phrase now and then after
+# something new, the lullaby at evening. The takes are in tunes/, as made;
+# written by experiments/music/adopt.py from Adam's picks on the music board.
+source: 'Made with ElevenLabs Music (text to music, Starter plan, which allows commercial use) and picked by ear by Adam on the music board (experiments/music). Our own tunes, inspired by the era, not copied from the cartoon.'
+tunes:
+- id: morning
+  takes:
+  - file: morning/01.mp3
+    prompt: 'A short, gentle wake-up tune reminiscent of 1970s Eastern European children''s cartoons, featuring a light, rising melody and whimsical motifs suitable for a small dog yawning and stretching awake in his doghouse as the sun comes up over the yard, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v1
+    song: 98cLT5g7wbYfYoIcKDmj
+  - file: morning/02.mp3
+    prompt: 'A short morning tune, rising and waking up: a flute melody climbing over slow harp chords, sunny and calm, ending on a bright glockenspiel note. Instrumental only. A small chamber ensemble from a 1970s Eastern European children''s animated film: pizzicato strings, clarinet, bassoon, flute, harp, xylophone and glockenspiel. Warm vintage tape sound, gentle and light. No drums, no synthesizers, no modern pop production.'
+    model: music_v2_5
+- id: phrase
+  takes:
+  - file: phrase/01.mp3
+    prompt: 'A catchy, playful instrumental theme reminiscent of 1970s Eastern European children''s cartoons, featuring lighthearted melodies and whimsical motifs suitable for a character exploring a yard and interacting with animals in a humorous way, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v1
+    song: WQ2JWkQMXwNSh8DD0zXJ
+  - file: phrase/02.mp3
+    prompt: 'A catchy, playful instrumental theme reminiscent of 1970s Eastern European children''s cartoons, featuring lighthearted melodies and whimsical motifs suitable for a character exploring a yard and interacting with animals in a humorous way, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
+    model: music_v2_5
+    song: 6xlOBu7Cmq8ZnCwdWo3D
+  - file: phrase/03.mp3
+    prompt: 'A catchy, playful instrumental theme reminiscent of 1970s Eastern European children''s cartoons, featuring lighthearted melodies and whimsical motifs suitable for a character exploring a yard and interacting with animals in a humorous way, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v2_5
+    song: IeTtc6YdlmOz5xIYPFKM
+  - file: phrase/04.mp3
+    prompt: 'Composition plan conditioned on experiments/music theme/10 (low): a simple, catchy, playful tune for a 1970s Eastern European children''s cartoon, humorous and light, a small dog exploring a yard'
+    model: music_v2_5
+    song: eJSTdkdoOu15zLbbltqT
+  - file: phrase/05.mp3
+    prompt: 'A bouncy, cheeky oom-pah tune for a small dog trotting around a backyard: pizzicato bass and off-beat chords, a playful clarinet melody, a xylophone answer. Instrumental only. A small chamber ensemble from a 1970s Eastern European children''s animated film: pizzicato strings, clarinet, bassoon, flute, harp, xylophone and glockenspiel. Warm vintage tape sound, gentle and light. No drums, no synthesizers, no modern pop production.'
+    model: music_v2_5
+- id: lullaby
+  takes:
+  - file: lullaby/01.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog licking his chops after supper and curling up in his doghouse, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
+    model: music_v1
+    song: sFQQeAqCW2HoF0Fo541Z
+  - file: lullaby/02.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog licking his chops after supper and curling up in his doghouse, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v1
+    song: ffXggC9nS7oMe7lnptzg
+  - file: lullaby/03.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog licking his chops after supper and curling up in his doghouse, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v1
+    song: NEumg7t7U7ckR5hek5rP
+  - file: lullaby/04.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog licking his chops after supper and curling up in his doghouse, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
+    model: music_v1
+    song: NZJnT62QeJjPzq1seko0

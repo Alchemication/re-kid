@@ -107,13 +107,21 @@ describe('what he wishes for', () => {
   })
 })
 
-describe('the music', () => {
-  it('is fullest while he is busy, and thins the longer he is left alone', () => {
-    assert.equal(Idle.energy({ busy: true, walking: false, sinceTap: 60000 }), 3)
-    assert.equal(Idle.energy({ busy: false, walking: true, sinceTap: 60000 }), 2)
-    assert.equal(Idle.energy({ busy: false, walking: false, sinceTap: 1000 }), 2)
-    assert.equal(Idle.energy({ busy: false, walking: false, sinceTap: 8000 }), 1)
-    assert.equal(Idle.energy({ busy: false, walking: false, sinceTap: 20000 }), 0)
+describe('a phrase of music', () => {
+  const gap = Idle.PHRASE_GAP_MS
+
+  it('follows something new, the first time and once the gap has passed', () => {
+    assert.equal(Idle.phraseOk({ playing: false, raining: false, sinceLast: Infinity }), true)
+    assert.equal(Idle.phraseOk({ playing: false, raining: false, sinceLast: gap }), true)
+  })
+
+  it('waits out the gap since the last one', () => {
+    assert.equal(Idle.phraseOk({ playing: false, raining: false, sinceLast: gap - 1 }), false)
+  })
+
+  it('never starts over music already playing, or in the rain', () => {
+    assert.equal(Idle.phraseOk({ playing: true, raining: false, sinceLast: Infinity }), false)
+    assert.equal(Idle.phraseOk({ playing: false, raining: true, sinceLast: Infinity }), false)
   })
 })
 

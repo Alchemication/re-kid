@@ -652,22 +652,30 @@ const Things = (() => {
 
   // ------------------------------------------------------------ supper
 
-  // Supper at bedtime (yard.js), as Kosmonauta ends (observed, about 9:30): a
-  // red bowl of steaming food by the doghouse; he eats it and licks his chops.
+  // Supper at bedtime (yard.js), as Kosmonauta ends (observed, about 9:30):
+  // steaming food, in his own bowl if it's out this play (bowl.js: one bowl,
+  // not two), else in a red dish by the doghouse; he eats it and licks his chops.
   const SUPPER_X = 645 // the dish's middle, as drawn (index.html #supper)
   const SUPPER_REACH = 116 // he stands this far left of it to eat, as at his bowl
+  const inBowl = () => Layout.props.includes('bowl')
 
   /** Where he stands to eat it. */
-  const supperAt = () => SUPPER_X - SUPPER_REACH
+  const supperAt = () => (inBowl() ? Bowl.thing.at() : SUPPER_X - SUPPER_REACH)
 
   /** Supper is set down, steaming. */
   function serveSupper() {
-    $('supper').classList.add('served')
+    if (inBowl()) Bowl.serveSupper()
+    else $('supper').classList.add('served')
     Sound.clang(0, 0.4)
   }
 
   /** He eats it all up and licks his chops. */
   async function eatSupper() {
+    if (inBowl()) {
+      await Bowl.eatSupper()
+      await Reksio.lick()
+      return
+    }
     const food = $('supper-food')
     let left = 1
     const lapping = Reksio.lap(8)

@@ -1,16 +1,6 @@
 licence: 'Samples from Versilian Studios: VSCO-2 Community Edition and the Versilian Community Sample Library, both CC0 1.0 (public domain).'
 instruments:
-# The oom-pah bass under everything.
-- id: bass
-  library: vsco2ce
-  max_seconds: 1.6
-  files:
-  - Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_A#0_v1_rr1.wav
-  - Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_D1_v1_rr1.wav
-  - Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_F#1_v1_rr1.wav
-  - Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_A1_v1_rr1.wav
-  - Strings/Solo Contrabass/Pizz/BKCtbss_Pizz_C#2_v1_rr1.wav
-# Pizzicato violins: the off-beat chords.
+# Pizzicato violins: a hop up the chord, the snap back's falling run.
 - id: pizz
   library: vsco2ce
   max_seconds: 1.2
@@ -21,15 +11,6 @@ instruments:
   - Strings/Violin Section/Pizz/VlnEns_Pizz_A3_v2_rr1.wav
   - Strings/Violin Section/Pizz/VlnEns_Pizz_C4_v2_rr1.wav
   - Strings/Violin Section/Pizz/VlnEns_Pizz_E4_v2_rr1.wav
-# Staccato clarinet: the tune.
-- id: clarinet
-  library: vsco2ce
-  max_seconds: 1.0
-  files:
-  - Woodwinds/Clarinet/stac/DCClar_stac_F3_v2_rr1_sum.wav
-  - Woodwinds/Clarinet/stac/DCClar_stac_A#3_v2_rr1_sum.wav
-  - Woodwinds/Clarinet/stac/DCClar_stac_D4_v2_rr1_sum.wav
-  - Woodwinds/Clarinet/stac/DCClar_stac_F4_v2_rr1_sum.wav
 # Staccato bassoon: comic answers and the stretch.
 - id: bassoon
   library: vsco2ce
@@ -65,17 +46,6 @@ instruments:
   - Percussion/Glock/glock_medium_G4.wav
   - Percussion/Glock/glock_medium_C5.wav
   - Percussion/Glock/glock_medium_G5.wav
-# Harp: the evening lullaby.
-- id: harp
-  library: vsco2ce
-  max_seconds: 2.5
-  files:
-  - Strings/Harp/KSHarp_G3_mf.wav
-  - Strings/Harp/KSHarp_B3_mf.wav
-  - Strings/Harp/KSHarp_D4_mf.wav
-  - Strings/Harp/KSHarp_F4_mf.wav
-  - Strings/Harp/KSHarp_A4_mf.wav
-  - Strings/Harp/KSHarp_C5_mf.wav
 # One-shot sounds.
 - id: timpani
   library: vsco2ce
@@ -91,12 +61,6 @@ instruments:
   files:
   - Idiophones/Struck Idiophones/Flexatone/flexatone_fast.wav
   - Idiophones/Struck Idiophones/Flexatone/flexatone_slap1.wav
-- id: woodblock
-  library: vcsl
-  pitched: false
-  max_seconds: 0.5
-  files:
-  - Idiophones/Struck Idiophones/Woodblock/wood_click_mp.wav
 - id: slapstick
   library: vcsl
   pitched: false

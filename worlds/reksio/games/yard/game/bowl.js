@@ -7,6 +7,8 @@
 // barks inside the bowl and the bird hears. It comes on the second use (the
 // bowl's variation), then every other empty bowl, or he goes back for the
 // last bits on his own, once a play, when left alone (`helped`, yard.js).
+//
+// At bedtime, if the bowl is out, his supper comes in it (things.js).
 
 /* global Clock, Debug, Motion, Layout, Sound, Reksio, Figure, Bird */
 /* exported Bowl */
@@ -135,6 +137,21 @@ const Bowl = (() => {
     return stuckInBowl()
   }
 
+  /** Supper in his bowl (things.js, at bedtime): full again, and steaming. */
+  function serveSupper() {
+    refill()
+    $('bowl').classList.add('supper')
+  }
+
+  /** He eats his supper up, and the steam goes with it. */
+  async function eatSupper() {
+    try {
+      await eat()
+    } finally {
+      $('bowl').classList.remove('supper')
+    }
+  }
+
   const thing = {
     at: () => 764 + X() + bowlPushed,
     face: 1,
@@ -174,6 +191,8 @@ const Bowl = (() => {
   return {
     thing,
     init,
+    serveSupper,
+    eatSupper,
     /** How often the bowl has stuck on his head this play. */
     get stuckTimes() { return stuckTimes },
   }

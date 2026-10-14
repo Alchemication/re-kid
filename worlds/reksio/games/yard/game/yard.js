@@ -81,7 +81,10 @@
       Debug.trace('use', { name, n, extra })
       await Debug.ignoreCut(thing.run({ extra }), `use ${name}`) // cut short: still counts
       const { first } = day.did(name)
-      if (first) Music.react.done()
+      if (first) {
+        Music.react.done()
+        phraseAfterNew()
+      }
       if (first && !pending) await Debug.ignoreCut(Reksio.hop(), 'hop of joy')
     } finally {
       busy = false
@@ -251,11 +254,19 @@
       busy = false
     }
     if (day.ended) return
+    lullabyOnceCuckooIsDone()
     const c = thingCenter('doghouse')
     stopBedTwinkle = Clock.every(BED_TWINKLE_MS, () => twinkle(c.x, c.y))
     showWish('doghouse')
     bedAt = Clock.now() + BED_AFTER_MS // dayAndNight sends him then, once he's free
     runPending()
+  }
+
+  /** Supper eaten: the lullaby, once the cuckoo has called its eight (not
+   * over them); bed() starts it at the latest. */
+  function lullabyOnceCuckooIsDone() {
+    if (Cuckoo.busy) Clock.after(200, lullabyOnceCuckooIsDone)
+    else Music.evening(eveningRandom)
   }
 
   /** A grown-up held the house: the sun hurries down (day.js). */
@@ -287,7 +298,7 @@
     Debug.trace('bed')
     stopBedTwinkle()
     Sky.night()
-    Music.evening()
+    Music.evening(eveningRandom) // sent to bed before the lullaby began: now (once a play)
     await wait(1600)
     if (await Reksio.walkTo(DOOR.x)) {
       Sound.knock()
@@ -712,8 +723,16 @@
   const pickAct = () => Idle.pick(ACTS, { ok: actOk, last: lastAct, firstWish, random })
 
   /** How full the music is: busy or just tapped → fuller; left alone → sparser. */
-  function musicEnergy(now) {
-    return Idle.energy({ busy: busy || !!hold || Reksio.stretching, walking: Reksio.walking, sinceTap: now - lastTap })
+  const phraseRandom = Debug.random('phrase-music') // which phrase: drawn only when one plays
+  let lastPhrase = -Infinity
+
+  /** Something new was done: a phrase of music, if it is time for one (idle.js). */
+  function phraseAfterNew() {
+    const now = Clock.now()
+    if (!Idle.phraseOk({ playing: Music.playing, raining: Weather.raining, sinceLast: now - lastPhrase })) return
+    if (!Music.phrase(phraseRandom)) return // no sound yet
+    lastPhrase = now
+    Debug.trace('phrase', {})
   }
 
   // ------------------------------------------------------------ puddles
@@ -733,7 +752,6 @@
 
   function idleLoop() {
     const now = Clock.now()
-    Music.setEnergy(musicEnergy(now))
     showNear()
     birdAndWish(now)
     const quiet = !Debug.still && !day.ended && !busy && !hold && !acting && !Reksio.walking && !Reksio.stretching
@@ -889,6 +907,7 @@
   const SUNRISE_MS = 4500 // the sun comes up as he wakes
   const SNORE_MS = 1700 // asleep, a snore and a Z from the door this often
   const morningRandom = Debug.random('morning-music') // the waking's own: the tune, how many yawns
+  const eveningRandom = Debug.random('evening-music') // which lullaby
   let stopSnoring = () => {}
 
   /** Dawn, and Reksio asleep in his doghouse, snoring, until he wakes. */
@@ -916,13 +935,16 @@
 
   /** He wakes: the sun comes up, he pops out of the doghouse and yawns a few
    * times, as he does in the cartoon (world.yaml, moves[waking-yawn]). Woken
-   * by a tap, sound can play: a soft morning tune, then the groove. */
+   * by a tap, sound can play: a morning tune. */
   async function wake(how) {
     if (!asleep) return
     asleep = false
     stopSnoring()
     Debug.trace('wake', { how })
-    if (Sound.heard) Music.startMorning(morningRandom)
+    if (Sound.heard) {
+      Music.startMorning(morningRandom)
+      lastPhrase = Clock.now() // the morning tune counts as a phrase: quiet before the day's first
+    }
     day.begin(Clock.now())
     Sky.sunrise(SUNRISE_MS)
     await Debug.ignoreCut(Reksio.duck(false), 'out of the doghouse')

@@ -267,7 +267,7 @@
             </g>
           </g>
 
-          <!-- ============ supper by the doghouse door, served at bedtime (things.js) ============ -->
+          <!-- ============ supper by the doghouse door, served at bedtime when his bowl isn't out (things.js) ============ -->
           <g id="supper" aria-hidden="true">
             <path class="steam" d="M626 774 q-6 -10 0 -20 q6 -10 0 -20" />
             <path class="steam" d="M645 770 q-6 -10 0 -20 q6 -10 0 -20" style="animation-delay: -0.8s" />
@@ -283,6 +283,10 @@
           <g id="bowl" class="thing" data-thing="bowl" data-hint-y="720">
             <rect class="hit" x="790" y="620" width="180" height="210" />
             <g id="bowl-body">
+              <!-- steam: supper in his bowl at bedtime (bowl.js) -->
+              <path class="steam" d="M861 762 q-6 -10 0 -20 q6 -10 0 -20" />
+              <path class="steam" d="M880 758 q-6 -10 0 -20 q6 -10 0 -20" style="animation-delay: -0.8s" />
+              <path class="steam" d="M899 762 q-6 -10 0 -20 q6 -10 0 -20" style="animation-delay: -1.6s" />
               <g id="food" style="transform-origin: 880px 770px">
                 <path class="food" d="M842 770 Q850 752 862 762 Q870 748 882 760 Q894 748 904 762 Q914 754 918 770 Z" />
               </g>
@@ -609,6 +613,7 @@
   <script src="effects.js"></script>
   <script src="sound.js"></script>
   <script src="samples.js"></script>
+  <script src="tunes.js"></script>
   <script src="music.js"></script>
   <script src="figure.js"></script>
   <script src="life.js"></script>

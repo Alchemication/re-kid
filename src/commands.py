@@ -37,6 +37,9 @@ from config import (
     SAMPLE_CACHE_DIR,
     SAMPLES_JS,
     SAMPLES_NAME,
+    TUNES_DIR,
+    TUNES_JS,
+    TUNES_NAME,
 )
 from schema.breakdown import Breakdown
 from schema.brief import GameBrief
@@ -515,6 +518,44 @@ def cmd_effects(args: argparse.Namespace) -> int:
             f"  {p.effect:8} {p.gain_db:+6.1f} dB  {len(p.data) // 1024:>3} KB  {p.file}"
         )
     out = write_js(packed, effect_set, game / EFFECTS_JS)
+    print(f"Wrote {out} ({out.stat().st_size // 1024} KB, {len(packed)} takes).")
+    return 0
+
+
+def cmd_tunes(args: argparse.Namespace) -> int:
+    """Level and roughen a game's picked music takes into tunes.js."""
+    from pydantic import ValidationError
+
+    from samples import SampleError
+    from schema.tunes import TuneSet
+    from tunes import build, write_js
+    from worlds import load_model
+
+    game = world_dir(args.world) / GAMES_DIR / args.game
+    path = game / TUNES_NAME
+    if not path.is_file():
+        logger.error(
+            "No %s in %s. List the game's picked music takes there first.",
+            TUNES_NAME,
+            game,
+        )
+        return 1
+    try:
+        tune_set = load_model(path, TuneSet)
+    except ValidationError as exc:
+        logger.error("%s is not valid: %s", path, exc)
+        return 1
+    print("Levelling and packing music…")
+    try:
+        packed = build(tune_set, game / TUNES_DIR)
+    except SampleError as exc:
+        logger.error("%s", exc)
+        return 1
+    for p in packed:
+        print(
+            f"  {p.tune:8} {p.gain_db:+6.1f} dB  {len(p.data) // 1024:>3} KB  {p.file}"
+        )
+    out = write_js(packed, tune_set, game / TUNES_JS)
     print(f"Wrote {out} ({out.stat().st_size // 1024} KB, {len(packed)} takes).")
     return 0
 

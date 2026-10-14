@@ -13,9 +13,11 @@ one Polish world, Reksio, and one short game for a parent and a young child.
 - [CLAUDE.md](CLAUDE.md) (same as [AGENTS.md](AGENTS.md)): working rules for
   coding agents and people.
 - [`.claude/skills/`](.claude/skills/): procedures for breaking down an
-  episode, adding a gag and making sounds.
+  episode, adding a gag, and making sounds and music.
 - [experiments/sound/README.md](experiments/sound/README.md): the
   sound-generation experiment.
+- [experiments/music/README.md](experiments/music/README.md): the
+  music-generation experiment.
 - This file: layout, commands, the site, performance, debugging the yard,
   reference media.
 
@@ -34,6 +36,7 @@ src/
   audio.py              audio measurements, clips, spectrograms (ffmpeg, librosa)
   samples.py            downloads, measures and packs a game's instrument samples
   effects.py            trims, levels and packs a game's picked sound effects (the retro recipe)
+  tunes.py              levels and packs a game's picked music takes (the same recipe)
   barks.py              cuts the marked original barks into a local script for the games
   mark.py               local server for the sound-marking tool
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
@@ -50,13 +53,16 @@ worlds/<id>/
   games/<game>/samples.yaml  instrument samples a game uses (schema.samples.SampleSet)
   games/<game>/effects.yaml  recorded sound effects picked by ear (schema.effects.EffectSet)
   games/<game>/effects/      the picked takes, as made (packed into game/effects.js)
+  games/<game>/tunes.yaml    recorded music picked by ear (schema.tunes.TuneSet)
+  games/<game>/tunes/        the picked music takes, as made (packed into game/tunes.js)
   games/<game>/game/    the game: static HTML, CSS and plain scripts
   games/<game>/tests/   the game's JS unit tests (node:test)
   games/<game>/lab/     workbench pages beside a game, opened from disk, not published
                         (yard/lab: Reksio drawn from poses by game/figure.js)
 experiments/sound/      making sound effects with a model and picking them by ear on a
                         board page (scripts committed; audio and the API key in .env not)
-.claude/skills/         procedures for Claude Code sessions (new-episode, new-gag, new-sound)
+experiments/music/      the same for the yard's music, against what the game plays today
+.claude/skills/         procedures for Claude Code sessions (new-episode, new-gag, new-sound, new-music)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
 .github/workflows/pages.yml  publishes the games to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)
@@ -89,6 +95,7 @@ uv run python main.py look WORLD [GAME] [--flags Q] [--before JS]... [--watch JS
                           [--for S] [--every MS] [--size WxH] [--close] [--out DIR]
 uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
 uv run python main.py effects WORLD [GAME]    # rebuilds the game's effects.js
+uv run python main.py tunes WORLD [GAME]      # rebuilds the game's tunes.js
 uv run python main.py barks WORLD             # packs the marked barks (local only)
 uv run python main.py schema world|sources|episodes|intro|brief
 ```

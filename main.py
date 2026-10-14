@@ -11,6 +11,7 @@ Subcommands:
     look      Play a gag and photograph it as it runs (frames, contact sheet).
     samples   Download and pack a game's instrument samples into samples.js.
     effects   Trim, level and pack a game's picked sound effects into effects.js.
+    tunes     Level and pack a game's picked music takes into tunes.js.
     barks     Cut the marked original barks into a local script for the games.
     schema    Print the JSON Schema for a research file type.
 
@@ -79,6 +80,13 @@ Examples:
         (the retro recipe) and packs them into effects.js. The game plays a
         random take of a sound each time, instead of its synthesised one.
 
+    uv run python main.py tunes reksio yard
+        Takes the music picked by ear (games/yard/tunes.yaml, the takes in
+        games/yard/tunes/), fades out their ends, puts them through the
+        effects' retro recipe, levels them and packs them into tunes.js. The
+        game plays a random take of a part when it comes: the morning, a
+        phrase now and then, the lullaby.
+
     uv run python main.py barks reksio
         Cuts the barks Adam marked (audio/intro/marks/bark.wav) apart and
         packs them into audio/barks.js. The games play them a little higher
@@ -110,6 +118,7 @@ from commands import (
     cmd_samples,
     cmd_schema,
     cmd_show,
+    cmd_tunes,
     cmd_validate,
 )
 from config import (
@@ -278,6 +287,16 @@ def main() -> int:
         help=f"Game folder under games/ (default: {DEFAULT_GAME})",
     )
 
+    p_tunes = sub.add_parser("tunes", help="Pack a game's picked music takes")
+    p_tunes.add_argument("world", metavar="WORLD")
+    p_tunes.add_argument(
+        "game",
+        metavar="GAME",
+        nargs="?",
+        default=DEFAULT_GAME,
+        help=f"Game folder under games/ (default: {DEFAULT_GAME})",
+    )
+
     p_barks = sub.add_parser("barks", help="Pack the marked barks for the games")
     p_barks.add_argument("world", metavar="WORLD")
 
@@ -298,6 +317,7 @@ def main() -> int:
         "look": cmd_look,
         "samples": cmd_samples,
         "effects": cmd_effects,
+        "tunes": cmd_tunes,
         "barks": cmd_barks,
         "schema": cmd_schema,
     }

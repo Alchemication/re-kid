@@ -49,24 +49,32 @@ class Packed:
     data: bytes
 
 
+def retro() -> list[str]:
+    """The retro recipe's ffmpeg filters (mono, the lows and highs rolled off,
+    a touch of saturation), shared by the game's effects and its music."""
+    return [
+        "aformat=channel_layouts=mono",
+        f"highpass=f={EFFECT_HIGHPASS_HZ}",
+        f"lowpass=f={EFFECT_LOWPASS_HZ}",
+        f"asoftclip=type=tanh:param={EFFECT_SATURATION}",
+    ]
+
+
 def recipe() -> str:
-    """The ffmpeg filters every take goes through before levelling."""
+    """The ffmpeg filters every effect take goes through before levelling."""
     keep = EFFECT_MAX_SECONDS
     return ",".join(
         [
             "silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.01",
-            "aformat=channel_layouts=mono",
             f"atrim=0:{keep}",
             f"afade=t=out:st={keep - FADE_S}:d={FADE_S}",
-            f"highpass=f={EFFECT_HIGHPASS_HZ}",
-            f"lowpass=f={EFFECT_LOWPASS_HZ}",
-            f"asoftclip=type=tanh:param={EFFECT_SATURATION}",
+            *retro(),
         ]
     )
 
 
-def levels(src: Path) -> tuple[float, float]:
-    """Mean and peak loudness (dB) of a take after the recipe."""
+def levels(src: Path, chain: str) -> tuple[float, float]:
+    """Mean and peak loudness (dB) of a take after the filters in ``chain``."""
     try:
         done = subprocess.run(
             [
@@ -75,7 +83,7 @@ def levels(src: Path) -> tuple[float, float]:
                 "-i",
                 str(src),
                 "-af",
-                f"{recipe()},volumedetect",
+                f"{chain},volumedetect",
                 "-f",
                 "null",
                 "-",
@@ -97,20 +105,23 @@ def levels(src: Path) -> tuple[float, float]:
     return float(mean.group(1)), float(peak.group(1))
 
 
-def level_gain(mean: float, peak: float) -> float:
-    """dB to bring a take to the target loudness without its peak clipping."""
-    return min(EFFECT_LOUDNESS_DB - mean, EFFECT_PEAK_DB - peak)
+def level_gain(mean: float, peak: float, target: float = EFFECT_LOUDNESS_DB) -> float:
+    """dB to bring a take to the ``target`` loudness without its peak clipping."""
+    return min(target - mean, EFFECT_PEAK_DB - peak)
 
 
-def prepare(src: Path, out: Path) -> float:
-    """Write the game's version of one take to ``out``; the gain it was given (dB)."""
-    gain = level_gain(*levels(src))
+def prepare(
+    src: Path, out: Path, chain: str, target: float = EFFECT_LOUDNESS_DB
+) -> float:
+    """Write the game's version of one take to ``out`` (the filters in
+    ``chain``, then levelled to ``target``); the gain it was given (dB)."""
+    gain = level_gain(*levels(src, chain), target)
     run_ffmpeg(
         [
             "-i",
             str(src),
             "-af",
-            f"{recipe()},volume={gain:.2f}dB",
+            f"{chain},volume={gain:.2f}dB",
             "-ar",
             str(EFFECT_OUT_RATE),
             "-b:a",
@@ -139,7 +150,7 @@ def build(effect_set: EffectSet, folder: Path) -> list[Packed]:
             (e, t) for e in effect_set.effects for t in e.takes
         ):
             out = Path(tmp) / f"{i}.mp3"
-            gain = prepare(folder / take.file, out)
+            gain = prepare(folder / take.file, out, recipe())
             packed.append(Packed(effect.id, take.file, gain, out.read_bytes()))
     return packed
 

@@ -601,12 +601,40 @@ class TestEvening:
         self, yard: callable
     ) -> None:
         y = self.fed(yard)
-        assert y.page.evaluate(
-            "document.getElementById('supper').classList.contains('served')"
-        )
         y.page.evaluate("yardGame.tap('doghouse')")
         y.page.wait_for_function("yardGame.state().ended", timeout=15_000)
         assert "bedtime" not in [e["what"] for e in y.events("ask")]
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_with_his_bowl_out_supper_is_in_his_bowl(self, yard: callable) -> None:
+        """One bowl, not two: supper steams in his own bowl, and he eats it there
+        (Adam saw a red dish appear by the doghouse beside the bowl)."""
+        y = yard(f"{DAY_PLAY}&hour=19.95&day=60")  # DAY_PLAY has the bowl out
+        y.page.wait_for_function(
+            "document.getElementById('bowl').classList.contains('supper')",
+            timeout=10_000,
+        )
+        y.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+        assert not y.page.evaluate(
+            "document.getElementById('supper').classList.contains('served')"
+        ), "a second dish by the doghouse"
+        assert y.page.evaluate("Math.abs(Reksio.x - Bowl.thing.at())") < 5, (
+            "he ate somewhere else"
+        )
+        assert not y.page.evaluate(
+            "document.getElementById('bowl').classList.contains('supper')"
+        ), "still steaming, eaten up"
+        assert not y.errors, "\n---\n".join(y.errors)
+
+    def test_without_his_bowl_supper_comes_in_a_dish(self, yard: callable) -> None:
+        y = yard(f"{STILL}&props=dig,film&flowers=1&hour=19.95&day=60")
+        y.page.wait_for_function(
+            "yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000
+        )
+        y.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+        assert y.page.evaluate(
+            "document.getElementById('supper').classList.contains('served')"
+        )
         assert not y.errors, "\n---\n".join(y.errors)
 
     def test_a_tap_on_the_doghouse_just_before_bedtime_is_not_overruled_by_supper(

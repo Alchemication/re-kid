@@ -1,6 +1,6 @@
 ---
 name: new-sound
-description: Make or replace a game's sound effects — word each sound, generate takes with ElevenLabs, have Adam pick by ear on the sound board, bring the keeps into the game (retro recipe, packed into effects.js), test, retro. Use when asked for new or better sounds, a sound for a new gag, more takes of a sound, or to bring back a silent one, e.g. "the bird's chirp sounds awful" or "a sound for the twig falling". Not for music.
+description: Make or replace a game's sound effects — word each sound, generate takes with ElevenLabs, have Adam pick by ear on the sound board, bring the keeps into the game (retro recipe, packed into effects.js), test, retro. Use when asked for new or better sounds, a sound for a new gag, more takes of a sound, or to bring back a silent one, e.g. "the bird's chirp sounds awful" or "a sound for the twig falling". Not for music (new-music).
 ---
 
 # New sound

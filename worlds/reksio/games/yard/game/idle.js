@@ -1,15 +1,14 @@
 // What Reksio does when nobody is tapping, as plain choices with no drawing,
 // clock or randomness of their own (yard.js passes in what it knows, and a
 // random stream): whether to do something now, which left-alone move, which
-// thing to wish for, and how full the music should be.
+// thing to wish for, and whether something new brings a phrase of music.
 
 /* exported Idle */
 const Idle = (() => {
   const FIRST_MS = 2500 // left alone this long, he starts doing things
   const GAP_MS = [1500, 3500] // then something new every 1.5–3.5 s
   const REST_AFTER_S = { sit: 8, lie: 18, nap: 30 } // left alone this long, he may sit, lie down, or nap
-  const LIVELY_MS = 4000 // the music stays full this long after a tap
-  const SPARSE_MS = 15000 // and thins to a bare bass line after this long
+  const PHRASE_GAP_MS = 40000 // a phrase of music at most this often: quiet in between
 
   /**
    * What to do now, left alone: 'shake' (wet, stopped, out of the rain: at
@@ -52,15 +51,17 @@ const Idle = (() => {
     return left.sort((a, b) => distance(a) - distance(b))[0] ?? null
   }
 
-  /** How full the music is: 3 busy, 2 just tapped or walking, 1 a while alone, 0 long alone. */
-  function energy({ busy, walking, sinceTap }) {
-    if (busy) return 3
-    if (walking || sinceTap < LIVELY_MS) return 2
-    return sinceTap < SPARSE_MS ? 1 : 0
-  }
+  /**
+   * Does something new done bring a phrase of music? Not while music plays,
+   * not in the rain, and not within PHRASE_GAP_MS of the last phrase. So the
+   * music follows the child: phrases come while new things are found, and a
+   * child who has stopped gets the yard's own sounds.
+   * @param {{playing: boolean, raining: boolean, sinceLast: number}} s
+   */
+  const phraseOk = ({ playing, raining, sinceLast }) => !playing && !raining && sinceLast >= PHRASE_GAP_MS
 
   /** How long until the next move after one that took `ms` (or a random gap). */
   const gap = (ms, random) => ms || GAP_MS[0] + random() * (GAP_MS[1] - GAP_MS[0])
 
-  return { FIRST_MS, GAP_MS, REST_AFTER_S, next, pick, restOk, wish, energy, gap }
+  return { FIRST_MS, GAP_MS, REST_AFTER_S, PHRASE_GAP_MS, next, pick, restOk, wish, phraseOk, gap }
 })()

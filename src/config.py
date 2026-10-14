@@ -168,6 +168,31 @@ EFFECT_MAX_SECONDS = 4.0
 """Longer takes are cut, with a short fade: no effect in the game needs more,
 and a long tail would overlap the next."""
 
+TUNES_NAME = "tunes.yaml"
+"""A game's recorded music inside its folder (``schema.tunes.TuneSet``): the
+takes picked by ear for each part of the day, and what each was made from."""
+
+TUNES_DIR = "tunes"
+"""Where the picked music takes are kept, as made, inside a game folder
+(committed): the packing recipe can change without making them again."""
+
+TUNES_JS = "game/tunes.js"
+"""Where ``main.py tunes`` writes the packed music inside a game folder (a
+script, as ``EFFECTS_JS``, so a ``file://`` page can load it)."""
+
+TUNE_LOUDNESS_DB = -20.0
+"""Mean loudness every music take is brought to, so takes of a part match
+and music.js sets the music's level once. A little under the effects'
+(``EFFECT_LOUDNESS_DB``): the music sits under what happens."""
+
+TUNE_FADE_S = 1.5
+"""Every take fades out over its last this many seconds: generated takes
+stop where their length was asked to end, often mid-phrase."""
+
+TUNE_MAX_SECONDS = 30.0
+"""Longer takes are cut (then faded): a phrase is heard now and then, not a
+song, and each second is about 6 KB in the page."""
+
 PITCH_TOLERANCE_CENTS = 60
 """How far a sample's measured pitch may sit from the nearest semitone before
 it is reported. Plucked and struck notes drift a little; more than this

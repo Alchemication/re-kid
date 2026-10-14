@@ -6,27 +6,13 @@ decided and why.
 
 ## Now
 
-1. **Adam looks at the day on a clock** (all three slices built,
-   2026-10-13). To judge:
-   - *The sky:* the four kinds of day and how often each comes (3:4:2:2 in
-     layout.js `DAYS`), the cloudy day's haze and its even row of clouds.
-   - *The cuckoo:* the call's loudness (`gain` in `effects.yaml`, also from
-     across the yard), how often it calls (on the hour, 25 s), his head only
-     slightly up when he barks back (`barkUp`, `glare` in antics.js), the
-     clock's size in the window.
-   - *The evening:* the supper, the 12 s wait before he goes to bed alone,
-     whether a toddler ever holds the house for 2 s, the sun button.
-2. **Wrap up the music:** decide its direction, then the work. For Adam's
-   ear:
-   - *The hook and the stretch run,* transcribed (Basic Pitch) from his two
-     melody marks. Do they sound like the theme? What is too busy, too sad
-     or annoying? A recognisable melody is still Kowalowski's composition,
-     so it goes into the licensing talk.
-   - *Themes B and C* (a skipping flute tune, a tiptoeing one in G minor),
-     taking turns with the hook (A A B B A A C C): catchy, and still Reksio?
-   - *The morning tune* and the mix: levels, whether the music drowns the
-     gags, ducking under a gag.
-3. **Eliot plays the yard:** the bowl, the bramble, the new sounds, the new
+1. **Adam listens to the yard's new music** (built 2026-10-13: takes in
+   `tunes.yaml`, phrases after something new). To judge in play: the level
+   against the effects (`VOLUME`, `TAKE_VOLUME` in music.js), how often
+   phrases come (`PHRASE_GAP_MS` in idle.js), whether five phrases is
+   enough variety, the morning (two takes: more through `new-music`), the
+   touches now heard only between takes.
+2. **Eliot plays the yard:** the bowl, the bramble, the new sounds, the new
    ending. First Adam tunes the bowl and bramble timing (`BEE_COMES_MS`,
    `LEAP` in bramble.js; `STEP_OFF`, `STRAIN` in antics.js; the `boing`).
    Watch: does he tap to call for help, laugh at the leap, worry about the
@@ -37,7 +23,7 @@ decided and why.
      layout rule: the fly and the spider out together).
    - *Help:* the bird drops a twig from its nest; Reksio fetches it back up
      to the wall.
-4. **The episode, *Reksio poliglota*,** each step a `new-episode` run:
+3. **The episode, *Reksio poliglota*,** each step a `new-episode` run:
    - Claude: frame pass and breakdown, `episodes/reksio-poliglota.yaml`.
    - Extend `main.py mark` to episode breakdowns (it does the intro only),
      then Adam's (or his wife's) listening pass.
@@ -61,8 +47,7 @@ decided and why.
   bowl, the film and falling fruit; ears drawn as tubes, the cartoon's are
   flaps. Then acting: reactions in each gag, starting with Eliot's
   favourites.
-- **Code:** `yard.js` is at 964 lines, split it before adding more;
-  `Music.scheduleStep` is an ESLint complexity hotspot;
+- **Code:** `yard.js` is at 975 lines, split it before adding more;
   `TestRealInput::test_a_key_tap_barks` fails about 1 run in 5 under
   `-n 8` (a quick key tap can count as a hold when frames are slow).
 
