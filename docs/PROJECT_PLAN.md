@@ -1,29 +1,12 @@
 # Project plan
 
-The next steps, in the order agreed with Adam (2026-10-14). When a step is
+The next steps, in the order agreed with Adam (2026-10-15). When a step is
 done, take it out: git log keeps what was done, `docs/DECISIONS.md` what was
 decided and why.
 
 ## Now
 
-1. **Adam listens to the yard's new music** (built 2026-10-13: takes in
-   `tunes.yaml`, phrases after something new). To judge in play: the level
-   against the effects (`VOLUME`, `TAKE_VOLUME` in music.js), how often
-   phrases come (`PHRASE_GAP_MS` in idle.js), whether five phrases is
-   enough variety, the morning (two takes: more through `new-music`), the
-   touches now heard only between takes.
-2. **Eliot plays the yard:** the bowl, the bramble, the new sounds, the new
-   ending. First Adam tunes the bowl and bramble timing (`BEE_COMES_MS`,
-   `LEAP` in bramble.js; `STEP_OFF`, `STRAIN` in antics.js; the `boing`).
-   Watch: does he tap to call for help, laugh at the leap, worry about the
-   mouse that can't eat, go for what, and does the ending land? If the
-   helping gags land, one more of each kind, each a `new-gag` run in a fresh
-   session:
-   - *Helped:* the pesky fly on his nose, caught by the spider (needs a
-     layout rule: the fly and the spider out together).
-   - *Help:* the bird drops a twig from its nest; Reksio fetches it back up
-     to the wall.
-3. **Krecik (Krtek), the second cartoon** (Adam, 2026-10-15: Eliot is a
+1. **Krecik (Krtek), the second cartoon** (Adam, 2026-10-15: Eliot is a
    big fan), with its own home scene (`docs/DECISIONS.md`: one scene per
    cartoon, not a game per episode). Track Adam's build hours from day one:
    how long a new world takes is the collection's real question.
@@ -52,11 +35,35 @@ decided and why.
    - Once both scenes play: a plain page to pick one (two pictures), which
      loads the scene in place, so the tap that picks it also lets sound
      play. Not a platform.
-4. **A third cartoon, and the platform with it:** two worlds will have
+2. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape, and its needs shape it (how scenes are found, picked and
    shared). Keep the platform as small as the third scene needs, so it
    doesn't hold the scene up.
+
+## Reksio's yard: parked
+
+New work on the yard waits (Adam, 2026-10-15), unless a creative idea is
+too good to leave. What Adam does in play still feeds it, and Krecik's
+scene:
+
+- **Adam listens to the yard's new music** (built 2026-10-13: takes in
+  `tunes.yaml`, phrases after something new). To judge in play: the level
+  against the effects (`VOLUME`, `TAKE_VOLUME` in music.js), how often
+  phrases come (`PHRASE_GAP_MS` in idle.js), whether five phrases is
+  enough variety, the morning (two takes: more through `new-music`), the
+  touches now heard only between takes.
+- **Eliot plays the yard:** the bowl, the bramble, the new sounds, the new
+  ending. First Adam tunes the bowl and bramble timing (`BEE_COMES_MS`,
+  `LEAP` in bramble.js; `STEP_OFF`, `STRAIN` in antics.js; the `boing`).
+  Watch: does he tap to call for help, laugh at the leap, worry about the
+  mouse that can't eat, go for what, and does the ending land? If the
+  helping gags land, one more of each kind, each a `new-gag` run:
+  - *Helped:* the pesky fly on his nose, caught by the spider (needs a
+    layout rule: the fly and the spider out together).
+  - *Help:* the bird drops a twig from its nest; Reksio fetches it back up
+    to the wall.
+- The yard's items under "Alongside" and "Later" below wait with it.
 
 ## Alongside, when working nearby
 
