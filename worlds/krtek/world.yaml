@@ -1,0 +1,530 @@
+id: krtek
+title: Krtek
+title_en: The Little Mole
+country: CZ
+summary: Krtek, the Little Mole, is the hero of 49 short Czech cartoons that Zdeněk Miler wrote, designed and directed between 1957 and 2002 at Krátký film Praha's studio Bratři v triku. The films run from about 5 to 28 minutes. Only the first one has speech; after it the mole talks in little exclamations and laughs, which Miler recorded with his young daughters, so the films can be followed by small children anywhere without words. Krtek is a small black mole with a red nose and a few hairs on his head. He lives under a molehill in a meadow, comes up to find things people have left (a toy car, an umbrella, paint tins, a cuckoo clock) and works out what to do with them, often helping a friend or an animal in trouble. His friends include a mouse, a hare and a hedgehog. Czech children knew him from Česká televize's Večerníček bedtime slot from 1975.
+production:
+  studio:
+    text: Krátký film Praha, in its studio for drawn and puppet film, Bratři v triku, with Barrandov laboratories processing the film. The 1975 films carry a line saying they were made for the West German broadcasters Saarländischer Rundfunk and Westdeutscher Rundfunk; cs-wikipedia lists West Germany, then Germany, as co-producing country for films 14–49.
+    status: verified
+    sources:
+    - nfa-krtek-a-auticko
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+    - krtek-youtube
+    - cs-wikipedia-o-krtkovi
+  credits:
+  - name: Zdeněk Miler
+    role: creator, director, screenwriter, visual design
+    claim:
+      text: Zdeněk Miler (1921–2011, born Zdeněk Müller in Kladno) created the mole, and wrote, designed and directed all 49 films. The NFA credits him as director, writer and art director of the first two films; the end credits of Krtek malířem, Krtek hodinářem and Krtek a buldozer read "Scénář · výtvarník · režie Zdeněk Miler".
+      status: verified
+      sources:
+      - nfa-zdenek-miler
+      - nfa-jak-krtek-ke-kalhotkam-prisel
+      - nfa-krtek-a-auticko
+      - cs-wikipedia-seznam-dilu
+      - krtek-youtube
+  - name: Ivan Klíma, Eduard Petiška, J. A. Novotný
+    role: story (námět), dialogue
+    claim:
+      text: cs-wikipedia's infobox lists Eduard Petiška, Ivan Klíma and J. A. Novotný for stories. The NFA credits Petiška with the dialogue of the first film; Ivan Klíma is credited for the story (Námět) of Krtek malířem (1972), Krtek hodinářem (1974) and Krtek a buldozer (1975) on their credits.
+      status: verified
+      sources:
+      - cs-wikipedia-o-krtkovi
+      - nfa-jak-krtek-ke-kalhotkam-prisel
+      - krtek-youtube
+  - name: Josef Hekrdla, Jindřich Bárta, Adolf Hamrlík, Ota Kudrnáč and others
+    role: animators
+    claim:
+      text: Teams of six to ten animators per film. Hekrdla and Bárta are credited on the first two films and on films of the 1970s; Hamrlík on Autíčko (1963) and the 1970s films checked; Kudrnáč on the first film and the 1972–1975 films checked.
+      status: verified
+      sources:
+      - nfa-jak-krtek-ke-kalhotkam-prisel
+      - nfa-krtek-a-auticko
+      - krtek-youtube
+  first_year: 1957
+  last_year: 2002
+  years:
+    text: The first film, Jak krtek ke kalhotkám přišel, premiered in Prague cinemas in May 1957. The second, Krtek a autíčko, followed in 1963; then films came one or a few a year until 1975, six long films between 1982 and 1994, and short ones again from 1995 to the last, Krtek a žabka, in 2002.
+    status: verified
+    sources:
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+    - nfa-krtek-a-auticko
+    - cs-wikipedia-seznam-dilu
+  episode_count:
+    text: 49 films by cs-wikipedia's list; en-wikipedia says around fifty and tables 43 short ones. Stream.cz carries 49 (43 short, 6 long). There are also 13 one-minute sketches dated 1998, not counted here.
+    status: verified
+    sources:
+    - cs-wikipedia-seznam-dilu
+    - en-wikipedia-little-mole
+    - stream-cz-krtek
+  episode_runtime:
+    text: From about 5 to about 28 minutes. The first two run 13 and 15 minutes per the NFA; 1965–1975 films 5–10 minutes; the six films of 1982–1994 about 28 minutes; from 1995 on about 5 minutes. The uploads sampled run 5:48 (Hodinářem), 5:50 (Vejce), 6:15 (Buldozer), 10:04 (Malířem) and 15:12 (Autíčko).
+    status: verified
+    sources:
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+    - nfa-krtek-a-auticko
+    - cs-wikipedia-seznam-dilu
+    - krtek-youtube
+  technique:
+    text: Drawn (cel) animation in colour, 1.37:1, mono sound, per the NFA. In the films sampled, flat characters with dark outlines move over painted backgrounds, some with visible brush and sponge texture (the forest in Malířem, the meadows in Buldozer).
+    status: verified
+    sources:
+    - nfa-krtek-a-auticko
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+    - krtek-youtube
+  origins:
+    text: Miler was asked for a children's film about how flax becomes cloth, wanted an animal hero, and chose a mole, by his account after tripping over a molehill on a walk (cs-wikipedia gives 1954 and says "allegedly"). The first film's working title was Krtek a len (The Mole and the Flax), and the NFA files it as educational as well as a fairy tale.
+    status: sourced
+    sources:
+    - cs-wikipedia-o-krtkovi
+    - en-wikipedia-little-mole
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+viewing_context:
+  text: Czech Television shows the shorter films in Večerníček, its evening bedtime cartoon slot, where they first appeared in 1975, in no fixed order; the six long films were never shown there. Earlier, the films were shown in cinemas. How and when they reached Polish television, where Eliot's generation's parents may have seen Krecik, is not yet known.
+  status: sourced
+  sources:
+  - cs-wikipedia-seznam-dilu
+  - cs-wikipedia-o-krtkovi
+premise:
+  text: A little mole lives under a molehill in a meadow. He comes up into a world full of things he doesn't know (a toy car, an egg, paint tins, a cuckoo clock, a survey pole) and finds out what they are for, often by trying them out wrongly first. Along the way someone needs help (a chick without its mother, the flowers in a bulldozer's path, birds whose nest a fox raids), and he and his animal friends find a way.
+  status: sourced
+  sources:
+  - cs-wikipedia-seznam-dilu
+  - krtek-youtube
+episode_formula:
+  text: 'In the five films sampled (Autíčko 1963, Malířem 1972, Hodinářem 1974, Vejce and Buldozer 1975): the mole comes up from his molehill or wakes in his den; he finds something; the middle is a chain of short attempts or visits, each a few seconds to half a minute (Vejce: he shows the egg to a mouse family, a hare family and a basset hound with puppies, 0:52–1:24, each one shaking its head; Hodinářem: he puts the clock together, tries a feather, then a screwdriver, 2:40–4:36); the problem is solved by cleverness rather than force; and the film ends back home, three of the five closing on an iris shrinking to a circle around him (Vejce 5:28, Hodinářem 5:24, Buldozer 5:48). Autíčko ends with him asleep in his den, as it began (0:44, 15:00).'
+  status: observed
+  sources:
+  - krtek-youtube
+  observed_by: claude-frames
+opening_sequence:
+  text: 'There is no shared title sequence. Each film has its own title and credits, drawn over its own scenery: Autíčko''s over a city park (0:00–0:40), Malířem''s over a forest (0:00–0:32, all credits at the start), Hodinářem''s over the cuckoo clock with the mole popping up behind it (0:08), Buldozer''s a plain red card. The 1970s films open with the distributor''s card "Ústřední půjčovna filmů uvádí".'
+  status: observed
+  sources:
+  - krtek-youtube
+  observed_by: claude-frames
+tone_and_mood:
+  text: Gentle and bright. Peril is real but short (a bulldozer, a fox, a wrecked toy, a trip through a biscuit factory) and always undone by the end. The mole is never cruel; even the people who threaten the meadow are got round, not hurt. Read from the five films sampled and cs-wikipedia's synopses; cs-wikipedia also notes that some films carry an ecological message (Krtek ve městě, Krtek a buldozer).
+  status: interpretation
+  sources:
+  - krtek-youtube
+  - cs-wikipedia-o-krtkovi
+humour:
+  text: 'Mostly from things misused or misunderstood and from transformation. He tries objects in the wrong role (cs-wikipedia: the lollipop as racket, spade and road sign); falls into red paint and becomes a red blob that scares the fox (Malířem 1:44–1:56) and makes him a scary totem with the mouse (3:20–3:28); a feather pushed into the clock comes back as fluff all over him (Hodinářem 3:32–3:52) and a screwdriver comes back as a spring (4:32); he rides inside the egg-tray machinery as eggs become dough and biscuits (Vejce 2:00–4:00). Big reactions on a small body: hands to cheeks, arms flung up, falling flat (Buldozer 5:20–5:24, Autíčko 11:40–11:56).'
+  status: observed
+  sources:
+  - krtek-youtube
+  observed_by: claude-frames
+themes_and_values:
+- text: 'Helping and making things right: he returns the chick to its mother (Vejce), saves his flower bed by rerouting a road rather than fighting it (Buldozer), mends a smashed toy car (Autíčko), and with the animals frightens off a fox that raids nests (Malířem).'
+  status: interpretation
+  sources:
+  - krtek-youtube
+  - cs-wikipedia-seznam-dilu
+- text: Curiosity about the human world, met with an animal's ingenuity. People and machines mostly appear as large, careless forces (a boy who smashes a toy, a bulldozer, a gardener with poison in Krtek a televizor).
+  status: interpretation
+  sources:
+  - krtek-youtube
+  - cs-wikipedia-seznam-dilu
+- text: 'Home and friendship: films begin and end at his molehill, and many involve the mouse or other friends.'
+  status: interpretation
+  sources:
+  - krtek-youtube
+  - cs-wikipedia-seznam-dilu
+characters:
+- id: krtek
+  name: Krtek (Krteček)
+  name_en: The Little Mole
+  kind: mole
+  role: protagonist
+  description:
+    text: A small mole who lives under a molehill. In the films sampled he digs up into a meadow, a park or a forest edge, and in Autíčko sleeps in an oval den underground, curled on a white pillow (0:44, 15:00). He makes and fixes things, tends a flower bed by his molehill in Buldozer (0:40–1:04).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  personality:
+    text: 'Curious, cheerful, easily delighted and easily upset, quick to help. Clever rather than strong: he wins by digging, rerouting and making, never by fighting.'
+    status: interpretation
+    sources:
+    - krtek-youtube
+    - cs-wikipedia-seznam-dilu
+  visual_signature:
+    text: Black, pear-shaped, with a grey-green belly patch, a round red nose, big white oval eyes, pink hands and feet, and three or so long hairs standing up on his head plus whiskers. Drawn small against everything around him.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  sound_signature:
+    text: 'Short exclamations, squeals and laughs instead of words, recorded by Miler''s young daughters (cs-wikipedia names "hele", "jé", "ach jo"). In the first film he speaks: the NFA credits Petr Kysela as the mole and Viola Zinková as the flax plant, while cs-wikipedia says Zinková voiced the mole. What the voice sounds like, and whether it is the same takes from film to film, needs a listener.'
+    status: sourced
+    sources:
+    - cs-wikipedia-o-krtkovi
+    - en-wikipedia-little-mole
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+  relationships:
+  - to: myska
+    claim:
+      text: His closest friend, with him in many films (cs-wikipedia's synopses of Žvýkačka, Zahradníkem, Ježek, Televizor, Zápalky, Fotografem, Metro, Žabka), and in Autíčko (2:08) and Malířem (2:16 on).
+      status: observed
+      sources:
+      - krtek-youtube
+      - cs-wikipedia-seznam-dilu
+      observed_by: claude-frames
+  - to: jezek
+    claim:
+      text: A friend; in Krtek a ježek the hedgehog first laughs at him, is rescued by him and the mouse, then saves them from a cat.
+      status: sourced
+      sources:
+      - cs-wikipedia-seznam-dilu
+  - to: zajic
+    claim:
+      text: A friend, one of the meadow animals in Malířem and later films (Metro, Maminka).
+      status: observed
+      sources:
+      - krtek-youtube
+      - cs-wikipedia-seznam-dilu
+      observed_by: claude-frames
+  moves:
+  - id: pops-up-from-molehill
+    claim:
+      text: Comes up through the top of a molehill, head and hands first, and leans his elbows on it to look about (Vejce 0:36, Hodinářem 0:20, Autíčko 1:20).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: asleep-in-den
+    claim:
+      text: Sleeps on his front, curled on a white pillow in an oval chamber underground, then sits up and stretches both arms (Autíčko 0:44–1:08).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: carries-overhead
+    claim:
+      text: Carries something big (the egg, a pole) held up in both hands, trotting (Vejce 0:44–1:32, Buldozer 4:44).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: waters-the-flowers
+    claim:
+      text: Fills a watering can at a spring and waters his flower bed; at the end of Buldozer he holds a can in each hand (0:28–0:40, 5:32–5:40).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: hands-to-cheeks
+    claim:
+      text: Claps both hands to his cheeks or over his ears in dismay or delight (Buldozer 5:20, Autíčko 11:40).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: arms-up-cheer
+    claim:
+      text: Flings both arms up when something works (Buldozer 5:24).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: lies-listening
+    claim:
+      text: Lies on his belly, chin on hands, listening to a cricket fiddle, and falls asleep there under the moon (Buldozer 1:24–1:44).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: bounces-on-seat
+    claim:
+      text: Bounces and rolls on a car seat like a trampoline (Autíčko 7:16–7:28).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+- id: myska
+  name: Myška
+  name_en: the mouse
+  kind: mouse
+  role: recurring
+  description:
+    text: A small mouse with big round ears and a long tail, grey in Autíčko (2:08–2:28, 14:04), brown in Malířem until the mole paints her yellow (2:16–3:04).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  personality:
+    text: A ready companion who joins the mole's schemes; cs-wikipedia's synopses have her helping, playing and building with him.
+    status: interpretation
+    sources:
+    - cs-wikipedia-seznam-dilu
+  visual_signature:
+    text: Round ears with pink insides, a pointed snout, a thin tail longer than her body.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  relationships:
+  - to: krtek
+    claim:
+      text: His friend and partner in most adventures.
+      status: sourced
+      sources:
+      - cs-wikipedia-seznam-dilu
+  moves: []
+- id: zajic
+  name: Zajíc
+  name_en: the hare
+  kind: hare
+  role: recurring
+  description:
+    text: A large brown hare among the forest animals in Malířem, painted with tiger stripes by the mole and the mouse (4:24–4:44). A family of grey hares turns the egg away in Vejce (1:04).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  personality:
+    text: Not yet seen in enough films to say.
+    status: unknown
+    sources: []
+  visual_signature:
+    text: Long upright ears, a white ruff around the face, buck teeth.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  relationships: []
+  moves: []
+- id: jezek
+  name: Ježek
+  name_en: the hedgehog
+  kind: hedgehog
+  role: recurring
+  description:
+    text: Among the forest animals in Malířem (4:16 on), where the mole paints him. Has a film of his own, Krtek a ježek (1970), not yet looked at.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  personality:
+    text: In Krtek a ježek he mocks the mole, is rescued by him, and repays it.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  visual_signature:
+    text: Round, with a fan of dark spines and a long snout.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  relationships: []
+  moves: []
+places:
+- id: molehill
+  name: The molehill and the den under it
+  description:
+    text: 'His home: a heap of earth in a meadow or a park lawn, with a den beneath it (Autíčko 0:44, 15:00). In Buldozer the molehill stands behind a dense bed of tulips and other flowers he tends, near a little spring with a pool where two bullfinches bathe (0:12–1:04); in Autíčko it is among tulips in a city park (1:12–1:24). A car can be parked beside it at night (Autíčko 14:40).'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+- id: meadow-and-forest
+  name: The meadow and the forest
+  description:
+    text: Painted meadows with tall flowers (bluebells, tulips, daisies), ferns and big old trees; a hollow oak holds the cuckoo clock in Hodinářem (1:08). Night is deep blue with a crescent moon, morning a round orange sun (Buldozer 1:32–1:48).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+- id: human-world
+  name: The human world
+  description:
+    text: 'Where people''s things come from and where peril lives: a city of tower blocks and cars (Autíčko), an egg and biscuit factory (Vejce 1:36–4:20), a building site with survey poles and a bulldozer (Buldozer 2:00–5:12), a cottage yard with paint tins (Malířem 0:28).'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+aesthetics:
+  overview:
+    text: Flat, outlined characters with simple solid fills over painted, textured backgrounds. Bright, saturated, natural colours in the meadow; cooler, patterned, geometric drawing for the human world (the tiled factory in Vejce, the checked tower blocks in Autíčko).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  palette:
+    text: Meadow greens, sky blue, flower reds and pinks, earth browns; the mole a true black with a red nose, standing out against everything. Night scenes are deep blue with a pale crescent (Buldozer 1:32).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  palette_hex:
+  - '#0a0d03'
+  - '#9cc0f3'
+  - '#4d6d1f'
+  - '#80b068'
+  - '#38250a'
+  - '#c16226'
+  - '#f0b976'
+  line_and_shape:
+    text: Round, soft shapes for animals; the mole is a pear with stubby limbs. Machines and buildings are drawn with straight lines and repeated patterns.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  backgrounds:
+    text: 'Painted plates with texture: dabbed foliage, stippled grass, misty layers of trees behind (Hodinářem, Buldozer). The 1963 Autíčko has flatter, more graphic backgrounds than the 1970s films. In Malířem''s night the forest itself is repainted in pattern (6:40–7:56).'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  character_animation:
+    text: 'Full, bouncy animation for the mole: squash and stretch, big arm gestures, quick double-takes. Animals move as simply as they are drawn.'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  pacing:
+    text: Unhurried. Shots of 3–10 seconds, room to watch him think. Short films stay on one problem; the chain of attempts sets the rhythm.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  composition:
+    text: Mostly side-on, at the mole's height, with him small in the frame and the world big around him; close-ups for reactions (Autíčko 11:40–11:56).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+sound:
+  overview:
+    text: 'What the films sound like: how music, the mole''s voice and sound effects fit together. Needs a listener (Adam).'
+    status: unknown
+    sources: []
+  credits:
+  - name: Jaroslav Křička
+    role: composer (Jak krtek ke kalhotkám přišel, 1957)
+    claim:
+      text: Music for the first film, played by FISYO under Štěpán Koníček.
+      status: verified
+      sources:
+      - nfa-jak-krtek-ke-kalhotkam-prisel
+  - name: Wiliam Bukový
+    role: composer (Krtek a autíčko, 1963)
+    claim:
+      text: 'Music for Autíčko, played by FISYO under František Belfín; sound effects credited separately (Ruchy: Adolf Řípa, Antonín Jedlička).'
+      status: verified
+      sources:
+      - nfa-krtek-a-auticko
+      - krtek-youtube
+  - name: Miloš Vacek
+    role: composer (Krtek malířem, 1972)
+    claim:
+      text: Credited "Hudba Miloš Vacek, nahrál FISYO, řídil Fr. Belfín", with "Zvukové ilustrace Ing. A. Řípa" (Malířem 0:12).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - name: Vadim Petrov
+    role: composer (1974 on)
+    claim:
+      text: Credited for the music of Hodinářem (1974) and Buldozer (1975). cs-wikipedia lists him among seven composers of the series, and the YouTube channel describes the music as his.
+      status: verified
+      sources:
+      - krtek-youtube
+      - cs-wikipedia-o-krtkovi
+  theme:
+    text: Is there a recurring Krtek theme or motif across films with different composers? Needs a listener across several films, starting with Hodinářem and Buldozer (both Petrov).
+    status: unknown
+    sources: []
+  music_role:
+    text: 'How music carries the action: does it move with each gesture, or run underneath? Needs a listener.'
+    status: unknown
+    sources: []
+  sound_effects:
+    text: 'Effects were credited separately from the music (Autíčko 1963: Ruchy; Malířem 1972: Zvukové ilustrace). What they are like needs a listener.'
+    status: verified
+    sources:
+    - nfa-krtek-a-auticko
+    - krtek-youtube
+  dialogue:
+    text: Only the first film has speech (the NFA lists a voice cast); the second is listed as without dialogue, and from it on the mole uses exclamations and laughter. In Krtek a telefon a telephone says "haló, haló".
+    status: verified
+    sources:
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+    - nfa-krtek-a-auticko
+    - cs-wikipedia-o-krtkovi
+    - cs-wikipedia-seznam-dilu
+legacy:
+- text: Plush moles flew on Space Shuttle Endeavour's last mission (STS-134, May 2011) and on a Soyuz to the International Space Station (2018).
+  status: sourced
+  sources:
+  - cs-wikipedia-o-krtkovi
+  - en-wikipedia-little-mole
+- text: 'Krtek a Panda: 52 computer-animated episodes made with China''s CCTV in 2016–2017, in which the mole talks, under a contract signed by Miler''s granddaughter. The composer Vadim Petrov said Miler had not wanted the series continued; the project ended in 2020 after the heirs'' settlement.'
+  status: sourced
+  sources:
+  - cs-wikipedia-o-krtkovi
+  - cs-wikipedia-karolina-milerova
+- text: Books retelling the films (Eduard Petiška, Hana Doskočilová and others, 1960 on), DVDs from 2000, and a long run of toys and merchandise.
+  status: sourced
+  sources:
+  - cs-wikipedia-o-krtkovi
+- text: 'Prizes for the first film at Venice in 1957. Sources disagree on what they were: the NFA lists the Cendrillon prize of the children''s film association and the main prize for films for the youngest children; Radio Prague says a Silver Lion; en-wikipedia says two Golden Lions.'
+  status: sourced
+  sources:
+  - nfa-jak-krtek-ke-kalhotkam-prisel
+  - radio-prague-rights-2017
+  - en-wikipedia-little-mole
+availability:
+- text: 31 of the 49 films (all those of 1957–1994) on the Krtek / The Mole YouTube channel, which play when signed in. Who runs the channel is not stated.
+  status: sourced
+  sources:
+  - krtek-youtube
+- text: All 49 on Stream.cz, for viewers in the Czech Republic only. Česká televize's iVysílání had none playable on 2026-10-15. DVDs were published 2000–2009.
+  status: sourced
+  sources:
+  - stream-cz-krtek
+  - ct-ivysilani-o-krtkovi
+  - cs-wikipedia-o-krtkovi
+rights:
+  text: 'Split. The films: the NFA (Národní filmový archiv) is recorded as copyright holder of the first two, and sells their rights through its sales department; the other 47 records were not read. The character: Miler''s heirs. After eight years in court, the estate was settled in 2020: daughter Barbora 40% of the property rights, his widow Emílie and children Kateřina and Michael 20% each. In 2019 the courts had ruled that the licence Miler gave his granddaughter Karolína in 2011, under which her Little Mole company licensed the character, was invalid. Who grants licences for the character today is not known.'
+  status: verified
+  sources:
+  - nfa-jak-krtek-ke-kalhotkam-prisel
+  - nfa-krtek-a-auticko
+  - ct24-dedictvi-2020
+  - radio-prague-rights-2017
+  - cs-wikipedia-karolina-milerova
+design_notes:
+- text: 'The home is the molehill, with the den under it and a flower bed and spring in front (Buldozer''s opening). A day can run as the films do: he wakes in the den, comes up, the day passes, the cricket fiddles at dusk, and he goes down to sleep, closing on an iris to a circle around him: the native ending, as the doghouse is Reksio''s.'
+  status: interpretation
+  sources:
+  - krtek-youtube
+- text: 'The verb is find and figure out: a found object he tries in the wrong roles before the right one, then uses to help someone. That suits a toddler''s taps (each tap, the next try) and Eliot''s wish for longer encounters: a chain of three or four tries or visits, as in Vejce and Hodinářem.'
+  status: interpretation
+  sources:
+  - krtek-youtube
+  - cs-wikipedia-seznam-dilu
+- text: The scene can have two levels, the meadow above and the tunnels below, since the mole travels by digging and pops up anywhere.
+  status: interpretation
+  sources:
+  - krtek-youtube
+- text: 'Wordless, like Reksio: the mole''s exclamations carry everything. Whether to use the original voice (as Reksio''s barks) is Adam''s call; it is the character''s signature.'
+  status: interpretation
+  sources:
+  - cs-wikipedia-o-krtkovi
+- text: Keep the flat outlined characters over painted textured plates; the cooler geometric drawing belongs to the human world, which can stay at the edges.
+  status: interpretation
+  sources:
+  - krtek-youtube
+open_questions:
+- Who grants licences for the character since the 2020 settlement, and who runs the Krtek / The Mole YouTube channel?
+- Do the NFA's records of the other 47 films also name the NFA as copyright holder? (The site blocks automated reading; Adam can open it.)
+- 'Who voiced the mole in the first film: Petr Kysela (NFA) or Viola Zinková (cs-wikipedia)?'
+- What does the mole's voice sound like, how often does he use it, and is it the same few takes across films? Needs Adam's ears.
+- Is there a recurring musical theme across the composers (Křička, Bukový, Vacek, Petrov and others)? Needs a listener.
+- When and how did Krtek reach Polish television, where Eliot knows him as Krecik?
+- Who made the 13 one-minute sketches dated 1998?
+- Which friends recur most across all 49 films (mouse, hare, hedgehog, frog)? Needs a pass over more films.
+- Read the cited Novinky, iROZHLAS and iDNES articles behind cs-wikipedia's voice and rights statements.

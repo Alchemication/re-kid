@@ -61,7 +61,7 @@ worlds/<id>/
 experiments/sound/      making sound effects with a model and picking them by ear on a
                         board page (scripts committed; audio and the API key in .env not)
 experiments/music/      the same for the yard's music, against what the game plays today
-.claude/skills/         procedures for Claude Code sessions (new-episode, new-gag, new-sound, new-music)
+.claude/skills/         procedures for Claude Code sessions (new-world, new-episode, new-gag, new-sound, new-music)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
 .github/workflows/pages.yml  publishes the games to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)

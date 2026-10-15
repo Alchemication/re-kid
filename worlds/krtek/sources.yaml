@@ -1,0 +1,93 @@
+sources:
+- id: nfa-jak-krtek-ke-kalhotkam-prisel
+  title: Jak krtek ke kalhotkám přišel (1957) — Filmový přehled
+  url: https://www.filmovyprehled.cz/cs/film/398768/jak-krtek-ke-kalhotkam-prisel
+  kind: archive
+  language: cs
+  publisher: Národní filmový archiv
+  accessed: '2026-10-15'
+  notes: The national film archive's record of the first film, read from the Wayback Machine copy of 2025-04-29 (the live site sits behind a Cloudflare check that blocks automated reading). Full credits with the voice cast per role, premieres, length in metres, copyright holder (NFA) and rights sales (NFA's sales department), awards. Primary for production facts.
+- id: nfa-krtek-a-auticko
+  title: The Little Mole and the Car (1963) — Filmový přehled
+  url: https://www.filmovyprehled.cz/en/film/398920/the-little-mole-and-the-car
+  kind: archive
+  language: en
+  publisher: Národní filmový archiv
+  accessed: '2026-10-15'
+  notes: The archive's record of the second film, read from the Wayback Machine copy of 2026-03-07. Full crew (sound effects credited separately), production companies, "without dialogue", copyright holder NFA, rights sales by the NFA. The other 47 films' records exist but could not be read from here (Cloudflare, no archived copies).
+- id: nfa-zdenek-miler
+  title: Zdeněk Miler — Filmový přehled
+  url: https://www.filmovyprehled.cz/en/person/5844/zdenek-miler
+  kind: archive
+  language: en
+  publisher: Národní filmový archiv
+  accessed: '2026-10-15'
+  notes: Miler's dates and places of birth and death and his birth name (Wayback copy of 2021-11-27). Its filmography lists only his early work, not the Krtek films.
+- id: cs-wikipedia-o-krtkovi
+  title: O krtkovi — Wikipedie
+  url: https://cs.wikipedia.org/wiki/O_krtkovi
+  kind: encyclopedia
+  language: cs
+  accessed: '2026-10-15'
+  notes: The series article. Infobox credits (composers, sound, camera, production managers), the origin story, the voice, books, DVD releases, Krtek a Panda and the end of the rights dispute. Cites Novinky.cz, iROZHLAS and iDNES for the voice and the rights; those articles have not been read yet.
+- id: cs-wikipedia-seznam-dilu
+  title: Seznam dílů seriálu O krtkovi — Wikipedie
+  url: https://cs.wikipedia.org/wiki/Seznam_d%C3%ADl%C5%AF_seri%C3%A1lu_O_krtkovi
+  kind: encyclopedia
+  language: cs
+  accessed: '2026-10-15'
+  notes: The only complete list found of the 49 films, with year, first Večerníček broadcast, DVD order, length and a short synopsis for about half of them. Uncited. Mentions 13 one-minute sketches from 1998, published on Stream.cz in 2024.
+- id: cs-wikipedia-karolina-milerova
+  title: Karolína Milerová — Wikipedie
+  url: https://cs.wikipedia.org/wiki/Karol%C3%ADna_Milerov%C3%A1
+  kind: encyclopedia
+  language: cs
+  accessed: '2026-10-15'
+  notes: Miler's granddaughter, founder of Little Mole a.s. and Little Mole Cartoon; the 2019 ruling against her licence and the 2020 settlement, citing iDNES and Deník articles not yet read.
+- id: en-wikipedia-little-mole
+  title: The Little Mole — Wikipedia
+  url: https://en.wikipedia.org/wiki/The_Little_Mole
+  kind: encyclopedia
+  language: en
+  accessed: '2026-10-15'
+  notes: Flagged for needing more and better citations (2024–2025). Useful for the voice story, later uses of the character (space, mascots) and an episode table that lists 43 of the 49 films (it leaves out the six long ones). Some claims (two Golden Lions in Venice) disagree with the NFA's record.
+- id: radio-prague-rights-2017
+  title: Czech Little Mole at centre of marketing rights battle
+  url: https://english.radio.cz/czech-little-mole-centre-marketing-rights-battle-8179119
+  kind: article
+  language: en
+  publisher: Radio Prague International (Czech Radio)
+  accessed: '2026-10-15'
+  notes: 'Ruth Fraňková, 2017-10-18, read from the Wayback Machine copy. The first ruling against Karolína Milerová''s licence, who the heirs were, and that licences were then being granted both by her Little Mole company and under contracts Fišerová/Fischerová had signed in Miler''s lifetime. Superseded on the outcome by ct24-dedictvi-2020.'
+- id: ct24-dedictvi-2020
+  title: Dědictví po výtvarníkovi Zdeňku Milerovi si rozdělilo šest lidí, píše server Seznam Zprávy
+  url: https://ct24.ceskatelevize.cz/clanek/domaci/dedictvi-po-vytvarnikovi-zdenku-milerovi-si-rozdelilo-sest-lidi-pise-server-seznam-zpravy-50555
+  kind: article
+  language: cs
+  publisher: ČT24 (Česká televize), from ČTK
+  accessed: '2026-10-15'
+  notes: 2020-04-27. How the estate was settled after eight years of court cases, with each heir's share of the property rights, and the 2019 ruling that Milerová's 2011 licence was invalid. Reports Seznam Zprávy, which read the court's order. Says nothing about who licenses the character since.
+- id: krtek-youtube
+  title: Krtek / The Mole — YouTube channel
+  url: https://www.youtube.com/channel/UC8ZKvF049Iku9y41WpIUUCA
+  kind: video
+  language: cs
+  publisher: unknown (channel @krtekthemole3695)
+  accessed: '2026-10-15'
+  notes: 'Verified by YouTube, about 243,000 subscribers, uploading since December 2018. On 2026-10-15 it had 44 videos: 31 of the 49 original films and 13 one-minute sketches with the mouse. Who runs it is not stated; whether it is the heirs'', the NFA''s or another licensee''s is unknown. Videos refuse anonymous downloads (they play when signed in). 4:3 picture pillarboxed into 854×480; higher formats not checked. The material behind every claim observed by claude-frames.'
+- id: stream-cz-krtek
+  title: Krteček — Stream.cz
+  url: https://www.stream.cz/krtek
+  kind: video
+  language: cs
+  publisher: Seznam.cz
+  accessed: '2026-10-15'
+  notes: All 49 original films (43 short, 6 long), uploaded 2019-10-18, plus the same 13 sketches as krtek-youtube under "Nová série". Streams are limited to the Czech Republic (the media URL carries geo-cz); from Poland they are refused.
+- id: ct-ivysilani-o-krtkovi
+  title: O krtkovi — iVysílání, Česká televize
+  url: https://www.ceskatelevize.cz/porady/898287-o-krtkovi/
+  kind: video
+  language: cs
+  publisher: Česká televize
+  accessed: '2026-10-15'
+  notes: Czech Television's page for the series, filed under Večerníček. On 2026-10-15 it said no episodes could be played.

@@ -1,0 +1,787 @@
+notes:
+- text: '49 films, made one at a time between 1957 and 2002, all directed by Zdeněk Miler. They were not made as a TV serial: some premiered in cinemas, and Česká televize later showed the shorter ones in its Večerníček bedtime slot (from 1975), in no fixed order. Lengths run from about 5 minutes to about 28; the six long films (1982–1994) were never shown in Večerníček.'
+  status: sourced
+  sources:
+  - cs-wikipedia-seznam-dilu
+  - cs-wikipedia-o-krtkovi
+- text: 'Numbering follows cs-wikipedia''s list, by year of production and then alphabetically within a year: the only complete list found. en-wikipedia''s table numbers 43 films in a slightly different order and leaves out the six long ones. They disagree on one year (Krtek a sněhulák: 1997 on cs-wikipedia, 1998 on en-wikipedia) and on most lengths by up to a minute.'
+  status: sourced
+  sources:
+  - cs-wikipedia-seznam-dilu
+  - en-wikipedia-little-mole
+- text: Year, director and length follow cs-wikipedia, which cites nothing. The NFA's own records were checked for the first two films and agree on years and director. The other 47 records exist in the NFA's database but could not be read from here.
+  status: interpretation
+  sources: []
+- text: Synopses are English renderings of cs-wikipedia's Czech ones, written for this catalogue. Films without a synopsis there have none here yet.
+  status: sourced
+  sources:
+  - cs-wikipedia-seznam-dilu
+- text: watch_url points at the Krtek / The Mole YouTube channel, which had 31 of the films on 2026-10-15 (all of 1957–1994, none of 1995–2002). The channel is verified by YouTube but does not say who runs it, so whether it is an official upload in this project's sense is unknown. All 49 films are on Stream.cz, but only for viewers in the Czech Republic.
+  status: sourced
+  sources:
+  - krtek-youtube
+  - stream-cz-krtek
+- text: Besides the 49 films there are 13 one-minute sketches with the mole and the mouse, dated 1998 by cs-wikipedia, published on Stream.cz in 2024 and on the YouTube channel. Who made them is not stated; they are not catalogued here.
+  status: sourced
+  sources:
+  - cs-wikipedia-seznam-dilu
+  - stream-cz-krtek
+  - krtek-youtube
+episodes:
+- id: jak-krtek-ke-kalhotkam-prisel
+  number: 1
+  title: Jak krtek ke kalhotkám přišel
+  year: 1957
+  directors:
+  - Zdeněk Miler
+  runtime_min: 13
+  watch_url: https://www.youtube.com/watch?v=__VW8vuPu_c
+  record:
+    text: Jak krtek ke kalhotkám přišel (1957), directed by Zdeněk Miler. 13:04 per cs-wikipedia's list; 13 min (380 m) per the NFA's record. The two agree on the year.
+    status: verified
+    sources:
+    - nfa-jak-krtek-ke-kalhotkam-prisel
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: 'The mole finds lots of interesting things but has nowhere to carry them. He sees trousers with pockets on a washing line and wants a pair. A flax plant tells him how: he harvests flax, and with the animals'' help turns it into thread (the stork breaks it, it is combed on the hedgehog), cloth (woven by ants), cut pieces (the crayfish) and finally trousers, sewn by a reed warbler.'
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-auticko
+  number: 2
+  title: Krtek a autíčko
+  year: 1963
+  directors:
+  - Zdeněk Miler
+  runtime_min: 14
+  watch_url: https://www.youtube.com/watch?v=sVBrRv8s2jQ
+  record:
+    text: Krtek a autíčko (1963), directed by Zdeněk Miler. 14:26 per cs-wikipedia's list; 15 min (425 m) per the NFA's record. The two agree on the year.
+    status: verified
+    sources:
+    - nfa-krtek-a-auticko
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole admires the cars in town. He finds a toy car that a naughty boy has smashed, takes it to a car repair shop, and drives about in it once it is mended.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-raketa
+  number: 3
+  title: Krtek a raketa
+  year: 1965
+  directors:
+  - Zdeněk Miler
+  runtime_min: 8
+  watch_url: https://www.youtube.com/watch?v=LqGqqzTO8MQ
+  record:
+    text: Krtek a raketa (1965), directed by Zdeněk Miler; 8:22 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds a model rocket in a sandpit, climbs in and it takes off, but soon crashes on a desert island and the pieces end up in the sea. A crab helps him find nearly all of them and he rebuilds the rocket. The last piece turns up in a diving boy's bag, among shells, turtles and fish, and the mole takes off just in time.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-tranzistor
+  number: 4
+  title: Krtek a tranzistor
+  year: 1968
+  directors:
+  - Zdeněk Miler
+  runtime_min: 8
+  watch_url: https://www.youtube.com/watch?v=O2XNh-vXZfQ
+  record:
+    text: Krtek a tranzistor (1968), directed by Zdeněk Miler; 8:12 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds a transistor radio and plays music and sports commentary, but the other animals don't share his excitement and leave the forest. Lonely and sad, the mole buries the radio, and the animals come back.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-zelena-hvezda
+  number: 5
+  title: Krtek a zelená hvězda
+  year: 1969
+  directors:
+  - Zdeněk Miler
+  runtime_min: 7
+  watch_url: https://www.youtube.com/watch?v=oKtWpECeuIc
+  record:
+    text: Krtek a zelená hvězda (1969), directed by Zdeněk Miler; 6:57 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds a green gem, decides it is a fallen star and tries to get it back into the sky. A magpie steals it, the mole finds it again, and in the end the star gets back up.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-zvykacka
+  number: 6
+  title: Krtek a žvýkačka
+  year: 1969
+  directors:
+  - Zdeněk Miler
+  runtime_min: 7
+  watch_url: https://www.youtube.com/watch?v=lhuMnz4enzU
+  record:
+    text: Krtek a žvýkačka (1969), directed by Zdeněk Miler; 7:26 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds chewing gum, which sticks to him. With the mouse's help he tries to get rid of it, without luck. Then a cow takes him into her mouth and separates him from the gum; the mole escapes and the cow chews on the gum.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-v-zoo
+  number: 7
+  title: Krtek v ZOO
+  year: 1969
+  directors:
+  - Zdeněk Miler
+  runtime_min: 6
+  watch_url: https://www.youtube.com/watch?v=otTwNhLcDfQ
+  record:
+    text: Krtek v ZOO (1969), directed by Zdeněk Miler; 6:09 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole comes up in a zoo, meets various animals, and in the end helps a lion with a sore tooth.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-zahradnikem
+  number: 8
+  title: Krtek zahradníkem
+  year: 1969
+  directors:
+  - Zdeněk Miler
+  runtime_min: 7
+  watch_url: https://www.youtube.com/watch?v=pXb6wz7RF60
+  record:
+    text: Krtek zahradníkem (1969), directed by Zdeněk Miler; 6:59 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: 'On a hot day the mole rests in the shade until water drips on him from a faulty hose. A bulge in the hose keeps the water from the flower bed and the flowers wilt. He tries to mend the leak but the hose bursts: a frog had blocked it. With the mouse he saves the flowers by digging an irrigation ditch.'
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-jezek
+  number: 9
+  title: Krtek a ježek
+  year: 1970
+  directors:
+  - Zdeněk Miler
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=ZgBMXI1WKWg
+  record:
+    text: Krtek a ježek (1970), directed by Zdeněk Miler; 8:34 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole comes up in the middle of a puddle, drains it and carries stones out, while a hedgehog laughs at him. The hedgehog is caught and taken to a school's specimen room. The mole and the mouse set out to rescue him; they free him, and the hedgehog then saves them from a nasty cat.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-lizatko
+  number: 10
+  title: Krtek a lízátko
+  year: 1970
+  directors:
+  - Zdeněk Miler
+  runtime_min: 8
+  watch_url: https://www.youtube.com/watch?v=4AVdVbPhxFo
+  record:
+    text: Krtek a lízátko (1970), directed by Zdeněk Miler; 8:10 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: Among rubbish children left in a park the mole finds a lollipop. Not knowing what it is for, he tries it as a tennis racket, a spade and a road sign. Wasps laugh at him all along, until they stick to the lollipop; two get free by themselves, the third only with the mole's help.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-televizor
+  number: 11
+  title: Krtek a televizor
+  year: 1970
+  directors:
+  - Zdeněk Miler
+  runtime_min: 6
+  watch_url: https://www.youtube.com/watch?v=__6ShpvC_Tw
+  record:
+    text: Krtek a televizor (1970), directed by Zdeněk Miler; 5:30 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole comes up in a garden where a gardener grows flowers. The gardener sees him and a wild chase wrecks the whole garden. Told by the television to destroy moles, the gardener goes out to buy poison; before he is back, the mole and the mouse put the garden right. The gardener throws the poison away and makes peace with the mole.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-paraplicko
+  number: 12
+  title: Krtek a paraplíčko
+  year: 1971
+  directors:
+  - Zdeněk Miler
+  runtime_min: 7
+  watch_url: https://www.youtube.com/watch?v=WesccyQ6V5U
+  record:
+    text: Krtek a paraplíčko (1971), directed by Zdeněk Miler; 7:11 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds an umbrella on a rubbish tip, mends it, and uses it as a boat, a parachute and a sunshade. When he hands out a stolen melon to the animals under it, the melon seller chases him; the mole gets away and the seller rolls off tangled in his own cart. Then it rains, and the mole and the animals shelter under the umbrella.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-malirem
+  number: 13
+  title: Krtek malířem
+  year: 1972
+  directors:
+  - Zdeněk Miler
+  runtime_min: 9
+  watch_url: https://www.youtube.com/watch?v=KTs-LhnUMFs
+  record:
+    text: Krtek malířem (1972), directed by Zdeněk Miler; 9:17 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds lots of paint tins in the forest and falls into one. Red all over, he scares off a wicked fox. Bit by bit he paints all the animals and the whole forest, and the fox runs away in fright.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-koberec
+  number: 14
+  title: Krtek a koberec
+  year: 1974
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=Bh1AnyL6lR4
+  record:
+    text: Krtek a koberec (1974), directed by Zdeněk Miler; 5:22 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds a magic flying carpet.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-muzika
+  number: 15
+  title: Krtek a muzika
+  year: 1974
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=lcY7MY_NT_s
+  record:
+    text: Krtek a muzika (1974), directed by Zdeněk Miler; 5:00 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mouse visits the mole, who is listening to a gramophone. A gale outside breaks the gramophone and the record when the door opens. The mole is sad, until he sees notes falling from the birds' instruments as they play. With the mouse he gathers the notes, makes a dough and moulds a new record, on which the birds' instruments take turns.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-telefon
+  number: 16
+  title: Krtek a telefon
+  year: 1974
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=RYwrCTxF9Oc
+  record:
+    text: Krtek a telefon (1974), directed by Zdeněk Miler; 5:12 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: Digging, the mole hears ringing, follows a cable and digs up a telephone. He plays with it; it rings, says "haló, haló", barks (calmed with a bone), shouts (he pours water on it and it catches a cold), and, wrapped in a scarf and blanket, falls asleep snoring. He dials another number, music plays, and he can sleep in peace.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-zapalky
+  number: 17
+  title: Krtek a zápalky
+  year: 1974
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=X811vvZbYwg
+  record:
+    text: Krtek a zápalky (1974), directed by Zdeněk Miler; 5:08 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: Gathering chestnuts, the mole finds a box of matches. He and the mouse use it as a table, a swing and a boat, and make stools and a table of matches and chestnuts. They tug over a carrot and grate it on a chestnut husk, then make a car of the box and ride downhill; it doesn't survive the ride and the matches catch fire. The mole and the mouse warm themselves at them late into the night.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-hodinarem
+  number: 18
+  title: Krtek hodinářem
+  year: 1974
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=lfmQoI5Mur8
+  record:
+    text: Krtek hodinářem (1974), directed by Zdeněk Miler; 5:08 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds a cuckoo clock in a tree. He swings on its pendulum but the mischievous cuckoo pesters him. The clock falls and breaks; he puts it back together but the cuckoo won't call. A feather pushed into the clock comes out shredded; a screwdriver comes out as the missing spring. He puts it in, the clock works, and the mole and the cuckoo play marbles.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-chemikem
+  number: 19
+  title: Krtek chemikem
+  year: 1974
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=h8xO4PiJ--w
+  record:
+    text: Krtek chemikem (1974), directed by Zdeněk Miler; 5:25 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds a chemistry set and experiments until he makes a mixture that spews out coloured cubes. At the last moment he sprays them with another chemical and they dissolve.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-buldozer
+  number: 20
+  title: Krtek a buldozer
+  year: 1975
+  directors:
+  - Zdeněk Miler
+  runtime_min: 6
+  watch_url: https://www.youtube.com/watch?v=zalSHd-B26c
+  record:
+    text: Krtek a buldozer (1975), directed by Zdeněk Miler; 5:43 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole saves a flower bed from a bulldozer building a road. He digs a pit for the bulldozer to fall into, and meanwhile marks out a route around the flowers.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-karneval
+  number: 21
+  title: Krtek a karneval
+  year: 1975
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=WXbkiXqOpvk
+  record:
+    text: Krtek a karneval (1975), directed by Zdeněk Miler; 5:14 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-vejce
+  number: 22
+  title: Krtek a vejce
+  year: 1975
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=9XjgsdslX5A
+  record:
+    text: Krtek a vejce (1975), directed by Zdeněk Miler; 5:15 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole finds an egg but doesn't know whose it is. He sees trays of eggs going to a factory and joins them with his egg, which hatches into a chick. Together they ride through a biscuit factory, and in the end find a crying hen, happy to have her chick back.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-fotografem
+  number: 23
+  title: Krtek fotografem
+  year: 1975
+  directors:
+  - Zdeněk Miler
+  runtime_min: 6
+  watch_url: https://www.youtube.com/watch?v=j5plTC3psKA
+  record:
+    text: Krtek fotografem (1975), directed by Zdeněk Miler; 5:33 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mouse has a camera. The mole offers her one thing after another for it, and finally swaps a clockwork cat. When he goes to photograph frogs, a chestnut falls from a tree and breaks the camera. In the end he draws whoever wants a picture on the backs of the photo papers.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-na-pousti
+  number: 24
+  title: Krtek na poušti
+  year: 1975
+  directors:
+  - Zdeněk Miler
+  runtime_min: 6
+  watch_url: https://www.youtube.com/watch?v=AheExCxJxlo
+  record:
+    text: Krtek na poušti (1975), directed by Zdeněk Miler; 5:35 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-o-vanocich
+  number: 25
+  title: Krtek o Vánocích
+  year: 1975
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  watch_url: https://www.youtube.com/watch?v=cZQFpvKhbyw
+  record:
+    text: Krtek o Vánocích (1975), directed by Zdeněk Miler; 5:26 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-ve-meste
+  number: 26
+  title: Krtek ve městě
+  year: 1982
+  directors:
+  - Zdeněk Miler
+  runtime_min: 28
+  watch_url: https://www.youtube.com/watch?v=D6u8MZti8FU
+  record:
+    text: Krtek ve městě (1982), directed by Zdeněk Miler; 28:28 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-ve-snu
+  number: 27
+  title: Krtek ve snu
+  year: 1984
+  directors:
+  - Zdeněk Miler
+  runtime_min: 28
+  watch_url: https://www.youtube.com/watch?v=bq3i1zjAIa4
+  record:
+    text: Krtek ve snu (1984), directed by Zdeněk Miler; 28:01 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-medicina
+  number: 28
+  title: Krtek a medicína
+  year: 1987
+  directors:
+  - Zdeněk Miler
+  runtime_min: 28
+  watch_url: https://www.youtube.com/watch?v=JaufuWSedI4
+  record:
+    text: Krtek a medicína (1987), directed by Zdeněk Miler; 28:04 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-filmova-hvezda
+  number: 29
+  title: Krtek filmová hvězda
+  year: 1988
+  directors:
+  - Zdeněk Miler
+  runtime_min: 28
+  watch_url: https://www.youtube.com/watch?v=cY_WMN51Hzk
+  record:
+    text: Krtek filmová hvězda (1988), directed by Zdeněk Miler; 27:47 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: One of the long films. The mole is invited to a film shoot and makes films with each of the meadow's animals in turn.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-orel
+  number: 30
+  title: Krtek a orel
+  year: 1992
+  directors:
+  - Zdeněk Miler
+  runtime_min: 28
+  watch_url: https://www.youtube.com/watch?v=2Un-sNSGNv8
+  record:
+    text: Krtek a orel (1992), directed by Zdeněk Miler; 27:59 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-hodiny
+  number: 31
+  title: Krtek a hodiny
+  year: 1994
+  directors:
+  - Zdeněk Miler
+  runtime_min: 28
+  watch_url: https://www.youtube.com/watch?v=LfWS47WcdDw
+  record:
+    text: Krtek a hodiny (1994), directed by Zdeněk Miler; 28:00 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-kachnicky
+  number: 32
+  title: Krtek a kachničky
+  year: 1995
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a kachničky (1995), directed by Zdeněk Miler; 5:21 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-kamaradi
+  number: 33
+  title: Krtek a kamarádi
+  year: 1995
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a kamarádi (1995), directed by Zdeněk Miler; 5:19 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-oslava
+  number: 34
+  title: Krtek a oslava
+  year: 1995
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a oslava (1995), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-robot
+  number: 35
+  title: Krtek a robot
+  year: 1995
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a robot (1995), directed by Zdeněk Miler; 5:21 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-uhli
+  number: 36
+  title: Krtek a uhlí
+  year: 1995
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a uhlí (1995), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-weekend
+  number: 37
+  title: Krtek a weekend
+  year: 1995
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a weekend (1995), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list. Also titled Krtek a víkend.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-houby
+  number: 38
+  title: Krtek a houby
+  year: 1997
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a houby (1997), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-maminka
+  number: 39
+  title: Krtek a maminka
+  year: 1997
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a maminka (1997), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole meets a hare and his mate, watches them court, and some time later helps the doe give birth.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-metro
+  number: 40
+  title: Krtek a metro
+  year: 1997
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a metro (1997), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole is digging a long tunnel when he remembers the robot he has hidden (from Krtek a robot). The robot digs a tunnel to the sea, and the mole goes there with the mouse, the hedgehog and the hare. They meet a crab, then a shark swallows the hare; the robot catches the shark, hauls it to the shore and makes it spit the hare out. They all ride back through the tunnel by train.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-myska
+  number: 41
+  title: Krtek a myška
+  year: 1997
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a myška (1997), directed by Zdeněk Miler; 5:19 per cs-wikipedia's list. Also titled Krtek a potopa.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-snehulak
+  number: 42
+  title: Krtek a sněhulák
+  year: 1997
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a sněhulák (1997), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list. en-wikipedia dates it 1998.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+    - en-wikipedia-little-mole
+- id: krtek-a-zajicek
+  number: 43
+  title: Krtek a zajíček
+  year: 1997
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a zajíček (1997), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-fletna
+  number: 44
+  title: Krtek a flétna
+  year: 1999
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a flétna (1999), directed by Zdeněk Miler; 5:16 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-pramen
+  number: 45
+  title: Krtek a pramen
+  year: 1999
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a pramen (1999), directed by Zdeněk Miler; 5:19 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-stoura
+  number: 46
+  title: Krtek a šťoura
+  year: 1999
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a šťoura (1999), directed by Zdeněk Miler; 5:22 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-vlastovka
+  number: 47
+  title: Krtek a vlaštovka
+  year: 2000
+  directors:
+  - Zdeněk Miler
+  runtime_min: 6
+  record:
+    text: Krtek a vlaštovka (2000), directed by Zdeněk Miler; 5:50 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-rybka
+  number: 48
+  title: Krtek a rybka
+  year: 2000
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a rybka (2000), directed by Zdeněk Miler; 5:17 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole saves a little fish from a wicked pike.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+- id: krtek-a-zabka
+  number: 49
+  title: Krtek a žabka
+  year: 2002
+  directors:
+  - Zdeněk Miler
+  runtime_min: 5
+  record:
+    text: Krtek a žabka (2002), directed by Zdeněk Miler; 5:20 per cs-wikipedia's list.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu
+  synopsis:
+    text: The mole drives the mouse to a disco in a car; a careless frog runs into the road. In the crash the mole nearly dies (the mouse and the frog put his little soul back into his body). The frog nurses him and all ends well.
+    status: sourced
+    sources:
+    - cs-wikipedia-seznam-dilu

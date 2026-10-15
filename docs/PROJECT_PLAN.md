@@ -9,16 +9,16 @@ decided and why.
 1. **Krecik (Krtek), the second cartoon** (Adam, 2026-10-15: Eliot is a
    big fan), with its own home scene (`docs/DECISIONS.md`: one scene per
    cartoon, not a game per episode). Track Adam's build hours from day one:
-   how long a new world takes is the collection's real question.
-   - A `new-world` skill, written from how Reksio's dossier was made, then
-     the run: `world.yaml`, `sources.yaml`, the episode catalogue, the
-     intro, and a look at a few episodes for what its characters do and how
-     they are funny (no beat-by-beat breakdown per game). Early in it: who
-     holds the rights, and whether he has a voice (laughs, little words)
-     and what we do about it (original, as the barks, or our own).
+   how long a new world takes is the collection's real question
+   (`worlds/krtek/hours.md`).
+   - **Adam decides the mole's voice** (the original exclamations, cut from
+     the films as the barks were; our own; or none), after listening to a
+     film or two (Hodinářem first). The world (`worlds/krtek/`) is done
+     otherwise; its `open_questions` wait, rights before release.
    - Its scene's brief (`games/<scene>/brief.yaml`), like the yard's: a day
-     in his place (likely a meadow and the ground under it, not a yard:
-     check), every part `original`, `inspired` or `invented`. Aim for a
+     at the molehill (the den under it, the flower bed and spring in front,
+     the meadow; `design_notes` in `world.yaml`), every part `original`,
+     `inspired` or `invented`. Aim for a
      first playable scene, not the yard's depth: a day with an ending, 4–5
      things to do, a couple of creatures, sound and music; then deepen it
      from what Eliot does.

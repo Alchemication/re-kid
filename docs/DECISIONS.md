@@ -96,8 +96,8 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   feel, not the notes; findings in `experiments/music/README.md`, procedure
   in the `new-music` skill. Retro recipe, as the effects.
 - **Procedures become skills, improved by every run** (2026-10-07), so
-  someone other than Adam can run them. `new-world` waits for a second
-  cartoon.
+  someone other than Adam can run them. `new-world` is drafted
+  thin, before its first run (Krecik), and shaped by that run's retro.
 
 ## The original brief
 

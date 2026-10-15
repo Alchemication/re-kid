@@ -1,0 +1,9 @@
+# Hours on Krtek
+
+Adam's time only. Each session's span comes from its Claude Code transcript
+(first to last message); Adam corrects it for breaks and adds time spent away
+from the session (watching, listening, playtests).
+
+| Date | Hours | What |
+|---|---|---|
+| 2026-10-15 | 0.7 (20:20–21:00, to confirm) | `new-world` drafted; rights, voice, sources, the 49-film catalogue, a frame pass over Eliot's five favourites, the dossier |
