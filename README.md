@@ -187,7 +187,8 @@ Flags in the page address (`main.py play` takes the first three):
 
 In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 `?day=S` (a day S seconds long: `?day=60` to see the evening and the
-ending in a minute) work the same; in the console, `meadowGame.state()`,
+ending in a minute) work the same; `?props=egg` says which encounters come
+(`?props=` for none) and `?soon` brings the first at once. In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 
 In the yard's console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,

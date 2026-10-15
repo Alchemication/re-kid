@@ -263,6 +263,7 @@ before a commit.
 | `input.js`, taps and keys | `"TestRealInput"` |
 | screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
+| Krtek's meadow (`worlds/krtek/games/meadow`, `tests/test_meadow_browser.py`) | `"Meadow"` |
 
 **Adding a gag:** run the `new-gag` skill; it has the steps and where each
 piece goes. Every gag gets its rows in the `test_game_browser.py` tables, a

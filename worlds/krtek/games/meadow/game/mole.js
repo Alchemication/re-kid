@@ -23,7 +23,7 @@ const Mole = (() => {
   const life = Debug.random('mole-life') // blinks and glances: their own stream
 
   const state = { x: 0, pose: 'down', busy: null, carrying: false }
-  let root, body, eyes, lids, pupils, arms, can, feet, tunnel, inLayer, outLayer
+  let root, body, tilt, eyes, lids, pupils, arms, can, feet, tunnel, inLayer, outLayer, carrySlot, hatSlot
 
   const el = (tag, attrs = {}, parent) => {
     const e = document.createElementNS(SVG, tag)
@@ -39,7 +39,8 @@ const Mole = (() => {
     outLayer = grass
     root = el('g', { class: 'mole' }, layer)
     body = el('g', { class: 'mole-body' }, root)
-    const art = el('g', {}, body)
+    tilt = el('g', { class: 'mole-tilt' }, body) // leaning: an ear to the egg, a tug at a pole
+    const art = el('g', {}, tilt)
     art.style.transform = `scale(${SCALE})`
     feet = el('g', { class: 'mole-feet' }, art)
     el('ellipse', { cx: -20, cy: -6, rx: 20, ry: 9, fill: '#f2a0a6', stroke: '#15140f', 'stroke-width': 3 }, feet)
@@ -71,6 +72,8 @@ const Mole = (() => {
     el('path', { d: 'M44 -66 q15 -22 30 0', stroke: '#15140f', 'stroke-width': 4, fill: 'none' }, can)
     can.style.transformOrigin = '58px -46px'
     can.style.display = 'none'
+    carrySlot = el('g', { class: 'mole-carry', transform: 'translate(0 -196)' }, art) // what he holds up over his head
+    hatSlot = el('g', { class: 'mole-hat', transform: 'translate(2 -142)' }, art) // what sits on his head
     tunnel = el('g', { class: 'tunnel' }, ground)
     blink()
     glance()
@@ -109,10 +112,11 @@ const Mole = (() => {
 
   /** Cut every gesture short: he stays where it was taking him. */
   function relax() {
-    for (const e of [root, body, ...arms.children, can]) e.getAnimations().forEach((a) => a.cancel())
+    for (const e of [root, body, tilt, ...arms.children, can, carrySlot]) e.getAnimations().forEach((a) => a.cancel())
     for (const b of [...tunnel.children]) b.remove()
-    arms.children[0].style.transform = arms.children[1].style.transform = ''
+    armsUp(!!carrySlot.firstChild)
     can.style.transform = ''
+    tilt.style.transform = ''
     state.busy = null
   }
 
@@ -184,9 +188,13 @@ const Mole = (() => {
 
   /** Take up the watering can, or put it down. */
   function hold(on) {
-    state.carrying = on
     can.style.display = on ? '' : 'none'
+    state.carrying = on || !!carrySlot.firstChild
   }
+
+  /** The middle of his head, in scene units: where something lands on it. */
+  const head = () => ({ x: state.x, y: Y + SINK[state.pose] - 150 * SCALE })
+
 
   /** Tip the can: filling it at the spring (down) or watering (forward). */
   async function tip(deg, ms) {
@@ -198,8 +206,48 @@ const Mole = (() => {
     put(state.x, on ? 'listen' : 'hill')
   }
 
+  /** Both arms up (holding something over his head) or down. */
+  function armsUp(on) {
+    arms.children[0].style.transform = on ? 'rotate(150deg)' : ''
+    arms.children[1].style.transform = on ? 'rotate(-150deg)' : ''
+  }
+
+  /** Hold `node` (an SVG group drawn round 0,0) up over his head, or put it down (null). Returns what he held. */
+  function carry(node) {
+    const had = carrySlot.firstChild
+    if (had) had.remove()
+    if (node) carrySlot.appendChild(node)
+    armsUp(!!node)
+    state.carrying = !!node || can.style.display !== 'none'
+    return had
+  }
+
+  /** Put `node` on his head (null: take it off). Returns what was there. */
+  function wear(node) {
+    const had = hatSlot.firstChild
+    if (had) had.remove()
+    if (node) hatSlot.appendChild(node)
+    return had
+  }
+
+  /** Lean towards (deg > 0: forward, to his right) and back: an ear to something, a tug. */
+  async function lean(deg, ms = 900) {
+    await Motion.endAt(tilt, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${deg}deg)`, offset: 0.3 }, { transform: `rotate(${deg}deg)`, offset: 0.75 }, { transform: 'rotate(0deg)' }], { duration: ms })
+  }
+
+  /** Knock twice with his right hand: on an egg, on a pole. */
+  async function knock() {
+    const right = arms.children[1]
+    await Motion.endAt(right, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-70deg)', offset: 0.2 }, { transform: 'rotate(-30deg)', offset: 0.4 }, { transform: 'rotate(-70deg)', offset: 0.6 }, { transform: 'rotate(-30deg)', offset: 0.8 }, { transform: 'rotate(0deg)' }], { duration: 900 })
+  }
+
+  /** Shake what he holds overhead: it wobbles in his hands. */
+  async function wobble(ms = 900) {
+    await Motion.endAt(carrySlot, [{ transform: 'translate(0px, -196px) rotate(0deg)' }, { transform: 'translate(-6px, -196px) rotate(-12deg)', offset: 0.25 }, { transform: 'translate(6px, -196px) rotate(12deg)', offset: 0.5 }, { transform: 'translate(-4px, -196px) rotate(-8deg)', offset: 0.75 }, { transform: 'translate(0px, -196px) rotate(0deg)' }], { duration: ms })
+  }
+
   /** Where the can's spout is now, in scene units, while he waters. */
   const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
 
-  return { state, spout, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
+  return { SCALE, state, spout, head, carry, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
 })()

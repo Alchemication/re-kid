@@ -157,16 +157,6 @@ CRITTERS = {"fly": "fly", "bee": "bee", "spider": "spider"}
 CRITTER_NEEDS = {"snail": "a snail, after rain", "worm": "worms, after rain"}
 
 
-@pytest.fixture(scope="session")
-def browser() -> Iterator[object]:
-    with playwright.sync_playwright() as p:
-        b = p.chromium.launch(
-            channel="chrome"
-        )  # the bundled Chromium can't decode the game's audio
-        yield b
-        b.close()
-
-
 class Yard:
     """One open play of the yard, collecting what went wrong."""
 

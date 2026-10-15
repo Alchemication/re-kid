@@ -3,8 +3,9 @@
 // stands left of the middle with the flower bed in front of it and the
 // spring to the right, as in Krtek a buldozer.
 //
-// Flags: `?day=N` makes the day N seconds long instead of five minutes, for
-// trying the evening and the ending (README).
+// Flags (README): `?day=N` makes the day N seconds long instead of five
+// minutes, for trying the evening and the ending; `?props=egg,poles` says
+// which encounters come (things.js), and `?soon` brings the first at once.
 
 /* exported Layout */
 const Layout = (() => {
@@ -16,7 +17,8 @@ const Layout = (() => {
 
   const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
   const daySeconds = Number(params.get('day'))
-  const flags = { day: daySeconds > 0 ? daySeconds : null }
+  const props = params.has('props') ? params.get('props').split(',').filter(Boolean) : null
+  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon') }
 
   return { GROUND, HOME, BED, SPRING, DIG, flags, dayMs: flags.day ? flags.day * 1000 : null }
 })()

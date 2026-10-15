@@ -160,5 +160,48 @@ const Sound = (() => {
     if (fiddle) fiddle.stop()
   }
 
-  return { ensure, say, dig, pop, water, cricket, quiet }
+  /** Something round rolling through the grass. */
+  function roll(seconds) {
+    if (!ready()) return
+    for (let t = 0; t < seconds; t += 0.12) hiss(t, 0.14, 500 + Math.random() * 200, 2, 0.06 * (1 - t / seconds))
+  }
+
+  /** Knock knock, on an eggshell. */
+  function knock() {
+    if (!ready()) return
+    for (const at of [0.18, 0.5]) {
+      note(1400, at, 0.05, 0.22, 'triangle', 0.6)
+      hiss(at, 0.03, 3000, 2, 0.12)
+    }
+  }
+
+  /** The mouse: two little squeaks. */
+  function squeak() {
+    if (!ready()) return
+    note(2200, 0, 0.09, 0.08, 'sine', 1.3)
+    note(2500, 0.14, 0.08, 0.07, 'sine', 1.25)
+  }
+
+  /** The chick: a few high peeps. */
+  function peep() {
+    if (!ready()) return
+    for (let i = 0; i < 3; i++) note(2600 + Math.random() * 400, i * 0.16, 0.08, 0.07, 'sine', 1.4)
+  }
+
+  /** The shell cracking. */
+  function crack() {
+    if (!ready()) return
+    for (let i = 0; i < 4; i++) hiss(i * 0.04, 0.05, 2400 + i * 400, 4, 0.3)
+  }
+
+  /** The hen: a soft "bok bok bok". */
+  function cluck() {
+    if (!ready()) return
+    for (let i = 0; i < 3; i++) {
+      note(420 - i * 20, i * 0.2, 0.11, 0.12, 'square', 0.7)
+      hiss(i * 0.2, 0.06, 1200, 3, 0.05)
+    }
+  }
+
+  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck }
 })()

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -121,3 +122,14 @@ def worlds_root(tmp_path: Path) -> Path:
     (base / "world.yaml").write_text(yaml.safe_dump(minimal_dossier()))
     (base / "sources.yaml").write_text(yaml.safe_dump(minimal_sources()))
     return tmp_path / "worlds"
+
+
+@pytest.fixture(scope="session")
+def browser() -> Iterator[object]:
+    """The installed Chrome, one per test worker, for every browser test (the
+    bundled Chromium can't decode the games' audio)."""
+    sync_api = pytest.importorskip("playwright.sync_api")
+    with sync_api.sync_playwright() as p:
+        b = p.chromium.launch(channel="chrome")
+        yield b
+        b.close()

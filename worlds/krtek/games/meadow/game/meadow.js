@@ -12,7 +12,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Clock, Day, Debug, Layout, Mole, Motion, Sound */
+/* global Clock, Day, Debug, Friends, Layout, Mole, Motion, Sound, Things */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -163,6 +163,7 @@ const meadowGame = (() => {
       t.left.style.transform = `rotate(${-34 * open}deg)`
       t.right.style.transform = `rotate(${34 * open}deg)`
     }
+    if (!game.ended) Things.tick(h)
     if (Day.cricket(h) && !cricket.classList.contains('out')) {
       cricket.classList.add('out')
       Debug.trace('cricket', { hour: Day.clock(h) })
@@ -180,7 +181,7 @@ const meadowGame = (() => {
 
   function stateNow() {
     const m = Mole.state
-    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length }
+    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state() }
   }
 
   function checkRules() {
@@ -188,26 +189,50 @@ const meadowGame = (() => {
     Debug.check('the mole is in the meadow', m.x >= DIG.from - 1 && m.x <= DIG.to + 1, { x: m.x })
     if (game.awake && !game.ended && !game.gesture) {
       Debug.check('a free mole stands', m.pose !== 'down', { pose: m.pose })
+      Debug.check('a free mole holds nothing', !m.carrying, {})
+      Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
     }
   }
 
   // ------------------------------------------------------------ what he does
 
-  /** Run a gesture, cutting short the one under way; whatever it leaves, he ends settled. */
-  function run(name, fn) {
+  /** Run a gesture, cutting short the one under way; whatever it leaves, he ends settled. `fn(alive)`
+   * should stop once alive() is false; `onCut` puts back what it moved if it is cut short. */
+  function run(name, fn, onCut = null) {
     if (game.gesture) Debug.trace('cut', { gesture: game.gesture, by: name })
-    Mole.relax()
-    settle()
+    cutShort()
     game.gesture = name
     const mine = Symbol(name)
     game.token = mine
+    game.onCut = onCut
     Debug.trace('gesture', { name })
-    Debug.ignoreCut(fn(), name).then(() => {
+    Debug.ignoreCut(fn(() => game.token === mine), name).then(() => {
       if (game.token !== mine) return
       game.gesture = null
+      game.onCut = null
       settle()
     })
+  }
+
+  /** Cut the gesture under way short: he stops where it was taking him, and
+   * whatever it moved is put back (its onCut), then he is settled. */
+  function cutShort() {
+    const cut = game.onCut
+    game.onCut = null
+    game.token = Symbol('cut')
+    Mole.relax()
+    if (cut) cut()
+    settle()
+  }
+
+  /** Get him out on the grass at x: tunnel there and climb out, or waddle if he's out already. */
+  async function goTo(x) {
+    x = clampX(x)
+    const m = Mole.state
+    if (m.pose === 'out') return Mole.walkTo(x)
+    if (Math.abs(x - m.x) > 50) await digTo(x)
+    await Mole.comeUp('out')
   }
 
   /** After a cut: he stands where he was going, with a molehill under him if he is in the ground. */
@@ -226,12 +251,24 @@ const meadowGame = (() => {
     const m = Mole.state
     if (Math.abs(x - m.x) < 50 && m.pose !== 'out') return Mole.cheer()
     if (m.pose === 'out' && !hillAt(m.x)) hill(m.x)
+    dropHat()
     Sound.dig()
     await Mole.goDown()
     await Mole.tunnelTo(x)
     if (!hillAt(x)) hill(x)
     Sound.pop()
     await Mole.comeUp('hill')
+  }
+
+  /** Whatever is on his head falls off as he dives: it lies on the grass a moment and fades. */
+  function dropHat() {
+    const hat = Mole.wear(null)
+    if (!hat) return
+    const { x, y } = Mole.head()
+    const g = el('g', {}, document.getElementById('things'))
+    g.appendChild(hat)
+    const s = `scale(${Mole.SCALE})` // drawn at his size, as it was on his head
+    Motion.endAt(g, [{ transform: `translate(${x}px, ${y}px) ${s}` }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, offset: 0.4 }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, opacity: 0 }], { duration: 2400 }).then(() => g.remove(), () => g.remove())
   }
 
   async function tapMole() {
@@ -310,8 +347,8 @@ const meadowGame = (() => {
   async function bedtime() {
     game.ended = true
     Debug.trace('bedtime')
-    Mole.relax()
-    settle()
+    cutShort()
+    Things.night()
     game.gesture = 'bedtime'
     if (Math.abs(Mole.state.x - HOME) > 50 || Mole.state.pose === 'out') await Debug.ignoreCut(digTo(HOME), 'home to bed')
     Mole.put(HOME, 'hill')
@@ -341,6 +378,7 @@ const meadowGame = (() => {
     [/^wake$/, () => wake()],
     [/^tap mole$/, () => run('tap mole', tapMole)],
     [/^water$/, () => run('water', water)],
+    [/^use ([a-z]+)$/, (m) => Things.use(m[1]) || run('tap mole', tapMole)],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
   ]
 
@@ -365,7 +403,10 @@ const meadowGame = (() => {
 
   /** What a tap at this point means. */
   function intentAt(target, p) {
-    if (target.closest('.mole')) return 'tap mole'
+    const thing = target.closest('[data-thing]')
+    if (thing) return `use ${thing.dataset.thing}`
+    // a tap on him while an encounter plays is a tap on it (he holds the egg): it hurries it on
+    if (target.closest('.mole')) return game.gesture && Things.get(game.gesture) ? `use ${game.gesture}` : 'tap mole'
     if (target.closest('#bed') || target.closest('#spring')) return 'water'
     if (p.y > 560) return `dig to ${Math.round(clampX(p.x))}`
     return 'tap mole' // the sky: he answers anyway
@@ -397,10 +438,18 @@ const meadowGame = (() => {
   // ------------------------------------------------------------ start
 
   makeScene()
-  Debug.pin({ flags: Layout.flags.day ? { day: Layout.flags.day } : {}, layout: { home: HOME, spring: SPRING } })
+  Friends.setup(document.getElementById('friends'))
+  const things = Things.setup({
+    run,
+    goTo,
+    free: () => game.awake && !game.ended && !game.gesture,
+    alone: () => Clock.now() - game.lastInput,
+    busyWith: () => game.gesture,
+  })
+  Debug.pin({ flags: { ...(Layout.flags.day ? { day: Layout.flags.day } : {}), props: things.join(',') }, layout: { home: HOME, spring: SPRING, things } })
   Debug.record(stateNow)
   Clock.every(TICK_MS, tick)
   Clock.after(WAKE_ANYWAY_MS, () => { if (!game.awake) perform('wake') })
 
-  return { perform, state: stateNow, trace: () => Debug.dump() }
+  return { perform, state: stateNow, trace: () => Debug.dump(), things: Things.names(), detail: (name) => Things.get(name).detail() }
 })()

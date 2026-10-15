@@ -24,6 +24,9 @@ principles:
   origin: inspired
   refs: [world:episode_formula, 'world:design_notes[1]']
 
+- text: The meadow is one screen, so its encounters don't stand about from the start. Each arrives at its own hour (about 09:00, 12:00 and 15:00), one at a time, and waits; a tap on it sets him going, and left alone a while he goes by himself. Each play brings one where he helps someone, one where someone helps him and one to discover, as in the yard. Left alone, a chain plays on like a little cartoon; a tap on the thing hurries it to its next step, and a tap anywhere else cuts it short, to be picked up later where it stopped.
+  origin: invented
+
 controls:
   text: 'Tap or click: on the meadow, he digs there and pops up; on the mole, a giggle or a word and a little hop; on the flower bed, he fetches water from the spring and waters it. Keyboard for the grown-up: arrows dig a little way left or right, space does whatever is nearest, any other key gets a word from him.'
   origin: invented
@@ -93,6 +96,17 @@ scenes:
     refs: ['world:characters[krtek].moves[waters-the-flowers].claim']
   sound:
     text: Water filling the can, a sprinkle.
+    origin: invented
+- id: egg
+  action:
+    text: An egg rolls into the meadow and stops in the grass; tap it, or leave him be and he goes to it himself.
+    origin: invented
+  result:
+    text: He knocks on it and puts his ear to it. Whose is it? He holds it up over his head and asks - the mouse pops out of her hole and shakes her head, the hare hops in and shakes his. Then the egg wobbles in his hands and cracks, a chick hatches, and the top of the shell lands on his head like a hat. The hen comes clucking along looking for her chick, it runs to her, and they go off together. He keeps the hat until he next dives into the ground. He helps someone.
+    origin: inspired
+    refs: [world:episode_formula, 'world:characters[krtek].moves[carries-overhead].claim', 'world:characters[myska].description', 'world:characters[zajic].description']
+  sound:
+    text: The egg rolling, a knock knock, his "ooh", a squeak, peeps, the crack and his squeak of fright, a giggle, the hen's bok bok.
     origin: invented
 - id: dusk
   action:
