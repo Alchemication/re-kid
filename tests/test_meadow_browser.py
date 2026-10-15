@@ -28,7 +28,7 @@ DONE_MS = 60_000  # the longest encounter runs well under this
 CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has.
-ENCOUNTERS = {"egg": 5, "paint": 5, "poles": 5}
+ENCOUNTERS = {"car": 6, "egg": 5, "paint": 5, "poles": 5}
 
 
 class Meadow:
@@ -212,3 +212,40 @@ class TestMeadowEncounters:
         m.wait("meadowGame.state().ended && !meadowGame.state().busy", 40_000)
         assert m.page.evaluate(f"meadowGame.detail('{name}').cast") == []
         assert not m.errors, m.errors
+
+
+class TestMeadowCar:
+    def test_once_mended_a_tap_gives_another_ride(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=car")
+        m.wake()
+        arrived(m, "car")
+        m.do("use car")
+        m.wait("meadowGame.state().things.car === 'done'")
+        m.wait_free()
+        m.do("use car")
+        m.wait("meadowGame.state().busy === 'car'", 2_000)
+        m.wait("meadowGame.detail('car').riding", 10_000)
+        m.do("use car")  # a tap while it rides is part of the ride
+        assert m.state()["busy"] == "car"
+        m.wait_free()
+        m.assert_settled()
+        assert not m.page.evaluate("meadowGame.detail('car').riding")
+
+    def test_a_cut_mid_ride_leaves_him_in_the_meadow(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=car")
+        m.wake()
+        arrived(m, "car")
+        m.do("use car")
+        m.wait("meadowGame.state().things.car === 'done'")
+        m.wait_free()
+        m.do("use car")
+        m.wait("meadowGame.detail('car').riding", 10_000)
+        m.page.wait_for_timeout(900)  # zooming towards the spring
+        m.do("tap mole")
+        m.wait_free()
+        m.assert_settled()
+        assert 140 <= m.state()["x"] <= 1460
+        m.do("use car")  # it sets off facing the spring again
+        m.wait("meadowGame.detail('car').riding", 10_000)
+        m.wait_free()
+        m.assert_settled()

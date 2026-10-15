@@ -132,6 +132,18 @@ scenes:
   sound:
     text: Tins dropped, a splash and his squeak of fright, his "ooh", brushes swished, a giggle, a low cartoon "boo", the fox's yelp, the spring's splash.
     origin: invented
+- id: car
+  action:
+    text: A toy car lies broken in the grass left of his molehill, its two wheels off beside it. Tap it or a wheel, or leave him be.
+    origin: inspired
+    refs: [world:episode_formula]
+  result:
+    text: He knocks on it and goes "ooh". He fetches a wheel and pops it on; the second slips out of his hands and rolls off towards his flowers, and he chases it back. He winds the key on its back, climbs in, and it shoots off backwards, then zooms across the meadow to the spring, turns, and brings him back to park by his molehill, where it stays all day. Once it is mended, a tap on it gives him another ride. In the film a boy smashes the car and the mole has it mended at a car service; mending it himself, the runaway wheel and the backwards start are ours. Something to discover.
+    origin: inspired
+    refs: [world:episode_formula, 'world:characters[krtek].moves[bounces-on-seat].claim', 'world:characters[krtek].moves[asleep-in-den].claim']
+  sound:
+    text: A knock knock, his "ooh", a wheel rolling away and his squeak, a pop as each goes on, the key's ratchet, "ahoj", the clockwork whirr, a giggle.
+    origin: invented
 - id: dusk
   action:
     text: Nothing; the sun goes down at 19:00.
@@ -165,7 +177,7 @@ parent_card:
   origin: invented
 
 open_questions:
-- Which encounters come first, and do they follow the yard's rule (each play offers something to discover, someone to help, and a moment when someone helps him)? Eliot's favourites (Adam, 2026-10-15) - traffic cones (the survey poles of Krtek a buldozer), eggs on the factory's conveyor belt (Vejce), the animals painting themselves to scare off the fox (Malířem), and a lot of Krtek a autíčko. Also the cuckoo clock he mends (Hodinářem). Built - the egg, the poles (Eliot's cones are the survey poles) and the paint.
+- Which encounters come first, and do they follow the yard's rule (each play offers something to discover, someone to help, and a moment when someone helps him)? Eliot's favourites (Adam, 2026-10-15) - traffic cones (the survey poles of Krtek a buldozer), eggs on the factory's conveyor belt (Vejce), the animals painting themselves to scare off the fox (Malířem), and a lot of Krtek a autíčko. Also the cuckoo clock he mends (Hodinářem). Built - the egg, the poles (Eliot's cones are the survey poles), the paint and the car.
 - Does a slow-closing circle over the last hour read as "bedtime is coming", or as the game going away?
 - Should the molehills he leaves sink by evening, or stay all day as a map of where he has been?
 - Which friends visit the meadow - the mouse first?

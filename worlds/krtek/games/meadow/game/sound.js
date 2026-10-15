@@ -253,5 +253,21 @@ const Sound = (() => {
     note(900, 0, 0.18, 0.15, 'square', 1.6)
   }
 
-  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp }
+  /** Winding a clockwork key: a ratchet. */
+  function crank() {
+    if (!ready()) return
+    for (let t = 0; t < 1.1; t += 0.09) {
+      note(1800, t, 0.03, 0.08, 'square', 0.8)
+      hiss(t, 0.02, 4000, 3, 0.05)
+    }
+  }
+
+  /** A clockwork toy car whizzing along: a whirr that rises. */
+  function vroom(seconds) {
+    if (!ready()) return
+    note(180, 0, seconds, 0.07, 'sawtooth', 1.8)
+    note(360, 0, seconds, 0.04, 'square', 1.7)
+  }
+
+  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
 })()

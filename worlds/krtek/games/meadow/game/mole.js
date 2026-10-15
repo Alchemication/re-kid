@@ -270,11 +270,22 @@ const Mole = (() => {
   async function perch(dy, ms = 600) {
     const from = lift
     lift = state.lift = dy
-    await Motion.endAt(root, [{ transform: `translate(${state.x}px, ${Y - from}px)` }, { transform: `translate(${state.x}px, ${Y - (from + dy) / 2 - 40}px)`, offset: 0.5 }, { transform: `translate(${state.x}px, ${Y - dy}px)` }], { duration: ms, easing: 'ease-out' })
+    await Motion.endAt(root, [{ transform: rootAt(state.x, from) }, { transform: rootAt(state.x, (from + dy) / 2 + 40), offset: 0.5 }, { transform: rootAt(state.x, dy) }], { duration: ms, easing: 'ease-out' })
+  }
+
+  /** Where his whole figure stands: at x, `dy` above the ground. */
+  const rootAt = (x, dy = 0) => `translate(${x}px, ${Y - dy}px)`
+
+  /** Glide smoothly to x, `dy` up (sitting in the car), over `ms`: riding, not walking. */
+  async function glide(x, ms, dy, easing) {
+    const from = rootAt(state.x, lift)
+    state.x = x
+    lift = state.lift = dy
+    await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
   /** Where the can's spout is now, in scene units, while he waters. */
   const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
 
-  return { SCALE, state, spout, head, carry, paint, dots, perch, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
+  return { SCALE, state, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
 })()

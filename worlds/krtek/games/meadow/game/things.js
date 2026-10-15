@@ -20,6 +20,8 @@
 //   restore(): after a cut, put everything it moved back in a state the
 //     next step can start from, and send its visitors home,
 //   night(): the day is over (bedtime): tidy up, nobody left out,
+//   again (optional): async (alive) => …, what a tap on it does once it is
+//     done (the car: another ride),
 //   detail(): its own state, for the overlay and the tests; `cast`, the
 //     visitors it has out now (none once the mole is free: checkRules).
 // It draws on the meadow's helpers (Things.meadow: goTo) for the mole's trips.
@@ -93,6 +95,10 @@ const Things = (() => {
   /** Go to `name` and play its chain on from where it stopped; a tap while it plays hurries it on. */
   function use(name, tapped = true) {
     const e = all[name]
+    if (e && e.done && e.again) {
+      if (api.busyWith() !== name) api.run(name, e.again, () => e.restore()) // a tap while it plays is part of it
+      return true
+    }
     if (!e || !e.out || e.done) return false
     if (api.busyWith() === name) {
       // a tap on it while it plays hurries it on: the breath before the next step is skipped
