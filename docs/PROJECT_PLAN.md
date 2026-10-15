@@ -23,22 +23,36 @@ decided and why.
      layout rule: the fly and the spider out together).
    - *Help:* the bird drops a twig from its nest; Reksio fetches it back up
      to the wall.
-3. **A second cartoon, with its own home scene** (`docs/DECISIONS.md`:
-   one scene per cartoon, not a game per episode):
-   - Adam picks the cartoon. The runner-up from the start was Kot Filemon;
-     one whose home is shaped like the yard (a house, a yard, small
-     animals) tests what carries over.
+3. **Krecik (Krtek), the second cartoon** (Adam, 2026-10-15: Eliot is a
+   big fan), with its own home scene (`docs/DECISIONS.md`: one scene per
+   cartoon, not a game per episode). Track Adam's build hours from day one:
+   how long a new world takes is the collection's real question.
    - A `new-world` skill, written from how Reksio's dossier was made, then
      the run: `world.yaml`, `sources.yaml`, the episode catalogue, the
      intro, and a look at a few episodes for what its characters do and how
-     they are funny (no beat-by-beat breakdown per game).
+     they are funny (no beat-by-beat breakdown per game). Early in it: who
+     holds the rights, and whether he has a voice (laughs, little words)
+     and what we do about it (original, as the barks, or our own).
    - Its scene's brief (`games/<scene>/brief.yaml`), like the yard's: a day
-     in its place, every part `original`, `inspired` or `invented`.
+     in his place (likely a meadow and the ground under it, not a yard:
+     check), every part `original`, `inspired` or `invented`. Aim for a
+     first playable scene, not the yard's depth: a day with an ending, 4–5
+     things to do, a couple of creatures, sound and music; then deepen it
+     from what Eliot does.
+   - *Longer encounters* than Reksio's (Eliot found the yard's too short):
+     each a few steps with someone, that he can watch run on, and that any
+     tap still cuts short cleanly (the yard's rule: a cut-short gag leaves
+     him free and standing). A target for the brief; the yard can take it
+     up too.
    - First build step: move what both scenes use (debug.js and the Clock,
      input and the recorder, sound and music, probably the day) out of the
      yard's folder into a shared one both load, and publish it with them
      (`.github/workflows/pages.yml`). Characters stay with their world. Not
      before: the second scene shows what is really shared.
+   - Once both scenes play: a plain page to pick one (two pictures), which
+     loads the scene in place, so the tap that picks it also lets sound
+     play. Not a platform.
+4. **A third cartoon,** the same way; then think about the platform.
 
 ## Alongside, when working nearby
 
@@ -65,6 +79,9 @@ decided and why.
   rolling into the mouse hole, pushed back by the mouse; wasps at fallen
   fruit; a gust shaking fruit down; a butterfly that lands on his nose; a
   fox's eyes under the gate at dusk; ants carrying crumbs; leaves to chase.
+- **An episode as a dream:** Reksio falls asleep in the doghouse and
+  dreams an episode (Kosmonauta's rocket, say), inside the yard: new
+  content for a world without leaving its scene.
 - **A mish-mash scene:** characters from several cartoons in one place,
   once two worlds have their own.
 - **The dossier's gaps:** `open_questions` in `worlds/reksio/world.yaml`
