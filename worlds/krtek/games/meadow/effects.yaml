@@ -1,0 +1,31 @@
+# The mole's voice (schema.effects.EffectSet), packed into game/effects.js by
+# `main.py effects krtek meadow`. Each sound plays one of its takes at random,
+# a little higher or lower each time (sound.js). The takes are in effects/, as made.
+source: 'Made with ElevenLabs sound effects (text to sound) and picked by ear by Adam on the sound board (experiments/sound), 2026-10-15.'
+effects:
+- id: achJo
+  takes:
+  - file: achJo/01.mp3
+    prompt: 'Imagine a 70''s eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl''s delighted, short, rising, breathy, dry studio recording. The word is "ach jo!".'
+- id: ahoj
+  takes:
+  - file: ahoj/01.mp3
+    prompt: 'Imagine a 70''s eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl''s delighted, short, rising, breathy, dry studio recording. The word is "ahoj!".'
+  - file: ahoj/02.mp3
+    prompt: 'Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl''s voice: delighted, short, rising, breathy, a dry studio recording. The sound is the word "ahoj!", a cheerful hello.'
+- id: fright
+  takes:
+  - file: fright/05.mp3
+    prompt: 'Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl''s voice: delighted, short, rising, breathy, a dry studio recording. The sound is a tiny squeak of fright.'
+- id: giggle
+  takes:
+  - file: giggle/01.mp3
+    prompt: 'Imagine a 70''s eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl''s delighted, short, rising, breathy, dry studio recording. The word is "hihihi!".'
+  - file: giggle/02.mp3
+    prompt: 'Imagine a 70''s eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl''s delighted, short, rising, breathy, dry studio recording. The word is "hihihi!".'
+  - file: giggle/03.mp3
+    prompt: 'Imagine a 70''s eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl''s delighted, short, rising, breathy, dry studio recording. The word is "hihihi!".'
+- id: ooh
+  takes:
+  - file: ooh/04.mp3
+    prompt: 'Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl''s voice: delighted, short, rising, breathy, a dry studio recording. The sound is an excited little "ooh!" of discovery.'

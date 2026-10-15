@@ -1,0 +1,29 @@
+/* Krtek's meadow: the scene fills the screen; outside the closing circle it
+   is dark, as the films' iris ending is. */
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+body { touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+#world { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: pointer; }
+
+/* the spring runs all day */
+#spring .flow { stroke-dasharray: 10 14; animation: flow 0.9s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -24; } }
+
+/* the cricket is out only at dusk, fiddling */
+#cricket { visibility: hidden; }
+#cricket.out { visibility: visible; }
+#cricket.out .bow { transform-origin: 17px -67px; animation: bow 0.84s ease-in-out infinite alternate; }
+@keyframes bow { from { transform: rotate(-8deg) translateX(-8px); } to { transform: rotate(6deg) translateX(10px); } }
+
+/* the den: Zs drifting up while he sleeps */
+#den .z { opacity: 0; animation: zee 3s ease-in-out infinite; }
+#den .z2 { animation-delay: 1s; }
+#den .z3 { animation-delay: 2s; }
+#den.waking .z { animation: none; opacity: 0; }
+#den.waking .sleeper { transform-origin: 800px 560px; transform: translateY(-14px) rotate(-4deg); transition: transform 0.6s; }
+@keyframes zee { 0% { opacity: 0; transform: translateY(10px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-40px); } }
+
+/* under ?debug */
+#debug { position: fixed; left: 8px; top: 8px; margin: 0; padding: 6px 8px; max-width: 46vw; max-height: 60vh; overflow: auto; font: 11px/1.3 ui-monospace, monospace; color: #fff; background: #000a; border-radius: 6px; pointer-events: none; white-space: pre-wrap; }
+#bug-button { position: fixed; right: 8px; top: 8px; font: 12px system-ui; }
+
+@media (prefers-reduced-motion: reduce) { #spring .flow, #den .z { animation: none; } }

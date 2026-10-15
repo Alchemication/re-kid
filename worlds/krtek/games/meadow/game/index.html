@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="theme-color" content="#000000">
+  <title>Krtek</title>
+  <link rel="icon" href="data:,"><!-- no icon: keeps the browser from asking for one -->
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <!-- The meadow is 1600 by 900 scene units, one screen wide; a wider or
+       narrower screen shows a little less of the sky or the sides. Everything
+       but the den is inside the circle (#iris) that closes round the molehill
+       at the end of the day. -->
+  <svg id="world" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Krtek in his meadow">
+    <defs>
+      <linearGradient id="sky-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#c9dcf2" />
+        <stop offset="1" stop-color="#f4e3c2" />
+      </linearGradient>
+      <mask id="iris" maskUnits="userSpaceOnUse" x="-200" y="-200" width="2000" height="1300">
+        <rect x="-200" y="-200" width="2000" height="1300" fill="#000" />
+        <circle id="iris-circle" cx="560" cy="630" r="1250" fill="#fff" />
+      </mask>
+    </defs>
+
+    <g mask="url(#iris)">
+      <g id="sky">
+        <rect x="-200" y="-200" width="2000" height="1000" fill="url(#sky-grad)" />
+        <g id="sun"><circle r="58" fill="#f08a2c" /><circle r="58" fill="none" stroke="#f6b25a" stroke-width="6" opacity="0.6" /></g>
+        <g id="moon"><path d="M0 -42 A42 42 0 1 0 0 42 A32 32 0 1 1 0 -42 Z" fill="#f4f1d8" /></g>
+      </g>
+      <g id="back">
+        <g id="far"></g>
+        <g id="back-ground"><path d="M-200 640 C200 600 500 630 800 612 S1300 600 1800 630 V900 H-200 Z" fill="#80b068" /></g>
+        <g id="spring">
+          <path d="M1290 690 c-30 -80 30 -130 90 -110 c50 18 60 80 40 110 z" fill="#8c8a7f" stroke="#3b3a33" stroke-width="3" />
+          <path d="M1300 640 c20 -40 70 -50 100 -20" fill="none" stroke="#6b6a61" stroke-width="4" />
+          <path class="flow" d="M1310 662 c-24 6 -34 18 -40 32" fill="none" stroke="#7fb3ea" stroke-width="12" stroke-linecap="round" />
+          <ellipse cx="1240" cy="700" rx="120" ry="22" fill="#5d96d6" stroke="#2f5d94" stroke-width="3" />
+          <ellipse cx="1230" cy="696" rx="70" ry="9" fill="#a9cdf2" opacity="0.8" />
+        </g>
+      </g>
+      <g id="mole"></g>
+      <g id="front">
+        <g id="front-ground"><path d="M-200 718 C300 712 700 724 1000 716 S1500 712 1800 720 V900 H-200 Z" fill="#a9cf7c" /></g>
+      </g>
+      <g id="top">
+        <g id="tunnels"></g>
+        <g id="mole-out"></g>
+        <g id="bed"></g>
+        <g id="drops"></g>
+        <g id="cricket" transform="translate(360 712)">
+          <ellipse cx="0" cy="-26" rx="26" ry="16" fill="#3d5a1e" stroke="#15140f" stroke-width="2.5" />
+          <circle cx="24" cy="-40" r="12" fill="#3d5a1e" stroke="#15140f" stroke-width="2.5" />
+          <circle cx="28" cy="-43" r="3.5" fill="#fff" /><circle cx="29" cy="-43" r="1.8" fill="#15140f" />
+          <path d="M30 -50 q20 -40 50 -44 M26 -51 q8 -40 32 -54" fill="none" stroke="#15140f" stroke-width="2" />
+          <path d="M-10 -14 l-14 14 M8 -14 l6 14 M-22 -30 l-30 22" stroke="#15140f" stroke-width="3" fill="none" stroke-linecap="round" />
+          <g class="fiddle"><path d="M10 -64 c-10 -10 6 -22 14 -12 c6 -8 20 2 10 12 c4 10 -12 18 -16 8 c-8 6 -16 -2 -8 -8z" fill="#b5651d" stroke="#15140f" stroke-width="2" /></g>
+          <g class="bow"><path d="M-10 -86 L44 -48" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round" /></g>
+        </g>
+      </g>
+    </g>
+
+    <!-- His den under the molehill, where the day begins and ends: an oval of
+         earth in the dark, as Krtek a autíčko opens and closes -->
+    <g id="den">
+      <rect x="-200" y="-200" width="2000" height="1300" fill="#000" />
+      <g class="specks" fill="#b36a2a">
+        <circle cx="560" cy="250" r="3" /><circle cx="1040" cy="300" r="2.5" /><circle cx="480" cy="640" r="3" /><circle cx="1130" cy="620" r="2" />
+        <circle cx="420" cy="420" r="2" /><circle cx="1190" cy="460" r="3" /><circle cx="700" cy="190" r="2" /><circle cx="900" cy="720" r="2.5" />
+      </g>
+      <ellipse cx="800" cy="450" rx="320" ry="230" fill="#c47a35" stroke="#7a4518" stroke-width="10" />
+      <ellipse cx="800" cy="450" rx="290" ry="200" fill="#d78f45" />
+      <g fill="#8a4f1c" opacity="0.6">
+        <circle cx="620" cy="360" r="6" /><circle cx="700" cy="300" r="4" /><circle cx="980" cy="330" r="7" /><circle cx="1010" cy="520" r="5" />
+        <circle cx="610" cy="540" r="5" /><circle cx="880" cy="290" r="4" /><circle cx="760" cy="600" r="6" /><circle cx="930" cy="610" r="4" />
+      </g>
+      <path d="M600 560 q-10 -60 60 -64 h300 q70 4 60 64 q-4 30 -60 30 h-300 q-56 0 -60 -30z" fill="#fbf8ef" stroke="#15140f" stroke-width="3" />
+      <g class="sleeper">
+        <path d="M640 540 c0 -70 70 -110 160 -110 c90 0 150 40 150 100 c0 30 -40 40 -150 40 c-110 0 -160 0 -160 -30z" fill="#15140f" />
+        <path d="M690 488 q14 10 28 0 M738 484 q14 10 28 0" stroke="#fbf8ef" stroke-width="4" fill="none" stroke-linecap="round" />
+        <circle cx="734" cy="512" r="15" fill="#d8322b" stroke="#15140f" stroke-width="2" />
+        <path d="M800 432 q-4 -20 4 -34 M790 434 q-14 -14 -16 -28" stroke="#15140f" stroke-width="3.5" fill="none" stroke-linecap="round" />
+        <ellipse cx="660" cy="552" rx="18" ry="10" fill="#f2a0a6" stroke="#15140f" stroke-width="2" />
+      </g>
+      <g class="zees" fill="none" stroke="#fbf8ef" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path class="z z1" d="M880 380 h22 l-22 24 h22" />
+        <path class="z z2" d="M920 340 h28 l-28 30 h28" />
+        <path class="z z3" d="M966 292 h34 l-34 36 h34" />
+      </g>
+    </g>
+  </svg>
+
+  <script src="debug.js"></script>
+  <script src="effects.js"></script>
+  <script src="layout.js"></script>
+  <script src="day.js"></script>
+  <script src="sound.js"></script>
+  <script src="mole.js"></script>
+  <script src="meadow.js"></script>
+</body>
+</html>

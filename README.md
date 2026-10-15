@@ -40,6 +40,9 @@ src/
   barks.py              cuts the marked original barks into a script for the games
   mark.py               local server for the sound-marking tool
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
+  shared.py             copies shared/ scripts into the games that load them
+shared/                 game scripts every game uses (debug.js: the clock, the recorder, the rules);
+                        `main.py shared` copies each into the games whose page loads it
 worlds/<id>/
   world.yaml            series dossier (schema.world.WorldDossier)
   sources.yaml          every source the world's files cite
@@ -118,6 +121,7 @@ uv run python main.py samples WORLD [GAME]    # rebuilds the game's samples.js
 uv run python main.py effects WORLD [GAME]    # rebuilds the game's effects.js
 uv run python main.py tunes WORLD [GAME]      # rebuilds the game's tunes.js
 uv run python main.py barks WORLD             # packs the marked barks into barks.js
+uv run python main.py shared                  # copies shared/ scripts into the games
 uv run python main.py schema world|sources|episodes|intro|brief
 ```
 
@@ -181,7 +185,12 @@ Flags in the page address (`main.py play` takes the first three):
 | `?mouse-at=S`, `?visitor-at=S` | When the mouse, and the tree's visitor, come out. |
 | `?fruit=apple\|plum\|nut` | The tree's fruit. |
 
-In the console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,
+In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
+`?day=S` (a day S seconds long: `?day=60` to see the evening and the
+ending in a minute) work the same; in the console, `meadowGame.state()`,
+`meadowGame.trace()`, `meadowGame.perform('water')`.
+
+In the yard's console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,
 `yardGame.use('bowl', true)` (true: the variation), `yardGame.perform('go to tap')`.
 
 **Bug reports.** The game keeps every input since the start and its state every

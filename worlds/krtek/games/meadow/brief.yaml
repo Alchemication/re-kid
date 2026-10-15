@@ -1,0 +1,133 @@
+id: meadow
+title: Krtek's meadow (working title)
+status: draft
+audience: Eliot, about 3, playing with a parent; Adam first, for a rough feel of the day.
+length: One day, 08:00 to 20:00 on the meadow's sun, in five minutes of play, as long as a day in Reksio's yard; it ends when the mole goes down to sleep.
+
+pitch:
+  text: The child is the little mole in his meadow. He wakes in his den under the molehill and comes up into the morning. Tap the meadow and he dives down and pops up there, through a fresh molehill; tap him and he giggles or says hello. By his molehill is his flower bed and a little spring, and he waters the flowers. The day passes on its own, the sun crossing the sky whatever he does. At dusk the tulips close, the cricket comes out and fiddles, and the mole settles in his molehill to listen; then he goes down into his molehill, the picture closes in a circle around it, and we see him asleep in his den.
+  origin: inspired
+  refs: ['world:places[molehill].description', 'world:characters[krtek].moves[pops-up-from-molehill].claim', 'world:characters[krtek].moves[asleep-in-den].claim', 'world:design_notes[0]']
+
+principles:
+- text: No text anywhere. The mole talks in little exclamations, never words to read.
+  origin: inspired
+  refs: [world:sound.dialogue]
+- text: The child is the mole, and every tap gets an answer. Nothing to get wrong, no score, no timer.
+  origin: invented
+- text: Nothing is a goal, and the end never comes as a surprise. The day is the same length whatever the child does. It runs on things that are always in the meadow, never on a thing that may not be out this play (a prop such as the cuckoo clock), so no encounter is ever needed to reach the ending.
+  origin: invented
+- text: The meadow has two levels, above and below. The mole travels by tunnel, as in the films, so a tap anywhere in the meadow is a short dig and a pop-up there; the molehills he leaves stay for a while, so the child sees where he has been, and sink back by evening.
+  origin: inspired
+  refs: ['world:characters[krtek].moves[pops-up-from-molehill].claim', 'world:design_notes[2]']
+- text: Encounters are chains of tries, longer than the yard's (Eliot found those too short), as in the films. He finds a thing, tries it wrong once or twice, then uses it right to help someone; each tap moves the chain on a step, and any tap still cuts it short cleanly. Built one at a time with new-gag, after the day feels right.
+  origin: inspired
+  refs: [world:episode_formula, 'world:design_notes[1]']
+
+controls:
+  text: 'Tap or click: on the meadow, he digs there and pops up; on the mole, a giggle or a word and a little hop; on the flower bed, he fetches water from the spring and waters it. Keyboard for the grown-up: arrows dig a little way left or right, space does whatever is nearest, any other key gets a word from him.'
+  origin: invented
+
+look:
+- text: The mole is small in the meadow, drawn in code and never traced, as the series draws him - black and pear-shaped, a grey-green belly, a round red nose, big white eyes, pink hands and feet, a few hairs standing up on his head.
+  origin: inspired
+  refs: ['world:characters[krtek].visual_signature']
+- text: Flat outlined things over a painted meadow - big soft flowers, dabbed foliage, a sky that goes from morning blue to dusk orange and night blue, a round orange sun and a pale crescent moon.
+  origin: inspired
+  refs: [world:aesthetics.backgrounds, world:aesthetics.palette]
+- text: His home is the molehill, with the den under it, his flower bed in front of it and a little spring with a pool beside.
+  origin: inspired
+  refs: ['world:places[molehill].description']
+
+sound:
+- text: The mole's voice is generated, picked by Adam's ear - a giggle, "ahoj", "ach jo", an excited "ooh", a little squeak of fright - played a little higher or lower each time.
+  origin: inspired
+  refs: ['world:characters[krtek].sound_signature']
+- text: The cricket fiddles at dusk, and his tune is the day's lullaby.
+  origin: inspired
+  refs: ['world:characters[krtek].moves[lies-listening].claim']
+- text: Small sounds made in the browser for digging, popping up and water, quiet and short.
+  origin: invented
+
+scenes:
+- id: wake
+  action:
+    text: Nothing; the play starts.
+    origin: invented
+  result:
+    text: The mole is asleep on his pillow in the den under the molehill. He sits up and stretches both arms, and the view rises to the meadow as he comes up through the top of the molehill and looks about.
+    origin: inspired
+    refs: ['world:characters[krtek].moves[asleep-in-den].claim', 'world:characters[krtek].moves[pops-up-from-molehill].claim']
+  sound:
+    text: A yawn, then "ahoj!".
+    origin: invented
+- id: dig-across
+  action:
+    text: Tap the meadow somewhere.
+    origin: invented
+  result:
+    text: He dives down head first; a line of earth bumps runs under the grass to the tap, and a fresh molehill heaps up there with him on top, elbows on it, looking about.
+    origin: inspired
+    refs: ['world:characters[krtek].moves[pops-up-from-molehill].claim']
+  sound:
+    text: A soft dig, a pop.
+    origin: invented
+- id: tap-mole
+  action:
+    text: Tap the mole.
+    origin: invented
+  result:
+    text: A little hop with his arms flung up, and a giggle or a word.
+    origin: inspired
+    refs: ['world:characters[krtek].moves[arms-up-cheer].claim']
+  sound:
+    text: One of his kept voice takes.
+    origin: invented
+- id: water-flowers
+  action:
+    text: Tap the flower bed.
+    origin: invented
+  result:
+    text: He fetches the watering can, fills it at the spring and waters the flowers, which perk up. Done again, it plays again; the tulips stand a little taller each time.
+    origin: inspired
+    refs: ['world:characters[krtek].moves[waters-the-flowers].claim']
+  sound:
+    text: Water filling the can, a sprinkle.
+    origin: invented
+- id: dusk
+  action:
+    text: Nothing; the sun goes down at 19:00.
+    origin: invented
+  result:
+    text: The sky warms to orange, the tulips close, and the cricket comes out by the molehill with his fiddle and plays. Left alone a moment, the mole goes home and settles in his molehill to listen, eyes half shut (in the film he lies on his belly, chin on his hands; a later drawing). Taps still answer.
+    origin: inspired
+    refs: ['world:characters[krtek].moves[lies-listening].claim']
+  sound:
+    text: The cricket's tune.
+    origin: invented
+- id: bedtime
+  action:
+    text: Nothing; the last hour runs out at 20:00.
+    origin: invented
+  result:
+    text: Through the last hour the picture closes slowly in a circle around the molehill. At 20:00 he yawns, goes down into the molehill, the circle closes, and opens again on him asleep in his den. After that a tap does nothing.
+    origin: inspired
+    refs: [world:episode_formula, 'world:design_notes[0]']
+  sound:
+    text: The end of the cricket's tune, a little yawn.
+    origin: invented
+
+ending:
+  text: He sleeps in his den, as Krtek a autíčko begins and ends. A new play only when a grown-up chooses it.
+  origin: inspired
+  refs: ['world:characters[krtek].moves[asleep-in-den].claim']
+
+parent_card:
+  text: Not written yet. Will say who the mole is, which films the meadow comes from (Buldozer's flower bed, Autíčko's den, the iris ending), and that his voice is ours, not the original.
+  origin: invented
+
+open_questions:
+- Which encounters come first, and do they follow the yard's rule (each play offers something to discover, someone to help, and a moment when someone helps him)? Eliot's favourites (Adam, 2026-10-15) - traffic cones, eggs on the factory's conveyor belt (Vejce), the animals painting themselves to scare off the fox (Malířem), and a lot of Krtek a autíčko. Also the cuckoo clock he mends (Hodinářem) and the survey poles he moves round his flowers (Buldozer).
+- Does a slow-closing circle over the last hour read as "bedtime is coming", or as the game going away?
+- Should the molehills he leaves sink by evening, or stay all day as a map of where he has been?
+- Which friends visit the meadow - the mouse first?
