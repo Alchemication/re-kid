@@ -52,7 +52,11 @@ decided and why.
    - Once both scenes play: a plain page to pick one (two pictures), which
      loads the scene in place, so the tap that picks it also lets sound
      play. Not a platform.
-4. **A third cartoon,** the same way; then think about the platform.
+4. **A third cartoon, and the platform with it:** two worlds will have
+   shown what every scene shares, so the third is built on the platform as
+   it takes shape, and its needs shape it (how scenes are found, picked and
+   shared). Keep the platform as small as the third scene needs, so it
+   doesn't hold the scene up.
 
 ## Alongside, when working nearby
 
