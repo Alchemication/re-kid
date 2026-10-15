@@ -66,6 +66,14 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   barks; since 2026-10-14 shipped with the site too (Adam: generated barks
   "are all crap once we know original sound"; a POC for one child). Characters are drawn in code, never with image models
   imitating the artwork.
+- **Krtek's voice is generated, not the original** (Adam, 2026-10-15, "for
+  now anyway"). Unlike Reksio's barks, the generated takes were good
+  enough: ElevenLabs sound effects, 8 kept for 5 of the 7 sounds tried
+  (giggle, ahoj, ach jo, ooh, fright; none for hele or jé), best with
+  Adam's wording that sets the scene before naming the word
+  (`experiments/sound/README.md`). Judged on their own, not yet side by
+  side with the films; if they fall flat in play, the original takes go
+  the way of the barks.
 - **Licensing: Adam contacts the rights holders before the game leaves his
   home** (2026-10-06). Until then it is a private build and may aim for a
   recognisable Reksio. Who holds the rights is an open research question

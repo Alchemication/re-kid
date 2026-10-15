@@ -11,10 +11,8 @@ decided and why.
    cartoon, not a game per episode). Track Adam's build hours from day one:
    how long a new world takes is the collection's real question
    (`worlds/krtek/hours.md`).
-   - **Adam decides the mole's voice** (the original exclamations, cut from
-     the films as the barks were; our own; or none), after listening to a
-     film or two (Hodinářem first). The world (`worlds/krtek/`) is done
-     otherwise; its `open_questions` wait, rights before release.
+   - The world (`worlds/krtek/`) is done; its `open_questions` wait,
+     rights before release. His voice is generated (`docs/DECISIONS.md`).
    - Its scene's brief (`games/<scene>/brief.yaml`), like the yard's: a day
      at the molehill (the den under it, the flower bed and spring in front,
      the meadow; `design_notes` in `world.yaml`), every part `original`,
