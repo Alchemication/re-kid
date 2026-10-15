@@ -4,135 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sound board</title>
-<style>
-  :root { --ink: #2b2420; --paper: #f6efe2; --card: #fffaf0; --keep: #3f8f4a; --maybe: #c99a2e; --no: #b5483c; --line: #e0d4bd; }
-  * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px; background: var(--paper); color: var(--ink); font: 15px/1.4 system-ui, sans-serif; }
-  h1 { font-size: 20px; margin: 0 0 4px; }
-  .lead { margin: 0 0 16px; color: #6b5d50; }
-  .bar { position: sticky; top: 0; background: var(--paper); padding: 8px 0; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; border-bottom: 1px solid var(--line); z-index: 1; }
-  button { font: inherit; border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-  button:hover { border-color: var(--ink); }
-  section { margin: 20px 0 28px; }
-  h2 { font-size: 17px; margin: 0; }
-  .for { color: #6b5d50; margin: 2px 0 10px; }
-  .current { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
-  .card { background: var(--card); border: 2px solid var(--line); border-radius: 10px; padding: 10px; }
-  .card.keep { border-color: var(--keep); } .card.maybe { border-color: var(--maybe); } .card.no { border-color: var(--no); opacity: 0.55; }
-  .card .top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-  .play { font-size: 18px; width: 44px; height: 44px; border-radius: 50%; }
-  .meta { font-size: 12px; color: #6b5d50; margin: 6px 0; min-height: 32px; }
-  .verdict { display: flex; gap: 6px; }
-  .verdict button { flex: 1; padding: 4px; }
-  .verdict button.on[data-v=keep] { background: var(--keep); color: #fff; }
-  .verdict button.on[data-v=maybe] { background: var(--maybe); color: #fff; }
-  .verdict button.on[data-v=no] { background: var(--no); color: #fff; }
-  textarea { width: 100%; margin-top: 6px; font: inherit; font-size: 13px; border: 1px solid var(--line); border-radius: 6px; padding: 4px; min-height: 30px; resize: vertical; background: #fff; }
-  .playing { outline: 3px solid #e5a33a; }
-  .card.hidden { display: none; }
-  body.unmarked .card.keep, body.unmarked .card.maybe, body.unmarked .card.no { display: none; }
-  button:disabled { opacity: 0.4; cursor: default; }
-</style>
+<link rel="stylesheet" href="../board/board.css">
 </head>
 <body>
-<h1>Sound board</h1>
-<p class="lead">Each of the game's sounds as it is now (synth), and candidates made by a model. Play, then mark each: keep, maybe or no. Your marks stay in this browser; <b>Save picks</b> downloads them for Claude.</p>
-<div class="bar">
-  <label>Candidate volume <input id="vol" type="range" min="0" max="1" step="0.05" value="0.6"></label>
-  <span id="count"></span>
-  <label><input id="unmarked" type="checkbox"> Only unmarked</label>
-  <label>Source <select id="source"><option value="">all</option></select></label>
-  <button id="save">Save picks</button>
-</div>
-<main id="board"></main>
-
 <script src="../../worlds/reksio/games/yard/game/debug.js"></script>
 <script src="../../worlds/reksio/games/yard/game/sound.js"></script>
 <script src="out/manifest.js"></script>
+<script src="../board/board.js"></script>
 <script>
-  const KEY = 'sound-board-picks'
-  let picks = {}
-  try { picks = JSON.parse(localStorage.getItem(KEY)) || {} } catch { picks = {} } // no storage: marks last this visit only
-  const store = () => { try { localStorage.setItem(KEY, JSON.stringify(picks)) } catch { /* no storage: kept in memory */ } }
-  const vol = document.getElementById('vol')
-  let playing = null
-
-  function play(src, card) {
-    if (playing) { playing.audio.pause(); playing.card.classList.remove('playing') }
-    const audio = new Audio(src)
-    audio.volume = Number(vol.value)
-    card.classList.add('playing')
-    playing = { audio, card }
-    audio.onended = () => card.classList.remove('playing')
-    audio.play()
-  }
-
-  function count() {
-    const v = Object.values(picks)
-    const n = (k) => v.filter((p) => p.verdict === k).length
-    document.getElementById('count').textContent = `${n('keep')} keep · ${n('maybe')} maybe · ${n('no')} no`
-  }
-
-  function card(name, c) {
-    const id = c.file
-    const el = document.createElement('div')
-    el.className = 'card'
-    el.dataset.source = c.source
-    const mine = picks[id] || {}
-    el.innerHTML = `<div class="top"><button class="play" title="Play">▶</button><span>${c.source} · wording ${c.wording} · seed ${c.seed}</span></div>
-      <div class="meta">${c.prompt}</div>
-      <div class="verdict"><button data-v="keep">Keep</button><button data-v="maybe">Maybe</button><button data-v="no">No</button></div>
-      <textarea placeholder="Note (optional)"></textarea>`
-    const mark = () => {
-      el.classList.remove('keep', 'maybe', 'no')
-      if (mine.verdict) el.classList.add(mine.verdict)
-      el.querySelectorAll('.verdict button').forEach((b) => b.classList.toggle('on', b.dataset.v === mine.verdict))
-    }
-    el.querySelector('.play').onclick = () => play(`out/${c.file}`, el)
-    el.querySelectorAll('.verdict button').forEach((b) => (b.onclick = () => {
-      mine.verdict = mine.verdict === b.dataset.v ? undefined : b.dataset.v
-      picks[id] = { ...c, sound: name, verdict: mine.verdict, note: mine.note }
-      store(); mark(); count()
-    }))
-    const note = el.querySelector('textarea')
-    note.value = mine.note || ''
-    note.oninput = () => { mine.note = note.value; picks[id] = { ...c, sound: name, verdict: mine.verdict, note: mine.note }; store() }
-    mark()
-    return el
-  }
-
-  const board = document.getElementById('board')
-  for (const [name, s] of Object.entries(window.CANDIDATES || {})) {
-    const sec = document.createElement('section')
-    sec.innerHTML = `<h2>${name}</h2><div class="for">${s.for}</div>
-      <div class="current"><button>▶ Now (synth)</button><button>▶ Now ×3</button><span class="meta">what the game plays today</span></div>`
-    const [once, thrice] = sec.querySelectorAll('.current button')
+  // Each sound with what the game plays today (the yard's synth, for Reksio's
+  // sounds) and the takes a model made. Picks keep the shape adopt.py reads.
+  const items = Object.entries(window.CANDIDATES || {}).map(([name, s]) => {
+    const world = s.world || 'reksio'
     const synth = () => { Sound.ensure(); Sound[name]() }
-    if (s.for.includes('Silent')) { once.disabled = thrice.disabled = true; sec.querySelector('.current .meta').textContent = 'silent in the game now' }
-    once.onclick = synth
-    thrice.onclick = () => { synth(); setTimeout(synth, 900); setTimeout(synth, 1800) } // a page of its own: plain timers are fine here
-    const grid = document.createElement('div')
-    grid.className = 'grid'
-    for (const c of s.candidates) grid.appendChild(card(name, c))
-    sec.appendChild(grid)
-    board.appendChild(sec)
-  }
-  if (!board.children.length) board.textContent = 'No candidates yet: run generate_moss.py.'
-  count()
-  const source = document.getElementById('source')
-  for (const s of [...new Set([...document.querySelectorAll('.card')].map((c) => c.dataset.source))]) source.add(new Option(s, s))
-  source.onchange = () => document.querySelectorAll('.card').forEach((c) => c.classList.toggle('hidden', !!source.value && c.dataset.source !== source.value && !(source.value === 'clean+retro' && ['clean', 'retro'].includes(c.dataset.source))))
-  source.add(new Option('clean + retro', 'clean+retro'))
-  document.getElementById('unmarked').onchange = (e) => document.body.classList.toggle('unmarked', e.target.checked)
-
-  document.getElementById('save').onclick = () => {
-    const blob = new Blob([JSON.stringify({ saved: new Date().toISOString(), picks: Object.values(picks).filter((p) => p.verdict || p.note) }, null, 1)], { type: 'application/json' })
-    const a = document.createElement('a')
-    a.href = URL.createObjectURL(blob)
-    a.download = 'picks.json'
-    a.click()
-  }
+    const silent = (s.for || '').includes('Silent')
+    const yard = world === 'reksio' && typeof Sound !== 'undefined' && typeof Sound[name] === 'function'
+    return {
+      name, world, for: s.for, candidates: s.candidates,
+      now: yard ? [
+        { label: '▶ Now (synth)', run: synth, disabled: silent },
+        { label: '▶ Now ×3', run: () => { synth(); setTimeout(synth, 900); setTimeout(synth, 1800) }, disabled: silent }, // a page of its own: plain timers are fine here
+      ] : [],
+      nowNote: silent ? 'silent in the game now' : yard ? 'what the game plays today' : 'not in a game yet',
+    }
+  })
+  Board.mount({
+    title: 'Sound board',
+    lead: 'Each sound, and takes made by a model. Play one, then mark it <b>keep</b>, <b>maybe</b> or <b>no</b>, with a note if something is right or wrong. Marks stay in this browser; <b>Save picks</b> downloads them for Claude.',
+    storageKey: 'sound-board-picks',
+    saveName: 'picks.json',
+    nameKey: 'sound',
+    volumeLabel: 'Volume',
+    empty: 'No takes yet: run generate_eleven.py.',
+    items,
+    group: (c) => ({ key: `${c.source}|${c.wording}|${c.prompt}`, label: `${c.source} · wording ${c.wording}`, prompt: c.prompt }),
+    takeLabel: (c) => ({ title: `Take ${c.seed}`, sub: '' }),
+    plays: (c) => [{ label: '▶', title: 'Play (space)', src: `out/${c.file}` }],
+  })
 </script>
 </body>
 </html>

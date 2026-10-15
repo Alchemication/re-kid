@@ -10,7 +10,10 @@ board, keep the picks. Outputs (`out/`) and model caches are not committed.
 - `generate_moss.py` — MOSS-SoundEffect, local on Apple Silicon (hot; 7 GB).
   Needs its own env: `uv venv --python 3.13 .venv-moss && uv pip install --python .venv-moss/bin/python mlx-speech`.
 - `normalise.py` — evens out the MOSS takes' loudness.
-- `board.html` — open from disk; play, mark keep/maybe/no, Save picks.
+- `board.html` — open from disk; play, mark keep/maybe/no, Save picks. Built on
+  `../board/` (shared with the music board): a world filter, one wording's
+  prompt above its takes, keys (←/→ move, space play, 1/2/3 keep, maybe, no,
+  N note, U next unmarked).
 - `adopt.py` — copies the kept takes from `picks.json` into the game (`effects/`,
   `effects.yaml`); then `main.py effects reksio` packs them.
 

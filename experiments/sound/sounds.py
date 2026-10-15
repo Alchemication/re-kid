@@ -173,6 +173,7 @@ _ADAM = (
 def _voice(what: str, said: str, sound: str) -> dict:
     """One of the mole's sounds: Adam's wording, then two variants."""
     return {
+        "world": "krtek",
         "for": f"Krtek's voice: {what}.",
         "seconds": 1.2,
         "prompts": [
@@ -189,6 +190,11 @@ def _voice(what: str, said: str, sound: str) -> dict:
 VOICES: dict[str, dict] = {
     "krtek-ach-jo": _voice(
         "a sad or resigned sigh", "ach jo!", 'a sad little "ach jo"'
+    ),
+    "krtek-ahoj": _voice(
+        "hello, the word Adam remembers most",
+        "ahoj!",
+        'the word "ahoj!", a cheerful hello',
     ),
     "krtek-hele": _voice("look, he has found something", "hele!", 'the word "hele!"'),
     "krtek-je": _voice("delight", "jé!", 'the word "jé!", delighted'),

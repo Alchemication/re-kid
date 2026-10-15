@@ -125,6 +125,7 @@ def main(args: list[str]) -> None:
         sound = {**SOUNDS, **VOICES}[name]
         entry = found.setdefault(name, {"for": sound["for"], "candidates": []})
         entry["for"] = sound["for"]
+        entry["world"] = sound.get("world", "reksio")  # the board's world filter
         done = {
             (c["prompt"], c["seed"])
             for c in entry["candidates"]

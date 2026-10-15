@@ -13,7 +13,7 @@ Outputs (`out/`) are not committed.
   retro recipe; run after each `generate.py`.
 - `board.html` — open from disk; ▶ plays a take as made, R retro, "Today"
   plays a random take of that part from the game (`Music.audition`); mark
-  keep/maybe/no, Save picks.
+  keep/maybe/no, Save picks. Built on `../board/`, shared with the sound board.
 - `picks.json` — Adam's latest verdicts.
 - `adopt.py` — the keeps into the yard (`tunes/`, `tunes.yaml`); then
   `main.py tunes reksio`. Procedure: the `new-music` skill.
