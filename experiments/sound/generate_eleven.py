@@ -9,6 +9,8 @@ Calls run PARALLEL at a time; only the main thread writes files and the
 manifest, so the board's list has one writer. --style NAME adds a style to
 each sound's first wording (STYLES), as its own labelled wording.
 
+Sounds in VOICES (Krtek's voice) are made only when named.
+
 Run: python3 generate_eleven.py [--test] [--style NAME] [sound ...]
 """
 
@@ -23,7 +25,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from sounds import SOUNDS
+from sounds import SOUNDS, VOICES
 
 OUT = Path(__file__).parent / "out"
 ENV = Path(__file__).parents[2] / ".env"
@@ -120,7 +122,7 @@ def main(args: list[str]) -> None:
     found = manifest()
     jobs = []  # (name, wording label, prompt, take): everything still to make
     for name in names:
-        sound = SOUNDS[name]
+        sound = {**SOUNDS, **VOICES}[name]
         entry = found.setdefault(name, {"for": sound["for"], "candidates": []})
         entry["for"] = sound["for"]
         done = {
@@ -143,7 +145,7 @@ def main(args: list[str]) -> None:
     started = time.time()
     with ThreadPoolExecutor(PARALLEL) as pool:
         running = {
-            pool.submit(generate, prompt, SOUNDS[name]["seconds"]): (
+            pool.submit(generate, prompt, {**SOUNDS, **VOICES}[name]["seconds"]): (
                 name,
                 w,
                 prompt,

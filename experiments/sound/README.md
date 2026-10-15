@@ -3,7 +3,8 @@
 Generate many candidates for each of the game's sounds, pick by ear on a
 board, keep the picks. Outputs (`out/`) and model caches are not committed.
 
-- `sounds.py` — the sounds, what each is for, and wordings for a model.
+- `sounds.py` — the sounds, what each is for, and wordings for a model;
+  `VOICES` holds Krtek's voice, made only when named.
 - `generate_eleven.py` — ElevenLabs sound effects (key: `ELEVENLABS_API_KEY`
   in the project's `.env`). `python3 generate_eleven.py [--style Reksio|1970s] [sound ...]`
 - `generate_moss.py` — MOSS-SoundEffect, local on Apple Silicon (hot; 7 GB).

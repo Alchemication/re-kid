@@ -152,3 +152,47 @@ SOUNDS: dict[str, dict] = {
         ],
     },
 }
+
+# Krtek's voice (worlds/krtek), to judge against the films by ear before
+# choosing it over the original exclamations. Made only when named
+# (generate_eleven.py krtek-ach-jo ...), never by a run of every sound.
+# The first wording of each is Adam's, which he found "almost there".
+_MOLE = (
+    "Imagine a 1970s Eastern European cartoon animal character who almost never "
+    "speaks, only makes short excited noises and the odd simple Czech word. We "
+    "imitate him with a little girl's voice: delighted, short, rising, breathy, a "
+    "dry studio recording. "
+)
+_ADAM = (
+    "Imagine a 70's eastern european cartoon animal character. He speaks only "
+    "simple short words in czechoslovakian language. We try to imitate it by a "
+    "little girl's delighted, short, rising, breathy, dry studio recording. "
+)
+
+
+def _voice(what: str, said: str, sound: str) -> dict:
+    """One of the mole's sounds: Adam's wording, then two variants."""
+    return {
+        "for": f"Krtek's voice: {what}.",
+        "seconds": 1.2,
+        "prompts": [
+            _ADAM + f'The word is "{said}".',
+            _MOLE + f"The sound is {sound}.",
+            (
+                f'A little girl says "{said}" as a cartoon animal would: short, '
+                "breathy, dry studio recording, no reverb."
+            ),
+        ],
+    }
+
+
+VOICES: dict[str, dict] = {
+    "krtek-ach-jo": _voice(
+        "a sad or resigned sigh", "ach jo!", 'a sad little "ach jo"'
+    ),
+    "krtek-hele": _voice("look, he has found something", "hele!", 'the word "hele!"'),
+    "krtek-je": _voice("delight", "jé!", 'the word "jé!", delighted'),
+    "krtek-ooh": _voice("discovery", "óóó!", 'an excited little "ooh!" of discovery'),
+    "krtek-giggle": _voice("a happy giggle", "hihihi!", "a short happy giggle"),
+    "krtek-fright": _voice("a fright", "jéje!", "a tiny squeak of fright"),
+}
