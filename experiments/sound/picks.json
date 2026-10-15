@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-13T13:23:40.664Z",
+ "saved": "2026-10-15T20:15:59.249Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1088,7 +1088,7 @@
    "wording": 2,
    "seed": 3,
    "sound": "cuckoo",
-   "verdict": "no"
+   "verdict": "keep"
   },
   {
    "file": "eleven/cuckoo/04.mp3",
@@ -1097,7 +1097,7 @@
    "wording": 2,
    "seed": 1,
    "sound": "cuckoo",
-   "verdict": "no"
+   "verdict": "keep"
   },
   {
    "file": "eleven/cuckoo/08.mp3",
@@ -1151,7 +1151,7 @@
    "wording": 3,
    "seed": 3,
    "sound": "cuckoo",
-   "verdict": "no"
+   "verdict": "keep"
   },
   {
    "file": "eleven/cuckoo/03.mp3",
@@ -1161,6 +1161,87 @@
    "seed": 3,
    "sound": "cuckoo",
    "verdict": "no"
+  },
+  {
+   "file": "eleven/boing/02.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon boing, a springy twang of a stretched rubber band snapping back",
+   "wording": 1,
+   "seed": 2,
+   "sound": "boing",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-fright/05.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl's voice: delighted, short, rising, breathy, a dry studio recording. The sound is a tiny squeak of fright.",
+   "wording": 2,
+   "seed": 2,
+   "sound": "krtek-fright",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-giggle/02.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 70's eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl's delighted, short, rising, breathy, dry studio recording. The word is \"hihihi!\".",
+   "wording": 1,
+   "seed": 2,
+   "sound": "krtek-giggle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-giggle/03.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 70's eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl's delighted, short, rising, breathy, dry studio recording. The word is \"hihihi!\".",
+   "wording": 1,
+   "seed": 3,
+   "sound": "krtek-giggle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-giggle/01.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 70's eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl's delighted, short, rising, breathy, dry studio recording. The word is \"hihihi!\".",
+   "wording": 1,
+   "seed": 1,
+   "sound": "krtek-giggle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-ooh/04.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl's voice: delighted, short, rising, breathy, a dry studio recording. The sound is an excited little \"ooh!\" of discovery.",
+   "wording": 2,
+   "seed": 1,
+   "sound": "krtek-ooh",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-ach-jo/01.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 70's eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl's delighted, short, rising, breathy, dry studio recording. The word is \"ach jo!\".",
+   "wording": 1,
+   "seed": 3,
+   "sound": "krtek-ach-jo",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-ahoj/02.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl's voice: delighted, short, rising, breathy, a dry studio recording. The sound is the word \"ahoj!\", a cheerful hello.",
+   "wording": 2,
+   "seed": 1,
+   "sound": "krtek-ahoj",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-ahoj/01.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 70's eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl's delighted, short, rising, breathy, dry studio recording. The word is \"ahoj!\".",
+   "wording": 1,
+   "seed": 3,
+   "sound": "krtek-ahoj",
+   "verdict": "keep"
   }
  ]
 }

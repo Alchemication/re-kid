@@ -38,6 +38,15 @@ Two models, the same 13 sounds and wordings, picked on the board:
   kept take per sound in two versions, both trimmed and levelled; retro won
   all 13: mono, 22 kHz, lows under 120 Hz and highs over 6.5 kHz rolled off,
   a touch of saturation (`process.py`; in the game, `config.EFFECT_*`).
+- **Krtek's voice (2026-10-15):** 7 sounds × 3 wordings × 3 takes on
+  ElevenLabs sound effects, judged without the original next to them.
+  8 kept, for 5 of the 7 sounds: giggle (3), ahoj (2), ach jo, ooh, fright.
+  None for hele or jé. By wording: Adam's own ("Imagine a 70's eastern
+  european cartoon animal character… a little girl's delighted, short,
+  rising, breathy, dry studio recording. The word is…") 5 keeps; the variant
+  that says he mostly makes excited noises 3; the short plain one ("A little
+  girl says…") none. So the scene-setting framing matters for a voice.
+  Not yet compared against the films.
 - **Not tried:** Meta's AudioGen (reported below commercial tools), Stable
   Audio 3 Small-SFX, and reference-guided generation from short original
   clips (MusicGen-Style or newer). If tried: compare against CC0 recordings
