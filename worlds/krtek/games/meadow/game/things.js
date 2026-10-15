@@ -72,13 +72,16 @@ const Things = (() => {
 
   /** The meadow's tick: things arrive on time; a waiting one draws the mole to it when he's left alone. */
   function tick(hour) {
+    // one at a time: the next arrives at its hour, or once the one before is done, whichever is later
+    const waitingNow = plan.some((p) => all[p.name].out && !all[p.name].done)
     for (const p of plan) {
       const e = all[p.name]
-      if (!e.out && hour >= p.at) {
+      if (!e.out && !waitingNow && hour >= p.at) {
         e.out = true
         e.arrived = Clock.now()
         Debug.trace('arrives', { thing: e.name })
         e.appear()
+        break
       }
     }
     // left alone, he goes to a waiting thing himself; not after sunset, when he goes home to listen

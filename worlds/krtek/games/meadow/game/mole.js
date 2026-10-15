@@ -22,7 +22,10 @@ const Mole = (() => {
   const WALK_MS_PER_UNIT = 3.2 // a mole's waddle on the grass
   const life = Debug.random('mole-life') // blinks and glances: their own stream
 
-  const state = { x: 0, pose: 'down', busy: null, carrying: false }
+  const state = { x: 0, pose: 'down', busy: null, carrying: false, lift: 0, painted: null }
+  let skin = [] // what paint colours: his body and his arms
+  let lift = 0 // how far up he stands (on someone's shoulders)
+  let spots = null // the friends' paint dabs on him
   let root, body, tilt, eyes, lids, pupils, arms, can, feet, tunnel, inLayer, outLayer, carrySlot, hatSlot
 
   const el = (tag, attrs = {}, parent) => {
@@ -45,10 +48,13 @@ const Mole = (() => {
     feet = el('g', { class: 'mole-feet' }, art)
     el('ellipse', { cx: -20, cy: -6, rx: 20, ry: 9, fill: '#f2a0a6', stroke: '#15140f', 'stroke-width': 3 }, feet)
     el('ellipse', { cx: 22, cy: -6, rx: 20, ry: 9, fill: '#f2a0a6', stroke: '#15140f', 'stroke-width': 3 }, feet)
-    el('path', { d: 'M-46 -8 C-52 -80 -34 -150 0 -150 C34 -150 52 -80 46 -8 Q0 6 -46 -8 Z', fill: '#15140f' }, art)
+    skin.push(el('path', { d: 'M-46 -8 C-52 -80 -34 -150 0 -150 C34 -150 52 -80 46 -8 Q0 6 -46 -8 Z', fill: '#15140f' }, art))
     el('ellipse', { cx: 0, cy: -48, rx: 24, ry: 34, fill: '#5d6b57' }, art)
     const hair = el('g', { class: 'mole-hair', stroke: '#15140f', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, art)
     for (const d of ['M0 -148 Q-3 -168 3 -182', 'M-6 -146 Q-18 -160 -20 -174', 'M6 -146 Q20 -158 26 -170']) el('path', { d }, hair)
+    spots = el('g', { class: 'mole-spots' }, art)
+    for (const [cx, cy] of [[-26, -40], [22, -30], [-8, -18], [30, -66], [-30, -78], [12, -48]]) el('circle', { cx, cy, r: 7 }, spots)
+    spots.style.display = 'none'
     eyes = el('g', { class: 'mole-eyes' }, art)
     for (const cx of [-15, 15]) el('ellipse', { cx, cy: -108, rx: 13, ry: 18, fill: '#fff', stroke: '#15140f', 'stroke-width': 2 }, eyes)
     pupils = el('g', {}, eyes)
@@ -63,7 +69,7 @@ const Mole = (() => {
     for (const side of [-1, 1]) {
       const arm = el('g', { class: `mole-arm side${side}` }, arms)
       arm.style.transformOrigin = `${side * 40}px -70px`
-      el('path', { d: `M${side * 40} -70 Q${side * 58} -52 ${side * 54} -36`, stroke: '#15140f', 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, arm)
+      skin.push(el('path', { d: `M${side * 40} -70 Q${side * 58} -52 ${side * 54} -36`, stroke: '#15140f', 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, arm))
       el('ellipse', { cx: side * 54, cy: -32, rx: 12, ry: 9, fill: '#f2a0a6', stroke: '#15140f', 'stroke-width': 2.5 }, arm)
     }
     can = el('g', { class: 'mole-can' }, art)
@@ -84,6 +90,7 @@ const Mole = (() => {
   function put(x, pose) {
     state.x = x
     state.pose = pose
+    lift = state.lift = 0
     root.style.transform = `translate(${x}px, ${Y}px)`
     const layer = pose === 'out' ? outLayer : inLayer
     if (root.parentNode !== layer) layer.appendChild(root)
@@ -193,7 +200,7 @@ const Mole = (() => {
   }
 
   /** The middle of his head, in scene units: where something lands on it. */
-  const head = () => ({ x: state.x, y: Y + SINK[state.pose] - 150 * SCALE })
+  const head = () => ({ x: state.x, y: Y - lift + SINK[state.pose] - 150 * SCALE })
 
 
   /** Tip the can: filling it at the spring (down) or watering (forward). */
@@ -246,8 +253,28 @@ const Mole = (() => {
     await Motion.endAt(carrySlot, [{ transform: 'translate(0px, -196px) rotate(0deg)' }, { transform: 'translate(-6px, -196px) rotate(-12deg)', offset: 0.25 }, { transform: 'translate(6px, -196px) rotate(12deg)', offset: 0.5 }, { transform: 'translate(-4px, -196px) rotate(-8deg)', offset: 0.75 }, { transform: 'translate(0px, -196px) rotate(0deg)' }], { duration: ms })
   }
 
+  /** Paint him all over in `colour` (null: washed clean, black again). */
+  function paint(colour) {
+    state.painted = colour
+    for (const s of skin) s.setAttribute(s.getAttribute('fill') === 'none' ? 'stroke' : 'fill', colour || '#15140f')
+    if (!colour) dots(null)
+  }
+
+  /** Dab spots of `colour` on him (null: none). */
+  function dots(colour) {
+    spots.style.display = colour ? '' : 'none'
+    if (colour) spots.setAttribute('fill', colour)
+  }
+
+  /** Climb up `dy` (onto someone's shoulders) or back down (0). He must be out on the grass. */
+  async function perch(dy, ms = 600) {
+    const from = lift
+    lift = state.lift = dy
+    await Motion.endAt(root, [{ transform: `translate(${state.x}px, ${Y - from}px)` }, { transform: `translate(${state.x}px, ${Y - (from + dy) / 2 - 40}px)`, offset: 0.5 }, { transform: `translate(${state.x}px, ${Y - dy}px)` }], { duration: ms, easing: 'ease-out' })
+  }
+
   /** Where the can's spout is now, in scene units, while he waters. */
   const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
 
-  return { SCALE, state, spout, head, carry, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
+  return { SCALE, state, spout, head, carry, paint, dots, perch, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
 })()

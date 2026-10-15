@@ -190,6 +190,7 @@ const meadowGame = (() => {
     if (game.awake && !game.ended && !game.gesture) {
       Debug.check('a free mole stands', m.pose !== 'down', { pose: m.pose })
       Debug.check('a free mole holds nothing', !m.carrying, {})
+      Debug.check('a free mole stands on the ground', m.lift === 0, { lift: m.lift })
       Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
     }

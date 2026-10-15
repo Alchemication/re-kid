@@ -24,7 +24,8 @@
   const HEN_FROM = 1720
   const ROLL_MS = 2200
 
-  const egg = { x: REST_X, where: 'away', node: null, wrap: null, chick: null, cast: [] }
+  const egg = { x: REST_X, where: 'away', node: null, wrap: null, chick: null }
+  const cast = Friends.troupe()
   const m = () => Things.meadow
   const el = (...args) => m().el(...args)
 
@@ -74,18 +75,6 @@
     Sound.roll(ROLL_MS / 1000)
   }
 
-  /** Someone to ask, gone again in restore() if the chain is cut. */
-  function cast(kind, x, face) {
-    const f = Friends.make(kind, x, face)
-    egg.cast.push(f)
-    return f
-  }
-
-  function dismiss(f) {
-    f.gone()
-    egg.cast = egg.cast.filter((c) => c !== f)
-  }
-
   // ------------------------------------------------------------ the chain
 
   /** He finds it: knock knock, an ear to it. */
@@ -117,7 +106,7 @@
     if (!alive()) return
     await m().goTo(ASK_X)
     if (!alive()) return
-    const mouse = cast('mouse', HOLE_X, 1)
+    const mouse = cast.call('mouse', HOLE_X, 1)
     mouse.under()
     Sound.squeak()
     await mouse.rise(true)
@@ -127,7 +116,7 @@
     await mouse.no()
     if (!alive()) return
     await mouse.rise(false)
-    dismiss(mouse)
+    cast.dismiss(mouse)
   }
 
   /** The hare hops in to look: not his either. */
@@ -136,7 +125,7 @@
     if (!alive()) return
     await m().goTo(ASK_X)
     if (!alive()) return
-    const hare = cast('hare', HARE_FROM, 1)
+    const hare = cast.call('hare', HARE_FROM, 1)
     await hare.go(HARE_AT, 1500, 36)
     if (!alive()) return
     await hare.bob(1)
@@ -145,7 +134,7 @@
     if (!alive()) return
     hare.turn(-1)
     await hare.go(HARE_FROM, 1300, 36)
-    dismiss(hare)
+    cast.dismiss(hare)
   }
 
   /** It wobbles, it cracks: a chick, and the top of the shell on his head. */
@@ -181,7 +170,7 @@
   /** The hen comes looking, the chick runs to her, and off they go together. */
   async function mother(alive) {
     const chick = egg.chick
-    const hen = cast('hen', HEN_FROM, -1)
+    const hen = cast.call('hen', HEN_FROM, -1)
     Sound.cluck()
     const near = Math.min(Mole.state.x + 220, 1380)
     await hen.go(near, 2600)
@@ -197,7 +186,7 @@
     hen.turn(1)
     await Promise.all([hen.go(HEN_FROM + 60, 2600), chick.go(HEN_FROM, 2600, 10), Mole.cheer()])
     if (!alive()) return
-    dismiss(hen)
+    cast.dismiss(hen)
     chick.gone()
     egg.chick = null
     if (egg.bottom) Motion.endAt(egg.bottom, [{ opacity: 1 }, { opacity: 0 }], { duration: 1500 }).then(() => egg.bottom.remove(), () => egg.bottom.remove())
@@ -206,7 +195,7 @@
 
   /** Cut short: visitors go home; an egg in his hands goes down in the grass where he stands; a chick waits. */
   function restore() {
-    for (const f of [...egg.cast]) dismiss(f)
+    cast.dismissAll()
     if (egg.where === 'carried') {
       Mole.carry(null)
       onGround(Math.max(150, Mole.state.x - 60))
@@ -233,6 +222,6 @@
     steps: [find, askMouse, askHare, hatch, mother],
     restore,
     night,
-    detail: () => ({ where: egg.where, x: Math.round(egg.x), chick: !!egg.chick, cast: egg.cast.map((c) => c.kind) }),
+    detail: () => ({ where: egg.where, x: Math.round(egg.x), chick: !!egg.chick, cast: cast.kinds() }),
   })
 })()

@@ -66,6 +66,20 @@ const Friends = (() => {
       el('path', { d: 'M-56 -88 q4 10 10 2', fill: '#d8322b' }, head)
       return head
     },
+    fox(g) {
+      el('path', { d: 'M40 -40 q60 -10 70 -60 q-30 10 -50 30 z', fill: '#c8642a', ...line }, g)
+      el('path', { d: 'M96 -90 q14 -12 14 -10 q-6 12 -8 16 z', fill: '#fff' }, g)
+      el('ellipse', { cx: 6, cy: -46, rx: 46, ry: 32, fill: '#c8642a', ...line }, g)
+      for (const x of [-26, -6, 18, 34]) el('path', { d: `M${x} -20 v20`, stroke: INK, 'stroke-width': 7, 'stroke-linecap': 'round' }, g)
+      const head = el('g', { class: 'head' }, g)
+      for (const x of [-44, -14]) el('path', { d: `M${x} -110 l-6 -34 l20 22 z`, fill: '#c8642a', ...line }, head)
+      el('path', { d: 'M-12 -100 C-4 -76 -20 -60 -44 -58 L-80 -72 C-70 -84 -54 -104 -12 -100 Z', fill: '#c8642a', ...line }, head)
+      el('path', { d: 'M-12 -98 c14 10 16 30 0 44 c-12 -14 -30 -14 -36 -4 c4 -16 18 -28 36 -40 z', fill: '#fff', ...line, 'stroke-width': 2 }, head)
+      el('circle', { cx: -82, cy: -72, r: 5, fill: INK }, head)
+      el('circle', { cx: -40, cy: -88, r: 4, fill: INK }, head)
+      el('path', { d: 'M-76 -64 q16 12 34 0', fill: '#fff', ...line, 'stroke-width': 2 }, head)
+      return head
+    },
     chick(g) {
       el('ellipse', { cx: 0, cy: -20, rx: 20, ry: 18, fill: '#f6d23b', ...line, 'stroke-width': 2.5 }, g)
       const head = el('g', { class: 'head' }, g)
@@ -126,6 +140,16 @@ const Friends = (() => {
       async rise(up) {
         await Motion.endAt(riser, [{ transform: `translateY(${up ? 0 : 110}px)` }], { duration: 420, easing: up ? 'cubic-bezier(.3,1.5,.5,1)' : 'ease-in' })
       },
+      /** Paint on it: 'stripes' (the hare, a tiger) or 'spots' (the mouse), in `colour`. */
+      daub(pattern, colour) {
+        const marks = el('g', { class: 'paint' }, inner)
+        if (pattern === 'stripes') for (let y = -96; y < -6; y += 18) el('path', { d: `M-40 ${y} q40 -10 80 0`, stroke: colour, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round' }, marks)
+        else for (const [cx, cy] of [[-14, -36], [10, -22], [16, -42], [-4, -16], [-24, -60], [-2, -66]]) el('circle', { cx, cy, r: 6, fill: colour }, marks)
+      },
+      /** Up onto someone's shoulders (dy) or back down (0). */
+      async lift(dy, ms = 600) {
+        await Motion.endAt(g, [{ transform: `translate(${f.x}px, ${Y - dy}px)` }], { duration: ms, easing: 'cubic-bezier(.3,1.4,.5,1)' })
+      },
       /** Start down in a hole (rise() brings it up). */
       under() {
         riser.style.transform = 'translateY(110px)'
@@ -140,5 +164,26 @@ const Friends = (() => {
     return f
   }
 
-  return { setup, make }
+  /** A troupe: the visitors one encounter has out, so its restore() can send them all home. */
+  function troupe() {
+    let out = []
+    return {
+      call(kind, x, face) {
+        const f = make(kind, x, face)
+        out.push(f)
+        return f
+      },
+      dismiss(f) {
+        if (!f) return
+        f.gone()
+        out = out.filter((c) => c !== f)
+      },
+      dismissAll() {
+        for (const f of [...out]) this.dismiss(f)
+      },
+      kinds: () => out.map((f) => f.kind),
+    }
+  }
+
+  return { setup, make, troupe }
 })()

@@ -28,7 +28,7 @@ DONE_MS = 60_000  # the longest encounter runs well under this
 CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has.
-ENCOUNTERS = {"egg": 5, "poles": 5}
+ENCOUNTERS = {"egg": 5, "paint": 5, "poles": 5}
 
 
 class Meadow:
@@ -112,6 +112,20 @@ class TestMeadowDay:
             m.do("dig to 400")
             m.wait_free()
             m.assert_settled()
+
+    def test_one_encounter_at_a_time(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&day=90&props=egg,poles")
+        m.wake()
+        m.wait("meadowGame.state().hour >= '13:00'", 40_000)
+        things = m.state()["things"]
+        assert things["egg"].startswith("step"), things
+        assert things["poles"].startswith("at"), (
+            "the poles came while the egg still waited"
+        )
+        m.do("use egg")
+        m.wait("meadowGame.state().things.egg === 'done'")
+        m.wait("meadowGame.state().things.poles.startsWith('step')", 5_000)
+        assert not m.errors, m.errors
 
     def test_the_day_ends_asleep_in_the_den(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&day=12&props=")

@@ -228,5 +228,30 @@ const Sound = (() => {
     for (let t = 0; t < seconds; t += 0.25) hiss(t, 0.3, 110 + Math.random() * 40, 1.2, 0.05)
   }
 
-  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck, plink, tug, whoosh, rumble }
+  /** A splash: into a tin of paint, or the spring. */
+  function splash() {
+    if (!ready()) return
+    hiss(0, 0.35, 900, 0.7, 0.3)
+    hiss(0.05, 0.25, 2400, 1.5, 0.15)
+  }
+
+  /** A brush, swished. */
+  function swish() {
+    if (!ready()) return
+    for (const at of [0, 0.22]) hiss(at, 0.16, 3200, 1.2, 0.1)
+  }
+
+  /** The monster's "boo": three voices low and loud, for a cartoon fright. */
+  function boo() {
+    if (!ready()) return
+    for (const f of [150, 190, 230]) note(f, 0, 0.7, 0.12, 'sawtooth', 0.7)
+  }
+
+  /** The fox, frightened: a quick yelp. */
+  function yelp() {
+    if (!ready()) return
+    note(900, 0, 0.18, 0.15, 'square', 1.6)
+  }
+
+  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp }
 })()

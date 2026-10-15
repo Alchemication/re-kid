@@ -24,7 +24,7 @@ principles:
   origin: inspired
   refs: [world:episode_formula, 'world:design_notes[1]']
 
-- text: The meadow is one screen, so its encounters don't stand about from the start. Each arrives at its own hour (about 09:00, 12:00 and 15:00), one at a time, and waits; a tap on it sets him going, and left alone a while he goes by himself. Each play brings one where he helps someone, one where someone helps him and one to discover, as in the yard. Left alone, a chain plays on like a little cartoon; a tap on the thing hurries it to its next step, and a tap anywhere else cuts it short, to be picked up later where it stopped.
+- text: The meadow is one screen, so its encounters don't stand about from the start. Each arrives at its own hour (about 09:00, 12:00 and 15:00), or once the one before is done if that is later, one at a time, and waits; a tap on it sets him going, and left alone a while he goes by himself. Each play brings one where he helps someone, one where someone helps him and one to discover, as in the yard. Left alone, a chain plays on like a little cartoon; a tap on the thing hurries it to its next step, and a tap anywhere else cuts it short, to be picked up later where it stopped.
   origin: invented
 
 controls:
@@ -120,6 +120,18 @@ scenes:
   sound:
     text: A far rumble, a wooden tok as each pole goes in, a knock knock, his sigh, a tug, a whoosh, his squeak and giggle.
     origin: invented
+- id: paint
+  action:
+    text: Paint tins get dropped in the grass between his flowers and the spring. Tap one, or leave him be.
+    origin: inspired
+    refs: [world:humour]
+  result:
+    text: He peers into the red tin and falls in head first, and comes out all red. A grinning fox comes sneaking in past the spring, and he claps his hands to his cheeks. Along come the hare and the mouse with brushes; they paint each other, tiger stripes and spots, and dab spots on him too. Then the three of them climb onto each other's shoulders - a big striped spotted monster with its arms up - and the fox yelps and runs. His friends wave and go, he jumps in the spring to wash the paint off, and the tins are fetched away. In the film he paints the whole forest and the fox runs from it; the stacked scary creature is there (Krtek malířem, 3:20), the wash in the spring is ours. Someone helps him.
+    origin: inspired
+    refs: [world:humour, 'world:characters[myska].description', 'world:characters[zajic].description', 'world:themes_and_values[0]']
+  sound:
+    text: Tins dropped, a splash and his squeak of fright, his "ooh", brushes swished, a giggle, a low cartoon "boo", the fox's yelp, the spring's splash.
+    origin: invented
 - id: dusk
   action:
     text: Nothing; the sun goes down at 19:00.
@@ -153,7 +165,7 @@ parent_card:
   origin: invented
 
 open_questions:
-- Which encounters come first, and do they follow the yard's rule (each play offers something to discover, someone to help, and a moment when someone helps him)? Eliot's favourites (Adam, 2026-10-15) - traffic cones (the survey poles of Krtek a buldozer), eggs on the factory's conveyor belt (Vejce), the animals painting themselves to scare off the fox (Malířem), and a lot of Krtek a autíčko. Also the cuckoo clock he mends (Hodinářem). Built - the egg and the poles (Eliot's cones are the survey poles).
+- Which encounters come first, and do they follow the yard's rule (each play offers something to discover, someone to help, and a moment when someone helps him)? Eliot's favourites (Adam, 2026-10-15) - traffic cones (the survey poles of Krtek a buldozer), eggs on the factory's conveyor belt (Vejce), the animals painting themselves to scare off the fox (Malířem), and a lot of Krtek a autíčko. Also the cuckoo clock he mends (Hodinářem). Built - the egg, the poles (Eliot's cones are the survey poles) and the paint.
 - Does a slow-closing circle over the last hour read as "bedtime is coming", or as the game going away?
 - Should the molehills he leaves sink by evening, or stay all day as a map of where he has been?
 - Which friends visit the meadow - the mouse first?
