@@ -79,6 +79,27 @@ each moment's "Listen for" question; marks and answers are saved to
 in `audio/intro/marks/<id>.wav`, updated on every save. The measurements (`audio.py`) are leads for the
 listener, never claims on their own.
 
+## Adding a cartoon, and what follows
+
+Each step but the brief is a skill in `.claude/skills/`, run in a Claude
+Code session. Top to bottom is the usual order; the steps under the scene
+repeat as often as needed.
+
+```
+new cartoon
+ └─ new-world ──────────► worlds/<id>/ world.yaml, sources.yaml,
+     │                    episodes/index.yaml, intro.yaml (if it has one)
+     ├─ new-episode ────► episodes/<id>.yaml, only when a gag needs one
+     │                    episode beat by beat; Adam marks its sounds (main.py mark)
+     └─ the scene's brief  games/<game>/brief.yaml, written with Adam (no skill)
+         └─ the scene     games/<game>/game/
+             ├─ new-gag ──► one gag or encounter at a time
+             ├─ new-sound ► its sound effects, Adam picks takes by ear
+             └─ new-music ► its music, Adam picks takes by ear
+```
+
+Every run ends with a retro that proposes edits to its skill.
+
 ## Commands
 
 ```

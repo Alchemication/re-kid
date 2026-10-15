@@ -43,10 +43,18 @@ through API calls from `main.py`. Write results straight into the YAML files and
 run `uv run python main.py validate <world>` before reporting done.
 
 Procedures live in skills (`.claude/skills/`): `new-world` researches a new
-cartoon into a world; `new-episode` breaks down an episode; `new-gag` adds a gag or encounter to a game; `new-sound` makes a
-game's sound effects and `new-music` its music (generated, picked by Adam's
-ear). Each run ends with a
-retro that proposes edits to its skill.
+cartoon into a world; `new-episode` breaks down an episode; `new-gag` adds a
+gag or encounter to a game; `new-sound` makes a game's sound effects and
+`new-music` its music (generated, picked by Adam's ear). README's "Adding a
+cartoon" shows their order. Each run ends with a retro that proposes edits
+to its skill.
+
+The skills are meant to become a general process for building any cartoon's
+world and scene, and the engine under it. So, at any time, not only in a
+retro: when work shows that a skill is wrong, missing a step, slow, or
+shaped around one cartoon, propose the edit to Adam, with the reason, as
+soon as you notice it; the same for a step done by hand twice that could
+become a skill. Make the edit once he agrees, never silently.
 
 Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`):
 
