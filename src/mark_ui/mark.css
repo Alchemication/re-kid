@@ -1,5 +1,7 @@
 /* Reksio marking tool. Colours come from the intro's credit cards:
-   mustard-ochre card, cream lettering, pastel crayon streaks, red accents. */
+   mustard-ochre card, cream lettering, pastel crayon streaks, red accents,
+   and Reksio himself in his doghouse. Shapes, type and controls match the
+   sound and music boards (experiments/board/board.css), which wear Krtek's. */
 
 :root {
   --mustard: #b5932f;
@@ -19,10 +21,10 @@
   --sky: #9fc4e3;
   --leaf: #a9cf98;
   --wave-bg: #2e2717;
-  --radius: 12px;
+  --radius: 14px;
   --shadow: 0 1px 2px rgba(44, 36, 22, 0.08), 0 4px 16px rgba(44, 36, 22, 0.06);
-  --display: "Luckiest Guy", "Arial Rounded MT Bold", system-ui, sans-serif;
-  --body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Chalkboard SE", "Comic Neue", "Marker Felt", ui-rounded, system-ui, sans-serif;
+  --body: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
@@ -54,17 +56,16 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .dim { color: var(--ink-soft); }
 
 kbd {
-  font: 12px var(--mono);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-bottom-width: 2px;
-  border-radius: 5px;
-  padding: 0 5px;
+  font: 600 11px var(--body);
+  background: var(--mustard-soft);
+  border: 0;
+  border-radius: 4px;
+  padding: 1px 5px;
 }
 
 .card {
   background: var(--paper);
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
@@ -72,29 +73,43 @@ kbd {
 /* ---- header: a credit card ---------------------------------------- */
 
 .top {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
-  padding: 8px 20px;
+  padding: 8px 20px 0;
+  min-height: 70px;
   color: var(--cream);
-  background:
-    linear-gradient(100deg, transparent 0 55%, rgba(234, 168, 163, 0.35) 56% 64%, transparent 65%),
-    linear-gradient(97deg, transparent 0 68%, rgba(159, 196, 227, 0.35) 69% 78%, transparent 79%),
-    linear-gradient(95deg, transparent 0 80%, rgba(169, 207, 152, 0.35) 81% 92%, transparent 93%),
-    var(--mustard);
-  border-bottom: 3px solid var(--mustard-deep);
+  background: var(--mustard);
+  box-shadow: 0 3px 0 var(--mustard-deep);
 }
+.top > * { position: relative; }
+.top .brand { flex: 1; align-self: center; padding-bottom: 8px; }
+.top .status { padding-bottom: 8px; }
+
+/* pastel crayon streaks, as scribbled on the credit cards */
+.top .crayon { position: absolute; inset: 0; width: 100%; height: 100%; }
+.crayon path { fill: none; stroke-width: 9; stroke-linecap: round; opacity: 0.45; }
+
+/* Reksio in his doghouse: he comes out while the film plays */
+.kennel { align-self: flex-end; width: 92px; height: 68px; flex: none; }
+.kennel .him { transform: translateY(7px); transition: transform 0.35s cubic-bezier(.3, 1.6, .5, 1); }
+.kennel .grin { opacity: 0; transition: opacity 0.2s; }
+body.playing .kennel .him { transform: translateY(0); }
+body.playing .kennel .grin { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .kennel .him { transition: none; } }
 
 .brand { display: flex; align-items: baseline; gap: 14px; }
 
 .logo {
-  font: 30px/1 var(--display);
-  letter-spacing: 1px;
+  font: 700 32px/1 var(--display);
+  letter-spacing: 0.5px;
   text-shadow: 2px 2px 0 var(--mustard-deep);
 }
+.logo::after { content: "."; color: var(--red); text-shadow: none; }
 
-.subtitle { font: 18px var(--display); letter-spacing: 0.5px; opacity: 0.95; }
+.subtitle { font: 600 16px var(--body); opacity: 0.95; }
 
 .status { display: flex; align-items: center; gap: 14px; font-weight: 600; }
 
@@ -105,11 +120,13 @@ kbd {
 
 button.ghost {
   background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 8px;
-  padding: 3px 10px;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  border-radius: 10px;
+  padding: 4px 12px;
+  font-weight: 600;
   cursor: pointer;
 }
+:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
 .card button.ghost { background: transparent; border-color: var(--line); }
 
 /* ---- top area ------------------------------------------------------ */
@@ -166,10 +183,9 @@ video { width: 100%; height: 100%; display: block; }
 
 .chip {
   display: inline-block;
-  font: 15px/1 var(--display);
-  letter-spacing: 0.5px;
-  padding: 6px 10px 4px;
-  border-radius: 8px;
+  font: 700 15px/1 var(--display);
+  padding: 6px 12px 5px;
+  border-radius: 999px;
   background: var(--mustard);
   color: var(--cream);
 }
@@ -179,7 +195,8 @@ video { width: 100%; height: 100%; display: block; }
 .marks { padding: 10px 14px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 
 .marks-head { display: flex; align-items: baseline; justify-content: space-between; }
-.marks-head h2, .modal-head h2 { font: 20px var(--display); letter-spacing: 0.5px; margin: 0; color: var(--mustard-deep); }
+.marks-head h2, .modal-head h2 { font: 700 22px var(--display); margin: 0; color: var(--ink); }
+.marks-head { border-bottom: 3px dotted var(--mustard); padding-bottom: 4px; }
 
 .empty {
   margin-top: 10px;
@@ -193,9 +210,9 @@ video { width: 100%; height: 100%; display: block; }
 .marks-list { list-style: none; margin: 10px 0 0; min-height: 0; padding: 0; overflow: auto; display: flex; flex-direction: column; gap: 10px; }
 
 .mark {
-  border: 1px solid var(--line);
-  border-left: 6px solid var(--red);
-  border-radius: 10px;
+  border: 2px solid var(--line);
+  border-left: 7px solid var(--red);
+  border-radius: 14px;
   padding: 10px 12px;
   background: white;
   cursor: pointer;
@@ -216,8 +233,8 @@ video { width: 100%; height: 100%; display: block; }
   background: var(--paper);
 }
 
-.kind { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
-.kind button { border: 0; background: var(--paper); padding: 4px 9px; cursor: pointer; font-size: 13px; }
+.kind { display: inline-flex; border: 2px solid var(--line); border-radius: 8px; overflow: hidden; }
+.kind button { border: 0; background: var(--paper); padding: 3px 9px; cursor: pointer; font-size: 13px; font-weight: 700; }
 .kind button.on { background: var(--ink); color: var(--cream); }
 
 .times { font: 13px var(--mono); display: inline-flex; align-items: center; gap: 4px; }
@@ -227,10 +244,11 @@ video { width: 100%; height: 100%; display: block; }
 
 .actions { margin-left: auto; display: inline-flex; gap: 4px; }
 .actions button {
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   background: var(--paper);
-  border-radius: 7px;
-  padding: 3px 9px;
+  border-radius: 8px;
+  padding: 2px 9px;
+  font-weight: 700;
   cursor: pointer;
 }
 .actions button.on { background: var(--mustard); color: white; border-color: var(--mustard-deep); }
@@ -255,18 +273,19 @@ video { width: 100%; height: 100%; display: block; }
 button.primary {
   background: var(--red);
   color: white;
-  border: 0;
-  border-radius: 9px;
-  padding: 7px 16px;
+  border: 2px solid var(--red);
+  border-radius: 10px;
+  padding: 6px 16px;
   font-weight: 700;
   cursor: pointer;
   min-width: 96px;
 }
+body.playing button.primary { box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--mustard); }
 
 .clock { font: 15px var(--mono); }
 
 .seg { display: inline-flex; align-items: center; gap: 4px; }
-.seg button { border: 1px solid var(--line); background: var(--paper); border-radius: 7px; padding: 3px 8px; cursor: pointer; font-size: 13px; }
+.seg button { border: 2px solid var(--line); background: var(--paper); border-radius: 8px; padding: 2px 9px; cursor: pointer; font-size: 13px; font-weight: 700; }
 .seg button.on { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 
 .zoom { display: inline-flex; align-items: center; gap: 6px; }
@@ -276,14 +295,14 @@ button.primary {
 
 .moments { display: flex; gap: 5px; margin: 8px 0 6px; flex-wrap: wrap; }
 .moments button {
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   background: var(--paper);
-  border-radius: 8px;
+  border-radius: 999px;
   padding: 3px 9px;
   cursor: pointer;
   font-size: 13px;
 }
-.moments button b { font-family: var(--display); font-weight: normal; color: var(--mustard-deep); margin-right: 4px; }
+.moments button b { font-family: var(--display); font-weight: 700; color: var(--mustard-deep); margin-right: 4px; }
 .moments button.current { background: var(--mustard); border-color: var(--mustard-deep); color: white; }
 .moments button.current b { color: var(--cream); }
 

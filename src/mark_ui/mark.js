@@ -688,8 +688,8 @@ async function start() {
       else if (t >= loop.end - 0.01) ws.setTime(loop.start)
     }
   })
-  ws.on('play', () => { $('#play').textContent = '❚❚ Pause'; $('#video-hint').hidden = true })
-  ws.on('pause', () => ($('#play').textContent = '▶ Play'))
+  ws.on('play', () => { $('#play').textContent = '❚❚ Pause'; $('#video-hint').hidden = true; document.body.classList.add('playing') })
+  ws.on('pause', () => { $('#play').textContent = '▶ Play'; document.body.classList.remove('playing') })
   ws.on('error', (err) => toast(`Audio problem: ${err.message || err}`))
 
   regions.on('region-created', (region) => {
