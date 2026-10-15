@@ -1,0 +1,208 @@
+// The poles (to discover), after Krtek a buldozer, and Eliot's "cones":
+// far off on the hill a little bulldozer starts puffing, and red-and-white
+// survey poles get planted one after another in a line that runs straight
+// at his flowers. He knocks on the nearest and sighs. Then he tugs it out
+// and throws it like a javelin: it sails off and plants itself far away on
+// the hill, and the line bends away from his flowers. The next one too.
+// The last is stuck: he tugs and tugs, it pops, he tumbles over, and the
+// pole flies off on its own and lands just where it should (the surprise).
+// The bulldozer follows the bent line away into the distance, and he
+// cheers. The poles stay out for the rest of the day.
+//
+// A tap on a pole or on him hurries it on; a tap elsewhere cuts it short
+// (things.js): a pole in his hands is stood up where he is, and the next
+// tap carries on with it.
+
+/* global Debug, Layout, Mole, Motion, Sound, Things */
+;(() => {
+  const Y = Layout.GROUND
+  // the line as planted, from the far right edge to just by his flowers...
+  const LINE = [1470, 1310, 1150, 990]
+  // ...and where the three nearest land when thrown: away up the hill, smaller with distance
+  // (left of the spring's rock, or right of it, never behind it)
+  const FAR = [{ x: 1120, y: 596, s: 0.38 }, { x: 1225, y: 606, s: 0.46 }, { x: 1445, y: 640, s: 0.62 }]
+  const PLANT_EVERY_MS = 650
+  const THROW_MS = 900
+  const DOZER = { from: 1700, at: 1520, y: 598, away: { x: 1060, y: 588, s: 0.3 } }
+
+  const poles = [] // { node, x, y, s, where: 'line' | 'carried' | 'far' }
+  let dozer = null
+  const m = () => Things.meadow
+  const el = (...args) => m().el(...args)
+
+  /** A pole, drawn standing with its point at 0,0: red and white bands, 170 high. */
+  function drawPole() {
+    const g = el('g', { class: 'pole-shape' })
+    el('path', { d: 'M-7 -170 h14 v160 l-7 12 l-7 -12 z', fill: '#fff', stroke: '#15140f', 'stroke-width': 3 }, g)
+    for (let i = 0; i < 5; i++) el('rect', { x: -7, y: -170 + i * 32, width: 14, height: 16, fill: '#d8322b' }, g)
+    return g
+  }
+
+  function drawDozer() {
+    const g = el('g', { class: 'dozer' }, document.getElementById('far-things'))
+    el('rect', { x: -40, y: -46, width: 64, height: 30, rx: 4, fill: '#e2762a', stroke: '#15140f', 'stroke-width': 3 }, g)
+    el('rect', { x: -20, y: -70, width: 30, height: 26, fill: '#e2762a', stroke: '#15140f', 'stroke-width': 3 }, g)
+    el('rect', { x: -14, y: -64, width: 18, height: 14, fill: '#cfe3f7' }, g)
+    el('path', { d: 'M-60 -8 l10 -40 h8 v42 z', fill: '#9a9a9a', stroke: '#15140f', 'stroke-width': 3 }, g)
+    el('rect', { x: -44, y: -18, width: 72, height: 18, rx: 9, fill: '#2b2b2b' }, g)
+    for (const cx of [-34, -14, 6, 20]) el('circle', { cx, cy: -9, r: 5, fill: '#6b6b6b' }, g)
+    el('rect', { x: 10, y: -86, width: 6, height: 18, fill: '#2b2b2b' }, g)
+    const puffs = el('g', { class: 'puffs' }, g)
+    for (let i = 0; i < 3; i++) el('circle', { class: `puff p${i}`, cx: 13, cy: -94, r: 8, fill: '#9aa0a6' }, puffs)
+    return g
+  }
+
+  /** Stand pole i at x, y at scale s (1: in front, by him; less: far away up the hill). */
+  function stand(p, x, y, s, layer) {
+    Object.assign(p, { x, y, s })
+    p.wrap.style.transform = `translate(${x}px, ${y}px) scale(${s})`
+    p.wrap.appendChild(p.node)
+    document.getElementById(layer).appendChild(p.wrap)
+  }
+
+  function appear() {
+    dozer = drawDozer()
+    dozer.style.transform = `translate(${DOZER.from}px, ${DOZER.y}px) scale(0.55)`
+    Motion.endAt(dozer, [{ transform: `translate(${DOZER.at}px, ${DOZER.y}px) scale(0.55)` }], { duration: 3500, easing: 'ease-out' }).catch(() => 'cut: it shows where it stopped')
+    Sound.rumble(3.5)
+    LINE.forEach((x, i) => {
+      const wrap = el('g', { class: 'thing pole', 'data-thing': 'poles' })
+      const p = { node: drawPole(), wrap, where: 'line' }
+      poles.push(p)
+      stand(p, x, Y + 4, 1, 'things')
+      // planted one after another, from the far end towards his flowers
+      Motion.endAt(wrap, [{ transform: `translate(${x}px, ${Y - 400}px) scale(1)`, opacity: 0 }, { transform: `translate(${x}px, ${Y - 400}px) scale(1)`, opacity: 0, offset: 0.01 }, { transform: `translate(${x}px, ${Y + 4}px) scale(1)`, opacity: 1 }], { duration: 400, delay: i * PLANT_EVERY_MS, easing: 'ease-in' })
+        .then(() => Sound.plink(), () => 'cut: it stands where it ends')
+    })
+  }
+
+  /** The nearest pole he hasn't sent away yet, and its place far off. */
+  const next = () => {
+    const i = [3, 2, 1].findIndex((k) => poles[k].where !== 'far')
+    return i === -1 ? null : { p: poles[[3, 2, 1][i]], far: FAR[i] }
+  }
+
+  // ------------------------------------------------------------ the chain
+
+  /** He finds the pole by his flowers: knock knock, a sigh. */
+  async function notice(alive) {
+    const p = poles[3]
+    await m().goTo(p.x - 60)
+    if (!alive()) return
+    Sound.knock()
+    await Mole.knock()
+    if (!alive()) return
+    await Mole.lean(10, 800)
+    if (!alive()) return
+    Sound.say('achJo')
+  }
+
+  /** Over to it, a tug or two, up over his head, and away it sails. */
+  async function sendAway(alive, stuck = false) {
+    const n = next()
+    if (!n) return
+    const { p, far } = n
+    if (p.where === 'line') {
+      await m().goTo(p.x - 50)
+      if (!alive()) return
+      for (let i = 0; i < (stuck ? 3 : 1); i++) {
+        Sound.tug()
+        await Mole.lean(-16, stuck ? 600 : 800)
+        if (!alive()) return
+      }
+      if (stuck) {
+        // it pops out of the ground, he tumbles over backwards, and it flies off by itself
+        Sound.pop()
+        Sound.say('fright')
+        await Promise.all([fly(p, far, { x: p.x, y: Y - 80 }, 720), Mole.lean(-55, 1100)])
+        if (!alive()) return
+        Sound.say('giggle')
+        return
+      }
+      p.where = 'carried'
+      p.wrap.remove()
+      p.node.style.transform = 'rotate(80deg) translate(0px, 85px)'
+      Mole.carry(p.node)
+    }
+    await Mole.wobble(600)
+    if (!alive()) return
+    Sound.whoosh()
+    Mole.carry(null)
+    await fly(p, far, Mole.head())
+  }
+
+  /** The pole sails from `from` (his hands, or where it stood) to `far`, in front of everything, and plants itself there, away up the hill. */
+  async function fly(p, far, from, spin = 0) {
+    const { x, y } = from
+    p.node.style.transform = ''
+    p.where = 'far'
+    p.wrap.removeAttribute('data-thing') // far off, it is the hill's: a tap there is a tap on the meadow
+    stand(p, far.x, far.y, far.s, 'things')
+    await Motion.endAt(p.wrap, [
+      { transform: `translate(${x}px, ${y}px) scale(1) rotate(${70 + spin}deg)` },
+      { transform: `translate(${(x + far.x) / 2}px, ${Math.min(y, far.y) - 260}px) scale(${(1 + far.s) / 2}) rotate(${20 + spin / 2}deg)`, offset: 0.5 },
+      { transform: `translate(${far.x}px, ${far.y}px) scale(${far.s}) rotate(0deg)` },
+    ], { duration: THROW_MS, easing: 'ease-in' })
+    stand(p, far.x, far.y, far.s, 'far-things') // landed: behind the meadow's front, up on the hill
+    Sound.plink()
+    Debug.trace('pole far', { x: far.x })
+  }
+
+  /** The bulldozer follows the bent line away into the distance. */
+  async function away(alive) {
+    Sound.rumble(4)
+    const a = DOZER.away
+    await Promise.all([
+      Motion.endAt(dozer, [{ transform: `translate(${DOZER.at}px, ${DOZER.y}px) scale(0.55)` }, { transform: `translate(${(DOZER.at + a.x) / 2 + 80}px, ${DOZER.y - 6}px) scale(0.45)`, offset: 0.5 }, { transform: `translate(${a.x}px, ${a.y}px) scale(${a.s})`, opacity: 0 }], { duration: 4200, easing: 'ease-in-out' }),
+      (async () => {
+        await Mole.cheer()
+        if (alive()) await Mole.cheer()
+      })(),
+    ])
+    if (!alive()) return
+    dozer.remove()
+    dozer = null
+    for (const p of poles) p.wrap.removeAttribute('data-thing') // done: they're the meadow's now
+  }
+
+  /** Where a dropped pole can stand by him without standing on another. */
+  function freeSpot(x) {
+    x = Math.min(1400, Math.max(160, x))
+    for (let tries = 0; tries < 8 && poles.some((p) => p.where === 'line' && Math.abs(p.x - x) < 60); tries++) x = Math.max(160, x - 70)
+    return x
+  }
+
+  /** Cut short: a pole in his hands stands up by him; one in the air lands; the bulldozer, if it was driving off, is back on the hill. */
+  function restore() {
+    for (const p of poles) p.wrap.getAnimations().forEach((a) => a.cancel())
+    for (const p of poles) {
+      if (p.where === 'far') stand(p, p.x, p.y, p.s, 'far-things')
+      if (p.where !== 'carried') continue
+      Mole.carry(null)
+      p.node.style.transform = ''
+      p.where = 'line'
+      stand(p, freeSpot(Mole.state.x + 40), Y + 4, 1, 'things')
+    }
+    if (dozer) {
+      dozer.getAnimations().forEach((a) => a.cancel())
+      dozer.style.opacity = ''
+      dozer.style.transform = `translate(${DOZER.at}px, ${DOZER.y}px) scale(0.55)`
+    }
+  }
+
+  function night() {
+    restore()
+    if (dozer) dozer.remove()
+    dozer = null
+  }
+
+  Things.add({
+    name: 'poles',
+    offer: 'discover',
+    appear,
+    steps: [notice, (alive) => sendAway(alive), (alive) => sendAway(alive), (alive) => sendAway(alive, true), away],
+    restore,
+    night,
+    detail: () => ({ poles: poles.map((p) => p.where), dozer: !!dozer, cast: [] }),
+  })
+})()

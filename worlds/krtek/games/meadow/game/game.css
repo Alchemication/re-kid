@@ -14,6 +14,12 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 #cricket.out .bow { transform-origin: 17px -67px; animation: bow 0.84s ease-in-out infinite alternate; }
 @keyframes bow { from { transform: rotate(-8deg) translateX(-8px); } to { transform: rotate(6deg) translateX(10px); } }
 
+/* the bulldozer far off: puffs of smoke */
+.dozer .puff { opacity: 0; transform-box: fill-box; transform-origin: center; animation: puff 1.8s ease-out infinite; }
+.dozer .p1 { animation-delay: 0.6s; }
+.dozer .p2 { animation-delay: 1.2s; }
+@keyframes puff { 0% { opacity: 0.9; transform: translate(0, 0) scale(0.6); } 100% { opacity: 0; transform: translate(-14px, -40px) scale(1.6); } }
+
 /* the den: Zs drifting up while he sleeps */
 #den .z { opacity: 0; animation: zee 3s ease-in-out infinite; }
 #den .z2 { animation-delay: 1s; }

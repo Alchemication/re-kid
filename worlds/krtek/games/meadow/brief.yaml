@@ -108,6 +108,18 @@ scenes:
   sound:
     text: The egg rolling, a knock knock, his "ooh", a squeak, peeps, the crack and his squeak of fright, a giggle, the hen's bok bok.
     origin: invented
+- id: poles
+  action:
+    text: Far off on the hill a little bulldozer starts puffing, and red-and-white poles get planted one after another in a line running straight at his flowers. Tap a pole, or leave him be.
+    origin: inspired
+    refs: [world:episode_formula, 'world:places[molehill].description']
+  result:
+    text: He knocks on the pole by his flowers and sighs "ach jo". Then he tugs it out and throws it like a javelin - it sails off and plants itself far away up the hill, and the line bends away from his flowers. The next one too. The last is stuck - he tugs and tugs, it pops, he tumbles over backwards, and the pole flies off by itself and lands just where it should. The bulldozer follows the bent line away into the distance, and he cheers. The poles stay out for the rest of the day. In the film he digs a pit for the bulldozer and moves the poles by hand; the throwing and the stuck pole are ours. Something to discover - Eliot's favourite, the "cones".
+    origin: inspired
+    refs: [world:episode_formula, 'world:characters[krtek].moves[carries-overhead].claim', 'world:characters[krtek].moves[arms-up-cheer].claim']
+  sound:
+    text: A far rumble, a wooden tok as each pole goes in, a knock knock, his sigh, a tug, a whoosh, his squeak and giggle.
+    origin: invented
 - id: dusk
   action:
     text: Nothing; the sun goes down at 19:00.
@@ -141,7 +153,7 @@ parent_card:
   origin: invented
 
 open_questions:
-- Which encounters come first, and do they follow the yard's rule (each play offers something to discover, someone to help, and a moment when someone helps him)? Eliot's favourites (Adam, 2026-10-15) - traffic cones, eggs on the factory's conveyor belt (Vejce), the animals painting themselves to scare off the fox (Malířem), and a lot of Krtek a autíčko. Also the cuckoo clock he mends (Hodinářem) and the survey poles he moves round his flowers (Buldozer).
+- Which encounters come first, and do they follow the yard's rule (each play offers something to discover, someone to help, and a moment when someone helps him)? Eliot's favourites (Adam, 2026-10-15) - traffic cones (the survey poles of Krtek a buldozer), eggs on the factory's conveyor belt (Vejce), the animals painting themselves to scare off the fox (Malířem), and a lot of Krtek a autíčko. Also the cuckoo clock he mends (Hodinářem). Built - the egg and the poles (Eliot's cones are the survey poles).
 - Does a slow-closing circle over the last hour read as "bedtime is coming", or as the game going away?
 - Should the molehills he leaves sink by evening, or stay all day as a map of where he has been?
 - Which friends visit the meadow - the mouse first?

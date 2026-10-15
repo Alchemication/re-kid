@@ -14,7 +14,6 @@
 
 /* global Debug, Friends, Layout, Mole, Motion, Sound, Things */
 (() => {
-  const SVG = 'http://www.w3.org/2000/svg'
   const Y = Layout.GROUND
   const ROLL_FROM = -60 // it rolls in from the left edge...
   const REST_X = 330 // ...and stops here, in the grass left of his molehill
@@ -27,13 +26,7 @@
 
   const egg = { x: REST_X, where: 'away', node: null, wrap: null, chick: null, cast: [] }
   const m = () => Things.meadow
-
-  const el = (tag, attrs = {}, parent) => {
-    const e = document.createElementNS(SVG, tag)
-    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v)
-    if (parent) parent.appendChild(e)
-    return e
-  }
+  const el = (...args) => m().el(...args)
 
   /** The egg, drawn round its middle. */
   function drawEgg() {

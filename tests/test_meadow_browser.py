@@ -28,7 +28,7 @@ DONE_MS = 60_000  # the longest encounter runs well under this
 CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has.
-ENCOUNTERS = {"egg": 5}
+ENCOUNTERS = {"egg": 5, "poles": 5}
 
 
 class Meadow:

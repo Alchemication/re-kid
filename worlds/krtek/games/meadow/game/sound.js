@@ -203,5 +203,30 @@ const Sound = (() => {
     }
   }
 
-  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck }
+  /** A pole planted in the ground: a wooden tok. */
+  function plink() {
+    if (!ready()) return
+    note(520, 0, 0.12, 0.2, 'triangle', 0.7)
+    hiss(0, 0.05, 900, 2, 0.1)
+  }
+
+  /** A tug at something stuck: a low strain. */
+  function tug() {
+    if (!ready()) return
+    hiss(0, 0.35, 260, 1.5, 0.18)
+  }
+
+  /** Something thrown: a whoosh. */
+  function whoosh() {
+    if (!ready()) return
+    hiss(0, 0.5, 1500, 0.8, 0.12)
+  }
+
+  /** The bulldozer far off: a soft low rumble for a few seconds. */
+  function rumble(seconds) {
+    if (!ready()) return
+    for (let t = 0; t < seconds; t += 0.25) hiss(t, 0.3, 110 + Math.random() * 40, 1.2, 0.05)
+  }
+
+  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck, plink, tug, whoosh, rumble }
 })()

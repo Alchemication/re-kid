@@ -442,6 +442,7 @@ const meadowGame = (() => {
   const things = Things.setup({
     run,
     goTo,
+    el,
     free: () => game.awake && !game.ended && !game.gesture,
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
