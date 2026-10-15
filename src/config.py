@@ -89,6 +89,17 @@ GAMES_DIR = "games"
 BRIEF_NAME = "brief.yaml"
 """A game's brief inside its folder (``schema.brief.GameBrief``)."""
 
+SHARED_DIR = REPO_ROOT / "shared"
+"""Game scripts every game may use (the clock and debug tools first). Each game
+gets a copy of the ones its page loads (``main.py shared``), so a game folder
+stays complete on its own: it opens from disk, and the site publishes it as it
+is (.github/workflows/pages.yml)."""
+
+SHARED_HEADER = (
+    "// Copied from shared/{name} by `main.py shared` — edit that, not this.\n"
+)
+"""The first line of a game's copy of a shared script, so nobody edits the copy."""
+
 GAME_PAGE = "game/index.html"
 """A game's page inside its folder: static HTML with plain scripts, so it opens
 straight from disk with no server."""
@@ -239,7 +250,7 @@ BUG_REPORT_DIR = Path.home() / "Downloads"
 this is every major browser's default download folder."""
 
 BUG_REPORT_GLOB = "*-bug-*.json"
-"""A game's bug report file name (the yard saves ``yard-bug-<time>.json``)."""
+"""A game's bug report file name: ``<game>-bug-<time>.json`` (debug.js)."""
 
 BUG_REPORT_VERSION = 1
 """The report shape ``main.py replay`` reads; matches ``REPORT_VERSION`` in the

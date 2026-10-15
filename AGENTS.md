@@ -141,7 +141,7 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     what Reksio does play note by note from CC0 instrument samples
     (`samples.yaml`, packed into `samples.js` by `main.py samples`).
   - `effects.js`, `tunes.js` and `samples.js` are generated: rebuild them,
-    don't edit.
+    don't edit. So are the copies of `shared/` scripts (`main.py shared`).
   - Original audio: never committed, except the bark (see Project), packed
     by `main.py barks` into the game's `barks.js`; without it
     the game falls back to a synthesised bark.
@@ -159,7 +159,11 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   needs a game-side name gets a hook, not an exception.
   `test_shared_parts_know_no_game` checks what they depend on; whether one
   is shaped around a single game is for review. They stay in the first
-  game's folder until a second game needs them.
+  game's folder until a second game needs them; then the source moves to
+  `shared/`, and `main.py shared` copies it into each game whose page
+  loads it, so every game folder still opens, tests and publishes on its
+  own. Edit `shared/`, never a copy (its first line says so;
+  `test_shared.py` fails on a stale one). `debug.js` is there so far.
 - **Game debuggability (`debug.js`, loaded first):** every bug must be
   replayable, so:
   - randomness comes from `Debug.random('<part>')`, never `Math.random`

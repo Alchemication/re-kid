@@ -1,12 +1,14 @@
-// Finding and replaying bugs in the yard, and the game's clock. Loaded
-// first, so every other script can use them.
+// Copied from shared/debug.js by `main.py shared` — edit that, not this.
+// Finding and replaying bugs in a game, and the game's clock. Loaded
+// first, so every other script can use them. The source is shared/debug.js;
+// `main.py shared` copies it into each game that loads it.
 //
 // - The clock (`Clock`): game time, timers and waits. It moves on only as
 //   frames are drawn, a frame counting for at most MAX_STEP_MS, so when the
 //   page is hidden (another tab, a covered window, a locked phone) the game
 //   pauses rather than running on unseen; its animations and sound pause too.
 //   Clock.hold pauses it the same way for other reasons (a phone held
-//   upright, yard.js).
+//   upright, in the yard).
 //   Everything that plays out over time uses it, never setTimeout or
 //   performance.now (sound's own audio clock aside).
 // - Motion.endAt: animate something to where it ends up, setting the end on
@@ -19,7 +21,7 @@
 //   anything that depends on frame timing drifts). The seed of every play is
 //   printed in the console at start.
 // - A trace: the last few hundred things that happened (taps, moves, cut-short
-//   gestures, errors), in `yardGame.trace()`.
+//   gestures, errors), which a game can show (the yard: `yardGame.trace()`).
 // - Cut-short gestures: relax() cancels animations, and whoever awaits them
 //   sees an AbortError. `ignoreCut` lets that one through quietly and reports
 //   anything else, so a real error never just leaves Reksio standing still.
@@ -246,6 +248,14 @@ const Debug = (() => {
     }
   }
 
+  /** The game's folder name, for the report's file name: `yard` from
+   * …/games/yard/game/index.html on disk or …/reksio/yard/ on the site. */
+  function gameName() {
+    const dirs = location.pathname.split('/').filter((d) => d && !d.includes('.'))
+    const last = dirs[dirs.length - 1] === 'game' ? dirs[dirs.length - 2] : dirs[dirs.length - 1]
+    return last || 'game'
+  }
+
   /** Ask what went wrong, then download the report as a file. */
   function saveBugReport() {
     const moment = { at: Math.round(Clock.now()), state: stateOf() }
@@ -256,7 +266,7 @@ const Debug = (() => {
     const stamp = report.saved.replace(/[-:]/g, '').replace('T', '-').slice(0, 15)
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([JSON.stringify(report, null, 1)], { type: 'application/json' }))
-    a.download = `yard-bug-${stamp}.json`
+    a.download = `${gameName()}-bug-${stamp}.json`
     a.click()
     setTimeout(() => URL.revokeObjectURL(a.href), 1000)
   }

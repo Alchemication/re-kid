@@ -34,6 +34,7 @@ from config import (
     MARK_PORT_TRIES,
     PLAY_STUB,
     REPLAY_PROGRESS_EVERY_MS,
+    REPO_ROOT,
     SAMPLE_CACHE_DIR,
     SAMPLES_JS,
     SAMPLES_NAME,
@@ -577,4 +578,15 @@ def cmd_barks(args: argparse.Namespace) -> int:
         logger.error("%s", exc)
         return 1
     print(f"Wrote {root / BARKS_JS} ({count} barks).")
+    return 0
+
+
+def cmd_shared(args: argparse.Namespace) -> int:
+    """Copy the shared game scripts into every game that loads them."""
+    from shared import sync
+
+    written = sync()
+    for c in written:
+        print(f"  {c.path.relative_to(REPO_ROOT)}")
+    print(f"{len(written)} copies updated." if written else "All copies up to date.")
     return 0

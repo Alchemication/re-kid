@@ -13,6 +13,7 @@ Subcommands:
     effects   Trim, level and pack a game's picked sound effects into effects.js.
     tunes     Level and pack a game's picked music takes into tunes.js.
     barks     Cut the marked original barks into barks.js for the games.
+    shared    Copy the shared game scripts (shared/) into the games that load them.
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -93,6 +94,11 @@ Examples:
         little higher and quicker each time; without the file they use a
         synthesised bark. The original recording, shipped with the game.
 
+    uv run python main.py shared
+        Copies each script in shared/ (the clock and debug tools) into every
+        game whose page loads it, with a header saying to edit shared/
+        instead. Run it after changing anything in shared/.
+
     uv run python main.py schema world
         JSON Schema for world.yaml (also: sources, episodes, intro, brief).
 """
@@ -117,6 +123,7 @@ from commands import (
     cmd_replay,
     cmd_samples,
     cmd_schema,
+    cmd_shared,
     cmd_show,
     cmd_tunes,
     cmd_validate,
@@ -300,6 +307,8 @@ def main() -> int:
     p_barks = sub.add_parser("barks", help="Pack the marked barks for the games")
     p_barks.add_argument("world", metavar="WORLD")
 
+    sub.add_parser("shared", help="Copy shared game scripts into the games")
+
     p_schema = sub.add_parser("schema", help="Print JSON Schema")
     p_schema.add_argument(
         "kind", choices=["world", "sources", "episodes", "intro", "brief"]
@@ -319,6 +328,7 @@ def main() -> int:
         "effects": cmd_effects,
         "tunes": cmd_tunes,
         "barks": cmd_barks,
+        "shared": cmd_shared,
         "schema": cmd_schema,
     }
     return dispatch[args.cmd](args)
