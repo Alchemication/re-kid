@@ -13,23 +13,23 @@ decided and why.
    (`worlds/krtek/hours.md`).
    - The world (`worlds/krtek/`) is done; its `open_questions` wait,
      rights before release. His voice is generated (`docs/DECISIONS.md`).
-   - Its scene's brief (`games/<scene>/brief.yaml`), like the yard's: a day
-     at the molehill (the den under it, the flower bed and spring in front,
-     the meadow; `design_notes` in `world.yaml`), every part `original`,
-     `inspired` or `invented`. Aim for a
-     first playable scene, not the yard's depth: a day with an ending, 4–5
-     things to do, a couple of creatures, sound and music; then deepen it
-     from what Eliot does.
-   - *Longer encounters* than Reksio's (Eliot found the yard's too short):
-     each a few steps with someone, that he can watch run on, and that any
-     tap still cuts short cleanly (the yard's rule: a cut-short gag leaves
-     him free and standing). A target for the brief; the yard can take it
-     up too.
-   - First build step: move what both scenes use (debug.js and the Clock,
-     input and the recorder, sound and music, probably the day) out of the
-     yard's folder into a shared one both load, and publish it with them
-     (`.github/workflows/pages.yml`). Characters stay with their world. Not
-     before: the second scene shows what is really shared.
+   - **Adam, then Eliot, play the meadow** (`main.py play krtek meadow`;
+     `?day=60` for the ending, `?props=egg&soon` for one encounter at
+     once). Built: the day from the den to the iris, digging, watering,
+     and four encounters, one of each kind a play (the egg he helps with;
+     the paint and the fox, where his friends help him; the poles or the
+     toy car to discover). None was checked with Adam before it was
+     built (he was asleep): judge each design, the lengths (about 25–40 s
+     left alone) and the looks, which are rough. Watch: does Eliot watch a
+     chain run on, or tap through it; does he laugh at the shell hat, the
+     tumble, the monster, the backwards car; does the closing circle read
+     as bedtime.
+   - Then, from what he does: the looks (the mole first), the music
+     (`new-music`: a morning, phrases, the cricket's lullaby), the
+     effects through `new-sound` (all synthesised now, but the voice), and
+     the next encounters (the cuckoo clock from Hodinářem). The meadow's
+     sound.js copies the yard's take player: the next part to move into
+     `shared/`, with music.js when the meadow gets music.
    - Once both scenes play: a plain page to pick one (two pictures), which
      loads the scene in place, so the tap that picks it also lets sound
      play. Not a platform.
