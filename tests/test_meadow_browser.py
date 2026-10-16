@@ -14,6 +14,7 @@ fails until you do.
 from __future__ import annotations
 
 from collections.abc import Iterator
+from itertools import pairwise
 from pathlib import Path
 
 import pytest
@@ -266,4 +267,36 @@ class TestMeadowView:
         m.page.mouse.click(1280 * 0.25, 720 * 0.9)
         m.wait_free()
         assert abs(m.state()["x"] - (view + 400)) < 30, m.state()
+        m.assert_settled()
+
+
+class TestMeadowWalking:
+    def test_quick_taps_never_make_him_jump(self, meadow: callable) -> None:
+        m = meadow()
+        m.wake()
+        m.do("go to 1000")  # out of his molehill and walking
+        m.wait_free()
+        xs = []
+        for i in range(8):  # each tap cuts a walk under way
+            m.page.mouse.click(1250 if i % 2 else 30, 650)
+            for _ in range(10):
+                xs.append(m.page.evaluate("Mole.drawnX()"))
+                m.page.wait_for_timeout(40)
+        worst = max(abs(a - b) for a, b in pairwise(xs))
+        assert worst < 60, f"he jumped {worst:.0f} units between frames"
+        m.wait_free()
+        m.assert_settled()
+
+    def test_an_arrow_held_walks_him_until_let_go(self, meadow: callable) -> None:
+        m = meadow()
+        m.wake()
+        x0 = m.state()["x"]
+        m.page.keyboard.down("ArrowRight")
+        m.page.wait_for_timeout(1200)
+        m.page.keyboard.up("ArrowRight")
+        m.wait_free(3_000)
+        x1 = m.state()["x"]
+        assert 150 < x1 - x0 < 1500, (x0, x1)
+        m.page.wait_for_timeout(600)
+        assert m.state()["x"] == x1, "he walked on after the key was let go"
         m.assert_settled()

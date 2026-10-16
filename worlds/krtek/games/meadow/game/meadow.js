@@ -391,6 +391,7 @@ const meadowGame = (() => {
     [/^water$/, () => run('water', water)],
     [/^use ([a-z]+)$/, (m) => Things.use(m[1]) || run('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => run('go', () => goTo(Number(m[1])))],
+    [/^stop$/, () => run('stop', async () => {})],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
   ]
 
@@ -441,10 +442,15 @@ const meadowGame = (() => {
     if (e.ctrlKey || e.metaKey || e.altKey || ['Shift', 'Meta', 'Control', 'Alt', 'Tab', 'CapsLock', 'Escape'].includes(e.key)) return
     Sound.ensure()
     const x = Mole.state.x
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform(`go to ${Math.round(clampX(x + (e.key === 'ArrowLeft' ? -300 : 300)))}`)
+    e.preventDefault()
+    if (e.repeat) return // a key held down repeats: he is already going
+    // an arrow held: he walks that way until it is let go (keyup)
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform(`go to ${e.key === 'ArrowLeft' ? DIG.from : DIG.to}`)
     else if (e.key === ' ') perform(x > BED.from - 120 && x < SPRING + 60 ? 'water' : 'tap mole')
     else perform('tap mole')
-    e.preventDefault()
+  })
+  document.addEventListener('keyup', (e) => {
+    if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && game.gesture === 'go') perform('stop')
   })
 
   // ------------------------------------------------------------ start
