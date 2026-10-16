@@ -12,10 +12,12 @@
   <link rel="stylesheet" href="game.css">
 </head>
 <body>
-  <!-- The meadow is 1600 by 900 scene units, one screen wide; a wider or
-       narrower screen shows a little less of the sky or the sides. Everything
-       but the den is inside the circle (#iris) that closes round the molehill
-       at the end of the day. -->
+  <!-- The meadow is 4000 by 900 scene units; a screen shows 1600 of it (a
+       wider or narrower screen a little less sky, or less at the sides), and
+       the view follows the mole (view.js): the sky stays, the far trees
+       (#far-view) scroll at half speed, everything on the ground (#cam) with
+       the view. Everything but the den is inside the circle (#iris) that
+       closes round the molehill at the end of the day. -->
   <svg id="world" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" role="img" aria-label="Krtek in his meadow">
     <defs>
       <linearGradient id="sky-grad" x1="0" y1="0" x2="0" y2="1">
@@ -24,7 +26,7 @@
       </linearGradient>
       <mask id="iris" maskUnits="userSpaceOnUse" x="-200" y="-200" width="2000" height="1300">
         <rect x="-200" y="-200" width="2000" height="1300" fill="#000" />
-        <circle id="iris-circle" cx="560" cy="630" r="1250" fill="#fff" />
+        <circle id="iris-circle" cx="800" cy="630" r="10000" fill="#fff" />
       </mask>
     </defs>
 
@@ -34,11 +36,12 @@
         <g id="sun"><circle r="58" fill="#f08a2c" /><circle r="58" fill="none" stroke="#f6b25a" stroke-width="6" opacity="0.6" /></g>
         <g id="moon"><path d="M0 -42 A42 42 0 1 0 0 42 A32 32 0 1 1 0 -42 Z" fill="#f4f1d8" /></g>
       </g>
+      <g id="far-view"><g id="far"></g></g>
+      <g id="cam">
       <g id="back">
-        <g id="far"></g>
+        <g id="back-ground"><path d="M-200 640 C200 600 500 630 800 612 S1300 600 1800 630 S2600 612 3000 626 S3800 604 4200 630 V900 H-200 Z" fill="#80b068" /></g>
         <g id="far-things"></g>
-        <g id="back-ground"><path d="M-200 640 C200 600 500 630 800 612 S1300 600 1800 630 V900 H-200 Z" fill="#80b068" /></g>
-        <g id="spring">
+        <g id="spring" transform="translate(1100 0)">
           <path d="M1290 690 c-30 -80 30 -130 90 -110 c50 18 60 80 40 110 z" fill="#8c8a7f" stroke="#3b3a33" stroke-width="3" />
           <path d="M1300 640 c20 -40 70 -50 100 -20" fill="none" stroke="#6b6a61" stroke-width="4" />
           <path class="flow" d="M1310 662 c-24 6 -34 18 -40 32" fill="none" stroke="#7fb3ea" stroke-width="12" stroke-linecap="round" />
@@ -48,7 +51,7 @@
       </g>
       <g id="mole"></g>
       <g id="front">
-        <g id="front-ground"><path d="M-200 718 C300 712 700 724 1000 716 S1500 712 1800 720 V900 H-200 Z" fill="#a9cf7c" /></g>
+        <g id="front-ground"><path d="M-200 718 C300 712 700 724 1000 716 S1500 712 1800 720 S2700 726 3100 716 S3800 714 4200 720 V900 H-200 Z" fill="#a9cf7c" /></g>
       </g>
       <g id="top">
         <g id="tunnels"></g>
@@ -57,7 +60,7 @@
         <g id="friends"></g>
         <g id="bed"></g>
         <g id="drops"></g>
-        <g id="cricket" transform="translate(360 712)">
+        <g id="cricket" transform="translate(720 712)">
           <ellipse cx="0" cy="-26" rx="26" ry="16" fill="#3d5a1e" stroke="#15140f" stroke-width="2.5" />
           <circle cx="24" cy="-40" r="12" fill="#3d5a1e" stroke="#15140f" stroke-width="2.5" />
           <circle cx="28" cy="-43" r="3.5" fill="#fff" /><circle cx="29" cy="-43" r="1.8" fill="#15140f" />
@@ -66,6 +69,7 @@
           <g class="fiddle"><path d="M10 -64 c-10 -10 6 -22 14 -12 c6 -8 20 2 10 12 c4 10 -12 18 -16 8 c-8 6 -16 -2 -8 -8z" fill="#b5651d" stroke="#15140f" stroke-width="2" /></g>
           <g class="bow"><path d="M-10 -86 L44 -48" stroke="#5a3a1a" stroke-width="3" stroke-linecap="round" /></g>
         </g>
+      </g>
       </g>
     </g>
 
@@ -104,6 +108,7 @@
   <script src="layout.js"></script>
   <script src="day.js"></script>
   <script src="sound.js"></script>
+  <script src="view.js"></script>
   <script src="mole.js"></script>
   <script src="friends.js"></script>
   <script src="things.js"></script>

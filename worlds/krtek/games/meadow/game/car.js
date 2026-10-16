@@ -1,10 +1,10 @@
 // The toy car (to discover), after Krtek a autíčko: a toy car lies broken in
-// the grass, its two wheels off beside it. He knocks on it ("ooh"), fetches
+// the grass beyond the spring, its two wheels off beside it. He knocks on it ("ooh"), fetches
 // a wheel and pops it on; the second slips out of his hands and rolls off
-// towards his flowers, and he chases it back (the laugh). He winds the key
+// back towards the spring, and he chases it (the laugh). He winds the key
 // on its back, climbs in, and it shoots off backwards (the surprise), then
-// zooms across the meadow to the spring, turns, and brings him back to park
-// by his molehill, where it stays, as the film ends with the car parked by
+// zooms to the far end of the meadow, turns, and brings him all the way back
+// to park by his molehill, where it stays, as the film ends with the car parked by
 // the molehill at night. Tapped again once it's mended, it gives him a ride.
 //
 // A tap on the car or on him hurries it on; a tap elsewhere cuts it short
@@ -14,11 +14,11 @@
 /* global Debug, Layout, Mole, Motion, Sound, Things */
 ;(() => {
   const Y = Layout.GROUND
-  const LIES_AT = 330 // where it lies broken, left of his molehill
-  const WHEELS_AT = [190, 430] // where its wheels lie
-  const ROLLS_TO = 610 // the second wheel rolls off this far, towards his flowers
-  const PARK_AT = 300 // where he parks it, by his molehill
-  const TURN_AT = 1380 // where it turns, past the spring
+  const LIES_AT = 3000 // where it lies broken, in the grass beyond the spring
+  const WHEELS_AT = [2860, 3100] // where its wheels lie
+  const ROLLS_TO = 2680 // the second wheel rolls off this far, back towards the spring
+  const PARK_AT = 560 // where he parks it, by his molehill
+  const TURN_AT = 3780 // where it turns, at the far end of the meadow
   const SEAT = 34 // how far up he sits in it
   const ZOOM_MS_PER_UNIT = 1.6
 
@@ -207,7 +207,7 @@
       if (w.held) {
         Mole.carry(null)
         w.held = false
-        w.x = Math.max(160, Math.min(1400, Mole.state.x - 40))
+        w.x = Math.max(Layout.DIG.from, Math.min(Layout.DIG.to, Mole.state.x - 40))
       }
       w.g.style.transform = `translate(${w.x}px, ${Y - 16}px)`
       if (!w.g.parentNode) document.getElementById('things').appendChild(w.g)

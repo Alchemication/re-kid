@@ -1,24 +1,26 @@
 // Krtek's meadow: the scene, what a tap means, and the day from waking to
 // sleep (brief.yaml). He wakes in his den under the molehill; a tap on the
-// meadow sends him tunnelling there, a tap on him gets a word and a hop, a
-// tap on the flower bed or the spring has him water the flowers. The day
+// meadow sends him waddling there (the view follows him, view.js), a tap on
+// him gets a word and a hop, a tap on the flower bed or the spring has him
+// water the flowers. The day
 // runs on its own (day.js); at dusk the tulips close and the cricket
 // fiddles, through the last hour the picture closes in a circle round his
 // molehill, and at 20:00 he goes down to sleep in his den. After that only
 // a grown-up's long press starts a new day.
 //
-// Every input is an intent ("dig to 900", "tap mole", "water", "wake"), run
+// Every input is an intent ("go to 900", "tap mole", "water", "wake"), run
 // by perform() so the recorder (debug.js) keeps it. A new intent cuts the
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Clock, Day, Debug, Friends, Layout, Mole, Motion, Sound, Things */
+/* global Clock, Day, Debug, Friends, Layout, Mole, Motion, Sound, Things, View */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const { GROUND, HOME, BED, SPRING, DIG } = Layout
-  const IRIS_FULL = 1250 // the circle's radius when it shows the whole meadow
-  const IRIS_AT = { x: HOME, y: GROUND - 90 } // it closes round the molehill
+  const IRIS_FULL = 1700 // the circle's radius when it shows the whole view, wherever he stands in it
+  const IRIS_OPEN = 10000 // until the last hour it is out of the way altogether
+  const IRIS_Y = GROUND - 90 // it closes round him (and at bedtime he is home, in his molehill)
   const IRIS_CLOSE_MS = 1400 // the last of it, at bedtime
   const WAKE_ANYWAY_MS = 4000 // left asleep this long, he wakes by himself
   const HOME_AT_DUSK_MS = 3000 // left alone this long at dusk, he goes home to listen
@@ -94,13 +96,15 @@ const meadowGame = (() => {
   function makeScene() {
     dab(layers.sky, 90, { x: -100, y: -100, w: 1800, h: 700 }, ['#ffffff', '#b9cfee'], [30, 70], 0.04)
     const far = document.getElementById('far')
-    for (let i = 0; i < 26; i++) {
+    const farW = Layout.WORLD_W / 2 + Layout.VIEW_W // the far trees scroll at half speed: this much covers the whole trip
+    for (let i = 0; i < farW / 66; i++) {
       const x = i * 66 + paint() * 40
       el('ellipse', { cx: x, cy: 610 - paint() * 40, rx: 60 + paint() * 50, ry: 80 + paint() * 70, fill: paint() < 0.5 ? '#6e9a5a' : '#88b06e', opacity: 0.85 }, far)
     }
-    dab(far, 160, { x: 0, y: 480, w: 1600, h: 160 }, ['#4d6d1f', '#a9cf7c', '#6e9a5a'], [8, 20])
-    dab(document.getElementById('back-ground'), 300, { x: 0, y: 600, w: 1600, h: 130 }, ['#4d6d1f', '#a9cf7c', '#3f7d22'], [3, 9])
-    dab(document.getElementById('front-ground'), 260, { x: 0, y: 730, w: 1600, h: 170 }, ['#4d6d1f', '#a9cf7c', '#3f7d22'], [3, 10])
+    const per = (w) => w / Layout.VIEW_W // as many dabs per screen as before
+    dab(far, 160 * per(farW), { x: 0, y: 480, w: farW, h: 160 }, ['#4d6d1f', '#a9cf7c', '#6e9a5a'], [8, 20])
+    dab(document.getElementById('back-ground'), 300 * per(Layout.WORLD_W), { x: 0, y: 600, w: Layout.WORLD_W, h: 130 }, ['#4d6d1f', '#a9cf7c', '#3f7d22'], [3, 9])
+    dab(document.getElementById('front-ground'), 260 * per(Layout.WORLD_W), { x: 0, y: 730, w: Layout.WORLD_W, h: 170 }, ['#4d6d1f', '#a9cf7c', '#3f7d22'], [3, 10])
     hill(HOME, true, false)
     makeBed()
     Mole.make(layers.mole, document.getElementById('mole-out'), document.getElementById('tunnels'))
@@ -173,7 +177,8 @@ const meadowGame = (() => {
 
   /** The circle closing through the last hour; at dusk, left alone, he goes home to listen; then bedtime. */
   function evening(h) {
-    irisCircle.setAttribute('r', String(Math.round(Day.iris(h) * IRIS_FULL)))
+    const share = Day.iris(h)
+    irisCircle.setAttribute('r', String(share >= 1 ? IRIS_OPEN : Math.round(share * IRIS_FULL)))
     const alone = !Debug.still && !game.gesture && Clock.now() - game.lastInput > HOME_AT_DUSK_MS
     if (Day.phase(h) === 'dusk' && alone && Mole.state.pose !== 'listen') run('home to listen', homeToListen)
     if (Day.phase(h) === 'bedtime') bedtime()
@@ -181,7 +186,7 @@ const meadowGame = (() => {
 
   function stateNow() {
     const m = Mole.state
-    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state() }
+    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state() }
   }
 
   function checkRules() {
@@ -227,13 +232,22 @@ const meadowGame = (() => {
     settle()
   }
 
-  /** Get him out on the grass at x: tunnel there and climb out, or waddle if he's out already. */
+  /** Get him out on the grass and waddle to x. */
   async function goTo(x) {
     x = clampX(x)
+    if (Mole.state.pose !== 'out') await Mole.comeUp('out')
+    if (Math.abs(x - Mole.state.x) > 4) await Mole.walkTo(x)
+  }
+
+  /** Home, and down into his molehill and up again inside it, unless he's there already. */
+  async function intoHome() {
     const m = Mole.state
-    if (m.pose === 'out') return Mole.walkTo(x)
-    if (Math.abs(x - m.x) > 50) await digTo(x)
-    await Mole.comeUp('out')
+    if (Math.abs(m.x - HOME) < 50 && (m.pose === 'hill' || m.pose === 'listen')) return
+    await goTo(HOME)
+    Sound.dig()
+    await Mole.goDown()
+    Sound.pop()
+    await Mole.comeUp('hill')
   }
 
   /** After a cut: he stands where he was going, with a molehill under him if he is in the ground. */
@@ -282,11 +296,7 @@ const meadowGame = (() => {
   async function water() {
     const m = Mole.state
     const fill = SPRING - 110
-    if (m.pose !== 'out' || Math.abs(m.x - fill) > 40) {
-      if (m.pose === 'out') await Mole.walkTo(fill)
-      else await digTo(fill)
-      await Mole.comeUp('out')
-    }
+    if (m.pose !== 'out' || Math.abs(m.x - fill) > 40) await goTo(fill)
     Mole.hold(true)
     Sound.water(0.9)
     await Mole.tip(55, 1000)
@@ -315,7 +325,7 @@ const meadowGame = (() => {
   }
 
   async function homeToListen() {
-    if (Math.abs(Mole.state.x - HOME) > 50 || Mole.state.pose === 'out') await digTo(HOME)
+    await intoHome()
     Mole.listen(true)
   }
 
@@ -351,7 +361,7 @@ const meadowGame = (() => {
     cutShort()
     Things.night()
     game.gesture = 'bedtime'
-    if (Math.abs(Mole.state.x - HOME) > 50 || Mole.state.pose === 'out') await Debug.ignoreCut(digTo(HOME), 'home to bed')
+    await Debug.ignoreCut(intoHome(), 'home to bed')
     Mole.put(HOME, 'hill')
     Sound.say('achJo')
     await Debug.ignoreCut(Mole.stretch(), 'bedtime stretch')
@@ -380,6 +390,7 @@ const meadowGame = (() => {
     [/^tap mole$/, () => run('tap mole', tapMole)],
     [/^water$/, () => run('water', water)],
     [/^use ([a-z]+)$/, (m) => Things.use(m[1]) || run('tap mole', tapMole)],
+    [/^go to (\d+)$/, (m) => run('go', () => goTo(Number(m[1])))],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
   ]
 
@@ -409,7 +420,7 @@ const meadowGame = (() => {
     // a tap on him while an encounter plays is a tap on it (he holds the egg): it hurries it on
     if (target.closest('.mole')) return game.gesture && Things.get(game.gesture) ? `use ${game.gesture}` : 'tap mole'
     if (target.closest('#bed') || target.closest('#spring')) return 'water'
-    if (p.y > 560) return `dig to ${Math.round(clampX(p.x))}`
+    if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`
     return 'tap mole' // the sky: he answers anyway
   }
 
@@ -430,7 +441,7 @@ const meadowGame = (() => {
     if (e.ctrlKey || e.metaKey || e.altKey || ['Shift', 'Meta', 'Control', 'Alt', 'Tab', 'CapsLock', 'Escape'].includes(e.key)) return
     Sound.ensure()
     const x = Mole.state.x
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform(`dig to ${Math.round(clampX(x + (e.key === 'ArrowLeft' ? -220 : 220)))}`)
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform(`go to ${Math.round(clampX(x + (e.key === 'ArrowLeft' ? -300 : 300)))}`)
     else if (e.key === ' ') perform(x > BED.from - 120 && x < SPRING + 60 ? 'water' : 'tap mole')
     else perform('tap mole')
     e.preventDefault()
@@ -439,6 +450,7 @@ const meadowGame = (() => {
   // ------------------------------------------------------------ start
 
   makeScene()
+  View.setup(() => Mole.drawnX(), (camX) => irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX))))
   Friends.setup(document.getElementById('friends'))
   const things = Things.setup({
     run,

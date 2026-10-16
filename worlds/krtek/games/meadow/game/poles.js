@@ -17,13 +17,13 @@
 ;(() => {
   const Y = Layout.GROUND
   // the line as planted, from the far right edge to just by his flowers...
-  const LINE = [1470, 1310, 1150, 990]
+  const LINE = [2000, 1760, 1520, 1330]
   // ...and where the three nearest land when thrown: away up the hill, smaller with distance
   // (left of the spring's rock, or right of it, never behind it)
-  const FAR = [{ x: 1120, y: 596, s: 0.38 }, { x: 1225, y: 606, s: 0.46 }, { x: 1445, y: 640, s: 0.62 }]
+  const FAR = [{ x: 1500, y: 596, s: 0.38 }, { x: 1640, y: 606, s: 0.46 }, { x: 1975, y: 640, s: 0.62 }]
   const PLANT_EVERY_MS = 650
   const THROW_MS = 900
-  const DOZER = { from: 1700, at: 1520, y: 598, away: { x: 1060, y: 588, s: 0.3 } }
+  const DOZER = { from: 2600, at: 2150, y: 598, away: { x: 1450, y: 588, s: 0.3 } }
 
   const poles = [] // { node, x, y, s, where: 'line' | 'carried' | 'far' }
   let dozer = null
@@ -167,8 +167,9 @@
 
   /** Where a dropped pole can stand by him without standing on another. */
   function freeSpot(x) {
-    x = Math.min(1400, Math.max(160, x))
-    for (let tries = 0; tries < 8 && poles.some((p) => p.where === 'line' && Math.abs(p.x - x) < 60); tries++) x = Math.max(160, x - 70)
+    const { from, to } = Layout.DIG
+    x = Math.min(to, Math.max(from, x))
+    for (let tries = 0; tries < 8 && poles.some((p) => p.where === 'line' && Math.abs(p.x - x) < 60); tries++) x = Math.max(from, x - 70)
     return x
   }
 

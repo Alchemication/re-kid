@@ -17,13 +17,14 @@
 /* global Debug, Friends, Layout, Mole, Motion, Sound, Things */
 ;(() => {
   const Y = Layout.GROUND
-  const TINS = [{ x: 995, colour: '#3a67ad' }, { x: 1052, colour: '#f2c94c' }, { x: 1108, colour: '#d8322b' }]
+  const S = Layout.SPRING
+  const TINS = [{ x: S - 255, colour: '#3a67ad' }, { x: S - 198, colour: '#f2c94c' }, { x: S - 142, colour: '#d8322b' }]
   const RED = 2 // the tin he falls into: the one nearest the spring
-  const PEER_X = 1175 // where he stands to peer into it, right of the tins
-  const FOX_FROM = 1740 // the fox sneaks in from the right edge...
-  const FOX_AT = 1440 // ...past the spring
-  const FRIENDS_FROM = -140 // the friends come from the left, past his molehill
-  const STACK_X = 1290 // where the monster stands, between the tins and the fox
+  const PEER_X = S - 75 // where he stands to peer into it, right of the tins
+  const FOX_FROM = PEER_X + 950 // the fox sneaks in from off to the right...
+  const FOX_AT = S + 190 // ...past the spring
+  const STACK_X = S + 40 // where the monster stands, between the tins and the fox
+  const FRIENDS_FROM = STACK_X - 950 // the friends come from off to the left, from his molehill's side
   const QUICK = 0.45 // coming back after a cut, everyone hurries
   const HARE_TALL = 150 // how high he stands on the hare's shoulders...
   const MOLE_TALL = 190 // ...and the mouse on his

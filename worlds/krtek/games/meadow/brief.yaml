@@ -5,7 +5,7 @@ audience: Eliot, about 3, playing with a parent; Adam first, for a rough feel of
 length: One day, 08:00 to 20:00 on the meadow's sun, in five minutes of play, as long as a day in Reksio's yard; it ends when the mole goes down to sleep.
 
 pitch:
-  text: The child is the little mole in his meadow. He wakes in his den under the molehill and comes up into the morning. Tap the meadow and he dives down and pops up there, through a fresh molehill; tap him and he giggles or says hello. By his molehill is his flower bed and a little spring, and he waters the flowers. The day passes on its own, the sun crossing the sky whatever he does. At dusk the tulips close, the cricket comes out and fiddles, and the mole settles in his molehill to listen; then he goes down into his molehill, the picture closes in a circle around it, and we see him asleep in his den.
+  text: The child is the little mole in his meadow. He wakes in his den under the molehill and comes up into the morning. Tap the meadow and he waddles there, the view following him along a meadow about two and a half screens wide; tap him and he giggles or says hello. By his molehill is his flower bed and a little spring, and he waters the flowers. The day passes on its own, the sun crossing the sky whatever he does. At dusk the tulips close, the cricket comes out and fiddles, and the mole settles in his molehill to listen; then he goes down into his molehill, the picture closes in a circle around it, and we see him asleep in his den.
   origin: inspired
   refs: ['world:places[molehill].description', 'world:characters[krtek].moves[pops-up-from-molehill].claim', 'world:characters[krtek].moves[asleep-in-den].claim', 'world:design_notes[0]']
 
@@ -17,7 +17,7 @@ principles:
   origin: invented
 - text: Nothing is a goal, and the end never comes as a surprise. The day is the same length whatever the child does. It runs on things that are always in the meadow, never on a thing that may not be out this play (a prop such as the cuckoo clock), so no encounter is ever needed to reach the ending.
   origin: invented
-- text: The meadow has two levels, above and below. The mole travels by tunnel, as in the films, so a tap anywhere in the meadow is a short dig and a pop-up there; the molehills he leaves stay for a while, so the child sees where he has been, and sink back by evening.
+- text: The meadow is wider than the screen, and the view follows him, so going somewhere is part of the fun and there is something to come across on the way. He waddles on the grass; tunnelling is a gag of its own, not his way of getting about (Adam, 2026-10-16) - a tap on a molehill will send him down it and up another, far along.
   origin: inspired
   refs: ['world:characters[krtek].moves[pops-up-from-molehill].claim', 'world:design_notes[2]']
 - text: Encounters are chains of tries, longer than the yard's (Eliot found those too short), as in the films. He finds a thing, tries it wrong once or twice, then uses it right to help someone; each tap moves the chain on a step, and any tap still cuts it short cleanly. Built one at a time with new-gag, after the day feels right.
@@ -28,7 +28,7 @@ principles:
   origin: invented
 
 controls:
-  text: 'Tap or click: on the meadow, he digs there and pops up; on the mole, a giggle or a word and a little hop; on the flower bed, he fetches water from the spring and waters it. Keyboard for the grown-up: arrows dig a little way left or right, space does whatever is nearest, any other key gets a word from him.'
+  text: 'Tap or click: on the meadow, he waddles there; on the mole, a giggle or a word and a little hop; on the flower bed, he fetches water from the spring and waters it; on a thing that has come, he goes to it. Keyboard for the grown-up: arrows walk a little way left or right, space does whatever is nearest, any other key gets a word from him.'
   origin: invented
 
 look:
@@ -64,16 +64,15 @@ scenes:
   sound:
     text: A yawn, then "ahoj!".
     origin: invented
-- id: dig-across
+- id: walk
   action:
     text: Tap the meadow somewhere.
     origin: invented
   result:
-    text: He dives down head first; a line of earth bumps runs under the grass to the tap, and a fresh molehill heaps up there with him on top, elbows on it, looking about.
-    origin: inspired
-    refs: ['world:characters[krtek].moves[pops-up-from-molehill].claim']
+    text: He climbs out of his molehill if he is in it and waddles there, getting into his stride on a long trip; the view follows him.
+    origin: invented
   sound:
-    text: A soft dig, a pop.
+    text: None yet (footsteps to come).
     origin: invented
 - id: tap-mole
   action:

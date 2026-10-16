@@ -172,7 +172,7 @@
     const chick = egg.chick
     const hen = cast.call('hen', HEN_FROM, -1)
     Sound.cluck()
-    const near = Math.min(Mole.state.x + 220, 1380)
+    const near = Math.min(Mole.state.x + 220, Layout.DIG.to)
     await hen.go(near, 2600)
     if (!alive()) return
     Sound.cluck()

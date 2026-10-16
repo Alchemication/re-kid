@@ -10,7 +10,7 @@
 // (on the grass, feet and all) or 'listen' (in his molehill, chin on his
 // hands, eyes half shut: the cricket is playing).
 
-/* global Clock, Debug, Layout, Motion */
+/* global Clock, Debug, DOMMatrixReadOnly, Layout, Motion */
 /* exported Mole */
 const Mole = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -19,7 +19,9 @@ const Mole = (() => {
   const SINK = { down: 240, hill: 16, out: 0, listen: 26 } // how far below his feet-line he sits, scene units
   const DIG_MS = 380 // diving down, or coming up
   const TUNNEL_MS_PER_UNIT = 0.9 // the bump of earth running under the grass
-  const WALK_MS_PER_UNIT = 3.2 // a mole's waddle on the grass
+  const WALK_MS_PER_UNIT = 3.2 // a mole's waddle on the grass...
+  const STRIDE_FROM = 300 // ...but on a longer trip he gets into his stride, after this far...
+  const STRIDE_MS_PER_UNIT = 1.4 // ...and goes this fast: the far side of the meadow is a few seconds, not ten
   const life = Debug.random('mole-life') // blinks and glances: their own stream
 
   const state = { x: 0, pose: 'down', busy: null, carrying: false, lift: 0, painted: null }
@@ -161,7 +163,8 @@ const Mole = (() => {
 
   /** Waddle along the grass to x (he is out). */
   async function walkTo(x) {
-    const ms = Math.max(250, Math.abs(x - state.x) * WALK_MS_PER_UNIT)
+    const d = Math.abs(x - state.x)
+    const ms = Math.max(250, d < STRIDE_FROM ? d * WALK_MS_PER_UNIT : STRIDE_FROM * WALK_MS_PER_UNIT + (d - STRIDE_FROM) * STRIDE_MS_PER_UNIT)
     const from = state.x
     state.x = x
     const steps = Math.max(2, Math.round(ms / 180))
@@ -197,6 +200,12 @@ const Mole = (() => {
   function hold(on) {
     can.style.display = on ? '' : 'none'
     state.carrying = on || !!carrySlot.firstChild
+  }
+
+  /** Where he is drawn now, mid-move (state.x is where he is going): for the view to follow. */
+  function drawnX() {
+    const t = getComputedStyle(root).transform
+    return t && t !== 'none' ? new DOMMatrixReadOnly(t).e : state.x
   }
 
   /** The middle of his head, in scene units: where something lands on it. */
@@ -287,5 +296,5 @@ const Mole = (() => {
   /** Where the can's spout is now, in scene units, while he waters. */
   const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
 
-  return { SCALE, state, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
+  return { SCALE, state, drawnX, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
 })()

@@ -97,7 +97,7 @@ class TestMeadowDay:
     def test_wakes_digs_answers_and_waters(self, meadow: callable) -> None:
         m = meadow()
         m.wake()
-        for intent in ("dig to 1100", "tap mole", "water", "dig to 300"):
+        for intent in ("go to 1100", "tap mole", "water", "go to 300"):
             m.do(intent)
             m.wait_free()
             m.assert_settled()
@@ -106,10 +106,10 @@ class TestMeadowDay:
     def test_a_tap_cuts_any_move_short(self, meadow: callable) -> None:
         m = meadow()
         m.wake()
-        for first in ("dig to 1300", "water", "tap mole"):
+        for first in ("go to 2300", "water", "tap mole", "dig to 1800"):
             m.do(first)
             m.page.wait_for_timeout(CUT_MS)
-            m.do("dig to 400")
+            m.do("go to 400")
             m.wait_free()
             m.assert_settled()
 
@@ -162,7 +162,7 @@ class TestMeadowEncounters:
         m.do(f"use {name}")
         m.wait(f"meadowGame.state().things.{name} === 'step {step}'")
         m.page.wait_for_timeout(CUT_MS)
-        m.do("dig to 1400")
+        m.do("go to 1400")
         m.wait_free()
         m.assert_settled()
         assert m.page.evaluate(f"meadowGame.detail('{name}').cast") == [], (
@@ -244,8 +244,26 @@ class TestMeadowCar:
         m.do("tap mole")
         m.wait_free()
         m.assert_settled()
-        assert 140 <= m.state()["x"] <= 1460
+        assert 140 <= m.state()["x"] <= 3860
         m.do("use car")  # it sets off facing the spring again
         m.wait("meadowGame.detail('car').riding", 10_000)
         m.wait_free()
+        m.assert_settled()
+
+
+class TestMeadowView:
+    def test_the_view_follows_him_and_a_tap_lands_where_aimed(
+        self, meadow: callable
+    ) -> None:
+        m = meadow()
+        m.wake()
+        m.do("go to 3500")
+        m.wait_free()
+        m.page.wait_for_timeout(1500)  # the view eases after him
+        view = m.state()["view"]
+        assert view >= 2300, f"the view stayed behind at {view}"
+        # a real tap a quarter of the way across the screen, low on the grass
+        m.page.mouse.click(1280 * 0.25, 720 * 0.9)
+        m.wait_free()
+        assert abs(m.state()["x"] - (view + 400)) < 30, m.state()
         m.assert_settled()
