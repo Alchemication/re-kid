@@ -194,7 +194,8 @@ const meadowGame = (() => {
     Debug.check('the mole is in the meadow', m.x >= DIG.from - 1 && m.x <= DIG.to + 1, { x: m.x })
     if (game.awake && !game.ended && !game.gesture) {
       Debug.check('a free mole stands', m.pose !== 'down', { pose: m.pose })
-      Debug.check('a free mole holds nothing', !m.carrying, {})
+      Debug.check('a free mole has put the can down', !m.can, {})
+      Debug.check('a free mole holds nothing up, unless an encounter waits on it', !m.holdsUp || Things.holding(), {})
       Debug.check('a free mole stands on the ground', m.lift === 0, { lift: m.lift })
       Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
@@ -208,6 +209,7 @@ const meadowGame = (() => {
   function run(name, fn, onCut = null) {
     if (game.gesture) Debug.trace('cut', { gesture: game.gesture, by: name })
     cutShort()
+    if (name !== Things.holder()) Things.putDown() // something else to do: the egg he holds up waiting goes down first
     game.gesture = name
     const mine = Symbol(name)
     game.token = mine
@@ -235,6 +237,7 @@ const meadowGame = (() => {
   /** Get him out on the grass and waddle to x. */
   async function goTo(x) {
     x = clampX(x)
+    Mole.lookAt(x) // he looks first: the tap was heard
     if (Mole.state.pose !== 'out') await Mole.comeUp('out')
     if (Math.abs(x - Mole.state.x) > 4) await Mole.walkTo(x)
   }
@@ -288,7 +291,7 @@ const meadowGame = (() => {
 
   async function tapMole() {
     const said = ['giggle', 'giggle', 'ooh', 'ahoj'][Math.floor(words() * 4)]
-    Sound.say(said)
+    Sound.say(said, true) // a tap on him: a word only now and then, never every tap
     Debug.trace('says', { said })
     await Mole.cheer()
   }
@@ -389,7 +392,7 @@ const meadowGame = (() => {
     [/^wake$/, () => wake()],
     [/^tap mole$/, () => run('tap mole', tapMole)],
     [/^water$/, () => run('water', water)],
-    [/^use ([a-z]+)$/, (m) => Things.use(m[1]) || run('tap mole', tapMole)],
+    [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || run('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => run('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
@@ -417,8 +420,11 @@ const meadowGame = (() => {
   /** What a tap at this point means. */
   function intentAt(target, p) {
     const thing = target.closest('[data-thing]')
-    if (thing) return `use ${thing.dataset.thing}`
-    // a tap on him while an encounter plays is a tap on it (he holds the egg): it hurries it on
+    const choice = target.closest('[data-choice]')
+    if (thing) return choice ? `use ${thing.dataset.thing} ${choice.dataset.choice}` : `use ${thing.dataset.thing}`
+    // a tap on what he holds up waiting (the egg) is a tap on it; on him while an encounter plays,
+    // a tap on that encounter (it plays on, not cut short)
+    if (target.closest('.mole-carry') && Things.holder()) return `use ${Things.holder()}`
     if (target.closest('.mole')) return game.gesture && Things.get(game.gesture) ? `use ${game.gesture}` : 'tap mole'
     if (target.closest('#bed') || target.closest('#spring')) return 'water'
     if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`

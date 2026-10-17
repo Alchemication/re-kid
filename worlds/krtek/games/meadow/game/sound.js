@@ -13,6 +13,7 @@ const Sound = (() => {
   const VOLUME = 0.5
   const VOICE_VOLUME = 0.9
   const VOICE_RATE = [0.95, 1.07] // each word a little lower or higher: never quite the same twice
+  const CASUAL_GAP_S = 4 // an idle remark only if he hasn't spoken for this long
   const CRICKET_VOLUME = 0.12
   // The cricket's tune: a slow, rocking phrase on a pentatonic scale (Hz, beats)
   const TUNE = [[523, 1], [587, 1], [659, 2], [587, 1], [523, 1], [440, 2], [392, 1], [440, 1], [523, 3], [0, 1]]
@@ -22,6 +23,7 @@ const Sound = (() => {
   let noise = null
   const takes = {} // decoded voice takes, by sound: {gain, buffers, last}
   let fiddle = null // the cricket's tune while it plays: {stop}
+  let lastSaid = -100 // when he last spoke (audio time)
 
   Clock.onHold((held) => {
     if (!ctx) return
@@ -54,11 +56,15 @@ const Sound = (() => {
   const bytes = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer
   const ready = () => ctx && ctx.state !== 'closed'
 
-  /** One of the mole's words or noises ('giggle', 'ahoj', 'achJo', 'ooh', 'fright'), if it has takes. */
-  function say(name) {
+  /** One of the mole's words or noises ('giggle', 'ahoj', 'achJo', 'ooh', 'fright'), if it has takes.
+   * `casual`: an idle remark (a tap on him, a look at a thing), skipped if he spoke only just now,
+   * so his voice is kept for real moments (docs/DESIGN_PRINCIPLES.md). */
+  function say(name, casual = false) {
     if (!ready()) return false
+    if (casual && ctx.currentTime - lastSaid < CASUAL_GAP_S) return false
     const e = takes[name]
     if (!e || !e.buffers.length) return false
+    lastSaid = ctx.currentTime // he spoke (only a word actually heard counts)
     let i = Math.floor(Math.random() * e.buffers.length)
     if (i === e.last && e.buffers.length > 1) i = (i + 1) % e.buffers.length
     e.last = i
@@ -182,6 +188,14 @@ const Sound = (() => {
     note(2500, 0.14, 0.08, 0.07, 'sine', 1.25)
   }
 
+  /** A small animal's sneeze: a breath in, then "tchoo". */
+  function sneeze() {
+    if (!ready()) return
+    hiss(0, 0.25, 1400, 1, 0.05)
+    hiss(0.3, 0.12, 3200, 1.5, 0.25)
+    note(900, 0.3, 0.1, 0.06, 'triangle', 0.6)
+  }
+
   /** The chick: a few high peeps. */
   function peep() {
     if (!ready()) return
@@ -269,5 +283,5 @@ const Sound = (() => {
     note(360, 0, seconds, 0.04, 'square', 1.7)
   }
 
-  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
+  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
 })()

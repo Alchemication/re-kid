@@ -34,6 +34,12 @@ beat many):
   about help, the trouble comes from a harmless mishap or curiosity; nobody is
   made helpless just to be rescued, and helpers have their own reasons and
   abilities.
+- **The child chooses.** Where it is a try-and-see situation (whose egg,
+  which mushroom), the things to try lie about as things to tap, each with
+  its own result: a funny wrong one, a revealing one, the one that resolves
+  it. No aiming or dragging. Left alone, he tries them himself, in a
+  sensible order. Depth before breadth: one encounter like this, well acted,
+  beats several that only play on.
 - **Fun to repeat.** The core stays the same each time (small children love
   exact repetition); something small is added on top now and then.
 - **New to the place.** It adds what the game doesn't have yet. First list
@@ -65,6 +71,10 @@ chosen one, write down briefly:
   Who acts in each (Reksio, a creature, the yard).
 - **Acting:** what his face and body show at each beat (surprise, glum,
   delight, suspicion). This, more than the motion, makes it read as a cartoon.
+  On every tap, an answer at once: he looks at what was tapped, then goes.
+- **Sound against moments:** name the moment each sound is for (curiosity,
+  effort, surprise, relief) and leave quiet between. His voice is for real
+  moments, never on every tap.
 - **What it offers:** `discover`, `help` (he helps someone) or `helped`
   (someone helps him). If it makes a kind real for a prop, that prop's
   `OFFERS` in `layout.js` gains it, and the layout tests follow.

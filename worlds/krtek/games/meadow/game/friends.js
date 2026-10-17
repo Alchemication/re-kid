@@ -140,6 +140,14 @@ const Friends = (() => {
       async rise(up) {
         await Motion.endAt(riser, [{ transform: `translateY(${up ? 0 : 110}px)` }], { duration: 420, easing: up ? 'cubic-bezier(.3,1.5,.5,1)' : 'ease-in' })
       },
+      /** A sneeze: the head jerks back, then forward. */
+      async jolt() {
+        await Motion.endAt(head, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(16deg) translateY(-6px)', offset: 0.35 }, { transform: 'rotate(-12deg) translateY(4px)', offset: 0.6 }, { transform: 'rotate(0deg)' }], { duration: 700 })
+      },
+      /** Disappointed: the head sinks, and comes slowly back up. */
+      async droop() {
+        await Motion.endAt(head, [{ transform: 'rotate(0deg) translateY(0px)' }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.3 }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.7 }, { transform: 'rotate(0deg) translateY(0px)' }], { duration: 1400 })
+      },
       /** Paint on it: 'stripes' (the hare, a tiger) or 'spots' (the mouse), in `colour`. */
       daub(pattern, colour) {
         const marks = el('g', { class: 'paint' }, inner)

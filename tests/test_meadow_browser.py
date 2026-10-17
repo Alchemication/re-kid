@@ -28,8 +28,12 @@ STILL = "seed=1&still"
 DONE_MS = 60_000  # the longest encounter runs well under this
 CUT_MS = 350  # into a step, the cut comes this soon
 
-# Each encounter and how many steps its chain has.
-ENCOUNTERS = {"car": 6, "egg": 5, "paint": 5, "poles": 5}
+# Each encounter and how many steps its chain has (for a choice encounter,
+# the steps before the child chooses).
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 5, "poles": 5}
+# What finishes a choice encounter once it waits for a choice: the taps, in
+# order (the egg: the mouse and the hare say no, the hen is its mother).
+SOLVE = {"egg": ["use egg mouse", "use egg hare", "use egg hen"]}
 
 
 class Meadow:
@@ -83,6 +87,15 @@ def meadow(browser: object) -> Iterator[callable]:
         m.page.close()
 
 
+def finish(m: Meadow, name: str) -> None:
+    """Taps it to its end: on and on, or, a choice encounter, its choices in turn."""
+    for intent in SOLVE.get(name, [f"use {name}"]):
+        m.do(intent)
+        m.wait_free()
+    m.wait(f"meadowGame.state().things.{name} === 'done'")
+    m.wait_free()
+
+
 def arrived(m: Meadow, name: str) -> None:
     m.wait(
         f"meadowGame.state().things.{name} && meadowGame.state().things.{name}.startsWith('step')"
@@ -123,8 +136,7 @@ class TestMeadowDay:
         assert things["poles"].startswith("at"), (
             "the poles came while the egg still waited"
         )
-        m.do("use egg")
-        m.wait("meadowGame.state().things.egg === 'done'")
+        finish(m, "egg")
         m.wait("meadowGame.state().things.poles.startsWith('step')", 5_000)
         assert not m.errors, m.errors
 
@@ -145,9 +157,7 @@ class TestMeadowEncounters:
         m = meadow(f"{STILL}&soon&props={name}")
         m.wake()
         arrived(m, name)
-        m.do(f"use {name}")
-        m.wait(f"meadowGame.state().things.{name} === 'done'")
-        m.wait_free()
+        finish(m, name)
         m.assert_settled()
         assert m.page.evaluate(f"meadowGame.detail('{name}').cast") == []
 
@@ -169,17 +179,18 @@ class TestMeadowEncounters:
         assert m.page.evaluate(f"meadowGame.detail('{name}').cast") == [], (
             "visitors left about"
         )
-        m.do(f"use {name}")
-        m.wait(f"meadowGame.state().things.{name} === 'done'")
-        m.wait_free()
+        finish(m, name)
         m.assert_settled()
 
     def test_hurried_by_taps(self, meadow: callable, name: str) -> None:
         m = meadow(f"{STILL}&soon&props={name}")
         m.wake()
         arrived(m, name)
+        last = SOLVE.get(name, [f"use {name}"])[
+            -1
+        ]  # a choice encounter: its answer, tapped again and again
         for _ in range(40):
-            m.do(f"use {name}")
+            m.do(last)
             m.page.wait_for_timeout(300)
             if m.state()["things"][name] == "done":
                 break
@@ -190,6 +201,8 @@ class TestMeadowEncounters:
     def test_a_tap_on_him_hurries_it_rather_than_cuts_it(
         self, meadow: callable, name: str
     ) -> None:
+        if name in SOLVE:
+            pytest.skip("a choice encounter: TestMeadowEgg taps him mid-choice")
         m = meadow(f"{STILL}&soon&props={name}")
         m.wake()
         arrived(m, name)
@@ -276,14 +289,17 @@ class TestMeadowWalking:
         m.wake()
         m.do("go to 1000")  # out of his molehill and walking
         m.wait_free()
-        xs = []
+        # where he is drawn, every animation frame, timed in the page (load can't stretch it)
+        m.page.evaluate(
+            """() => { window.__xs = []; const f = (t) => { window.__xs.push([t, Mole.drawnX()]); if (window.__xs.length < 100000) requestAnimationFrame(f) }; requestAnimationFrame(f) }"""
+        )
         for i in range(8):  # each tap cuts a walk under way
             m.page.mouse.click(1250 if i % 2 else 30, 650)
-            for _ in range(10):
-                xs.append(m.page.evaluate("Mole.drawnX()"))
-                m.page.wait_for_timeout(40)
-        worst = max(abs(a - b) for a, b in pairwise(xs))
-        assert worst < 60, f"he jumped {worst:.0f} units between frames"
+            m.page.wait_for_timeout(400)
+        xs = m.page.evaluate("window.__xs")
+        speed = max(abs(b[1] - a[1]) / max(1, b[0] - a[0]) for a, b in pairwise(xs))
+        # a run is about 0.43 units/ms; the bug teleported him thousands of units in one frame
+        assert speed < 1.5, f"he jumped: {speed:.1f} units/ms"
         m.wait_free()
         m.assert_settled()
 
@@ -300,3 +316,142 @@ class TestMeadowWalking:
         m.page.wait_for_timeout(600)
         assert m.state()["x"] == x1, "he walked on after the key was let go"
         m.assert_settled()
+
+
+class TestMeadowEgg:
+    """The egg is the child's choice: whom to show it to."""
+
+    def open(self, meadow: callable, query: str = "") -> Meadow:
+        m = meadow(f"{STILL}&soon&props=egg{query}")
+        m.wake()
+        arrived(m, "egg")
+        m.do("use egg")
+        m.wait("meadowGame.state().things.egg === 'choosing'")
+        m.wait_free()
+        return m
+
+    def test_wrong_guesses_answer_and_wait_the_hen_resolves(
+        self, meadow: callable
+    ) -> None:
+        m = self.open(meadow)
+        assert m.page.evaluate("meadowGame.detail('egg').where") == "carried", (
+            "he holds it up, waiting"
+        )
+        for who in ("mouse", "hare", "mouse"):  # a wrong guess can be had again
+            m.do(f"use egg {who}")
+            m.wait_free()
+            assert m.state()["things"]["egg"] == "choosing", who
+            assert m.page.evaluate("meadowGame.detail('egg').cast") == []
+        m.do("use egg hen")
+        m.wait("meadowGame.state().things.egg === 'done'")
+        m.wait_free()
+        m.assert_settled()
+
+    def test_another_choice_mid_way_sends_him_there_instead(
+        self, meadow: callable
+    ) -> None:
+        m = self.open(meadow)
+        m.do("use egg mouse")
+        m.page.wait_for_timeout(1200)  # the mouse is out
+        m.do("use egg hare")
+        m.wait(
+            'meadowGame.trace().includes(\'try {"thing":"egg","who":"hare"}\')', 5_000
+        )
+        m.wait_free()
+        assert m.page.evaluate("meadowGame.detail('egg').cast") == [], (
+            "the mouse was left out"
+        )
+        m.assert_settled()
+
+    def test_a_tap_on_the_egg_while_waiting_gets_a_look(self, meadow: callable) -> None:
+        m = self.open(meadow)
+        m.page.locator(".mole-carry .egg-shape").click(
+            force=True
+        )  # a real tap on the egg he holds up
+        m.page.wait_for_timeout(100)
+        assert m.state()["busy"] == "egg"
+        m.wait_free()
+        assert m.state()["things"]["egg"] == "choosing"
+        m.assert_settled()
+
+    def test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it(
+        self, meadow: callable
+    ) -> None:
+        m = self.open(meadow)
+        m.do("use egg hare")
+        m.page.wait_for_timeout(600)
+        m.page.locator(
+            "#mole-out .mole .mole-body, #mole .mole .mole-body"
+        ).first.click(force=True)
+        m.page.wait_for_timeout(200)
+        assert m.state()["busy"] == "egg", "a tap on him cut the choice short"
+        m.wait_free()
+        m.assert_settled()
+
+    def test_wandering_off_mid_choice_and_coming_back(self, meadow: callable) -> None:
+        m = self.open(meadow)
+        m.do("use egg mouse")
+        m.page.wait_for_timeout(1300)
+        m.do("go to 2000")
+        m.wait_free()
+        m.assert_settled()
+        assert m.page.evaluate("meadowGame.detail('egg').cast") == []
+        m.do("use egg hen")
+        m.wait("meadowGame.state().things.egg === 'done'")
+        m.wait_free()
+        m.assert_settled()
+
+    def test_left_alone_he_tries_them_himself(self, meadow: callable) -> None:
+        m = meadow("seed=1&soon&props=egg")
+        m.wake()
+        m.wait("meadowGame.state().things.egg === 'done'", 90_000)
+        tries = m.page.evaluate(
+            "meadowGame.trace().split('\\n').filter((l) => l.includes(' try ')).map((l) => JSON.parse(l.slice(l.indexOf('{'))).who)"
+        )
+        assert tries[:3] == ["mouse", "hare", "hen"], tries
+        assert not m.errors, m.errors
+
+    def test_doing_something_else_puts_the_egg_down(self, meadow: callable) -> None:
+        m = self.open(meadow)
+        m.do("go to 2000")
+        m.wait_free()
+        assert m.page.evaluate("meadowGame.detail('egg').where") == "ground"
+        assert not m.page.evaluate("Mole.state.holdsUp")
+        m.assert_settled()
+
+    def test_choices_tapped_while_he_finds_it_dont_restart_it(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&soon&props=egg")
+        m.wake()
+        arrived(m, "egg")
+        m.do("use egg")
+        m.page.wait_for_timeout(400)
+        for _ in range(6):  # a toddler tapping the hen over and over
+            m.do("use egg hen")
+            m.page.wait_for_timeout(200)
+        m.wait("meadowGame.state().things.egg === 'done'")
+        steps = m.page.evaluate(
+            "meadowGame.trace().split('\\n').filter((l) => l.includes(' step ')).length"
+        )
+        assert steps == 1, f"finding it started over {steps} times"
+        m.wait_free()
+        m.assert_settled()
+
+    def test_a_cut_as_the_hare_hops_home_still_finishes_it(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&soon&props=egg,poles&day=90")
+        m.wake()
+        arrived(m, "egg")
+        m.do("use egg hen")
+        m.wait(
+            "meadowGame.detail('egg').where === 'home'"
+        )  # given back; the hare hops off
+        m.do("go to 300")
+        m.wait_free()
+        assert m.state()["things"]["egg"] == "done"
+        m.wait(
+            "meadowGame.state().things.poles.startsWith('step')", 20_000
+        )  # and the next one comes
+        assert not m.errors, m.errors

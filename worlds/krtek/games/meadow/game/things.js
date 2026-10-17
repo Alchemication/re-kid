@@ -22,6 +22,16 @@
 //   night(): the day is over (bedtime): tidy up, nobody left out,
 //   again (optional): async (alive) => …, what a tap on it does once it is
 //     done (the car: another ride),
+//   ask (optional), for a try-and-see encounter where the child picks
+//     what he tries (docs/DESIGN_PRINCIPLES.md: a tap is a choice, not a
+//     skip): after its steps, it waits for a choice instead of ending.
+//     ask(who, alive): try `who` (a tap on something carrying
+//       data-choice="who" inside the thing's data-thing, the intent
+//       "use egg hen"); next(): what he tries himself when left alone;
+//       resolved(): it is over; fidget(alive): a tap on the thing itself
+//       while it waits for a choice (he looks at it again); holds(): he
+//       holds it up as he waits (the egg), which a free mole otherwise
+//       never does (checkRules).
 //   detail(): its own state, for the overlay and the tests; `cast`, the
 //     visitors it has out now (none once the mole is free: checkRules).
 // It draws on the meadow's helpers (Things.meadow: goTo) for the mole's trips.
@@ -86,41 +96,105 @@ const Things = (() => {
         break
       }
     }
-    // left alone, he goes to a waiting thing himself; not after sunset, when he goes home to listen
+    // left alone, he goes to a waiting thing himself (or tries its next choice); not after sunset,
+    // when he goes home to listen
     const waiting = plan.map((p) => all[p.name]).find((e) => e.out && !e.done)
-    const waited = waiting && Math.min(api.alone(), Clock.now() - waiting.arrived)
+    const waited = waiting && Math.min(api.alone(), Clock.now() - Math.max(waiting.arrived, waiting.tried || 0))
     if (waiting && hour < Day.SUNSET && !Debug.still && api.free() && waited > ENGAGE_MS) use(waiting.name, false)
   }
 
-  /** Go to `name` and play its chain on from where it stopped; a tap while it plays hurries it on. */
-  function use(name, tapped = true) {
-    const e = all[name]
-    if (e && e.done && e.again) {
-      if (api.busyWith() !== name) api.run(name, e.again, () => e.restore()) // a tap while it plays is part of it
-      return true
+  /** Its steps, from where they stopped; true once they are all done. */
+  async function stepsOn(e, alive) {
+    while (e.step < e.steps.length) {
+      Debug.trace('step', { thing: e.name, step: e.step })
+      await e.steps[e.step](alive)
+      if (!alive()) return false
+      e.step++
+      if (e.step < e.steps.length && !e.hurry) await breath()
+      e.hurry = false
+      if (!alive()) return false
     }
-    if (!e || !e.out || e.done) return false
-    if (api.busyWith() === name) {
-      // a tap on it while it plays hurries it on: the breath before the next step is skipped
-      if (tapped && skip) skip()
-      else if (tapped) e.hurry = true
-      return true
-    }
-    api.run(name, async (alive) => {
-      while (e.step < e.steps.length) {
-        Debug.trace('step', { thing: name, step: e.step })
-        await e.steps[e.step](alive)
-        if (!alive()) return
-        e.step++
-        if (e.step < e.steps.length && !e.hurry) await breath()
-        e.hurry = false
-        if (!alive()) return
-      }
-      e.done = true
-      Debug.trace('done', { thing: name })
-    }, () => e.restore())
     return true
   }
+
+  function finish(e) {
+    e.done = true
+    Debug.trace('done', { thing: e.name })
+  }
+
+  /**
+   * A tap on `name` (or, with `who`, on one of its choices), or, not tapped, the mole going by
+   * himself. Its steps play on from where they stopped; a tap while they play hurries them on;
+   * then a choice encounter waits for the child to pick what he tries.
+   */
+  function use(name, tapped = true, who = null) {
+    const e = all[name]
+    if (!e || !e.out) return false
+    if (e.done) return again(e)
+    if (api.busyWith() === name && whileBusy(e, tapped, who)) return true
+    if (e.ask) tryChoice(e, who || (tapped || e.step < e.steps.length ? null : e.next()))
+    else api.run(name, async (alive) => { if ((await stepsOn(e, alive)) && !e.ask) finish(e) }, () => e.restore())
+    return true
+  }
+
+  /** A tap on it while it plays: true if that's taken care of; false if it should start afresh
+   * (another choice than the one being tried: he goes to that one instead). */
+  function whileBusy(e, tapped, who) {
+    if (who && e.step < e.steps.length) e.pending = who // a choice tapped while its steps play: tried after them, not a restart
+    else if (who && who !== e.trying) return false
+    else hurry(e, tapped)
+    return true
+  }
+
+  /** A done thing tapped: its `again` (the car's ride), if it has one; a tap while that plays is part of it. */
+  function again(e) {
+    if (!e.again) return false
+    if (api.busyWith() !== e.name) api.run(e.name, e.again, () => e.restore())
+    return true
+  }
+
+  /** A tap on it while it plays hurries it on: the breath before the next step is skipped. */
+  function hurry(e, tapped) {
+    if (tapped && skip) skip()
+    else if (tapped && e.step < e.steps.length) e.hurry = true // a choice under way plays on as it is
+  }
+
+  /** Its steps if any are left, then `pick` tried (none: a tap on the thing itself, and he looks at it again). */
+  function tryChoice(e, pick) {
+    e.trying = pick
+    e.pending = null
+    const finding = e.step < e.steps.length // its steps are still to play (he finds the egg first)
+    api.run(e.name, async (alive) => {
+      if (!(await stepsOn(e, alive))) return
+      const who = e.pending || pick // a choice tapped while the steps played
+      e.pending = null
+      e.trying = who
+      if (!who) return finding ? undefined : e.fidget(alive) // found: it waits for a choice; already found, a look at it again
+      Debug.trace('try', { thing: e.name, who })
+      try {
+        await e.ask(who, alive)
+      } finally {
+        e.trying = null
+        if (e.resolved()) finish(e) // resolved even if a tap cut its aftermath short
+      }
+      if (alive()) e.tried = Clock.now()
+    }, () => {
+      e.trying = null
+      e.restore()
+      if (e.resolved() && !e.done) finish(e)
+    })
+  }
+
+  /** Put down whatever an encounter has him holding up as he waits (the egg): another gesture is starting. */
+  function putDown() {
+    for (const e of Object.values(all)) if (e.out && !e.done && e.holds && e.holds()) e.restore()
+  }
+
+  /** The encounter whose thing he is holding up as he waits, if any: a tap on it is a tap on that encounter. */
+  const holder = () => Object.values(all).find((e) => e.out && !e.done && e.holds && e.holds())?.name ?? null
+
+  /** Whether an encounter waiting for a choice has him holding something up (the egg): allowed while free. */
+  const holding = () => Object.values(all).some((e) => e.out && !e.done && e.holds && e.holds())
 
   function breath() {
     return new Promise((resolve) => {
@@ -142,7 +216,8 @@ const Things = (() => {
   /** Every visitor out now, from every encounter. */
   const cast = () => Object.values(all).filter((e) => e.out).flatMap((e) => e.detail().cast)
 
-  const state = () => Object.fromEntries(plan.map((p) => [p.name, all[p.name].done ? 'done' : all[p.name].out ? `step ${all[p.name].step}` : `at ${p.at}`]))
+  const stateOf = (e) => (e.done ? 'done' : !e.out ? null : e.ask && e.step >= e.steps.length ? 'choosing' : `step ${e.step}`)
+  const state = () => Object.fromEntries(plan.map((p) => [p.name, stateOf(all[p.name]) || `at ${p.at}`]))
 
-  return { names: () => Object.keys(all), add, choose, setup, tick, use, night, state, cast, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
+  return { names: () => Object.keys(all), add, choose, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
 })()

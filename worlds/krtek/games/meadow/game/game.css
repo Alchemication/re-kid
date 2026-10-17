@@ -14,6 +14,10 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 #cricket.out .bow { transform-origin: 17px -67px; animation: bow 0.84s ease-in-out infinite alternate; }
 @keyframes bow { from { transform: rotate(-8deg) translateX(-8px); } to { transform: rotate(6deg) translateX(10px); } }
 
+/* the hen pecks about while she waits */
+.friend.pecking .head { animation: peck 1.8s ease-in-out infinite; }
+@keyframes peck { 0%, 60%, 100% { transform: rotate(0deg); } 70% { transform: rotate(-24deg) translateY(10px); } 80% { transform: rotate(-8deg); } 88% { transform: rotate(-24deg) translateY(10px); } }
+
 /* the bulldozer far off: puffs of smoke */
 .dozer .puff { opacity: 0; transform-box: fill-box; transform-origin: center; animation: puff 1.8s ease-out infinite; }
 .dozer .p1 { animation-delay: 0.6s; }

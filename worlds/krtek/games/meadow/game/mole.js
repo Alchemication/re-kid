@@ -26,7 +26,7 @@ const Mole = (() => {
   const RUN_FROM = 650 // a trip longer than this, he runs
   const life = Debug.random('mole-life') // blinks and glances: their own stream
 
-  const state = { x: 0, pose: 'down', busy: null, carrying: false, lift: 0, painted: null, facing: 0 }
+  const state = { x: 0, pose: 'down', busy: null, carrying: false, can: false, holdsUp: false, lift: 0, painted: null, facing: 0 }
   let skin = [] // what paint colours: his body and his arms
   let lift = 0 // how far up he stands (on someone's shoulders)
   let spots = null // the friends' paint dabs on him
@@ -122,6 +122,13 @@ const Mole = (() => {
     skin.push(el('path', { d: 'M14 -78 Q34 -66 44 -54', stroke: '#15140f', 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, sideArm))
     el('ellipse', { cx: 48, cy: -50, rx: 11, ry: 8, fill: '#f2a0a6', ...ink, 'stroke-width': 2.5 }, sideArm)
     return side
+  }
+
+  /** Look towards scene x (his eyes, facing us): the first answer to a tap, before he goes. */
+  function lookAt(x) {
+    const dx = Math.max(-7, Math.min(7, (x - state.x) / 40))
+    pupils.getAnimations().forEach((a) => a.cancel())
+    pupils.style.transform = `translate(${Math.round(dx)}px, -2px)`
   }
 
   /** Show him in profile facing `dir` (1 right, -1 left), or facing us (0). */
@@ -272,7 +279,8 @@ const Mole = (() => {
   /** Take up the watering can, or put it down. */
   function hold(on) {
     can.style.display = on ? '' : 'none'
-    state.carrying = on || !!carrySlot.firstChild
+    state.can = on
+    state.carrying = on || state.holdsUp
   }
 
   /** Where he is drawn now, mid-move (state.x is where he is going): for the view to follow. */
@@ -308,7 +316,8 @@ const Mole = (() => {
     if (had) had.remove()
     if (node) carrySlot.appendChild(node)
     armsUp(!!node)
-    state.carrying = !!node || can.style.display !== 'none'
+    state.holdsUp = !!node
+    state.carrying = !!node || state.can
     return had
   }
 
@@ -370,5 +379,5 @@ const Mole = (() => {
   /** Where the can's spout is now, in scene units, while he waters. */
   const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
 
-  return { SCALE, state, drawnX, face, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
+  return { SCALE, state, drawnX, face, lookAt, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
 })()

@@ -32,6 +32,16 @@ is at the end. Status and next steps are in `docs/PROJECT_PLAN.md`.
   funny.
 - **Mistakes are safe, and sometimes funny.** No failure, no scores, no
   judging how well the child does.
+- **A tap is the child's choice, not a skip.** Where a character could try
+  more than one thing, the child picks which by tapping it, and each try
+  has its own understandable, often funny, result; one of them resolves it.
+  Left alone, the character tries by himself, so watching is fine too. A
+  tap that only hurries a scene on gives the child nothing to decide (the
+  meadow's first encounters, 2026-10-16).
+- **The character shows he heard.** Every tap gets an answer at once, before
+  any long move: a look towards what was tapped, a lean, then off. Acting,
+  more than motion, makes it read as a cartoon; it never makes the child
+  wait to be answered.
 - **Kindness happens in the story.** Characters help each other: Reksio
   helps, and sometimes he needs help. These are small stories, not lessons
   about being good.

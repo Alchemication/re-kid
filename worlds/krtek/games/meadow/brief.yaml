@@ -98,14 +98,14 @@ scenes:
     origin: invented
 - id: egg
   action:
-    text: An egg rolls into the meadow and stops in the grass; tap it, or leave him be and he goes to it himself.
+    text: An egg rolls into the meadow and stops in the grass; the hare sits nearby and the hen pecks about further along. Tap the egg, or leave him be. Then the child chooses whom he shows it to, by tapping the mouse's hole, the hare or the hen.
     origin: invented
   result:
-    text: He knocks on it and puts his ear to it. Whose is it? He holds it up over his head and asks - the mouse pops out of her hole and shakes her head, the hare hops in and shakes his. Then the egg wobbles in his hands and cracks, a chick hatches, and the top of the shell lands on his head like a hat. The hen comes clucking along looking for her chick, it runs to her, and they go off together. He keeps the hat until he next dives into the ground. He helps someone.
+    text: He knocks on it, puts his ear to it, and holds it up over his head, puzzled - whose is it? The mouse pops out of her hole, sniffs, and sneezes so hard the egg wobbles in his hands - not hers. The hare looks, his ears sink, he shakes his head - not his. The hen sees it and comes running, clucking; it hatches in his hands, a chick, and the top of the shell lands on his head like a hat; the chick runs to her and they go off together, and the hare hops home. Each wrong guess can be had again. Left alone, he asks them himself, the mouse, the hare, then the hen. In the film he shows it to a mouse family, a hare family and a hound with puppies before the factory and the hen; the choosing, the sneeze and the hat are ours. He helps someone.
     origin: inspired
     refs: [world:episode_formula, 'world:characters[krtek].moves[carries-overhead].claim', 'world:characters[myska].description', 'world:characters[zajic].description']
   sound:
-    text: The egg rolling, a knock knock, his "ooh", a squeak, peeps, the crack and his squeak of fright, a giggle, the hen's bok bok.
+    text: The egg rolling, a knock knock, his "ooh", the mouse's squeak and sneeze, peeps, the crack and his squeak of fright, a giggle, the hen's bok bok.
     origin: invented
 - id: poles
   action:
