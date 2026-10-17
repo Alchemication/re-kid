@@ -15,24 +15,27 @@ const Figure = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const COLOURS = { ink: '#1d1914', white: '#f6f8f6', ochre: '#e1a23a', red: '#c8371f', tongue: '#ee8b7c' }
   const OUTLINE = 4.5 // line width round the body and head
-  const PELVIS_R = 24 // the bean's rear end…
-  const CHEST_R = 18 // …and its front end
+  const PELVIS_R = 27 // the bean's rear end…
+  const CHEST_R = 20 // …and its front end
   // tubes: [outline width, white width]; the outline shows (a - b) / 2 each side
-  const LEG = [17, 11]
+  const LEG = [21, 15] // short and thick, as the films draw them
   const ARM = [15, 9]
   const TAIL = [9, 4]
   const EAR = [24, 17]
   const EAR_LENGTHS = [18, 16] // base to bend, bend to tip
   const TOE = 6 // a foot reaches this far forward of the ankle
-  // The head, in its own units about its centre: a tall egg, widest at the
-  // jaw, with no neck. The muzzle grows out of it as he turns side-on.
+  // The head, in its own units about its centre: a round dome, widest at the
+  // jaw, with no neck. The long muzzle grows out of it as he turns side-on,
+  // the nose on its tip (Aktor 240 s, Kompan 135 s). Drawn this much bigger
+  // than its units: the films' head is nearly half his height.
+  const HEAD_SCALE = 1.15
   const JAW_DROP = 16 // how far his jaw drops with his mouth wide open
   const GRIN_WIDEN = 14 // how much wider a wide-open grin is than a closed smile (the cartoon's spans his face)
   const MOUTH_MARGIN = 7 // …but its corners stay this far inside his head
   const TEETH = 5 // teeth in a row
   const egg = (open) => {
     const b = 42 + JAW_DROP * open
-    return `M0 -42 C18 -42 34 -22 34 4 C34 ${fmt(b - 14)} 20 ${fmt(b)} 0 ${fmt(b)} C-20 ${fmt(b)} -34 ${fmt(b - 14)} -34 4 C-34 -22 -18 -42 0 -42 Z`
+    return `M0 -38 C22 -38 36 -20 36 4 C36 ${fmt(b - 14)} 22 ${fmt(b)} 0 ${fmt(b)} C-22 ${fmt(b)} -36 ${fmt(b - 14)} -36 4 C-36 -20 -22 -38 0 -38 Z`
   }
 
   // ------------------------------------------------------------ points
@@ -304,12 +307,12 @@ const Figure = (() => {
   function layout(turn) {
     const t = clamp01(turn)
     return {
-      nose: [52 * t, 10 - 4 * t],
-      eyes: [[-13 + 33 * t, -8], [13 + 29 * t, -8]],
+      nose: [60 * t, 10 - 9 * t],
+      eyes: [[-13 + 31 * t, -9], [13 + 27 * t, -9]],
       farEye: clamp01((0.75 - t) / 0.25), // how much of the far eye shows
-      mouth: [36 * t, 22 - 2 * t],
+      mouth: [42 * t, 22 - 2 * t],
       ears: [[-15 + 10 * t, -36], [15 + 4 * t, -38]],
-      muzzle: { c: [26 * t, 14], rx: 12 + 18 * t, ry: 17 - 3 * t },
+      muzzle: { c: [30 * t, 13], rx: 12 + 26 * t, ry: 17 - 2 * t },
     }
   }
 
@@ -356,7 +359,7 @@ const Figure = (() => {
   function headSpan(y, L, open) {
     const bottom = 42 + JAW_DROP * open
     const across = (dy, r) => Math.sqrt(Math.max(0, 1 - (dy / r) ** 2))
-    const egg = 34 * (y > 4 ? across(y - 4, bottom - 4) : across(y - 4, 46))
+    const egg = 36 * (y > 4 ? across(y - 4, bottom - 4) : across(y - 4, 42))
     const m = L.muzzle
     const muzzle = m.c[0] + m.rx * across(y - m.c[1], m.ry)
     return [-egg, Math.max(egg, muzzle)]
@@ -409,7 +412,8 @@ const Figure = (() => {
   /** A point given in head units (about its centre, before the tilt) in his own units. */
   function onHead(p, local) {
     const a = (p.head.tilt * Math.PI) / 180
-    const turned = [local[0] * Math.cos(a) - local[1] * Math.sin(a), local[0] * Math.sin(a) + local[1] * Math.cos(a)]
+    const [x, y] = mul(local, HEAD_SCALE)
+    const turned = [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)]
     return add([p.head.x, p.head.y], turned)
   }
 
@@ -434,10 +438,10 @@ const Figure = (() => {
     const L = layout(h.turn)
     const m = L.muzzle
     return {
-      transform: `translate(${fmt(h.x)} ${fmt(h.y)}) rotate(${fmt(h.tilt)})`,
+      transform: `translate(${fmt(h.x)} ${fmt(h.y)}) rotate(${fmt(h.tilt)}) scale(${HEAD_SCALE})`,
       skull: `${egg(f.open)} ${ellipsePath(m.c, m.rx, m.ry)}`,
       ears: [ear(L.ears[0], ears.near), ear(L.ears[1], ears.far)],
-      patch: { c: [L.eyes[0][0] + 3, -16], rx: 17, ry: 22 },
+      patch: { c: [L.eyes[0][0] - 9 - 8 * clamp01(h.turn), -16], rx: 22, ry: 27 },
       nose: noseAt(L.nose, h.turn),
       eyes: eyes(L, f),
       mouth: mouth(L, f),
@@ -447,7 +451,7 @@ const Figure = (() => {
 
   /** The big black nose: a rounded triangle, point down, narrower side-on. */
   function noseAt([x, y], turn) {
-    const w = 10 - 3 * clamp01(turn)
+    const w = 12 - 3 * clamp01(turn)
     return `M${pt([x - w, y - 5])} Q${pt([x, y - 9])} ${pt([x + w, y - 5])} Q${pt([x + w, y + 4])} ${pt([x, y + 7])} Q${pt([x - w, y + 4])} ${pt([x - w, y - 5])} Z`
   }
 

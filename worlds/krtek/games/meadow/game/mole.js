@@ -1,39 +1,45 @@
-// The little mole: drawn in code from the series' look (black and
-// pear-shaped, a grey-green belly, big white eyes, a round red nose, pink
-// hands, a few hairs standing up; worlds/krtek/world.yaml, characters), and
-// his gestures. Every gesture moves him with Motion.endAt on the Clock, so a
-// tap can cut it short with relax() and he always ends free and standing,
-// as he is drawn: nothing is frozen on an animation's last frame.
+// The little mole: where he is, which way he looks, and his gestures. He is
+// drawn by moleart.js in three views (facing us, three-quarter, profile);
+// this file shows one at a time and poses its parts. As in the films
+// (worlds/krtek/world.yaml, aesthetics.character_animation), he moves pose to
+// pose: a pose held, then a quick snap to the next, his head turning between
+// views as he looks about. Every gesture moves him with Motion.endAt on the
+// Clock, so a tap can cut it short with relax(), and he always ends free and
+// standing as he is drawn: nothing is frozen on an animation's last frame.
 //
 // Where he is: `x` along the meadow, and how much of him shows (`pose`):
 // 'down' (under the ground), 'hill' (up to his middle in a molehill), 'out'
 // (on the grass, feet and all) or 'listen' (in his molehill, chin on his
-// hands, eyes half shut: the cricket is playing).
+// hands, eyes half shut: the cricket is playing). Which way: `view` ('front',
+// 'three' or 'side') and `facing` (1 right, -1 left).
 
-/* global Clock, Debug, DOMMatrixReadOnly, Layout, Motion */
+/* global Clock, Debug, DOMMatrixReadOnly, Layout, MoleArt, Motion */
 /* exported Mole */
 const Mole = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const Y = Layout.GROUND // his feet-line
   const SCALE = 1.2 // drawn at this size: about a fifth of the screen high, out on the grass
   const SINK = { down: 240, hill: 16, out: 0, listen: 26 } // how far below his feet-line he sits, scene units
+  const PEEK = 104 // coming up, how far down he is while only his hands show above the molehill
   const DIG_MS = 380 // diving down, or coming up
+  const SNAP_MS = 90 // pose to pose: how quickly he moves from one held pose to the next
   const TUNNEL_MS_PER_UNIT = 0.9 // the bump of earth running under the grass
   // His gaits, in scene units and ms: a walk with short quick steps, a bob and an arm swinging, and
-  // on a long trip a run, longer and quicker, leaning forward (the films: he walks, sometimes runs)
+  // on a long trip a run, longer and quicker, leaning forward (the films: he walks, sometimes runs low)
   const WALK = { step: 38, stepMs: 210, reach: 9, lift: 7, bounce: 5, swing: 22, lean: 0 }
-  const RUN = { step: 64, stepMs: 150, reach: 14, lift: 12, bounce: 10, swing: 40, lean: 7 }
+  const RUN = { step: 64, stepMs: 150, reach: 14, lift: 12, bounce: 10, swing: 40, lean: 9 }
   const RUN_FROM = 650 // a trip longer than this, he runs
-  const life = Debug.random('mole-life') // blinks and glances: their own stream
+  // His arms, in degrees about the shoulder from hanging (left arm first; the right is mirrored)
+  const ARMS = { down: 0, up: 150, wide: 120, rim: 60, face: 172 }
+  const IDLE_MS = [2600, 5200] // left standing, now and then he looks about: another view, the other way
+  const life = Debug.random('mole-life') // blinks, glances and looking about: their own stream
 
-  const state = { x: 0, pose: 'down', busy: null, carrying: false, can: false, holdsUp: false, lift: 0, painted: null, facing: 0 }
-  let skin = [] // what paint colours: his body and his arms
-  let lift = 0 // how far up he stands (on someone's shoulders)
-  let spots = null // the friends' paint dabs on him
-  const views = { front: null, side: null } // facing us, or in profile
-  let sideFeet = [] // his two feet in profile, for the walk cycle
-  let sideArm = null
-  let root, body, tilt, eyes, lids, pupils, arms, can, feet, tunnel, inLayer, outLayer, carrySlot, hatSlot
+  const state = { x: 0, pose: 'down', busy: null, carrying: false, can: false, holdsUp: false, lift: 0, painted: null, facing: 1, view: 'front' }
+  const skin = [] // what paint colours: his body, snout and arms in every view
+  let lift = 0 // how far up he stands (on someone's shoulders, in the car)
+  let views = null // moleart.js's three views
+  let free = () => false // the meadow says when he is free to look about by himself
+  let root, body, tilt, can, tunnel, inLayer, outLayer, carrySlot, hatSlot
 
   const el = (tag, attrs = {}, parent) => {
     const e = document.createElementNS(SVG, tag)
@@ -41,6 +47,8 @@ const Mole = (() => {
     if (parent) parent.appendChild(e)
     return e
   }
+  const cur = () => views[state.view]
+  const all = () => Object.values(views)
 
   /** Draw him into `layer` (behind the molehills, so they hide his lower half), out on the grass into
    * `grass` (in front of them), and the tunnel bumps into `ground`. */
@@ -49,94 +57,58 @@ const Mole = (() => {
     outLayer = grass
     root = el('g', { class: 'mole' }, layer)
     body = el('g', { class: 'mole-body' }, root)
-    tilt = el('g', { class: 'mole-tilt' }, body) // leaning: an ear to the egg, a tug at a pole
+    tilt = el('g', { class: 'mole-tilt' }, body) // leaning: an ear to the egg, a tug at a pole, a squash
+    tilt.style.transformOrigin = '0px 0px'
     const art = el('g', {}, tilt)
     art.style.transform = `scale(${SCALE})`
-    const front = el('g', { class: 'mole-front' }, art) // facing us: standing, in his molehill
-    views.front = front
-    feet = el('g', { class: 'mole-feet' }, front)
-    el('ellipse', { cx: -20, cy: -6, rx: 20, ry: 9, fill: '#f2a0a6', stroke: '#15140f', 'stroke-width': 3 }, feet)
-    el('ellipse', { cx: 22, cy: -6, rx: 20, ry: 9, fill: '#f2a0a6', stroke: '#15140f', 'stroke-width': 3 }, feet)
-    skin.push(el('path', { d: 'M-46 -8 C-52 -80 -34 -150 0 -150 C34 -150 52 -80 46 -8 Q0 6 -46 -8 Z', fill: '#15140f' }, front))
-    el('ellipse', { cx: 0, cy: -48, rx: 24, ry: 34, fill: '#5d6b57' }, front)
-    const hair = el('g', { class: 'mole-hair', stroke: '#15140f', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, front)
-    for (const d of ['M0 -148 Q-3 -168 3 -182', 'M-6 -146 Q-18 -160 -20 -174', 'M6 -146 Q20 -158 26 -170']) el('path', { d }, hair)
-    spots = el('g', { class: 'mole-spots' }, front)
-    for (const [cx, cy] of [[-26, -40], [22, -30], [-8, -18], [30, -66], [-30, -78], [12, -48]]) el('circle', { cx, cy, r: 7 }, spots)
-    spots.style.display = 'none'
-    eyes = el('g', { class: 'mole-eyes' }, front)
-    for (const cx of [-15, 15]) el('ellipse', { cx, cy: -108, rx: 13, ry: 18, fill: '#fff', stroke: '#15140f', 'stroke-width': 2 }, eyes)
-    pupils = el('g', {}, eyes)
-    for (const cx of [-12, 18]) el('ellipse', { cx, cy: -104, rx: 5.5, ry: 7.5, fill: '#15140f' }, pupils)
-    lids = el('g', { class: 'mole-lids' }, eyes)
-    for (const cx of [-15, 15]) el('path', { d: `M${cx - 14} -126 H${cx + 14} V-108 Q${cx} -100 ${cx - 14} -108 Z`, fill: '#15140f' }, lids)
-    lids.style.transformOrigin = '0px -126px'
-    lids.style.transform = 'scaleY(0)'
-    el('circle', { cx: 4, cy: -84, r: 15, fill: '#d8322b', stroke: '#15140f', 'stroke-width': 2 }, front)
-    el('path', { d: 'M-10 -64 Q2 -56 14 -64', stroke: '#15140f', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' }, front)
-    arms = el('g', { class: 'mole-arms' }, front)
-    for (const side of [-1, 1]) {
-      const arm = el('g', { class: `mole-arm side${side}` }, arms)
-      arm.style.transformOrigin = `${side * 40}px -70px`
-      skin.push(el('path', { d: `M${side * 40} -70 Q${side * 58} -52 ${side * 54} -36`, stroke: '#15140f', 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, arm))
-      el('ellipse', { cx: side * 54, cy: -32, rx: 12, ry: 9, fill: '#f2a0a6', stroke: '#15140f', 'stroke-width': 2.5 }, arm)
-    }
-    views.side = drawSide(art) // in profile: walking, running
-    views.side.style.display = 'none'
+    views = MoleArt.draw(art, skin)
     can = el('g', { class: 'mole-can' }, art)
     el('path', { d: 'M36 -66 h46 l-6 40 h-34 z', fill: '#3a67ad', stroke: '#15140f', 'stroke-width': 3 }, can)
     el('path', { d: 'M80 -56 l34 -22 l4 6 l-32 24 z', fill: '#3a67ad', stroke: '#15140f', 'stroke-width': 2.5 }, can)
     el('path', { d: 'M44 -66 q15 -22 30 0', stroke: '#15140f', 'stroke-width': 4, fill: 'none' }, can)
     can.style.transformOrigin = '58px -46px'
     can.style.display = 'none'
-    carrySlot = el('g', { class: 'mole-carry', transform: 'translate(0 -196)' }, art) // what he holds up over his head
-    hatSlot = el('g', { class: 'mole-hat', transform: 'translate(2 -142)' }, art) // what sits on his head
+    carrySlot = el('g', { class: 'mole-carry' }, art) // what he holds up over his head
+    hatSlot = el('g', { class: 'mole-hat' }, art) // what sits on his head
     tunnel = el('g', { class: 'tunnel' }, ground)
     blink()
     glance()
+    lookAbout()
     put(state.x, state.pose)
   }
 
-  /** His profile, facing right (scaleX(-1) for left): leaning a little forward, a long grey snout
-   * with the red nose at its tip, one big eye, an arm, two feet that step. As the films draw him
-   * walking (Krtek a autíčko, and riding the snail). */
-  function drawSide(art) {
-    const side = el('g', { class: 'mole-side' }, art)
-    const ink = { stroke: '#15140f', 'stroke-width': 3 }
-    sideFeet = [-14, 16].map((cx) => {
-      const f = el('ellipse', { cx, cy: -5, rx: 17, ry: 8, fill: '#f2a0a6', ...ink, 'stroke-width': 2.5 }, side)
-      f.style.transformOrigin = `${cx}px -5px`
-      return f
-    })
-    skin.push(el('path', { d: 'M-38 -8 C-50 -70 -36 -142 4 -148 C38 -152 56 -116 54 -82 C52 -44 40 -12 30 -6 Q-4 4 -38 -8 Z', fill: '#15140f' }, side))
-    el('path', { d: 'M18 -92 C40 -88 46 -50 32 -18 C24 -10 6 -12 4 -28 C2 -52 4 -84 18 -92 Z', fill: '#5d6b57' }, side)
-    el('path', { d: 'M40 -124 C64 -124 92 -114 104 -104 C94 -94 66 -94 44 -100 Z', fill: '#8f9692', ...ink, 'stroke-width': 2.5 }, side)
-    el('circle', { cx: 105, cy: -104, r: 8, fill: '#d8322b', ...ink, 'stroke-width': 2 }, side)
-    el('path', { d: 'M92 -98 l20 6 M92 -100 l22 -2', stroke: '#15140f', 'stroke-width': 1.5, fill: 'none' }, side)
-    el('ellipse', { cx: 30, cy: -126, rx: 11, ry: 15, fill: '#fff', ...ink, 'stroke-width': 2 }, side)
-    el('ellipse', { cx: 35, cy: -123, rx: 4.5, ry: 6.5, fill: '#15140f' }, side)
-    const hair = el('g', { stroke: '#15140f', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, side)
-    for (const d of ['M2 -147 Q0 -166 8 -180', 'M-6 -145 Q-16 -160 -16 -174', 'M10 -147 Q22 -158 30 -168']) el('path', { d }, hair)
-    sideArm = el('g', { class: 'mole-side-arm' }, side)
-    sideArm.style.transformOrigin = '14px -78px'
-    skin.push(el('path', { d: 'M14 -78 Q34 -66 44 -54', stroke: '#15140f', 'stroke-width': 14, fill: 'none', 'stroke-linecap': 'round' }, sideArm))
-    el('ellipse', { cx: 48, cy: -50, rx: 11, ry: 8, fill: '#f2a0a6', ...ink, 'stroke-width': 2.5 }, sideArm)
-    return side
+  /** The meadow's hook: is he free (no gesture, no walk) to look about by himself? */
+  function setFree(fn) {
+    free = fn
   }
 
-  /** Look towards scene x (his eyes, facing us): the first answer to a tap, before he goes. */
-  function lookAt(x) {
-    const dx = Math.max(-7, Math.min(7, (x - state.x) / 40))
-    pupils.getAnimations().forEach((a) => a.cancel())
-    pupils.style.transform = `translate(${Math.round(dx)}px, -2px)`
+  /** Show him in `view` ('front', 'three' or 'side'), facing `dir` (1 right, -1 left). */
+  function show(view, dir = state.facing) {
+    state.view = view
+    state.facing = dir || 1
+    for (const [name, v] of Object.entries(views)) {
+      v.view.style.display = name === view ? '' : 'none'
+      v.view.style.transform = name !== 'front' && state.facing < 0 ? 'scaleX(-1)' : ''
+    }
+    const dx = view === 'front' ? 0 : state.facing * (view === 'side' ? 12 : 8)
+    carrySlot.style.transform = `translate(${dx}px, -200px)`
+    hatSlot.style.transform = `translate(${dx}px, -150px)`
+    armsUp(state.holdsUp)
   }
 
-  /** Show him in profile facing `dir` (1 right, -1 left), or facing us (0). */
+  /** Facing `dir` in profile (walking), or facing us (0): the meadow's word for it. */
   function face(dir) {
-    state.facing = dir
-    views.front.style.display = dir ? 'none' : ''
-    views.side.style.display = dir ? '' : 'none'
-    views.side.style.transform = dir < 0 ? 'scaleX(-1)' : ''
+    if (dir) show('side', dir)
+    else show(state.pose === 'out' ? 'three' : 'front')
+  }
+
+  /** Look towards scene x: the first answer to a tap, before he goes. Standing, he turns to it. */
+  function lookAt(x) {
+    const dir = x >= state.x ? 1 : -1
+    if (state.pose === 'out' && Math.abs(x - state.x) > 30) show('three', dir)
+    const dx = Math.max(-6, Math.min(6, (x - state.x) / 40)) * (state.view === 'front' ? 1 : state.facing)
+    cur().pupils.getAnimations().forEach((a) => a.cancel())
+    cur().pupils.style.transform = `translate(${Math.round(dx)}px, -2px)`
   }
 
   /** Stand him at x in `pose`, as the end of whatever brought him there. */
@@ -144,19 +116,29 @@ const Mole = (() => {
     state.x = x
     state.pose = pose
     lift = state.lift = 0
-    root.style.transform = `translate(${x}px, ${Y}px)`
-    face(0)
+    root.style.transform = rootAt(x)
     const layer = pose === 'out' ? outLayer : inLayer
     if (root.parentNode !== layer) layer.appendChild(root)
     body.style.transform = `translateY(${SINK[pose]}px)`
-    feet.style.visibility = pose === 'out' ? 'visible' : 'hidden'
-    lids.style.transform = pose === 'listen' ? 'scaleY(0.55)' : 'scaleY(0)'
+    tilt.style.transform = ''
+    for (const v of all()) for (const f of v.feet) f.style.visibility = pose === 'out' ? 'visible' : 'hidden'
+    show(pose === 'out' ? 'three' : 'front')
+    for (const v of all()) v.lids.style.transform = pose === 'listen' ? 'scaleY(0.55)' : 'scaleY(0)'
+    if (pose === 'hill' || pose === 'listen') onRim()
+  }
+
+  /** In his molehill, his hands rest on its rim. */
+  function onRim() {
+    if (state.holdsUp) return
+    const [l, r] = views.front.arms
+    l.style.transform = `rotate(${ARMS.rim}deg)`
+    r.style.transform = `rotate(${-ARMS.rim}deg)`
   }
 
   function blink() {
     Clock.after(2200 + life() * 3500, () => {
       if (state.pose !== 'listen' && state.pose !== 'down') {
-        Debug.ignoreCut(Motion.endAt(lids, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)', offset: 0.5 }, { transform: 'scaleY(0)' }], { duration: 160 }), 'blink')
+        Debug.ignoreCut(Motion.endAt(cur().lids, [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)', offset: 0.5 }, { transform: 'scaleY(0)' }], { duration: 160 }), 'blink')
       }
       blink()
     })
@@ -166,43 +148,94 @@ const Mole = (() => {
     Clock.after(1500 + life() * 3000, () => {
       const dx = Math.round((life() - 0.5) * 8)
       const dy = Math.round((life() - 0.6) * 5)
-      Debug.ignoreCut(Motion.endAt(pupils, [{ transform: `translate(${dx}px, ${dy}px)` }], { duration: 180, easing: 'ease-out' }), 'glance')
+      Debug.ignoreCut(Motion.endAt(cur().pupils, [{ transform: `translate(${dx}px, ${dy}px)` }], { duration: 120, easing: 'ease-out' }), 'glance')
       glance()
     })
   }
 
+  /** Left standing, now and then he looks about: a turn of his head to us, or the other way, held. */
+  function lookAbout() {
+    Clock.after(IDLE_MS[0] + life() * (IDLE_MS[1] - IDLE_MS[0]), () => {
+      const roll = life() // drawn either way, so a still play draws as many
+      if (free() && !state.holdsUp) {
+        if (state.pose === 'out') show(roll < 0.4 ? 'front' : 'three', roll < 0.7 ? state.facing : -state.facing)
+        else if (state.pose === 'hill') Debug.ignoreCut(lean((roll - 0.5) * 16, 700), 'look about')
+      }
+      lookAbout()
+    })
+  }
+
   /** Cut every gesture short. He stays where he is drawn now, mid-step (a cut walk must not jump him
-   * to where it was going), and faces us again. */
+   * to where it was going), and stands as he is. */
   function relax() {
-    const walking = root.getAnimations().length > 0
-    const x = walking ? drawnX() : state.x
-    for (const e of [root, body, tilt, ...arms.children, can, carrySlot, sideArm, ...sideFeet]) e.getAnimations().forEach((a) => a.cancel())
-    if (walking) {
+    const moving = root.getAnimations().length > 0
+    const x = moving ? drawnX() : state.x
+    const parts = [root, body, tilt, can, carrySlot]
+    for (const v of all()) parts.push(...v.arms, ...v.feet, v.lids)
+    for (const e of parts) e.getAnimations().forEach((a) => a.cancel())
+    if (moving) {
       state.x = x
-      root.style.transform = `translate(${x}px, ${Y - lift}px)`
+      root.style.transform = rootAt(x, lift)
     }
-    face(0)
     for (const b of [...tunnel.children]) b.remove()
-    armsUp(!!carrySlot.firstChild)
+    for (const v of all()) for (const a of v.arms) a.style.transform = ''
     can.style.transform = ''
     tilt.style.transform = ''
+    laugh(false)
+    show(state.pose === 'out' ? 'three' : 'front')
+    if (state.pose === 'hill' || state.pose === 'listen') onRim()
     state.busy = null
   }
+
+  /** Open his mouth in a laugh (or close it again). */
+  function laugh(on) {
+    for (const v of all()) {
+      v.smile.style.display = on ? 'none' : ''
+      v.laugh.style.display = on ? '' : 'none'
+    }
+  }
+
+  /** His two arms in this view to `left`/`right` degrees (from hanging), over ms with an ease, or at once. */
+  function arms(left, right, ms = SNAP_MS, view = cur()) {
+    const [l, r] = view.arms
+    return Promise.all([
+      Motion.endAt(l, [{ transform: `rotate(${left}deg)` }], { duration: ms, easing: 'ease-out' }),
+      l === r ? null : Motion.endAt(r, [{ transform: `rotate(${right}deg)` }], { duration: ms, easing: 'ease-out' }),
+    ])
+  }
+
+  const hold = (ms) => Clock.wait(ms)
 
   const sink = (pose, ms = DIG_MS, easing = 'ease-in') =>
     Motion.endAt(body, [{ transform: `translateY(${SINK[pose]}px)` }], { duration: ms, easing }).then(() => put(state.x, pose))
 
-  /** Come up through the molehill he is under. */
+  /** Come up through the molehill he is under: his hands first, gripping the top, then up he pops between them. */
   async function comeUp(pose = 'hill') {
-    feet.style.visibility = pose === 'out' ? 'visible' : 'hidden'
-    if (pose === 'out') outLayer.appendChild(root) // climbing out in front of the molehill
-    await sink(pose, DIG_MS + 120, 'cubic-bezier(.3,1.5,.5,1)')
+    for (const v of all()) for (const f of v.feet) f.style.visibility = pose === 'out' ? 'visible' : 'hidden'
+    if (pose === 'out') {
+      outLayer.appendChild(root) // climbing out in front of the molehill
+      show('three')
+      await sink('out', DIG_MS + 120, 'cubic-bezier(.3,1.5,.5,1)')
+      return
+    }
+    show('front')
+    if (state.pose === 'down') {
+      const [l, r] = views.front.arms
+      l.style.transform = `rotate(${ARMS.up}deg)`
+      r.style.transform = `rotate(${-ARMS.up}deg)`
+      await Motion.endAt(body, [{ transform: `translateY(${PEEK}px)` }], { duration: 260, easing: 'ease-out' })
+      await hold(240) // just his hands, on the rim
+      arms(ARMS.rim, -ARMS.rim, 200)
+    }
+    await sink(pose, DIG_MS, 'cubic-bezier(.3,1.6,.5,1)')
   }
 
-  /** Dive down where he is. */
+  /** Dive down where he is: arms up, and in. */
   async function goDown() {
-    feet.style.visibility = 'hidden'
+    for (const v of all()) for (const f of v.feet) f.style.visibility = 'hidden'
     inLayer.appendChild(root) // back behind the molehill he goes down into
+    show('front')
+    arms(ARMS.up, -ARMS.up, 120)
     await sink('down')
   }
 
@@ -218,10 +251,10 @@ const Mole = (() => {
     } finally {
       bump.remove()
     }
-    root.style.transform = `translate(${x}px, ${Y}px)`
+    root.style.transform = rootAt(x)
   }
 
-  /** Walk along the grass to x (he is out), in profile, his feet stepping; on a long trip he runs. */
+  /** Walk along the grass to x (he is out), in profile, his feet stepping; on a long trip he runs, low. */
   async function walkTo(x) {
     const from = state.x
     const d = Math.abs(x - from)
@@ -229,10 +262,11 @@ const Mole = (() => {
     const g = d > RUN_FROM ? RUN : WALK
     const steps = Math.max(2, Math.round(d / g.step))
     const ms = steps * g.stepMs
+    const dir = x > from ? 1 : -1
     state.x = x
-    face(x > from ? 1 : -1)
+    show('side', dir)
     const cycle = { duration: g.stepMs * 2, iterations: steps / 2 }
-    const [back, ahead] = sideFeet
+    const [back, ahead] = views.side.feet
     const stepping = (lead) => [
       { transform: 'translate(0px, 0px)' },
       { transform: `translate(${lead * g.reach}px, ${-g.lift}px)`, offset: 0.25 },
@@ -242,42 +276,100 @@ const Mole = (() => {
     ]
     const bob = []
     for (let i = 0; i <= steps; i++) bob.push({ transform: `translate(${from + ((x - from) * i) / steps}px, ${Y - lift - (i % 2 ? g.bounce : 0)}px)` })
-    bob[bob.length - 1] = { transform: `translate(${x}px, ${Y - lift}px)` }
+    bob[bob.length - 1] = { transform: rootAt(x, lift) }
     const moves = [
       Motion.endAt(root, bob, { duration: ms }),
       Motion.endAt(back, stepping(1), cycle),
       Motion.endAt(ahead, stepping(-1), cycle),
-      Motion.endAt(tilt, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${g.lean}deg)`, offset: 0.15 }, { transform: `rotate(${g.lean}deg)`, offset: 0.85 }, { transform: 'rotate(0deg)' }], { duration: ms }),
+      Motion.endAt(tilt, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${g.lean}deg)`, offset: 0.12 }, { transform: `rotate(${g.lean}deg)`, offset: 0.88 }, { transform: 'rotate(0deg)' }], { duration: ms }),
     ]
-    if (!state.carrying) moves.push(Motion.endAt(sideArm, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${-g.swing}deg)`, offset: 0.25 }, { transform: `rotate(${g.swing}deg)`, offset: 0.75 }, { transform: 'rotate(0deg)' }], cycle))
+    if (!state.carrying) moves.push(Motion.endAt(views.side.arms[0], [{ transform: 'rotate(0deg)' }, { transform: `rotate(${-g.swing}deg)`, offset: 0.25 }, { transform: `rotate(${g.swing}deg)`, offset: 0.75 }, { transform: 'rotate(0deg)' }], cycle))
     try {
       await Promise.all(moves)
     } finally {
-      if (state.x === x) face(0) // there: facing us again (a cut has turned him round already)
+      if (state.x === x) show('three', dir) // there: standing, still looking the way he went
     }
   }
 
-  /** A hop with both arms flung up. */
+  /** A jump of joy: a crouch, then up with arms flung wide and a laugh, held, and down with a squash.
+   * In his molehill, a hop. */
   async function cheer() {
-    const [left, right] = arms.children
-    const up = (side) => [{ transform: 'rotate(0deg)' }, { transform: `rotate(${side * -130}deg)`, offset: 0.35 }, { transform: `rotate(${side * -130}deg)`, offset: 0.7 }, { transform: 'rotate(0deg)' }]
-    const hop = [{ transform: `translateY(${SINK[state.pose]}px)` }, { transform: `translateY(${SINK[state.pose] - 34}px)`, offset: 0.4 }, { transform: `translateY(${SINK[state.pose]}px)` }]
-    await Promise.all([
-      Motion.endAt(left, up(-1), { duration: 700 }),
-      Motion.endAt(right, up(1), { duration: 700 }),
-      Motion.endAt(body, hop, { duration: 700, easing: 'ease-out' }),
-    ])
+    const out = state.pose === 'out'
+    if (out) show(life() < 0.5 ? 'front' : 'three')
+    else show('front')
+    const v = cur()
+    const base = SINK[state.pose]
+    const up = out ? 46 : 26
+    laugh(true)
+    try {
+      await Motion.endAt(tilt, [{ transform: 'scale(1, 1)' }, { transform: 'scale(1.1, 0.86)' }], { duration: 110, easing: 'ease-out' }) // the crouch
+      arms(ARMS.wide, -ARMS.wide, SNAP_MS, v)
+      await Promise.all([
+        Motion.endAt(body, [{ transform: `translateY(${base}px)` }, { transform: `translateY(${base - up}px)`, offset: 0.35 }, { transform: `translateY(${base - up}px)`, offset: 0.65 }, { transform: `translateY(${base}px)` }], { duration: 620, easing: 'ease-out' }),
+        Motion.endAt(tilt, [{ transform: 'scale(1.1, 0.86)' }, { transform: 'scale(0.94, 1.1)', offset: 0.25 }, { transform: 'scale(1, 1)', offset: 0.65 }, { transform: 'scale(1.12, 0.88)', offset: 0.85 }, { transform: 'scale(1, 1)' }], { duration: 620 }),
+      ])
+      await arms(out ? 0 : ARMS.rim, out ? 0 : -ARMS.rim, 160, v)
+    } finally {
+      laugh(false)
+    }
   }
 
-  /** Stretch both arms up, slowly: waking, or bedtime. */
+  /** Stretch both arms up, slowly, eyes shut and mouth wide: waking, or bedtime. */
   async function stretch() {
-    const [left, right] = arms.children
-    const up = (side) => [{ transform: 'rotate(0deg)' }, { transform: `rotate(${side * -150}deg)`, offset: 0.5 }, { transform: 'rotate(0deg)' }]
-    await Promise.all([Motion.endAt(left, up(-1), { duration: 1300 }), Motion.endAt(right, up(1), { duration: 1300 })])
+    show('front')
+    const v = cur()
+    laugh(true)
+    v.lids.style.transform = 'scaleY(1)'
+    try {
+      await arms(ARMS.up, -ARMS.up, 600, v)
+      await hold(500)
+      await arms(state.pose === 'out' ? 0 : ARMS.rim, state.pose === 'out' ? 0 : -ARMS.rim, 400, v)
+    } finally {
+      laugh(false)
+      v.lids.style.transform = state.pose === 'listen' ? 'scaleY(0.55)' : 'scaleY(0)'
+    }
+  }
+
+  /** Thinking: in three-quarter view, a hand to his chin, held (Krtek a autíčko 11:36).
+   * The far arm is the one that reaches: it comes in front of him for it. */
+  async function ponder(ms = 1100) {
+    if (state.holdsUp) return
+    show('three')
+    const v = cur()
+    const hand = v.arms[1]
+    const behind = hand.nextSibling
+    v.view.appendChild(hand)
+    try {
+      await Motion.endAt(hand, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-78deg)' }], { duration: SNAP_MS, easing: 'ease-out' })
+      await hold(ms)
+      await Motion.endAt(hand, [{ transform: 'rotate(0deg)' }], { duration: 160 })
+    } finally {
+      hand.style.transform = ''
+      v.view.insertBefore(hand, behind)
+    }
+  }
+
+  /** Both hands up, palms out, then clapped over his face, eyes shut: a fright, or laughing too much (Krtek a autíčko 11:38). */
+  async function handsToFace(ms = 900) {
+    if (state.holdsUp) return
+    show('front')
+    const v = cur()
+    laugh(true)
+    try {
+      await arms(ARMS.wide, -ARMS.wide, SNAP_MS, v)
+      await hold(220)
+      v.lids.style.transform = 'scaleY(1)'
+      await arms(ARMS.face, -ARMS.face, SNAP_MS, v)
+      await hold(ms)
+    } finally {
+      v.lids.style.transform = 'scaleY(0)'
+      laugh(false)
+      await arms(state.pose === 'out' ? 0 : ARMS.rim, state.pose === 'out' ? 0 : -ARMS.rim, 160, v)
+    }
   }
 
   /** Take up the watering can, or put it down. */
-  function hold(on) {
+  function holdCan(on) {
     can.style.display = on ? '' : 'none'
     state.can = on
     state.carrying = on || state.holdsUp
@@ -292,7 +384,6 @@ const Mole = (() => {
   /** The middle of his head, in scene units: where something lands on it. */
   const head = () => ({ x: state.x, y: Y - lift + SINK[state.pose] - 150 * SCALE })
 
-
   /** Tip the can: filling it at the spring (down) or watering (forward). */
   async function tip(deg, ms) {
     await Motion.endAt(can, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${deg}deg)`, offset: 0.25 }, { transform: `rotate(${deg}deg)`, offset: 0.8 }, { transform: 'rotate(0deg)' }], { duration: ms })
@@ -303,11 +394,13 @@ const Mole = (() => {
     put(state.x, on ? 'listen' : 'hill')
   }
 
-  /** Both arms up (holding something over his head) or down. */
+  /** Both arms up (holding something over his head) or down, in every view. */
   function armsUp(on) {
-    arms.children[0].style.transform = on ? 'rotate(150deg)' : ''
-    arms.children[1].style.transform = on ? 'rotate(-150deg)' : ''
-    sideArm.style.transform = on ? 'rotate(-130deg)' : ''
+    for (const v of all()) {
+      const [l, r] = v.arms
+      l.style.transform = on ? `rotate(${l === r ? -130 : ARMS.up}deg)` : ''
+      if (l !== r) r.style.transform = on ? `rotate(${-ARMS.up}deg)` : ''
+    }
   }
 
   /** Hold `node` (an SVG group drawn round 0,0) up over his head, or put it down (null). Returns what he held. */
@@ -315,9 +408,10 @@ const Mole = (() => {
     const had = carrySlot.firstChild
     if (had) had.remove()
     if (node) carrySlot.appendChild(node)
-    armsUp(!!node)
     state.holdsUp = !!node
     state.carrying = !!node || state.can
+    armsUp(!!node)
+    if (!node && (state.pose === 'hill' || state.pose === 'listen')) onRim()
     return had
   }
 
@@ -329,20 +423,23 @@ const Mole = (() => {
     return had
   }
 
-  /** Lean towards (deg > 0: forward, to his right) and back: an ear to something, a tug. */
+  /** Lean towards (deg > 0: to his right) and back: an ear to something, a tug, a look about. */
   async function lean(deg, ms = 900) {
-    await Motion.endAt(tilt, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${deg}deg)`, offset: 0.3 }, { transform: `rotate(${deg}deg)`, offset: 0.75 }, { transform: 'rotate(0deg)' }], { duration: ms })
+    await Motion.endAt(tilt, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${deg}deg)`, offset: 0.2 }, { transform: `rotate(${deg}deg)`, offset: 0.8 }, { transform: 'rotate(0deg)' }], { duration: ms })
   }
 
-  /** Knock twice with his right hand: on an egg, on a pole. */
+  /** Knock twice with his near hand: on an egg, on a pole. */
   async function knock() {
-    const right = arms.children[1]
-    await Motion.endAt(right, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-70deg)', offset: 0.2 }, { transform: 'rotate(-30deg)', offset: 0.4 }, { transform: 'rotate(-70deg)', offset: 0.6 }, { transform: 'rotate(-30deg)', offset: 0.8 }, { transform: 'rotate(0deg)' }], { duration: 900 })
+    if (state.pose === 'out') show('three')
+    const near = cur().arms[cur() === views.front ? 1 : 0]
+    const sign = cur() === views.front ? 1 : -1
+    await Motion.endAt(near, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${sign * -80}deg)`, offset: 0.15 }, { transform: `rotate(${sign * -45}deg)`, offset: 0.35 }, { transform: `rotate(${sign * -80}deg)`, offset: 0.55 }, { transform: `rotate(${sign * -45}deg)`, offset: 0.75 }, { transform: 'rotate(0deg)' }], { duration: 900 })
   }
 
   /** Shake what he holds overhead: it wobbles in his hands. */
   async function wobble(ms = 900) {
-    await Motion.endAt(carrySlot, [{ transform: 'translate(0px, -196px) rotate(0deg)' }, { transform: 'translate(-6px, -196px) rotate(-12deg)', offset: 0.25 }, { transform: 'translate(6px, -196px) rotate(12deg)', offset: 0.5 }, { transform: 'translate(-4px, -196px) rotate(-8deg)', offset: 0.75 }, { transform: 'translate(0px, -196px) rotate(0deg)' }], { duration: ms })
+    const at = carrySlot.style.transform || 'translate(0px, -200px)'
+    await Motion.endAt(carrySlot, [{ transform: `${at} rotate(0deg)` }, { transform: `${at} rotate(-12deg)`, offset: 0.25 }, { transform: `${at} rotate(12deg)`, offset: 0.5 }, { transform: `${at} rotate(-8deg)`, offset: 0.75 }, { transform: `${at} rotate(0deg)` }], { duration: ms })
   }
 
   /** Paint him all over in `colour` (null: washed clean, black again). */
@@ -354,9 +451,14 @@ const Mole = (() => {
 
   /** Dab spots of `colour` on him (null: none). */
   function dots(colour) {
-    spots.style.display = colour ? '' : 'none'
-    if (colour) spots.setAttribute('fill', colour)
+    for (const v of all()) {
+      v.dots.style.display = colour ? '' : 'none'
+      if (colour) v.dots.setAttribute('fill', colour)
+    }
   }
+
+  /** Where his whole figure stands: at x, `dy` above the ground. */
+  const rootAt = (x, dy = 0) => `translate(${x}px, ${Y - dy}px)`
 
   /** Climb up `dy` (onto someone's shoulders) or back down (0). He must be out on the grass. */
   async function perch(dy, ms = 600) {
@@ -364,9 +466,6 @@ const Mole = (() => {
     lift = state.lift = dy
     await Motion.endAt(root, [{ transform: rootAt(state.x, from) }, { transform: rootAt(state.x, (from + dy) / 2 + 40), offset: 0.5 }, { transform: rootAt(state.x, dy) }], { duration: ms, easing: 'ease-out' })
   }
-
-  /** Where his whole figure stands: at x, `dy` above the ground. */
-  const rootAt = (x, dy = 0) => `translate(${x}px, ${Y - dy}px)`
 
   /** Glide smoothly to x, `dy` up (sitting in the car), over `ms`: riding, not walking. */
   async function glide(x, ms, dy, easing) {
@@ -379,5 +478,5 @@ const Mole = (() => {
   /** Where the can's spout is now, in scene units, while he waters. */
   const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
 
-  return { SCALE, state, drawnX, face, lookAt, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold, tip, listen }
+  return { SCALE, state, drawnX, face, show, lookAt, setFree, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold: holdCan, tip, listen }
 })()

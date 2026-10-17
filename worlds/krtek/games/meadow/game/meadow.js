@@ -293,7 +293,10 @@ const meadowGame = (() => {
     const said = ['giggle', 'giggle', 'ooh', 'ahoj'][Math.floor(words() * 4)]
     Sound.say(said, true) // a tap on him: a word only now and then, never every tap
     Debug.trace('says', { said })
-    await Mole.cheer()
+    const how = words() // a jump of joy most times; now and then a think, or hands over his face for laughing
+    if (how < 0.6) await Mole.cheer()
+    else if (how < 0.8) await Mole.handsToFace(600)
+    else await Mole.ponder(900)
   }
 
   async function water() {
@@ -462,6 +465,7 @@ const meadowGame = (() => {
   // ------------------------------------------------------------ start
 
   makeScene()
+  Mole.setFree(() => game.awake && !game.ended && !game.gesture)
   View.setup(() => Mole.drawnX(), (camX) => irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX))))
   Friends.setup(document.getElementById('friends'))
   const things = Things.setup({

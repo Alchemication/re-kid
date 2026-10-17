@@ -151,7 +151,7 @@ characters:
     - krtek-youtube
     - cs-wikipedia-seznam-dilu
   visual_signature:
-    text: Black, pear-shaped, with a grey-green belly patch, a round red nose, big white oval eyes, pink hands and feet, and three or so long hairs standing up on his head plus whiskers. Drawn small against everything around him.
+    text: Head and body are one soft black teardrop that runs into a long snout, pointing forward and a little up, grey with a small red nose at its tip and whiskers; a big white oval eye with a black pupil sits high, near the base of the snout; three or four long thin hairs arch back from the crown; a long dark teal (in some transfers blue-grey) belly patch runs from his throat down his front; big pink hands with four fingers and pink feet. Mostly drawn in three-quarter view or profile; facing us, his two big eyes sit close together at the top, with the small nose below them and a wide smile (Krtek a autíčko 11:36-11:40, 7:12-7:15).
     status: observed
     sources:
     - krtek-youtube
@@ -239,6 +239,41 @@ characters:
   - id: bounces-on-seat
     claim:
       text: Bounces and rolls on a car seat like a trampoline (Autíčko 7:16–7:28).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: ponders-hand-to-chin
+    claim:
+      text: Stands in profile with one hand to his chin and the other across his belly, thinking, eyes wide (Krtek a autíčko 11:36-11:37).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: hands-over-face
+    claim:
+      text: Flings both hands up, palms out, mouth open, then claps them over his face and squeezes his eyes shut, laughing or in dismay (Krtek a autíčko 11:38-11:40).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: hands-first
+    claim:
+      text: Coming up over something, his pink hands appear first and grip the top, then his face pops up between them (Krtek a buldozer 5:12-5:13).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: looks-about-turning
+    claim:
+      text: Sitting, he swings his head and body between front, three-quarter and profile as he looks about, palms down at his sides, smiling with his mouth open (Krtek a autíčko 7:12-7:15).
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
+  - id: runs-low
+    claim:
+      text: Runs low and leaning forward, arms reaching ahead, snout first (Krtek a autíčko 2:36-2:38).
       status: observed
       sources:
       - krtek-youtube
@@ -379,7 +414,7 @@ aesthetics:
     - krtek-youtube
     observed_by: claude-frames
   character_animation:
-    text: 'Full, bouncy animation for the mole: squash and stretch, big arm gestures, quick double-takes. Animals move as simply as they are drawn.'
+    text: 'Pose to pose: he holds a pose for a few frames, then snaps to the next in about a tenth of a second (from pondering to both arms up in one beat, Krtek a autíčko 11:37.8), with small changes of head angle at each pose. Big gestures on a small body: arms flung wide, hands to the face, the whole body leaning into a look. Animals move as simply as they are drawn.'
     status: observed
     sources:
     - krtek-youtube
