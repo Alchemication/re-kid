@@ -279,10 +279,11 @@ LOOK_DIR = REPO_ROOT / "looks"
 """Where ``main.py look`` saves its frames, unless told otherwise: in the
 repository (gitignored), so a session can read them straight back."""
 
-LOOK_FLAGS = {"seed": "1", "still": "", "rain": "0", "creatures": ""}
+LOOK_FLAGS = {"seed": "1", "still": "", "rain": "0", "creatures": "", "film": "0"}
 """The play a look opens unless its flags say otherwise: seeded, Reksio moving
-only when asked, dry, no creatures. The same play every time, nothing else
-going on, so only the gag being looked at moves."""
+only when asked, dry, no creatures, and without the old-print look (its grain
+and dust would read as flaws in the drawing). The same play every time,
+nothing else going on, so only the gag being looked at moves."""
 
 LOOK_EVERY_MS = 350
 """One look screenshot this often: a gag's beats (a freeze, a tug, a pop) are

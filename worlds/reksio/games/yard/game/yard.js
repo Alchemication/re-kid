@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -47,6 +47,7 @@
   // tapped: that first tap is his wake-up call and nothing else.
   Reksio.keepBetween(Layout.MIN_X, Layout.MAX_X) // from the house wall to the fence
   Reksio.listen((what, at) => Creatures.notice(what, at.x, at.y)) // a bark, a snap: the creatures hear
+  FilmLook.mount($('stage'))
   let asleep = Layout.morning
   if (asleep) Reksio.sleepIn(Things.DOOR.x)
   let camX = clampCam(Reksio.x - Painting.VIEW_W / 2)

@@ -103,6 +103,13 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   Adam's ear for this retro cartoon feel, from a wording that names the
   feel, not the notes; findings in `experiments/music/README.md`, procedure
   in the `new-music` skill. Retro recipe, as the effects.
+- **An old print, but still: no drawing on twos** (Adam, 2026-10-18; on
+  in every game, `?film=0` turns it off). Grain and a faded grade are kept. Drawing Reksio
+  and the camera on twos (12 a second) made him stutter: it shows fixed
+  moments of a smooth blend, not drawings an animator chose. Scratches
+  looked like a glitch and flicker was annoying, so both are out, and the
+  weave went with them. A drawn feel is to come from timing in his
+  gestures, not from a lower frame rate.
 - **Procedures become skills, improved by every run** (2026-10-07), so
   someone other than Adam can run them. `new-world` is drafted
   thin, before its first run (Krecik), and shaped by that run's retro.

@@ -41,7 +41,8 @@ src/
   mark.py               local server for the sound-marking tool
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
   shared.py             copies shared/ scripts into the games that load them
-shared/                 game scripts every game uses (debug.js: the clock, the recorder, the rules);
+shared/                 game scripts every game uses (debug.js: the clock, the recorder, the rules;
+                        filmlook.js: the old-print look);
                         `main.py shared` copies each into the games whose page loads it
 worlds/<id>/
   world.yaml            series dossier (schema.world.WorldDossier)
@@ -184,10 +185,11 @@ Flags in the page address (`main.py play` takes the first three):
 | `?rain=1` / `0`, `?rain-at=S` | Force the shower, and when it starts. |
 | `?mouse-at=S`, `?visitor-at=S` | When the mouse, and the tree's visitor, come out. |
 | `?fruit=apple\|plum\|nut` | The tree's fruit. |
+| `?film=0` | Without the old-print look (on by default: grain, faded warm colours, a soft vignette, a rare speck of dust or hair; `filmlook.js`). `main.py look` takes its frames without it. |
 
 In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 `?day=S` (a day S seconds long: `?day=60` to see the evening and the
-ending in a minute) work the same; `?props=egg` says which encounters come
+ending in a minute) and `?film=0` work the same; `?props=egg` says which encounters come
 (`?props=` for none) and `?soon` brings the first at once. In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 

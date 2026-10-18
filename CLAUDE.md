@@ -163,7 +163,8 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   `shared/`, and `main.py shared` copies it into each game whose page
   loads it, so every game folder still opens, tests and publishes on its
   own. Edit `shared/`, never a copy (its first line says so;
-  `test_shared.py` fails on a stale one). `debug.js` is there so far.
+  `test_shared.py` fails on a stale one). `debug.js` and `filmlook.js`
+  are there so far.
 - **Game debuggability (`debug.js`, loaded first):** every bug must be
   replayable, so:
   - randomness comes from `Debug.random('<part>')`, never `Math.random`
@@ -192,7 +193,8 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     source of truth that a cut-short gag leaves behind. Set the end on the
     element and animate to it (`Motion.endAt`, debug.js; for Reksio, a
     blend or a pose); a new gag follows the same rule;
-  - a new page-address flag goes in layout.js, makes its random draw either
+  - a new page-address flag goes in layout.js (a shared part reads its
+    own, as debug.js and filmlook.js do), makes its random draw either
     way (so seeded plays don't shift), and is listed in README.
 - **Browser UI (`src/mark_ui/`):** plain HTML, CSS and ES modules, no build
   step. Libraries are vendored at a pinned version under `vendor/`, never loaded

@@ -65,16 +65,44 @@ scene:
 
 ## Alongside, when working nearby
 
+- **Cartoon timing in Reksio's gestures:** anticipation, snap, overshoot,
+  holds. It's what drawing on twos was reaching for and didn't give
+  (`docs/DECISIONS.md`, the old print).
 - **The rest of the sound audit:** the other ~30 synth effects through
   `new-sound`, worst first. Recorded takes' level against the synth ones
   (`EFFECT_VOLUME` in sound.js); whether the 2.5 s snore fits the doghouse's
   snore every 1.7 s. Slurp is still silent (no takes).
-- **Reksio's looks:** one look at each gag as a contact sheet (the browser
-  tests prove he ends free, not that it looks right). Known: his old-style
-  drawing asleep in the doghouse doorway (`#nap`); where his mouth meets the
-  bowl, the film and falling fruit; ears drawn as tubes, the cartoon's are
-  flaps. Then acting: reactions in each gag, starting with Eliot's
-  favourites.
+- **Redraw Reksio after the films** (after the 70s look is in). Side by
+  side with Sportowiec 142 s and 318 s, Kompan 70 s and 135 s and Aktor
+  240 s (2026-10-18), ours reads as a generic rabbit-dog sticker: Adam's
+  wife asked why he looks so weird. In `figure.js`, by payoff:
+  1. Ears: short, wide flaps about a third of the head's height, the white
+     one standing, the brown one folded over. Ours are long and curved,
+     like a rabbit's.
+  2. A snout at three-quarter view: the films' muzzle pushes past the
+     head's outline with the nose on its tip; ours grows only side-on,
+     and his rest pose turns a third of the way (`turn: 0.35`). Eyes
+     closer together and nearer the nose.
+  3. A bigger face: a mouth up to half the face, a big red open grin,
+     eyebrow lines that act. Ours has wide-set dots and a small smile.
+  4. A curve through his rest pose and gestures: one hip out, weight on
+     one leg, leaning. Ours stands straight with parallel legs.
+  5. Mitten hands with a thumb when he gestures (Kompan 70 s); the head
+     running into the body, no visible neck; the brown as one band from
+     round his eye up into the folded ear. Correct `world.yaml`'s
+     "limbs plain tubes": true of his feet, not his hands.
+  6. No painted texture on Reksio: the films put clean, flat characters
+     over textured backgrounds. Film grain is another matter: it is in
+     the print, over everything, him too (`filmlook.js`, Adam,
+     2026-10-18).
+
+  Check each with a `look --close` sheet next to the same film frames,
+  and the `"TestGestures or TestGettingUp"` slice. Also known: his
+  old-style drawing asleep in the doghouse doorway (`#nap`); where his
+  mouth meets the bowl, the film and falling fruit; he reads big against
+  the yard, as tall as the doghouse's roof (Adam, 2026-10-18: check his
+  size against the films). Then one look at each gag as a contact sheet,
+  and acting: reactions in each gag, starting with Eliot's favourites.
 - **Code:** `yard.js` is at 975 lines, split it before adding more;
   `TestRealInput::test_a_key_tap_barks` fails about 1 run in 5 under
   `-n 8` (a quick key tap can count as a hold when frames are slow).

@@ -13,7 +13,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Clock, Day, Debug, Friends, Layout, Mole, Motion, Sound, Things, View */
+/* global Clock, Day, Debug, FilmLook, Friends, Layout, Mole, Motion, Sound, Things, View */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -478,6 +478,7 @@ const meadowGame = (() => {
   })
   Debug.pin({ flags: { ...(Layout.flags.day ? { day: Layout.flags.day } : {}), props: things.join(',') }, layout: { home: HOME, spring: SPRING, things } })
   Debug.record(stateNow)
+  FilmLook.mount(document.body) // the old print over the whole page
   Clock.every(TICK_MS, tick)
   Clock.after(WAKE_ANYWAY_MS, () => { if (!game.awake) perform('wake') })
 
