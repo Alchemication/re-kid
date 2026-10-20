@@ -5,8 +5,10 @@
 //
 // Each thing's run({ extra, n }) plays its action; `extra` asks for its
 // variation, and `n` is which use this is. A toddler loves exact repetition,
-// so a repeat keeps the same core and only now and then adds something on
-// top (yard.js decides when; the doghouse nap, every time after the first).
+// so a repeat keeps the same core and adds something on top: now and then
+// (yard.js decides when), or, for a thing with a pool of variations
+// (VARIATIONS, and the doghouse nap), a different one every use after the
+// first.
 //
 // The mouse: some plays, a mouse trap baited with cheese stands by a mouse
 // hole in the wall. After a while a mouse comes out, wants the cheese, and
@@ -14,7 +16,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -41,6 +43,26 @@ const Things = (() => {
   const sparkle = Debug.random('fx') // particles only: how many fly depends on frame timing, so they keep out of the stream above
   const SVG_NS = 'http://www.w3.org/2000/svg'
   let isEnded = () => false
+
+  // ------------------------------------------------------------ variety
+
+  // Each thing's variations, after the first use one every time (Adam,
+  // 2026-10-19: "each encounter should be a bit random and different"):
+  // the tap sprays him, only drips (on his nose), or gives him hiccups; the
+  // flowers' bigger sneeze, or a petal on his nose; a bigger dog barks
+  // back from beyond the gate; the bird he barks at, he tries to fly after,
+  // or it lands on his head.
+  const VARIATIONS = { tap: ['spray', 'drips', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer'], bird: ['fly', 'head'] }
+  const variety = Debug.random('variety') // its own stream: how often the pools draw depends on taps
+  const pools = Object.fromEntries(Object.entries(VARIATIONS).map(([name, names]) => [name, Idle.pool(names, variety)]))
+
+  /** Which variation a use of `name` gets: none the first time (unless one
+   * is asked for, extra), then one from its pool every time. */
+  function variation(name, extra, n) {
+    const v = extra || n > 1 ? pools[name]() : null
+    Debug.trace('variation', { name, v })
+    return v
+  }
 
   // ------------------------------------------------------------ effects
 
@@ -270,6 +292,89 @@ const Things = (() => {
     mouse = 'fed'
   }
 
+  // ------------------------------------------------------------ the variations' own moments
+
+  const SPOUT = { x: 1320, y: 566 } // where the tap's water comes out (index.html), before X('tap')
+  const UNDER_SPOUT = 50 // he stands this far short of the spout, so his upturned nose is under it
+  const nose = () => Reksio.pointAt(Figure.noseTipAt)
+  const headTop = () => Reksio.pointAt(Figure.bowlTopAt)
+
+  /** A drop falling from one point to another (the ground, or his nose). */
+  function drip(from, to, ms = 700) {
+    const d = document.createElementNS(SVG_NS, 'circle')
+    for (const [k, v] of Object.entries({ class: 'drop', r: 7, cx: from.x, cy: from.y })) d.setAttribute(k, v)
+    fx.appendChild(d)
+    return d.animate([{ transform: 'translate(0, 0)' }, { transform: `translate(${to.x - from.x}px, ${to.y - from.y}px)` }], { duration: ms, easing: 'ease-in' }).finished.then(() => d.remove())
+  }
+
+  /** The tap only drips: he waits under it, head up, mouth open; two drops
+   * miss, the third lands on his nose, he sneezes, and gives the tap a
+   * puzzled look. */
+  async function drips(close) {
+    const spout = { x: SPOUT.x + X('tap'), y: SPOUT.y }
+    if (!(await Reksio.walkTo(spout.x - UNDER_SPOUT))) return // under it, nose up (sent elsewhere: not)
+    Reksio.face(1)
+    const waiting = Reksio.waitForDrop(2700)
+    await wait(400)
+    for (let i = 0; i < 2; i++) {
+      await drip(spout, { x: spout.x + 14 * (i ? 1 : -1), y: 790 }) // just missing him
+      Sound.plink()
+      await wait(350)
+    }
+    await drip(spout, nose())
+    Sound.plink()
+    await waiting
+    Sound.sneeze()
+    Music.react.sneeze()
+    await Reksio.nod(-24, 380)
+    close()
+    await Reksio.puzzled()
+  }
+
+  /** A petal flutters down onto his nose: cross-eyed, he blows it off, it
+   * floats down onto his head, and he shakes it off. */
+  async function petalOnNose() {
+    const petal = document.createElementNS(SVG_NS, 'ellipse')
+    for (const [k, v] of Object.entries({ class: 'petal-red', rx: 10, ry: 6 })) petal.setAttribute(k, v) // outlined, as on the flowers: a dot would be lost
+    fx.appendChild(petal)
+    let at = { ...nose(), y: nose().y - 140 }
+    const put = (p) => {
+      at = p
+      petal.setAttribute('cx', p.x)
+      petal.setAttribute('cy', p.y)
+    }
+    /** Move the petal from where it is to where(), over ms, with a flutter. */
+    const glide = async (where, ms, sway = 8) => {
+      const from = at
+      const t0 = Clock.now()
+      for (let k = 0; k < 1; ) {
+        k = Math.min(1, (Clock.now() - t0) / ms)
+        const to = where()
+        put({ x: from.x + (to.x - from.x) * k + sway * Math.sin(k * 9) * (1 - k), y: from.y + (to.y - from.y) * k })
+        if (k < 1) await Clock.frame()
+      }
+    }
+    let stay = () => {}
+    try {
+      put(at)
+      await glide(nose, 900)
+      stay = Clock.every(0, () => put(nose()))
+      await Reksio.crossEyed(700)
+      stay()
+      Sound.toss()
+      await Promise.all([Reksio.blow(), glide(() => ({ x: headTop().x + 20, y: headTop().y - 70 }), 350, 0)])
+      await glide(headTop, 700)
+      stay = Clock.every(0, () => put(headTop()))
+      await Reksio.lookUp(900)
+      stay()
+      Sound.shake()
+      await Promise.all([Reksio.shake(), glide(() => ({ x: Reksio.x + 50, y: 800 }), 600)])
+    } finally {
+      stay()
+      petal.remove()
+    }
+  }
+
   /** Once she's been fed: Reksio sniffs by her hole and she comes out to say hello. */
   async function visit(extra) {
     Reksio.face(1)
@@ -348,34 +453,48 @@ const Things = (() => {
     tap: {
       at: () => 1201 + X('tap'),
       face: 1,
-      async run({ extra }) {
+      async run({ extra, n }) {
+        const v = variation('tap', extra, n)
         const handle = $('tap-handle')
         const water = $('water')
         Sound.squeak()
         Motion.endAt(handle, [{ transform: 'rotate(0)' }, { transform: 'rotate(90deg)' }], { duration: 300 })
-        await wait(300)
-        water.style.opacity = '1'
-        const flow = water.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -80 }], { duration: 400, iterations: Infinity })
-        Sound.water(1.9)
-        const drinking = Reksio.nod(-10, 1700)
-        for (let i = 0; i < 5; i++) {
-          burst(1322 + X('tap'), 790, 3, 'drop', { height: 30, reach: 30, size: 3 })
-          if (extra && i >= 2) {
-            // the extra: the water sprays sideways, all over him
-            burst(1320 + X('tap'), 570, 24, 'drop', { dir: -1, height: 40, reach: 200, size: 4.5 })
-            Sound.splash()
-          }
-          await wait(320)
+        let flow = null
+        let open = true
+        /** Water off and the handle back, once, however the use ends. */
+        const close = () => {
+          flow?.cancel()
+          water.style.opacity = '0'
+          if (open) Motion.endAt(handle, [{ transform: 'rotate(90deg)' }, { transform: 'rotate(0)' }], { duration: 300 })
+          open = false
         }
-        await drinking
-        flow.cancel()
-        water.style.opacity = '0'
-        Motion.endAt(handle, [{ transform: 'rotate(90deg)' }, { transform: 'rotate(0)' }], { duration: 300 })
-        if (extra) await Reksio.startle()
+        try {
+          await wait(300)
+          if (v === 'drips') return await drips(close)
+          water.style.opacity = '1'
+          flow = water.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -80 }], { duration: 400, iterations: Infinity })
+          Sound.water(1.9)
+          const drinking = Reksio.nod(-10, 1700)
+          for (let i = 0; i < 5; i++) {
+            burst(1322 + X('tap'), 790, 3, 'drop', { height: 30, reach: 30, size: 3 })
+            if (v === 'spray' && i >= 2) {
+              // the water sprays sideways, all over him
+              burst(1320 + X('tap'), 570, 24, 'drop', { dir: -1, height: 40, reach: 200, size: 4.5 })
+              Sound.splash()
+            }
+            await wait(320)
+          }
+          await drinking
+        } finally {
+          close()
+        }
+        const soaked = v === 'spray'
+        if (soaked) await Reksio.startle()
+        if (v === 'hiccups') await Reksio.hiccups() // drank too fast
         await wait(250)
-        for (let i = 0; i < (extra ? 2 : 1); i++) {
+        for (let i = 0; i < (soaked ? 2 : 1); i++) {
           Sound.shake()
-          burst(Reksio.x, 730, extra ? 22 : 14, 'drop', { height: 70, reach: 90, size: 3.5 })
+          burst(Reksio.x, 730, soaked ? 22 : 14, 'drop', { height: 70, reach: 90, size: 3.5 })
           await Reksio.shake()
         }
       },
@@ -383,7 +502,8 @@ const Things = (() => {
     flowers: {
       at: () => 1483 + X('flowers'),
       face: 1,
-      async run({ extra }) {
+      async run({ extra, n }) {
+        const v = variation('flowers', extra, n)
         for (let i = 0; i < 3; i++) {
           Sound.step()
           await Reksio.nod(8, 260)
@@ -394,8 +514,9 @@ const Things = (() => {
         await wait(320)
         Reksio.nod(-24, 380)
         burst(1640 + X('flowers'), 680, 12, 'petal', { height: 70, reach: 110, size: 5 })
-        if (extra) {
-          // the extra: a second, bigger sneeze blows him backwards
+        if (v === 'petal') await petalOnNose()
+        if (v === 'blow') {
+          // a second, bigger sneeze blows him backwards
           await wait(600)
           Sound.sneeze()
           Music.react.sneeze()
@@ -411,13 +532,22 @@ const Things = (() => {
     gate: {
       at: () => Layout.MAX_X,
       face: 1,
-      async run() {
-        Sound.rattle()
-        $('gate').animate(
-          [0, -1.5, 1.5, -1, 1, 0].map((d) => ({ transform: `rotate(${d}deg)` })),
-          { duration: 600 },
-        )
+      async run({ extra, n }) {
+        const v = variation('gate', extra, n)
+        const rattle = () => {
+          Sound.rattle()
+          $('gate').animate([0, -1.5, 1.5, -1, 1, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: 600 })
+        }
+        rattle()
         await Reksio.nod(10, 500)
+        if (v === 'answer') {
+          // a bigger dog barks back from the other side: a jump back, then a bigger bark
+          await wait(250)
+          Sound.farBark()
+          rattle()
+          await Reksio.startle()
+          await Reksio.puffUp()
+        }
         await Reksio.bark()
       },
     },
@@ -492,12 +622,16 @@ const Things = (() => {
     bird: {
       at: () => Bird.perch.x - 70,
       face: 1,
-      async run() {
+      async run({ extra, n }) {
         if (Bird.flying) return
         if (Bird.friend) return Bird.visit()
+        const v = variation('bird', extra, n)
         await Reksio.nod(-22, 300)
         await Reksio.bark()
+        // it lands on his head instead: he looks up at it, and shakes it off
+        if (v === 'head') return Bird.onHead({ lookUp: () => Reksio.lookUp(1300), shakeOff: () => Reksio.shake() })
         await Bird.flyAway()
+        if (v === 'fly') await Reksio.tryToFly() // after it, ears flapping
       },
     },
     dig: {
@@ -637,7 +771,7 @@ const Things = (() => {
   }
 
   return {
-    THINGS, DOOR, burst, twinkle, ready, init, stuckTap, supperAt, serveSupper, eatSupper,
+    THINGS, VARIATIONS, DOOR, burst, twinkle, ready, init, stuckTap, supperAt, serveSupper, eatSupper,
     /** A gag holds him (the bowl on his head, his tail caught): it answers every tap. */
     get holding() { return !!held },
     get stamped() { return stamped },

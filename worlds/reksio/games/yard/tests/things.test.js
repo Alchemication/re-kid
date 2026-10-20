@@ -36,10 +36,10 @@ function yard(query = '') {
   const bee = [] // where the bee was sent, and 'free' when let go
   const Creatures = { async beeTo(x, y) { bee.push({ x, y }) }, beeFree() { bee.push('free') } }
   const Weather = { raining: false }
-  const page = load(['debug.js', 'layout.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'things.js'], {
+  const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
-    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {} }, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
+    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {}, noseTipAt() {} }, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
   })
   const Things = page.get('Things')
   Things.init({ ended: () => ended })
@@ -54,11 +54,17 @@ function yard(query = '') {
     reksio,
     played,
     advance: page.advance,
+    /** The variations traced so far, by thing. */
+    variations() {
+      const out = {}
+      for (const m of page.get('Debug.dump()').matchAll(/variation \{"name":"(\w+)","v":"(\w+)"\}/g)) (out[m[1]] ??= []).push(m[2])
+      return out
+    },
     end: () => (ended = true),
     /** Use a thing the way yard.js does (cut short counts as over), and let
      * the clock run until it's over. */
-    async use(name, extra = false) {
-      const run = Things.THINGS[name].run({ extra })
+    async use(name, extra = false, n = 1) {
+      const run = Things.THINGS[name].run({ extra, n })
       let over = false
       run.then(
         () => (over = true),
@@ -441,5 +447,30 @@ describe('his tail caught in the bramble', () => {
     await y.use('berries', true)
     assert.equal(y.Bramble.caughtTimes, 0)
     assert.equal(y.bee.length, 0)
+  })
+})
+
+describe('variations', () => {
+  it('after its first use, each thing plays a variation every time, all of them before any comes again, each to its end', async () => {
+    const y = yard('flowers=1')
+    const pools = { ...y.Things.VARIATIONS }
+    for (const [name, names] of Object.entries(pools)) {
+      for (let n = 1; n <= names.length * 2 + 1; n++) await y.use(name, false, n)
+    }
+    const seen = y.variations()
+    for (const [name, names] of Object.entries(pools)) {
+      const got = seen[name] ?? []
+      assert.equal(got.length, names.length * 2, `${name}: ${got}`)
+      assert.deepEqual([...got.slice(0, names.length)].sort(), [...names].sort(), `${name}: ${got}`)
+      assert.deepEqual([...got.slice(names.length)].sort(), [...names].sort(), `${name}: ${got}`)
+    }
+  })
+
+  it('the first use is plain, unless a variation is asked for', async () => {
+    const y = yard()
+    await y.use('tap', false, 1)
+    assert.equal(y.variations().tap, undefined)
+    await y.use('tap', true, 1)
+    assert.equal(y.variations().tap.length, 1)
   })
 })

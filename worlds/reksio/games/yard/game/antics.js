@@ -231,7 +231,100 @@
     await faceOff(300)
   }
 
-  const gestures = { bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare }
+  // ------------------------------------------------------------ the variations' moves (things.js)
+
+  /** Puzzled: both ears up, brows up, forehead lines, a little dash of a
+   * mouth, head on one side, for ms. */
+  async function puzzled(ms = rnd(700, 1000)) {
+    k.perk('both', ms)
+    faceTo(PUZZLED, 150)
+    await blend(add, 'tilt', 10, 200)
+    await pause(ms)
+    blend(add, 'tilt', 0, 200)
+    await faceOff(200)
+  }
+
+  /** Under the dripping tap: head right back, mouth open, tongue ready,
+   * for ms (resolves when his head is back down). */
+  async function waitForDrop(ms) {
+    faceTo({ open: 0.5, smile: 0.4, lift: 1, eyes: 1, joy: 0, tongue: 0.3 }, 150)
+    await blend(add, 'tilt', -34, 250, k.EASE_OUT)
+    await pause(ms)
+    blend(add, 'tilt', 0, 200)
+    await faceOff(200)
+  }
+
+  /** Hiccups after drinking too fast: little hops, a "hic" each, his mouth
+   * an O; then a puzzled look. */
+  async function hiccups(times = 3) {
+    for (let i = 0; i < times; i++) {
+      faceTo({ open: 0.3, o: 1, lift: 1, eyes: 1, joy: 0 }, 40)
+      Sound.pop()
+      k.perk('both', 160)
+      await blend(add, 'dy', -16, 90, k.EASE_OUT)
+      await blend(add, 'dy', 0, 120, k.EASE_IN)
+      await faceOff(80)
+      await pause(rnd(380, 560))
+    }
+    await puzzled(rnd(600, 800))
+  }
+
+  /** Trying to fly after the bird: ears flapping, arms out, two hops, and
+   * down on his bottom with a boing; a sheepish look, and up. */
+  async function tryToFly() {
+    await actTo(Figure.vary(k.basePose(), { nearArm: k.POSES.armsWide.nearArm, farArm: k.POSES.armsWide.farArm }), 160, k.OVERSHOOT)
+    faceTo({ lift: 1, eyes: 1, open: 0.2, smile: 0.6 }, 100)
+    for (let i = 0; i < 2; i++) {
+      k.perk('both', 140)
+      Sound.hop()
+      await blend(add, 'dy', -34 - 10 * i, 220, k.EASE_OUT)
+      k.perk('both', 140)
+      await blend(add, 'dy', 0, 200, k.EASE_IN)
+    }
+    actOff(120)
+    Sound.boing()
+    faceTo(STARTLED, 60)
+    await k.settle('sit', 160)
+    await pause(rnd(400, 550))
+    await faceTo({ ...WORRIED, smile: 0.2, small: 0.4 }, 200) // sheepish
+    await pause(rnd(500, 700))
+    await faceOff(200)
+    await k.rise(350)
+  }
+
+  /** Cross-eyed at something on his nose: head down a little, eyes on it. */
+  async function crossEyed(ms = 700) {
+    faceTo({ eyes: 1, lift: 0.8, brows: 0.5, small: 1, smile: 0, look: 1 }, 120)
+    await blend(add, 'tilt', 12, 200)
+    await pause(ms)
+    blend(add, 'tilt', 0, 200)
+    await faceOff(150)
+  }
+
+  /** A puff of breath: blowing something off his nose. */
+  async function blow() {
+    faceTo({ o: 1, open: 0.35, small: 0, lift: 0.5 }, 60)
+    await blend(add, 'tilt', -6, 120)
+    await pause(250)
+    blend(add, 'tilt', 0, 200)
+    await faceOff(200)
+  }
+
+  /** Puffed up, chest out, hands on hips: a bigger bark back. */
+  async function puffUp() {
+    await Promise.all([actTo(Figure.vary(k.POSES.handsOnHips, { chest: [k.POSES.handsOnHips.chest[0] + 6, k.POSES.handsOnHips.chest[1] - 4] }), 200, k.OVERSHOOT), faceTo({ brows: -0.6, smile: 0.2, open: 0, lift: 0 }, 150)])
+    await blend(add, 'tilt', -10, 200)
+    faceTo({ open: 0.85, smile: 0.3, brows: -0.6 }, 60)
+    Sound.bark()
+    k.tell('bark', Reksio.mouth())
+    await pause(500)
+    await faceTo({ ...k.POSES.content.face, eyes: 0.3, joy: 0.3 }, 200) // that told him
+    await pause(rnd(400, 600))
+    blend(add, 'tilt', 0, 250)
+    await Promise.all([actOff(250), faceOff(250)])
+  }
+
+  const gestures = { bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
   Reksio.addGestures(gestures)
 
 })()

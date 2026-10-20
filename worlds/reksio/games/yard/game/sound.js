@@ -23,6 +23,9 @@ const Sound = (() => {
   const CRITTER_VOLUME = 0.55 // the yard's creatures, even right by Reksio: quiet
   const HEARING = 900 // creatures further from Reksio than this are not heard
   const MUFFLE_HZ = 520 // a bark inside the bowl on his head: only its boom gets out
+  const FAR_BARK_HZ = 1400 // a bigger dog beyond the gate: the fence and distance take its top off…
+  const FAR_BARK_RATE = 0.72 // …and it is deeper than his
+  let far = null // the far bark's filter, made on first use
   const BOWL_RING = [880, 2210] // the bowl's own ring when it's knocked: a hollow note and a bright partial
   let ctx = null
   let master = null
@@ -162,11 +165,11 @@ const Sound = (() => {
 
   /** One of the original barks, played at a random speed (and so pitch), to
    * `out` (the speakers, unless muffled). */
-  function realBark(at, out = null) {
+  function realBark(at, out = null, rate = BARK_RATE[0] + Math.random() * (BARK_RATE[1] - BARK_RATE[0])) {
     const c = ensure()
     const src = c.createBufferSource()
     src.buffer = barks[Math.floor(Math.random() * barks.length)]
-    src.playbackRate.value = BARK_RATE[0] + Math.random() * (BARK_RATE[1] - BARK_RATE[0])
+    src.playbackRate.value = rate
     const g = c.createGain()
     g.gain.value = BARK_VOLUME
     src.connect(g).connect(out ?? master)
@@ -267,6 +270,24 @@ const Sound = (() => {
       if (barks.length) realBark(0, muffle)
       else if (!recorded('bark', muffle)) woof(0, muffle)
       sounds.clang(0.03, 0.5)
+    },
+    /** Another dog barks back from beyond the gate: bigger and further off,
+     * so lower and muffled (his own barks slowed, or a take, filtered). */
+    farBark() {
+      const c = ensure()
+      if (!far) {
+        far = c.createBiquadFilter() // one, kept: not a new node left on the output each time
+        far.type = 'lowpass'
+        far.frequency.value = FAR_BARK_HZ
+        far.connect(master)
+      }
+      if (barks.length) {
+        realBark(0, far, FAR_BARK_RATE)
+        realBark(0.32, far, FAR_BARK_RATE * 0.95)
+      } else if (!recorded('bark', far)) {
+        woof(0, far)
+        woof(0.3, far)
+      }
     },
     /** The bowl rings, knocked (at: seconds from now; loud: 0 to 1). */
     clang(at = 0, loud = 1) {

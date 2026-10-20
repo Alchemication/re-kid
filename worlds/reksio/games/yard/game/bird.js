@@ -173,6 +173,38 @@ const Bird = (() => {
     return land
   }
 
+  /**
+   * Not yet his friend, it answers his bark by landing on his head: he looks
+   * up (lookUp), it pecks twice at the top of his head and chirps, and he
+   * shakes it off (shakeOff) as it flies to another perch.
+   * @param {{lookUp: () => Promise<void>, shakeOff: () => Promise<void>}} r his part
+   */
+  async function onHead({ lookUp, shakeOff }) {
+    if (flying) return // off after a worm while he barked: not this time
+    flying = true
+    inFront(true)
+    Debug.trace('bird on his head')
+    try {
+      const facing = await flyBetween(PERCHES[perch], bowlTop())
+      const stop = ride(facing)
+      try {
+        const looking = lookUp()
+        for (let i = 0; i < 2; i++) {
+          await peck()
+          Sound.tok()
+          await wait(220)
+        }
+        Sound.chirp()
+        await looking
+      } finally {
+        stop()
+      }
+      await Promise.all([shakeOff(), flyAway(bowlTop())])
+    } finally {
+      home()
+    }
+  }
+
   /** His friend now, it comes down to him: a hop and a chirp, his play-bow,
    * and back up to its perch. */
   async function visit() {
@@ -212,7 +244,7 @@ const Bird = (() => {
   }
 
   return {
-    PERCHES, flyAway, hunt, rescue, visit, home, init,
+    PERCHES, flyAway, hunt, rescue, visit, onHead, home, init,
     get perch() { return PERCHES[perch] },
     get flying() { return flying },
     get friend() { return friend },

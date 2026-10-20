@@ -1,7 +1,8 @@
 // What Reksio does when nobody is tapping, as plain choices with no drawing,
 // clock or randomness of their own (yard.js passes in what it knows, and a
 // random stream): whether to do something now, which left-alone move, which
-// thing to wish for, and whether something done brings a phrase of music.
+// thing to wish for, whether something done brings a phrase of music, and a
+// pool of variations drawn without repeats.
 
 /* exported Idle */
 const Idle = (() => {
@@ -65,8 +66,31 @@ const Idle = (() => {
    */
   const phraseOk = ({ playing, raining, sinceLast, alone = false }) => !playing && !raining && sinceLast >= (alone ? LONG_QUIET_MS : PHRASE_GAP_MS)
 
+  /**
+   * A pool of variations (a thing's, a nap's): next() gives each before any
+   * comes again, and never the same twice running (unless there is only one).
+   * @param {string[]} names
+   * @param {() => number} random the caller's stream
+   */
+  function pool(names, random) {
+    let order = []
+    let last = null
+    return () => {
+      if (!order.length) {
+        order = [...names]
+        for (let i = order.length - 1; i > 0; i--) {
+          const j = Math.floor(random() * (i + 1))
+          ;[order[i], order[j]] = [order[j], order[i]]
+        }
+        if (order.length > 1 && order[0] === last) order.push(order.shift())
+      }
+      last = order.shift()
+      return last
+    }
+  }
+
   /** How long until the next move after one that took `ms` (or a random gap). */
   const gap = (ms, random) => ms || GAP_MS[0] + random() * (GAP_MS[1] - GAP_MS[0])
 
-  return { FIRST_MS, GAP_MS, REST_AFTER_S, PHRASE_GAP_MS, LONG_QUIET_MS, next, pick, restOk, wish, phraseOk, gap }
+  return { FIRST_MS, GAP_MS, REST_AFTER_S, PHRASE_GAP_MS, LONG_QUIET_MS, pool, next, pick, restOk, wish, phraseOk, gap }
 })()

@@ -12,7 +12,7 @@
 // other; he dreams of supper, smiling and licking his chops; or he woofs in
 // his sleep, ears up, paws paddling.
 
-/* global Clock, Debug, Sound, Music, Figure, Things, Reksio */
+/* global Clock, Debug, Sound, Music, Figure, Things, Reksio, Idle */
 /* exported Nap */
 const Nap = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -23,7 +23,6 @@ const Nap = (() => {
   const SNORES = 3 // a nap's snores
   const VARIATION_AT_MS = 1700 // what happens on top starts with the second snore
   const Z_FROM = [26, -44] // where his Zs rise from, from the door's centre
-  const random = Debug.random('nap')
 
   /** 0 to 1 and back over a..b of k (0 to 1), nothing outside it. */
   const hump = (k, a, b) => (k < a || k > b ? 0 : Math.sin((Math.PI * (k - a)) / (b - a)))
@@ -69,8 +68,6 @@ const Nap = (() => {
   }
 
   let drawn = null // the figure in the doorway, made on first use
-  let order = [] // the variations still to come before any repeats
-  let last = null
   let snores = 0 // a nap's snores so far: the music's touch rises with them
 
   function door() {
@@ -152,19 +149,8 @@ const Nap = (() => {
   }
 
   /** The next variation: all of them before any comes again, and never the
-   * same twice running. */
-  function next() {
-    if (!order.length) {
-      order = Object.keys(VARIATIONS)
-      for (let i = order.length - 1; i > 0; i--) {
-        const j = Math.floor(random() * (i + 1))
-        ;[order[i], order[j]] = [order[j], order[i]]
-      }
-      if (order[0] === last) order.push(order.shift())
-    }
-    last = order.shift()
-    return last
-  }
+   * same twice running (idle.js). */
+  const next = Idle.pool(Object.keys(VARIATIONS), Debug.random('nap'))
 
   /** A nap in the doorway (the doghouse thing): the snores, and on top the
    * named variation (or none). Resolves when he is ready to come out. */

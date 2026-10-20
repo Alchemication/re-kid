@@ -81,6 +81,14 @@ GESTURES = {
     "smugTurn": "Reksio.smugTurn().then(() => Reksio.glare())",
     "spunRound": "Reksio.spunRound().then(() => Reksio.glare())",
     "glare": "Reksio.glare()",
+    # the things' variations (antics.js, things.js)
+    "puzzled": "Reksio.puzzled()",
+    "waitForDrop": "Reksio.waitForDrop(800)",
+    "hiccups": "Reksio.hiccups()",
+    "tryToFly": "Reksio.tryToFly()",
+    "crossEyed": "Reksio.crossEyed()",
+    "blow": "Reksio.blow()",
+    "puffUp": "Reksio.puffUp()",
     "stretch": "(async () => { Reksio.beginStretch(); await new Promise((r) => setTimeout(r, 600)); await Reksio.endStretch() })()",
 }
 # Reksio's other functions: state, not gestures, or tested through a thing.
@@ -319,6 +327,43 @@ class TestThings:
         assert abs(s["reksio"]["x"] - y.page.evaluate("Layout.MIN_X + 100")) < 5, (
             "the waiting walk never ran"
         )
+
+
+class TestVariations:
+    """After its first use, each thing with a pool plays one of its
+    variations every time (things.js VARIATIONS), each running to its end
+    and each cut short by a tap leaving him free."""
+
+    @pytest.mark.parametrize(
+        ("name", "uses"), [("tap", 4), ("flowers", 3), ("gate", 2), ("bird", 3)]
+    )
+    def test_each_variation_runs_to_the_end(
+        self, yard: callable, name: str, uses: int
+    ) -> None:
+        y = open_for_thing(yard, name)
+        for _ in range(uses):
+            y.run(f"yardGame.use('{name}')")
+            y.settled()
+        seen = re.findall(
+            rf'variation \{{"name":"{name}","v":"(\w+)"\}}',
+            y.page.evaluate("yardGame.trace()"),
+        )
+        assert sorted(seen) == sorted(
+            y.page.evaluate(f"Things.VARIATIONS['{name}']")
+        ), seen
+
+    @pytest.mark.parametrize("name", ["tap", "flowers", "gate", "bird"])
+    def test_a_tap_mid_variation_waits_and_he_ends_free(
+        self, yard: callable, name: str
+    ) -> None:
+        y = open_for_thing(yard, name)
+        y.run(f"yardGame.use('{name}')")
+        y.settled()
+        y.page.evaluate(f"yardGame.tap('{name}')")
+        y.page.wait_for_function("yardGame.state().busy", timeout=DONE_MS)
+        y.page.wait_for_timeout(1500)
+        y.page.evaluate("yardGame.walk(Layout.MIN_X + 100)")
+        y.settled()
 
 
 class TestNap:

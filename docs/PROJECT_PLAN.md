@@ -65,8 +65,11 @@ scene:
   be a bit random and different"). Built: the doghouse nap, where every
   nap after the first brings one of four things on top, all before any
   repeats (`nap.js`), and one sleeping Reksio in the morning, on a tap and
-  at bedtime. Next, each a `new-gag` run, the things Eliot goes back to
-  first: a pool of 3–4 variations per thing, drawn without repeats; then
+  at bedtime. Pools built (2026-10-20, Adam to judge in play): the tap
+  (spray, drips on his nose, hiccups), the flowers (bigger sneeze, petal
+  on his nose), the gate (a bigger dog barks back), the bird (he tries
+  to fly after it; it lands on his head). Next: pools for the props
+  (mound, film, trap, tree, bramble), each a `new-gag` run; then
   an in-world hint that a thing still has something new (his thought
   bubble, an ear perking towards it), never a marker or a count; then the
   fly and bee a little more often. Keep the yard quiet: variety in each

@@ -6,7 +6,7 @@ const { load } = require('./load')
 
 describe('what happens on top of a nap', () => {
   it('is never the same twice running, and all of them come before any again', () => {
-    const page = load(['debug.js', 'figure.js', 'nap.js'], { query: '?seed=3' })
+    const page = load(['debug.js', 'idle.js', 'figure.js', 'nap.js'], { query: '?seed=3' })
     const Nap = page.get('Nap')
     const all = Object.keys(Nap.VARIATIONS)
     const drawn = Array.from({ length: all.length * 6 }, () => Nap.next())
@@ -15,7 +15,7 @@ describe('what happens on top of a nap', () => {
   })
 
   it('only for its moment: before it starts and once it ends, his face is his sleeping face', () => {
-    const page = load(['debug.js', 'figure.js', 'nap.js'], { query: '?seed=3' })
+    const page = load(['debug.js', 'idle.js', 'figure.js', 'nap.js'], { query: '?seed=3' })
     const [Nap, Figure] = [page.get('Nap'), page.get('Figure')]
     const p = Figure.POSES.doorNap
     for (const [name, v] of Object.entries(Nap.VARIATIONS)) {
@@ -27,7 +27,7 @@ describe('what happens on top of a nap', () => {
   })
 
   it('every variation leaves him a pose that draws', () => {
-    const page = load(['debug.js', 'figure.js', 'nap.js'], { query: '?seed=3' })
+    const page = load(['debug.js', 'idle.js', 'figure.js', 'nap.js'], { query: '?seed=3' })
     const [Nap, Figure] = [page.get('Nap'), page.get('Figure')]
     for (const [name, v] of Object.entries(Nap.VARIATIONS)) {
       for (const k of [0, 0.25, 0.5, 0.75, 1]) {

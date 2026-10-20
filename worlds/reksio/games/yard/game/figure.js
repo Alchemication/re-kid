@@ -563,6 +563,12 @@ const Figure = (() => {
     return onHead(p, [L.mouth[0], L.mouth[1] + 6])
   }
 
+  /** The top of his nose, in his own units (a drop or a petal lands on it). */
+  function noseTipAt(p) {
+    const L = layout(p.head.turn)
+    return onHead(p, [L.nose[0], L.nose[1] - 6])
+  }
+
   /** A point given in head units (about its centre, before the tilt) in his own units. */
   function onHead(p, local) {
     const a = (p.head.tilt * Math.PI) / 180
@@ -839,5 +845,5 @@ const Figure = (() => {
     }
   }
 
-  return { POSES, mix, vary, perked, shape, mouthAt, bowlTopAt, mount, capsule }
+  return { POSES, mix, vary, perked, shape, mouthAt, noseTipAt, bowlTopAt, mount, capsule }
 })()
