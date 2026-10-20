@@ -324,7 +324,90 @@
     await Promise.all([actOff(250), faceOff(250)])
   }
 
-  const gestures = { bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
+  // ------------------------------------------------------------ the hen's ladder (hen.js)
+
+  // on a ladder, side-on, a paw on a rung above his head, the other lower, in turn
+  const CLIMB = [
+    { nearArm: [[26, -120], [32, -150]], farArm: [[8, -104], [16, -124]] },
+    { nearArm: [[24, -104], [30, -126]], farArm: [[10, -120], [18, -150]] },
+  ]
+  const onRung = (i) => Figure.vary(k.basePose(), CLIMB[i % 2])
+
+  /** Up a ladder: `rise` (his units) in `rungs` steps, paw over paw. Ends at
+   * the top, still holding on (climbDown brings him back). */
+  async function climb(rise, rungs) {
+    faceTo({ lift: 0.6, brows: 0.3, smile: 0.3 }, 150)
+    for (let i = 0; i < rungs; i++) {
+      actTo(onRung(i), 160)
+      Sound.step()
+      await blend(add, 'dy', (-rise * (i + 1)) / rungs, 260, k.EASE_OUT)
+      await pause(60)
+    }
+    k.perk('both', 600)
+  }
+
+  /** Down the ladder, slower and careful (an egg in his mouth). `wobble`,
+   * if given, plays half-way down while he clings on, worried. */
+  async function climbDown(rungs, wobble = null) {
+    const from = add.dy
+    faceTo({ ...k.POSES.content.face, eyes: 0.6, joy: 0, small: 0.5 }, 150)
+    for (let i = rungs - 1; i >= 0; i--) {
+      if (wobble && i === Math.floor(rungs / 2)) {
+        faceTo({ ...WORRIED, eyes: 1 }, 80)
+        k.perk('both', 1100)
+        await Promise.all([wobble(), blend(add, 'lean', 4, 300).then(() => blend(add, 'lean', -3, 400)).then(() => blend(add, 'lean', 0, 300))])
+        faceTo({ ...k.POSES.content.face, eyes: 0.6, joy: 0, small: 0.5 }, 150)
+      }
+      actTo(onRung(i), 200)
+      Sound.step()
+      await blend(add, 'dy', (from * i) / rungs, 340, k.EASE_IN)
+      await pause(90)
+    }
+    await Promise.all([actOff(200), faceOff(200)])
+  }
+
+  /** Aww: head on one side, a soft smile, looking down at something small. */
+  async function aww() {
+    faceTo({ ...CONTENT, eyes: 0.7, joy: 0.4 }, 200)
+    await blend(add, 'tilt', 14, 300)
+    await pause(rnd(700, 900))
+    blend(add, 'tilt', 0, 300)
+    await faceOff(300)
+  }
+
+  // ------------------------------------------------------------ at the gate (things.js)
+
+  /** A leap up to peek over the gate: paws on the top rail, ears up, a long
+   * look out, a grin, and down again. rise: how high (his units). */
+  async function peekOver(rise) {
+    k.perk('both', 1800)
+    await actTo(Figure.vary(k.basePose(), { nearArm: [[30, -128], [42, -156]], farArm: [[14, -126], [26, -154]] }), 160)
+    Sound.hop()
+    await blend(add, 'dy', -rise, 260, k.EASE_OUT)
+    faceTo({ lift: 1, eyes: 1, joy: 0, open: 0.3, o: 1, smile: 0 }, 100) // oh! what's out there
+    await pause(rnd(700, 900))
+    faceTo({ smile: 1, open: 0.5, eyes: 0, joy: 1 }, 120)
+    await pause(450)
+    await blend(add, 'dy', 0, 280, k.EASE_IN)
+    Sound.hop()
+    await Promise.all([actOff(220), faceOff(220)])
+  }
+
+  /** A picket in his teeth, tugging for all he's worth (onTug at each
+   * tug: the gate rattles); then he lets go and licks his lips. */
+  async function gnaw(onTug) {
+    await faceTo({ eyes: 0, joy: -1, brows: -0.9, lines: 1, grit: 1, smile: 0, open: 0 }, 120)
+    for (let i = 0; i < 3; i++) {
+      onTug()
+      await blend(add, 'lean', -9, 230, k.EASE_OUT)
+      await blend(add, 'lean', 0, 200)
+    }
+    faceTo({ grit: 0, tongue: 0.8, open: 0.2, eyes: 0.6, joy: 0, lines: 0 }, 150)
+    await pause(450)
+    await faceOff(200)
+  }
+
+  const gestures = { peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
   Reksio.addGestures(gestures)
 
 })()

@@ -583,6 +583,18 @@ const Sound = (() => {
       src.stop(t + seconds + 0.05)
     },
     shake() { for (let i = 0; i < 5; i++) hiss(i * 0.07, 0.12, 0.004, 0.05, 'highpass', 3000) },
+    /** A hen: a cluck (or a few), and big: the loud "ko-DAK" after laying. */
+    cluck(times = 1, big = false) {
+      for (let i = 0; i < times; i++) {
+        const at = i * 0.17
+        tone('square', big ? 520 : 430, big ? 300 : 330, at, big ? 0.09 : 0.06, 0.006, big ? 0.22 : 0.07)
+        hiss(at, 0.05, 0.003, 0.04, 'bandpass', 1200, 2)
+      }
+    },
+    /** A chick: one thin high cheep. */
+    cheep() { tone('sine', 3300, 4100, 0, 0.09, 0.008, 0.09) },
+    /** An eggshell cracking: a dry little snap. */
+    crack() { hiss(0, 0.18, 0.001, 0.03, 'highpass', 3000); hiss(0.06, 0.1, 0.001, 0.025, 'highpass', 3600) },
     chirp() { tone('sine', 2600, 3600, 0, 0.12, 0.01, 0.07); tone('sine', 2800, 3900, 0.11, 0.1, 0.01, 0.07) },
     /** A cuckoo clock's call, "ku-ku": two soft falling notes (a minor
      * third, as from its two little pipes) starting at `notes` (seconds), a

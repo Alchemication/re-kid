@@ -89,6 +89,11 @@ GESTURES = {
     "crossEyed": "Reksio.crossEyed()",
     "blow": "Reksio.blow()",
     "puffUp": "Reksio.puffUp()",
+    "peekOver": "Reksio.peekOver(70)",
+    "gnaw": "Reksio.gnaw(() => {})",
+    "climb": "Reksio.climb(120, 4).then(() => Reksio.climbDown(4))",
+    "climbDown": "Reksio.climb(60, 2).then(() => Reksio.climbDown(2, () => Clock.wait(300)))",
+    "aww": "Reksio.aww()",
     "stretch": "(async () => { Reksio.beginStretch(); await new Promise((r) => setTimeout(r, 600)); await Reksio.endStretch() })()",
 }
 # Reksio's other functions: state, not gestures, or tested through a thing.
@@ -159,8 +164,9 @@ THINGS = [
     "trap",
     "tree",
     "berries",
+    "hen",
 ]
-POOL = {"bowl", "dig", "film", "trap", "tree", "berries"}  # layout.js PROP_POOL
+POOL = {"bowl", "dig", "film", "trap", "tree", "berries", "hen"}  # layout.js PROP_POOL
 
 CRITTERS = {"fly": "fly", "bee": "bee", "spider": "spider"}
 CRITTER_NEEDS = {"snail": "a snail, after rain", "worm": "worms, after rain"}
@@ -170,11 +176,15 @@ class Yard:
     """One open play of the yard, collecting what went wrong."""
 
     def __init__(
-        self, browser: object, query: str, size: tuple[int, int] = (1280, 720)
+        self,
+        browser: object,
+        query: str,
+        size: tuple[int, int] = (1280, 720),
+        touch: bool = True,
     ) -> None:
         self.errors: list[str] = []
         self.page = browser.new_page(
-            viewport={"width": size[0], "height": size[1]}, has_touch=True
+            viewport={"width": size[0], "height": size[1]}, has_touch=touch
         )
         self.page.on("console", self._console)
         self.page.on("pageerror", lambda e: self.errors.append(f"uncaught: {e}"))
@@ -232,8 +242,10 @@ class Yard:
 def yard(browser: object) -> Iterator[callable]:
     opened: list[Yard] = []
 
-    def open_(query: str = STILL, size: tuple[int, int] = (1280, 720)) -> Yard:
-        opened.append(Yard(browser, query, size))
+    def open_(
+        query: str = STILL, size: tuple[int, int] = (1280, 720), touch: bool = True
+    ) -> Yard:
+        opened.append(Yard(browser, query, size, touch))
         return opened[-1]
 
     yield open_
@@ -299,7 +311,7 @@ class TestActs:
 
 def open_for_thing(yard: callable, name: str) -> Yard:
     props = f"&props={name}" if name in POOL else ""
-    y = yard(f"{STILL}&flowers=1&mouse-at=0&visitor-at=0{props}")
+    y = yard(f"{STILL}&flowers=1&mouse-at=0&visitor-at=0&hen-at=0{props}")
     try:
         y.page.wait_for_function(f"Things.ready('{name}')", timeout=20_000)
     except playwright.TimeoutError:
@@ -335,7 +347,8 @@ class TestVariations:
     and each cut short by a tap leaving him free."""
 
     @pytest.mark.parametrize(
-        ("name", "uses"), [("tap", 4), ("flowers", 3), ("gate", 2), ("bird", 3)]
+        ("name", "uses"),
+        [("tap", 4), ("flowers", 3), ("gate", 5), ("bird", 3), ("hen", 4)],
     )
     def test_each_variation_runs_to_the_end(
         self, yard: callable, name: str, uses: int
@@ -352,7 +365,7 @@ class TestVariations:
             y.page.evaluate(f"Things.VARIATIONS['{name}']")
         ), seen
 
-    @pytest.mark.parametrize("name", ["tap", "flowers", "gate", "bird"])
+    @pytest.mark.parametrize("name", ["tap", "flowers", "gate", "bird", "hen"])
     def test_a_tap_mid_variation_waits_and_he_ends_free(
         self, yard: callable, name: str
     ) -> None:
@@ -865,11 +878,37 @@ class TestRealInput:
 
     @staticmethod
     def intents(y: Yard) -> list[str]:
+        """What was asked of him, not counting the mouse passing over things."""
         return [
             e["intent"]
             for e in y.page.evaluate("yardGame.events()")
-            if e["kind"] == "input"
+            if e["kind"] == "input" and not e["intent"].startswith("notice ")
         ]
+
+    def test_the_mouse_over_a_thing_makes_it_glow_and_him_notice(
+        self, yard: callable
+    ) -> None:
+        """With a mouse, what can be clicked shows itself (Adam, 2026-10-20:
+        the kids couldn't tell): the thing glows, and he turns to it."""
+        y = yard(STILL, touch=False)  # a desktop: a mouse, no touch
+        box = y.page.locator("#things [data-thing='house']").bounding_box()
+        left = max(box["x"], 0)  # the house is partly off screen at the start
+        y.page.mouse.move(
+            (left + box["x"] + box["width"]) / 2, box["y"] + box["height"] / 2
+        )
+        y.page.wait_for_timeout(300)
+        assert y.page.evaluate(
+            "getComputedStyle(document.querySelector('#house')).filter.includes('drop-shadow')"
+        ), "no glow"
+        assert "notice house" in [
+            e.get("intent") for e in y.page.evaluate("yardGame.events()")
+        ]
+        assert y.page.evaluate("Reksio.facing") == -1, "he didn't turn to it"
+        y.page.mouse.move(5, 5)
+        y.page.wait_for_timeout(300)
+        assert not y.page.evaluate(
+            "getComputedStyle(document.querySelector('#house')).filter.includes('drop-shadow')"
+        ), "still glowing"
 
     def test_a_tap_on_a_thing_uses_it(self, yard: callable) -> None:
         y = yard(STILL)

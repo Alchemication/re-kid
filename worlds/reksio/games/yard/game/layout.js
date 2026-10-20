@@ -27,7 +27,7 @@ const Layout = (() => {
   // doghouse, house, tap, bird and gate are always there and only discover.
   // A kind is listed only once a gag gives it (helped: the bowl on his head,
   // his tail caught in the bramble).
-  const OFFERS = { bowl: ['discover', 'helped'], dig: ['discover'], film: ['discover'], trap: ['help'], tree: ['help'], berries: ['discover', 'helped'] }
+  const OFFERS = { bowl: ['discover', 'helped'], dig: ['discover'], film: ['discover'], trap: ['help'], tree: ['help'], berries: ['discover', 'helped'], hen: ['help'] }
   const PROP_POOL = Object.keys(OFFERS)
   const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do
   const CREATURE_POOL = ['fly', 'bee', 'spider']
@@ -57,7 +57,7 @@ const Layout = (() => {
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
   // Each thing on the ground as drawn: from the left of its drawing or action
   // spot (whichever is further left) to the right of the other.
-  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650] }
+  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650], hen: [990, 1360] }
 
   const random = Debug.random('layout') // this part's own random stream (debug.js)
 
@@ -145,6 +145,8 @@ const Layout = (() => {
   const fruitDrawn = FRUITS[Math.floor(random() * FRUITS.length)]
   const fruit = FRUITS.includes(params.get('fruit')) ? params.get('fruit') : fruitDrawn
   const visitorAt = params.has('visitor-at') ? Number(params.get('visitor-at')) : null
+  // ?hen-at=SECONDS: when the hen goes up to lay (hen.js)
+  const henAt = params.has('hen-at') ? Number(params.get('hen-at')) : null
   const { dayS, hour } = dayFlags(params)
 
   // props that aren't out this time
@@ -211,7 +213,7 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */

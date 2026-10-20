@@ -27,7 +27,7 @@ describe('a play', () => {
   it('always has someone Reksio can help and someone who helps him', () => {
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}`)
-      assert.ok(L.props.some((n) => ['trap', 'tree'].includes(n)), `seed ${seed}: ${L.props}`)
+      assert.ok(L.props.some((n) => ['trap', 'tree', 'hen'].includes(n)), `seed ${seed}: ${L.props}`)
       assert.ok(L.props.some((n) => ['bowl', 'berries'].includes(n)), `seed ${seed}: ${L.props}`)
       for (const n of L.props) assert.ok(L.OFFERS[n], n)
     }
@@ -42,13 +42,13 @@ describe('a play', () => {
   it('still brings every prop out now and then', () => {
     const seen = new Set()
     for (const seed of SEEDS) for (const n of layout(`?seed=${seed}`).props) seen.add(n)
-    assert.deepEqual([...seen].sort(), ['berries', 'bowl', 'dig', 'film', 'trap', 'tree'])
+    assert.deepEqual([...seen].sort(), ['berries', 'bowl', 'dig', 'film', 'hen', 'trap', 'tree'])
   })
 
   it('shows a prop only when it is out (the tap always, the flowers sometimes)', () => {
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}`)
-      for (const n of ['bowl', 'dig', 'film', 'trap', 'tree', 'berries']) assert.equal(L.hidden.includes(n), !L.props.includes(n), `seed ${seed}: ${n}`)
+      for (const n of ['bowl', 'dig', 'film', 'trap', 'tree', 'berries', 'hen']) assert.equal(L.hidden.includes(n), !L.props.includes(n), `seed ${seed}: ${n}`)
       assert.ok(!L.hidden.includes('tap'))
       assert.equal(L.hidden.includes('flowers'), !L.flowers)
     }

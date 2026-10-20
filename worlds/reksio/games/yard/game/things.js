@@ -16,7 +16,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle, Hen */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -49,10 +49,12 @@ const Things = (() => {
   // Each thing's variations, after the first use one every time (Adam,
   // 2026-10-19: "each encounter should be a bit random and different"):
   // the tap sprays him, only drips (on his nose), or gives him hiccups; the
-  // flowers' bigger sneeze, or a petal on his nose; a bigger dog barks
-  // back from beyond the gate; the bird he barks at, he tries to fly after,
+  // flowers' bigger sneeze, or a petal on his nose; at the gate a bigger dog
+  // barks back, or he digs under it, tugs a picket in his teeth, or leaps
+  // up to peek over it (the yard's edge stays put); the bird he barks at,
+  // he tries to fly after,
   // or it lands on his head.
-  const VARIATIONS = { tap: ['spray', 'drips', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer'], bird: ['fly', 'head'] }
+  const VARIATIONS = { tap: ['spray', 'drips', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer', 'dig', 'gnaw', 'peek'], bird: ['fly', 'head'], hen: Hen.VARIATIONS }
   const variety = Debug.random('variety') // its own stream: how often the pools draw depends on taps
   const pools = Object.fromEntries(Object.entries(VARIATIONS).map(([name, names]) => [name, Idle.pool(names, variety)]))
 
@@ -295,6 +297,7 @@ const Things = (() => {
   // ------------------------------------------------------------ the variations' own moments
 
   const SPOUT = { x: 1320, y: 566 } // where the tap's water comes out (index.html), before X('tap')
+  const PEEK_RISE = 70 // how high he leaps to look over the gate (his units): paws on its top rail
   const UNDER_SPOUT = 50 // he stands this far short of the spout, so his upturned nose is under it
   const nose = () => Reksio.pointAt(Figure.noseTipAt)
   const headTop = () => Reksio.pointAt(Figure.bowlTopAt)
@@ -548,6 +551,20 @@ const Things = (() => {
           await Reksio.startle()
           await Reksio.puffUp()
         }
+        if (v === 'dig') {
+          // a hole under the gate: earth flies, then he gives up and shakes it off
+          const digging = Reksio.paddle(1500)
+          Sound.dig()
+          for (let i = 0; i < 6; i++) {
+            burst(Layout.MAX_X + 30, 805, 3, 'clod', { dir: -1, height: 70, reach: 110, size: 4.5 })
+            await wait(230)
+          }
+          await digging
+          await Reksio.puzzled() // no good: a gate goes down into the ground
+          await Reksio.shake()
+        }
+        if (v === 'gnaw') await Reksio.gnaw(rattle)
+        if (v === 'peek') await Reksio.peekOver(PEEK_RISE)
         await Reksio.bark()
       },
     },
@@ -702,6 +719,7 @@ const Things = (() => {
       },
     },
     tree: Tree.thing,
+    hen: { ...Hen.thing, run: ({ extra, n }) => Hen.thing.run({ v: variation('hen', extra, n) }) },
     berries: Bramble.thing,
     trap: {
       // before: stand so his paws land just short of the trap; after: nose at her hole
@@ -757,7 +775,7 @@ const Things = (() => {
   /** Can it be used now? The trap only once the mouse is out, the tree once
    * someone hungry is under it, the bird only while it sits somewhere. */
   const ready = (name) =>
-    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !Bird.flying : name === 'tree' ? Tree.ready : true
+    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !Bird.flying : name === 'tree' ? Tree.ready : name === 'hen' ? Hen.ready : true
 
   function init({ ended }) {
     isEnded = ended
@@ -767,6 +785,7 @@ const Things = (() => {
     Bowl.init({ effects: { burst }, hold })
     Bramble.init({ effects: { burst }, hold })
     Tree.init({ ended, effects: { burst, twinkle } })
+    Hen.init({ ended, effects: { heart } })
     document.querySelectorAll('.icon-fruit').forEach((u) => u.setAttribute('href', `#fruit-${Layout.fruit}`))
   }
 

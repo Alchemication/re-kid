@@ -73,6 +73,10 @@
                 <circle class="eye" cx="48" cy="-250" r="2" />
                 <circle class="mouse-nose" cx="58" cy="-246" r="2.6" />
         </g>
+        <g id="icon-hen">
+                <rect class="icon-wall" x="20" y="-244" width="72" height="20" />
+                <ellipse class="egg" cx="56" cy="-258" rx="11" ry="14" />
+        </g>
         <g id="icon-tree">
                 <rect class="trunk" x="51" y="-250" width="10" height="24" />
                 <circle class="leaves-ink" cx="56" cy="-262" r="22" />
@@ -413,6 +417,15 @@
             <g id="tree-ground"></g>
           </g>
 
+          <!-- ============ the hen's nest, and the garden ladder by the wall (hen.js) ============ -->
+          <g id="hen" class="thing" data-thing="hen" data-hint-y="560">
+            <rect class="hit" x="990" y="560" width="310" height="270" />
+            <path class="nest" d="M1010 806 Q1012 788 1050 786 Q1088 788 1090 806 Q1088 818 1050 819 Q1012 818 1010 806 Z" />
+            <path class="nest-straw" d="M1016 800 L1032 794 M1030 812 L1050 802 M1060 796 L1080 806 M1068 814 L1086 800" />
+            <g id="hen-ladder"></g>
+            <g id="hen-bird"></g>
+          </g>
+
           <!-- ============ a mouse trap with cheese, by a mouse hole in the wall ============ -->
           <g id="trap" class="thing" data-thing="trap" data-hint-y="700">
             <rect class="hit" x="960" y="660" width="240" height="170" />
@@ -521,6 +534,8 @@
               <use class="wish-icon" data-wish="berries" href="#icon-berries" opacity="0" />
               <!-- the tree, with someone hungry under it -->
               <use class="wish-icon" data-wish="tree" href="#icon-tree" opacity="0" />
+              <!-- the hen's egg, up on the wall -->
+              <use class="wish-icon" data-wish="hen" href="#icon-hen" opacity="0" />
               <!-- sleep in the doghouse -->
               <use class="wish-icon" data-wish="doghouse" href="#icon-doghouse" opacity="0" />
             </g>
@@ -610,6 +625,7 @@
   <script src="bird.js"></script>
   <script src="bowl.js"></script>
   <script src="cuckoo.js"></script>
+  <script src="hen.js"></script>
   <script src="things.js"></script>
   <script src="nap.js"></script>
   <script src="wet.js"></script>

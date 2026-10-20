@@ -24,6 +24,11 @@
   const BEDTIME_ACTS = ['yawn', 'sit', 'lie'] // at bedtime, all he does left alone: nothing new starts
   const BED_TWINKLE_MS = 1400 // and till then the doghouse twinkles this often
   const GLANCE_NEAR = 900 // on the hour, he looks up at the cuckoo only if he is this near the house (scene units) and free
+  // the mouse over a thing (a desktop): it glows (game.css), and Reksio, if
+  // free, turns to it with an ear up: the kids didn't see what could be
+  // clicked (Adam, 2026-10-20)
+  const NOTICE_GAP_MS = 900 // at most this often, so sweeping the mouse across the yard doesn't spin him
+  const NOTICE_TURN = 60 // he turns to it only if it's more than this far to one side (scene units)
   const CRITTER_CORE = 0.45 // where a critter's tap circle covers a thing or Reksio, the critter wins only this close to its middle (share of the circle): about its drawn size
   const X = Layout.x // per-play offset of a movable thing, scene units
 
@@ -377,6 +382,7 @@
     [/^release$/, () => holdEnd()],
     [/^stop$/, () => !busy && Reksio.stopWalking()],
     [/^evening now$/, () => hurryEvening()],
+    [/^notice (\w+)$/, (m) => notice(m[1])],
   ]
 
   function perform(intent) {
@@ -386,6 +392,19 @@
       if (m) return run(m)
     }
     Debug.check(`known intent: ${intent}`, false)
+  }
+
+  let noticedAt = -Infinity
+  const noticeOk = () => free() && !day.ended && Clock.now() - noticedAt >= NOTICE_GAP_MS
+  /** The mouse is over a thing: if he's free, he turns to it, an ear up. */
+  function notice(name) {
+    if (!noticeOk()) return
+    noticedAt = Clock.now()
+    const x = name === 'bird' ? Bird.perch.x : THINGS[name]?.at()
+    if (x === undefined) return
+    Debug.trace('notice', { name })
+    if (Math.abs(x - Reksio.x) > NOTICE_TURN) Reksio.face(x > Reksio.x ? 1 : -1)
+    Reksio.kit.perk('either', 700)
   }
 
   /** The thing an element is part of: among the things, or the bird when it
@@ -443,6 +462,7 @@
     trap: () => ({ x: (Things.mouse === 'fed' ? 960 : 1000) + X('trap'), r: 110 }),
     tree: () => ({ x: 1600 + X('tree'), r: 120 }),
     berries: () => ({ x: 2330 + X('berries'), r: 110 }),
+    hen: () => ({ x: Things.THINGS.hen.at() + 20, r: 100 }), // by the ladder, wherever it leans now
   }
   const spotEls = {}
 
@@ -512,14 +532,20 @@
     })
   }
 
-  // the mouse over a thing lights up its spot
+  // the mouse over a thing: it glows, its spot lights up, and he notices it
+  // (a finger on a phone has no hover: a touch is a tap)
   $('stage').addEventListener('pointerover', (e) => {
     const thing = thingAt(e.target)
-    if (thing && spotEls[thing.dataset.thing]) spotEls[thing.dataset.thing].classList.add('hover')
+    if (!thing) return
+    thing.classList.add('hover')
+    spotEls[thing.dataset.thing]?.classList.add('hover')
+    if (e.pointerType === 'mouse' && !thing.contains(e.relatedTarget) && noticeOk()) perform(`notice ${thing.dataset.thing}`) // only recorded when he'll answer it
   })
   $('stage').addEventListener('pointerout', (e) => {
     const thing = thingAt(e.target)
-    if (thing && spotEls[thing.dataset.thing]) spotEls[thing.dataset.thing].classList.remove('hover')
+    if (!thing || thing.contains(e.relatedTarget)) return
+    thing.classList.remove('hover')
+    spotEls[thing.dataset.thing]?.classList.remove('hover')
   })
 
   document.addEventListener('contextmenu', (e) => e.preventDefault())
@@ -849,8 +875,8 @@
       spotEls.bird.setAttribute('cx', SPOTS.bird().x)
       spotEls.bird.style.opacity = Bird.flying ? '0' : ''
     }
-    if (spotEls.trap) spotEls.trap.setAttribute('cx', SPOTS.trap().x)
-    for (const n of ['trap', 'tree']) if (spotEls[n]) spotEls[n].style.opacity = Things.ready(n) ? '' : '0'
+    for (const n of ['trap', 'hen']) if (spotEls[n]) spotEls[n].setAttribute('cx', SPOTS[n]().x) // these spots move (the mouse fed, the ladder moved)
+    for (const n of ['trap', 'tree', 'hen']) if (spotEls[n]) spotEls[n].style.opacity = Things.ready(n) ? '' : '0'
     const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
     if (Math.abs(camX - shownCam) > 0.05) {
@@ -882,7 +908,7 @@
   paint()
 
   // this play's layout: move the movable things, hide what isn't in play
-  const GROUPS = { bowl: 'bowl', tap: 'tap', flowers: 'flowers', dig: 'mound', film: 'film', trap: 'trap', tree: 'tree', berries: 'bramble', gate: 'fence' }
+  const GROUPS = { bowl: 'bowl', tap: 'tap', flowers: 'flowers', dig: 'mound', film: 'film', trap: 'trap', tree: 'tree', berries: 'bramble', gate: 'fence', hen: 'hen' }
   for (const [name, id] of Object.entries(GROUPS)) {
     const g = $(id)
     if (Layout.hidden.includes(name)) g.style.display = 'none'

@@ -186,6 +186,15 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .worm-body { fill: none; stroke: #d9837d; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
 @keyframes buzz { from { transform: scaleY(1); } to { transform: scaleY(0.35); } }
 
+/* With a mouse (any, so a touchscreen laptop counts): the hand only over
+   what answers a click, and a thing under the pointer glows round its
+   outline (yard.js adds .hover). Not on a phone, where nothing hovers. */
+@media (any-hover: hover) {
+  .stage { cursor: default; }
+  .thing, #reksio, [data-critter], .spot { cursor: pointer; }
+  #things .thing.hover, #bird.hover { filter: brightness(1.06) drop-shadow(0 0 3px #fffaf0) drop-shadow(0 0 12px rgba(255, 214, 110, 0.95)); }
+}
+
 /* action spots on the ground: stand in one (or tap it) to use the thing */
 .spot { fill: rgba(255, 250, 232, 0.12); stroke: rgba(255, 252, 240, 0.5); stroke-width: 3; stroke-dasharray: 10 8; transition: fill 0.25s ease, stroke 0.25s ease, opacity 0.4s ease; cursor: pointer; }
 .spot.on, .spot.hover { fill: rgba(255, 226, 140, 0.55); stroke: #e9a93a; stroke-dasharray: none; }
@@ -360,6 +369,21 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .squirrel-cheek { fill: #d07a46; stroke: var(--ink); stroke-width: 1.2; }
 .squirrel-paws, .squirrel-feet { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
 #tree.not-yet { pointer-events: none; }
+/* the hen (hen.js) */
+#hen.not-yet { pointer-events: none; }
+.nest { fill: #c99a52; stroke: var(--ink); stroke-width: 3.5; }
+.nest-straw { fill: none; stroke: #8a6230; stroke-width: 2.5; stroke-linecap: round; }
+.ladder-ink { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
+.ladder-wood { fill: none; stroke: #d89b45; stroke-width: 5; stroke-linecap: round; }
+.hen-body { fill: #b8642c; stroke: var(--ink); stroke-width: 3; }
+.hen-wing { fill: #8f4a1f; stroke: var(--ink); stroke-width: 2.5; }
+.hen-tail { fill: #6f3a17; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.hen-comb { fill: var(--red); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.hen-beak { fill: #f2c94c; stroke: var(--ink); stroke-width: 1.8; stroke-linejoin: round; }
+.hen-leg { fill: none; stroke: #e0a13a; stroke-width: 3; stroke-linecap: round; }
+.chick-body { fill: #f7dc5a; stroke: var(--ink); stroke-width: 2.5; }
+.egg { fill: #fbf3e2; stroke: var(--ink); stroke-width: 3; transform-box: fill-box; transform-origin: center; }
+.icon-wall { fill: #9aa792; stroke: var(--ink); stroke-width: 3; }
 
 /* ---- the blackberry bramble ---- */
 .bramble-leaves { fill: #7f9c55; }
