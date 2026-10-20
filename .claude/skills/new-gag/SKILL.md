@@ -79,7 +79,10 @@ chosen one, write down briefly:
   (someone helps him). If it makes a kind real for a prop, that prop's
   `OFFERS` in `layout.js` gains it, and the layout tests follow.
 - **How the child gets to see it.** A tap on a thing (first use), the thing's
-  variation (second use, then about every other: easy to never see), a
+  variation (second use, then about every other: easy to never see; or, as
+  the doghouse nap does, something new on every use after the first: a
+  thing's `run({ extra, n })` knows which use it is, and `nap.js` `next()`
+  draws from a pool without repeats until all have come), a
   left-alone move (`yard.js` `ACTS`; `due: true` makes a once-a-play move
   happen the first time it can), a creature's own timing, or the weather.
   The bowl was first built as a variation only and needed a second round.
@@ -174,7 +177,11 @@ for (precedents: `bird.js`, `bowl.js` and `bramble.js` out of `things.js`,
   into the bramble. Check `Things.holding` or `free()` wherever input or the
   yard acts on him outside `command`.
 - Brief text: an unquoted `: ` inside a YAML string breaks the file. Use a
-  full stop.
+  full stop, and run `main.py validate` right after editing the brief.
+- Every file of moves or things must be loaded by a unit test, at least to
+  check its moves end (`reksio.test.js` loads `antics.js`). `antics.js` had
+  none, and a constant using `k` above the line defining it stopped every
+  gag in the file; only the slow browser suite would have caught it.
 
 - A CSS animation that scales or turns part of an SVG drawing needs
   `transform-box: fill-box; transform-origin: center` (or an explicit
@@ -199,6 +206,13 @@ sheet).
 uv run python main.py look <world> --flags props=bowl --close \
   --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"
 ```
+
+For a pose, a walk or a face rather than a gag, `look` is too slow (about
+one frame per quarter second, so a stride is missed): draw the poses
+straight from `figure.js` (and `Gait.stride` for a step) onto a scratch
+page with `Figure.mount`, a row per pose or per point of the stride, and
+screenshot it with Playwright (`channel="chrome"`). Put film frames beside
+it to compare.
 
 Read `looks/latest/sheet.jpg`, then single frames for detail
 (`looks/latest/frames/`, times in `look.json`). Check that each beat reads
