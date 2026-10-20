@@ -13,6 +13,7 @@ test_every_*_is_tested fails until you do.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 from collections.abc import Iterator
@@ -318,6 +319,46 @@ class TestThings:
         assert abs(s["reksio"]["x"] - y.page.evaluate("Layout.MIN_X + 100")) < 5, (
             "the waiting walk never ran"
         )
+
+
+class TestNap:
+    """A nap in the doghouse: the first plain, each after with something on
+    top, all four before any comes again (nap.js)."""
+
+    def test_each_nap_after_the_first_brings_something_new(
+        self, yard: callable
+    ) -> None:
+        y = open_for_thing(yard, "doghouse")
+        for _ in range(5):
+            y.run("yardGame.use('doghouse')")
+            y.settled()
+        naps = re.findall(
+            r'nap \{"variation":(null|"\w+")\}', y.page.evaluate("yardGame.trace()")
+        )
+        assert naps[0] == "null", naps
+        assert sorted(naps[1:]) == sorted(
+            f'"{v}"' for v in y.page.evaluate("Object.keys(Nap.VARIATIONS)")
+        ), naps
+
+    def test_a_first_nap_asked_for_with_extra_has_something_on_top(
+        self, yard: callable
+    ) -> None:
+        y = open_for_thing(yard, "doghouse")
+        y.run("yardGame.use('doghouse', true)")
+        y.settled()
+        assert 'nap {"variation":null}' not in y.page.evaluate("yardGame.trace()")
+
+    def test_he_sleeps_as_himself_in_the_morning_and_at_bedtime(
+        self, yard: callable
+    ) -> None:
+        """One sleeping Reksio: the figure in the doorway, not the old drawing."""
+        y = yard("seed=1&rain=0&creatures=")
+        assert y.page.evaluate("!document.getElementById('nap')"), (
+            "the old drawing is back"
+        )
+        assert y.page.evaluate(
+            "getComputedStyle(document.querySelector('#doghouse g[clip-path]')).display !== 'none'"
+        ), "not asleep in the doorway this morning"
 
 
 class TestBowl:
@@ -852,7 +893,8 @@ class TestScreens:
             return { reksio: rk.height, sunTop: sun.top - stage.top, sunBottom: sun.bottom - stage.top,
                      wallTop: (334 - Painting.VIEW_TOP) / Painting.VIEW_H * stage.height }
         }""")
-        assert got["reksio"] > 115, got  # 98 px with all of the sky showing
+        # bigger than with all of the sky showing (98 px, measured before his ears folded down)
+        assert got["reksio"] > 110, got
         assert 0 <= got["sunTop"] and got["sunBottom"] < got["wallTop"], got
 
     def test_he_can_go_anywhere_on_a_phone(self, yard: callable) -> None:

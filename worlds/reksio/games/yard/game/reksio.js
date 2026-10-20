@@ -153,6 +153,7 @@ const Reksio = (() => {
     if (alive) p = lively(p, alive)
     if (act.w > 0) p = Figure.mix(p, Figure.mix(act.from, act.to, act.k), act.w)
     if (face.w > 0) p = { ...p, face: Figure.mix(p.face, Figure.mix(face.from, face.to, face.k), face.w) }
+    if (alive) p = Figure.perked(p, alive.perk) // over a gesture's pose: an ear goes up whatever he is doing
     p = Figure.vary(p, { head: { tilt: p.head.tilt + add.tilt } })
     if (stretch) p = stretched(p, stretch)
     if (add.kick) p = Figure.vary(p, { nearLeg: [[p.nearLeg[0][0], p.nearLeg[0][1] - add.kick / 2], [p.nearLeg[1][0], p.nearLeg[1][1] - add.kick]] })
@@ -558,6 +559,10 @@ const Reksio = (() => {
   const kit = {
     blend, pause, loose, tell, faceTo, faceOff, actTo, actOff, onFours, upright, settle, rise, basePose, toScene, add, POSES: F, SCALE,
     EASE, EASE_OUT, EASE_IN, OVERSHOOT, random, rnd, rndInt, pickOne,
+    /** Something caught his attention: an ear ('near', 'far', 'both' or
+     * 'either') snaps up for ms, then flops back. On life's clock, not a
+     * blend: relax() can't leave it up. */
+    perk: (which, ms) => life.perk(which, Clock.now(), ms),
     /** How far he is down on all fours (0 upright, 1 on all fours). */
     get fours() { return stance.fours },
     /** A gesture's pose is (still partly) over his own. */

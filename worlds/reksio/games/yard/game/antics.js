@@ -21,15 +21,21 @@
   const GLUM = { smile: -0.7, open: 0 } // what shows of his face under the bowl
   const STEP_OFF = 24 // setting off, he gets this far before his tail yanks him back (his units)
   const STRAIN = 46 // straining hard, this far: the tail stretches like elastic
-  const EFFORT = { eyes: 0, joy: -1, brows: -0.9, smile: -0.4, teeth: 1, open: 0.2 } // eyes screwed shut, teeth gritted
+  const EFFORT = { eyes: 0, joy: -1, brows: -0.9, lines: 1, smile: 0, grit: 1, open: 0 } // eyes screwed shut, teeth clenched
   const STARTLED = { lift: 1, brows: 0.6, o: 1, open: 0.3, smile: 0 }
   const FRIGHT = { lift: 1, brows: 1, open: 0.8, o: 1, smile: 0, eyes: 1, joy: 0 }
   const PROUD = { smile: 1, eyes: 0, joy: 1, lift: 0.3 } // eyes shut, beaming
   const SMUG = { smile: 0.9, eyes: 0.35, joy: 0.3, brows: 0.4 } // eyes half shut, nose up
-  const CROSS = { brows: -1, smile: -0.5, open: 0, eyes: 1, joy: 0 }
   const LOOK_BACK = { turn: 0 } // his head turned to us, the eyes looking back over his shoulder (face.look)
   const k = Reksio.kit
   const { blend, pause, faceTo, faceOff, actTo, actOff, add, rnd, rndInt } = k
+  // the expressions after the films' frames (figure.js POSES): cross at the
+  // cuckoo, worried with his tail caught, puzzled at the hum, content once
+  // he is freed
+  const CROSS = { ...k.POSES.cross.face, joy: 0 }
+  const WORRIED = k.POSES.worried.face
+  const PUZZLED = k.POSES.puzzled.face
+  const CONTENT = k.POSES.content.face
 
   /** Stuck in the bowl: he freezes, arms out, then shakes his head hard to
    * get it off, the bowl clanging. */
@@ -81,20 +87,24 @@
     await blend(add, 'tilt', DROOP * 0.5, ms * 0.4, k.OVERSHOOT)
   }
 
-  /** The bowl is off: a blink of surprise, then delight, and up he gets. */
+  /** Freed (the bowl off, his tail loose): a blink of surprise, then
+   * delight, up he gets, and a moment of contentment. */
   async function freed() {
     faceTo({ lift: 1, brows: 0.6, open: 0.4, o: 1, smile: 0 }, 60)
+    k.perk('both', 500)
     await blend(add, 'tilt', -6, 160, k.EASE_OUT)
     await pause(rnd(400, 650))
     faceTo({ smile: 1, open: 0.7, eyes: 0, joy: 1, teeth: 1 }, 160)
     await blend(add, 'tilt', 0, 200)
     await k.rise(400)
+    await faceTo(CONTENT, 300)
+    await pause(rnd(500, 800))
     await faceOff(250)
   }
 
   /** A suspicious look: eyes narrowed, brows down, head cocked. */
   async function squint(ms = rnd(800, 1200)) {
-    await faceTo({ eyes: 0.35, brows: -0.9, smile: -0.3, open: 0 }, 200)
+    await faceTo({ eyes: 0.35, brows: -0.9, lines: 0.6, small: 0.6, smile: -0.3, open: 0 }, 200)
     await blend(add, 'tilt', 8, 250)
     await pause(ms)
     await blend(add, 'tilt', 0, 200)
@@ -154,12 +164,13 @@
   /** Sitting glum, looking back at his caught tail, until `freed` resolves
    * (a tap's strain may come and go meanwhile: he goes back to it after). */
   async function sulk() {
-    await lookBack(true, 400, { ...GLUM, eyes: 0.7 })
+    await lookBack(true, 400, WORRIED)
   }
 
   /** A hum, right behind him: he freezes, eyes wide, and slowly looks round. */
   async function hearsBee() {
-    await Promise.all([actOff(150), faceTo({ ...FRIGHT, open: 0.15, look: 0 }, 90)])
+    k.perk('either', 1800) // an ear goes up before he dares look
+    await Promise.all([actOff(150), faceTo({ ...PUZZLED, look: 0 }, 90)]) // what was that?
     blend(add, 'tilt', -6, 150)
     await pause(rnd(700, 900)) // frozen
     await lookBack(true, 700, FRIGHT) // slowly…
@@ -170,6 +181,7 @@
    * `far` ahead on his feet. */
   async function leapFright(far = 150) {
     faceTo({ ...FRIGHT, look: 0 }, 60)
+    k.perk('both', 900)
     await Promise.all([k.settle('stand', 140), actTo(Figure.vary(k.POSES.armsWide, { face: FRIGHT }), 140, k.OVERSHOOT, true)])
     Sound.hop()
     const going = Reksio.walkTo(Reksio.x + Reksio.facing * far)

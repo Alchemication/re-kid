@@ -119,6 +119,12 @@ describe('a phrase of music', () => {
     assert.equal(Idle.phraseOk({ playing: false, raining: false, sinceLast: gap - 1 }), false)
   })
 
+  it('left alone, comes only after a long quiet', () => {
+    assert.equal(Idle.phraseOk({ playing: false, raining: false, sinceLast: gap, alone: true }), false)
+    assert.equal(Idle.phraseOk({ playing: false, raining: false, sinceLast: Idle.LONG_QUIET_MS, alone: true }), true)
+    assert.ok(Idle.LONG_QUIET_MS > gap)
+  })
+
   it('never starts over music already playing, or in the rain', () => {
     assert.equal(Idle.phraseOk({ playing: true, raining: false, sinceLast: Infinity }), false)
     assert.equal(Idle.phraseOk({ playing: false, raining: true, sinceLast: Infinity }), false)

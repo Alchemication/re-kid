@@ -96,8 +96,10 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   (2026-10-13). The note-by-note oom-pah with three themes taking turns
   played all day and wore on a grown-up (Adam: "repeated constantly does get
   a bit annoying"; he heard no copy of the theme in its hook). Now a morning
-  take, a phrase after something new at most every 40 s, a lullaby; left
-  alone, the yard's own sounds. The music no longer thins and fills with the
+  take, a phrase after something done at most every 25 s (and one anyway
+  after 50 s of quiet as he potters about alone), a lullaby. It began as a
+  phrase only after something new, at most every 40 s; Adam found too many
+  moments quiet (2026-10-19). The music no longer thins and fills with the
   play, and the in-key touches play only between takes (each take has its
   own key). Made with ElevenLabs **Music v1**, which beat v2 and v2.5 by
   Adam's ear for this retro cartoon feel, from a wording that names the

@@ -51,6 +51,8 @@
   /** Lap from a bowl: quick little dips with the tongue out, n times. */
   async function lap(n) {
     await onFours()
+    faceTo(F.eager.face, 120) // eager, mouth open, before the first lap
+    k.perk('far', 400)
     await actTo(headDown(22), 220, EASE_OUT)
     faceTo({ tongue: 0.8, open: 0.3, ...(random() < 0.5 ? { eyes: 0, joy: -1 } : {}) }, 120)
     for (let i = 0; i < n; i++) {
@@ -106,6 +108,7 @@
 
   /** Look up at the sky (or the bird) for a moment. */
   async function lookUp(ms = rnd(900, 1800)) {
+    k.perk('either', ms)
     if (random() < 0.5) faceTo({ lift: 1, open: 0.3, o: 0.6, smile: 0 }, ms * 0.2) // wonder
     await blend(add, 'tilt', rnd(-28, -18), ms * 0.2)
     await pause(ms * 0.6)
@@ -188,6 +191,7 @@
   /** Watch something that moves: turn to it and follow it with the head for
    * ms. where() returns its current {x, y} (or null once it's gone). */
   async function watch(where, ms = rnd(1500, 3000)) {
+    k.perk('either', ms)
     const end = Clock.now() + ms
     while (Clock.now() < end && !k.setOff) {
       const p = where()
@@ -247,6 +251,7 @@
    * backwards. */
   async function startle() {
     Sound.yelp()
+    k.perk('both', 700)
     const back = Reksio.facing > 0 ? -60 : 60
     Reksio.walkTo(Reksio.x + back)
     Reksio.face(back > 0 ? -1 : 1) // keep facing the thing that startled him
@@ -393,6 +398,7 @@
     return Figure.vary(p, {
       head: { tilt: -4 - 10 * size, turn: 0.1 },
       face: { eyes: 0, joy: 1, open: 0.45 + 0.55 * size, smile: 0.1, teeth: 0, tongue: size > 0.8 ? 0.4 : 0 },
+      ears: F.stand.ears, // sleepy, not alert: the arms of a cheer, not its ears
     })
   }
 

@@ -9,10 +9,10 @@ const { fakeSound } = require('./fakes')
 
 const DT = 1 / 60
 
-function reksio() {
+function reksio(extra = []) {
   const { Sound, Music } = fakeSound()
   const noticed = [] // what the game heard he did
-  const page = load(['debug.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js'], { query: '?seed=1', dom: true, globals: { Sound, Music } })
+  const page = load(['debug.js', 'figure.js', 'life.js', 'gait.js', 'reksio.js', 'gestures.js', ...extra], { query: '?seed=1', dom: true, globals: { Sound, Music } })
   const R = page.get('Reksio')
   R.keepBetween(380, 3650)
   R.listen((what) => noticed.push(what))
@@ -160,6 +160,20 @@ describe('every gesture', () => {
       assert.equal(await r.walk(r.R.x + 200), true, `${name}: could not walk off`)
     }
   })
+})
+
+describe('the bigger gags\' moves (antics.js)', () => {
+  // the ones that show his expressions; each may end sitting, but must end
+  const ANTICS = { glare: [], hearsBee: [], strain: [0.5], sulk: [], freed: [], squint: [500] }
+  for (const [name, args] of Object.entries(ANTICS)) {
+    it(`${name} ends`, async () => {
+      const r = reksio(['antics.js'])
+      let over = false
+      r.R[name](...args).then(() => (over = true))
+      for (let i = 0; i < 40 && !over; i++) await r.page.advance(250)
+      assert.ok(over, `${name} never ended`)
+    })
+  }
 })
 
 describe('yawning', () => {

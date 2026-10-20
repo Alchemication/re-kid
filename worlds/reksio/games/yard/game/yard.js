@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -80,12 +80,10 @@
       const drawn = n === 2 || (n > 2 && random() < 0.5)
       const extra = forceExtra ?? drawn
       Debug.trace('use', { name, n, extra })
-      await Debug.ignoreCut(thing.run({ extra }), `use ${name}`) // cut short: still counts
+      await Debug.ignoreCut(thing.run({ extra, n }), `use ${name}`) // cut short: still counts
       const { first } = day.did(name)
-      if (first) {
-        Music.react.done()
-        phraseAfterNew()
-      }
+      if (first) Music.react.done()
+      if (!day.dusk) phraseAfter() // in the evening the lullaby is coming
       if (first && !pending) await Debug.ignoreCut(Reksio.hop(), 'hop of joy')
     } finally {
       busy = false
@@ -301,9 +299,11 @@
     Sky.night()
     Music.evening(eveningRandom) // sent to bed before the lullaby began: now (once a play)
     await wait(1600)
+    let stopNap = () => {}
     if (await Reksio.walkTo(DOOR.x)) {
       Sound.knock()
       await Reksio.duck(true)
+      stopNap = Nap.asleep({ snoring: false, smiling: true }) // asleep in the doorway, smiling, as the picture closes
     }
     await wait(700)
     const iris = $('iris')
@@ -319,6 +319,7 @@
       }
       Clock.after(0, close)
     })
+    stopNap()
     $('supper').classList.remove('served') // behind the closed picture: no steam rising for nobody
     $('again').hidden = false // for the grown-up: a new morning, held
   }
@@ -617,7 +618,7 @@
   const idleFor = () => (Clock.now() - lastTap) / 1000
 
   const ACTS = {
-    wish: { weight: 2, ok: () => wishFor() && Clock.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
+    wish: { weight: 2, quiet: true, ok: () => wishFor() && Clock.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
     sniff: { weight: 5, run: () => Reksio.sniff() }, // he sniffs about a lot (Adam)
     wander: {
       weight: 3,
@@ -669,9 +670,9 @@
     },
     biteTail: { weight: 1, run: () => Reksio.biteTail() },
     // resting, the longer he's left alone: sit and watch, lie down, nap
-    sit: { weight: 3, ok: () => Idle.restOk('sit', idleFor()), run: () => Reksio.sit() },
-    lie: { weight: 3, ok: () => Idle.restOk('lie', idleFor()), run: () => Reksio.lieDown() },
-    nap: { weight: 4, ok: () => Idle.restOk('nap', idleFor()) && !Weather.raining, run: () => Reksio.nap() },
+    sit: { weight: 3, quiet: true, ok: () => Idle.restOk('sit', idleFor()), run: () => Reksio.sit() },
+    lie: { weight: 3, quiet: true, ok: () => Idle.restOk('lie', idleFor()), run: () => Reksio.lieDown() },
+    nap: { weight: 4, quiet: true, ok: () => Idle.restOk('nap', idleFor()) && !Weather.raining, run: () => Reksio.nap() },
     howl: { weight: 1, ok: () => day.count >= 1, run: () => Reksio.howl() },
     fly: {
       // the fly is close: watch it, and sometimes pounce
@@ -727,10 +728,11 @@
   const phraseRandom = Debug.random('phrase-music') // which phrase: drawn only when one plays
   let lastPhrase = -Infinity
 
-  /** Something new was done: a phrase of music, if it is time for one (idle.js). */
-  function phraseAfterNew() {
+  /** Something was done (alone: a left-alone move): a phrase of music, if
+   * it is time for one (idle.js). */
+  function phraseAfter(alone = false) {
     const now = Clock.now()
-    if (!Idle.phraseOk({ playing: Music.playing, raining: Weather.raining, sinceLast: now - lastPhrase })) return
+    if (!Idle.phraseOk({ playing: Music.playing, raining: Weather.raining, sinceLast: now - lastPhrase, alone })) return
     if (!Music.phrase(phraseRandom)) return // no sound yet
     lastPhrase = now
     Debug.trace('phrase', {})
@@ -824,6 +826,7 @@
     if (name === 'wish') firstWish = false
     acting = true
     Debug.trace('act', { name })
+    if (!day.dusk && !ACTS[name].quiet) phraseAfter(true) // quiet a long while: a phrase as he potters about (not over a rest or a thought bubble)
     return Debug.ignoreCut(Promise.resolve().then(() => ACTS[name].run()), `act ${name}`)
       .finally(() => {
         acting = false
@@ -906,7 +909,6 @@
   // ------------------------------------------------------------ the morning
 
   const SUNRISE_MS = 4500 // the sun comes up as he wakes
-  const SNORE_MS = 1700 // asleep, a snore and a Z from the door this often
   const morningRandom = Debug.random('morning-music') // the waking's own: the tune, how many yawns
   const eveningRandom = Debug.random('evening-music') // which lullaby
   let stopSnoring = () => {}
@@ -915,22 +917,7 @@
   function beginMorning() {
     acting = true // nothing left-alone happens while he sleeps or wakes
     Sky.dawn()
-    const door = Things.DOOR
-    const fellAsleep = Clock.now()
-    // a slow breath, every frame, and a snore with a Z at the top of each
-    const stopBreathing = Clock.every(0, () => {
-      const t = (Clock.now() - fellAsleep) / SNORE_MS
-      Things.napInDoor(true, (1 - Math.cos(2 * Math.PI * t)) / 2)
-    })
-    const stopZs = Clock.every(SNORE_MS, () => {
-      Sound.snore() // silent until a tap lets sound play (sound.js)
-      Reksio.floatZ({ x: door.x + 26, y: door.y - 44 })
-    })
-    stopSnoring = () => {
-      stopBreathing()
-      stopZs()
-      Things.napInDoor(false)
-    }
+    stopSnoring = Nap.asleep()
     Clock.after(Layout.wakeAfter * 1000, () => wake('by himself'))
   }
 

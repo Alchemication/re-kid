@@ -46,7 +46,7 @@ too good to leave. What Adam does in play still feeds it, and Krecik's
 scene:
 
 - **Adam listens to the yard's new music** (built 2026-10-13: takes in
-  `tunes.yaml`, phrases after something new). To judge in play: the level
+  `tunes.yaml`, phrases after something done, or a long quiet). To judge in play: the level
   against the effects (`VOLUME`, `TAKE_VOLUME` in music.js), how often
   phrases come (`PHRASE_GAP_MS` in idle.js), whether five phrases is
   enough variety, the morning (two takes: more through `new-music`), the
@@ -61,6 +61,16 @@ scene:
     layout rule: the fly and the spider out together).
   - *Help:* the bird drops a twig from its nest; Reksio fetches it back up
     to the wall.
+- **More variety in repeats** (Adam, 2026-10-19: "each encounter should
+  be a bit random and different"). Built: the doghouse nap, where every
+  nap after the first brings one of four things on top, all before any
+  repeats (`nap.js`), and one sleeping Reksio in the morning, on a tap and
+  at bedtime. Next, each a `new-gag` run, the things Eliot goes back to
+  first: a pool of 3–4 variations per thing, drawn without repeats; then
+  an in-world hint that a thing still has something new (his thought
+  bubble, an ear perking towards it), never a marker or a count; then the
+  fly and bee a little more often. Keep the yard quiet: variety in each
+  thing before more things at once.
 - The yard's items under "Alongside" and "Later" below wait with it.
 
 ## Alongside, when working nearby
@@ -76,25 +86,33 @@ scene:
   side with Sportowiec 142 s and 318 s, Kompan 70 s and 135 s and Aktor
   240 s (2026-10-18), ours reads as a generic rabbit-dog sticker: Adam's
   wife asked why he looks so weird. In `figure.js`, by payoff:
-  1. Ears: short, wide flaps about a third of the head's height, the white
-     one standing, the brown one folded over. Ours are long and curved,
-     like a rabbit's.
-  2. A snout at three-quarter view: the films' muzzle pushes past the
-     head's outline with the nose on its tip; ours grows only side-on,
-     and his rest pose turns a third of the way (`turn: 0.35`). Eyes
-     closer together and nearer the nose.
-  3. A bigger face: a mouth up to half the face, a big red open grin,
-     eyebrow lines that act. Ours has wide-set dots and a small smile.
-  4. A curve through his rest pose and gestures: one hip out, weight on
-     one leg, leaning. Ours stands straight with parallel legs.
-  5. Mitten hands with a thumb when he gestures (Kompan 70 s); the head
-     running into the body, no visible neck; the brown as one band from
-     round his eye up into the folded ear. Correct `world.yaml`'s
-     "limbs plain tubes": true of his feet, not his hands.
-  6. No painted texture on Reksio: the films put clean, flat characters
-     over textured backgrounds. Film grain is another matter: it is in
-     the print, over everything, him too (`filmlook.js`, Adam,
-     2026-10-18).
+  1–3. Built 2026-10-18, for Adam to judge in play: shorter, wider ears,
+     the brown one folded as two flaps; the snout out at three-quarter
+     view; eyes close together over the nose; a wider smile and a grin
+     up to half his face. Both ears fold at rest; one or both snap up
+     when he notices something (watching, looking up, the bee, a fright,
+     now and then on a glance; `kit.perk`), as in the films. The face
+     (2026-10-19): a taller dome with the eyes low on it, lids that
+     come down and slope with the brows, brows always shown, forehead
+     creases, a small mouth, clenched teeth; five expressions after
+     Adam's frames (puzzled, eager, worried, content, cross: POSES in
+     figure.js), now in the yard's moments: puzzled at the bee's hum,
+     clenched teeth straining and worried sulking in the bramble,
+     content once freed, eager before lapping, cross at the cuckoo.
+     The head is pear-shaped and tall, with a short, deep muzzle and no
+     neck; a smaller tan patch; mitten hands with a thumb. For Adam to
+     judge in play.
+  4. Built 2026-10-19, for Adam to judge: a thinner line, the same all
+     over (`LINE` in figure.js), and standing at ease: leaning back, chin
+     up, weight on the back leg. The rigid bean body caps how far the
+     curve can go; a body that bends is the next step if it still reads
+     stiff.
+  5. Built 2026-10-19 (see 1–3).
+  6. Once redrawn, look at him at phone size: if the film grain still
+     makes his big white areas look dirty, lower `GRAIN_ALPHA` in
+     `filmlook.js` for the whole picture. The grain stays on him too: it
+     is in the print, over everything (Adam, 2026-10-18), and his fills
+     are already flat.
 
   Check each with a `look --close` sheet next to the same film frames,
   and the `"TestGestures or TestGettingUp"` slice. Also known: his

@@ -16,7 +16,7 @@ const Gait = (() => {
     // speed in scene units/s; cadence in stride radians/s; stride, lift and
     // arm swing in his own units; bob: how much he rises and falls; fours:
     // upright (0) or on all fours (1)
-    walk: { name: 'walk', speed: 250, cadence: 11, stride: 12, lift: 9, swing: 9, bob: 3, fours: 0 },
+    walk: { name: 'walk', speed: 250, cadence: 11, stride: 18, lift: 19, swing: 15, bob: 6, fours: 0 },
     // a gallop: about four strides a second, a hop in each (hop: how high)
     run: { name: 'run', speed: 600, cadence: 26, stride: 22, lift: 14, swing: 20, bob: 1, hop: 14, fours: 1 },
     // nose down on all fours, sniffing as he goes
@@ -26,6 +26,17 @@ const Gait = (() => {
   const RUN_FOR_JOY = [220, 0.3] // …and from this long, this share of them too: he's an energetic dog
   const SNIFF_TRIP = [300, 0.2] // trips shorter than this, this share are a sniffing trot
   const PLAIN = { lift: 1, swing: 1, bob: 1, tilt: 0 } // a walk's swagger, as is
+  // walking upright, the films' springy walk (Adam's frame of him carrying
+  // a ladder, 2026-10-19): knees well bent, the back foot kicked up behind,
+  // heel high, as the leg comes through; his body upright, head high, nose
+  // up, nodding with every step. Legs under his hips, not his at-ease stance.
+  const WALK_LEGS = { nearLeg: [[12, -34], [10, 0]], farLeg: [[2, -34], [0, 0]] }
+  const LEAN = 2 // how far forward his chest and head lean, walking (his units): barely
+  const SWAY = 2 // his chest's sway with each step
+  const NOD = 4 // his head's nod with each step (degrees)
+  const NOSE_UP = -5 // his head held high, walking (degrees)
+  const KNEE_UP = 1 // a lifting leg's knee comes forward this much of its lift…
+  const HEEL_KICK = 1.3 // …and, as it leaves the ground, its foot kicks up behind this much
 
   /** Which gait for a trip of dist: a run for a long way (and some middling
    * ways, for joy), now and then a sniffing trot for a short one, otherwise
@@ -65,26 +76,35 @@ const Gait = (() => {
    */
   function stride(p, { gait: g, phase, amount, fours, swagger: sw = PLAIN }) {
     const lift0 = g.lift * sw.lift
-    const limb = (pair, offset, lift, swing = g.stride) => {
-      const out = Math.sin(phase + offset) * swing * amount
-      const up = Math.max(0, Math.cos(phase + offset)) * lift * amount
-      return [[pair[0][0] + out * 0.6, pair[0][1] - up * 0.6], [pair[1][0] + out, pair[1][1] - up]]
+    const limb = (pair, offset, lift, swing = g.stride, knee = 0, kick = 0) => {
+      const a = phase + offset
+      const out = Math.sin(a) * swing * amount
+      const up = Math.max(0, Math.cos(a)) * lift * amount
+      const back = Math.max(0, -Math.sin(a)) * up * kick // still behind him as it lifts: the heel kicks up
+      return [[pair[0][0] + out * 0.6 + up * knee, pair[0][1] - up * 0.6], [pair[1][0] + out - back, pair[1][1] - up - back]]
     }
     // going somewhere, he looks where he goes: his head turns side-on
     p = Figure.vary(p, { head: { turn: p.head.turn + (0.85 - p.head.turn) * Math.min(1, amount * 1.5), tilt: p.head.tilt + sw.tilt * amount } })
-    if (!fours) {
-      // upright: legs in turn, arms swinging against them
-      return Figure.vary(p, {
-        nearLeg: limb(p.nearLeg, 0, lift0), farLeg: limb(p.farLeg, Math.PI, lift0),
-        nearArm: limb(p.nearArm, Math.PI, 0, g.swing * sw.swing), farArm: limb(p.farArm, 0, 0, g.swing * sw.swing),
-      })
-    }
+    if (!fours) return walking(p, { g, phase, amount, sw, limb, lift0 })
     if (g === GAITS.run) return gallop(p, phase, amount)
     // on all fours at a trot: diagonal pairs together; sniffing, nose down
     if (g === GAITS.sniff) p = Figure.vary(p, { head: { x: F.sniff.head.x, y: F.sniff.head.y, tilt: F.sniff.head.tilt }, face: { eyes: 0.5, brows: 0.3 } })
     return Figure.vary(p, {
       nearLeg: limb(p.nearLeg, 0, lift0), farLeg: limb(p.farLeg, Math.PI, lift0),
       nearArm: limb(p.nearArm, Math.PI, lift0), farArm: limb(p.farArm, 0, lift0),
+    })
+  }
+
+  /** Upright: legs in turn under his hips, arms swinging against them, his
+   * body leaning in and his head nodding with each step. */
+  function walking(p, { g, phase, amount, sw, limb, lift0 }) {
+    const legs = Figure.mix({ nearLeg: p.nearLeg, farLeg: p.farLeg }, WALK_LEGS, Math.min(1, amount * 1.5))
+    const step = Math.sin(phase * 2) // twice a stride: once a step
+    return Figure.vary(p, {
+      nearLeg: limb(legs.nearLeg, 0, lift0, g.stride, KNEE_UP, HEEL_KICK), farLeg: limb(legs.farLeg, Math.PI, lift0, g.stride, KNEE_UP, HEEL_KICK),
+      nearArm: limb(p.nearArm, Math.PI, 0, g.swing * sw.swing), farArm: limb(p.farArm, 0, 0, g.swing * sw.swing),
+      chest: [p.chest[0] + (LEAN + SWAY * step) * amount, p.chest[1]],
+      head: { x: p.head.x + LEAN * amount, tilt: p.head.tilt + (NOSE_UP + NOD * step) * amount },
     })
   }
 

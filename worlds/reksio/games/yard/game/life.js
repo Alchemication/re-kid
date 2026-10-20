@@ -3,7 +3,9 @@
 // face the viewer, shifts how he stands (hands on hips, a paw on his chin,
 // scratching his head), and his face changes with his mood. Here he also
 // blinks, his eyes dart before his head follows, and his ears and tail swing
-// after his body and settle.
+// after his body and settle. When something catches his attention an ear
+// snaps straight up, holds, and flops back (perk: Kompan 70 s, 74 s); left
+// alone, now and then a glance perks one, as if he heard something.
 //
 // Pure: step() is told the time and what he is doing, and says what to add
 // to his pose; reksio.js applies it. Nothing here waits or draws. Its own
@@ -32,6 +34,12 @@ const Life = (() => {
   // per unit of his head's speed (degrees per unit/s), and how far they may
   // swing (degrees)
   const SPRING = { k: 170, c: 9, drag: 0.06, max: 30 }
+  // an ear perking up (0 folded, 1 up): stiff and springy, so it snaps up a
+  // little past straight and wobbles, and flops back down with a bounce
+  const PERK = { k: 420, c: 15, max: 2 }
+  const PERK_CHANCE = 0.2 // the chance a glance, left alone, perks an ear…
+  const PERK_S = [0.7, 1.5] // …for this long
+  const EARS = { near: [0], far: [1], both: [0, 1] } // which ears a perk raises; 'either' takes turns (no random draw)
 
   const pick = (random, list) => list[Math.floor(random() * list.length)]
   const between = (random, [lo, hi]) => lo + random() * (hi - lo)
@@ -60,9 +68,12 @@ const Life = (() => {
     s.standAt = t + between(s.random, STAND_S)
   }
 
-  function newGlance(s, t) {
+  function newGlance(s, t, free) {
     const m = MOODS[s.mood]
     s.glanceAt = t + between(s.random, GLANCE_S)
+    const hears = s.random() < PERK_CHANCE // both drawn either way, so the stream doesn't shift
+    const holdS = between(s.random, PERK_S)
+    if (hears && free) perk(s, 'either', t, holdS)
     if (s.random() < TO_VIEWER) {
       s.turnTo = 0 // face the child…
       s.viewerUntil = t + between(s.random, TO_VIEWER_S) // …with a grin, for a moment
@@ -87,6 +98,21 @@ const Life = (() => {
     const again = since - BLINK_MS * 1.6
     if (s.doubleBlink && again >= 0 && again < BLINK_MS) return Math.sin((Math.PI * again) / BLINK_MS)
     return 0
+  }
+
+  /** Raise `which` ear ('near', 'far', 'both' or 'either') until t + holdS. */
+  function perk(s, which, t, holdS) {
+    const ears = which === 'either' ? [(s.nextEar = 1 - s.nextEar)] : EARS[which]
+    for (const i of ears) s.perkUntil[i] = Math.max(s.perkUntil[i], t + holdS)
+  }
+
+  /** Each ear springs towards up while perked, and back down after. */
+  function perkSprings(s, t, dt) {
+    s.perk = s.perk.map((e, i) => {
+      const to = t < s.perkUntil[i] ? 1 : 0
+      const moved = spring({ x: e.x - to, v: e.v }, 0, dt, PERK)
+      return { x: to + moved.x, v: moved.v }
+    })
   }
 
   /** The ears and tail trail behind his head as it moves, by how fast it
@@ -127,7 +153,7 @@ const Life = (() => {
     const t = nowMs / 1000
     if (t >= s.moodAt) newMood(s, t)
     if (ctx.free && t >= s.standAt) newStand(s, t)
-    if (t >= s.glanceAt) newGlance(s, t)
+    if (t >= s.glanceAt) newGlance(s, t, ctx.free)
     if (t >= s.blinkAt) startBlink(s, t)
     moodFace(s, t, dt)
     s.standK = ease(s.standK, 1, dt, 0.18)
@@ -135,12 +161,14 @@ const Life = (() => {
     s.faceW = ease(s.faceW, ctx.free ? 1 : ctx.walking ? 0.6 : 0, dt, 0.15)
     turnHead(s, dt)
     swing(s, dt, ctx.head)
+    perkSprings(s, t, dt)
     return {
       mood: s.mood,
       stand: s.stand, standFrom: s.standFrom, standK: s.standK, standW: s.standW,
       turn: s.turn, tilt: s.tilt, look: s.look, blink: blinkNow(s, t),
       face: { ...s.face }, faceW: s.faceW,
       ears: [s.ears[0].x, s.ears[1].x], tail: s.tail.x,
+      perk: [s.perk[0].x, s.perk[1].x],
     }
   }
 
@@ -151,7 +179,10 @@ const Life = (() => {
    *          (where his head is, along the way he faces, in his own units) }
    *   returns: { mood, stand, standFrom, standK, standW (how much of that way
    *              of standing shows), turn, tilt, look, blink, face, faceW,
-   *              ears: [swing, flop], tail }
+   *              ears: [swing, flop], tail, perk: [near, far] (0 down,
+   *              1 up: Figure.perked) }
+   * perk(which, now, holdMs) raises an ear ('near', 'far', 'both' or
+   * 'either') for holdMs: something caught his attention.
    */
   function create(random) {
     const s = {
@@ -163,8 +194,13 @@ const Life = (() => {
       viewerUntil: 0, blinkAt: between(random, BLINK_S), blinkStart: -1, doubleBlink: false,
       standW: 0, faceW: 0, face: { ...MOODS.happy.face },
       head: null, ears: [{ x: 0, v: 0 }, { x: 0, v: 0 }], tail: { x: 0, v: 0 },
+      perk: [{ x: 0, v: 0 }, { x: 0, v: 0 }], perkUntil: [0, 0], nextEar: 1,
     }
-    return { step: (dt, nowMs, ctx) => step(s, dt, nowMs, ctx), get mood() { return s.mood } }
+    return {
+      step: (dt, nowMs, ctx) => step(s, dt, nowMs, ctx),
+      perk: (which, nowMs, holdMs) => perk(s, which, nowMs / 1000, holdMs / 1000),
+      get mood() { return s.mood },
+    }
   }
 
   return { MOODS, create, spring }

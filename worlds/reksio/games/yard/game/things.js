@@ -3,9 +3,10 @@
 // The bowl, the tree, the bramble and the cuckoo clock have files of their
 // own (bowl.js, tree.js, bramble.js, cuckoo.js).
 //
-// Each thing's run({ extra }) plays its action; `extra` asks for its
-// variation. A toddler loves exact repetition, so a repeat keeps the same core
-// and only now and then adds something on top (yard.js decides when).
+// Each thing's run({ extra, n }) plays its action; `extra` asks for its
+// variation, and `n` is which use this is. A toddler loves exact repetition,
+// so a repeat keeps the same core and only now and then adds something on
+// top (yard.js decides when; the doghouse nap, every time after the first).
 //
 // The mouse: some plays, a mouse trap baited with cheese stands by a mouse
 // hole in the wall. After a while a mouse comes out, wants the cheese, and
@@ -13,7 +14,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Figure, Bird, Cuckoo */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -316,46 +317,6 @@ const Things = (() => {
     Clock.after((Layout.mouseAt ?? rnd(...MOUSE_AT_S)) * 1000, mouseComesOut)
   }
 
-  // ------------------------------------------------------------ asleep in the doorway
-
-  // Reksio asleep inside his doghouse, just seen: his head on his paws in
-  // the doorway, front view, clipped to the dark door. Drawn by figure.js.
-  const DOOR_R = [44, 50] // the door's half-width and half-height, as drawn (index.html)
-  const DOOR_NAP_SCALE = 0.62 // his head fills the lower part of the door
-  let doorNap = null
-
-  function makeDoorNap() {
-    const house = $('doghouse')
-    const clip = document.createElementNS(SVG_NS, 'clipPath')
-    clip.setAttribute('id', 'door-clip')
-    const shape = document.createElementNS(SVG_NS, 'ellipse')
-    for (const [k, v] of Object.entries({ cx: DOOR.x, cy: DOOR.y, rx: DOOR_R[0], ry: DOOR_R[1] })) shape.setAttribute(k, v)
-    clip.appendChild(shape)
-    house.appendChild(clip)
-    const g = document.createElementNS(SVG_NS, 'g')
-    g.setAttribute('clip-path', 'url(#door-clip)')
-    g.setAttribute('pointer-events', 'none')
-    house.appendChild(g)
-    const inner = document.createElementNS(SVG_NS, 'g')
-    inner.setAttribute('transform', `translate(${DOOR.x} ${DOOR.y + DOOR_R[1]}) scale(${DOOR_NAP_SCALE})`)
-    g.appendChild(inner)
-    return { g, draw: Figure.mount(inner) }
-  }
-
-  /** Show him asleep in the doorway (breath: 0 to 1, how far his slow
-   * breath has risen; a snore lifts his head and parts his lips), or not. */
-  function napInDoor(on, breath = 0) {
-    doorNap = doorNap || makeDoorNap()
-    doorNap.g.style.display = on ? '' : 'none'
-    if (!on) return
-    const p = Figure.POSES.doorNap
-    doorNap.draw(Figure.vary(p, {
-      head: { y: p.head.y - 3 * breath, tilt: -3 * breath },
-      chest: [p.chest[0], p.chest[1] - 2 * breath],
-      face: { open: 0.15 * breath },
-    }))
-  }
-
   // ------------------------------------------------------------ things
 
   let held = null // while a gag holds him (the bowl on his head, his tail caught): a tap's answer (yard.js stuckTap)
@@ -373,43 +334,12 @@ const Things = (() => {
   const THINGS = {
     doghouse: {
       at: () => DOOR.x,
-      async run({ extra }) {
+      // a nap in the doorway (nap.js): the first plain, every one after (or
+      // one asked for with extra) with something on top, a different one each time
+      async run({ extra, n }) {
         Sound.knock()
         await Reksio.duck(true)
-        const nap = $('nap')
-        const head = $('nap-head')
-        await Motion.endAt(nap, [{ opacity: 0 }, { opacity: 1 }], { duration: 350 })
-        // the extra: he dreams of a bone, paws twitching
-        const dream = $('dream')
-        if (extra) dream.animate([{ opacity: 0 }, { opacity: 1, offset: 0.15 }, { opacity: 1, offset: 0.85 }, { opacity: 0 }], { duration: 5200 })
-        const zs = ['z1', 'z2', 'z3'].map($)
-        for (let i = 0; i < 3; i++) {
-          Sound.snore()
-          Music.react.snore(i)
-          head.animate(
-            [{ transform: 'scaleY(1)' }, { transform: 'scaleY(1.05) translateY(-2px)', offset: 0.45 }, { transform: 'scaleY(1)' }],
-            { duration: 1700, easing: 'ease-in-out' },
-          )
-          if (extra) {
-            document.querySelectorAll('#nap .paw').forEach((p, k) =>
-              p.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-4px)' }, { transform: 'translateY(0)' }], { duration: 180, delay: 400 + k * 120, iterations: 2 }),
-            )
-          } else {
-            zs.forEach((z, k) =>
-              z.animate(
-                [
-                  { opacity: 0, transform: 'translate(0, 0)' },
-                  { opacity: 1, transform: 'translate(4px, -10px)', offset: 0.3 },
-                  { opacity: 0, transform: 'translate(10px, -34px)' },
-                ],
-                { duration: 1200, delay: 650 + k * 180, easing: 'ease-out' },
-              ),
-            )
-          }
-          await wait(1750)
-        }
-        await wait(300)
-        await Motion.endAt(nap, [{ opacity: 1 }, { opacity: 0 }], { duration: 250 })
+        await Nap.nap(extra || n > 1 ? Nap.next() : null)
         await Reksio.duck(false)
         await Reksio.wakeUp() // out of the doghouse, a big yawn, as in the cartoon
       },
@@ -707,7 +637,7 @@ const Things = (() => {
   }
 
   return {
-    THINGS, DOOR, burst, twinkle, ready, init, napInDoor, stuckTap, supperAt, serveSupper, eatSupper,
+    THINGS, DOOR, burst, twinkle, ready, init, stuckTap, supperAt, serveSupper, eatSupper,
     /** A gag holds him (the bowl on his head, his tail caught): it answers every tap. */
     get holding() { return !!held },
     get stamped() { return stamped },

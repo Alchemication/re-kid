@@ -4,8 +4,8 @@
 //
 // - The morning: a morning take as he wakes.
 // - Through the day, a phrase now and then: the game asks for one (phrase())
-//   when something new is done; when is the game's rule (idle.js phraseOk),
-//   so a child left alone gets the yard's own sounds, not a loop.
+//   when something is done, or after a long quiet; when is the game's rule (idle.js phraseOk),
+//   so a child left alone mostly gets the yard's own sounds, not a loop.
 // - At evening (supper), a lullaby take; a phrase still playing fades out first.
 // - Rain and the sun going down make it quieter.
 // - Actions play along on samples: a xylophone flourish when a new thing is
@@ -137,7 +137,7 @@ const Music = (() => {
     if (!night) playTake('morning', random, bus.ctx.currentTime + 0.15)
   }
 
-  /** A phrase now, after something new (the game decides when: idle.js
+  /** A phrase now, after something done (the game decides when: idle.js
    * phraseOk); true if one started. random: the game's stream for it. */
   function phrase(random) {
     if (!ready || night || current) return false
