@@ -71,6 +71,15 @@ const Layout = (() => {
     return { dayS, hour }
   }
 
+  /** When things happen, in seconds into the play, if the page address
+   * says (else null: their own time): ?mouse-at, the mouse comes out;
+   * ?visitor-at, the tree's visitor; ?hen-at, the hen goes up to lay;
+   * ?mushrooms, the mushrooms come up, rain or not. */
+  function whenFlags(params) {
+    const at = (name) => (params.has(name) ? Number(params.get(name)) : null)
+    return { mouseAt: at('mouse-at'), visitorAt: at('visitor-at'), henAt: at('hen-at'), mushroomsAt: at('mushrooms') }
+  }
+
   /** The kind of day for a draw `u` (0–1), by each kind's chance, unless
    * `asked` names one. */
   function pickDay(u, asked) {
@@ -139,14 +148,11 @@ const Layout = (() => {
   // ?props=trap,bowl picks the props, and ?mouse-at=SECONDS brings the mouse out, likewise
   const asked = listed('props', PROP_POOL)
   if (asked.length) props.splice(0, props.length, ...asked)
-  const mouseAt = params.has('mouse-at') ? Number(params.get('mouse-at')) : null
+  const { mouseAt, visitorAt, henAt, mushroomsAt } = whenFlags(params)
   // the tree's fruit this play (?fruit=apple|plum|nut forces it), and when its visitor comes
   const FRUITS = ['apple', 'plum', 'nut']
   const fruitDrawn = FRUITS[Math.floor(random() * FRUITS.length)]
   const fruit = FRUITS.includes(params.get('fruit')) ? params.get('fruit') : fruitDrawn
-  const visitorAt = params.has('visitor-at') ? Number(params.get('visitor-at')) : null
-  // ?hen-at=SECONDS: when the hen goes up to lay (hen.js)
-  const henAt = params.has('hen-at') ? Number(params.get('hen-at')) : null
   const { dayS, hour } = dayFlags(params)
 
   // props that aren't out this time
@@ -213,7 +219,7 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, mushroomsAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */

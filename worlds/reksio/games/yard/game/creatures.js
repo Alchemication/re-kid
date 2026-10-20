@@ -57,6 +57,10 @@ const Creatures = (() => {
    * one (flies and bees buzz); the silent ones only make small cartoon
    * noises when they do something. */
   const hear = (x, play) => Sound.from(Math.abs(x - world.reksio.x), play)
+  const SNAIL_NOSE = 22 // a snail's nose, ahead of her middle
+  const SNAIL_REACH = 26 // she eats food this close to her nose
+  const SNAIL_BITE_S = 1.3 // a bite this often…
+  const SNAIL_BITES = 6 // …and it's gone after this many
   const WHINE_EVERY_S = 9 // on average, a passing fly whines this often
   const HUM_EVERY_S = 7 // …and a bee hums between flowers this often
   // The fly and the bee are visitors: they turn up a while into the play,
@@ -592,6 +596,9 @@ const Creatures = (() => {
     x: 0, y: GROUND + 20, dir: 1,
     out: false, // has it come out yet
     tucked: false, // hiding in its shell
+    food: null, // a porcino Reksio has put down for her (mushrooms.js): {x, bite(k), done()}
+    bites: 0,
+    biteAt: 0,
     trail: [],
     g: null,
     make() {
@@ -632,6 +639,36 @@ const Creatures = (() => {
         hear(this.x, () => Sound.schlup())
       }
     },
+    /** On along the ground at a snail's pace, leaving her shiny trail. */
+    creep(dt) {
+      this.x += this.dir * 9 * dt
+      if (this.x < 420 || this.x > Layout.MAX_X) this.dir *= -1
+      const last = this.trail[this.trail.length - 1]
+      if (!last || Math.abs(last - this.x) > 4) this.trail.push(this.x)
+      if (this.trail.length > 90) this.trail.shift()
+      this.stalks.setAttribute('transform', `rotate(${Math.sin(world.t * 1.5) * 6} 18 -8)`)
+    },
+    /** Is she at the food (then a bite now and then, and it shrinks)? Turned
+     * towards it if not. */
+    eat() {
+      const f = this.food
+      const nose = this.x + this.dir * SNAIL_NOSE
+      if (Math.abs(f.x - nose) > SNAIL_REACH) {
+        this.dir = f.x > this.x ? 1 : -1
+        return false
+      }
+      if (world.t < this.biteAt) return true
+      this.biteAt = world.t + SNAIL_BITE_S
+      this.bites += 1
+      hear(this.x, () => Sound.nibble())
+      f.bite(1 - this.bites / SNAIL_BITES)
+      if (this.bites >= SNAIL_BITES) {
+        f.done()
+        this.food = null
+        this.bites = 0
+      }
+      return true
+    },
     update(dt) {
       if (!this.out) {
         const since = Weather.sinceRain
@@ -641,14 +678,7 @@ const Creatures = (() => {
       const nose = world.reksio.nose
       if (dist(nose.x, nose.y, this.x, this.y - 10) < 120) this.tuck(true)
       else if (this.tucked && world.t > this.peekAt) this.tuck(false)
-      if (!this.tucked) {
-        this.x += this.dir * 9 * dt // a snail's pace
-        if (this.x < 420 || this.x > Layout.MAX_X) this.dir *= -1
-        const last = this.trail[this.trail.length - 1]
-        if (!last || Math.abs(last - this.x) > 4) this.trail.push(this.x)
-        if (this.trail.length > 90) this.trail.shift()
-        this.stalks.setAttribute('transform', `rotate(${Math.sin(world.t * 1.5) * 6} 18 -8)`)
-      }
+      if (!this.tucked && !(this.food && this.eat())) this.creep(dt) // eating, she stays put
       if (this.trail.length > 1) {
         this.trailPath.setAttribute('d', `M${this.trail[0]} ${this.y + 2} ` + this.trail.map((x) => `L${x} ${this.y + 2}`).join(' '))
       }
@@ -746,8 +776,15 @@ const Creatures = (() => {
     notice(type, x, y) { world.events.push({ type, x, y }) },
     /** The sun has set: the fly and the bee go home, and don't come back. */
     evening() { dusk = true },
-    /** Where the snail is, once it's out. */
-    get snail() { return snail.out ? { x: snail.x, y: snail.y } : null },
+    /** Where the snail is, once it's out, and which way she's heading. */
+    get snail() { return snail.out ? { x: snail.x, y: snail.y, dir: snail.dir } : null },
+    /** Food put down for the snail (a porcino: mushrooms.js): she goes to it
+     * and eats it bite by bite, bite(k) as it shrinks (k: what's left), done() at the end. */
+    feedSnail(food) {
+      snail.food?.done() // one still being eaten: finished, not left half-eaten
+      snail.food = food
+      snail.bites = 0
+    },
     /** A worm that's up out of the ground (for the bird): {x, y, eat()}. */
     get worm() {
       const w = worms.up

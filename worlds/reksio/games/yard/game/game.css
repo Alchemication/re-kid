@@ -383,6 +383,14 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .hen-leg { fill: none; stroke: #e0a13a; stroke-width: 3; stroke-linecap: round; }
 .chick-body { fill: #f7dc5a; stroke: var(--ink); stroke-width: 2.5; }
 .egg { fill: #fbf3e2; stroke: var(--ink); stroke-width: 3; transform-box: fill-box; transform-origin: center; }
+.porcino-cap { fill: #7a4624; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.porcino-stem { fill: #efe2c4; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.agaric-cap { fill: #d23a22; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.agaric-stem { fill: #f6f3ea; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.agaric-dot { fill: #fbf8ef; }
+.basket-body { fill: #c08a45; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.basket-weave { fill: none; stroke: #8a5d28; stroke-width: 2; }
+.basket-handle { fill: none; stroke: var(--ink); stroke-width: 7; stroke-linecap: round; }
 .icon-wall { fill: #9aa792; stroke: var(--ink); stroke-width: 3; }
 
 /* ---- the blackberry bramble ---- */

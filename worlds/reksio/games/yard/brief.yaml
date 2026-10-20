@@ -177,6 +177,13 @@ scenes:
     origin: inspired
     refs: ['world:themes_and_values[0]']
   sound: {text: 'Clucks, a loud ko-dak after laying, wingbeats, a wooden knock as the ladder leans, his steps on the rungs, an eggshell''s crack and a chick''s cheep.', origin: invented}
+- id: mushrooms
+  action: {text: 'After a shower, tap a mushroom: the fly agaric or a porcino.', origin: invented}
+  result:
+    text: After Reksio kompan (1976), where Reksio and the boy go mushroom picking and in the end he finds a huge porcino. A few seconds after a shower clears, three mushrooms come up beside a puddle, a red fly agaric and two porcinos, and the boy's basket stands a little way off. The child chooses which to tap. The fly agaric he sniffs from a distance, backs away from with a frown and shakes his head; later he wags a paw at it, or walks off with a wary look back. He never takes it in his mouth, and nothing is ever eaten by him. A porcino he sniffs, picks gently in his mouth and carries to the basket, sometimes showing it off to the child first or sniffing it blissfully. Once the basket holds three, he shares the next with the snail. He puts it down in front of her and steps back, she hides in her shell, peeks out, and eats it bite by bite. Picked porcinos slowly grow back, up to six a play. Plays without rain have no mushrooms.
+    origin: inspired
+    refs: ['world:themes_and_values[0]']
+  sound: {text: 'Soft pops as they come up, sniffs, a plop into the basket, the snail nibbling.', origin: invented}
 - id: tree
   action: {text: 'Once someone hungry is waiting under it, tap the fruit tree.', origin: invented}
   result:

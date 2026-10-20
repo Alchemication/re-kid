@@ -407,7 +407,55 @@
     await faceOff(200)
   }
 
-  const gestures = { peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
+  // ------------------------------------------------------------ mushrooms (mushrooms.js)
+
+  /** A blissful sniff: eyes shut, a smile, head up, a sigh. */
+  async function bliss() {
+    faceTo({ eyes: 0, joy: 1, smile: 1, small: 0.3 }, 200)
+    await blend(add, 'tilt', -14, 400)
+    await pause(rnd(600, 800))
+    blend(add, 'tilt', 0, 300)
+    await faceOff(300)
+  }
+
+  /** Turned to the child, showing off what he carries: head up, proud. */
+  async function showOff() {
+    faceTo(PROUD, 150)
+    await Promise.all([actTo(Figure.vary(k.basePose(), { head: { turn: 0 } }), 250), blend(add, 'tilt', -8, 250)])
+    k.perk('both', 700)
+    await pause(rnd(700, 900))
+    blend(add, 'tilt', 0, 250)
+    await Promise.all([actOff(250), faceOff(250)])
+  }
+
+  /** Yuck: a sniff he doesn't like. Ears down, a recoil, a head shake: no. */
+  async function yuck() {
+    faceTo({ eyes: 0.4, joy: 0, brows: -0.6, lines: 0.8, small: 1, smile: -0.7 }, 100)
+    await Promise.all([blend(add, 'dy', -10, 120, k.EASE_OUT).then(() => blend(add, 'dy', 0, 160)), blend(add, 'dx', -16, 280, k.EASE_OUT)])
+    for (let i = 0; i < 3; i++) {
+      await blend(add, 'lean', 5, 120)
+      await blend(add, 'lean', -5, 120)
+    }
+    await Promise.all([blend(add, 'lean', 0, 120), blend(add, 'dx', 0, 400), faceOff(250)])
+  }
+
+  /** No, no: a paw raised, wagging, a stern little face. */
+  async function wagFinger() {
+    faceTo({ brows: -0.5, eyes: 0.8, small: 1, smile: -0.3, lines: 0.5 }, 120)
+    const up = (out) => Figure.vary(k.basePose(), { nearArm: [[30, -108], [36 + out, -142]] })
+    for (let i = 0; i < 4; i++) await actTo(up(i % 2 ? -8 : 8), 150)
+    await Promise.all([actOff(200), faceOff(200)])
+  }
+
+  /** Walking off, a wary look back over his shoulder at it. */
+  async function wary() {
+    await lookBack(true, 250, { brows: -0.4, eyes: 0.6, small: 1, smile: -0.3 })
+    await pause(rnd(600, 800))
+    await lookBack(false, 250)
+    await faceOff(200)
+  }
+
+  const gestures = { bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
   Reksio.addGestures(gestures)
 
 })()

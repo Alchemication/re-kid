@@ -35,8 +35,8 @@ function yard(query = '') {
   let ended = false
   const bee = [] // where the bee was sent, and 'free' when let go
   const Creatures = { async beeTo(x, y) { bee.push({ x, y }) }, beeFree() { bee.push('free') } }
-  const Weather = { raining: false }
-  const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'hen.js', 'things.js'], {
+  const Weather = { raining: false, on() {} }
+  const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'hen.js', 'mushrooms.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
     globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {}, noseTipAt() {} }, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
@@ -54,6 +54,7 @@ function yard(query = '') {
     reksio,
     played,
     advance: page.advance,
+    page,
     /** The variations traced so far, by thing. */
     variations() {
       const out = {}
@@ -472,5 +473,39 @@ describe('variations', () => {
     assert.equal(y.variations().tap, undefined)
     await y.use('tap', true, 1)
     assert.equal(y.variations().tap.length, 1)
+  })
+})
+
+describe('mushrooms', () => {
+  /** A yard where the mushrooms have just come up. */
+  async function picking() {
+    const y = yard('mushrooms=0')
+    await y.advance(1500)
+    return { y, M: y.Things.THINGS, page: y }
+  }
+
+  it('come up when asked: two porcinos and a fly agaric, ready to tap', async () => {
+    const { y } = await picking()
+    assert.ok(y.Things.ready('porcino') && y.Things.ready('agaric'))
+  })
+
+  it('a porcino goes into the basket, and the fly agaric is never picked', async () => {
+    const { y } = await picking()
+    await y.use('porcino')
+    await y.use('agaric')
+    assert.ok(y.Things.ready('agaric'), 'the fly agaric is gone')
+    assert.ok(y.Things.ready('porcino'), 'only one of two picked, yet none is left')
+  })
+
+  it('a pick cut short before he has it leaves the porcino there to pick', async () => {
+    const { y } = await picking()
+    const M = y.page.get('Mushrooms')
+    const before = M.porcinos
+    y.reksio.sniff = async () => {
+      throw Object.assign(new Error('cut short'), { name: 'AbortError' })
+    }
+    await y.use('porcino')
+    delete y.reksio.sniff
+    assert.equal(M.porcinos, before, 'a porcino was lost')
   })
 })

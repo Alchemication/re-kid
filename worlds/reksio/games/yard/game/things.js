@@ -16,7 +16,7 @@
 // nothing and flings the cheese to the mouse, who eats it and thanks him, and
 // he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle, Hen */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle, Hen, Mushrooms */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -54,9 +54,13 @@ const Things = (() => {
   // up to peek over it (the yard's edge stays put); the bird he barks at,
   // he tries to fly after,
   // or it lands on his head.
-  const VARIATIONS = { tap: ['spray', 'drips', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer', 'dig', 'gnaw', 'peek'], bird: ['fly', 'head'], hen: Hen.VARIATIONS }
+  const VARIATIONS = { tap: ['spray', 'drips', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer', 'dig', 'gnaw', 'peek'], bird: ['fly', 'head'], hen: Hen.VARIATIONS, ...Mushrooms.VARIATIONS }
   const variety = Debug.random('variety') // its own stream: how often the pools draw depends on taps
   const pools = Object.fromEntries(Object.entries(VARIATIONS).map(([name, names]) => [name, Idle.pool(names, variety)]))
+
+  /** A thing kept in its own file, whose run takes the variation (v) that
+   * things.js draws for it from VARIATIONS. */
+  const varied = (name, thing) => ({ ...thing, run: ({ extra, n }) => thing.run({ v: variation(name, extra, n) }) })
 
   /** Which variation a use of `name` gets: none the first time (unless one
    * is asked for, extra), then one from its pool every time. */
@@ -639,6 +643,7 @@ const Things = (() => {
     bird: {
       at: () => Bird.perch.x - 70,
       face: 1,
+      ready: () => !Bird.flying,
       async run({ extra, n }) {
         if (Bird.flying) return
         if (Bird.friend) return Bird.visit()
@@ -718,13 +723,17 @@ const Things = (() => {
         await Reksio.nod(-14, 700)
       },
     },
-    tree: Tree.thing,
-    hen: { ...Hen.thing, run: ({ extra, n }) => Hen.thing.run({ v: variation('hen', extra, n) }) },
+    tree: { ...Tree.thing, ready: () => Tree.ready },
+    hen: varied('hen', { ...Hen.thing, ready: () => Hen.ready }),
+    // after the rain (mushrooms.js): each a thing of its own, so the child chooses
+    porcino: varied('porcino', Mushrooms.things.porcino),
+    agaric: varied('agaric', Mushrooms.things.agaric),
     berries: Bramble.thing,
     trap: {
       // before: stand so his paws land just short of the trap; after: nose at her hole
       at: () => (mouse === 'fed' ? HOLE.x - 210 : TRAP_X - 60 - PAW_REACH) + X('trap'),
       face: 1,
+      ready: () => mouse === 'wanting' || mouse === 'fed',
       async run({ extra }) {
         if (mouse === 'wanting') return rescue()
         if (mouse === 'fed') return visit(extra)
@@ -772,10 +781,10 @@ const Things = (() => {
     await Reksio.lick()
   }
 
-  /** Can it be used now? The trap only once the mouse is out, the tree once
-   * someone hungry is under it, the bird only while it sits somewhere. */
-  const ready = (name) =>
-    name === 'trap' ? mouse === 'wanting' || mouse === 'fed' : name === 'bird' ? !Bird.flying : name === 'tree' ? Tree.ready : name === 'hen' ? Hen.ready : true
+  /** Can it be used now? Each thing says, if it has a say (its `ready`): the
+   * trap only once the mouse is out, the tree once someone hungry is under
+   * it, the bird only while it sits somewhere… The rest always. */
+  const ready = (name) => THINGS[name]?.ready?.() ?? true
 
   function init({ ended }) {
     isEnded = ended
@@ -786,6 +795,7 @@ const Things = (() => {
     Bramble.init({ effects: { burst }, hold })
     Tree.init({ ended, effects: { burst, twinkle } })
     Hen.init({ ended, effects: { heart } })
+    Mushrooms.init({ ended })
     document.querySelectorAll('.icon-fruit').forEach((u) => u.setAttribute('href', `#fruit-${Layout.fruit}`))
   }
 

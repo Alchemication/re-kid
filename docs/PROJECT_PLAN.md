@@ -71,9 +71,9 @@ scene:
   to fly after it; it lands on his head), the gate (also: digging under
   it, tugging a picket, leaping up to peek over). New (2026-10-20): the
   hen's egg on the wall, fetched with the garden ladder (hen.js; after
-  Reksio i nośna kura), with its own pool. Next gag: the mushrooms after
-  the rain (Adam: the fly agaric sniffed and left; porcinos to the
-  basket by the house, and once it's full some to the snails). Then pools for the props
+  Reksio i nośna kura), with its own pool; the mushrooms after the rain
+  (mushrooms.js; after Reksio kompan: the fly agaric sniffed and left,
+  porcinos to the boy's basket, then shared with the snail). Then pools for the props
   (mound, film, trap, tree, bramble), each a `new-gag` run; then
   an in-world hint that a thing still has something new (his thought
   bubble, an ear perking towards it), never a marker or a count; then the
@@ -129,9 +129,7 @@ scene:
   the yard, as tall as the doghouse's roof (Adam, 2026-10-18: check his
   size against the films). Then one look at each gag as a contact sheet,
   and acting: reactions in each gag, starting with Eliot's favourites.
-- **Code:** `yard.js` is at 1000 lines: split it before the next gag
-  (input and hover, or the morning and bedtime, into their own files).
-  Under `-n 8`, three tests fail now and then and pass alone:
+- **Code:** Under `-n 8`, three tests fail now and then and pass alone:
   `TestRecorder::test_report_saves_and_replays`,
   `test_look.py::test_photographs_a_gesture_until_it_ends` (both start a
   second Chrome) and the meadow's `test_a_tap_on_the_egg_while_waiting`:

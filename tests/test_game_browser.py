@@ -94,6 +94,11 @@ GESTURES = {
     "climb": "Reksio.climb(120, 4).then(() => Reksio.climbDown(4))",
     "climbDown": "Reksio.climb(60, 2).then(() => Reksio.climbDown(2, () => Clock.wait(300)))",
     "aww": "Reksio.aww()",
+    "bliss": "Reksio.bliss()",
+    "showOff": "Reksio.showOff()",
+    "yuck": "Reksio.yuck()",
+    "wagFinger": "Reksio.wagFinger()",
+    "wary": "Reksio.wary()",
     "stretch": "(async () => { Reksio.beginStretch(); await new Promise((r) => setTimeout(r, 600)); await Reksio.endStretch() })()",
 }
 # Reksio's other functions: state, not gestures, or tested through a thing.
@@ -165,6 +170,8 @@ THINGS = [
     "tree",
     "berries",
     "hen",
+    "porcino",
+    "agaric",
 ]
 POOL = {"bowl", "dig", "film", "trap", "tree", "berries", "hen"}  # layout.js PROP_POOL
 
@@ -311,7 +318,7 @@ class TestActs:
 
 def open_for_thing(yard: callable, name: str) -> Yard:
     props = f"&props={name}" if name in POOL else ""
-    y = yard(f"{STILL}&flowers=1&mouse-at=0&visitor-at=0&hen-at=0{props}")
+    y = yard(f"{STILL}&flowers=1&mouse-at=0&visitor-at=0&hen-at=0&mushrooms=0{props}")
     try:
         y.page.wait_for_function(f"Things.ready('{name}')", timeout=20_000)
     except playwright.TimeoutError:
@@ -348,13 +355,23 @@ class TestVariations:
 
     @pytest.mark.parametrize(
         ("name", "uses"),
-        [("tap", 4), ("flowers", 3), ("gate", 5), ("bird", 3), ("hen", 4)],
+        [
+            ("tap", 4),
+            ("flowers", 3),
+            ("gate", 5),
+            ("bird", 3),
+            ("hen", 4),
+            ("porcino", 3),
+            ("agaric", 3),
+        ],
     )
     def test_each_variation_runs_to_the_end(
         self, yard: callable, name: str, uses: int
     ) -> None:
         y = open_for_thing(yard, name)
         for _ in range(uses):
+            # ready again first (a picked porcino takes a while to grow back)
+            y.page.wait_for_function(f"Things.ready('{name}')", timeout=60_000)
             y.run(f"yardGame.use('{name}')")
             y.settled()
         seen = re.findall(
@@ -365,7 +382,9 @@ class TestVariations:
             y.page.evaluate(f"Things.VARIATIONS['{name}']")
         ), seen
 
-    @pytest.mark.parametrize("name", ["tap", "flowers", "gate", "bird", "hen"])
+    @pytest.mark.parametrize(
+        "name", ["tap", "flowers", "gate", "bird", "hen", "porcino", "agaric"]
+    )
     def test_a_tap_mid_variation_waits_and_he_ends_free(
         self, yard: callable, name: str
     ) -> None:
@@ -377,6 +396,23 @@ class TestVariations:
         y.page.wait_for_timeout(1500)
         y.page.evaluate("yardGame.walk(Layout.MIN_X + 100)")
         y.settled()
+
+
+class TestMushrooms:
+    """After the rain (mushrooms.js): porcinos to the basket, then, once it
+    holds three, one shared with the snail."""
+
+    def test_after_a_full_basket_he_shares_with_the_snail(self, yard: callable) -> None:
+        y = yard("seed=1&still&creatures=&rain=1&rain-at=0&mushrooms=0")
+        y.page.wait_for_function(
+            "Creatures.snail && Things.ready('porcino')", timeout=90_000
+        )
+        for _ in range(4):
+            y.page.wait_for_function("Things.ready('porcino')", timeout=60_000)
+            y.run("yardGame.use('porcino')")
+            y.settled()
+        assert y.page.evaluate("Mushrooms.inBasket") == 3
+        assert "porcino to the snail" in y.page.evaluate("yardGame.trace()")
 
 
 class TestNap:

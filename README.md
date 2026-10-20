@@ -183,7 +183,7 @@ Flags in the page address (`main.py play` takes the first three):
 | `?creatures=fly,spider` | Which creatures come (`?creatures=` for none). |
 | `?flowers=1` / `0` | Flowers out or not. |
 | `?rain=1` / `0`, `?rain-at=S` | Force the shower, and when it starts. |
-| `?mouse-at=S`, `?visitor-at=S`, `?hen-at=S` | When the mouse, the tree's visitor, and the hen (up to lay on the wall) come out. |
+| `?mouse-at=S`, `?visitor-at=S`, `?hen-at=S`, `?mushrooms=S` | When the mouse, the tree's visitor, and the hen (up to lay on the wall) come out, and when the mushrooms come up (rain or not). |
 | `?fruit=apple\|plum\|nut` | The tree's fruit. |
 | `?film=0` | Without the old-print look (on by default: grain, faded warm colours, a soft vignette, a rare speck of dust or hair; `filmlook.js`). `main.py look` takes its frames without it. |
 

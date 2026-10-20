@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -39,7 +39,6 @@
   const random = Debug.random('yard') // this part's own random stream (debug.js)
   const huntRandom = Debug.random('bird-hunt') // drawn every idle tick, so kept out of the stream above
   const rnd = (lo, hi) => lo + random() * (hi - lo)
-  const SVG_NS = 'http://www.w3.org/2000/svg'
 
   let busy = false
   let pending = null
@@ -444,61 +443,7 @@
 
   GrownUp.init({ perform })
 
-  // ------------------------------------------------------------ action spots
-
-  // Where Reksio must stand to use each thing: a wide oval on the ground,
-  // drawn faintly and lit up when he is in it. Generous on purpose.
-  // x = centre, r = half-width, both scene units.
-  const SPOTS = {
-    house: () => ({ x: 410, r: 70 }),
-    doghouse: () => ({ x: 560, r: 130 }),
-    bowl: () => ({ x: 830 + X('bowl'), r: 120 }),
-    tap: () => ({ x: 1260 + X('tap'), r: 120 }),
-    flowers: () => ({ x: 1570 + X('flowers'), r: 130 }),
-    dig: () => ({ x: 2060 + X('dig'), r: 130 }),
-    film: () => ({ x: 2430 + X('film'), r: 220 }),
-    gate: () => ({ x: Layout.MAX_X + 20, r: 90 }),
-    bird: () => ({ x: Bird.perch.x - 30, r: 130 }), // on the ground, under the bird
-    trap: () => ({ x: (Things.mouse === 'fed' ? 960 : 1000) + X('trap'), r: 110 }),
-    tree: () => ({ x: 1600 + X('tree'), r: 120 }),
-    berries: () => ({ x: 2330 + X('berries'), r: 110 }),
-    hen: () => ({ x: Things.THINGS.hen.at() + 20, r: 100 }), // by the ladder, wherever it leans now
-  }
-  const spotEls = {}
-
-  function makeSpots() {
-    for (const name of Object.keys(SPOTS)) {
-      if (Layout.hidden.includes(name)) continue
-      const e = document.createElementNS(SVG_NS, 'ellipse')
-      e.setAttribute('class', 'spot')
-      e.setAttribute('data-thing', name)
-      e.setAttribute('cy', '826')
-      e.setAttribute('ry', '30')
-      $('spots').appendChild(e)
-      spotEls[name] = e
-    }
-    placeSpots()
-  }
-
-  function placeSpots() {
-    for (const [name, e] of Object.entries(spotEls)) {
-      const { x, r } = SPOTS[name]()
-      e.setAttribute('cx', x)
-      e.setAttribute('rx', r)
-    }
-  }
-
-  /** The thing whose spot Reksio is standing in (nearest centre wins). */
-  function nearest() {
-    let best = null
-    for (const name of Object.keys(spotEls)) {
-      if (!Things.ready(name)) continue
-      const { x, r } = SPOTS[name]()
-      const d = Math.abs(Reksio.x - x)
-      if (d <= r && (!best || d < best.d)) best = { name, d }
-    }
-    return best && best.name
-  }
+  // ------------------------------------------------------------ keys and the mouse
 
   let holdKey = null
   document.addEventListener('keydown', (e) => {
@@ -508,7 +453,7 @@
     Sound.ensure()
     if (asleep) return perform('wake up')
     Music.start()
-    const intent = Input.keyDown(key, { nearest: nearest(), minX: Layout.MIN_X, maxX: Layout.MAX_X })
+    const intent = Input.keyDown(key, { nearest: Spots.nearest(), minX: Layout.MIN_X, maxX: Layout.MAX_X })
     if (!intent) return
     if (intent === 'press') holdKey = e.key // any other key: tap to bark, hold to stretch
     perform(intent)
@@ -538,14 +483,14 @@
     const thing = thingAt(e.target)
     if (!thing) return
     thing.classList.add('hover')
-    spotEls[thing.dataset.thing]?.classList.add('hover')
+    Spots.hover(thing.dataset.thing, true)
     if (e.pointerType === 'mouse' && !thing.contains(e.relatedTarget) && noticeOk()) perform(`notice ${thing.dataset.thing}`) // only recorded when he'll answer it
   })
   $('stage').addEventListener('pointerout', (e) => {
     const thing = thingAt(e.target)
     if (!thing || thing.contains(e.relatedTarget)) return
     thing.classList.remove('hover')
-    spotEls[thing.dataset.thing]?.classList.remove('hover')
+    Spots.hover(thing.dataset.thing, false)
   })
 
   document.addEventListener('contextmenu', (e) => e.preventDefault())
@@ -606,14 +551,8 @@
     wishEl.style.opacity = '0'
   }
 
-  // ------------------------------------------------------------ spots
-
-  // Every spot looks the same: nothing is a goal. The spot Reksio is standing
-  // in (or the mouse is over) glows.
-  function showNear() {
-    const name = !busy && !day.ended ? nearest() : null
-    for (const [n, e] of Object.entries(spotEls)) e.classList.toggle('on', n === name)
-  }
+  /** The spot Reksio is standing in glows (spots.js), unless he's busy. */
+  const showNear = () => Spots.show(!busy && !day.ended ? Spots.nearest() : null)
 
   // ------------------------------------------------------------ left alone
 
@@ -629,7 +568,7 @@
   const WISHABLE = [...document.querySelectorAll('.wish-icon')].map((u) => u.dataset.wish)
 
   function wishFor() {
-    return Idle.wish(WISHABLE.filter((n) => spotEls[n]), {
+    return Idle.wish(WISHABLE.filter(Spots.out), {
       wants: day.wants,
       ready: Things.ready,
       distance: (n) => Math.abs((n === 'bird' ? Bird.perch.x : THINGS[n].at()) - Reksio.x),
@@ -738,7 +677,7 @@
    * plays, and one that can't happen now, the bramble in the rain when no bee
    * comes, leaves it to the next). */
   function helpedDue(name) {
-    const canNow = (n) => HELPED.includes(n) && !!spotEls[n] && THINGS[n].helped.can()
+    const canNow = (n) => HELPED.includes(n) && Spots.out(n) && THINGS[n].helped.can()
     const first = Layout.props.find(canNow)
     return first === name && HELPED.every((n) => !THINGS[n].helped.times) && !day.dusk &&
       idleFor() > HELPED_AFTER_S && Clock.now() > HELPED_FROM_S * 1000
@@ -871,12 +810,7 @@
     Creatures.tick(dt)
     Weather.tick(dt, camX)
     Wet.frame(t)
-    if (spotEls.bird) {
-      spotEls.bird.setAttribute('cx', SPOTS.bird().x)
-      spotEls.bird.style.opacity = Bird.flying ? '0' : ''
-    }
-    for (const n of ['trap', 'hen']) if (spotEls[n]) spotEls[n].setAttribute('cx', SPOTS[n]().x) // these spots move (the mouse fed, the ladder moved)
-    for (const n of ['trap', 'tree', 'hen']) if (spotEls[n]) spotEls[n].style.opacity = Things.ready(n) ? '' : '0'
+    Spots.frame()
     const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
     if (Math.abs(camX - shownCam) > 0.05) {
@@ -919,7 +853,7 @@
   Clock.after(0, () => $('stage').classList.remove('starting'))
 
   Things.init({ ended: () => day.ended })
-  makeSpots()
+  Spots.init()
   Sky.init()
   Cuckoo.init({ hourAt: () => day.hour(Clock.now()), onHour: glanceAtCuckoo, inView: () => camX < Cuckoo.X + 150, hushed: () => day.hurrying(Clock.now()) })
   Sky.show(day.hour(Clock.now())) // ?hour: the sky for it from the start
