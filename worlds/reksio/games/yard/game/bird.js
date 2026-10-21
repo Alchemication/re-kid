@@ -205,6 +205,23 @@ const Bird = (() => {
     }
   }
 
+  /** Over to the wall above x, to watch for ms (what is he burying?), and
+   * back to its perch. Not if it's already flying. */
+  async function watch(x, ms) {
+    if (flying) return
+    flying = true
+    try {
+      const spot = { x, y: 330 }
+      await flyBetween(PERCHES[perch], spot)
+      at(spot, -1)
+      Sound.chirp()
+      await wait(ms)
+      await flyBetween(spot, PERCHES[perch])
+    } finally {
+      home()
+    }
+  }
+
   /** His friend now, it comes down to him: a hop and a chirp, his play-bow,
    * and back up to its perch. */
   async function visit() {
@@ -244,7 +261,7 @@ const Bird = (() => {
   }
 
   return {
-    PERCHES, flyAway, hunt, rescue, visit, onHead, home, init,
+    PERCHES, flyAway, hunt, rescue, visit, onHead, watch, home, init,
     get perch() { return PERCHES[perch] },
     get flying() { return flying },
     get friend() { return friend },

@@ -73,9 +73,9 @@ scene:
   hen's egg on the wall, fetched with the garden ladder (hen.js; after
   Reksio i nośna kura), with its own pool; the mushrooms after the rain
   (mushrooms.js; after Reksio kompan: the fly agaric sniffed and left,
-  porcinos to the boy's basket, then shared with the snail). Then pools for the props
-  (mound, film, trap, tree, bramble), each a `new-gag` run; then
-  an in-world hint that a thing still has something new (his thought
+  porcinos to the boy's basket, then shared with the snail); pools for
+  the props (2026-10-21: the mound, the film, the trap's mouse, the tree,
+  the bramble; mouse.js, mound.js, film.js). Next: an in-world hint that a thing still has something new (his thought
   bubble, an ear perking towards it), never a marker or a count; then the
   fly and bee a little more often. Keep the yard quiet: variety in each
   thing before more things at once.

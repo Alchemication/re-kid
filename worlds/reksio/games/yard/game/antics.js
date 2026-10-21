@@ -455,7 +455,20 @@
     await faceOff(200)
   }
 
-  const gestures = { bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
+  /** His tongue out, a long cross-eyed look down at it (it's gone purple:
+   * the page colours it), and a grin. */
+  async function lookAtTongue() {
+    await faceTo({ tongue: 1, open: 0.25, eyes: 1, joy: 0, look: 1, lift: 1, brows: 0.5, small: 0 }, 200)
+    k.perk('both', 900)
+    await blend(add, 'tilt', 16, 300)
+    await pause(rnd(900, 1100))
+    await faceTo({ smile: 1, open: 0.6, eyes: 0, joy: 1, tongue: 0.5, look: 0, lift: 0.3 }, 200)
+    blend(add, 'tilt', 0, 300)
+    await pause(600)
+    await faceOff(300)
+  }
+
+  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
   Reksio.addGestures(gestures)
 
 })()

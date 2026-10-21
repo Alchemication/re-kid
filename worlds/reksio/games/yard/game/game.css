@@ -363,6 +363,8 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .fruit-leaf { fill: #6f8f4a; stroke: var(--ink); stroke-width: 1.5; }
 .fruit-shine { fill: #fff; opacity: 0.55; }
 .leaf { fill: #6f8f4a; }
+#reksio.purple .fig-tongue { fill: #7a3c8f; } /* blackberries (bramble.js) */
+.head-leaf { fill: #6f9445; stroke: var(--ink); stroke-width: 2.5; } /* on his head (tree.js): outlined, to read against him */
 .nutshell { fill: #8a5a2e; }
 .squirrel-fur, .squirrel-tail { fill: #c0612b; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
 .squirrel-belly { fill: #f1dcc0; }
@@ -391,6 +393,8 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .basket-body { fill: #c08a45; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
 .basket-weave { fill: none; stroke: #8a5d28; stroke-width: 2; }
 .basket-handle { fill: none; stroke: var(--ink); stroke-width: 7; stroke-linecap: round; }
+.boot { fill: #6b4a2e; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.boot-sole { fill: none; stroke: var(--ink); stroke-width: 5; stroke-linecap: round; }
 .icon-wall { fill: #9aa792; stroke: var(--ink); stroke-width: 3; }
 
 /* ---- the blackberry bramble ---- */

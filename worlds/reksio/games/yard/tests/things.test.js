@@ -36,10 +36,10 @@ function yard(query = '') {
   const bee = [] // where the bee was sent, and 'free' when let go
   const Creatures = { async beeTo(x, y) { bee.push({ x, y }) }, beeFree() { bee.push('free') } }
   const Weather = { raining: false, on() {} }
-  const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'hen.js', 'mushrooms.js', 'things.js'], {
+  const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'mouse.js', 'mound.js', 'film.js', 'hen.js', 'mushrooms.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
-    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {}, noseTipAt() {} }, Tree: { init() {}, ready: false, thing: { at: () => 1600, async run() {} } } },
+    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {}, noseTipAt() {} }, Tree: { init() {}, ready: false, VARIATIONS: ['stuck', 'leaves'], thing: { at: () => 1600, async run() {} } } },
   })
   const Things = page.get('Things')
   Things.init({ ended: () => ended })
@@ -356,11 +356,17 @@ describe('his tail caught in the bramble', () => {
     assert.equal(y.Things.stuckTap(), false, 'taps are ordinary again')
   })
 
-  it('then takes turns with the missed berry', async () => {
-    const y = yard('props=berries')
-    for (const extra of [true, true, true]) await y.use('berries', extra)
-    assert.equal(y.Bramble.caughtTimes, 2)
-    assert.equal(count(y, 'pounce'), 1, 'the one in between is the miss')
+  it('the first catch stands in for a variation, which comes later: one catch in the first five', async () => {
+    // all pools share one stream: taps on the tap first give the bramble's pool other orders
+    let replaced = 0
+    for (let before = 0; before < 4; before++) {
+      const y = yard('props=berries')
+      for (let i = 0; i < before; i++) await y.use('tap', true)
+      for (let i = 0; i < 5; i++) await y.use('berries', true)
+      if (y.variations().berries[0] !== 'caught') replaced += 1
+      assert.equal(y.Bramble.caughtTimes, 1, `after ${before} taps: ${y.variations().berries}`)
+    }
+    assert.ok(replaced > 0, 'no order where the first catch stood in for another')
   })
 
   it('not in the rain (no bee comes out), and the next dry variation still catches it', async () => {
@@ -454,7 +460,8 @@ describe('his tail caught in the bramble', () => {
 describe('variations', () => {
   it('after its first use, each thing plays a variation every time, all of them before any comes again, each to its end', async () => {
     const y = yard('flowers=1')
-    const pools = { ...y.Things.VARIATIONS }
+    // the pools named after a thing (the mound's 'bury' is drawn through 'dig', holding the bone)
+    const pools = Object.fromEntries(Object.entries(y.Things.VARIATIONS).filter(([name]) => name in y.Things.THINGS))
     for (const [name, names] of Object.entries(pools)) {
       for (let n = 1; n <= names.length * 2 + 1; n++) await y.use(name, false, n)
     }

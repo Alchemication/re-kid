@@ -1,7 +1,7 @@
-// What Reksio does with each thing in the yard, the bird he chases, the mouse
-// he helps, and the small effects they share (flung crumbs, twinkles, hearts).
-// The bowl, the tree, the bramble and the cuckoo clock have files of their
-// own (bowl.js, tree.js, bramble.js, cuckoo.js).
+// What Reksio does with each thing in the yard, the bird he chases, and the
+// small effects they share (flung crumbs, twinkles, hearts). The bigger
+// things have files of their own (bowl.js, tree.js, bramble.js, cuckoo.js,
+// hen.js, mushrooms.js, mouse.js, mound.js, film.js).
 //
 // Each thing's run({ extra, n }) plays its action; `extra` asks for its
 // variation, and `n` is which use this is. A toddler loves exact repetition,
@@ -10,39 +10,20 @@
 // (VARIATIONS, and the doghouse nap), a different one every use after the
 // first.
 //
-// The mouse: some plays, a mouse trap baited with cheese stands by a mouse
-// hole in the wall. After a while a mouse comes out, wants the cheese, and
-// can't get it past the trap. Reksio stamps beside the trap: it snaps shut on
-// nothing and flings the cheese to the mouse, who eats it and thanks him, and
-// he noses the sprung trap away. After that she comes out to say hello.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle, Hen, Mushrooms */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle, Hen, Mushrooms, Mouse, Mound, Film */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
   const X = Layout.x // per-play offset of a movable thing, scene units
-  const FRAMES_DRAWN = [2290, 2360, 2430, 2500, 2570] // film frame centres as drawn
-  const FRAMES = FRAMES_DRAWN.map((f) => f + X('film')) // …and where they are this play
   const PAW_REACH = 31 // from Reksio's middle to where his front paws land
-  const MOUSE_AT_S = [14, 30] // the mouse comes out this long after the start
-  const MOUSE_SCALE = 1.7 // cartoon-big, so a small child can see what she does
-  const MOUSE_SPEED = 120 // scene units per second, scurrying
-  // the trap thing as drawn (index.html), before its per-play offset
-  const HOLE = { x: 1150, y: 706 } // the mouse hole at the foot of the wall
-  const TRAP_X = 1080 // the trap's hinge
-  const CHEESE = { x: 1100, y: 798 } // cheese on the trap's trigger
-  const CHEESE_LANDS = 1175 // where the snap flings it, by the mouse
-  const MOUSE_WAITS = 1195 // where she sits looking at the cheese she can't have
   const GROUND = 812
 
   const $ = (id) => document.getElementById(id)
   const fx = $('fx')
   const wait = Clock.wait
-  const random = Debug.random('things') // this part's own random stream (debug.js)
-  const rnd = (lo, hi) => lo + random() * (hi - lo)
-  const sparkle = Debug.random('fx') // particles only: how many fly depends on frame timing, so they keep out of the stream above
+  const sparkle = Debug.random('fx') // particles only: how many fly depends on frame timing, so they keep out of the other streams
   const SVG_NS = 'http://www.w3.org/2000/svg'
-  let isEnded = () => false
 
   // ------------------------------------------------------------ variety
 
@@ -54,7 +35,7 @@ const Things = (() => {
   // up to peek over it (the yard's edge stays put); the bird he barks at,
   // he tries to fly after,
   // or it lands on his head.
-  const VARIATIONS = { tap: ['spray', 'drips', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer', 'dig', 'gnaw', 'peek'], bird: ['fly', 'head'], hen: Hen.VARIATIONS, ...Mushrooms.VARIATIONS }
+  const VARIATIONS = { tap: ['spray', 'drips', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer', 'dig', 'gnaw', 'peek'], bird: ['fly', 'head'], hen: Hen.VARIATIONS, ...Mushrooms.VARIATIONS, trap: ['crumb', 'baby', 'hide', 'ride'], dig: ['harder', 'boot', 'molehill'], bury: ['sly', 'watched'], film: ['roll', 'show', 'restamp'], tree: Tree.VARIATIONS, berries: ['miss', 'caught', 'tongue', 'share', 'juggle'] }
   const variety = Debug.random('variety') // its own stream: how often the pools draw depends on taps
   const pools = Object.fromEntries(Object.entries(VARIATIONS).map(([name, names]) => [name, Idle.pool(names, variety)]))
 
@@ -120,183 +101,6 @@ const Things = (() => {
   /** A small twinkle above a thing: "you can tap me". Nothing solid moves. */
   const twinkle = (x, y) => floatUp('twinkle-shape', 'twinkle', x, y)
   const heart = (x, y) => floatUp('heart-shape', 'heart', x, y, { rise: 60, spin: false, ms: 1600 })
-
-  // ------------------------------------------------------------ the mouse
-
-  // mouse: 'away' (not out yet) | 'wanting' (out, can't reach the cheese) |
-  // 'rescuing' | 'fed' (back in her hole, happy to say hello)
-  let mouse = 'away'
-  let visiting = false
-  const mouseEl = $('mouse')
-  const mousePos = { x: HOLE.x, y: HOLE.y, dir: -1 }
-
-  function mouseAt(x, y, dir = mousePos.dir, el = mouseEl, scale = MOUSE_SCALE) {
-    el.style.transform = `translate(${x + X('trap')}px, ${y}px) scale(${dir * scale}, ${scale})`
-    if (el === mouseEl) Object.assign(mousePos, { x, y, dir })
-  }
-
-  /** Scurry to (x, y), little hops all the way. */
-  async function scurry(x, y = GROUND, el = mouseEl, from = mousePos, scale = MOUSE_SCALE) {
-    const dir = x < from.x ? -1 : 1
-    const ms = (Math.hypot(x - from.x, y - from.y) / MOUSE_SPEED) * 1000 + 120
-    const at = (px, py, lift = 0) => `translate(${px + X('trap')}px, ${py - lift}px) scale(${dir * scale}, ${scale})`
-    const steps = Math.max(2, Math.round(ms / 110))
-    const frames = []
-    for (let i = 0; i <= steps; i++) {
-      const k = i / steps
-      frames.push({ transform: at(from.x + (x - from.x) * k, from.y + (y - from.y) * k, i % 2 ? 3 : 0) })
-    }
-    await el.animate(frames, { duration: ms }).finished
-    if (el === mouseEl) mouseAt(x, y, dir)
-    else el.style.transform = at(x, y)
-  }
-
-  /** Out of the hole: she grows from the dark. */
-  async function peekOut(el = mouseEl) {
-    el.style.opacity = '1'
-    await el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 }).finished
-  }
-
-  async function goHome(el = mouseEl, from = mousePos, scale = MOUSE_SCALE) {
-    await scurry(HOLE.x, HOLE.y, el, from, scale)
-    await el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250 }).finished
-    el.style.opacity = '0'
-  }
-
-  /** Nose forward, a few quick sniffs. */
-  async function mouseSniff(n = 3) {
-    const head = $('mouse-head')
-    for (let i = 0; i < n; i++) {
-      await head.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(8deg)' }, { transform: 'rotate(0)' }], { duration: 160 }).finished
-    }
-  }
-
-  /** Squeak n times; from afar (while she waits) it's heard as from where she is. */
-  async function squeak(n = 1, afar = false) {
-    for (let i = 0; i < n; i++) {
-      if (afar) Sound.from(Math.abs(mousePos.x + X('trap') - Reksio.x), Sound.mouse)
-      else Sound.mouse()
-      await $('mouse-head').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-14deg)' }, { transform: 'rotate(0)' }], { duration: 220 }).finished
-    }
-  }
-
-  /** Out she comes, and the trap becomes something to help with. */
-  async function mouseComesOut() {
-    if (mouse !== 'away' || isEnded()) return
-    mouse = 'wanting'
-    $('trap').classList.remove('not-yet')
-    // a rescue cancels her animations mid-way: that ends this loop, quietly
-    Debug.ignoreCut(mouseWants(), 'mouse wants')
-  }
-
-  /** While she can't get the cheese: creep up, reach, flinch back, look to Reksio. */
-  async function mouseWants() {
-    mouseAt(HOLE.x, HOLE.y, -1)
-    await peekOut()
-    await scurry(MOUSE_WAITS + 20)
-    while (mouse === 'wanting' && !isEnded()) {
-      await mouseSniff(2)
-      if (mouse !== 'wanting') return
-      await scurry(CHEESE.x + 50)
-      if (mouse !== 'wanting') return
-      // reaching for the cheese… and the trap: no!
-      await $('mouse-head').animate([{ transform: 'rotate(0)' }, { transform: 'translateX(5px) rotate(10deg)' }], { duration: 400 }).finished
-      Sound.from(Math.abs(mousePos.x + X('trap') - Reksio.x), Sound.mouse)
-      if (mouse !== 'wanting') return
-      await scurry(MOUSE_WAITS + rnd(0, 30))
-      if (mouse !== 'wanting') return
-      // turn to Reksio, a squeak: help?
-      mouseAt(mousePos.x, mousePos.y, Reksio.x < mousePos.x + X('trap') ? -1 : 1)
-      await squeak(2, true)
-      await wait(rnd(2500, 5000))
-      if (mouse !== 'wanting') return
-      mouseAt(mousePos.x, mousePos.y, -1)
-      if (random() < 0.25) {
-        // back into the hole for a moment, then out again
-        await goHome()
-        await wait(rnd(1500, 3000))
-        if (mouse !== 'wanting') return
-        mouseAt(HOLE.x, HOLE.y, -1)
-        await peekOut()
-        await scurry(MOUSE_WAITS + 20)
-      }
-    }
-  }
-
-  async function rescue() {
-    mouse = 'rescuing'
-    mouseEl.getAnimations().forEach((a) => a.cancel())
-    if (mouseEl.style.opacity !== '1') {
-      mouseAt(HOLE.x, HOLE.y, -1)
-      await peekOut()
-    }
-    await scurry(MOUSE_WAITS + 30)
-    mouseAt(mousePos.x, mousePos.y, -1)
-    Reksio.face(1)
-    await Reksio.sniff(2)
-    const trapBody = $('trap-body')
-    const bar = $('trap-bar')
-    const cheese = $('cheese')
-    await Reksio.stamp(() => {
-      Sound.stamp(0)
-      Music.react.stamp()
-      burst(Reksio.x + PAW_REACH, GROUND, 5, 'dust', { height: 22, reach: 40, size: 3.5 })
-      // the thump sets the trap off: SNAP, it jumps, and the cheese flies
-      Sound.trap()
-      Motion.endAt(bar, [{ transform: 'rotate(0)' }, { transform: 'rotate(180deg)' }], { duration: 90, easing: 'ease-in' })
-      trapBody.animate(
-        [{ transform: 'translateY(0) rotate(0)' }, { transform: 'translateY(-46px) rotate(-14deg)', offset: 0.45 }, { transform: 'translateY(0) rotate(0)' }],
-        { duration: 520, easing: 'ease-out' },
-      )
-      const dx = CHEESE_LANDS - CHEESE.x
-      Motion.endAt(
-        cheese,
-        [
-          { transform: 'translate(0, 0) rotate(0)' },
-          { transform: `translate(${dx * 0.5}px, -90px) rotate(200deg)`, offset: 0.5 },
-          { transform: `translate(${dx}px, ${GROUND - CHEESE.y - 4}px) rotate(360deg)` },
-        ],
-        { duration: 700, easing: 'ease-in-out' },
-      )
-    })
-    await Reksio.startle()
-    await wait(500)
-    // the mouse to her cheese
-    mouseAt(mousePos.x, mousePos.y, -1)
-    await squeak(1)
-    await scurry(CHEESE_LANDS + 44)
-    const cheeks = $('mouse-cheek')
-    for (let i = 0; i < 5; i++) {
-      Sound.nibble()
-      cheese.style.opacity = String(1 - (i + 1) * 0.18)
-      await $('mouse-head').animate([{ transform: 'rotate(0)' }, { transform: 'rotate(7deg)' }, { transform: 'rotate(0)' }], { duration: 260 }).finished
-      cheeks.setAttribute('r', String(2 + i * 1.4))
-      burst(CHEESE_LANDS + X('trap'), GROUND - 6, 1, 'cheese-crumb', { height: 14, reach: 16, size: 2 })
-    }
-    cheese.style.opacity = '0'
-    await wait(300)
-    cheeks.setAttribute('r', '0')
-    // thank you
-    mouseAt(mousePos.x, mousePos.y, Reksio.x < mousePos.x + X('trap') ? -1 : 1)
-    await squeak(2)
-    heart(mousePos.x + X('trap'), GROUND - 50)
-    Music.react.wish()
-    await wait(700)
-    const home = goHome()
-    // and the sprung trap: he noses it away, out of the yard
-    if (await Reksio.walkTo(TRAP_X + X('trap') - 150)) {
-      Reksio.face(1)
-      Reksio.nod(16, 600)
-      Sound.scrape()
-      await Motion.endAt(
-        $('trap-body'),
-        [{ transform: 'translateX(0) rotate(0)', opacity: 1 }, { transform: 'translateX(70px) rotate(8deg)', opacity: 1, offset: 0.5 }, { transform: 'translateX(120px) rotate(20deg)', opacity: 0 }],
-        { duration: 1000, easing: 'ease-out' },
-      )
-    }
-    await home
-    mouse = 'fed'
-  }
 
   // ------------------------------------------------------------ the variations' own moments
 
@@ -382,57 +186,9 @@ const Things = (() => {
     }
   }
 
-  /** Once she's been fed: Reksio sniffs by her hole and she comes out to say hello. */
-  async function visit(extra) {
-    Reksio.face(1)
-    await Reksio.sniff(2)
-    if (visiting) return
-    visiting = true
-    const front = { x: HOLE.x - 40, y: GROUND } // on the ground, under his nose
-    mouseAt(HOLE.x, HOLE.y, -1)
-    await peekOut()
-    await scurry(front.x, front.y)
-    mouseAt(front.x, front.y, -1)
-    await squeak(2)
-    // nose to nose
-    Sound.mouse()
-    await Reksio.nod(18, 450)
-    if (extra && random() < 0.5) {
-      // she brings him a crumb of cheese
-      burst(front.x + X('trap') - 40, GROUND - 6, 5, 'cheese-crumb', { dir: -1, height: 18, reach: 30, size: 2.5 })
-      Sound.munch()
-      await Reksio.nod(14, 400)
-      Sound.munch()
-      await Reksio.lick()
-      heart(front.x + X('trap'), GROUND - 70)
-    } else if (extra) {
-      // and a little one comes out behind her
-      const baby = $('mouse-baby')
-      const babyAt = { x: HOLE.x + 10, y: GROUND }
-      baby.style.transform = `translate(${HOLE.x + X('trap')}px, ${HOLE.y}px) scale(-1, 1)`
-      await peekOut(baby)
-      await scurry(babyAt.x, babyAt.y, baby, HOLE, 1)
-      Sound.mouse()
-      heart(babyAt.x + X('trap'), GROUND - 50)
-      await wait(900)
-      await goHome(baby, babyAt, 1)
-    } else {
-      await wait(400)
-    }
-    await goHome()
-    visiting = false
-  }
-
-  function startMouse() {
-    if (Layout.hidden.includes('trap')) return
-    $('trap').classList.add('not-yet')
-    Clock.after((Layout.mouseAt ?? rnd(...MOUSE_AT_S)) * 1000, mouseComesOut)
-  }
-
   // ------------------------------------------------------------ things
 
   let held = null // while a gag holds him (the bowl on his head, his tail caught): a tap's answer (yard.js stuckTap)
-  let stamped = 0 // film frames stamped so far
 
   /** A tap while a gag holds him answers inside it (the bowl on his head: a
    * bark in it, the bird hears; his tail caught: another try). False if
@@ -572,74 +328,7 @@ const Things = (() => {
         await Reksio.bark()
       },
     },
-    film: {
-      at: () => FRAMES[Math.min(stamped, FRAMES.length - 1)] - PAW_REACH,
-      face: 1,
-      async run({ extra }) {
-        if (stamped >= FRAMES.length) {
-          const reel = $('reel')
-          if (extra) {
-            // the extra: the reel rolls off and he chases it, then noses it back
-            const roll = (from, to, ms) =>
-              Motion.endAt(reel, [{ transform: `translateX(${from}px) rotate(${from * 2.4}deg)` }, { transform: `translateX(${to}px) rotate(${to * 2.4}deg)` }], { duration: ms, easing: 'ease-out' })
-            Sound.reel()
-            const away = roll(0, -170, 1300)
-            await wait(200)
-            await Reksio.walkTo(FRAMES[FRAMES.length - 1] + 40 - 170 - 120)
-            Reksio.face(1)
-            await away
-            await Reksio.pounce(FRAMES[FRAMES.length - 1] + 40 - 170)
-            await Reksio.walkTo(FRAMES[FRAMES.length - 1] + 40 - 170 - 140)
-            Reksio.face(1)
-            Reksio.nod(12, 500)
-            Sound.reel()
-            await roll(-170, 0, 1100)
-            await Reksio.bark()
-            return
-          }
-          // already a reel: give it a spin
-          Sound.reel()
-          await reel.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(720deg)' }], { duration: 900, easing: 'ease-out' }).finished
-          await Reksio.bark()
-          return
-        }
-        const prints = document.querySelectorAll('#strip .print')
-        for (let i = stamped; i < FRAMES.length; i++) {
-          if (i > stamped) await Reksio.walkTo(FRAMES[i] - PAW_REACH)
-          Reksio.face(1)
-          await Reksio.stamp(() => {
-            Sound.stamp(i)
-            Music.react.stamp()
-            const print = prints[i]
-            print.setAttribute('opacity', '1')
-            print.style.transformOrigin = `${FRAMES_DRAWN[i]}px 791px` // inside the moved strip
-            print.animate([{ transform: 'scale(1.6)', opacity: 0.2 }, { transform: 'scale(1)', opacity: 1 }], { duration: 220, easing: 'ease-out' })
-            burst(FRAMES[i], 812, 5, 'dust', { height: 22, reach: 40, size: 3.5 })
-          })
-          stamped = i + 1
-        }
-        // thump, thump … and the double squeak: the little Reksios squeak back
-        await wait(250)
-        Sound.squeaks()
-        prints.forEach((p, k) => {
-          p.style.transformOrigin = `${FRAMES_DRAWN[k]}px 800px`
-          p.animate(
-            [{ transform: 'scale(1, 1)' }, { transform: 'scale(1.2, 0.75)' }, { transform: 'scale(0.9, 1.15)' }, { transform: 'scale(1.2, 0.75)' }, { transform: 'scale(1, 1)' }],
-            { duration: 420 },
-          )
-        })
-        await wait(650)
-        // the full strip rolls up into a reel
-        Sound.reel()
-        const strip = $('strip')
-        const reel = $('reel')
-        reel.setAttribute('opacity', '1')
-        reel.animate([{ transform: 'scale(0.2) rotate(0)' }, { transform: 'scale(1) rotate(900deg)' }], { duration: 900, easing: 'ease-out' })
-        await Motion.endAt(strip, [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 900, easing: 'ease-in' })
-        strip.style.visibility = 'hidden'
-        await Reksio.hop(50, 2)
-      },
-    },
+    film: varied('film', Film.thing),
     bird: {
       at: () => Bird.perch.x - 70,
       face: 1,
@@ -656,89 +345,14 @@ const Things = (() => {
         if (v === 'fly') await Reksio.tryToFly() // after it, ears flapping
       },
     },
-    dig: {
-      // the bone goes round: dug up and carried off, buried again, dug up again…
-      at: () => 2000 + X('dig'),
-      face: 1,
-      async run({ extra }) {
-        const digFor = async (ms, clods) => {
-          const digging = Reksio.paddle(ms)
-          Sound.dig()
-          for (let i = 0; i < clods; i++) {
-            burst(2040 + X('dig'), 790, 3, 'clod', { dir: -1, height: 80, reach: 120, size: 4.5 })
-            await wait(200)
-          }
-          await digging
-        }
-        const bone = $('found-bone')
-        if (Reksio.holdingBone) {
-          // bury it: (the extra: a sly look round first) dig a hole, drop it in,
-          // nose the earth back over it, pat it down
-          if (extra) {
-            await Reksio.lookAround(700)
-            Reksio.face(1)
-            await Reksio.lookAround(500)
-            Reksio.face(1)
-          }
-          await digFor(1000, 4)
-          Reksio.holdBone(false)
-          bone.style.opacity = '1'
-          await Motion.endAt(
-            bone,
-            [{ transform: 'translateY(-30px) scale(1)', opacity: 1 }, { transform: 'translateY(26px) scale(0.6)', opacity: 0 }],
-            { duration: 500, easing: 'ease-in' },
-          )
-          bone.style.opacity = '0'
-          for (let i = 0; i < 3; i++) {
-            Sound.from(150, Sound.dig)
-            burst(2010 + X('dig'), 800, 3, 'clod', { dir: 1, height: 20, reach: 40, size: 4 })
-            await Reksio.nod(22, 380)
-          }
-          await Reksio.stamp(() => {
-            Sound.stamp(0)
-            burst(2040 + X('dig'), 806, 4, 'dust', { height: 16, reach: 30, size: 3 })
-          })
-          await Reksio.nod(-12, 500) // pleased with that
-          return
-        }
-        await digFor(1300, 6)
-        if (extra) {
-          // the extra: nothing there… a puzzled look, then dig harder
-          await Reksio.lookAround(800)
-          Reksio.face(1)
-          await digFor(1500, 9)
-        }
-        bone.style.opacity = '1'
-        await Motion.endAt(
-          bone,
-          [{ transform: 'translateY(30px) scale(0.4)' }, { transform: 'translateY(-50px) scale(1.2)' }, { transform: 'translateY(-30px) scale(1)' }],
-          { duration: 600, easing: 'ease-out' },
-        )
-        Music.react.wish()
-        await wait(500)
-        bone.style.transform = ''
-        bone.style.opacity = '0'
-        Reksio.holdBone(true)
-        Sound.original('bark') // easter egg: his original quick barks, if the clip exists
-        await Reksio.nod(-14, 700)
-      },
-    },
-    tree: { ...Tree.thing, ready: () => Tree.ready },
+    dig: { ...Mound.thing, run: ({ extra, n }) => Mound.thing.run({ v: variation(Reksio.holdingBone ? 'bury' : 'dig', extra, n) }) },
+    tree: varied('tree', { ...Tree.thing, ready: () => Tree.ready }),
     hen: varied('hen', { ...Hen.thing, ready: () => Hen.ready }),
     // after the rain (mushrooms.js): each a thing of its own, so the child chooses
     porcino: varied('porcino', Mushrooms.things.porcino),
     agaric: varied('agaric', Mushrooms.things.agaric),
-    berries: Bramble.thing,
-    trap: {
-      // before: stand so his paws land just short of the trap; after: nose at her hole
-      at: () => (mouse === 'fed' ? HOLE.x - 210 : TRAP_X - 60 - PAW_REACH) + X('trap'),
-      face: 1,
-      ready: () => mouse === 'wanting' || mouse === 'fed',
-      async run({ extra }) {
-        if (mouse === 'wanting') return rescue()
-        if (mouse === 'fed') return visit(extra)
-      },
-    },
+    berries: varied('berries', Bramble.thing),
+    trap: varied('trap', Mouse.thing),
   }
 
   // ------------------------------------------------------------ supper
@@ -787,9 +401,10 @@ const Things = (() => {
   const ready = (name) => THINGS[name]?.ready?.() ?? true
 
   function init({ ended }) {
-    isEnded = ended
     Bird.init({ ended })
-    startMouse()
+    Mouse.init({ ended, effects: { burst, heart } })
+    Mound.init({ effects: { burst } })
+    Film.init({ effects: { burst } })
     const hold = (answer) => (held = answer)
     Bowl.init({ effects: { burst }, hold })
     Bramble.init({ effects: { burst }, hold })
@@ -803,7 +418,7 @@ const Things = (() => {
     THINGS, VARIATIONS, DOOR, burst, twinkle, ready, init, stuckTap, supperAt, serveSupper, eatSupper,
     /** A gag holds him (the bowl on his head, his tail caught): it answers every tap. */
     get holding() { return !!held },
-    get stamped() { return stamped },
-    get mouse() { return mouse },
+    get stamped() { return Film.stamped },
+    get mouse() { return Mouse.state },
   }
 })()

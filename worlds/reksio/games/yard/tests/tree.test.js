@@ -27,9 +27,9 @@ function yard(query = 'props=tree', seed = 1) {
     end: () => (ended = true),
     count,
     /** Shake the tree, and let the clock run until he's done. */
-    async shake(extra = false) {
+    async shake(v = null) {
       let over = false
-      Tree.thing.run({ extra }).then(() => (over = true))
+      Tree.thing.run({ v }).then(() => (over = true))
       for (let i = 0; i < 300 && !over; i++) await page.advance(100)
       assert.ok(over, 'still shaking after half a minute')
     },
@@ -90,11 +90,11 @@ describe('the fruit', () => {
   it('lands an apple on his head in the variation (bonk), never a nut', async () => {
     const apple = yard(`props=tree&${VISITOR}&fruit=apple`)
     await apple.advance(30000)
-    await apple.shake(true)
+    await apple.shake('bonk')
     assert.ok(apple.played.includes('bonk'))
     const nut = yard(`props=tree&${VISITOR}&fruit=nut`)
     await nut.advance(30000)
-    await nut.shake(true)
+    await nut.shake('bonk')
     assert.ok(!nut.played.includes('bonk'))
   })
 })

@@ -255,7 +255,7 @@ before a commit.
 
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
-| a thing in `things.js` / `bowl.js` / `tree.js` / `bramble.js` / `bird.js` / `cuckoo.js` / `nap.js` / `hen.js` / `mushrooms.js` / `spots.js` | `"TestThings and <name>"`, the bowl `"TestBowl"`, the bramble `"TestBramble"`, the clock `"TestClock"`, the doghouse nap `"TestNap"`, the variations and the hen `"TestVariations"`, the mushrooms `"TestMushrooms"` (and its rules in `things.test.js` / `tree.test.js` / `cuckoo.test.js` / `nap.test.js`) |
+| a thing in `things.js` / `bowl.js` / `tree.js` / `bramble.js` / `bird.js` / `cuckoo.js` / `nap.js` / `hen.js` / `mushrooms.js` / `spots.js` / `mouse.js` / `mound.js` / `film.js` | `"TestThings and <name>"`, the bowl `"TestBowl"`, the bramble `"TestBramble"`, the clock `"TestClock"`, the doghouse nap `"TestNap"`, the variations and the hen `"TestVariations"`, the mushrooms `"TestMushrooms"` (and its rules in `things.test.js` / `tree.test.js` / `cuckoo.test.js` / `nap.test.js`) |
 | a gesture or pose in `reksio.js`, `gestures.js`, `antics.js`, `figure.js`, `life.js` or `gait.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |

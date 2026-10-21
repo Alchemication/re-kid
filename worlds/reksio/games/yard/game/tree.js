@@ -6,13 +6,17 @@
 // squirrel for nuts. Reksio rears up against the trunk and shakes it; leaves
 // fly and fruit drops. The snail creeps to an apple and slowly eats it, and
 // more snails come to share; the squirrel eats one nut and buries another,
-// then runs off up the trunk. Shake again and more falls (and sometimes an
-// apple lands on Reksio's head).
+// then runs off up the trunk. Shake again and more falls, and something on
+// top, a different thing each time (VARIATIONS): an apple or plum lands on
+// Reksio's head; one fruit won't come down until he gives up and turns
+// away, then drops right behind him; the squirrel runs up the trunk and
+// drops a nut for him to catch, which he puts down for her; or a shower of
+// leaves lands on his head, and he shakes them off.
 //
 // Everything here lives inside the tree's own group, in the coordinates it
 // is drawn in (index.html); Layout.x('tree') moves the lot.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Figure */
 /* exported Tree */
 const Tree = (() => {
   const TRUNK_X = 1660 // drawn
@@ -33,6 +37,10 @@ const Tree = (() => {
   // where fruit hangs in the crown, as drawn
   const ON_TREE = [[1588, 418], [1628, 342], [1694, 330], [1738, 398], [1652, 440], [1712, 456]]
   const X = () => Layout.x('tree')
+  // what a repeat adds, by fruit: the squirrel only comes for nuts; a nut on his head is no joke
+  const VARIATIONS = Layout.fruit === 'nut' ? ['stuck', 'squirrel', 'leaves'] : ['bonk', 'stuck', 'leaves']
+  const GIVE_UP = 90 // he turns and walks this far away before the stuck fruit lets go
+  const SQUIRREL_UP = 470 // how high up the trunk she runs to drop him a nut
   /** A fruit's transform at (x, y), shrunk to k as it's eaten. */
   const at = (x, y, k = 1) => `translate(${x}px, ${y}px) scale(${k * FRUIT_SCALE})`
 
@@ -230,8 +238,96 @@ const Tree = (() => {
     await Reksio.sit(1300)
   }
 
-  async function shake({ extra }) {
+  /** One fruit won't fall: he shakes and shakes; once he gives up and turns
+   * away, it drops right behind him. */
+  async function stuck() {
+    const f = hanging.shift()
+    for (let i = 0; i < 3; i++) await Reksio.stamp(wobbleCrown)
+    await Reksio.lookUp(800)
+    await Reksio.walkTo(Reksio.x - GIVE_UP) // oh well
+    const g = await drop(f, WAITS_AT - 80)
+    fallen.push({ el: g, x: WAITS_AT - 80, bites: 0, eater: null })
     Reksio.face(1)
+    await Reksio.startle()
+  }
+
+  /** The squirrel runs up the trunk and drops a nut to him: he jumps and
+   * catches it, and puts it down for her. False if she can't now. */
+  async function squirrelHelps() {
+    const q = squirrel
+    if (!q || q.busy || !hanging.length) return false
+    q.busy = true
+    try {
+      q.g.style.opacity = '1'
+      await scamper(TRUNK_X + 10, SQUIRREL_UP)
+      q.up = true
+      hear(q.x, () => Sound.chitter())
+      const f = hanging.shift()
+      const m = Reksio.mouth()
+      const catching = drop(f, m.x - X(), m.y - 10)
+      await wait(250)
+      await Reksio.hop(30, 1)
+      const g = await catching
+      Sound.snap()
+      const x = WAITS_AT - 40
+      await Reksio.nod(24, 500) // and down for her: it rolls over to her
+      const m2 = Reksio.mouth()
+      await Motion.endAt(g, [{ transform: at(m2.x - X(), FRUIT_REST_Y) }, { transform: at(x, FRUIT_REST_Y) }], { duration: 500, easing: 'ease-out' })
+      Sound.tok()
+      shakes += 1 // counts as a shake: the next drops fewer
+      fallen.push({ el: g, x, bites: 0, eater: null })
+    } finally {
+      q.busy = false
+    }
+    return true
+  }
+
+  /** A shower of leaves, two of them landing on his head; a look up, and he
+   * shakes them off. */
+  async function leaves() {
+    fx.burst(Reksio.x, 520, 14, 'leaf', { height: 10, reach: 80, size: 6 })
+    const top = () => Reksio.pointAt(Figure.bowlTopAt)
+    const onHead = [-16, 14].map((dx) => ({ dx, el: el('ellipse', { class: 'leaf head-leaf', rx: 14, ry: 7 }, $('fx')) }))
+    const put = () => onHead.forEach((s) => {
+      const p = top()
+      s.el.setAttribute('cx', p.x + s.dx)
+      s.el.setAttribute('cy', p.y + 4)
+    })
+    put()
+    const stay = Clock.every(0, put)
+    try {
+      await Reksio.lookUp(900)
+    } catch (e) {
+      onHead.forEach((s) => s.el.remove()) // cut short: no leaves left behind
+      throw e
+    } finally {
+      stay()
+    }
+    Sound.shake()
+    onHead.forEach((s, i) => s.el.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${(i ? 1 : -1) * 40}px, 90px)`, opacity: 0 }], { duration: 700, easing: 'ease-in' }).finished.then(() => s.el.remove()))
+    await Reksio.shake()
+  }
+
+  /** Whoever is hungry comes to eat what's down. */
+  function feed() {
+    if (nut()) squirrelEats()
+    else snailsEat()
+    if (visitor === 'hungry') visitor = 'fed'
+  }
+
+  /** These fruit fall from the crown to the ground by the visitor, one after another. */
+  const fall = (falling) => Promise.all(
+    falling.map(async (f, i) => {
+      await wait(i * 180)
+      const x = WAITS_AT - 70 + i * 60 + rnd(-15, 15)
+      const g = await drop(f, x)
+      fallen.push({ el: g, x, bites: 0, eater: null })
+    }),
+  )
+
+  async function shake({ v }) {
+    Reksio.face(1)
+    if (v === 'squirrel' && (await squirrelHelps())) return feed()
     for (let i = 0; i < 3; i++) await Reksio.stamp(wobbleCrown)
     shakes += 1
     const n = Math.min(hanging.length, shakes === 1 ? (nut() ? 3 : 2) : nut() ? 2 : 1)
@@ -241,18 +337,11 @@ const Tree = (() => {
       return
     }
     const falling = hanging.splice(0, n)
-    if (extra && !nut() && falling.length) await bonk(falling.pop())
-    await Promise.all(
-      falling.map(async (f, i) => {
-        await wait(i * 180)
-        const x = WAITS_AT - 70 + i * 60 + rnd(-15, 15)
-        const g = await drop(f, x)
-        fallen.push({ el: g, x, bites: 0, eater: null })
-      }),
-    )
-    if (nut()) squirrelEats()
-    else snailsEat()
-    if (visitor === 'hungry') visitor = 'fed'
+    if (v === 'bonk' && !nut() && falling.length) await bonk(falling.pop())
+    await fall(falling)
+    if (v === 'stuck' && hanging.length) await stuck()
+    feed()
+    if (v === 'leaves') await leaves()
     await wait(600)
   }
 
@@ -434,6 +523,7 @@ const Tree = (() => {
   }
 
   return {
+    VARIATIONS,
     thing,
     init,
     /** Can the tree be shaken? Once the hungry visitor is there. */

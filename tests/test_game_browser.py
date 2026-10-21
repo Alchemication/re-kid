@@ -99,6 +99,7 @@ GESTURES = {
     "yuck": "Reksio.yuck()",
     "wagFinger": "Reksio.wagFinger()",
     "wary": "Reksio.wary()",
+    "lookAtTongue": "Reksio.lookAtTongue()",
     "stretch": "(async () => { Reksio.beginStretch(); await new Promise((r) => setTimeout(r, 600)); await Reksio.endStretch() })()",
 }
 # Reksio's other functions: state, not gestures, or tested through a thing.
@@ -363,6 +364,11 @@ class TestVariations:
             ("hen", 4),
             ("porcino", 3),
             ("agaric", 3),
+            ("trap", 5),
+            ("dig", 7),
+            ("film", 4),
+            ("tree", 4),
+            ("berries", 6),
         ],
     )
     def test_each_variation_runs_to_the_end(
@@ -383,7 +389,21 @@ class TestVariations:
         ), seen
 
     @pytest.mark.parametrize(
-        "name", ["tap", "flowers", "gate", "bird", "hen", "porcino", "agaric"]
+        "name",
+        [
+            "tap",
+            "flowers",
+            "gate",
+            "bird",
+            "hen",
+            "porcino",
+            "agaric",
+            "trap",
+            "dig",
+            "film",
+            "tree",
+            "berries",
+        ],
     )
     def test_a_tap_mid_variation_waits_and_he_ends_free(
         self, yard: callable, name: str

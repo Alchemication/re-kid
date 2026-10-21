@@ -57,7 +57,7 @@ const Layout = (() => {
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
   // Each thing on the ground as drawn: from the left of its drawing or action
   // spot (whichever is further left) to the right of the other.
-  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650], hen: [990, 1360] }
+  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [760, 1290], tree: [1480, 1840], berries: [2220, 2650], hen: [990, 1360] }
 
   const random = Debug.random('layout') // this part's own random stream (debug.js)
 
