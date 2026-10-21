@@ -112,6 +112,13 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   looked like a glitch and flicker was annoying, so both are out, and the
   weave went with them. A drawn feel is to come from timing in his
   gestures, not from a lower frame rate.
+- **Variety, not a hint of it** (Adam, 2026-10-21). After children played,
+  repeats needed more variety. Each thing now has a pool of variations:
+  every use after the first brings a different one, all before any comes
+  again. A hint that a thing still has something new (a marker, his ear
+  perking towards it) was considered and dropped: every repeat already
+  does, so it would point at everything, and a marker nudges a child to
+  keep playing.
 - **Procedures become skills, improved by every run** (2026-10-07), so
   someone other than Adam can run them. `new-world` is drafted
   thin, before its first run (Krecik), and shaped by that run's retro.

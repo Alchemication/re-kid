@@ -75,10 +75,10 @@ scene:
   (mushrooms.js; after Reksio kompan: the fly agaric sniffed and left,
   porcinos to the boy's basket, then shared with the snail); pools for
   the props (2026-10-21: the mound, the film, the trap's mouse, the tree,
-  the bramble; mouse.js, mound.js, film.js). Next: an in-world hint that a thing still has something new (his thought
-  bubble, an ear perking towards it), never a marker or a count; then the
-  fly and bee a little more often. Keep the yard quiet: variety in each
-  thing before more things at once.
+  the bramble; mouse.js, mound.js, film.js). No hint that a thing has
+  something new (Adam, 2026-10-21: every repeat already does). Next, if
+  wanted: the fly and bee a little more often. Keep the yard quiet:
+  variety in each thing before more things at once.
 - The yard's items under "Alongside" and "Later" below wait with it.
 
 ## Alongside, when working nearby
