@@ -78,14 +78,23 @@ chosen one, write down briefly:
 - **What it offers:** `discover`, `help` (he helps someone) or `helped`
   (someone helps him). If it makes a kind real for a prop, that prop's
   `OFFERS` in `layout.js` gains it, and the layout tests follow.
-- **How the child gets to see it.** A tap on a thing (first use), the thing's
-  variation (second use, then about every other: easy to never see; or, as
-  the doghouse nap does, something new on every use after the first: a
-  thing's `run({ extra, n })` knows which use it is, and `nap.js` `next()`
-  draws from a pool without repeats until all have come), a
-  left-alone move (`yard.js` `ACTS`; `due: true` makes a once-a-play move
-  happen the first time it can), a creature's own timing, or the weather.
-  The bowl was first built as a variation only and needed a second round.
+- **How the child gets to see it.** A tap on a thing (first use), the
+  thing's variations (every use after the first), a left-alone move
+  (`yard.js` `ACTS`; `due: true` makes a once-a-play move happen the first
+  time it can), a creature's own timing, or the weather. The bowl was first
+  built as a variation only and needed a second round.
+- **Variety on repeats, from the start.** Repeats are what children come
+  back for (Adam watched kids play, 2026-10-19). Design two to four
+  variations with the gag, not later: the core stays the same, and every
+  use after the first adds one, all before any repeats. In the yard a
+  thing's pool is listed in `things.js` `VARIATIONS`, drawn by `variation()`
+  (`Idle.pool`), and a thing in its own file gets it as `run({ v })`
+  through `varied(name, thing)`. A variation that needs something not
+  always there (the bird near, nuts on the tree) falls back to another, or
+  its pool depends on the play (`Tree.VARIATIONS`). A rule like "the first
+  variation is always his tail caught" must not lose the variation it
+  stands in for (the bramble's `owed`). No hint that a thing has something
+  new: every repeat does (`docs/DECISIONS.md`).
 - **What a tap does at each beat.** Every tap gets an answer, and for each
   beat decide which: it waits for after (the default while he is busy with a
   thing), it is answered inside the gag (the child takes part), or it cuts the
@@ -107,7 +116,15 @@ checked with him, and list it in `docs/PROJECT_PLAN.md` as his to judge.
 **Room for it.** Before placing it, list where everything already stands
 in the scene (props, spots, where visitors come from and go to) and give
 the new gag a place of its own. In the meadow, the paint tins first landed
-on the egg's spot.
+on the egg's spot; in the yard, the mushrooms came up on the hen's nest.
+A prop gets a footprint in the row (`layout.js` `FOOTPRINTS`) wide enough
+for everything it moves (the ladder, a second mouse hole), and the row
+must still fit with the widest props out (the layout tests say). Anything
+that appears mid-play (after rain, on a timer) takes free ground from
+`Layout.gaps`, less their puddles, never "beside" something, and gets a
+browser test over a dozen seeds that it never lands on a thing or in a
+puddle (`TestMushrooms`). Keep what the child must see on screen when it
+happens (the bird must be near for him to flick it a berry).
 
 ## 3. Where each piece goes
 
@@ -194,6 +211,22 @@ for (precedents: `bird.js`, `bowl.js` and `bramble.js` out of `things.js`,
   Spread them first (`[...list]`, `{ ...obj }`).
 - A second browser test file must not start its own Playwright session:
   use the shared `browser` fixture in `tests/conftest.py`.
+- `el.animate(frames, { transformOrigin })` ignores the option: an SVG
+  shape scaled or turned that way swings about the scene's corner (the
+  egg flew across the yard). Set `transform-box: fill-box;
+  transform-origin: center` in CSS.
+- A page-address flag (`?hen-at`) must make its random draw either way,
+  or a seeded play with the flag differs from one without.
+- A unit test can pass by the luck of its seed (the pool happened to draw
+  the right one first). Vary the order (all pools share one stream: use
+  another pooled thing first), and check the test fails on the old code.
+- Something drawn every frame that is hidden: `display: none`, not
+  `opacity: 0` (it still costs the browser), and don't compute it.
+- `async` functions always return a promise, so `const busy = start()`
+  is truthy even when `start` did nothing: check the condition first.
+- Something laid on him (a leaf, an egg in his mouth) that follows him
+  each frame: remove it in a `catch` or `finally`, or a cut leaves it
+  behind where he was.
 
 ## 5. Look at it
 

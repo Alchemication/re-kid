@@ -66,7 +66,7 @@ experiments/sound/      making sound effects with a model and picking them by ea
                         board page (scripts committed; audio and the API key in .env not)
 experiments/music/      the same for the yard's music, against what the game plays today
 experiments/board/      what both boards share: the page, its look (Krtek's meadow) and keys
-.claude/skills/         procedures for Claude Code sessions (new-world, new-episode, new-gag, new-sound, new-music)
+.claude/skills/         procedures for Claude Code sessions (new-world, new-episode, new-character, new-gag, new-sound, new-music)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
 .github/workflows/pages.yml  publishes the games to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)
@@ -98,6 +98,7 @@ new cartoon
      │                    episode beat by beat; Adam marks its sounds (main.py mark)
      └─ the scene's brief  games/<game>/brief.yaml, written with Adam (no skill)
          └─ the scene     games/<game>/game/
+             ├─ new-character ► its hero drawn after the films, side by side
              ├─ new-gag ──► one gag or encounter at a time
              ├─ new-sound ► its sound effects, Adam picks takes by ear
              └─ new-music ► its music, Adam picks takes by ear

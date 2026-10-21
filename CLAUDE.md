@@ -43,10 +43,11 @@ through API calls from `main.py`. Write results straight into the YAML files and
 run `uv run python main.py validate <world>` before reporting done.
 
 Procedures live in skills (`.claude/skills/`): `new-world` researches a new
-cartoon into a world; `new-episode` breaks down an episode; `new-gag` adds a
-gag or encounter to a game; `new-sound` makes a game's sound effects and
-`new-music` its music (generated, picked by Adam's ear). README's "Adding a
-cartoon" shows their order. Each run ends with a retro that proposes edits
+cartoon into a world; `new-episode` breaks down an episode; `new-character`
+draws a hero after the films; `new-gag` adds a gag or encounter to a game;
+`new-sound` makes a game's sound effects and `new-music` its music
+(generated, picked by Adam's ear). README's "Adding a cartoon" shows their
+order. Each run ends with a retro that proposes edits
 to its skill.
 
 The skills are meant to become a general process for building any cartoon's
@@ -101,7 +102,7 @@ and fix what you find before reporting done.
 | `docs/DESIGN_PRINCIPLES.md` | How the games should feel and what they must never do, with the research on short play for toddlers. Check a new gag, ending or feature against it. |
 | `README.md` | Layout, commands, the site, performance, debugging the yard, a note for parents. |
 | `CLAUDE.md` / `AGENTS.md` | Working rules (this file). |
-| `.claude/skills/*/SKILL.md` | Procedures: `new-world`, `new-episode`, `new-gag`, `new-sound`, `new-music`. |
+| `.claude/skills/*/SKILL.md` | Procedures: `new-world`, `new-episode`, `new-character`, `new-gag`, `new-sound`, `new-music`. |
 | `experiments/sound/README.md` | The sound-generation experiment and its board. |
 | `experiments/music/README.md` | The music-generation experiment and its board. |
 | `worlds/<id>/games/<game>/brief.yaml` | A game's parts, each `original`, `inspired` or `invented`. |

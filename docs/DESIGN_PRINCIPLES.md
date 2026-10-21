@@ -42,6 +42,11 @@ is at the end. Status and next steps are in `docs/PROJECT_PLAN.md`.
   any long move: a look towards what was tapped, a lean, then off. Acting,
   more than motion, makes it read as a cartoon; it never makes the child
   wait to be answered.
+- **What can be tapped shows itself, to a mouse.** On a computer, the
+  thing under the pointer glows round its outline and the character turns
+  to it, and the hand cursor shows only over what answers a click.
+  Nothing is marked for a finger: on a phone or tablet the scene stays as
+  drawn (children at a desktop couldn't tell what to click, 2026-10-20).
 - **Kindness happens in the story.** Characters help each other: Reksio
   helps, and sometimes he needs help. These are small stories, not lessons
   about being good.

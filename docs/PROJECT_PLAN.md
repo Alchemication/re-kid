@@ -57,8 +57,9 @@ scene:
   Watch: does he tap to call for help, laugh at the leap, worry about the
   mouse that can't eat, go for what, and does the ending land? If the
   helping gags land, one more of each kind, each a `new-gag` run:
-  - *Helped:* the pesky fly on his nose, caught by the spider (needs a
-    layout rule: the fly and the spider out together).
+  - *Helped:* a cat who helps him (Adam, 2026-10-20), with a reason of
+    her own: his bone rolled where his snout won't fit and her paw will.
+    Not things landing on his nose (Adam doesn't want those).
   - *Help:* the bird drops a twig from its nest; Reksio fetches it back up
     to the wall.
 - **More variety in repeats** (Adam, 2026-10-19: "each encounter should
