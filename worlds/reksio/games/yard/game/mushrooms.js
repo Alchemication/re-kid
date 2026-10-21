@@ -19,16 +19,17 @@
 const Mushrooms = (() => {
   const GROUND = 812
   const AFTER_RAIN_S = 5 // they come up this long after a shower clears
-  const SPACING = 62 // between mushrooms in the cluster
-  const FROM_PUDDLE = 50 // the cluster starts this far past a puddle's edge
-  const BASKET_FROM = 280 // the basket stands this far before the mushrooms: a short carry, not the whole yard
+  const SPACING = 42 // between mushrooms in the cluster: tight, so three fit the narrowest gap between things
+  const CAP_R = 25 // half a cap's width, as drawn at SCALE
+  const CLEAR = 12 // they keep this clear of a puddle's edge, and of the things either side (Adam, 2026-10-21: they came up on the hen's nest)
+  const BASKET_ROOM = 80 // the basket wants this much free ground, beside the mushrooms or in the next free stretch
   const BASKET_HOLDS = 3 // then he shares with the snail
   const REGROW_S = [12, 25] // a picked porcino grows back after this long…
   const PORCINOS_MAX = 6 // …up to this many in a play
   const PICK_FROM = 48 // he stands this far from a porcino to pick it
   const SNAIL_RANGE = [460, 60] // food for the snail no nearer the house, or the fence, than this (she turns back at 420)
   const KEEP_AWAY = 150 // and this far from the fly agaric: down on all fours to sniff, his nose stops short of it
-  const SCALE = 1.35
+  const SCALE = 1.15
   const VARIATIONS = { porcino: ['proud', 'bliss'], agaric: ['nono', 'wary'] }
 
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -100,22 +101,40 @@ const Mushrooms = (() => {
 
   // ------------------------------------------------------------ coming up
 
-  /** By the widest puddle's far side, inside the yard. */
-  function clusterAt() {
-    const p = Layout.puddles[0]
-    if (!p) return 1500
-    const after = p.x + p.rx + FROM_PUDDLE
-    // too near the fence: the puddle's other side instead, never in the water
-    return after + 2 * SPACING < Layout.MAX_X - 150 ? after : p.x - p.rx - FROM_PUDDLE - 2 * SPACING
+  /** The free ground: the gaps between things (layout.js), less their
+   * puddles, clear of both; the widest first. [from, to], scene units. */
+  function stretches() {
+    const out = []
+    for (const [a, b] of Layout.gaps) {
+      const p = Layout.puddles.find((q) => q.x > a && q.x < b)
+      const parts = p ? [[a, p.x - p.rx], [p.x + p.rx, b]] : [[a, b]]
+      for (const [x0, x1] of parts) if (x1 - x0 > 2 * CLEAR) out.push([x0 + CLEAR, x1 - CLEAR])
+    }
+    return out.sort((s, t) => t[1] - t[0] - (s[1] - s[0]))
   }
+
+  let patch = [1500, 1700] // where they grow: the widest free stretch
+
+  /** How wide a cluster of n is, caps and all. */
+  const across = (n) => (n - 1) * SPACING + 2 * CAP_R
 
   function comeUp() {
     if (up || isEnded()) return
     up = true
-    Debug.trace('mushrooms up')
-    const x0 = clusterAt()
+    const free = stretches()
+    const width = free[0] ? free[0][1] - free[0][0] : 0
+    // three if the widest free stretch has room, else two (a third grows later), else none this play
+    const n = width >= across(3) ? 3 : width >= across(2) ? 2 : 0
+    Debug.trace('mushrooms up', { n })
+    if (!n) return
+    patch = free[0]
+    // the basket beside them if the stretch has room for both, else in another with room for it
+    const other = free.slice(1).find(([a, b]) => b - a >= BASKET_ROOM)
+    const shared = width >= across(n) + BASKET_ROOM || !other
+    const cluster = shared ? [patch[0], patch[1] - BASKET_ROOM] : patch
+    const x0 = (cluster[0] + cluster[1]) / 2 - ((n - 1) * SPACING) / 2
     // the fly agaric at the near end: he keeps his distance from it without standing over a porcino
-    ;['agaric', 'porcino', 'porcino'].forEach((kind, i) => {
+    ;['agaric', 'porcino', 'porcino'].slice(0, n).forEach((kind, i) => {
       const x = x0 + i * SPACING
       if (kind === 'agaric') agaric = grow(kind, x)
       else {
@@ -123,9 +142,9 @@ const Mushrooms = (() => {
         grown += 1
       }
     })
-    // before the mushrooms, or after them if that's off the yard
-    const before = x0 - BASKET_FROM
-    drawBasket(before > Layout.MIN_X + 80 ? before : x0 + 2 * SPACING + BASKET_FROM)
+    drawBasket(shared ? patch[1] - BASKET_ROOM / 2 : (other[0] + other[1]) / 2)
+    patch = [cluster[0] + CAP_R, cluster[1] - CAP_R] // where more grow: inside it, caps and all
+    if (n < 3) regrow()
   }
 
   /** A picked porcino grows back a while later, near where they grow. */
@@ -135,8 +154,9 @@ const Mushrooms = (() => {
     Clock.after(rnd(...REGROW_S) * 1000, () => {
       if (isEnded()) return
       const taken = (x) => [agaric, ...porcinos].some((m) => m && Math.abs(m.x - x) < SPACING * 0.8)
-      let x = clusterAt() + rnd(-1, 4) * SPACING
-      for (let i = 0; i < 6 && taken(x); i++) x = clusterAt() + rnd(-1, 4) * SPACING
+      // somewhere in their patch, not on another
+      let x = rnd(...patch)
+      for (let i = 0; i < 6 && taken(x); i++) x = rnd(...patch)
       porcinos.push(grow('porcino', x))
     })
   }

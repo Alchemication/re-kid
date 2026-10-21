@@ -422,6 +422,27 @@ class TestMushrooms:
     """After the rain (mushrooms.js): porcinos to the basket, then, once it
     holds three, one shared with the snail."""
 
+    @pytest.mark.parametrize("seed", range(1, 13))
+    def test_they_come_up_on_free_ground(self, yard: callable, seed: int) -> None:
+        """Never on a thing's ground, nor in a puddle (Adam, 2026-10-21: they
+        came up on the hen's nest, under her ladder)."""
+        y = yard(f"seed={seed}&still&creatures=&rain=0&mushrooms=0")
+        y.page.wait_for_function("Things.ready('porcino')", timeout=20_000)
+        clash = y.page.evaluate("""() => {
+            const taken = Object.entries(Layout.FOOTPRINTS)
+              .filter(([n]) => !Layout.hidden.includes(n))
+              .map(([n, [a, b]]) => [n, a + Layout.x(n), b + Layout.x(n)])
+            const xs = [...document.querySelectorAll('#mushrooms .mushroom, #mushrooms .basket')]
+              .map((g) => g.transform.baseVal.consolidate().matrix.e)
+            const out = []
+            for (const x of xs) {
+              for (const [n, a, b] of taken) if (x > a - 20 && x < b + 20) out.push(`${Math.round(x)} on ${n}`)
+              for (const p of Layout.puddles) if (Math.abs(x - p.x) < p.rx) out.push(`${Math.round(x)} in a puddle`)
+            }
+            return out
+        }""")
+        assert not clash, clash
+
     def test_after_a_full_basket_he_shares_with_the_snail(self, yard: callable) -> None:
         y = yard("seed=1&still&creatures=&rain=1&rain-at=0&mushrooms=0")
         y.page.wait_for_function(

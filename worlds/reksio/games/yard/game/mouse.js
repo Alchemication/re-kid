@@ -20,12 +20,13 @@ const Mouse = (() => {
   const MOUSE_SPEED = 120 // scene units per second, scurrying
   // the trap thing as drawn (index.html), before its per-play offset
   const HOLE = { x: 1150, y: 706 } // the mouse hole at the foot of the wall
-  const OTHER_HOLE = { x: 790, y: 706 } // her other hole, along the wall, behind him as he waits at the first: hide and seek
+  const OTHER_HOLE = { x: 1262, y: 706 } // her other hole, further along the wall past the first: hide and seek
   const TRAP_X = 1080 // the trap's hinge
   const CHEESE = { x: 1100, y: 798 } // cheese on the trap's trigger
   const CHEESE_LANDS = 1175 // where the snap flings it, by the mouse
   const MOUSE_WAITS = 1195 // where she sits looking at the cheese she can't have
   const RIDE = 110 // how far he carries her on his head, and back
+  const PEER = 50 // the step he takes along to look for her at her other hole
   const GROUND = 812
 
   const $ = (id) => document.getElementById(id)
@@ -273,19 +274,18 @@ const Mouse = (() => {
    * she ducks back in… and pops out of the first one, behind him. */
   async function hideAndSeek() {
     await wait(500)
-    mouseAt(OTHER_HOLE.x, OTHER_HOLE.y, 1)
+    mouseAt(OTHER_HOLE.x, OTHER_HOLE.y, -1)
     await peekOut()
     await squeak(1, true)
-    Reksio.face(-1)
-    Reksio.kit.perk('both', 800)
-    await wait(500)
+    Reksio.kit.perk('both', 800) // over there!
+    await Reksio.walkTo(Reksio.x + PEER) // a step along to look
+    Reksio.face(1)
     await mouseEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200 }).finished
     mouseEl.style.opacity = '0'
     await Reksio.puzzled()
     mouseAt(HOLE.x, HOLE.y, -1)
     await peekOut()
-    await squeak(1)
-    Reksio.face(1) // spun round: there she is
+    await squeak(1) // and there she is, back at the first
     await Reksio.startle()
     Reksio.face(1)
   }

@@ -21,7 +21,7 @@ const Layout = (() => {
   const MAX_X = 2690 + GATE_SHIFT // the fence: the yard's right end, for Reksio
   const ROW_FROM = 725 // the doghouse's right edge
   const ROW_TO = MAX_X - 70 // the gate's action spot starts here
-  const MIN_GAP = 140 // at least a dog's length between two things
+  const MIN_GAP = 160 // at least this between two things: a dog's length and some, so three mushrooms fit a gap without a puddle (mushrooms.js). With the widest props out the row still has room for 169
   // what each prop can offer a play: something to find out about (discover),
   // someone Reksio can help (help), someone who helps him (helped). The
   // doghouse, house, tap, bird and gate are always there and only discover.
@@ -57,7 +57,7 @@ const Layout = (() => {
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
   // Each thing on the ground as drawn: from the left of its drawing or action
   // spot (whichever is further left) to the right of the other.
-  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [760, 1290], tree: [1480, 1840], berries: [2220, 2650], hen: [990, 1360] }
+  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650], hen: [990, 1360] }
 
   const random = Debug.random('layout') // this part's own random stream (debug.js)
 
@@ -219,7 +219,7 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, mushroomsAt, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, mushroomsAt, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */
