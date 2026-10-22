@@ -13,9 +13,14 @@
 //   rising bassoon as Reksio stretches and a falling run (the shape of the
 //   marked stretching melody) as he snaps back. They are in B-flat and each
 //   take is in its own key, so they play only while no take does.
+// - The bed (if the game turns it on: bed.start): quiet music under all of
+//   it, so the yard is never silent; bed.js says what it plays, the game
+//   says the moment and how busy the child is (bed.set). It goes through
+//   the retro recipe the effects use, with a little tape wobble, steps back
+//   under a take and comes back after, and stops at the lullaby.
 
 // Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
-/* global Sound, SAMPLES, TUNES, Debug */
+/* global Sound, SAMPLES, TUNES, Debug, Clock, Bed */
 /* exported Music */
 const Music = (() => {
   const VOLUME = 0.42 // music under the sound effects
@@ -24,6 +29,12 @@ const Music = (() => {
   const FADE_S = 0.5 // a take cut short (evening) fades over about this long
   const EIGHTH_S = 60 / 136 / 2 // the touches' pace: eighth notes at 136 BPM
   const CHORD = [62, 65, 70] // D4 F4 B-flat4: the touches stay in B-flat
+  const BED_VOLUME = 0.9 // the bed against the takes and touches (its notes are soft already: bed.js)
+  // the retro recipe the effects are packed with (config.EFFECT_*), live on the bed
+  const RETRO = { highpass: 120, lowpass: 5500, saturation: 0.6 }
+  const WOW = { hz: 0.45, depth: 0.0018, delay: 0.012 } // tape wobble: a slow drift of a hair of pitch
+  const BED_AHEAD_S = 0.6 // bars are scheduled this far ahead on the audio clock
+  const BED_BACK_S = 1.6 // after a take, the bed comes back over about this long
 
   let bus = null
   let out = null
@@ -60,8 +71,8 @@ const Music = (() => {
   }
 
   /** Play one note (or one-shot sound) at time t. Pitched instruments use the
-   * nearest sample, re-tuned by playback rate. */
-  function play(inst, midi, t, vol = 0.8, { index = 0 } = {}) {
+   * nearest sample, re-tuned by playback rate. to: where it goes (the bed's bus). */
+  function play(inst, midi, t, vol = 0.8, { index = 0, to = out } = {}) {
     const list = buffers[inst]
     if (!ready || !list || !list.length) return
     let pick = list[Math.min(index, list.length - 1)]
@@ -75,7 +86,7 @@ const Music = (() => {
     src.playbackRate.value = rate
     const g = bus.ctx.createGain()
     g.gain.value = vol
-    src.connect(g).connect(out)
+    src.connect(g).connect(to)
     src.start(Math.max(t, bus.ctx.currentTime))
   }
 
@@ -95,8 +106,12 @@ const Music = (() => {
     gain.gain.value = TAKE_VOLUME
     src.connect(gain).connect(out)
     const take = { src, gain }
-    src.onended = () => { if (current === take) current = null }
+    src.onended = () => {
+      if (current === take) current = null
+      bedBack()
+    }
     current = take
+    bedAway(t)
     src.start(Math.max(t, bus.ctx.currentTime))
     return true
   }
@@ -108,6 +123,80 @@ const Music = (() => {
     current.gain.gain.setTargetAtTime(0.0001, now, FADE_S / 3)
     current.src.stop(now + FADE_S * 2)
     current = null
+  }
+
+  // ------------------------------------------------------------ the bed
+
+  const bed = { on: false, mood: 'morning', energy: 0.3, style: 'musicbox', playing: false, n: 0, next: 0, gain: null, random: null, timer: () => {}, lfo: null }
+
+  /** The bed's bus: its gain, then the retro recipe and a tape wobble, into the music's out. */
+  function bedBus() {
+    const c = bus.ctx
+    const gain = c.createGain()
+    gain.gain.value = BED_VOLUME
+    const low = c.createBiquadFilter()
+    low.type = 'highpass'
+    low.frequency.value = RETRO.highpass
+    const high = c.createBiquadFilter()
+    high.type = 'lowpass'
+    high.frequency.value = RETRO.lowpass
+    const shaper = c.createWaveShaper()
+    const curve = new Float32Array(1024)
+    for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh((i / 511.5 - 1) * (1 + RETRO.saturation)) / Math.tanh(1 + RETRO.saturation)
+    shaper.curve = curve
+    const wow = c.createDelay(0.05)
+    wow.delayTime.value = WOW.delay
+    const lfo = c.createOscillator()
+    lfo.frequency.value = WOW.hz
+    const depth = c.createGain()
+    depth.gain.value = WOW.depth
+    lfo.connect(depth).connect(wow.delayTime)
+    lfo.start()
+    bed.lfo = lfo
+    gain.connect(low).connect(high).connect(shaper).connect(wow).connect(out)
+    return gain
+  }
+
+  /** Bars, scheduled a little ahead on the audio clock, while the bed is on. */
+  function bedBars() {
+    if (!ready || night) return
+    const c = bus.ctx
+    if (current || bed.next < c.currentTime) bed.next = c.currentTime + 0.1 // under a take nothing is scheduled (nobody would hear it); back from a hidden page, afresh
+    if (current) return
+    while (bed.next < c.currentTime + BED_AHEAD_S) {
+      const pick = Bed.style(bed.mood, bed.energy, bed.playing)
+      if (pick.style !== bed.style) bed.n = 0 // a new bed starts its chords from the top
+      bed.style = pick.style
+      bed.playing = pick.playing
+      const { notes, seconds } = Bed.bar(bed.style, bed.mood, bed.energy, bed.n, bed.random)
+      for (const note of notes) play(note.inst, note.midi, bed.next + note.at, note.vol, { to: bed.gain })
+      bed.next += seconds
+      bed.n += 1
+    }
+  }
+
+  /** The bed off: its bars stop, its sound fades, its wobble stops; it may start again. */
+  function stopBed() {
+    if (!bed.on) return
+    bed.timer()
+    bed.gain?.gain.setTargetAtTime(0.0001, bus.ctx.currentTime, 0.3)
+    const { gain, lfo } = bed
+    Clock.after(1500, () => {
+      lfo?.stop()
+      gain?.disconnect()
+    })
+    bed.on = false
+    bed.gain = null
+  }
+
+  /** A take begins at t: the bed steps back. */
+  function bedAway(t) {
+    if (bed.gain) bed.gain.gain.setTargetAtTime(0.0001, Math.max(t, bus.ctx.currentTime), 0.25)
+  }
+
+  /** No take now: the bed comes back (not after the lullaby). */
+  function bedBack() {
+    if (bed.gain && !current && !night) bed.gain.gain.setTargetAtTime(BED_VOLUME, bus.ctx.currentTime, BED_BACK_S / 3)
   }
 
   // ------------------------------------------------------------ public
@@ -224,6 +313,7 @@ const Music = (() => {
     fadeTake()
     playTake('lullaby', random, bus.ctx.currentTime + after)
     night = true
+    stopBed() // the lullaby is the last music of the day
   }
 
   let auditionRandom = null // its own stream, made when first needed, so a play's draws stay put
@@ -243,7 +333,35 @@ const Music = (() => {
     }
   }
 
+  /** The bed (bed.js), which a game turns on: start() once sound may play;
+   * set({ mood, energy }) as the day goes and the child plays or stops. */
+  const bedApi = {
+    async start() {
+      if (bed.on || night) return
+      bed.on = true // at once, so taps while it loads don't start it twice
+      try {
+        await prepare()
+      } catch (e) {
+        bed.on = false // the samples wouldn't load: no bed, and the next tap may try again
+        Debug.trace('music bed', { failed: String(e?.message ?? e) })
+        return
+      }
+      bed.random ??= Debug.random('music-bed')
+      bed.gain = bedBus()
+      if (current) bedAway(bus.ctx.currentTime)
+      bed.timer = Clock.every(200, bedBars)
+    },
+    set({ mood = bed.mood, energy = bed.energy }) {
+      bed.mood = mood
+      bed.energy = energy
+    },
+    get on() { return bed.on },
+    get style() { return bed.style },
+    get mood() { return bed.mood },
+  }
+
   return {
+    bed: bedApi,
     start, startMorning, phrase, audition, setDusk, setRain, react, evening,
     get ready() { return ready },
     get playing() { return !!current },

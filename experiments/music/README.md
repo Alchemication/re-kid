@@ -17,6 +17,15 @@ Outputs (`out/`) are not committed.
 - `picks.json` — Adam's latest verdicts.
 - `adopt.py` — the keeps into the yard (`tunes/`, `tunes.yaml`); then
   `main.py tunes reksio`. Procedure: the `new-music` skill.
+- `bed.html` — the music bed board (2026-10-21): eight beds of quiet
+  music under the yard, played live from the yard's samples in B-flat,
+  steered by mood and how busy the yard is, with a touch and a recorded
+  phrase to hear over them. Mark keep/maybe/no, tick where each could be
+  used, Save picks (`bed-picks.json`). The first card, "The yard's day",
+  plays the game's own `bed.js` (a bed for each moment, as Adam's verdict
+  "they all sound good" became); "Old film sound" puts them through the
+  retro recipe, a tape wobble and looser timing, as the game does
+  (Adam: "a bit too crisp").
 
 ## Findings (2026-10-13)
 

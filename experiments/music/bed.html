@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Background music</title>
+<style>
+  :root { --ink: #1d1914; --paper: #f7f2e7; --card: #fffdf8; --line: #ddd2bd; --accent: #b5652b; --muted: #6d6458; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 80px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
+  .lead b { color: var(--ink); }
+  .bar { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+  .bar label { color: var(--muted); }
+  button { font: inherit; border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  select, input[type=range] { font: inherit; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .card.playing { border-color: var(--accent); box-shadow: 0 0 0 2px #b5652b33; }
+  .card h2 { font-size: 17px; margin: 0; }
+  .what { color: var(--muted); margin: 0; }
+  .listen { margin: 0; font-size: 14px; }
+  .listen b { color: var(--accent); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .uses { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; color: var(--muted); }
+  textarea { font: inherit; font-size: 13px; width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 8px; padding: 6px; resize: vertical; }
+  .verdict button.keep.on { background: #4f7a3a; border-color: #4f7a3a; }
+  .verdict button.maybe.on { background: #c08a2d; border-color: #c08a2d; }
+  .verdict button.no.on { background: #9a3b2c; border-color: #9a3b2c; }
+  .note { font-size: 13px; color: var(--muted); }
+
+  .hero { display: flex; gap: 16px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 14px 0 18px; position: sticky; top: 8px; z-index: 3; box-shadow: 0 4px 14px #0000000f; }
+  .hero .big { font-size: 34px; width: 46px; text-align: center; }
+  .hero .scene { font-weight: 600; font-size: 17px; }
+  .hero .ask { color: var(--muted); font-size: 14px; }
+  .hero .timeline { display: flex; gap: 3px; margin-top: 6px; }
+  .hero .timeline span { height: 5px; flex: 1; border-radius: 3px; background: var(--line); }
+  .hero .timeline span.done { background: var(--accent); }
+  .card .top { display: flex; align-items: center; gap: 10px; }
+  .card .em { font-size: 26px; }
+  .card .play { font-size: 16px; padding: 8px 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 13px; padding: 4px 10px; border-radius: 999px; }
+  .chip.on { background: #e9dcc5; border-color: var(--accent); color: var(--ink); }
+  .q { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .verdict button { flex: 1; }
+  .verdict .keep.on { background: #4f7a3a; border-color: #4f7a3a; color: #fff; }
+  .verdict .maybe.on { background: #c08a2d; border-color: #c08a2d; color: #fff; }
+  .verdict .no.on { background: #9a3b2c; border-color: #9a3b2c; color: #fff; }
+  .footer { margin-top: 22px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .footer .count { color: var(--muted); }
+  details { margin-top: 18px; color: var(--muted); }
+  details summary { cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Background music for the yard</h1>
+  <p class="lead">Today the yard is silent between music clips. These are ideas for <b>quiet music that's always there underneath</b>, changing with what's happening. Press <b>▶</b> on one: you'll hear 45 seconds of a pretend day, with what's happening shown below. Then say if you like it, and what it's good for.</p>
+
+  <div class="hero" id="hero">
+    <div class="big" id="heroEmoji">🎧</div>
+    <div style="flex:1">
+      <div class="scene" id="heroScene">Press ▶ on any card below</div>
+      <div class="ask" id="heroAsk">Each one plays a short pretend day: morning, playing, quiet, rain, evening, a nap.</div>
+      <div class="timeline" id="timeline"></div>
+    </div>
+    <label class="note" title="As the game plays it: the old-film sound the sound effects have, a slight tape wobble, notes a little loose"><input id="old" type="checkbox" checked> 🎞 Old film sound</label>
+    <label class="note">🔈 <input id="volume" type="range" min="0" max="1" step="0.05" value="0.4"> 🔊</label>
+    <button id="stop">■ Stop</button>
+  </div>
+
+  <div class="grid" id="cards"></div>
+
+  <div class="footer">
+    <span class="count" id="count">0 rated</span>
+    <button id="save">⬇ Download my picks</button>
+    <span class="note">then put <b>bed-picks.json</b> in <code>experiments/music/</code>, or just tell Claude.</span>
+  </div>
+
+  <details>
+    <summary>Try it by hand (optional)</summary>
+    <p>While one plays, pick what's happening in the yard, and hear it change.</p>
+    <div class="chips" id="manual"></div>
+    <p><button id="touch">✨ He does something new</button> <button id="take">🎵 A recorded clip comes in</button></p>
+    <p class="note">The recorded clips are in their own keys, so a jump between this music and a clip is expected for now; the next step ties them together.</p>
+  </details>
+</main>
+
+<script src="../../worlds/reksio/games/yard/game/samples.js"></script>
+<script src="../../worlds/reksio/games/yard/game/bed.js"></script>
+<script>
+const TONIC = 58 // B-flat3, the touches' key
+const SCALE = [0, 2, 4, 5, 7, 9, 11]
+const deg = (s) => TONIC + 12 * Math.floor(s / 7) + SCALE[((s % 7) + 7) % 7]
+const triad = (d) => [deg(d), deg(d + 2), deg(d + 4)]
+const MOODS = {
+  morning: { chords: [0, 3, 0, 4], lift: 12, dens: [2, 5] },
+  day: { chords: [0, 5, 3, 4], lift: 0, dens: [2, 5] },
+  afternoon: { chords: [0, 2, 3, 0], lift: 0, dens: [1, 4] },
+  dusk: { chords: [5, 3, 0, 4], lift: 0, dens: [1, 3] },
+  rain: { chords: [0, 3], lift: 12, dens: [1, 3] },
+  rest: { chords: [0, 3], lift: 0, dens: [0, 1] },
+}
+const density = (m, e) => Math.round(m.dens[0] + (m.dens[1] - m.dens[0]) * e)
+function slots(n, beats, rnd) {
+  const out = new Set()
+  for (let i = 0; i < n * 3 && out.size < n; i++) out.add(1 + Math.floor(rnd() * (beats * 2 - 1)))
+  return [...out]
+}
+
+// The pretend day each ▶ plays: when (seconds), what's happening, and what to listen for.
+const TOUR = [
+  { t: 0, mood: 'morning', energy: 0.5, emoji: '🌅', scene: 'Morning: Reksio has just woken up', ask: 'Bright and fresh?' },
+  { t: 7, mood: 'day', energy: 1, emoji: '👆', scene: 'Daytime: the child is tapping lots of things', ask: 'Lively enough to feel like play, not too busy?' },
+  { t: 11, mood: 'day', energy: 1, emoji: '✨', scene: 'He does something new: a sparkle plays', ask: 'Does the sparkle fit with the music, or clash?', touch: true },
+  { t: 16, mood: 'day', energy: 0, emoji: '👀', scene: 'The child stops and just watches', ask: 'Does it calm down, but not go silent?' },
+  { t: 23, mood: 'rain', energy: 0.4, emoji: '🌧', scene: 'It starts to rain', ask: 'Does it feel like rain, softer?' },
+  { t: 30, mood: 'dusk', energy: 0.3, emoji: '🌇', scene: 'Evening: the sun goes down', ask: 'Winding down, a little sleepy?' },
+  { t: 37, mood: 'rest', energy: 0, emoji: '💤', scene: 'Reksio lies down for a nap', ask: 'Nearly nothing, but still there?' },
+  { t: 45, end: true },
+]
+const SCENES = [['morning', '🌅 Morning'], ['day', '🐕 Playing'], ['afternoon', '☀️ Lazy afternoon'], ['dusk', '🌇 Evening'], ['rain', '🌧 Rain'], ['rest', '💤 Napping']]
+
+const BEDS = [
+  {
+    id: 'musicbox', name: 'Music box', emoji: '🎁', bpm: 72,
+    what: 'Plucked strings and a little bell, like a music box.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = [{ i: 'pizz', midi: c[0] - 12, at: 0, v: 0.32 }]
+      for (const s of slots(density(m, e), 4, rnd)) {
+        const glock = rnd() < 0.25
+        out.push({ i: glock ? 'glock' : 'pizz', midi: c[Math.floor(rnd() * 3)] + m.lift + (glock ? 12 : 0), at: s / 2, v: glock ? 0.16 : 0.24 })
+      }
+      return out
+    },
+  },
+  {
+    id: 'tiptoe', name: 'Tiptoe walk', emoji: '🐾', bpm: 96,
+    what: 'A plucked bass walking on every beat: the cartoon "sneaking about" feel.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      const walk = [c[0] - 12, c[1] - 12, c[2] - 12, c[1] - 12]
+      walk.forEach((midi, k) => { if (k === 0 || e > 0.25 || k === 2) out.push({ i: 'pizz', midi, at: k, v: 0.26 }) })
+      for (const s of slots(Math.max(0, density(m, e) - 1), 4, rnd)) out.push({ i: rnd() < 0.5 ? 'xylo' : 'pizz', midi: c[Math.floor(rnd() * 3)] + 12 + m.lift, at: s / 2, v: 0.14 })
+      return out
+    },
+  },
+  {
+    id: 'lightoompah', name: 'Soft oom-pah', emoji: '🎺', bpm: 88,
+    what: 'The old music\'s idea (bassoon, plucked chords), much quieter and with no tune.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      out.push({ i: 'bassoon', midi: c[0] - 12, at: 0, v: 0.22 })
+      if (e > 0.2) out.push({ i: 'bassoon', midi: c[2] - 24, at: 2, v: 0.18 })
+      for (const b of [1, 3]) for (const midi of [c[1], c[2]]) out.push({ i: 'pizz', midi: midi + m.lift, at: b, v: 0.13 })
+      return out
+    },
+  },
+  {
+    id: 'air', name: 'Air', emoji: '🎐', bpm: 64,
+    what: 'High and sparse: a bell here and there, a little flute now and then.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      for (const s of slots(Math.max(1, density(m, e) - 1), 4, rnd)) out.push({ i: 'glock', midi: c[Math.floor(rnd() * 3)] + 12 + m.lift, at: s / 2, v: 0.15 })
+      if (rnd() < 0.25 + 0.3 * e) [c[2] + 14, c[2] + 12, c[1] + 12].forEach((midi, k) => out.push({ i: 'flute', midi: midi + m.lift, at: 2 + k * 0.5, v: 0.17 }))
+      return out
+    },
+  },
+  {
+    id: 'patter', name: 'Xylophone patter', emoji: '🪵', bpm: 84,
+    what: 'Soft xylophone notes rolling up and down.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      if (n % 2 === 0) out.push({ i: 'pizz', midi: c[0] - 12, at: 0, v: 0.3 })
+      const run = [c[0], c[1], c[2], c[0] + 12, c[2], c[1]]
+      const len = Math.max(1, Math.round(1 + 5 * e * (m.dens[1] / 5)))
+      const from = Math.floor(rnd() * 3)
+      for (let k = 0; k < len; k++) out.push({ i: 'xylo', midi: run[(from + k) % run.length] + 12 + m.lift, at: 1 + k * 0.5, v: 0.12 })
+      return out
+    },
+  },
+  {
+    id: 'conversation', name: 'Flute and bassoon chatting', emoji: '💬', bpm: 76,
+    what: 'A low bassoon asks, a high flute answers, over and over.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = [{ i: 'pizz', midi: c[0] - 12, at: 0, v: 0.26 }]
+      if (n % 2 === 0) {
+        const q = [c[0] - 12, c[1] - 12, c[2] - 12]
+        q.forEach((midi, k) => out.push({ i: 'bassoon', midi, at: 1 + k * 0.5, v: 0.2 }))
+      } else if (rnd() < 0.5 + 0.5 * e) {
+        const a = [c[2] + 12, c[1] + 12, c[0] + 12]
+        a.forEach((midi, k) => out.push({ i: 'flute', midi: midi + m.lift, at: 1 + k * 0.5, v: 0.16 }))
+      }
+      return out
+    },
+  },
+  {
+    id: 'floor', name: 'Almost nothing', emoji: '🤫', bpm: 60,
+    what: 'Just a low note now and then and a rare bell: the least it can be.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      if (n % 2 === 0) out.push({ i: 'pizz', midi: c[0] - 12, at: 0, v: 0.28 })
+      if (n % 3 === 1 || rnd() < 0.3 * e) out.push({ i: 'glock', midi: c[Math.floor(rnd() * 3)] + 12 + m.lift, at: 2, v: 0.14 })
+      return out
+    },
+  },
+  {
+    id: 'drips', name: 'Drips', emoji: '💧', bpm: 80,
+    what: 'High notes at odd moments, like drops off a roof. Meant for rain.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      if (n % 2 === 0) out.push({ i: 'pizz', midi: c[0] - 12, at: 0, v: 0.24 })
+      const k = 2 + Math.round(4 * e)
+      for (let j = 0; j < k; j++) out.push({ i: rnd() < 0.5 ? 'glock' : 'pizz', midi: c[Math.floor(rnd() * 3)] + 24, at: 0.25 + rnd() * 3.6, v: 0.12 })
+      return out
+    },
+  },
+]
+
+
+// The one the game plays (bed.js): each moment its own bed from those above.
+BEDS.unshift({
+  id: 'yard', name: 'The yard\'s day, as the game plays it', emoji: '🏡', game: true,
+  what: 'Each moment its own: music box in the morning and while watching, tiptoe while playing, patter in the afternoon, chatting at evening, drips in the rain, almost nothing for a nap.',
+})
+
+// ---------------------------------------------------------------- engine
+
+let ctx, master, ready = null
+const buffers = {}
+const bytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer
+function prepare() {
+  if (ready) return ready
+  ctx = new AudioContext()
+  master = ctx.createGain()
+  master.gain.value = Number($('volume').value)
+  master.connect(ctx.destination)
+  chain()
+  ready = Promise.all(Object.entries(SAMPLES).map(async ([inst, notes]) => {
+    buffers[inst] = await Promise.all(notes.map(async (n) => ({ midi: n.midi, buffer: await ctx.decodeAudioData(bytes(n.data)) })))
+    buffers[inst].sort((a, b) => (a.midi ?? 0) - (b.midi ?? 0))
+  }))
+  return ready
+}
+function play(inst, midi, t, vol, out) {
+  const list = buffers[inst]
+  if (!list?.length) return
+  let pick = list[0], rate = 1
+  if (midi != null) {
+    pick = list.reduce((b, s) => (Math.abs(s.midi - midi) < Math.abs(b.midi - midi) ? s : b))
+    rate = 2 ** ((midi - pick.midi) / 12)
+  }
+  const src = ctx.createBufferSource()
+  src.buffer = pick.buffer
+  src.playbackRate.value = rate
+  const g = ctx.createGain()
+  g.gain.value = vol
+  src.connect(g).connect(out)
+  src.start(Math.max(t, ctx.currentTime))
+}
+// the old-film sound, as the game's bed has it (music.js RETRO, WOW)
+let bedOut = null, retroIn = null
+function chain() {
+  bedOut = ctx.createGain()
+  const low = ctx.createBiquadFilter(); low.type = 'highpass'; low.frequency.value = 120
+  const high = ctx.createBiquadFilter(); high.type = 'lowpass'; high.frequency.value = 5500
+  const shaper = ctx.createWaveShaper(), curve = new Float32Array(1024)
+  for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh((i / 511.5 - 1) * 1.6) / Math.tanh(1.6)
+  shaper.curve = curve
+  const wow = ctx.createDelay(0.05); wow.delayTime.value = 0.012
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.45
+  const depth = ctx.createGain(); depth.gain.value = 0.0018
+  lfo.connect(depth).connect(wow.delayTime); lfo.start()
+  low.connect(high).connect(shaper).connect(wow).connect(master)
+  retroIn = low
+  route()
+}
+const old = () => $('old').checked
+function route() {
+  bedOut.disconnect()
+  bedOut.connect(old() ? retroIn : master)
+}
+
+function stream(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32) }
+
+const now = { mood: 'day', energy: 0.5 } // what's happening in the pretend yard
+let playing = null // { bed, card, gain, timer, tour: [timeouts] }
+
+function stopAll() {
+  if (!playing) return
+  clearInterval(playing.timer)
+  playing.tour.forEach(clearTimeout)
+  playing.gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15)
+  playing.card.classList.remove('playing')
+  playing.card.querySelector('.play').textContent = '▶ Listen'
+  playing = null
+  showScene({ emoji: '🎧', scene: 'Stopped', ask: 'Press ▶ on any card to listen.' }, -1)
+}
+
+function startBed(bed, card, tour = true) {
+  stopAll()
+  const gain = ctx.createGain()
+  gain.connect(bedOut)
+  const rnd = stream(7)
+  let n = 0, next = ctx.currentTime + 0.1, style = null, wasPlaying = false
+  const tick = () => {
+    while (next < ctx.currentTime + 0.6) {
+      if (bed.game) {
+        // the game's own: bed.js picks the bed for the moment, and plays it
+        const pick = Bed.style(now.mood, now.energy, wasPlaying)
+        if (pick.style !== style) n = 0
+        style = pick.style
+        wasPlaying = pick.playing
+        const bar = Bed.bar(style, now.mood, now.energy, n, rnd)
+        for (const note of bar.notes) play(note.inst, note.midi, next + note.at, note.vol, gain)
+        next += bar.seconds
+      } else {
+        const beat = 60 / bed.bpm
+        for (const note of bed.bar(MOODS[now.mood], now.energy, n, rnd)) {
+          const loose = old() ? (rnd() * 2 - 1) * 0.025 : 0 // played a little loose, old-style
+          play(note.i, note.midi, next + Math.max(0, note.at * beat + loose), note.v * (old() ? 1 + (rnd() * 2 - 1) * 0.15 : 1), gain)
+        }
+        next += 4 * beat
+      }
+      n += 1
+    }
+  }
+  playing = { bed, card, gain, timer: null, tour: [] }
+  if (tour) {
+    TOUR.forEach((step, k) => playing.tour.push(setTimeout(() => {
+      if (step.end) return finish()
+      now.mood = step.mood
+      now.energy = step.energy
+      showScene(step, k)
+      if (step.touch) setTimeout(touch, 600)
+    }, step.t * 1000)))
+  }
+  tick()
+  playing.timer = setInterval(tick, 150)
+  card.classList.add('playing')
+  card.querySelector('.play').textContent = '■ Stop'
+}
+
+function finish() {
+  const card = playing?.card
+  stopAll()
+  showScene({ emoji: '👂', scene: 'That was the whole day', ask: 'Now rate it on its card: do you like it, and what is it good for?' }, TOUR.length)
+  card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
+
+const $ = (id) => document.getElementById(id)
+function showScene(step, k) {
+  $('heroEmoji').textContent = step.emoji
+  $('heroScene').textContent = step.scene
+  $('heroAsk').textContent = step.ask
+  ;[...$('timeline').children].forEach((s, i) => s.classList.toggle('done', i <= k))
+}
+TOUR.slice(0, -1).forEach(() => $('timeline').appendChild(document.createElement('span')))
+
+async function touch() {
+  if (!ctx) return
+  const t = ctx.currentTime + 0.02, e = 60 / 136 / 2
+  // the game's level for these was set for silence around them: here, with the music under them, about half
+  ;[74, 77, 82, 86].forEach((n, k) => play('xylo', n, t + (k * e) / 2, 0.22, master))
+  play('glock', 94, t + 2 * e, 0.15, master)
+}
+
+let tunes = null, takeAt = 0
+function loadTunes() {
+  tunes ??= new Promise((done) => {
+    const s = document.createElement('script')
+    s.src = '../../worlds/reksio/games/yard/game/tunes.js'
+    s.onload = async () => done(await Promise.all(TUNES.phrase.map((b64) => ctx.decodeAudioData(bytes(b64)))))
+    document.body.appendChild(s)
+  })
+  return tunes
+}
+async function clip() {
+  await prepare()
+  const list = await loadTunes()
+  const src = ctx.createBufferSource()
+  src.buffer = list[takeAt++ % list.length]
+  const g = ctx.createGain()
+  g.gain.value = 0.3 // a little above the music under it, not over it
+  src.connect(g).connect(master)
+  const t = ctx.currentTime + 0.1
+  if (playing) {
+    playing.gain.gain.setTargetAtTime(0.0001, t, 0.4)
+    playing.gain.gain.setTargetAtTime(1, t + src.buffer.duration, 1.2)
+  }
+  src.start(t)
+}
+
+// ---------------------------------------------------------------- cards and picks
+
+const KEY = 'bed-board-picks'
+let picks = {}
+try { picks = JSON.parse(localStorage.getItem(KEY)) || {} } catch { picks = {} }
+const keep = () => {
+  try { localStorage.setItem(KEY, JSON.stringify(picks)) } catch { /* private window: only for this visit */ }
+  $('count').textContent = `${Object.values(picks).filter((p) => p.verdict).length} of ${BEDS.length} rated`
+}
+const VERDICTS = [['keep', '👍 Like it'], ['maybe', '🤷 Not sure'], ['no', '👎 No']]
+
+for (const bed of BEDS) {
+  const p = (picks[bed.id] ??= { verdict: null, uses: [], note: '' })
+  const card = document.createElement('section')
+  card.className = 'card'
+  card.innerHTML = `
+    <div class="top"><span class="em">${bed.emoji}</span><h2>${bed.name}</h2></div>
+    <p class="what">${bed.what}</p>
+    <button class="play">▶ Listen</button>
+    <div class="row verdict">${VERDICTS.map(([v, label]) => `<button class="${v}" data-v="${v}">${label}</button>`).join('')}</div>
+    <div class="q">Good for:</div>
+    <div class="chips">${SCENES.map(([v, label]) => `<button class="chip" data-use="${v}">${label}</button>`).join('')}</div>
+    <textarea placeholder="Anything to add? (optional)"></textarea>`
+  card.querySelector('.play').onclick = async () => {
+    await prepare()
+    if (playing?.bed === bed) return stopAll()
+    startBed(bed, card)
+  }
+  const verdicts = card.querySelectorAll('.verdict button')
+  const showVerdict = () => verdicts.forEach((x) => x.classList.toggle('on', p.verdict === x.dataset.v))
+  verdicts.forEach((b) => (b.onclick = () => { p.verdict = p.verdict === b.dataset.v ? null : b.dataset.v; showVerdict(); keep() }))
+  showVerdict()
+  card.querySelectorAll('.chip').forEach((c) => {
+    c.classList.toggle('on', p.uses.includes(c.dataset.use))
+    c.onclick = () => {
+      p.uses = p.uses.includes(c.dataset.use) ? p.uses.filter((u) => u !== c.dataset.use) : [...p.uses, c.dataset.use]
+      c.classList.toggle('on', p.uses.includes(c.dataset.use))
+      keep()
+    }
+  })
+  const note = card.querySelector('textarea')
+  note.value = p.note
+  note.oninput = () => { p.note = note.value; keep() }
+  $('cards').appendChild(card)
+}
+keep()
+
+for (const [v, label] of SCENES) {
+  const b = document.createElement('button')
+  b.className = 'chip'
+  b.textContent = label
+  b.onclick = () => {
+    if (!playing) return
+    playing.tour.forEach(clearTimeout) // by hand now: the pretend day stops steering
+    playing.tour = []
+    now.mood = v
+    document.querySelectorAll('#manual .chip').forEach((x) => x.classList.toggle('on', x === b))
+    showScene({ emoji: label.split(' ')[0], scene: label.slice(label.indexOf(' ') + 1), ask: 'By hand: pick another, or try the buttons below.' }, -1)
+  }
+  $('manual').appendChild(b)
+}
+$('stop').onclick = stopAll
+$('old').onchange = () => bedOut && route()
+$('volume').oninput = () => { if (master) master.gain.setTargetAtTime(Number($('volume').value), ctx.currentTime, 0.05) }
+$('touch').onclick = touch
+$('take').onclick = clip
+$('save').onclick = () => {
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(picks, null, 2)], { type: 'application/json' }))
+  a.download = 'bed-picks.json'
+  a.click()
+}
+</script>
+</body>
+</html>

@@ -418,6 +418,50 @@ class TestVariations:
         y.settled()
 
 
+class TestMusicBed:
+    """?music=layered: quiet music under the yard (bed.js), steered by the
+    moment and how busy the child is; without the flag, the music as it was."""
+
+    def test_after_a_tap_the_bed_plays_and_follows_the_moment(
+        self, yard: callable
+    ) -> None:
+        y = yard(f"{STILL}&music=layered")
+        y.page.mouse.click(640, 650)  # a tap: sound may play now
+        y.page.wait_for_function("Music.bed.on && Music.ready", timeout=20_000)
+        y.page.wait_for_timeout(500)
+        assert y.page.evaluate("Music.bed.style") in ("musicbox", "tiptoe")
+        assert y.page.evaluate("Music.bed.mood") == "morning", "the play starts at 8"
+        assert not y.errors, y.errors
+
+    def test_in_the_rain_it_plays_the_drips(self, yard: callable) -> None:
+        y = yard("seed=1&creatures=&rain=1&rain-at=1&music=layered")
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_function("Weather.raining && Music.bed.on", timeout=30_000)
+        # after the morning take (the bed waits under it)
+        y.page.wait_for_function("Music.bed.style === 'drips'", timeout=25_000)
+        assert not y.errors, y.errors
+
+    def test_it_stops_at_the_lullaby_and_a_replay_keeps_it(
+        self, yard: callable
+    ) -> None:
+        y = yard(f"{STILL}&music=layered")
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_function("Music.bed.on && Music.ready", timeout=20_000)
+        assert "music=layered" in y.page.evaluate("yardGame.replayUrl()")
+        y.page.evaluate("Music.evening(Debug.random('test-evening'))")
+        assert y.page.evaluate("Music.bed.on") is False, "still on after the lullaby"
+        y.page.mouse.click(640, 650)  # a tap after it: the day is over, no bed again
+        y.page.wait_for_timeout(500)
+        assert y.page.evaluate("Music.bed.on") is False
+        assert not y.errors, y.errors
+
+    def test_without_the_flag_there_is_no_bed(self, yard: callable) -> None:
+        y = yard(STILL)
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_timeout(1500)
+        assert y.page.evaluate("Music.bed.on") is False
+
+
 class TestMushrooms:
     """After the rain (mushrooms.js): porcinos to the basket, then, once it
     holds three, one shared with the snail."""

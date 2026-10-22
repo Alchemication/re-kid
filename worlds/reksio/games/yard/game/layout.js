@@ -149,6 +149,8 @@ const Layout = (() => {
   const asked = listed('props', PROP_POOL)
   if (asked.length) props.splice(0, props.length, ...asked)
   const { mouseAt, visitorAt, henAt, mushroomsAt } = whenFlags(params)
+  // ?music=layered: the music bed under everything (bed.js), to try it next to the music as it is
+  const layered = params.get('music') === 'layered'
   // the tree's fruit this play (?fruit=apple|plum|nut forces it), and when its visitor comes
   const FRUITS = ['apple', 'plum', 'nut']
   const fruitDrawn = FRUITS[Math.floor(random() * FRUITS.length)]
@@ -219,11 +221,11 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, mushroomsAt, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, mushroomsAt, layered, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */
-  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit, ...(dayS ? { day: dayS } : {}), ...(hour !== null ? { hour } : {}) })
+  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit, ...(dayS ? { day: dayS } : {}), ...(hour !== null ? { hour } : {}), ...(layered ? { music: 'layered' } : {}) })
   Debug.pin({ flags: replayFlags(), layout }) // a replay builds this same yard (debug.js)
   return layout
 })()

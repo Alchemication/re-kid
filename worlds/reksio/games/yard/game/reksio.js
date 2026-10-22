@@ -582,6 +582,8 @@ const Reksio = (() => {
     /** The pose he is in or moving into: stand, sit, lie, nap, curl, sprawl,
      * bowStretch, backStretch. Standing may be upright or on all fours. */
     get pose() { return current },
+    /** Lying down: resting, napping, curled up or sprawled out. */
+    get lying() { return LYING.includes(current) },
     get stretching() { return stretching || stretch !== 0 },
     /** Moving along while not drawn walking: a gesture still posing him, or
      * his body still drawn resting. Read from what was drawn, not from the

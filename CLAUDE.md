@@ -140,7 +140,9 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     `main.py tunes` with the effects' retro recipe), a part at a time:
     the morning, a phrase now and then, the lullaby. Small touches for
     what Reksio does play note by note from CC0 instrument samples
-    (`samples.yaml`, packed into `samples.js` by `main.py samples`).
+    (`samples.yaml`, packed into `samples.js` by `main.py samples`), and,
+    behind `?music=layered`, a quiet bed under everything (`bed.js`, a bed
+    for each moment, played from the same samples).
   - `effects.js`, `tunes.js` and `samples.js` are generated: rebuild them,
     don't edit. So are the copies of `shared/` scripts (`main.py shared`).
   - Original audio: never committed, except the bark (see Project), packed
@@ -222,7 +224,7 @@ the edge cases that would let bad data pass silently.
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
-  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`): the part that draws tells them what
+  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js`): the part that draws tells them what
   happened and does what they say. Drawing parts are tested here too, on a
   pretend page and clock: `load(…, { dom: true, globals })`, then
   `await page.advance(ms)` runs the timers and animation frames due (all

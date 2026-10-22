@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots, Bed */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -434,6 +434,7 @@
     if (e.target.closest('#fullscreen, #again')) return
     e.preventDefault()
     Sound.ensure()
+    stirBed() // ?music=layered: the bed starts with the first tap (sound may play now), and livens up with each
     if (asleep) return perform('wake up')
     Music.start()
     const intent = tapIntent(e)
@@ -451,6 +452,7 @@
     if (!Input.ownsKey(key)) return
     e.preventDefault()
     Sound.ensure()
+    if (!e.repeat) stirBed()
     if (asleep) return perform('wake up')
     Music.start()
     const intent = Input.keyDown(key, { nearest: Spots.nearest(), minX: Layout.MIN_X, maxX: Layout.MAX_X })
@@ -801,6 +803,23 @@
 
   let last = Clock.now()
   let shownCam = -1
+  // the music bed (?music=layered, bed.js): the moment of the day, and how
+  // busy the child is, told to it as often as it reads them
+  const BED_STEER_MS = 200
+  let busyness = 0.3
+  function stirBed() {
+    if (!Layout.layered) return
+    busyness = Bed.livelier(busyness)
+    Music.bed.start()
+  }
+  if (Layout.layered) {
+    Clock.every(BED_STEER_MS, () => {
+      busyness = Bed.calmer(busyness, BED_STEER_MS / 1000)
+      const resting = asleep || Reksio.lying
+      Music.bed.set({ mood: Bed.moodAt({ hour: day.hour(Clock.now()), raining: Weather.raining, resting, dusk: day.dusk }), energy: busyness })
+    })
+  }
+
   function frame() {
     const t = Clock.now() // game time: stands still while the page is hidden
     const dt = Math.min(0.05, (t - last) / 1000)

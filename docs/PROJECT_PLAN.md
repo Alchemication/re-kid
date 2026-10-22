@@ -45,6 +45,15 @@ New work on the yard waits (Adam, 2026-10-15), unless a creative idea is
 too good to leave. What Adam does in play still feeds it, and Krecik's
 scene:
 
+- **Adam tries the music bed** (`?music=layered`, built 2026-10-21; Adam:
+  too much silence, clips repeating; on the bed board all the beds sounded
+  good, "a bit too crisp"): quiet music under everything, a bed for each
+  moment, through the old-film sound. Judge it in the yard against the
+  music as it is. Then step 2: the recorded takes tagged with key and
+  tempo, the bed moving into their key and the take starting on its
+  beat; step 3: the bed leaning ahead to what's coming (the mouse, the
+  hen, the clouds, the cuckoo, dusk); step 4: more highlights cut from
+  longer takes. If it works, it becomes the default and the meadow gets it.
 - **Adam listens to the yard's new music** (built 2026-10-13: takes in
   `tunes.yaml`, phrases after something done, or a long quiet). To judge in play: the level
   against the effects (`VOLUME`, `TAKE_VOLUME` in music.js), how often
