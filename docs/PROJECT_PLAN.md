@@ -45,15 +45,12 @@ New work on the yard waits (Adam, 2026-10-15), unless a creative idea is
 too good to leave. What Adam does in play still feeds it, and Krecik's
 scene:
 
-- **Adam tries the music bed** (`?music=layered`, built 2026-10-21; Adam:
-  too much silence, clips repeating; on the bed board all the beds sounded
-  good, "a bit too crisp"): quiet music under everything, a bed for each
-  moment, through the old-film sound. Judge it in the yard against the
-  music as it is. Then step 2: the recorded takes tagged with key and
-  tempo, the bed moving into their key and the take starting on its
-  beat; step 3: the bed leaning ahead to what's coming (the mouse, the
-  hen, the clouds, the cuckoo, dusk); step 4: more highlights cut from
-  longer takes. If it works, it becomes the default and the meadow gets it.
+- **The music bed is on** (Adam, 2026-10-22: "it feels good"; `bed.js`,
+  `?music=takes` for the takes alone). Next: step 2, the recorded takes
+  tagged with key and tempo, the bed moving into their key and the take
+  starting on its beat; step 3, the bed leaning ahead to what's coming
+  (the mouse, the hen, the clouds, the cuckoo, dusk); step 4, more
+  highlights cut from longer takes. Then the meadow gets it.
 - **Adam listens to the yard's new music** (built 2026-10-13: takes in
   `tunes.yaml`, phrases after something done, or a long quiet). To judge in play: the level
   against the effects (`VOLUME`, `TAKE_VOLUME` in music.js), how often
@@ -139,7 +136,10 @@ scene:
   the yard, as tall as the doghouse's roof (Adam, 2026-10-18: check his
   size against the films). Then one look at each gag as a contact sheet,
   and acting: reactions in each gag, starting with Eliot's favourites.
-- **Code:** Under `-n 8`, three tests fail now and then and pass alone:
+- **Code:** the perf budget's slack is thin: walking measures 24–25% busy
+  of 25% (2026-10-22, the bed about one point of it). Before adding more
+  drawn every frame, win some back (the sky and painting are the biggest).
+  Under `-n 8`, three tests fail now and then and pass alone:
   `TestRecorder::test_report_saves_and_replays`,
   `test_look.py::test_photographs_a_gesture_until_it_ends` (both start a
   second Chrome) and the meadow's `test_a_tap_on_the_egg_while_waiting`:

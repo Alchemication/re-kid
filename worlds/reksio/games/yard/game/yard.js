@@ -434,7 +434,7 @@
     if (e.target.closest('#fullscreen, #again')) return
     e.preventDefault()
     Sound.ensure()
-    stirBed() // ?music=layered: the bed starts with the first tap (sound may play now), and livens up with each
+    stirBed() // the music bed starts with the first tap (sound may play now), and livens up with each
     if (asleep) return perform('wake up')
     Music.start()
     const intent = tapIntent(e)
@@ -803,7 +803,7 @@
 
   let last = Clock.now()
   let shownCam = -1
-  // the music bed (?music=layered, bed.js): the moment of the day, and how
+  // the music bed (bed.js; ?music=takes turns it off): the moment of the day, and how
   // busy the child is, told to it as often as it reads them
   const BED_STEER_MS = 200
   let busyness = 0.3

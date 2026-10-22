@@ -187,7 +187,7 @@ Flags in the page address (`main.py play` takes the first three):
 | `?mouse-at=S`, `?visitor-at=S`, `?hen-at=S`, `?mushrooms=S` | When the mouse, the tree's visitor, and the hen (up to lay on the wall) come out, and when the mushrooms come up (rain or not). |
 | `?fruit=apple\|plum\|nut` | The tree's fruit. |
 | `?film=0` | Without the old-print look (on by default: grain, faded warm colours, a soft vignette, a rare speck of dust or hair; `filmlook.js`). `main.py look` takes its frames without it. |
-| `?music=layered` | The yard: quiet music under everything, there all the time (`bed.js`, picked on `experiments/music/bed.html`): a different bed for the morning, play, the afternoon, evening, rain and a nap, through the old-film sound, stepping back under the recorded takes. Without it, the music as it is. |
+| `?music=takes` | The yard without its music bed (`bed.js`: quiet music under everything, a bed for each moment, picked on `experiments/music/bed.html`): only the recorded takes, with quiet between, as before. |
 
 In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 `?day=S` (a day S seconds long: `?day=60` to see the evening and the

@@ -140,9 +140,9 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     `main.py tunes` with the effects' retro recipe), a part at a time:
     the morning, a phrase now and then, the lullaby. Small touches for
     what Reksio does play note by note from CC0 instrument samples
-    (`samples.yaml`, packed into `samples.js` by `main.py samples`), and,
-    behind `?music=layered`, a quiet bed under everything (`bed.js`, a bed
-    for each moment, played from the same samples).
+    (`samples.yaml`, packed into `samples.js` by `main.py samples`), and a
+    quiet bed under everything (`bed.js`, a bed for each moment, played
+    from the same samples; `?music=takes` turns it off).
   - `effects.js`, `tunes.js` and `samples.js` are generated: rebuild them,
     don't edit. So are the copies of `shared/` scripts (`main.py shared`).
   - Original audio: never committed, except the bark (see Project), packed

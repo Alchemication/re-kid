@@ -105,6 +105,14 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   Adam's ear for this retro cartoon feel, from a wording that names the
   feel, not the notes; findings in `experiments/music/README.md`, procedure
   in the `new-music` skill. Retro recipe, as the effects.
+- **A music bed under the takes** (Adam, 2026-10-22), which revises the
+  entry above. The takes alone left too many silent moments, and their
+  few clips came round too often. Now a quiet bed plays under everything
+  (`bed.js`): a few notes a bar from the instrument samples, no tune to
+  hum (which is what wore on him in the oom-pah), a bed for each moment
+  of the day picked by ear on `experiments/music/bed.html`, through the
+  effects' retro recipe. The takes are the moments it swells into: it
+  steps back under them. `?music=takes` gives the takes alone.
 - **An old print, but still: no drawing on twos** (Adam, 2026-10-18; on
   in every game, `?film=0` turns it off). Grain and a faded grade are kept. Drawing Reksio
   and the camera on twos (12 a second) made him stutter: it shows fixed

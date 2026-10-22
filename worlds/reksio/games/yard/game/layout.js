@@ -149,8 +149,8 @@ const Layout = (() => {
   const asked = listed('props', PROP_POOL)
   if (asked.length) props.splice(0, props.length, ...asked)
   const { mouseAt, visitorAt, henAt, mushroomsAt } = whenFlags(params)
-  // ?music=layered: the music bed under everything (bed.js), to try it next to the music as it is
-  const layered = params.get('music') === 'layered'
+  // the music bed under everything (bed.js), on unless ?music=takes (the takes alone, with quiet between, as before)
+  const layered = params.get('music') !== 'takes'
   // the tree's fruit this play (?fruit=apple|plum|nut forces it), and when its visitor comes
   const FRUITS = ['apple', 'plum', 'nut']
   const fruitDrawn = FRUITS[Math.floor(random() * FRUITS.length)]
@@ -225,7 +225,7 @@ const Layout = (() => {
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */
-  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit, ...(dayS ? { day: dayS } : {}), ...(hour !== null ? { hour } : {}), ...(layered ? { music: 'layered' } : {}) })
+  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit, ...(dayS ? { day: dayS } : {}), ...(hour !== null ? { hour } : {}), ...(layered ? {} : { music: 'takes' }) })
   Debug.pin({ flags: replayFlags(), layout }) // a replay builds this same yard (debug.js)
   return layout
 })()

@@ -13,7 +13,7 @@
 //   rising bassoon as Reksio stretches and a falling run (the shape of the
 //   marked stretching melody) as he snaps back. They are in B-flat and each
 //   take is in its own key, so they play only while no take does.
-// - The bed (if the game turns it on: bed.start): quiet music under all of
+// - The bed (the game turns it on: bed.start): quiet music under all of
 //   it, so the yard is never silent; bed.js says what it plays, the game
 //   says the moment and how busy the child is (bed.set). It goes through
 //   the retro recipe the effects use, with a little tape wobble, steps back
