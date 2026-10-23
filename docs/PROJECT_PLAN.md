@@ -13,23 +13,39 @@ decided and why.
    (`worlds/krtek/hours.md`).
    - The world (`worlds/krtek/`) is done; its `open_questions` wait,
      rights before release. His voice is generated (`docs/DECISIONS.md`).
+   - **Adam listens to the meadow's music in play** (built 2026-10-22,
+     `worlds/krtek/MUSIC_DIRECTION.md`): the theme as he wakes, curious as
+     a thing arrives, sad at its trouble (the egg found, the poles at his
+     flowers), happy as it comes right, the music stepping back for the
+     fox, the cricket's fiddle from dusk; quiet between. Judge: the
+     levels, where each mood comes, whether the silence between wants a
+     meadow bed (E major at 103, the takes' key and pulse; flute, bowed
+     strings, birds), as the films play all through.
    - **Adam, then Eliot, play the meadow** (`main.py play krtek meadow`;
      `?day=60` for the ending, `?props=egg&soon` for one encounter at
-     once). Built: the day from the den to the iris, digging, watering,
-     and four encounters, one of each kind a play (the egg he helps with;
-     the paint and the fox, where his friends help him; the poles or the
-     toy car to discover). None was checked with Adam before it was
-     built (he was asleep): judge each design, the lengths (about 25–40 s
-     left alone) and the looks, which are rough. Watch: does Eliot watch a
-     chain run on, or tap through it; does he laugh at the shell hat, the
-     tumble, the monster, the backwards car; does the closing circle read
-     as bedtime.
-   - Then, from what he does: the looks (the mole first), the music
-     (`new-music`: a morning, phrases, the cricket's lullaby), the
+     once, `?critters=now` for a butterfly). Built: the day from the den
+     to the iris, digging, watering, and all four encounters a play, two
+     hours apart (the egg he helps with; the paint and the fox, where his
+     friends help him; the poles and the toy car to discover). None was
+     checked with Adam before it was built (he was asleep): judge each
+     design and the lengths (about 25–40 s left alone). Watch: does Eliot
+     watch a chain run on, or tap through it; does he laugh at the shell
+     hat, the tumble, the monster, the backwards car; does the closing
+     circle read as bedtime.
+   - **Adam judges the night's look and life** (2026-10-22, built while he
+     slept, nothing checked with him): the meadow painted after the
+     films' backgrounds (`painting.js`; the night darkens it), the mole
+     slimmed to the films' proportions with human hands and a face that
+     acts with his words (an "o", a frown, his hairs perking), the
+     visitors redrawn (the hare's ruff, the fox's ruff and socks, the
+     mouse's snout), the warm glow under the mouse on a computer, a tap
+     on him answered five ways in turn (a wave and peekaboo are new),
+     butterflies to tap, and all four encounters a day instead of three.
+   - Then, from what he does: the
      effects through `new-sound` (all synthesised now, but the voice), and
      the next encounters (the cuckoo clock from Hodinářem). The meadow's
-     sound.js copies the yard's take player: the next part to move into
-     `shared/`, with music.js when the meadow gets music.
+     sound.js copies the yard's player for recorded effects: the next
+     part to move into `shared/`.
    - Once both scenes play: a plain page to pick one (two pictures), which
      loads the scene in place, so the tap that picks it also lets sound
      play. Not a platform.
@@ -146,6 +162,8 @@ scene:
   timing bugs to find;
   `TestRealInput::test_a_key_tap_barks` fails about 1 run in 5 under
   `-n 8` (a quick key tap can count as a hold when frames are slow).
+  `TestScreens::test_turning_the_phone_refits_it` failed once under `-n 8`
+  (2026-10-22) and passed alone: not yet looked into.
 
 ## Later
 

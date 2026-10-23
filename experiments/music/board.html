@@ -11,6 +11,7 @@
 <script src="../../worlds/reksio/games/yard/game/sound.js"></script>
 <script src="../../worlds/reksio/games/yard/game/samples.js"></script>
 <script src="../../worlds/reksio/games/yard/game/tunes.js"></script>
+<script src="../../worlds/reksio/games/yard/game/takes.js"></script>
 <script src="../../worlds/reksio/games/yard/game/music.js"></script>
 <script src="out/manifest.js"></script>
 <script src="../board/board.js"></script>
@@ -29,10 +30,21 @@
   const NAMES = { morning: 'a morning take', phrase: 'a phrase', lullaby: 'a lullaby take' }
   const items = Object.entries(window.PIECES || {}).map(([name, p]) => ({
     name, world: p.world || 'reksio', for: p.for, candidates: p.candidates,
-    now: (p.now || []).map((part) => ({ label: `▶ Today: ${NAMES[part] || part}`, run: () => code(part) })),
+    now: [
+      ...(p.now || []).map((part) => ({ label: `▶ Today: ${NAMES[part] || part}`, run: () => code(part) })),
+      // another world's music, to hear what this one must not sound like (only the yard's is loaded: the meadow has none yet)
+      ...((p.world || 'reksio') !== 'reksio' ? [{ label: "▶ Reksio's yard, for contrast", run: () => code('phrase') }] : []),
+    ],
   }))
+  // What each world's music should be (worlds/<id>/MUSIC_DIRECTION.md), and
+  // the question every take is judged by.
+  const WORLD_NOTE = {
+    reksio: 'Reksio\'s yard: a small acoustic band (plucked strings, bassoon, flute, xylophone, a bell), gentle and cheeky, played loose, never crisp. <b>Does this belong to this world?</b> A take as good in another cartoon is a maybe at best.',
+    krtek: 'Krtek\'s meadow: untested; read <code>worlds/krtek/MUSIC_DIRECTION.md</code> after the listening kit. <b>Does this belong to this world?</b> Not to Reksio\'s yard: a take that fits the yard just as well is a no here.',
+  }
   Board.mount({
     title: 'Music board',
+    worldNote: WORLD_NOTE,
     lead: 'What the game plays today, and takes made by ElevenLabs Music, levelled to the same loudness. <b>▶</b> plays a take as made, <b>R</b> through the retro recipe the sound effects use (mono, narrower, a little saturated). Mark each <b>keep</b>, <b>maybe</b> or <b>no</b>, with a note on what is right or wrong. Marks stay in this browser; <b>Save picks</b> downloads them for Claude.',
     storageKey: 'music-board-picks',
     saveName: 'music-picks.json',

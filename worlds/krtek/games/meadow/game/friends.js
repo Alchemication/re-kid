@@ -21,34 +21,56 @@ const Friends = (() => {
   }
   const line = { stroke: INK, 'stroke-width': 3, 'stroke-linejoin': 'round' }
 
+  /** A furry outline: an ellipse whose edge goes in and out in n points, as the films draw fur (the hare, the fox's ruff). */
+  function fluffy(cx, cy, rx, ry, n, jag) {
+    const pts = []
+    for (let i = 0; i < n * 2; i++) {
+      const a = (i / (n * 2)) * Math.PI * 2
+      const k = i % 2 ? 1 : 1 + jag
+      pts.push(`${(cx + Math.cos(a) * rx * k).toFixed(1)} ${(cy + Math.sin(a) * ry * k).toFixed(1)}`)
+    }
+    return `M${pts.join(' L')} Z`
+  }
+
   const DRAW = {
     mouse(g) {
       el('path', { d: 'M24 -10 q30 6 44 -14', fill: 'none', stroke: INK, 'stroke-width': 3, 'stroke-linecap': 'round' }, g)
-      el('ellipse', { cx: 0, cy: -26, rx: 30, ry: 24, fill: '#8e8577', ...line }, g)
+      el('path', { d: fluffy(0, -26, 29, 23, 14, 0.07), fill: '#8e8577', ...line }, g)
+      el('ellipse', { cx: -6, cy: -22, rx: 14, ry: 13, fill: '#c9c0b2' }, g)
       const head = el('g', { class: 'head' }, g)
-      for (const cx of [-26, 4]) {
-        el('circle', { cx, cy: -76, r: 17, fill: '#8e8577', ...line }, head)
-        el('circle', { cx, cy: -76, r: 9, fill: '#f2a0a6' }, head)
+      for (const cx of [-26, 6]) {
+        el('circle', { cx, cy: -78, r: 17, fill: '#8e8577', ...line }, head)
+        el('circle', { cx, cy: -78, r: 9.5, fill: '#f2a0a6' }, head)
       }
-      el('ellipse', { cx: -10, cy: -54, rx: 20, ry: 17, fill: '#8e8577', ...line }, head)
-      el('circle', { cx: -16, cy: -58, r: 4, fill: INK }, head)
-      el('circle', { cx: -2, cy: -58, r: 4, fill: INK }, head)
-      el('circle', { cx: -30, cy: -50, r: 5, fill: INK }, head)
+      // a pointed snout, a pink nose at its tip, whiskers: a mouse's face as in Krtek a vejce
+      el('path', { d: 'M8 -60 C6 -74 -16 -76 -26 -64 L-46 -52 C-30 -40 4 -40 8 -60 Z', fill: '#8e8577', ...line }, head)
+      el('circle', { cx: -47, cy: -52, r: 5, fill: '#f2a0a6', ...line, 'stroke-width': 1.5 }, head)
+      el('ellipse', { cx: -16, cy: -62, rx: 5, ry: 6.5, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
+      el('circle', { cx: -17, cy: -61, r: 2.8, fill: INK }, head)
+      el('path', { d: 'M-40 -52 l-18 -6 M-40 -50 l-19 2 M-40 -48 l-16 8', stroke: INK, 'stroke-width': 1.2, fill: 'none' }, head)
       return head
     },
     hare(g) {
-      el('ellipse', { cx: 0, cy: -50, rx: 42, ry: 48, fill: '#9a6a3c', ...line }, g)
-      el('ellipse', { cx: 0, cy: -40, rx: 24, ry: 30, fill: '#f3ead8' }, g)
+      // sitting up, brown, with a white belly, big feet and a white ruff round his face (Krtek malířem)
+      for (const x of [-26, 20]) el('ellipse', { cx: x, cy: -6, rx: 24, ry: 9, fill: '#8a5c32', ...line }, g)
+      el('path', { d: fluffy(0, -50, 40, 46, 16, 0.07), fill: '#9a6a3c', ...line }, g)
+      el('ellipse', { cx: -2, cy: -40, rx: 22, ry: 30, fill: '#f3ead8' }, g)
+      for (const x of [-16, 10]) el('ellipse', { cx: x, cy: -66, rx: 9, ry: 7, fill: '#9a6a3c', ...line, 'stroke-width': 2 }, g)
       const head = el('g', { class: 'head' }, g)
-      for (const [cx, r] of [[-18, -12], [16, 10]]) {
-        el('ellipse', { cx, cy: -168, rx: 12, ry: 40, fill: '#9a6a3c', ...line, transform: `rotate(${r} ${cx} -132)` }, head)
+      for (const [cx, r] of [[-18, -12], [14, 10]]) {
+        const ear = el('g', { transform: `rotate(${r} ${cx} -132)` }, head)
+        el('ellipse', { cx, cy: -172, rx: 13, ry: 42, fill: '#9a6a3c', ...line }, ear)
+        el('ellipse', { cx, cy: -168, rx: 6, ry: 32, fill: '#d9b08a' }, ear)
       }
-      el('circle', { cx: 0, cy: -112, r: 32, fill: '#f3ead8', ...line }, head)
-      el('circle', { cx: 0, cy: -114, r: 24, fill: '#9a6a3c' }, head)
-      el('circle', { cx: -9, cy: -120, r: 4.5, fill: INK }, head)
-      el('circle', { cx: 9, cy: -120, r: 4.5, fill: INK }, head)
-      el('ellipse', { cx: 0, cy: -106, rx: 6, ry: 4.5, fill: INK }, head)
-      el('rect', { x: -6, y: -101, width: 12, height: 9, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
+      el('path', { d: fluffy(-2, -108, 38, 30, 18, 0.16), fill: '#f6f1e4', ...line, 'stroke-width': 2 }, head)
+      el('circle', { cx: -2, cy: -118, r: 25, fill: '#9a6a3c' }, head)
+      for (const x of [-12, 8]) {
+        el('ellipse', { cx: x, cy: -124, rx: 6.5, ry: 8, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
+        el('circle', { cx: x - 1, cy: -122, r: 3.4, fill: INK }, head)
+      }
+      for (const x of [-10, 6]) el('circle', { cx: x, cy: -104, r: 9, fill: '#fbf8ef' }, head)
+      el('ellipse', { cx: -2, cy: -110, rx: 5.5, ry: 4, fill: '#d98a8a', ...line, 'stroke-width': 1.5 }, head)
+      el('rect', { x: -7, y: -100, width: 10, height: 8, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
       return head
     },
     hen(g) {
@@ -67,17 +89,27 @@ const Friends = (() => {
       return head
     },
     fox(g) {
-      el('path', { d: 'M40 -40 q60 -10 70 -60 q-30 10 -50 30 z', fill: '#c8642a', ...line }, g)
-      el('path', { d: 'M96 -90 q14 -12 14 -10 q-6 12 -8 16 z', fill: '#fff' }, g)
-      el('ellipse', { cx: 6, cy: -46, rx: 46, ry: 32, fill: '#c8642a', ...line }, g)
-      for (const x of [-26, -6, 18, 34]) el('path', { d: `M${x} -20 v20`, stroke: INK, 'stroke-width': 7, 'stroke-linecap': 'round' }, g)
+      // a big bushy tail with a white tip, a sly face in a jagged white ruff, legs in dark socks (Krtek malířem)
+      el('path', { d: 'M36 -44 C70 -40 104 -64 112 -112 C100 -96 86 -92 72 -94 C88 -106 92 -120 86 -128 C72 -96 52 -76 30 -66 Z', fill: '#c8642a', ...line }, g)
+      el('path', { d: 'M112 -112 C110 -122 100 -130 86 -128 C92 -120 88 -106 72 -94 C86 -92 100 -96 112 -112 Z', fill: '#fbf8ef', ...line, 'stroke-width': 2 }, g)
+      for (const x of [-30, -10, 16, 34]) {
+        el('path', { d: `M${x - 6} -34 L${x - 4} -6 L${x + 4} -6 L${x + 6} -34 Z`, fill: '#c8642a', ...line, 'stroke-width': 2 }, g)
+        el('path', { d: `M${x - 5} -12 L${x - 4} 0 L${x + 6} 0 L${x + 5} -12 Z`, fill: '#3a2414', ...line, 'stroke-width': 2 }, g)
+      }
+      el('path', { d: fluffy(6, -48, 46, 28, 14, 0.06), fill: '#c8642a', ...line }, g)
+      el('path', { d: fluffy(-26, -56, 18, 20, 9, 0.22), fill: '#fbf8ef' }, g)
       const head = el('g', { class: 'head' }, g)
-      for (const x of [-44, -14]) el('path', { d: `M${x} -110 l-6 -34 l20 22 z`, fill: '#c8642a', ...line }, head)
-      el('path', { d: 'M-12 -100 C-4 -76 -20 -60 -44 -58 L-80 -72 C-70 -84 -54 -104 -12 -100 Z', fill: '#c8642a', ...line }, head)
-      el('path', { d: 'M-12 -98 c14 10 16 30 0 44 c-12 -14 -30 -14 -36 -4 c4 -16 18 -28 36 -40 z', fill: '#fff', ...line, 'stroke-width': 2 }, head)
-      el('circle', { cx: -82, cy: -72, r: 5, fill: INK }, head)
-      el('circle', { cx: -40, cy: -88, r: 4, fill: INK }, head)
-      el('path', { d: 'M-76 -64 q16 12 34 0', fill: '#fff', ...line, 'stroke-width': 2 }, head)
+      for (const x of [-44, -14]) {
+        el('path', { d: `M${x} -108 l-6 -36 l22 24 z`, fill: '#c8642a', ...line }, head)
+        el('path', { d: `M${x - 4} -128 l-2 -14 l9 9 z`, fill: '#3a2414' }, head)
+      }
+      el('path', { d: fluffy(-34, -78, 34, 26, 12, 0.24), fill: '#fbf8ef', ...line, 'stroke-width': 2 }, head)
+      el('path', { d: 'M-12 -100 C-4 -78 -20 -64 -44 -62 L-84 -74 C-72 -88 -54 -106 -12 -100 Z', fill: '#c8642a', ...line }, head)
+      el('circle', { cx: -86, cy: -74, r: 5.5, fill: INK }, head)
+      el('ellipse', { cx: -40, cy: -88, rx: 7, ry: 5, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
+      el('circle', { cx: -42, cy: -88, r: 3, fill: INK }, head)
+      el('path', { d: 'M-50 -95 l14 -3', stroke: INK, 'stroke-width': 2.5, 'stroke-linecap': 'round' }, head)
+      el('path', { d: 'M-80 -66 q18 10 36 -2', fill: '#fff', ...line, 'stroke-width': 2 }, head)
       return head
     },
     chick(g) {

@@ -151,7 +151,7 @@ characters:
     - krtek-youtube
     - cs-wikipedia-seznam-dilu
   visual_signature:
-    text: Head and body are one soft black teardrop that runs into a long snout, pointing forward and a little up, grey with a small red nose at its tip and whiskers; a big white oval eye with a black pupil sits high, near the base of the snout; three or four long thin hairs arch back from the crown; a long dark teal (in some transfers blue-grey) belly patch runs from his throat down his front; big pink hands with four fingers and pink feet. Mostly drawn in three-quarter view or profile; facing us, his two big eyes sit close together at the top, with the small nose below them and a wide smile (Krtek a autíčko 11:36-11:40, 7:12-7:15).
+    text: Head and body are one soft black teardrop that runs into a long snout, pointing forward and a little up, grey with a small red nose at its tip and whiskers; a big white oval eye with a black pupil sits high, near the base of the snout; three or four long thin hairs arch back from the crown; a long dark teal (in some transfers blue-grey) belly patch runs from his throat down his front; big pink hands with four fingers and pink feet. Mostly drawn in three-quarter view or profile; facing us, his two big eyes sit close together at the top, with the small nose below them and a wide smile (Krtek a autíčko 11:36-11:40, 7:12-7:15). In the 1970s films sampled, where he is mostly small in wide shots (Krtek a buldozer 0:52, 2:16; Krtek a vejce 0:08, 1:10), his outline is wider at the hips than at the crown, the snout is shorter and thicker than in Autíčko, the patch is a narrower oval under the snout, and his hands are big, about as wide as his face.
     status: observed
     sources:
     - krtek-youtube
@@ -433,9 +433,11 @@ aesthetics:
     observed_by: claude-frames
 sound:
   overview:
-    text: 'What the films sound like: how music, the mole''s voice and sound effects fit together. Needs a listener (Adam).'
-    status: unknown
-    sources: []
+    text: 'In Hodinářem and Buldozer (both scored by Petrov), music plays all the way through, with no silence, and is "beautiful mostly, and matches what''s seen on the screen really well". Strings, a flute and perhaps a clarinet in Hodinářem; a mostly flute melody with birdsong at the start of Buldozer, "calming and positive". Next to Reksio, Adam found Reksio "a bit more cheeky sometimes, less calming and nature-friendly". Heard in eight clips of the two films (2026-10-22).'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: adam
   credits:
   - name: Jaroslav Křička
     role: composer (Jak krtek ke kalhotkám přišel, 1957)
@@ -469,13 +471,17 @@ sound:
       - krtek-youtube
       - cs-wikipedia-o-krtkovi
   theme:
-    text: Is there a recurring Krtek theme or motif across films with different composers? Needs a listener across several films, starting with Hodinářem and Buldozer (both Petrov).
-    status: unknown
-    sources: []
+    text: 'Each film has its own theme: Buldozer''s is "a totally different theme" from Hodinářem''s, though both are Petrov''s. Within a film, one theme comes back changed with the story. In Hodinářem the happy morning theme returns an octave higher as he finds the clock, "a bit more curious" as he repairs it, sad once he finds the bird, and back "stronger, and even more happy… quite emotional" when the cuckoo sings at the end. In Buldozer the opening theme fades back in with the morning and returns at the end. Whether the other composers'' films share a theme is still open.'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: adam
   music_role:
-    text: 'How music carries the action: does it move with each gesture, or run underneath? Needs a listener.'
-    status: unknown
-    sources: []
+    text: 'The music follows the story''s mood rather than each gesture: the same theme, varied, from scene to scene. Sound effects are separate from the music and about as loud. When trouble comes (the bulldozer), the music turns very quiet and ambient, and the machine''s sounds lead; the mole cries a little, but it is not scary. The cricket''s tune at night is played on strings: simple, repeating, "somewhat raw and broken-feeling", with notes that sound wrong on purpose. Heard by Adam in clips of Hodinářem and Buldozer (2026-10-22).'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: adam
   sound_effects:
     text: 'Effects were credited separately from the music (Autíčko 1963: Ruchy; Malířem 1972: Zvukové ilustrace). What they are like needs a listener.'
     status: verified
@@ -558,7 +564,7 @@ open_questions:
 - Do the NFA's records of the other 47 films also name the NFA as copyright holder? (The site blocks automated reading; Adam can open it.)
 - 'Who voiced the mole in the first film: Petr Kysela (NFA) or Viola Zinková (cs-wikipedia)?'
 - What does the mole's voice sound like, how often does he use it, and is it the same few takes across films? Needs Adam's ears.
-- Is there a recurring musical theme across the composers (Křička, Bukový, Vacek, Petrov and others)? Needs a listener.
+- Is there a recurring musical theme across the composers (Křička, Bukový, Vacek, Petrov and others)? Not across Petrov's own Hodinářem and Buldozer (Adam, 2026-10-22); the other composers' films are still to hear.
 - When and how did Krtek reach Polish television, where Eliot knows him as Krecik?
 - Who made the 13 one-minute sketches dated 1998?
 - Which friends recur most across all 49 films (mouse, hare, hedgehog, frog)? Needs a pass over more films.

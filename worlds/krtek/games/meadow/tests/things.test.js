@@ -18,18 +18,19 @@ const ENCOUNTERS = [
 ]
 const seq = (...values) => { let i = 0; return () => values[i++ % values.length] }
 
-test('one of each offer comes, each at its own hour', () => {
+test('one of each offer comes first, then the rest, each at its own hour', () => {
   const plan = Things.choose(ENCOUNTERS, seq(0.1, 0.9, 0.5, 0.3, 0.7))
-  assert.equal(plan.length, 3)
-  const offers = [...plan.map((p) => ENCOUNTERS.find((e) => e.name === p.name).offer)].sort()
+  assert.equal(plan.length, 4)
+  const offers = [...plan.slice(0, 3).map((p) => ENCOUNTERS.find((e) => e.name === p.name).offer)].sort()
   assert.deepEqual(offers, ['discover', 'help', 'helped'])
-  assert.deepEqual([...plan.map((p) => p.at)], [9.2, 12.2, 15.2])
+  assert.deepEqual([...plan.map((p) => p.name)].sort(), ['car', 'egg', 'paint', 'poles'])
+  assert.deepEqual([...plan.map((p) => p.at)], [9, 11, 13, 15.2])
 })
 
 test('?props forces which come, in that order; ?soon brings the first now', () => {
   const plan = Things.choose(ENCOUNTERS, seq(0.5), { props: ['car', 'egg', 'nope'], soon: true })
   assert.deepEqual([...plan.map((p) => p.name)], ['car', 'egg'])
-  assert.deepEqual([...plan.map((p) => p.at)], [8, 12.2])
+  assert.deepEqual([...plan.map((p) => p.at)], [8, 11])
 })
 
 test('forcing them makes the same draws, so the rest of the play is unchanged', () => {

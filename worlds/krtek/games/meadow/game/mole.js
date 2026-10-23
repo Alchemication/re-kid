@@ -32,9 +32,18 @@ const Mole = (() => {
   // His arms, in degrees about the shoulder from hanging (left arm first; the right is mirrored)
   const ARMS = { down: 0, up: 150, wide: 120, rim: 60, face: 172 }
   const IDLE_MS = [2600, 5200] // left standing, now and then he looks about: another view, the other way
+  const PERK_MS = 650 // his hairs springing up when he notices something, and settling
+  // the face each of his words comes with, held this long (the films act with the mouth, lids and hairs):
+  // mouth, how far the lids come down (0 open, 1 shut), how hard his hairs perk
+  const FACES = {
+    ooh: { mouth: 'oh', perk: 1, ms: 1000 },
+    fright: { mouth: 'oh', perk: 1.6, ms: 900 },
+    achJo: { mouth: 'frown', lids: 0.45, ms: 1400 },
+    ahoj: { perk: 0.7, ms: 600 },
+  }
   const life = Debug.random('mole-life') // blinks, glances and looking about: their own stream
 
-  const state = { x: 0, pose: 'down', busy: null, carrying: false, can: false, holdsUp: false, lift: 0, painted: null, facing: 1, view: 'front' }
+  const state = { x: 0, pose: 'down', busy: null, carrying: false, can: false, holdsUp: false, lift: 0, painted: null, facing: 1, view: 'front', mouth: 'smile' }
   const skin = [] // what paint colours: his body, snout and arms in every view
   let lift = 0 // how far up he stands (on someone's shoulders, in the car)
   let views = null // moleart.js's three views
@@ -171,7 +180,7 @@ const Mole = (() => {
     const moving = root.getAnimations().length > 0
     const x = moving ? drawnX() : state.x
     const parts = [root, body, tilt, can, carrySlot]
-    for (const v of all()) parts.push(...v.arms, ...v.feet, v.lids)
+    for (const v of all()) parts.push(...v.arms, ...v.feet, v.lids, v.hair)
     for (const e of parts) e.getAnimations().forEach((a) => a.cancel())
     if (moving) {
       state.x = x
@@ -187,12 +196,44 @@ const Mole = (() => {
     state.busy = null
   }
 
+  /** Show one of his mouths in every view: 'smile', 'laugh', 'oh' or 'frown'. */
+  function mouth(name) {
+    state.mouth = name
+    for (const v of all()) for (const m of ['smile', 'laugh', 'oh', 'frown']) v[m].style.display = m === name ? '' : 'none'
+  }
+
   /** Open his mouth in a laugh (or close it again). */
-  function laugh(on) {
+  const laugh = (on) => mouth(on ? 'laugh' : 'smile')
+
+  /** His hairs spring up and settle: he has noticed something (k: how hard). */
+  function perk(k = 1) {
     for (const v of all()) {
-      v.smile.style.display = on ? 'none' : ''
-      v.laugh.style.display = on ? '' : 'none'
+      Debug.ignoreCut(Motion.endAt(v.hair, [
+        { transform: 'none' },
+        { transform: `scaleY(${1 + 0.22 * k}) rotate(${-7 * k}deg)`, offset: 0.2 },
+        { transform: `scaleY(${1 - 0.06 * k}) rotate(${4 * k}deg)`, offset: 0.55 },
+        { transform: 'none' },
+      ], { duration: PERK_MS }), 'perk')
     }
+  }
+
+  let faceToken = null
+
+  /** The face that goes with a word he says (FACES), held a moment, then his smile back. */
+  function express(word) {
+    const f = FACES[word]
+    if (!f || state.pose === 'down') return
+    if (f.perk) perk(f.perk)
+    if (!f.mouth && !f.lids) return
+    const mine = (faceToken = Symbol(word))
+    if (f.mouth && state.mouth !== 'laugh') mouth(f.mouth)
+    if (f.lids) for (const v of all()) v.lids.style.transform = `scaleY(${f.lids})`
+    Clock.after(f.ms, () => {
+      if (faceToken !== mine) return
+      if (state.mouth === f.mouth) mouth('smile')
+      // the lids back only where they are still as the word left them (a stretch or peekaboo since has its own)
+      if (f.lids) for (const v of all()) if (v.lids.style.transform === `scaleY(${f.lids})`) v.lids.style.transform = state.pose === 'listen' ? 'scaleY(0.55)' : 'scaleY(0)'
+    })
   }
 
   /** His two arms in this view to `left`/`right` degrees (from hanging), over ms with an ease, or at once. */
@@ -368,6 +409,44 @@ const Mole = (() => {
     }
   }
 
+  /** A wave hello: one hand up, waving to and fro, then down. */
+  async function wave() {
+    if (state.holdsUp) return
+    show('front')
+    const v = cur()
+    const hand = v.arms[1]
+    const rest = state.pose === 'out' ? 0 : -ARMS.rim
+    perk(0.7)
+    try {
+      // up beside his head (further over, his hand would cover his eye), then to and fro
+      await Motion.endAt(hand, [{ transform: `rotate(${rest}deg)` }, { transform: 'rotate(-100deg)' }], { duration: SNAP_MS, easing: 'ease-out' })
+      await Motion.endAt(hand, [{ transform: 'rotate(-100deg)' }, { transform: 'rotate(-80deg)', offset: 0.17 }, { transform: 'rotate(-112deg)', offset: 0.34 }, { transform: 'rotate(-80deg)', offset: 0.5 }, { transform: 'rotate(-112deg)', offset: 0.67 }, { transform: 'rotate(-80deg)', offset: 0.84 }, { transform: 'rotate(-100deg)' }], { duration: 900 })
+    } finally {
+      await Motion.endAt(hand, [{ transform: `rotate(${rest}deg)` }], { duration: 180 })
+    }
+  }
+
+  /** Peekaboo: hands over his face, eyes shut, held… then open wide, laughing, hairs up. */
+  async function peekaboo() {
+    if (state.holdsUp) return
+    show('front')
+    const v = cur()
+    try {
+      v.lids.style.transform = 'scaleY(1)'
+      await arms(ARMS.face, -ARMS.face, SNAP_MS, v)
+      await hold(800)
+      v.lids.style.transform = 'scaleY(0)'
+      laugh(true)
+      perk(1.4)
+      await Promise.all([arms(ARMS.wide, -ARMS.wide, SNAP_MS, v), Motion.endAt(tilt, [{ transform: 'scale(1, 1)' }, { transform: 'scale(1.08, 0.92)', offset: 0.4 }, { transform: 'scale(1, 1)' }], { duration: 300 })])
+      await hold(500)
+    } finally {
+      v.lids.style.transform = 'scaleY(0)'
+      laugh(false)
+      await arms(state.pose === 'out' ? 0 : ARMS.rim, state.pose === 'out' ? 0 : -ARMS.rim, 160, v)
+    }
+  }
+
   /** Take up the watering can, or put it down. */
   function holdCan(on) {
     can.style.display = on ? '' : 'none'
@@ -478,5 +557,5 @@ const Mole = (() => {
   /** Where the can's spout is now, in scene units, while he waters. */
   const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
 
-  return { SCALE, state, drawnX, face, show, lookAt, setFree, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold: holdCan, tip, listen }
+  return { SCALE, state, drawnX, face, show, lookAt, perk, express, setFree, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold: holdCan, tip, listen }
 })()

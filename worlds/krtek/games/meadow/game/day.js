@@ -21,9 +21,9 @@ const Day = (() => {
   // The sky's colour through the day, top and bottom, by hour: a cool
   // morning, a clear blue day, the dusk orange, the night blue of Buldozer
   const SKY = [
-    [8, '#c9dcf2', '#f4e3c2'],
-    [10, '#8fb9ee', '#d7e7fb'],
-    [17, '#8fb9ee', '#d7e7fb'],
+    [8, '#a9c6ee', '#ece6ee'],
+    [10, '#94b8ea', '#e4e8f6'],
+    [17, '#94b8ea', '#e4e8f6'],
     [18.6, '#e9a76b', '#f6d39a'],
     [19.3, '#4e4f86', '#d98a5b'],
     [20, '#1d2a5a', '#3e4b80'],

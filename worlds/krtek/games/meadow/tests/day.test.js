@@ -54,7 +54,7 @@ test('the sun crosses from left to right and is gone at sunset; the moon rises a
 })
 
 test('the sky moves between its colours by hour', () => {
-  assert.deepEqual({ ...Day.sky(12) }, { top: '#8fb9ee', bottom: '#d7e7fb' })
+  assert.deepEqual({ ...Day.sky(12) }, { top: '#94b8ea', bottom: '#e4e8f6' })
   assert.match(Day.sky(18).top, /^#[0-9a-f]{6}$/)
   assert.deepEqual({ ...Day.sky(20) }, { top: '#1d2a5a', bottom: '#3e4b80' })
 })

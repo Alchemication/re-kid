@@ -13,7 +13,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Clock, Day, Debug, FilmLook, Friends, Layout, Mole, Motion, Sound, Things, View */
+/* global Clock, Critters, Day, Debug, FilmLook, Friends, Layout, Mole, Motion, Music, Painting, Sound, Things, View */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -28,6 +28,7 @@ const meadowGame = (() => {
   const MAX_HILLS = 6 // molehills he has left about the meadow; the oldest sinks back
   const TULIPS = 9
   const TICK_MS = 100
+  const NIGHT_TINT = 0.6 // how dark the night's blue makes the meadow at its darkest (multiplied over it)
   const words = Debug.random('meadow-words')
   const paint = Debug.random('meadow-paint')
 
@@ -35,6 +36,7 @@ const meadowGame = (() => {
   const layers = Object.fromEntries(['sky', 'back', 'mole', 'front', 'top', 'den'].map((id) => [id, document.getElementById(id)]))
   const frontGround = document.getElementById('front-ground')
   const irisCircle = document.getElementById('iris-circle')
+  const night = document.getElementById('night')
   const sun = document.getElementById('sun')
   const moon = document.getElementById('moon')
   const stops = [...document.querySelectorAll('#sky-grad stop')]
@@ -52,16 +54,6 @@ const meadowGame = (() => {
   }
 
   // ------------------------------------------------------------ the scene
-
-  /** Soft dabs of paint over the sky and the meadow, as the series' backgrounds are dabbed: drawn once. */
-  function dab(parent, n, area, colours, size, faint = 0.12) {
-    for (let i = 0; i < n; i++) {
-      el('circle', {
-        cx: area.x + paint() * area.w, cy: area.y + paint() * area.h, r: size[0] + paint() * size[1],
-        fill: colours[Math.floor(paint() * colours.length)], opacity: faint + paint() * faint * 1.5,
-      }, parent)
-    }
-  }
 
   function hillPath(w, h) {
     return `M${-w / 2} 6 C${-w * 0.42} ${-h * 0.7} ${-w * 0.22} ${-h} 0 ${-h} C${w * 0.22} ${-h} ${w * 0.42} ${-h * 0.7} ${w / 2} 6 Z`
@@ -94,17 +86,14 @@ const meadowGame = (() => {
   const hillAt = (x) => Math.abs(x - HOME) < 70 || game.hills.some((h) => Math.abs(h.x - x) < 70)
 
   function makeScene() {
-    dab(layers.sky, 90, { x: -100, y: -100, w: 1800, h: 700 }, ['#ffffff', '#b9cfee'], [30, 70], 0.04)
-    const far = document.getElementById('far')
-    const farW = Layout.WORLD_W / 2 + Layout.VIEW_W // the far trees scroll at half speed: this much covers the whole trip
-    for (let i = 0; i < farW / 66; i++) {
-      const x = i * 66 + paint() * 40
-      el('ellipse', { cx: x, cy: 610 - paint() * 40, rx: 60 + paint() * 50, ry: 80 + paint() * 70, fill: paint() < 0.5 ? '#6e9a5a' : '#88b06e', opacity: 0.85 }, far)
-    }
-    const per = (w) => w / Layout.VIEW_W // as many dabs per screen as before
-    dab(far, 160 * per(farW), { x: 0, y: 480, w: farW, h: 160 }, ['#4d6d1f', '#a9cf7c', '#6e9a5a'], [8, 20])
-    dab(document.getElementById('back-ground'), 300 * per(Layout.WORLD_W), { x: 0, y: 600, w: Layout.WORLD_W, h: 130 }, ['#4d6d1f', '#a9cf7c', '#3f7d22'], [3, 9])
-    dab(document.getElementById('front-ground'), 260 * per(Layout.WORLD_W), { x: 0, y: 730, w: Layout.WORLD_W, h: 170 }, ['#4d6d1f', '#a9cf7c', '#3f7d22'], [3, 10])
+    const ctm = svg.getScreenCTM()
+    Painting.paint({
+      sky: layers.sky,
+      far: document.getElementById('far'),
+      back: document.getElementById('back-ground'),
+      front: frontGround,
+      bed: document.getElementById('bed'),
+    }, (ctm ? ctm.a : 1) * (window.devicePixelRatio || 1))
     hill(HOME, true, false)
     makeBed()
     Mole.make(layers.mole, document.getElementById('mole-out'), document.getElementById('tunnels'))
@@ -152,6 +141,10 @@ const meadowGame = (() => {
     const s = Day.sky(h)
     stops[0].setAttribute('stop-color', s.top)
     stops[1].setAttribute('stop-color', s.bottom)
+    const [cr, cg, cb] = [1, 3, 5].map((i) => parseInt(s.top.slice(i, i + 2), 16) / 255)
+    const light = Math.max(0, Math.min(1, (0.3 * cr + 0.59 * cg + 0.11 * cb - 0.2) / 0.4)) // 1 by day, 0 at night
+    Painting.cloudsAt(light) // the wash of cloud fades as the sky darkens
+    night.setAttribute('opacity', String(NIGHT_TINT * (1 - light))) // and the painted meadow darkens with it
     const pos = Day.sun(h)
     sun.style.visibility = pos ? 'visible' : 'hidden'
     if (pos) sun.style.transform = `translate(${pos.across * 1600}px, ${640 - pos.up * 470}px)`
@@ -171,7 +164,7 @@ const meadowGame = (() => {
     if (Day.cricket(h) && !cricket.classList.contains('out')) {
       cricket.classList.add('out')
       Debug.trace('cricket', { hour: Day.clock(h) })
-      Sound.cricket()
+      Music.evening()
     }
   }
 
@@ -289,14 +282,32 @@ const meadowGame = (() => {
     Motion.endAt(g, [{ transform: `translate(${x}px, ${y}px) ${s}` }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, offset: 0.4 }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, opacity: 0 }], { duration: 2400 }).then(() => g.remove(), () => g.remove())
   }
 
+  // What a tap on him does, each with its word: all of them in turn before any comes again, in a
+  // new order each round, never the same twice running (the yard's lesson: repeats need variety)
+  const ANSWERS = {
+    cheer: ['giggle', () => Mole.cheer()],
+    wave: ['ahoj', () => Mole.wave()],
+    peekaboo: ['giggle', () => Mole.peekaboo()],
+    laughs: ['giggle', () => Mole.handsToFace(600)],
+    ponder: ['ooh', () => Mole.ponder(900)],
+  }
+  let answers = []
+  let lastAnswer = null
+
   async function tapMole() {
-    const said = ['giggle', 'giggle', 'ooh', 'ahoj'][Math.floor(words() * 4)]
+    if (!answers.length) {
+      answers = Object.keys(ANSWERS)
+      for (let i = answers.length - 1; i > 0; i--) {
+        const j = Math.floor(words() * (i + 1))
+        ;[answers[i], answers[j]] = [answers[j], answers[i]]
+      }
+      if (answers[0] === lastAnswer) answers.push(answers.shift())
+    }
+    const how = (lastAnswer = answers.shift())
+    const [said, act] = ANSWERS[how]
     Sound.say(said, true) // a tap on him: a word only now and then, never every tap
-    Debug.trace('says', { said })
-    const how = words() // a jump of joy most times; now and then a think, or hands over his face for laughing
-    if (how < 0.6) await Mole.cheer()
-    else if (how < 0.8) await Mole.handsToFace(600)
-    else await Mole.ponder(900)
+    Debug.trace('says', { said, how })
+    await act()
   }
 
   async function water() {
@@ -344,6 +355,7 @@ const meadowGame = (() => {
     const mine = (game.token = Symbol('wake'))
     Debug.trace('wake')
     Sound.ensure()
+    Music.prepare() // loading as he wakes, so a thing arriving at once gets its music
     den.classList.add('waking')
     await Clock.wait(900)
     await Debug.ignoreCut(Motion.endAt(den, [{ opacity: 1 }, { opacity: 0 }], { duration: 700 }), 'den fades')
@@ -352,6 +364,7 @@ const meadowGame = (() => {
     tick()
     if (game.token !== mine) return // a tap has him busy already
     Sound.pop()
+    Music.morning()
     await Debug.ignoreCut(Mole.comeUp('hill'), 'come up')
     if (game.token !== mine) return
     Sound.say('ahoj')
@@ -380,7 +393,7 @@ const meadowGame = (() => {
       await Clock.frame()
     }
     irisCircle.setAttribute('r', '0')
-    Sound.quiet()
+    Music.quiet()
     den.style.display = ''
     den.classList.remove('waking')
     den.classList.add('night')
@@ -399,7 +412,16 @@ const meadowGame = (() => {
     [/^go to (\d+)$/, (m) => run('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
+    [/^tap butterfly (\d+)$/, (m) => tapButterfly(Number(m[1]))],
   ]
+
+  /** A tap on a butterfly: it flutters off, and, if he is free, he looks up after it, hairs up: "ooh". */
+  function tapButterfly(id) {
+    const at = Critters.tap(id)
+    if (!at || !(game.awake && !game.ended && !game.gesture)) return
+    Mole.lookAt(at.x)
+    Sound.say('ooh', true)
+  }
 
   function perform(intent) {
     Debug.input(intent)
@@ -422,6 +444,8 @@ const meadowGame = (() => {
 
   /** What a tap at this point means. */
   function intentAt(target, p) {
+    const critter = target.closest('[data-critter]')
+    if (critter) return `tap butterfly ${critter.dataset.critter}`
     const thing = target.closest('[data-thing]')
     const choice = target.closest('[data-choice]')
     if (thing) return choice ? `use ${thing.dataset.thing} ${choice.dataset.choice}` : `use ${thing.dataset.thing}`
@@ -466,8 +490,12 @@ const meadowGame = (() => {
 
   makeScene()
   Mole.setFree(() => game.awake && !game.ended && !game.gesture)
+  Sound.listen((word) => Mole.express(word)) // each word he says comes with its face
   View.setup(() => Mole.drawnX(), (camX) => irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX))))
   Friends.setup(document.getElementById('friends'))
+  // the flowers a butterfly may settle on: the bed, the bluebells and the yellow spike (painting.js)
+  const flowerTops = [...[0, 1, 2, 3, 4].map((i) => ({ x: BED.from + 30 + i * 60, y: 690 })), { x: 380, y: 545 }, { x: HOME - 210, y: 555 }, { x: HOME + 150, y: 570 }, { x: HOME - 128, y: 480 }, { x: 2780, y: 545 }, { x: 3420, y: 545 }]
+  Critters.setup(document.getElementById('critters'), () => game.hour, () => flowerTops, { now: Layout.flags.critters === 'now', still: Debug.still })
   const things = Things.setup({
     run,
     goTo,
@@ -475,6 +503,8 @@ const meadowGame = (() => {
     free: () => game.awake && !game.ended && !game.gesture,
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
+    music: (part) => Music.cue(part),
+    notice: () => Mole.perk(1.3), // something has arrived: his hairs spring up
   })
   Debug.pin({ flags: { ...(Layout.flags.day ? { day: Layout.flags.day } : {}), props: things.join(',') }, layout: { home: HOME, spring: SPRING, things } })
   Debug.record(stateNow)
@@ -482,5 +512,5 @@ const meadowGame = (() => {
   Clock.every(TICK_MS, tick)
   Clock.after(WAKE_ANYWAY_MS, () => { if (!game.awake) perform('wake') })
 
-  return { perform, state: stateNow, trace: () => Debug.dump(), things: Things.names(), detail: (name) => Things.get(name).detail() }
+  return { perform, state: stateNow, trace: () => Debug.dump(), music: () => Music.part, things: Things.names(), detail: (name) => Things.get(name).detail() }
 })()

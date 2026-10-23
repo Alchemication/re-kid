@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listening kit</title>
+<style>
+  :root { --ink: #2a2118; --soft: #6b5d4f; --paper: #f6efe2; --card: #fffaf0; --line: #e0d3bd; --red: #c8402f; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 16px; }
+  h1 { margin: 8px 0 4px; } .lead { color: var(--soft); }
+  .top { position: sticky; top: 0; z-index: 2; background: var(--paper); padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  .bar { padding: 8px 0; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  video { display: block; width: 100%; max-height: 30vh; background: #000; border-radius: 6px; }
+  .clip { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 14px 0; }
+  .clip.on { border-color: var(--red); box-shadow: 0 0 0 2px var(--red) inset; }
+  .clip h2 { font-size: 1.05rem; margin: 0 0 2px; } .clip .when { color: var(--soft); font-size: .9rem; }
+  .clip p.what { margin: 6px 0; }
+  .q { margin: 10px 0 0; } .q label { display: block; font-weight: 600; } .q small { color: var(--soft); display: block; }
+  textarea { width: 100%; box-sizing: border-box; min-height: 2.6em; font: inherit; border: 1px solid var(--line); border-radius: 5px; padding: 6px; background: #fff; }
+  button { font: inherit; padding: 5px 12px; border-radius: 5px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+  button.play { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .missing { color: var(--red); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Listening kit: Krtek</h1>
+  <p class="lead">About 15 minutes: eight short clips from the two films Vadim Petrov scored (Hodinářem, 1974; Buldozer, 1975), about 8 minutes of film plus time to write. For each one, press <b>▶ Play the clip</b> (it stops at the end), listen, and jot short answers. "Don't know" is a fine answer, and so is a hum written down as "da-da-DUM". Your answers become observations in <code>worlds/krtek/world.yaml</code>, and the meadow's music direction is written from them. They stay in this browser; <b>Download answers</b> saves them for Claude.</p>
+  <div class="top">
+  <div class="bar">
+    <label>Volume <input id="vol" type="range" min="0" max="1" step="0.05" value="0.4"></label>
+    <button id="contrast" title="A take from Reksio's yard, for contrast">▶ Reksio's yard, for contrast</button>
+    <button id="save">⬇ Download answers</button>
+    <span id="count"></span>
+  </div>
+  <video id="film" controls preload="metadata"></video>
+  </div>
+  <p id="missing" class="missing" hidden>The films aren't here: they live in <code>worlds/krtek/media/</code> (not in git). Fetch them as <code>info.txt</code> there says.</p>
+  <div id="clips"></div>
+  <div class="clip">
+    <h2>Last: the whole meadow</h2>
+    <div id="overall"></div>
+  </div>
+</main>
+<script src="../../worlds/reksio/games/yard/game/debug.js"></script>
+<script src="../../worlds/reksio/games/yard/game/sound.js"></script>
+<script src="../../worlds/reksio/games/yard/game/samples.js"></script>
+<script src="../../worlds/reksio/games/yard/game/tunes.js"></script>
+<script src="../../worlds/reksio/games/yard/game/takes.js"></script>
+<script src="../../worlds/reksio/games/yard/game/music.js"></script>
+<script>
+  // A listening kit for Adam: clips of the films, each with what to listen
+  // for. The questions are the open sound claims in worlds/krtek/world.yaml
+  // (sound.overview, music_role, theme, the cricket); his answers become
+  // observed_by: adam claims there, and MUSIC_DIRECTION.md is written from
+  // them. The films are local only (worlds/*/media/ is not in git).
+  const MEDIA = '../../worlds/krtek/media/'
+  const CLIPS = [
+    {
+      id: 'hodinarem-open', film: 'hodinarem', from: 0, to: 45, title: 'Hodinářem: the start',
+      what: 'The cuckoo clock under the tree, then the mole popping up by his molehill.',
+      qs: [
+        ['instruments', 'What plays?', 'Whatever you can name: strings, a flute, a piano, a whistle, a band, an orchestra.'],
+        ['tune', 'Is there a tune you could hum afterwards?', 'If so, hum it to yourself and write how it goes, or just "yes".'],
+        ['feel', 'Three words for how it feels.', 'e.g. sunny, busy, dreamy, cheeky, grand, simple.'],
+      ],
+    },
+    {
+      id: 'hodinarem-clock', film: 'hodinarem', from: 60, to: 110, title: 'Hodinářem: the broken clock',
+      what: 'He finds the clock, the cuckoo, a puddle.',
+      qs: [
+        ['follows', 'Does the music move with what he does, or run underneath?', 'Moving with him: a note for a step, a slide for a fall. Underneath: a tune that goes on whatever happens. Or a bit of both.'],
+        ['effects', 'Can you tell music from sound effects here?', 'Are the clicks and splashes separate noises, or played by the instruments?'],
+      ],
+    },
+    {
+      id: 'hodinarem-repair', film: 'hodinarem', from: 150, to: 195, title: 'Hodinářem: the repair',
+      what: 'Tools out of a box, cogs everywhere: he is busy.',
+      qs: [
+        ['busy', 'When he is busy, what does the music do?', 'Faster, more notes, quieter, stops?'],
+        ['silence', 'Is there ever silence, or only his voice and effects?', ''],
+      ],
+    },
+    {
+      id: 'hodinarem-end', film: 'hodinarem', from: 270, to: 340, title: 'Hodinářem: it works, and the end',
+      what: 'The clock ticks again, the cuckoo comes out, then the meadow and the credits.',
+      qs: [
+        ['ending', 'How does the music say "it worked" and "the end"?', ''],
+        ['same', 'Do you hear the start\'s music again here?', ''],
+      ],
+    },
+    {
+      id: 'buldozer-home', film: 'buldozer', from: 0, to: 70, title: 'Buldozer: his home',
+      what: 'The title, a bird by the spring, the molehill and its flower bed. This is the meadow in our game.',
+      qs: [
+        ['instruments', 'What plays?', ''],
+        ['theme', 'Is it the same music as Hodinářem, or a theme you recognise from it?', 'Same tune, same instruments only, or quite different.'],
+        ['feel', 'Three words for how it feels.', ''],
+      ],
+    },
+    {
+      id: 'buldozer-cricket', film: 'buldozer', from: 70, to: 115, title: 'Buldozer: the cricket, night, and morning',
+      what: 'The cricket plays his fiddle, the mole lies listening and falls asleep under the moon; then the sun comes up. Our game\'s evening and morning.',
+      qs: [
+        ['cricket', 'What is the cricket\'s tune like?', 'An instrument you can name? Slow or quick? Could it be a lullaby?'],
+        ['night', 'What does the night sound like?', 'Music, quiet, crickets?'],
+        ['morning', 'How does the morning arrive in the sound?', ''],
+      ],
+    },
+    {
+      id: 'buldozer-trouble', film: 'buldozer', from: 205, to: 285, title: 'Buldozer: trouble',
+      what: 'Surveyors\' poles, the mound moves, the forest, the bulldozer.',
+      qs: [
+        ['trouble', 'How does the music change when trouble comes?', ''],
+        ['scary', 'Too scary for a three-year-old, or still gentle?', ''],
+      ],
+    },
+    {
+      id: 'buldozer-end', film: 'buldozer', from: 315, to: 372, title: 'Buldozer: the end',
+      what: 'He stands on top, the garden is back.',
+      qs: [
+        ['ending', 'How does it end? Like the start?', ''],
+      ],
+    },
+  ]
+  const OVERALL = [
+    ['one', 'In one sentence: what does Krtek\'s music sound like?', 'This becomes sound.overview.'],
+    ['vs', 'Press "Reksio\'s yard, for contrast". What is the biggest difference?', 'Instruments, speed, how busy, how cheeky, how sweet.'],
+    ['meadow', 'What should our meadow\'s music have, and never have?', ''],
+  ]
+
+  const KEY = 'krtek-listening-kit'
+  const $ = (id) => document.getElementById(id)
+  const escape = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+  let answers = {}
+  try { answers = JSON.parse(localStorage.getItem(KEY)) || {} } catch { answers = {} }
+  const keep = () => {
+    try { localStorage.setItem(KEY, JSON.stringify(answers)) } catch { /* private window: only for this visit */ }
+    const all = [...CLIPS.flatMap((c) => c.qs.map((q) => `${c.id}.${q[0]}`)), ...OVERALL.map((q) => `overall.${q[0]}`)]
+    $('count').textContent = `${all.filter((k) => answers[k]?.trim()).length} of ${all.length} answered`
+  }
+
+  const film = $('film')
+  film.volume = Number($('vol').value)
+  $('vol').oninput = () => { film.volume = Number($('vol').value) }
+  film.onerror = () => { $('missing').hidden = false }
+  let stopAt = null
+  film.ontimeupdate = () => { if (stopAt != null && film.currentTime >= stopAt) { film.pause(); stopAt = null } }
+
+  const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+  function question(key, [, label, hint]) {
+    const box = document.createElement('div')
+    box.className = 'q'
+    box.innerHTML = `<label for="${key}">${escape(label)}</label>${hint ? `<small>${escape(hint)}</small>` : ''}<textarea id="${key}"></textarea>`
+    const area = box.querySelector('textarea')
+    area.value = answers[key] || ''
+    area.oninput = () => { answers[key] = area.value; keep() }
+    return box
+  }
+  for (const c of CLIPS) {
+    const card = document.createElement('div')
+    card.className = 'clip'
+    card.innerHTML = `<h2>${escape(c.title)}</h2><div class="when">${mmss(c.from)}–${mmss(c.to)}</div><p class="what">${escape(c.what)}</p>`
+    const play = Object.assign(document.createElement('button'), { className: 'play', textContent: '▶ Play the clip' })
+    play.onclick = () => {
+      document.querySelectorAll('.clip.on').forEach((n) => n.classList.remove('on'))
+      card.classList.add('on')
+      const start = () => { film.currentTime = c.from; stopAt = c.to; film.play() }
+      if (film.dataset.film === c.film) start()
+      else {
+        // a seek before the film has loaded is lost: wait for it
+        film.addEventListener('loadedmetadata', start, { once: true })
+        film.src = `${MEDIA}${c.film}.mp4`
+        film.dataset.film = c.film
+      }
+    }
+    card.append(play)
+    for (const q of c.qs) card.append(question(`${c.id}.${q[0]}`, q))
+    $('clips').append(card)
+  }
+  for (const q of OVERALL) $('overall').append(question(`overall.${q[0]}`, q))
+
+  // The other world, for contrast: a random phrase take as the yard plays it.
+  $('contrast').onclick = () => {
+    film.pause()
+    Sound.bus().master.gain.value = Number($('vol').value)
+    Music.audition('phrase')
+  }
+  $('save').onclick = () => {
+    const a = document.createElement('a')
+    const out = { saved: new Date().toISOString(), clips: CLIPS.map((c) => ({ id: c.id, film: c.film, from: c.from, to: c.to })), answers }
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }))
+    a.download = 'listen-answers.json'
+    a.click()
+  }
+  keep()
+</script>
+</body>
+</html>

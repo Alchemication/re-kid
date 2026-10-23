@@ -127,7 +127,13 @@ def main(args: list[str]) -> None:
     for name in names:
         piece = PIECES[name]
         entry = found.setdefault(name, {"candidates": []})
-        entry.update({"for": piece["for"], "now": piece["now"]})
+        entry.update(
+            {
+                "for": piece["for"],
+                "now": piece.get("now", []),
+                "world": piece.get("world", "reksio"),
+            }
+        )
         done = {
             (
                 c["prompt"],

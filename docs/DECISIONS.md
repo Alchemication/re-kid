@@ -113,6 +113,16 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   of the day picked by ear on `experiments/music/bed.html`, through the
   effects' retro recipe. The takes are the moments it swells into: it
   steps back under them. `?music=takes` gives the takes alone.
+- **Krtek's music: one theme, turned with the story** (Adam, 2026-10-22),
+  unlike the yard's bed with no tune. Adam listened to the two Petrov
+  films: each has one theme that comes back curious, sad and happy with
+  the story, calm and close to nature, and the music goes quiet when
+  trouble comes. So the meadow has one generated theme and its moods,
+  grown from the kept take by conditioning (on Music v2.5; v1 takes no
+  composition plan), which copied the seed for the yard's variety but
+  is what a mood of one theme needs. Adam kept all six. The cricket's
+  fiddle is takes measured against the film first (about 4 notes a
+  second). `worlds/krtek/MUSIC_DIRECTION.md` has the evidence.
 - **An old print, but still: no drawing on twos** (Adam, 2026-10-18; on
   in every game, `?film=0` turns it off). Grain and a faded grade are kept. Drawing Reksio
   and the camera on twos (12 a second) made him stutter: it shows fixed

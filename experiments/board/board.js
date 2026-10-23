@@ -180,7 +180,7 @@ const Board = (() => {
       item.anchor = `item-${i}`
       const sec = el(`<section class="item" id="${item.anchor}" data-world="${item.world}">
         <header><h2>${escape(item.name)}</h2><span class="world">${escape(WORLDS[item.world] || item.world)}</span><span class="count"></span></header>
-        <p class="for">${escape(item.for || '')}</p><div class="now"></div></section>`)
+        <p class="for">${escape(item.for || '')}</p>${cfg.worldNote?.[item.world] ? `<p class="for world-note">${cfg.worldNote[item.world]}</p>` : ''}<div class="now"></div></section>`)
       const now = sec.querySelector('.now')
       for (const b of item.now || []) {
         const button = el(`<button class="btn">${escape(b.label)}</button>`)

@@ -104,6 +104,7 @@ section.item { margin: 0 0 34px; }
 .item .world { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--soft); }
 .item .count { margin-left: auto; font-size: 13px; color: var(--soft); }
 .item .for { margin: 6px 0 10px; color: var(--soft); max-width: 80ch; }
+.item .world-note { border-left: 3px solid var(--line); padding-left: 8px; }
 .now { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; }
 .now .meta { font-size: 13px; color: var(--soft); }
 

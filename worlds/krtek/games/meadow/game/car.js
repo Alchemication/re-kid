@@ -217,6 +217,7 @@
   Things.add({
     name: 'car',
     offer: 'discover',
+    music: { 4: 'happy' }, // it goes: the ride
     appear,
     steps: [find, (alive) => wheel(alive, 0), (alive) => wheel(alive, 1), wind, (alive) => ride(alive, true), park],
     again: async (alive) => {

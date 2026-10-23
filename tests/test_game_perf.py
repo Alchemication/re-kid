@@ -1,4 +1,4 @@
-"""Performance budgets for the yard, the way games are measured: a phone-sized
+"""Performance budgets for the yard and the meadow, the way games are measured: a phone-sized
 screen at 3x pixels, Chrome's CPU slowed 4x (a mid-range phone), and for each
 scenario how much of every second the page's main thread is busy and how long
 frames take (60 fps is a 16.7 ms budget a frame).
@@ -21,9 +21,9 @@ import pytest
 pytestmark = pytest.mark.perf
 playwright = pytest.importorskip("playwright.sync_api")
 
-YARD = (
-    Path(__file__).resolve().parent.parent / "worlds/reksio/games/yard/game/index.html"
-)
+ROOT = Path(__file__).resolve().parent.parent
+YARD = ROOT / "worlds/reksio/games/yard/game/index.html"
+MEADOW = ROOT / "worlds/krtek/games/meadow/game/index.html"
 PHONE = {"width": 844, "height": 390}  # an iPhone on its side
 PHONE_PIXELS = 3
 CPU_SLOWDOWN = 4  # Chrome's own throttling: about a mid-range phone
@@ -35,13 +35,26 @@ FRAME_P95_BUDGET_MS = (
 
 SCENARIOS = {
     # a cloudy day: the most sky to draw between showers (clouds, haze)
-    "idle": ("rain=0&sky=cloudy", None),  # left alone: he keeps busy on his own
+    "idle": (YARD, "rain=0&sky=cloudy", None),  # left alone: he keeps busy on his own
     "walking": (
+        YARD,
         "rain=0&sky=cloudy",
         "setInterval(() => yardGame.walk(Reksio.x < 2000 ? 3400 : 600), 4000); yardGame.walk(3400)",
     ),
-    "rain": ("rain=1&rain-at=0", None),  # rain, splashes, puddles: the busiest drawing
+    "rain": (
+        YARD,
+        "rain=1&rain-at=0",
+        None,
+    ),  # rain, splashes, puddles: the busiest drawing
+    # the meadow: its painted layers, the far trees at half speed (view.js)
+    "meadow-idle": (MEADOW, "props=", None),
+    "meadow-walking": (
+        MEADOW,
+        "props=",
+        "setInterval(() => meadowGame.perform(meadowGame.state().x < 2000 ? 'go to 3400' : 'go to 600'), 5000); meadowGame.perform('go to 3400')",
+    ),
 }
+READY = {YARD: "window.yardGame", MEADOW: "typeof meadowGame !== 'undefined'"}
 FRAME_TIMES = """() => { window.__frames = []; let last = performance.now()
     const f = (t) => { __frames.push(t - last); last = t; requestAnimationFrame(f) }
     requestAnimationFrame(f) }"""
@@ -55,7 +68,7 @@ def browser() -> Iterator[object]:
         b.close()
 
 
-def measure(browser: object, query: str, action: str | None) -> dict:
+def measure(browser: object, game: Path, query: str, action: str | None) -> dict:
     """Main-thread busy % and frame times over SECONDS of play."""
     ctx = browser.new_context(
         viewport=PHONE, device_scale_factor=PHONE_PIXELS, has_touch=True
@@ -64,8 +77,8 @@ def measure(browser: object, query: str, action: str | None) -> dict:
     cdp = ctx.new_cdp_session(page)
     cdp.send("Performance.enable")
     cdp.send("Emulation.setCPUThrottlingRate", {"rate": CPU_SLOWDOWN})
-    page.goto(f"{YARD.as_uri()}?seed=2&{query}")
-    page.wait_for_function("window.yardGame")
+    page.goto(f"{game.as_uri()}?seed=2&{query}")
+    page.wait_for_function(READY[game])
     page.wait_for_timeout(2000)  # past the first paint
     page.mouse.click(400, 300)  # a first tap: sound and music on, as in play
     if action:
@@ -91,8 +104,8 @@ def measure(browser: object, query: str, action: str | None) -> dict:
 
 @pytest.mark.parametrize("scenario", SCENARIOS)
 def test_stays_within_budget_on_a_phone(browser: object, scenario: str) -> None:
-    query, action = SCENARIOS[scenario]
-    m = measure(browser, query, action)
+    game, query, action = SCENARIOS[scenario]
+    m = measure(browser, game, query, action)
     print(
         f"\n  {scenario}: main thread {m['busy']}% busy, {m['fps']} fps, frames p50 {m['p50']} ms, p95 {m['p95']} ms"
     )

@@ -65,6 +65,9 @@ sound:
 - text: The music follows the child, with quiet in between. A morning tune as he wakes; through the day, a short tune after something is done (at most every 25 seconds, counting the morning tune, never in the rain), and one anyway after 50 seconds of quiet as he potters about alone, so the yard's own sounds come between tunes instead of a loop; a lullaby once supper is eaten and the cuckoo has called eight. Between tunes, actions play along on real instruments (CC0 samples) — a xylophone flourish for each new thing, glockenspiel for a thought bubble, a flute trill for the bird, timpani under each stamp, a rising bassoon as he stretches and a falling run (the shape of the marked stretching melody) as he snaps back.
   origin: inspired
   refs: [mark:stretching-melody, world:sound.music_role]
+- text: Under everything, a quiet music bed made from the same instruments, a few notes at a time with no tune to hum, different for each moment of the day (a music box in the morning, a tiptoe walk while the child plays, a xylophone patter in the afternoon, a bassoon and flute chatting at dusk, drips in the rain, almost nothing for a nap). It steps back under a tune and stops for the lullaby. What the yard's music should be, and what Adam has said of it, is in worlds/reksio/MUSIC_DIRECTION.md.
+  origin: invented
+  refs: [world:sound.music_role]
 - text: Each day looks a little different. It may be clear, fair with a few small clouds drifting across, cloudy with a softer sun and a grey haze, or golden with warmer light all day; and the sun comes up and goes down a little further left or right. The shape of the day stays the same.
   origin: invented
 - text: A quiet wind is always there, changing like real wind — mostly a light breeze that comes and goes, now and then a gust, stronger when the clouds come, dropping at evening. The grass and flowers lean further in a gust, so the child can see what they hear. Rain is a soft hush under everything.

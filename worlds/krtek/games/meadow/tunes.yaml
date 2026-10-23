@@ -1,0 +1,58 @@
+# Recorded music for the meadow (schema.tunes.TuneSet), packed into
+# game/tunes.js by `main.py tunes`. music.js plays a random take of a part
+# when it comes: the meadow's theme as he wakes, the theme's moods in an
+# encounter (curious, sad, happy), the cricket's fiddle from dusk. The takes
+# are in tunes/, as made; written by experiments/music/adopt.py from Adam's
+# picks on the music board (worlds/krtek/MUSIC_DIRECTION.md).
+source: 'Made with ElevenLabs Music (text to music, Starter plan, which allows commercial use) and picked by ear by Adam on the music board (experiments/music). Our own tunes, inspired by the era, not copied from the cartoon.'
+tunes:
+- id: morning
+  takes:
+  - file: morning/01.mp3
+    prompt: 'A calm, beautiful instrumental theme for a sunny meadow morning in a 1970s Eastern European children''s animated film: a gentle flute melody over soft strings, with birdsong, warm and positive, simple and tender, as a small creature comes out to greet the day.'
+    model: music_v1
+    song: F6cJ73OJz2rTa7FCDdpe
+- id: curious
+  takes:
+  - file: curious/01.mp3
+    prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (medium): the same gentle meadow theme, now curious and inquisitive: lighter, a little quicker, plucked strings and a questioning flute, as a small creature finds something new'
+    model: music_v2_5
+    song: 91rjm4dTXIyuhXCkTVUq
+  - file: curious/02.mp3
+    prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (low): the same gentle meadow theme, now curious and inquisitive: lighter, a little quicker, plucked strings and a questioning flute, as a small creature finds something new'
+    model: music_v2_5
+    song: YSuaYAus1AiSekXUzTJ3
+- id: sad
+  takes:
+  - file: sad/01.mp3
+    prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (low): the same gentle meadow theme, now sad and tender: slower, in a minor key, a lonely flute over soft strings, as a small creature finds a friend in trouble, never frightening'
+    model: music_v2_5
+    song: oHWmDrifb4T1eUEWtuNB
+  - file: sad/02.mp3
+    prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (medium): the same gentle meadow theme, now sad and tender: slower, in a minor key, a lonely flute over soft strings, as a small creature finds a friend in trouble, never frightening'
+    model: music_v2_5
+    song: wnwMswUTj0dC0erEiO7k
+- id: happy
+  takes:
+  - file: happy/01.mp3
+    prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (medium): the same gentle meadow theme, now joyful and triumphant: fuller and brighter, strings and flute together, as everything turns out well in the end'
+    model: music_v2_5
+    song: PjznUDRazLU6L81vjkN1
+  - file: happy/02.mp3
+    prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (low): the same gentle meadow theme, now joyful and triumphant: fuller and brighter, strings and flute together, as everything turns out well in the end'
+    model: music_v2_5
+    song: AS4GA6D4lu39AOZPGuqn
+- id: lullaby
+  takes:
+  - file: lullaby/01.mp3
+    prompt: 'A lively little tune played on a single fiddle by a cricket in a meadow at dusk: quick, rocking, about four short notes a second at around 130 beats per minute, leaping up and down across two octaves, a short phrase that repeats, a little rough and slightly out of tune, homemade and charming, like a vintage 1970s Eastern European children''s animated film. Solo violin only.'
+    model: music_v1
+    song: B3cNnV3yvaISjq3yypO4
+  - file: lullaby/02.mp3
+    prompt: 'A cricket''s fiddle tune at dusk, from a vintage 1970s Eastern European children''s animated film: a single violin, nimble and bouncy, quick short notes jumping high and low, a simple phrase played over and over, scratchy and a little out of tune, gentle and charming. Solo violin only, no accompaniment.'
+    model: music_v1
+    song: eUp7e8tYvIs3nm1UWrgg
+  - file: lullaby/03.mp3
+    prompt: 'A cricket''s fiddle tune at dusk, from a vintage 1970s Eastern European children''s animated film: a single violin, nimble and bouncy, quick short notes jumping high and low, a simple phrase played over and over, scratchy and a little out of tune, gentle and charming. Solo violin only, no accompaniment.'
+    model: music_v1
+    song: ooBGVBjPHNuBDgMGXsYo

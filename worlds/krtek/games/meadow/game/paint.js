@@ -208,6 +208,7 @@
   Things.add({
     name: 'paint',
     offer: 'helped',
+    music: { 1: 'hush', 3: 'happy' }, // the fox: a fright, the effects lead; the monster sends it off
     appear,
     steps: [tumble, foxComes, friendsPaint, monster, wash],
     restore,

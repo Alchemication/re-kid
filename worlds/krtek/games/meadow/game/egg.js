@@ -297,6 +297,7 @@
   Things.add({
     name: 'egg',
     offer: 'help',
+    music: { 0: 'sad' }, // a lost egg: whose is it? (happy once the hen has her chick)
     appear,
     steps: [find],
     ask: choose,

@@ -455,3 +455,127 @@ class TestMeadowEgg:
             "meadowGame.state().things.poles.startsWith('step')", 20_000
         )  # and the next one comes
         assert not m.errors, m.errors
+
+
+MUSIC = "meadowGame.trace().split('\\n').filter((l) => l.includes(' music ')).map((l) => JSON.parse(l.slice(l.indexOf('{'))).part)"
+
+
+def in_order(parts: list[str], wanted: list[str]) -> bool:
+    """Whether `wanted` comes in `parts` in that order (others may come between)."""
+    it = iter(parts)
+    return all(w in it for w in wanted)
+
+
+class TestMeadowMusic:
+    """The meadow's music (music.js): the theme as he wakes, its moods in an
+    encounter, the cricket from dusk. Read from the trace: whether a take is
+    heard is for Adam's ears."""
+
+    def test_the_theme_as_he_comes_up(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=")
+        m.wake()
+        m.wait(f"{MUSIC}.includes('morning')", 10_000)
+        assert not m.errors, m.errors
+
+    def test_an_encounter_turns_the_theme_curious_sad_then_happy(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&soon&props=poles")
+        m.wake()
+        arrived(m, "poles")
+        finish(m, "poles")
+        parts = m.page.evaluate(MUSIC)
+        assert in_order(parts, ["curious", "sad", "happy"]), parts
+        assert not m.errors, m.errors
+
+    def test_the_music_steps_back_for_the_fox_and_comes_back_happy(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&soon&props=paint")
+        m.wake()
+        arrived(m, "paint")
+        m.do("use paint")
+        m.wait("meadowGame.state().things.paint === 'step 1'")
+        m.page.wait_for_timeout(1500)  # the fade
+        assert m.page.evaluate("meadowGame.music()") is None, "music over the fox"
+        finish(m, "paint")
+        assert m.page.evaluate(MUSIC)[-1] == "happy"
+        assert not m.errors, m.errors
+
+    def test_the_cricket_fiddles_from_dusk_until_the_circle_closes(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&day=12&props=")
+        m.wake()
+        m.wait(f"{MUSIC}.includes('lullaby')", 40_000)
+        assert m.page.evaluate("meadowGame.music()") == "lullaby"
+        m.wait("meadowGame.state().ended && !meadowGame.state().busy", 40_000)
+        m.page.wait_for_timeout(1500)  # the fade
+        assert m.page.evaluate("meadowGame.music()") is None
+        parts = m.page.evaluate(MUSIC)
+        assert parts[parts.index("lullaby") :] == ["lullaby"] * len(
+            parts[parts.index("lullaby") :]
+        ), f"something but the cricket after dusk: {parts}"
+        assert not m.errors, m.errors
+
+
+class TestMeadowCritters:
+    """The butterflies (critters.js): one comes, a tap sends it off and has
+    him look up after it, they go at sunset; nobody is left stuck."""
+
+    def test_a_tap_sends_it_off_and_he_looks_up(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&critters=now")
+        m.wake()
+        m.wait("document.querySelector('[data-critter]') !== null", 10_000)
+        m.page.wait_for_timeout(1500)  # in view, over the meadow
+        m.page.locator("[data-critter]").first.click(force=True)
+        m.wait("meadowGame.trace().includes('\"tapped\":true')", 5_000)
+        m.wait("document.querySelector('[data-critter]') === null", 15_000)
+        m.wait_free()
+        m.assert_settled()
+
+    def test_none_in_a_still_play_unless_asked(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=")
+        m.wake()
+        m.page.wait_for_timeout(4000)
+        assert (
+            m.page.evaluate("document.querySelectorAll('[data-critter]').length") == 0
+        )
+        assert not m.errors, m.errors
+
+    def test_they_go_at_sunset(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&critters=now&day=20")
+        m.wake()
+        m.wait("meadowGame.state().ended", 40_000)
+        m.wait("document.querySelector('[data-critter]') === null", 15_000)
+        assert not m.errors, m.errors
+
+
+class TestMeadowTapHim:
+    """A tap on him: every answer in turn (wave, peekaboo, a jump of joy, a
+    think, a laugh behind his hands), never the same twice running; each
+    ends with him free, and each can be cut short by a tap elsewhere."""
+
+    HOWS = "meadowGame.trace().split('\\n').filter((l) => l.includes(' says ')).map((l) => JSON.parse(l.slice(l.indexOf('{'))).how)"
+
+    def test_every_answer_in_turn_never_twice_running(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=")
+        m.wake()
+        for _ in range(10):
+            m.do("tap mole")
+            m.wait_free()
+            m.assert_settled()
+        hows = m.page.evaluate(self.HOWS)
+        assert set(hows[:5]) == {"cheer", "wave", "peekaboo", "laughs", "ponder"}, hows
+        assert all(a != b for a, b in pairwise(hows)), hows
+
+    def test_each_answer_cut_short(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=")
+        m.wake()
+        for _ in range(5):
+            m.do("tap mole")
+            m.page.wait_for_timeout(CUT_MS)
+            m.do("go to 600")
+            m.wait_free()
+            m.assert_settled()
+            assert m.page.evaluate("meadowGame.state().pose") != "listen"

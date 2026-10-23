@@ -200,6 +200,7 @@
   Things.add({
     name: 'poles',
     offer: 'discover',
+    music: { 0: 'sad' }, // the line runs at his flowers, and he sighs (happy as the bulldozer goes)
     appear,
     steps: [notice, (alive) => sendAway(alive), (alive) => sendAway(alive), (alive) => sendAway(alive, true), away],
     restore,

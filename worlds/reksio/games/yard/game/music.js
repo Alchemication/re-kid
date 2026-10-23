@@ -20,13 +20,13 @@
 //   under a take and comes back after, and stops at the lullaby.
 
 // Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
-/* global Sound, SAMPLES, TUNES, Debug, Clock, Bed */
+/* global Sound, SAMPLES, TUNES, Debug, Clock, Bed, Takes */
 /* exported Music */
 const Music = (() => {
   const VOLUME = 0.42 // music under the sound effects
   const TAKE_VOLUME = 0.8 // the takes against the samples' touches (both levelled when packed)
   const PHRASE_LEAD_S = 0.8 // a phrase starts after the new thing's flourish, not over it
-  const FADE_S = 0.5 // a take cut short (evening) fades over about this long
+  const PARTS = ['morning', 'phrase', 'lullaby'] // the parts it plays (tunes.yaml)
   const EIGHTH_S = 60 / 136 / 2 // the touches' pace: eighth notes at 136 BPM
   const CHORD = [62, 65, 70] // D4 F4 B-flat4: the touches stay in B-flat
   const BED_VOLUME = 0.9 // the bed against the takes and touches (its notes are soft already: bed.js)
@@ -39,9 +39,7 @@ const Music = (() => {
   let bus = null
   let out = null
   const buffers = {} // instrument -> [{midi, buffer}]
-  const takes = { morning: [], phrase: [], lullaby: [] } // part -> decoded takes
-  const last = {} // part -> the take played last time, so it doesn't come twice running
-  let current = null // the take playing now: {src, gain}
+  let takes = null // the recorded takes' player (takes.js)
   let ready = false
   let night = false // after the lullaby starts, nothing else plays
   let dusk = 0
@@ -60,11 +58,7 @@ const Music = (() => {
         jobs.push(ctx.decodeAudioData(bytes(note.data)).then((buffer) => buffers[inst].push({ midi: note.midi, buffer })))
       }
     }
-    if (typeof TUNES !== 'undefined') {
-      for (const [part, list] of Object.entries(TUNES)) {
-        for (const b64 of list) jobs.push(ctx.decodeAudioData(bytes(b64)).then((buffer) => takes[part]?.push(buffer), () => {})) // a take that won't decode is left out: the part plays from the others
-      }
-    }
+    if (typeof TUNES !== 'undefined') jobs.push(takes.load(TUNES))
     await Promise.all(jobs)
     for (const list of Object.values(buffers)) list.sort((a, b) => (a.midi ?? 0) - (b.midi ?? 0))
     ready = true
@@ -92,37 +86,11 @@ const Music = (() => {
 
   // ------------------------------------------------------------ takes
 
-  /** Play a random take of `part` (never the one before, if it has others)
-   * from time t; false if it has none ready. random: the caller's stream. */
+  /** A random take of `part` (never the one before, if it has others) from
+   * time t; false if it has none ready. random: the caller's stream. The bed
+   * steps back while it plays (takes.js onStart, onEnd). */
   function playTake(part, random, t) {
-    const list = takes[part]
-    if (!ready || !list.length) return false
-    const others = list.map((_, i) => i).filter((i) => i !== last[part] || list.length === 1)
-    const i = others[Math.floor(random() * others.length)]
-    last[part] = i
-    const src = bus.ctx.createBufferSource()
-    src.buffer = list[i]
-    const gain = bus.ctx.createGain()
-    gain.gain.value = TAKE_VOLUME
-    src.connect(gain).connect(out)
-    const take = { src, gain }
-    src.onended = () => {
-      if (current === take) current = null
-      bedBack()
-    }
-    current = take
-    bedAway(t)
-    src.start(Math.max(t, bus.ctx.currentTime))
-    return true
-  }
-
-  /** Fade out the take playing now, if any. */
-  function fadeTake() {
-    if (!current) return
-    const now = bus.ctx.currentTime
-    current.gain.gain.setTargetAtTime(0.0001, now, FADE_S / 3)
-    current.src.stop(now + FADE_S * 2)
-    current = null
+    return ready && takes.play(part, random, t)
   }
 
   // ------------------------------------------------------------ the bed
@@ -161,8 +129,8 @@ const Music = (() => {
   function bedBars() {
     if (!ready || night) return
     const c = bus.ctx
-    if (current || bed.next < c.currentTime) bed.next = c.currentTime + 0.1 // under a take nothing is scheduled (nobody would hear it); back from a hidden page, afresh
-    if (current) return
+    if (takes.playing || bed.next < c.currentTime) bed.next = c.currentTime + 0.1 // under a take nothing is scheduled (nobody would hear it); back from a hidden page, afresh
+    if (takes.playing) return
     while (bed.next < c.currentTime + BED_AHEAD_S) {
       const pick = Bed.style(bed.mood, bed.energy, bed.playing)
       if (pick.style !== bed.style) bed.n = 0 // a new bed starts its chords from the top
@@ -196,7 +164,7 @@ const Music = (() => {
 
   /** No take now: the bed comes back (not after the lullaby). */
   function bedBack() {
-    if (bed.gain && !current && !night) bed.gain.gain.setTargetAtTime(BED_VOLUME, bus.ctx.currentTime, BED_BACK_S / 3)
+    if (bed.gain && !takes.playing && !night) bed.gain.gain.setTargetAtTime(BED_VOLUME, bus.ctx.currentTime, BED_BACK_S / 3)
   }
 
   // ------------------------------------------------------------ public
@@ -209,6 +177,7 @@ const Music = (() => {
       out = bus.ctx.createGain()
       out.gain.value = VOLUME
       out.connect(bus.master)
+      takes = Takes.player(bus.ctx, out, { volume: TAKE_VOLUME, onStart: bedAway, onEnd: bedBack })
       loading = load()
     }
     return loading
@@ -229,7 +198,7 @@ const Music = (() => {
   /** A phrase now, after something done (the game decides when: idle.js
    * phraseOk); true if one started. random: the game's stream for it. */
   function phrase(random) {
-    if (!ready || night || current) return false
+    if (!ready || night || takes.playing) return false
     return playTake('phrase', random, bus.ctx.currentTime + PHRASE_LEAD_S)
   }
 
@@ -250,7 +219,7 @@ const Music = (() => {
   }
 
   /** In-key touches for what happens in the yard, only while no take plays. */
-  const quiet = () => ready && !current && !night
+  const quiet = () => ready && !takes.playing && !night
   const react = {
     /** A new thing done: a xylophone run up the chord, a glockenspiel on top. */
     done() {
@@ -309,8 +278,8 @@ const Music = (() => {
    * once a play. random: the evening's own stream. */
   function evening(random) {
     if (!ready || night) return
-    const after = current ? FADE_S + 0.3 : 0.1 // straight away, or once the phrase has faded
-    fadeTake()
+    const after = takes.playing ? takes.FADE_S + 0.3 : 0.1 // straight away, or once the phrase has faded
+    takes.fade()
     playTake('lullaby', random, bus.ctx.currentTime + after)
     night = true
     stopBed() // the lullaby is the last music of the day
@@ -324,8 +293,8 @@ const Music = (() => {
   async function audition(part) {
     await prepare()
     auditionRandom ??= Debug.random('music-audition')
-    fadeTake()
-    if (takes[part]) {
+    takes.fade()
+    if (PARTS.includes(part)) {
       playTake(part, auditionRandom, bus.ctx.currentTime + 0.1)
     } else if (part === 'stretch') {
       for (let n = 0; n < 6; n++) setTimeout(() => react.stretchStep(n), n * 300)
@@ -348,7 +317,7 @@ const Music = (() => {
       }
       bed.random ??= Debug.random('music-bed')
       bed.gain = bedBus()
-      if (current) bedAway(bus.ctx.currentTime)
+      if (takes.playing) bedAway(bus.ctx.currentTime)
       bed.timer = Clock.every(200, bedBars)
     },
     set({ mood = bed.mood, energy = bed.energy }) {
@@ -364,7 +333,7 @@ const Music = (() => {
     bed: bedApi,
     start, startMorning, phrase, audition, setDusk, setRain, react, evening,
     get ready() { return ready },
-    get playing() { return !!current },
+    get playing() { return !!takes?.playing },
     get buffers() { return buffers },
   }
 })()

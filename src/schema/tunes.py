@@ -3,8 +3,9 @@
 Stored at ``worlds/<id>/games/<game>/tunes.yaml``, with the takes themselves
 in the game's ``tunes/`` folder, as they were made. ``main.py tunes`` puts
 them through the effects' retro recipe, levels them and packs them into the
-game's ``tunes.js``; music.js plays one take of a part at random when that
-part comes (the morning, a phrase after something new, the lullaby).
+game's ``tunes.js``; the game's music.js plays one take of a part at random
+when that part comes (the morning, a phrase after something new, a mood of
+an encounter, the lullaby).
 
 Example:
     tunes = TuneSet.model_validate(yaml.safe_load(path.read_text()))
@@ -34,10 +35,13 @@ class TuneTake(Model):
 class Tune(Model):
     """One part of the day's music, and the takes it plays from."""
 
-    id: Literal["morning", "phrase", "lullaby"] = Field(
+    id: Literal["morning", "phrase", "curious", "sad", "happy", "lullaby"] = Field(
         description=(
-            "The part in music.js: 'morning' as he wakes, 'phrase' now and "
-            "then through the day, 'lullaby' at evening."
+            "The part in the game's music.js (its PARTS): 'morning' as he "
+            "wakes; 'phrase' now and then through the day (the yard); the "
+            "theme's moods in an encounter, 'curious' as it arrives, 'sad' "
+            "at its trouble, 'happy' as it comes right (the meadow); "
+            "'lullaby' at evening."
         )
     )
     takes: list[TuneTake] = Field(min_length=1)

@@ -14,9 +14,22 @@ Outputs (`out/`) are not committed.
 - `board.html` — open from disk; ▶ plays a take as made, R retro, "Today"
   plays a random take of that part from the game (`Music.audition`); mark
   keep/maybe/no, Save picks. Built on `../board/`, shared with the sound board.
-- `picks.json` — Adam's latest verdicts.
-- `adopt.py` — the keeps into the yard (`tunes/`, `tunes.yaml`); then
-  `main.py tunes reksio`. Procedure: the `new-music` skill.
+- `picks.json` — Adam's latest verdicts. Each world's card on the board says
+  what its music should be (from `worlds/<id>/MUSIC_DIRECTION.md`) and asks
+  whether a take belongs to that world; a world other than Reksio gets a
+  button to hear the yard for contrast. A piece's `world` in `pieces.py`
+  says whose it is (Reksio when not set).
+- `measure.py` — measures a film's moment (`file@start-end`) and our
+  takes the same way: pulse, notes a second, key, melody range, how far
+  off pitch. These are leads for the wording and for Adam, not claims.
+- `listen.html` — Krtek's listening kit: eight clips of the two films Vadim
+  Petrov scored (from `worlds/krtek/media/`, local only), each with questions
+  from the open `sound` claims in `world.yaml`, about 15 minutes. Answers stay
+  in the browser; "Download answers" saves `listen-answers.json` for Claude,
+  who turns them into `observed_by: adam` claims.
+- `adopt.py` — the keeps into each world's game (`tunes/`, `tunes.yaml`;
+  `--world`, `--also` for a maybe); then `main.py tunes <world> <game>`.
+  Procedure: the `new-music` skill.
 - `bed.html` — the music bed board (2026-10-21): eight beds of quiet
   music under the yard, played live from the yard's samples in B-flat,
   steered by mood and how busy the yard is, with a touch and a recorded
@@ -27,7 +40,7 @@ Outputs (`out/`) are not committed.
   retro recipe, a tape wobble and looser timing, as the game does
   (Adam: "a bit too crisp").
 
-## Findings (2026-10-13)
+## Findings (2026-10-13, Reksio's yard)
 
 Four rounds, 87 takes, about 18,000 credits (Starter plan: 40,000 a month;
 about 12.5 credits a second of music, 3 calls at once, 20 s takes in ~10 s).

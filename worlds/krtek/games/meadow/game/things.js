@@ -6,11 +6,11 @@
 // cartoon; a tap on the thing hurries it to its next step, a tap anywhere
 // else cuts it short, and next time it picks up at the step it stopped on.
 //
-// Not everything every play (brief.yaml, principles): which encounters come
-// is decided once, from the page's seed: always one where he helps someone,
-// one where someone helps him, and one to discover, as in the yard
-// (docs/DECISIONS.md, "Helping is the yard's theme"), from what exists.
-// None is needed for the day to end.
+// Which encounters come is decided once, from the page's seed: first one
+// where he helps someone, one where someone helps him, and one to discover,
+// as in the yard (docs/DECISIONS.md, "Helping is the yard's theme"), then
+// the rest, as many as there are hours for (children wanted more to happen
+// in a day: the yard's lesson). None is needed for the day to end.
 //
 // An encounter registers itself (Things.add) with:
 //   name, offer ('help', 'helped' or 'discover'),
@@ -32,14 +32,20 @@
 //       while it waits for a choice (he looks at it again); holds(): he
 //       holds it up as he waits (the egg), which a free mole otherwise
 //       never does (checkRules).
+//   music (optional): { [step]: 'sad' | 'happy' | 'hush' }, the music's
+//     moment as that step starts (music.js: the theme sad at its trouble,
+//     happy as it comes right, stepping back at a fright). The theme comes
+//     curious as any encounter arrives, and happy as it is done unless a
+//     step has had it already.
 //   detail(): its own state, for the overlay and the tests; `cast`, the
 //     visitors it has out now (none once the mole is free: checkRules).
-// It draws on the meadow's helpers (Things.meadow: goTo) for the mole's trips.
+// It draws on the meadow's helpers (Things.meadow: goTo) for the mole's
+// trips, and tells the meadow the music's moments (Things.meadow.music).
 
 /* global Clock, Day, Debug, Layout */
 /* exported Things */
 const Things = (() => {
-  const HOURS = [9.2, 12.2, 15.2] // when the chosen ones arrive, in their (seeded) order
+  const HOURS = [9, 11, 13, 15.2] // when the chosen ones arrive, in their (seeded) order: one every 2 hours or so, about 50 s of play apart
   const SOON_HOUR = 8 // ?soon: the first arrives as he wakes, for trying it
   const ENGAGE_MS = 7000 // a thing out and the mole left alone this long: he goes to it himself
   const BETWEEN_MS = 1300 // a breath between steps, so each reads (a tap on the thing skips it)
@@ -55,26 +61,31 @@ const Things = (() => {
 
   /**
    * Which encounters come this play, and at what hour: one of each offer
-   * there is, chosen from `rand` (pure: the unit tests call it). `props`
+   * there is, then the others, chosen from `rand` (pure: the unit tests call it). `props`
    * (the ?props flag) forces a list instead; `soon` brings the first now.
    * The draws are made either way, so forcing one doesn't shift the rest.
    */
   function choose(encounters, rand, { props = null, soon = false } = {}) {
+    const shuffle = (list) => {
+      for (let i = list.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1))
+        ;[list[i], list[j]] = [list[j], list[i]]
+      }
+      return list
+    }
     const byOffer = {}
     for (const e of encounters) (byOffer[e.offer] ||= []).push(e.name)
-    let names = Object.keys(byOffer).sort().map((offer) => {
+    const first = Object.keys(byOffer).sort().map((offer) => {
       const list = byOffer[offer]
       return list[Math.floor(rand() * list.length)]
     })
-    for (let i = names.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1))
-      ;[names[i], names[j]] = [names[j], names[i]]
-    }
+    const rest = encounters.map((e) => e.name).filter((n) => !first.includes(n))
+    let names = [...shuffle(first), ...shuffle(rest)]
     if (props) names = props.filter((n) => encounters.some((e) => e.name === n))
     return names.slice(0, HOURS.length).map((name, i) => ({ name, at: soon && i === 0 ? SOON_HOUR : HOURS[i] }))
   }
 
-  /** Decide this play's encounters; `meadow` lends its run(), free() and alone(). */
+  /** Decide this play's encounters; `meadow` lends its run(), free(), alone(), music() and notice(). */
   function setup(meadow) {
     api = meadow
     plan = choose(Object.values(all), Debug.random('things'), Layout.flags)
@@ -93,6 +104,8 @@ const Things = (() => {
         e.arrived = Clock.now()
         Debug.trace('arrives', { thing: e.name })
         e.appear()
+        api.music?.('curious')
+        api.notice?.()
         break
       }
     }
@@ -107,6 +120,7 @@ const Things = (() => {
   async function stepsOn(e, alive) {
     while (e.step < e.steps.length) {
       Debug.trace('step', { thing: e.name, step: e.step })
+      if (e.music?.[e.step]) api.music?.(e.music[e.step])
       await e.steps[e.step](alive)
       if (!alive()) return false
       e.step++
@@ -120,6 +134,7 @@ const Things = (() => {
   function finish(e) {
     e.done = true
     Debug.trace('done', { thing: e.name })
+    if (!Object.values(e.music || {}).includes('happy')) api.music?.('happy')
   }
 
   /**

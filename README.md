@@ -18,6 +18,9 @@ one Polish world, Reksio, and one short game for a parent and a young child.
   sound-generation experiment.
 - [experiments/music/README.md](experiments/music/README.md): the
   music-generation experiment.
+- `worlds/<id>/MUSIC_DIRECTION.md` ([Reksio](worlds/reksio/MUSIC_DIRECTION.md),
+  [Krtek](worlds/krtek/MUSIC_DIRECTION.md)): what a world's music should
+  be, from the films, our direction, and Adam's verdicts.
 - This file: layout, commands, the site, performance, debugging the yard,
   reference media.
 
@@ -42,11 +45,12 @@ src/
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
   shared.py             copies shared/ scripts into the games that load them
 shared/                 game scripts every game uses (debug.js: the clock, the recorder, the rules;
-                        filmlook.js: the old-print look);
+                        filmlook.js: the old-print look; takes.js: the music's recorded takes);
                         `main.py shared` copies each into the games whose page loads it
 worlds/<id>/
   world.yaml            series dossier (schema.world.WorldDossier)
   sources.yaml          every source the world's files cite
+  MUSIC_DIRECTION.md    what its music should be: from the films, our direction, Adam's verdicts
   episodes/index.yaml   episode catalogue (schema.episode.EpisodeCatalogue)
   episodes/<id>.yaml    one episode, beat by beat (schema.breakdown.Breakdown)
   intro.yaml            title sequence, beat by beat (schema.breakdown.Breakdown)
@@ -64,7 +68,8 @@ worlds/<id>/
                         (yard/lab: Reksio drawn from poses by game/figure.js)
 experiments/sound/      making sound effects with a model and picking them by ear on a
                         board page (scripts committed; audio and the API key in .env not)
-experiments/music/      the same for the yard's music, against what the game plays today
+experiments/music/      the same for the games' music, against what the game plays today, the bed
+                        board, and a kit for listening to the films (listen.html)
 experiments/board/      what both boards share: the page, its look (Krtek's meadow) and keys
 .claude/skills/         procedures for Claude Code sessions (new-world, new-episode, new-character, new-gag, new-sound, new-music)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
@@ -192,7 +197,8 @@ Flags in the page address (`main.py play` takes the first three):
 In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 `?day=S` (a day S seconds long: `?day=60` to see the evening and the
 ending in a minute) and `?film=0` work the same; `?props=egg` says which encounters come
-(`?props=` for none) and `?soon` brings the first at once. In the console, `meadowGame.state()`,
+(`?props=` for none) and `?soon` brings the first at once; `?critters=now` brings a butterfly at
+once, even in a `?still` play (which otherwise has none). In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 
 In the yard's console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,

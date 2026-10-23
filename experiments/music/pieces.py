@@ -1,10 +1,16 @@
-"""The music the board asks candidates for: each piece, what it is for in the
-yard, how long, which part of today's code music plays next to it
-(`Music.audition`), and wordings for a model."""
+"""The music the board asks candidates for: each piece, what it is for in its
+game, which part of the game's music a keep becomes (`part`, or `parts` by
+wording; else the first of `now`), how long, which part of today's code music plays next to it
+(`Music.audition`), and wordings for a model.
+
+Everything above PIECES was learnt on Reksio's yard and holds for it only.
+A piece for another world sets `"world"` and `"style": False`, and is
+worded from that world's MUSIC_DIRECTION.md (`worlds/<id>/`), not from
+STYLE, SEEDS or Adam's form until his ear says they fit there too."""
 
 from __future__ import annotations
 
-# The yard's instruments today (samples.yaml) and the era, said once and
+# Reksio: the yard's instruments today (samples.yaml) and the era, said once and
 # added to every wording, so the takes stay in one world and the wordings
 # differ only in what the piece does. No names of the cartoon or its
 # composer: the music is ours, inspired, not copied.
@@ -174,6 +180,74 @@ PIECES: dict[str, dict] = {
             "A bouncy, cheeky oom-pah tune for a small dog trotting around a backyard: pizzicato bass and off-beat chords, a playful clarinet melody, a xylophone answer.",
             "A light skipping tune for a sunny afternoon in a backyard: flute melody with little chromatic turns, pizzicato strings, a bassoon joining in with a wink.",
             "A tiptoeing, mischievous little tune, as if sneaking up on a fly: staccato bassoon and pizzicato, a clarinet that pounces, then a happy resolution.",
+        ],
+    },
+    # Krtek's meadow (worlds/krtek/MUSIC_DIRECTION.md, from Adam's listening
+    # on 2026-10-22): calm, flute and strings, birds; not Reksio's form,
+    # whose "catchy, playful, whimsical" pulls towards cheeky. Music v1, as
+    # it was best for the yard.
+    "cricket": {
+        "world": "krtek",
+        "for": "The cricket fiddles at dusk by the molehill and the mole listens, then goes down to sleep: the meadow's lullaby. In the films, strings: simple, repeating, a little raw, notes wrong on purpose.",
+        "part": "lullaby",
+        "seconds": 15,
+        "style": False,
+        "models": ["music_v1"],
+        "prompts": [
+            "A simple, slow lullaby played on a single fiddle by a cricket in a meadow at night: a short rocking phrase that repeats, a little rough and slightly out of tune, homemade and charming, like a vintage 1970s Eastern European children's animated film. Solo violin only, quiet and sleepy.",
+            "A lone fiddle at dusk in a summer meadow: a small, simple tune that repeats, played a bit scratchy and imperfect, with a few wrong notes, gentle and sleepy, from a vintage 1970s children's animated film.",
+        ],
+    },
+    "meadow-theme": {
+        "world": "krtek",
+        "for": "The meadow's own theme, as it is in the morning; later grown into its other moods (curious, sad, happy). Calm, flute over strings, birdsong: a tune you could hum.",
+        "part": "morning",
+        "seconds": 20,
+        "style": False,
+        "models": ["music_v1"],
+        "takes": 2,
+        "prompts": [
+            "A calm, beautiful instrumental theme for a sunny meadow morning in a 1970s Eastern European children's animated film: a gentle flute melody over soft strings, with birdsong, warm and positive, simple and tender, as a small creature comes out to greet the day.",
+            "A gentle pastoral melody reminiscent of vintage 1970s children's animated films from Central Europe: flute and strings, perhaps a clarinet, birds chirping, calm, nature-loving and happy, a simple tune you could hum, like the start of a peaceful day in a flower meadow.",
+        ],
+    },
+    # Round 2 (Adam, 2026-10-22: no cricket kept; "should be a bit
+    # faster"). measure.py on the film's cricket (Buldozer 1:18-1:46): about
+    # 4 notes a second, a pulse near 130, the line over two octaves, notes
+    # wandering off pitch; round 1's were 1.3-3.5 a second, one octave, in
+    # tune. His wording 1 form, made quicker and wider.
+    "cricket-quick": {
+        "world": "krtek",
+        "for": "The cricket's fiddle at dusk, quicker than round 1: the film's cricket plays about 4 notes a second (measured), leaping about, a little out of tune.",
+        "part": "lullaby",
+        "seconds": 15,
+        "style": False,
+        "models": ["music_v1"],
+        "prompts": [
+            "A lively little tune played on a single fiddle by a cricket in a meadow at dusk: quick, rocking, about four short notes a second at around 130 beats per minute, leaping up and down across two octaves, a short phrase that repeats, a little rough and slightly out of tune, homemade and charming, like a vintage 1970s Eastern European children's animated film. Solo violin only.",
+            "A cricket's fiddle tune at dusk, from a vintage 1970s Eastern European children's animated film: a single violin, nimble and bouncy, quick short notes jumping high and low, a simple phrase played over and over, scratchy and a little out of tune, gentle and charming. Solo violin only, no accompaniment.",
+        ],
+    },
+    # The kept theme take (meadow-theme/01, wording 1) in the moods the
+    # films give their theme: does conditioning, which copied the seed for
+    # Reksio, give the same tune in another mood? Low and medium strength.
+    "meadow-moods": {
+        "world": "krtek",
+        "for": "The kept meadow theme (meadow-theme/01) grown into its other moods. Listen for: the same tune you kept, but curious, sad or happy. A copy of it, or a different tune, are both no.",
+        "parts": ["curious", "sad", "happy"],  # by wording
+        "seconds": 20,
+        "models": [
+            "music_v2_5"
+        ],  # v1 takes no composition plan (422), so no conditioning
+        "seeds": [
+            {"from": "meadow-theme/01", "song": "F6cJ73OJz2rTa7FCDdpe", "ms": 20000}
+        ],
+        "strengths": ["low", "medium"],
+        "takes": 1,
+        "prompts": [
+            "the same gentle meadow theme, now curious and inquisitive: lighter, a little quicker, plucked strings and a questioning flute, as a small creature finds something new",
+            "the same gentle meadow theme, now sad and tender: slower, in a minor key, a lonely flute over soft strings, as a small creature finds a friend in trouble, never frightening",
+            "the same gentle meadow theme, now joyful and triumphant: fuller and brighter, strings and flute together, as everything turns out well in the end",
         ],
     },
 }

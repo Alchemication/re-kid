@@ -1,4 +1,4 @@
-"""Recorded music: the tunes.yaml schema, the yard's picks, and packing."""
+"""Recorded music: the tunes.yaml schema, each game's picks, and packing."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from tunes import Packed, build, write_js
 from worlds import load_model
 
 ROOT = Path(__file__).resolve().parents[1]
-YARD = ROOT / "worlds/reksio/games/yard"
+GAMES = [ROOT / "worlds/reksio/games/yard", ROOT / "worlds/krtek/games/meadow"]
 
 needs_ffmpeg = pytest.mark.skipif(
     shutil.which("ffmpeg") is None, reason="ffmpeg not installed"
@@ -61,40 +61,44 @@ class TestSchema:
             Tune.model_validate(_tune(takes=[{"file": "a.mp3", "prompt": "p"}]))
 
 
-class TestYardTunes:
-    """The yard's tunes.yaml against its tunes/ folder, music.js and tunes.js."""
+@pytest.mark.parametrize("game", GAMES, ids=[g.name for g in GAMES])
+class TestGameTunes:
+    """A game's tunes.yaml against its tunes/ folder, music.js and tunes.js."""
 
     @pytest.fixture
-    def tunes(self) -> TuneSet:
-        return load_model(YARD / "tunes.yaml", TuneSet)
+    def tunes(self, game: Path) -> TuneSet:
+        return load_model(game / "tunes.yaml", TuneSet)
 
-    def test_every_take_is_there(self, tunes: TuneSet) -> None:
+    def test_every_take_is_there(self, game: Path, tunes: TuneSet) -> None:
         missing = [
             t.file
             for tune in tunes.tunes
             for t in tune.takes
-            if not (YARD / "tunes" / t.file).is_file()
+            if not (game / "tunes" / t.file).is_file()
         ]
         assert not missing, f"listed in tunes.yaml but not in tunes/: {missing}"
 
-    def test_no_take_left_unlisted(self, tunes: TuneSet) -> None:
+    def test_no_take_left_unlisted(self, game: Path, tunes: TuneSet) -> None:
         listed = {t.file for tune in tunes.tunes for t in tune.takes}
         found = {
-            str(p.relative_to(YARD / "tunes")) for p in (YARD / "tunes").rglob("*.mp3")
+            str(p.relative_to(game / "tunes")) for p in (game / "tunes").rglob("*.mp3")
         }
         assert found <= listed, f"in tunes/ but not in tunes.yaml: {found - listed}"
 
-    def test_every_part_is_one_music_js_plays(self, tunes: TuneSet) -> None:
-        text = (YARD / "game/music.js").read_text()
-        parts = set(re.search(r"const takes = \{([^}]*)\}", text).group(1).split(","))
-        known = {p.split(":")[0].strip() for p in parts if p.strip()}
+    def test_every_part_is_one_music_js_plays(self, game: Path, tunes: TuneSet) -> None:
+        text = (game / "game/music.js").read_text()
+        known = set(
+            re.findall(
+                r"'(\w+)'", re.search(r"const PARTS = \[([^\]]*)\]", text).group(1)
+            )
+        )
         unknown = [t.id for t in tunes.tunes if t.id not in known]
         assert not unknown, f"parts music.js doesn't play: {unknown}"
 
-    def test_packed_script_is_up_to_date(self, tunes: TuneSet) -> None:
+    def test_packed_script_is_up_to_date(self, game: Path, tunes: TuneSet) -> None:
         """tunes.js holds exactly the listed parts and takes: rebuild it with
         `main.py tunes` after changing tunes.yaml."""
-        text = (YARD / "game/tunes.js").read_text()
+        text = (game / "game/tunes.js").read_text()
         table = json.loads(text.split("const TUNES = ", 1)[1])
         assert {k: len(v) for k, v in table.items()} == {
             t.id: len(t.takes) for t in tunes.tunes

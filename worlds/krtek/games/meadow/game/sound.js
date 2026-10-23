@@ -1,8 +1,9 @@
 // The meadow's sounds. The mole's voice is recorded takes picked by ear
 // (effects.yaml, packed into effects.js by `main.py effects`): one at random
 // each time, never the same twice running, a little higher or lower. The
-// rest is made in the browser, quiet and short: digging, popping up, water,
-// and the cricket's fiddle at dusk.
+// rest is made in the browser, quiet and short: digging, popping up, water.
+// The music (the cricket's fiddle among it) is music.js's, on this audio
+// context (bus).
 //
 // Its take player does what the yard's sound.js does for recorded effects;
 // both are the next part to move into shared/ (CLAUDE.md, "Shared parts").
@@ -14,16 +15,12 @@ const Sound = (() => {
   const VOICE_VOLUME = 0.9
   const VOICE_RATE = [0.95, 1.07] // each word a little lower or higher: never quite the same twice
   const CASUAL_GAP_S = 4 // an idle remark only if he hasn't spoken for this long
-  const CRICKET_VOLUME = 0.12
-  // The cricket's tune: a slow, rocking phrase on a pentatonic scale (Hz, beats)
-  const TUNE = [[523, 1], [587, 1], [659, 2], [587, 1], [523, 1], [440, 2], [392, 1], [440, 1], [523, 3], [0, 1]]
-  const BEAT_S = 0.42
   let ctx = null
   let master = null
   let noise = null
   const takes = {} // decoded voice takes, by sound: {gain, buffers, last}
-  let fiddle = null // the cricket's tune while it plays: {stop}
   let lastSaid = -100 // when he last spoke (audio time)
+  let heard = () => {} // the game's hook: a word he says, as he says it (his face goes with it)
 
   Clock.onHold((held) => {
     if (!ctx) return
@@ -60,8 +57,9 @@ const Sound = (() => {
    * `casual`: an idle remark (a tap on him, a look at a thing), skipped if he spoke only just now,
    * so his voice is kept for real moments (docs/DESIGN_PRINCIPLES.md). */
   function say(name, casual = false) {
+    if (casual && ready() && ctx.currentTime - lastSaid < CASUAL_GAP_S) return false
+    heard(name) // his face says it even where the sound can't play
     if (!ready()) return false
-    if (casual && ctx.currentTime - lastSaid < CASUAL_GAP_S) return false
     const e = takes[name]
     if (!e || !e.buffers.length) return false
     lastSaid = ctx.currentTime // he spoke (only a word actually heard counts)
@@ -129,41 +127,6 @@ const Sound = (() => {
   function water(seconds = 0.8) {
     if (!ready()) return
     for (let t = 0; t < seconds; t += 0.07) hiss(t, 0.1, 2600 + Math.random() * 1800, 3, 0.08)
-  }
-
-  /** The cricket's fiddle, played over and over until stopped (dusk to bedtime). */
-  function cricket() {
-    if (!ready() || fiddle) return
-    let at = 0
-    const oscs = []
-    for (let round = 0; round < 6; round++) {
-      for (const [freq, beats] of TUNE) {
-        if (freq) {
-          const o = note(freq, at, beats * BEAT_S * 0.95, CRICKET_VOLUME, 'triangle')
-          const vib = ctx.createOscillator() // a fiddler's vibrato
-          const depth = ctx.createGain()
-          vib.frequency.value = 5.5
-          depth.gain.value = freq * 0.012
-          vib.connect(depth).connect(o.frequency)
-          vib.start(ctx.currentTime + at)
-          vib.stop(ctx.currentTime + at + beats * BEAT_S)
-          oscs.push(o, vib)
-        }
-        at += beats * BEAT_S
-      }
-    }
-    fiddle = {
-      stop() {
-        for (const o of oscs) {
-          try { o.stop() } catch { /* already ended: nothing to stop */ }
-        }
-        fiddle = null
-      },
-    }
-  }
-
-  function quiet() {
-    if (fiddle) fiddle.stop()
   }
 
   /** Something round rolling through the grass. */
@@ -283,5 +246,11 @@ const Sound = (() => {
     note(360, 0, seconds, 0.04, 'square', 1.7)
   }
 
-  return { ensure, say, dig, pop, water, cricket, quiet, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
+  return {
+    ensure,
+    /** The audio context and the master gain, for the music. */
+    bus() { ensure(); return { ctx, master } },
+    /** The game's hook: fn(word) as he says each word. */
+    listen(fn) { heard = fn },
+    say, dig, pop, water, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
 })()

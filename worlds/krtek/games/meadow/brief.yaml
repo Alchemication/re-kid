@@ -24,18 +24,18 @@ principles:
   origin: inspired
   refs: [world:episode_formula, 'world:design_notes[1]']
 
-- text: The meadow is one screen, so its encounters don't stand about from the start. Each arrives at its own hour (about 09:00, 12:00 and 15:00), or once the one before is done if that is later, one at a time, and waits; a tap on it sets him going, and left alone a while he goes by himself. Each play brings one where he helps someone, one where someone helps him and one to discover, as in the yard. Left alone, a chain plays on like a little cartoon; a tap on the thing hurries it to its next step, and a tap anywhere else cuts it short, to be picked up later where it stopped.
+- text: The meadow is one screen, so its encounters don't stand about from the start. Each arrives at its own hour (about 09:00, 11:00, 13:00 and 15:00), or once the one before is done if that is later, one at a time, and waits; a tap on it sets him going, and left alone a while he goes by himself. Each play brings first one where he helps someone, one where someone helps him and one to discover, as in the yard, then the rest, so every encounter comes in a day (the yard's lesson. children wanted more to happen in five minutes). Left alone, a chain plays on like a little cartoon; a tap on the thing hurries it to its next step, and a tap anywhere else cuts it short, to be picked up later where it stopped.
   origin: invented
 
 controls:
-  text: 'Tap or click: on the meadow, he waddles there; on the mole, a giggle or a word and a little hop; on the flower bed, he fetches water from the spring and waters it; on a thing that has come, he goes to it. Keyboard for the grown-up: arrows walk a little way left or right, space does whatever is nearest, any other key gets a word from him.'
+  text: 'Tap or click: on the meadow, he waddles there; on the mole, an answer with a word (a jump of joy, a wave, peekaboo, a think, a laugh behind his hands); on a butterfly, it flutters off and he looks up after it; on the flower bed, he fetches water from the spring and waters it; on a thing that has come, he goes to it. Keyboard for the grown-up: arrows walk a little way left or right, space does whatever is nearest, any other key gets a word from him.'
   origin: invented
 
 look:
-- text: The mole is small in the meadow, drawn in code and never traced, as the series draws him - black and pear-shaped, a grey-green belly, a round red nose, big white eyes, pink hands and feet, a few hairs standing up on his head.
+- text: The mole is small in the meadow, drawn in code and never traced, as the 1970s films draw him - slim, about twice as tall as wide, black, a short snout with a round red nose, big white eyes, a grey-green oval on his front, pink human hands with a thumb, pink feet, three hairs on his head. His face acts with his words. an "o" for ooh and a fright, a frown and heavy lids for ach jo, and his hairs spring up when he notices something.
   origin: inspired
   refs: ['world:characters[krtek].visual_signature']
-- text: Flat outlined things over a painted meadow - big soft flowers, dabbed foliage, a sky that goes from morning blue to dusk orange and night blue, a round orange sun and a pale crescent moon.
+- text: Flat outlined characters over a meadow painted in code in the manner of the films' backgrounds (Krtek a buldozer, a vejce) - a pale blue sky with a wash of cloud; far off, a misty band of pines and sponged round trees; nearer, bushes and trees made of little stars of leaves, fans of long leaves, fern fronds by the spring, bluebells and a tall yellow flower spike behind his molehill; grass in fine strokes with daisies along the front; the flower bed a dense mass of daisies and cornflowers round the tulips. The sky goes from morning blue to dusk orange and night blue, and the night darkens the whole meadow. A round orange sun and a pale crescent moon.
   origin: inspired
   refs: [world:aesthetics.backgrounds, world:aesthetics.palette]
 - text: His home is the molehill, with the den under it, his flower bed in front of it and a little spring with a pool beside.
@@ -49,6 +49,9 @@ sound:
 - text: The cricket fiddles at dusk, and his tune is the day's lullaby.
   origin: inspired
   refs: ['world:characters[krtek].moves[lies-listening].claim']
+- text: The meadow has one theme of its own, recorded (generated, picked by Adam's ear), which turns with what happens, as the films' music does. It plays as the mole comes up in the morning; curious as something arrives; sad at its trouble (a lost egg, the poles marching at his flowers); happy as it comes right. When the fox comes it steps back and the sounds lead. Quiet between. From dusk the cricket's fiddle plays, quick, rough and a little out of tune, until the circle closes. What it should be and what Adam said of it is in worlds/krtek/MUSIC_DIRECTION.md.
+  origin: inspired
+  refs: [world:sound.music_role, world:sound.overview]
 - text: Small sounds made in the browser for digging, popping up and water, quiet and short.
   origin: invented
 
@@ -79,7 +82,7 @@ scenes:
     text: Tap the mole.
     origin: invented
   result:
-    text: A little hop with his arms flung up, and a giggle or a word.
+    text: An answer with a word, each in turn and never the same twice running - a jump of joy with his arms flung up, a wave hello, peekaboo (hands over his face, then open wide, laughing), a think with a hand to his chin, a laugh behind his hands.
     origin: inspired
     refs: ['world:characters[krtek].moves[arms-up-cheer].claim']
   sound:
@@ -142,6 +145,16 @@ scenes:
     refs: [world:episode_formula, 'world:characters[krtek].moves[bounces-on-seat].claim', 'world:characters[krtek].moves[asleep-in-den].claim']
   sound:
     text: A knock knock, his "ooh", a wheel rolling away and his squeak, a pop as each goes on, the key's ratchet, "ahoj", the clockwork whirr, a giggle.
+    origin: invented
+- id: butterflies
+  action:
+    text: Nothing, or tap a butterfly.
+    origin: invented
+  result:
+    text: Now and then through the day, one or two butterflies flutter in, wander over the meadow, settle on a flower a moment and flutter on; they go at sunset. Tapped, one flutters up and away, and the mole looks up after it, hairs springing up - ooh.
+    origin: invented
+  sound:
+    text: His "ooh", now and then.
     origin: invented
 - id: dusk
   action:
