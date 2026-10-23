@@ -10,7 +10,7 @@
 // to park by his molehill, where it stays, as the film ends with the car parked by
 // the molehill at night. Tapped again once it's mended, it gives him a ride.
 //
-// A tap on the car or on him hurries it on; a tap elsewhere cuts it short
+// A tap on the car or on him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
 // (things.js): a wheel in his hands goes down by him, and if he was riding,
 // he climbs out where the car stopped.
 

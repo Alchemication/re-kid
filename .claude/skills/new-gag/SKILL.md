@@ -157,7 +157,9 @@ here when it gets its first gag).
 The meadow is one screen, so its encounters arrive one at a time at their
 own hours and wait (`things.js`): each is a chain of steps that plays on
 when he's left alone, a tap on it hurries it to its next step, and a tap
-elsewhere cuts it short to be picked up at the same step later.
+elsewhere waits for the step to end (as in the yard; meadow.js `waits`),
+then cuts it short to be picked up at the next step later. Keep each step
+4–8 s, so no tap waits long.
 
 | Piece | Where |
 |---|---|

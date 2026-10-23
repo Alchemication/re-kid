@@ -43,7 +43,7 @@ const meadowGame = (() => {
   const cricket = document.getElementById('cricket')
   const den = layers.den
 
-  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, hills: [], grow: 1 }
+  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], grow: 1 }
   let tulipHeads = []
 
   const el = (tag, attrs = {}, parent) => {
@@ -376,6 +376,7 @@ const meadowGame = (() => {
 
   async function bedtime() {
     game.ended = true
+    game.queued = null
     Debug.trace('bedtime')
     cutShort()
     Things.night()
@@ -423,11 +424,42 @@ const meadowGame = (() => {
     Sound.say('ooh', true)
   }
 
+  /**
+   * While a step of an encounter plays, a tap elsewhere waits, as in the yard: he glances its way
+   * and goes once the step is over (Things calls stepped). A toddler taps all the time, and cut
+   * short at every tap a step started again and again, and nothing ever ended (a filmed day,
+   * 2026-10-23). A tap on the encounter itself still hurries it; between steps, and while it waits
+   * for a choice, taps are free. Only the latest waiting tap counts.
+   */
+  function waits(intent) {
+    const busy = Things.stepping
+    if (!busy || game.gesture !== busy) return false
+    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly')) return false
+    game.queued = intent
+    const to = intent.match(/^(?:go|dig) to (\d+)$/)
+    if (to) Mole.lookAt(Number(to[1]))
+    Debug.trace('waits', { intent, for: busy })
+    return true
+  }
+
+  /** A step is over: a tap that waited for it goes now. */
+  function stepped() {
+    const q = game.queued
+    game.queued = null
+    if (q && !game.ended) Clock.after(0, () => run1(q))
+  }
+
   function perform(intent) {
     Debug.input(intent)
     if (game.ended) return
     game.lastInput = Clock.now()
     if (!game.awake) return wake()
+    if (waits(intent)) return
+    run1(intent)
+  }
+
+  /** Do what an intent asks. */
+  function run1(intent) {
     for (const [re, fn] of INTENTS) {
       const m = intent.match(re)
       if (m) return fn(m)
@@ -505,6 +537,7 @@ const meadowGame = (() => {
     busyWith: () => game.gesture,
     music: (part) => Music.cue(part),
     notice: () => Mole.perk(1.3), // something has arrived: his hairs spring up
+    stepped,
   })
   Debug.pin({ flags: { ...(Layout.flags.day ? { day: Layout.flags.day } : {}), props: things.join(',') }, layout: { home: HOME, spring: SPRING, things } })
   Debug.record(stateNow)

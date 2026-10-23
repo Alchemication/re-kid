@@ -11,7 +11,7 @@
 // The bulldozer follows the bent line away into the distance, and he
 // cheers. The poles stay out for the rest of the day.
 //
-// A tap on a pole or on him hurries it on; a tap elsewhere cuts it short
+// A tap on a pole or on him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
 // (things.js): a pole in his hands is stood up where he is, and the next
 // tap carries on with it.
 

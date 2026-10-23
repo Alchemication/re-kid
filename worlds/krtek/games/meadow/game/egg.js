@@ -25,7 +25,8 @@
   const REST_X = 330 // ...and stops here, in the grass left of his molehill
   const HOLE_X = 190 // the mouse's hole
   const HARE_AT = 650 // where the hare sits, between the egg and his molehill
-  const HEN_AT = 1460 // where the hen pecks about, past his flowers
+  const HEN_AT = 1460 // where the hen pecks about, past his flowers…
+  const HEN_NEAR = 1000 // …and where she comes once he holds the egg up, so she shows by him (a child must see whom to ask)
   const HEN_FROM = HEN_AT + 900 // she comes pecking her way in from off to the right…
   const HARE_FROM = -140 // …and the hare hops in from off to the left (nobody just appears)
   const ARRIVE_MS = 2600
@@ -37,6 +38,7 @@
   const cast = Friends.troupe() // visitors called in for a moment (the mouse): sent home on a cut
   let hare = null // the hare and the hen are about while the egg is: they wait to be asked
   let hen = null
+  let henAt = HEN_AT // where she waits: closer once he holds the egg up
   const tried = new Set()
   const m = () => Things.meadow
   const el = (...args) => m().el(...args)
@@ -126,6 +128,11 @@
     await holdIt(alive)
     if (!alive()) return
     Sound.say('ooh')
+    if (hen && henAt !== HEN_NEAR) { // she has heard him, and comes pecking closer
+      henAt = HEN_NEAR
+      hen.turn(-1)
+      Debug.ignoreCut(hen.go(HEN_NEAR, 1800), 'the hen comes closer').then(() => hen?.turn(-1))
+    }
     await puzzled(alive)
   }
 
@@ -177,7 +184,7 @@
   /** The hen sees it and comes running; it hatches in his hands; the chick runs to her, and off they go. */
   async function askHen(alive) {
     if (!egg.chick) {
-      await m().goTo(Math.max(HARE_AT + 160, HEN_AT - 420))
+      await m().goTo(Math.max(HARE_AT + 160, henAt - 420))
       if (!alive()) return
       hen.g.classList.remove('pecking')
       Sound.cluck()
@@ -255,15 +262,6 @@
     if (alive()) tried.add(who) // asked to the end: left alone, he asks someone else next
   }
 
-  /** A tap on the egg while he holds it: he gives it a shake and wonders. */
-  async function fidget(alive) {
-    await holdIt(alive)
-    if (!alive()) return
-    await Mole.wobble(600)
-    if (!alive()) return
-    Sound.say('ooh', true)
-  }
-
   /** Cut short: the mouse ducks home; the egg in his hands goes down in the grass by him; the hare and the hen walk back to where they were. */
   function restore() {
     cast.dismissAll()
@@ -275,7 +273,7 @@
       hare.leave() // given back, and cut as the hare hopped off: on he hops, home
       hare = null
     }
-    for (const [f, at] of [[hare, HARE_AT], [hen, HEN_AT]]) {
+    for (const [f, at] of [[hare, HARE_AT], [hen, henAt]]) {
       if (!f) continue
       // stop what was moving them (not the hen's own pecking, a CSS animation that keeps going), and back they walk
       f.g.getAnimations({ subtree: true }).filter((a) => !(a instanceof CSSAnimation)).forEach((a) => a.cancel())
@@ -307,7 +305,6 @@
     next: () => (egg.chick ? 'hen' : ORDER.find((who) => !tried.has(who)) || 'hen'),
     resolved: () => egg.where === 'home',
     holds: () => egg.where === 'carried',
-    fidget,
     restore,
     night,
     detail: () => ({ where: egg.where, x: Math.round(egg.x), chick: !!egg.chick, tried: [...tried], cast: cast.kinds() }),

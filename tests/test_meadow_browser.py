@@ -363,7 +363,7 @@ class TestMeadowEgg:
         )
         m.assert_settled()
 
-    def test_a_tap_on_the_egg_while_waiting_gets_a_look(self, meadow: callable) -> None:
+    def test_a_tap_on_the_egg_while_waiting_is_a_try(self, meadow: callable) -> None:
         m = self.open(meadow)
         m.page.locator(".mole-carry .egg-shape").click(
             force=True
@@ -371,7 +371,17 @@ class TestMeadowEgg:
         m.page.wait_for_timeout(100)
         assert m.state()["busy"] == "egg"
         m.wait_free()
-        assert m.state()["things"]["egg"] == "choosing"
+        assert m.page.evaluate("meadowGame.detail('egg').tried") == ["mouse"]
+        m.assert_settled()
+
+    def test_tapping_only_the_egg_solves_it(self, meadow: callable) -> None:
+        """A child taps the egg, not the hen: tap after tap he tries the mouse,
+        the hare, then the hen, and it is solved (in a filmed day it waited all day)."""
+        m = self.open(meadow)
+        for _ in range(3):
+            m.do("use egg")
+            m.wait_free()
+        m.wait("meadowGame.state().things.egg === 'done'")
         m.assert_settled()
 
     def test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it(
@@ -579,3 +589,26 @@ class TestMeadowTapHim:
             m.wait_free()
             m.assert_settled()
             assert m.page.evaluate("meadowGame.state().pose") != "listen"
+
+
+class TestMeadowTapsWait:
+    """As in the yard: while a step of an encounter plays, a tap elsewhere
+    waits for it (he glances that way), then he goes."""
+
+    def test_a_tap_on_the_meadow_mid_step_waits_then_goes(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&soon&props=poles")
+        m.wake()
+        arrived(m, "poles")
+        m.do("use poles")
+        m.wait("meadowGame.state().things.poles === 'step 0'")
+        m.page.wait_for_timeout(CUT_MS)
+        m.do("go to 400")
+        m.page.wait_for_timeout(200)
+        assert m.state()["busy"] == "poles", "the tap cut the step short"
+        m.wait("meadowGame.state().busy === 'go'", 15_000)  # the step over, off he goes
+        m.wait_free()
+        assert m.state()["x"] == 400
+        assert m.state()["things"]["poles"] == "step 1", "the step was not kept"
+        m.assert_settled()

@@ -4,7 +4,8 @@
 // waits. A tap on it sets the mole going; left alone a while, he goes by
 // himself. Each is a chain of steps that then plays on like a little
 // cartoon; a tap on the thing hurries it to its next step, a tap anywhere
-// else cuts it short, and next time it picks up at the step it stopped on.
+// else waits for the step he is in to end (as in the yard) and then cuts it
+// short, and next time it picks up at the next step.
 //
 // Which encounters come is decided once, from the page's seed: first one
 // where he helps someone, one where someone helps him, and one to discover,
@@ -28,8 +29,8 @@
 //     ask(who, alive): try `who` (a tap on something carrying
 //       data-choice="who" inside the thing's data-thing, the intent
 //       "use egg hen"); next(): what he tries himself when left alone;
-//       resolved(): it is over; fidget(alive): a tap on the thing itself
-//       while it waits for a choice (he looks at it again); holds(): he
+//       resolved(): it is over (a tap on the thing itself while it waits
+//       is a try too: next()'s); holds(): he
 //       holds it up as he waits (the egg), which a free mole otherwise
 //       never does (checkRules).
 //   music (optional): { [step]: 'sad' | 'happy' | 'hush' }, the music's
@@ -49,11 +50,24 @@ const Things = (() => {
   const SOON_HOUR = 8 // ?soon: the first arrives as he wakes, for trying it
   const ENGAGE_MS = 7000 // a thing out and the mole left alone this long: he goes to it himself
   const BETWEEN_MS = 1300 // a breath between steps, so each reads (a tap on the thing skips it)
+  const STUCK_MS = 60000 // one out this long and not done (a busy child, never leaving him alone): the next may come too
 
   const all = {} // by name
   let api = null // the meadow's: run, alone, free
   let plan = [] // [{ name, at }], the order they come
   let skip = null // resolves the breath between steps early
+  let stepping = null // the encounter whose step (or try) is playing now: a tap elsewhere waits for it (meadow.js)
+
+  /** Play one step (or try) of `e`, saying so while it plays, and telling the meadow once it is over. */
+  async function oneStep(e, play) {
+    stepping = e.name
+    try {
+      await play()
+    } finally {
+      stepping = null
+      api.stepped?.()
+    }
+  }
 
   function add(encounter) {
     all[encounter.name] = { step: 0, out: false, done: false, ...encounter }
@@ -85,7 +99,8 @@ const Things = (() => {
     return names.slice(0, HOURS.length).map((name, i) => ({ name, at: soon && i === 0 ? SOON_HOUR : HOURS[i] }))
   }
 
-  /** Decide this play's encounters; `meadow` lends its run(), free(), alone(), music() and notice(). */
+  /** Decide this play's encounters; `meadow` lends its run(), free(), alone(), music(), notice()
+   * and stepped() (a step is over: a tap that waited for it may go). */
   function setup(meadow) {
     api = meadow
     plan = choose(Object.values(all), Debug.random('things'), Layout.flags)
@@ -95,8 +110,9 @@ const Things = (() => {
 
   /** The meadow's tick: things arrive on time; a waiting one draws the mole to it when he's left alone. */
   function tick(hour) {
-    // one at a time: the next arrives at its hour, or once the one before is done, whichever is later
-    const waitingNow = plan.some((p) => all[p.name].out && !all[p.name].done)
+    // one at a time: the next arrives at its hour, or once the one before is done (or has waited
+    // STUCK_MS), whichever is later
+    const waitingNow = plan.some((p) => all[p.name].out && !all[p.name].done && Clock.now() - all[p.name].arrived < STUCK_MS)
     for (const p of plan) {
       const e = all[p.name]
       if (!e.out && !waitingNow && hour >= p.at) {
@@ -121,7 +137,7 @@ const Things = (() => {
     while (e.step < e.steps.length) {
       Debug.trace('step', { thing: e.name, step: e.step })
       if (e.music?.[e.step]) api.music?.(e.music[e.step])
-      await e.steps[e.step](alive)
+      await oneStep(e, () => e.steps[e.step](alive))
       if (!alive()) return false
       e.step++
       if (e.step < e.steps.length && !e.hurry) await breath()
@@ -184,10 +200,15 @@ const Things = (() => {
       const who = e.pending || pick // a choice tapped while the steps played
       e.pending = null
       e.trying = who
-      if (!who) return finding ? undefined : e.fidget(alive) // found: it waits for a choice; already found, a look at it again
-      Debug.trace('try', { thing: e.name, who })
+      // found: it waits for a choice. Already found, a tap on the thing itself is a try too: the next he
+      // would try himself (a child taps the egg, not the hen: in a filmed day, 2026-10-23, a busy
+      // child kept tapping the egg and it waited all day)
+      if (!who && finding) return
+      const tryWho = who || e.next()
+      e.trying = tryWho
+      Debug.trace('try', { thing: e.name, who: tryWho })
       try {
-        await e.ask(who, alive)
+        await oneStep(e, () => e.ask(tryWho, alive))
       } finally {
         e.trying = null
         if (e.resolved()) finish(e) // resolved even if a tap cut its aftermath short
@@ -234,5 +255,5 @@ const Things = (() => {
   const stateOf = (e) => (e.done ? 'done' : !e.out ? null : e.ask && e.step >= e.steps.length ? 'choosing' : `step ${e.step}`)
   const state = () => Object.fromEntries(plan.map((p) => [p.name, stateOf(all[p.name]) || `at ${p.at}`]))
 
-  return { names: () => Object.keys(all), add, choose, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
+  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, names: () => Object.keys(all), add, choose, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
 })()

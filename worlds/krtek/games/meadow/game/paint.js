@@ -12,7 +12,7 @@
 // falls from the sky or vanishes: Adam, 2026-10-23). If bedtime comes first,
 // he goes to bed washed.
 //
-// A tap on a tin or on him hurries it on; a tap elsewhere cuts it short
+// A tap on a tin or on him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
 // (things.js): the friends and the fox go home, and the next tap carries
 // on from the step it stopped at (the fox comes back first, quicker); he
 // stays red until he washes.

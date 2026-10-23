@@ -24,7 +24,7 @@ principles:
   origin: inspired
   refs: [world:episode_formula, 'world:design_notes[1]']
 
-- text: The meadow is one screen, so its encounters don't stand about from the start. Each arrives at its own hour (about 09:00, 11:00, 13:00 and 15:00), or once the one before is done if that is later, one at a time, and waits; a tap on it sets him going, and left alone a while he goes by himself. Each play brings first one where he helps someone, one where someone helps him and one to discover, as in the yard, then the rest, so every encounter comes in a day (the yard's lesson. children wanted more to happen in five minutes). Left alone, a chain plays on like a little cartoon; a tap on the thing hurries it to its next step, and a tap anywhere else cuts it short, to be picked up later where it stopped.
+- text: The meadow is one screen, so its encounters don't stand about from the start. Each arrives at its own hour (about 09:00, 11:00, 13:00 and 15:00), or once the one before is done if that is later, one at a time, and waits; a tap on it sets him going, and left alone a while he goes by himself. Each play brings first one where he helps someone, one where someone helps him and one to discover, as in the yard, then the rest, so every encounter comes in a day (the yard's lesson. children wanted more to happen in five minutes). Left alone, a chain plays on like a little cartoon; a tap on the thing hurries it to its next step, and a tap anywhere else waits for the step he is in (he glances that way), then cuts it short, to be picked up later where it stopped.
   origin: invented
 
 controls:
