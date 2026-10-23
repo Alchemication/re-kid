@@ -7,6 +7,7 @@ on:
     paths:
       - ".github/workflows/pages.yml"
       - "worlds/*/games/*/game/**"
+      - "site/**"
   workflow_dispatch:
 
 permissions:
@@ -26,8 +27,9 @@ jobs:
       - name: Build site
         # The games are plain static pages, so "building" is copying each
         # worlds/<world>/games/<game>/game/ to _site/<world>/<game>/ (main.py
-        # replay maps a report saved on the site back to that folder). Only
-        # the game folders go out: no research or media. The one original
+        # replay maps a report saved on the site back to that folder), and
+        # site/ (the front page, where a child picks a scene) to the top.
+        # Only those go out: no research or media. The one original
         # recording is the bark (game/barks.js), Adam's call for the POC.
         run: |
           mkdir -p _site
@@ -37,13 +39,7 @@ jobs:
             mkdir -p "_site/$world"
             cp -R "$game" "_site/$world/$name"
           done
-          cat > _site/index.html <<'HTML'
-          <!doctype html>
-          <meta charset="utf-8">
-          <meta http-equiv="refresh" content="0; url=reksio/yard/">
-          <title>Reksio's yard</title>
-          <a href="reksio/yard/">Reksio's yard</a>
-          HTML
+          cp -R site/. _site/
           touch _site/.nojekyll
           find _site -type f | sort
 

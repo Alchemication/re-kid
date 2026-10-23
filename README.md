@@ -73,7 +73,8 @@ experiments/music/      the same for the games' music, against what the game pla
 experiments/board/      what both boards share: the page, its look (Krtek's meadow) and keys
 .claude/skills/         procedures for Claude Code sessions (new-world, new-episode, new-character, new-gag, new-sound, new-music)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
-.github/workflows/pages.yml  publishes the games to GitHub Pages
+site/index.html         the site's front page: pick a scene (two live pictures, drawn by the games' own code)
+.github/workflows/pages.yml  publishes the games and the front page to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)
 ```
 
@@ -138,10 +139,14 @@ Development: `uv run ruff check . && uv run ruff format . && uv run pytest`,
 
 ## The site
 
-Every push to `main` that changes a game publishes it to GitHub Pages
+Every push to `main` that changes a game or `site/` publishes it to GitHub Pages
 (`.github/workflows/pages.yml`): https://alchemication.github.io/re-kid/
-(forwards to the yard; each game is at `<site>/<world>/<game>/`). Only the
-game folders go out, the original barks with them (`barks.js`); on an iPhone or iPad the sound plays even with the ringer
+opens on a page to pick a scene, with no words to read (`site/index.html`):
+Reksio in his yard and the mole in his meadow, alive (drawn by each game's
+own `figure.js` and `moleart.js`); a tap on one and he cheers, and his scene
+opens. It opens from disk too, finding the games in `worlds/`. Each game is
+at `<site>/<world>/<game>/`; add the front page to the home screen and both
+are a tap away. Only the game folders and `site/` go out, the original barks with them (`barks.js`); on an iPhone or iPad the sound plays even with the ringer
 switch on silent (Safari 17+). The game pauses, sound and all, while its page is hidden (another tab, a
 covered window, a locked phone) and plays on when it is back. On a phone, play it on its side: a screen
 wider than 16:9 shows more of the yard (up to 21:9), and on a short screen

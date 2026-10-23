@@ -120,7 +120,7 @@ const MoleArt = (() => {
     const v = el('g', { class: 'mole-front' }, parent)
     const feet = [foot(v, -24), foot(v, 24)]
     const arms = [arm(v, skin, [-30, -90], [-58, -64], -50), arm(v, skin, [30, -90], [58, -64], 50)]
-    skin.push(el('path', { d: 'M-37 -4 C-45 -60 -42 -150 0 -158 C42 -150 45 -60 37 -4 Q0 6 -37 -4 Z', fill: BODY }, v))
+    skin.push(el('path', { d: 'M-38 -4 C-46 -26 -35 -62 -35 -82 C-35 -100 -46 -116 -41 -136 C-37 -156 -18 -164 0 -164 C18 -164 37 -156 41 -136 C46 -116 35 -100 35 -82 C35 -62 46 -26 38 -4 Q0 6 -38 -4 Z', fill: BODY }, v))
     el('path', { d: 'M-17 -78 C-26 -56 -25 -28 -15 -17 Q0 -11 15 -17 C25 -28 26 -56 17 -78 C9 -85 -9 -85 -17 -78 Z', fill: BIB }, v)
     const dots = spots(v, [[-30, -44], [28, -34], [-8, -22], [34, -70], [-36, -78], [14, -52]])
     const hair = hairs(v, ['M-6 -154 C-10 -184 -28 -192 -36 -176', 'M0 -156 C2 -190 -8 -204 -18 -194', 'M6 -154 C10 -184 28 -192 36 -176'], [0, -154])
@@ -137,7 +137,7 @@ const MoleArt = (() => {
     const v = el('g', { class: 'mole-three' }, parent)
     const far = arm(v, skin, [32, -94], [58, -70], 45) // behind his body
     const feet = [foot(v, -16), foot(v, 24)]
-    skin.push(el('path', { d: 'M-34 -4 C-44 -60 -36 -148 2 -152 C32 -153 46 -124 45 -96 C45 -60 41 -16 33 -4 Q-1 6 -34 -4 Z', fill: BODY }, v))
+    skin.push(el('path', { d: 'M-36 -4 C-44 -26 -32 -62 -32 -84 C-32 -102 -42 -118 -37 -136 C-32 -152 -14 -156 4 -154 C28 -152 44 -132 44 -110 C44 -98 38 -92 38 -80 C38 -60 46 -24 36 -4 Q0 6 -36 -4 Z', fill: BODY }, v))
     skin.push(el('path', { d: 'M34 -126 C44 -130 54 -134 62 -138 C70 -128 64 -116 52 -110 C46 -107 40 -107 34 -108 Z', fill: BODY }, v))
     el('path', { d: 'M22 -98 C37 -96 41 -70 38 -44 C36 -26 28 -18 18 -20 C10 -38 10 -76 22 -98 Z', fill: BIB }, v)
     const dots = spots(v, [[-24, -44], [22, -34], [-6, -22], [30, -70], [-28, -82], [8, -56]])
@@ -145,7 +145,7 @@ const MoleArt = (() => {
     const eye = eyes(v, [{ x: 42, y: -134, rx: 9, ry: 14, px: 45, py: -131 }, { x: 24, y: -132, rx: 13, ry: 19, px: 29, py: -128 }])
     el('circle', { cx: 66, cy: -136, r: 9, fill: NOSE, stroke: INK, 'stroke-width': 2 }, v)
     line('M56 -130 l14 -4 M56 -126 l14 4', v, 1.5)
-    const m = mouth(v, 'M42 -106 Q52 -98 61 -111', 'M42 -108 Q52 -86 63 -113 Q52 -102 42 -108 Z', [52, -103, 6], 'M43 -99 Q52 -110 60 -103')
+    const m = mouth(v, 'M45 -110 Q51 -104 57 -109', 'M42 -108 Q52 -86 63 -113 Q52 -102 42 -108 Z', [52, -103, 6], 'M43 -99 Q52 -110 60 -103')
     const near = arm(v, skin, [-22, -92], [-50, -68], -45)
     return { view: v, feet, arms: [near, far], hair, ...eye, ...m, dots }
   }
@@ -154,7 +154,7 @@ const MoleArt = (() => {
   function side(parent, skin) {
     const v = el('g', { class: 'mole-side' }, parent)
     const feet = [foot(v, -14), foot(v, 16)]
-    skin.push(el('path', { d: 'M-34 -4 C-44 -60 -34 -142 4 -150 C34 -152 50 -128 50 -104 C50 -74 42 -22 32 -4 Q-1 6 -34 -4 Z', fill: BODY }, v))
+    skin.push(el('path', { d: 'M-36 -4 C-44 -26 -32 -62 -32 -84 C-32 -102 -42 -118 -37 -136 C-32 -150 -14 -152 4 -150 C34 -152 50 -128 50 -108 C50 -96 40 -92 40 -80 C40 -60 46 -24 36 -4 Q0 6 -36 -4 Z', fill: BODY }, v))
     skin.push(el('path', { d: 'M44 -134 C62 -138 78 -132 86 -122 C82 -104 64 -98 48 -100 Z', fill: BODY }, v))
     el('path', { d: 'M30 -96 C42 -88 44 -60 36 -34 C32 -22 20 -22 16 -32 C14 -58 18 -86 30 -96 Z', fill: BIB }, v)
     const dots = spots(v, [[-18, -40], [20, -30], [-4, -20], [28, -64], [-22, -80]])
@@ -162,7 +162,7 @@ const MoleArt = (() => {
     const eye = eyes(v, [{ x: 36, y: -128, rx: 11, ry: 16, px: 41, py: -126 }])
     el('circle', { cx: 88, cy: -124, r: 9, fill: NOSE, stroke: INK, 'stroke-width': 2 }, v)
     line('M76 -118 l16 -5 M76 -114 l16 4', v, 1.5)
-    const m = mouth(v, 'M54 -102 Q62 -95 72 -104', 'M54 -103 Q62 -85 74 -106 Q62 -99 54 -103 Z', [62, -99, 6], 'M55 -95 Q63 -104 71 -97')
+    const m = mouth(v, 'M57 -103 Q62 -99 68 -103', 'M54 -103 Q62 -85 74 -106 Q62 -99 54 -103 Z', [62, -99, 6], 'M55 -95 Q63 -104 71 -97')
     const a = arm(v, skin, [10, -94], [40, -74], 60)
     return { view: v, feet, arms: [a, a], hair, ...eye, ...m, dots }
   }
