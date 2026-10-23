@@ -1,7 +1,9 @@
 // The poles (to discover), after Krtek a buldozer, and Eliot's "cones":
-// far off on the hill a little bulldozer starts puffing, and red-and-white
-// survey poles get planted one after another in a line that runs straight
-// at his flowers. He knocks on the nearest and sighs. Then he tugs it out
+// far off on the hill a little bulldozer comes puffing, and bullfinches (the
+// film's birds) fly in one after another, each with a red-and-white survey
+// pole in its feet, and drop it so it plants itself, in a line that runs
+// straight at his flowers; then off they fly (nothing falls from the sky
+// by itself: Adam, 2026-10-23). He knocks on the nearest and sighs. Then he tugs it out
 // and throws it like a javelin: it sails off and plants itself far away on
 // the hill, and the line bends away from his flowers. The next one too.
 // The last is stuck: he tugs and tugs, it pops, he tumbles over, and the
@@ -13,7 +15,7 @@
 // (things.js): a pole in his hands is stood up where he is, and the next
 // tap carries on with it.
 
-/* global Debug, Layout, Mole, Motion, Sound, Things */
+/* global Clock, Debug, Friends, Layout, Mole, Motion, Sound, Things */
 ;(() => {
   const Y = Layout.GROUND
   // the line as planted, from the far right edge to just by his flowers...
@@ -25,7 +27,13 @@
   const THROW_MS = 900
   const DOZER = { from: 2600, at: 2150, y: 598, away: { x: 1450, y: 588, s: 0.3 } }
 
+  const FLY_MS = 1500 // a bird flying in with its pole…
+  const HIGH = Y - 330 // …from this high…
+  const DROP_AT = Y - 250 // …to over its spot, where it lets go
+  const HANG = 182 // the pole hangs this far under the bird (its top in the bird's feet)
+
   const poles = [] // { node, x, y, s, where: 'line' | 'carried' | 'far' }
+  const flock = Friends.troupe() // the birds bringing them: not the encounter's cast
   let dozer = null
   const m = () => Things.meadow
   const el = (...args) => m().el(...args)
@@ -60,19 +68,39 @@
     document.getElementById(layer).appendChild(p.wrap)
   }
 
+  /** A bird flies in from off to the right with pole p, lets go over its spot (it plants itself), and flies off. */
+  async function bring(p, x, i) {
+    await Clock.wait(i * PLANT_EVERY_MS)
+    const from = Friends.offscreen(1, x + 700)
+    const bird = flock.call('bullfinch', from, -1)
+    bird.g.classList.add('flying')
+    const at = (bx, by) => [{ transform: `translate(${bx}px, ${by}px)` }, { transform: `translate(${bx}px, ${by + HANG}px) scale(1)` }]
+    const [b0, p0] = at(from, HIGH)
+    const [b1, p1] = at(x, DROP_AT)
+    try {
+      await Promise.all([Motion.endAt(bird.g, [b0, b1], { duration: FLY_MS, easing: 'ease-out' }), Motion.endAt(p.wrap, [p0, p1], { duration: FLY_MS, easing: 'ease-out' })])
+      Motion.endAt(p.wrap, [p1, { transform: `translate(${x}px, ${Y + 4}px) scale(1)` }], { duration: 260, easing: 'ease-in' }).then(() => Sound.plink(), () => 'cut: it stands where it ends')
+      const away = Friends.offscreen(1, x + 600)
+      await Motion.endAt(bird.g, [b1, { transform: `translate(${away}px, ${HIGH - 120}px)` }], { duration: FLY_MS, easing: 'ease-in' })
+    } catch {
+      // bedtime came first: the birds are gone, and the poles stand in their line (restore)
+    }
+    if (bird.g.isConnected) bird.gone() // flown off out of sight (friends.js checks it is)
+  }
+
   function appear() {
     dozer = drawDozer()
-    dozer.style.transform = `translate(${DOZER.from}px, ${DOZER.y}px) scale(0.55)`
+    const from = Friends.offscreen(1, DOZER.from) // up on the hill, coming from beyond the view
+    dozer.style.transform = `translate(${from}px, ${DOZER.y}px) scale(0.55)`
     Motion.endAt(dozer, [{ transform: `translate(${DOZER.at}px, ${DOZER.y}px) scale(0.55)` }], { duration: 3500, easing: 'ease-out' }).catch(() => 'cut: it shows where it stopped')
     Sound.rumble(3.5)
     LINE.forEach((x, i) => {
       const wrap = el('g', { class: 'thing pole', 'data-thing': 'poles' })
       const p = { node: drawPole(), wrap, where: 'line' }
       poles.push(p)
-      stand(p, x, Y + 4, 1, 'things')
-      // planted one after another, from the far end towards his flowers
-      Motion.endAt(wrap, [{ transform: `translate(${x}px, ${Y - 400}px) scale(1)`, opacity: 0 }, { transform: `translate(${x}px, ${Y - 400}px) scale(1)`, opacity: 0, offset: 0.01 }, { transform: `translate(${x}px, ${Y + 4}px) scale(1)`, opacity: 1 }], { duration: 400, delay: i * PLANT_EVERY_MS, easing: 'ease-in' })
-        .then(() => Sound.plink(), () => 'cut: it stands where it ends')
+      stand(p, x, Y + 4, 1, 'things') // where it ends: the bird brings it there, from the far end towards his flowers
+      wrap.style.transform = `translate(${Friends.offscreen(1, x + 700)}px, ${HIGH + HANG}px) scale(1)` // until its bird comes
+      Debug.ignoreCut(bring(p, x, i), 'a bird brings a pole')
     })
   }
 
@@ -177,6 +205,7 @@
   function restore() {
     for (const p of poles) p.wrap.getAnimations().forEach((a) => a.cancel())
     for (const p of poles) {
+      if (p.where === 'line') stand(p, p.x, p.y, p.s, 'things') // planted, not hanging where a bird was cut short
       if (p.where === 'far') stand(p, p.x, p.y, p.s, 'far-things')
       if (p.where !== 'carried') continue
       Mole.carry(null)
@@ -192,6 +221,7 @@
   }
 
   function night() {
+    flock.dismissAll(true) // bedtime: the birds gone, under the closing circle
     restore()
     if (dozer) dozer.remove()
     dozer = null

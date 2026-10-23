@@ -1,5 +1,6 @@
-// The paint and the fox (someone helps him), after Krtek malířem: paint
-// tins get dropped in the open grass between his flowers and the spring. He peers into the red one and falls in
+// The paint and the fox (someone helps him), after Krtek malířem: the hare
+// and the mouse carry three paint tins in and set them down in the open grass
+// between his flowers and the spring, and go off. He peers into the red one and falls in
 // head first, and comes out all red. Then a grinning fox comes sneaking in
 // from the edge of the meadow, and he claps his hands to his cheeks. Along
 // come the hare and the mouse with brushes: they paint each other (tiger
@@ -7,7 +8,9 @@
 // other's shoulders, a big striped spotted monster with its arms up, and
 // the fox yelps and runs (the surprise, as the stacked monster in the film).
 // His friends wave and go, he jumps in the spring to wash the paint off, and
-// the tins are fetched away. If bedtime comes first, he goes to bed washed.
+// the hare and the mouse come back for the tins and carry them off (nothing
+// falls from the sky or vanishes: Adam, 2026-10-23). If bedtime comes first,
+// he goes to bed washed.
 //
 // A tap on a tin or on him hurries it on; a tap elsewhere cuts it short
 // (things.js): the friends and the fox go home, and the next tap carries
@@ -29,9 +32,14 @@
   const HARE_TALL = 150 // how high he stands on the hare's shoulders...
   const MOLE_TALL = 190 // ...and the mouse on his
   const WASH_AT = Layout.SPRING - 40
+  const CARRY_Y = 66 // a tin is carried this high, in front of whoever carries it…
+  const STACK_Y = 50 // …the second on top of the first
+  const CARRY_MS = 3200 // bringing them in, or carrying them off
+  const LOADS = [['mouse', [0]], ['hare', [RED, 1]]] // who carries which tins (the hare two, stacked)
 
   const tins = []
   const cast = Friends.troupe()
+  const porters = Friends.troupe() // the hare and the mouse bringing the tins and fetching them: not the chain's cast
   let fox = null
   let friends = { hare: null, mouse: null }
   let red = false // he fell in the tin (step 0 done)
@@ -48,16 +56,53 @@
     return g
   }
 
+  /** Off the screen to the left, or where the friends come from if that is further. */
+  const offLeft = () => Friends.offscreen(-1, FRIENDS_FROM)
+
+  /** A tin down in the grass at its place, to be tapped. */
+  function setDown(i) {
+    const g = tins[i]
+    document.getElementById('things').appendChild(g)
+    g.style.transform = `translate(${TINS[i].x}px, ${Y + 8}px)`
+    g.setAttribute('data-thing', 'paint')
+  }
+
+  /** A tin up in front of `f`, carried (k: which in the stack). */
+  function pickUp(i, f, k) {
+    const g = tins[i]
+    g.removeAttribute('data-thing')
+    f.g.appendChild(g)
+    g.style.transform = `translate(${k ? 6 : -4}px, ${-CARRY_Y - k * STACK_Y}px)`
+  }
+
+  /** The hare and the mouse carry the tins in, set each down at its place, and go off. */
+  async function bring() {
+    const from = offLeft()
+    try {
+      await Promise.all(LOADS.map(async ([kind, which], n) => {
+        const f = porters.call(kind, from - n * 90, 1)
+        which.forEach((i, k) => pickUp(i, f, k))
+        for (const i of which) {
+          await f.go(TINS[i].x - 30, which[0] === i ? CARRY_MS : 500)
+          setDown(i)
+          Sound.plink()
+        }
+      }))
+    } catch {
+      // bedtime came first (porters gone at once): the tins stand at their places all the same
+    } finally {
+      tins.forEach((g, i) => { if (g.parentNode !== document.getElementById('things')) setDown(i) }) // any still carried
+      porters.dismissAll(false, -1) // off they go, back the way they came (for brushes, it turns out)
+    }
+  }
+
   function appear() {
-    TINS.forEach((t, i) => {
-      const g = el('g', { class: 'thing tin', 'data-thing': 'paint' }, document.getElementById('things'))
+    TINS.forEach((t) => {
+      const g = el('g', { class: 'thing tin' })
       g.appendChild(drawTin(t.colour))
-      g.style.transform = `translate(${t.x}px, ${Y + 8}px)`
       tins.push(g)
-      // dropped one after another, as if by someone passing
-      Motion.endAt(g, [{ transform: `translate(${t.x}px, ${Y - 500}px)` }, { transform: `translate(${t.x}px, ${Y + 8}px)` }], { duration: 500, delay: i * 350, easing: 'cubic-bezier(.5,0,.8,1.4)' })
-        .then(() => Sound.plink(), () => 'cut: it stands where it ends')
     })
+    bring()
   }
 
   const pace = (ms) => (again ? ms * QUICK : ms)
@@ -97,7 +142,7 @@
   /** The fox sneaks in, grinning; he claps his hands to his cheeks. */
   async function foxComes(alive) {
     if (!fox) {
-      fox = cast.call('fox', FOX_FROM, -1)
+      fox = cast.call('fox', Friends.offscreen(1, FOX_FROM), -1)
       await fox.go(FOX_AT, pace(2600))
       if (!alive()) return
     }
@@ -113,8 +158,8 @@
     if (!alive()) return
     await m().goTo(STACK_X)
     if (!alive()) return
-    friends.hare = cast.call('hare', FRIENDS_FROM, 1)
-    friends.mouse = cast.call('mouse', FRIENDS_FROM - 90, 1)
+    friends.hare = cast.call('hare', offLeft(), 1)
+    friends.mouse = cast.call('mouse', offLeft() - 90, 1)
     await Promise.all([friends.hare.go(STACK_X - 130, pace(3600), 36), friends.mouse.go(STACK_X - 210, pace(3600))])
     if (!alive()) return
     Sound.swish()
@@ -183,17 +228,28 @@
     fetchTins()
   }
 
-  /** The tins are fetched away (someone comes back for them), leaving the grass free. */
-  function fetchTins() {
-    for (const t of tins) {
-      t.removeAttribute('data-thing')
-      Motion.endAt(t, [{ opacity: 1 }, { opacity: 0 }], { duration: 1500 }).then(() => t.remove(), () => t.remove())
+  /** The hare and the mouse come back for the tins and carry them off, leaving the grass free. */
+  async function fetchTins() {
+    for (const g of tins) g.removeAttribute('data-thing') // done with: not to be tapped
+    const from = offLeft()
+    try {
+      await Promise.all(LOADS.map(async ([kind, which], n) => {
+        const f = porters.call(kind, from - n * 90, 1)
+        for (const [k, i] of [...which].reverse().entries()) {
+          await f.go(TINS[i].x - 30, k ? 500 : CARRY_MS)
+          pickUp(i, f, which.length - 1 - k)
+        }
+        f.turn(-1)
+      }))
+    } catch {
+      // bedtime came first: everyone home at once, tins and all
     }
+    porters.dismissAll(false, -1) // off the screen the way they came, tins and all
   }
 
   /** Cut short: the fox and the friends go home (they'll come again, quicker); he stays as painted as he is. */
   function restore() {
-    cast.dismissAll()
+    cast.dismissAll() // home on their own feet (friends.js leave)
     fox = null
     friends = { hare: null, mouse: null }
     again = true
@@ -202,6 +258,8 @@
   /** Bedtime: everyone home, and he goes to bed washed. */
   function night() {
     restore()
+    cast.dismissAll(true) // bedtime, under the closing circle: home at once
+    porters.dismissAll(true)
     Mole.paint(null)
   }
 

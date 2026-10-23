@@ -1,5 +1,8 @@
-// The toy car (to discover), after Krtek a autíčko: a toy car lies broken in
-// the grass beyond the spring, its two wheels off beside it. He knocks on it ("ooh"), fetches
+// The toy car (to discover), after Krtek a autíčko: a clockwork toy car comes
+// rolling in backwards from off the far end of the meadow, bumps, loses one
+// wheel and then the other, and comes to rest broken in the grass beyond the
+// spring, its two wheels beside it (nothing appears from nowhere: Adam,
+// 2026-10-23). He knocks on it ("ooh"), fetches
 // a wheel and pops it on; the second slips out of his hands and rolls off
 // back towards the spring, and he chases it (the laugh). He winds the key
 // on its back, climbs in, and it shoots off backwards (the surprise), then
@@ -11,7 +14,7 @@
 // (things.js): a wheel in his hands goes down by him, and if he was riding,
 // he climbs out where the car stopped.
 
-/* global Debug, Layout, Mole, Motion, Sound, Things */
+/* global Debug, Friends, Layout, Mole, Motion, Sound, Things */
 ;(() => {
   const Y = Layout.GROUND
   const LIES_AT = 3000 // where it lies broken, in the grass beyond the spring
@@ -73,16 +76,51 @@
     await Promise.all([move([from, carAt(x)], { duration: ms, easing }), ...rides])
   }
 
+  const ARRIVE_MS = 3200 // rolling in from off the far end…
+  const POPS_AT = [3060, 3330] // …its wheels coming off here (front, then back), rolling on to where they lie
+
+  /** A wheel coming off the car at x, rolling (and bouncing) on to where it lies. */
+  function loseWheel(i, x) {
+    car.slots[i].replaceChildren() // off the car…
+    const w = el('g', { class: 'thing car-wheel-lies', 'data-thing': 'car' }, document.getElementById('things'))
+    w.appendChild(drawWheel())
+    car.loose[i] = { g: w, x: WHEELS_AT[i] }
+    Sound.pop()
+    Sound.roll(0.8)
+    // …and away it rolls, with a hop, to where it lies (set there first: a cut leaves it there)
+    return Motion.endAt(w, [
+      { transform: `translate(${x}px, ${Y - 16}px) rotate(0deg)` },
+      { transform: `translate(${(x + WHEELS_AT[i]) / 2}px, ${Y - 50}px) rotate(-200deg)`, offset: 0.4 },
+      { transform: `translate(${WHEELS_AT[i]}px, ${Y - 16}px) rotate(-400deg)` },
+    ], { duration: 900, easing: 'ease-out' }).catch(() => 'cut: it lies where it ends')
+  }
+
+  /** It rolls in backwards, bumping; off comes the back wheel, then the front, and it tips and stops. */
+  async function arrive(from) {
+    const at = (x, tilt = 0, dy = 0) => carAt(x, 1, tilt, dy)
+    try {
+      Sound.vroom(ARRIVE_MS / 1000)
+      await move([at(from), at(POPS_AT[1] + 40, 0, 0), at(POPS_AT[1], 0, 10)], { duration: ARRIVE_MS * 0.6, easing: 'linear' })
+      loseWheel(1, POPS_AT[1] + 66)
+      await move([at(POPS_AT[1], 0, 10), at(POPS_AT[0], 4, 0), at(POPS_AT[0] - 10, 4, 12)], { duration: ARRIVE_MS * 0.3, easing: 'linear' })
+      loseWheel(0, POPS_AT[0] - 62)
+      Sound.knock()
+      await move([at(POPS_AT[0] - 10, 4, 12), at(LIES_AT, 6, 0)], { duration: ARRIVE_MS * 0.1, easing: 'ease-out' })
+    } catch {
+      // bedtime (or a cut) came first: it lies where it ends, broken, its wheels by it
+    }
+    for (const [i, x] of POPS_AT.entries()) if (!car.loose[i]) loseWheel(i, x)
+    place(LIES_AT, 1)
+  }
+
   function appear() {
     drawCar()
-    place(LIES_AT, 1)
-    for (const [i, x] of WHEELS_AT.entries()) {
-      const w = el('g', { class: 'thing car-wheel-lies', 'data-thing': 'car' }, document.getElementById('things'))
-      w.appendChild(drawWheel())
-      w.style.transform = `translate(${x}px, ${Y - 16}px)`
-      car.loose[i] = { g: w, x }
-    }
-    Sound.plink()
+    for (const slot of car.slots) slot.appendChild(drawWheel()) // whole, as it comes
+    const from = Friends.offscreen(1, LIES_AT + 900)
+    car.wheels = 0 // broken where it ends: steps start from there
+    car.x = LIES_AT
+    car.back.style.transform = car.front.style.transform = carAt(from, 1, 0)
+    Debug.ignoreCut(arrive(from), 'the car rolls in')
   }
 
   // ------------------------------------------------------------ the chain

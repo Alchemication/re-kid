@@ -101,7 +101,7 @@ scenes:
     origin: invented
 - id: egg
   action:
-    text: An egg rolls into the meadow and stops in the grass; the hare sits nearby and the hen pecks about further along. Tap the egg, or leave him be. Then the child chooses whom he shows it to, by tapping the mouse's hole, the hare or the hen.
+    text: An egg rolls into the meadow and stops in the grass; the hare hops in and sits nearby, and the hen comes pecking her way in further along. Tap the egg, or leave him be. Then the child chooses whom he shows it to, by tapping the mouse's hole, the hare or the hen.
     origin: invented
   result:
     text: He knocks on it, puts his ear to it, and holds it up over his head, puzzled - whose is it? The mouse pops out of her hole, sniffs, and sneezes so hard the egg wobbles in his hands - not hers. The hare looks, his ears sink, he shakes his head - not his. The hen sees it and comes running, clucking; it hatches in his hands, a chick, and the top of the shell lands on his head like a hat; the chick runs to her and they go off together, and the hare hops home. Each wrong guess can be had again. Left alone, he asks them himself, the mouse, the hare, then the hen. In the film he shows it to a mouse family, a hare family and a hound with puppies before the factory and the hen; the choosing, the sneeze and the hat are ours. He helps someone.
@@ -112,7 +112,7 @@ scenes:
     origin: invented
 - id: poles
   action:
-    text: Far off on the hill a little bulldozer starts puffing, and red-and-white poles get planted one after another in a line running straight at his flowers. Tap a pole, or leave him be.
+    text: Far off on the hill a little bulldozer comes puffing, and bullfinches fly in one after another, each with a red-and-white pole in its feet, and drop it so it plants itself, in a line running straight at his flowers; then off they fly. Tap a pole, or leave him be.
     origin: inspired
     refs: [world:episode_formula, 'world:places[molehill].description']
   result:
@@ -124,19 +124,19 @@ scenes:
     origin: invented
 - id: paint
   action:
-    text: Paint tins get dropped in the grass between his flowers and the spring. Tap one, or leave him be.
+    text: The hare and the mouse carry three paint tins in, set them down in the grass between his flowers and the spring, and go off. Tap one, or leave him be.
     origin: inspired
     refs: [world:humour]
   result:
-    text: He peers into the red tin and falls in head first, and comes out all red. A grinning fox comes sneaking in past the spring, and he claps his hands to his cheeks. Along come the hare and the mouse with brushes; they paint each other, tiger stripes and spots, and dab spots on him too. Then the three of them climb onto each other's shoulders - a big striped spotted monster with its arms up - and the fox yelps and runs. His friends wave and go, he jumps in the spring to wash the paint off, and the tins are fetched away. In the film he paints the whole forest and the fox runs from it; the stacked scary creature is there (Krtek malířem, 3:20), the wash in the spring is ours. Someone helps him.
+    text: He peers into the red tin and falls in head first, and comes out all red. A grinning fox comes sneaking in past the spring, and he claps his hands to his cheeks. Along come the hare and the mouse with brushes; they paint each other, tiger stripes and spots, and dab spots on him too. Then the three of them climb onto each other's shoulders - a big striped spotted monster with its arms up - and the fox yelps and runs. His friends wave and go, he jumps in the spring to wash the paint off, and the hare and the mouse come back for the tins and carry them off. In the film he paints the whole forest and the fox runs from it; the stacked scary creature is there (Krtek malířem, 3:20), the wash in the spring is ours. Someone helps him.
     origin: inspired
     refs: [world:humour, 'world:characters[myska].description', 'world:characters[zajic].description', 'world:themes_and_values[0]']
   sound:
-    text: Tins dropped, a splash and his squeak of fright, his "ooh", brushes swished, a giggle, a low cartoon "boo", the fox's yelp, the spring's splash.
+    text: Tins set down, a splash and his squeak of fright, his "ooh", brushes swished, a giggle, a low cartoon "boo", the fox's yelp, the spring's splash.
     origin: invented
 - id: car
   action:
-    text: A toy car lies broken in the grass left of his molehill, its two wheels off beside it. Tap it or a wheel, or leave him be.
+    text: A clockwork toy car comes rolling in backwards from the far end of the meadow, bumps, loses one wheel and then the other, and comes to rest broken in the grass beyond the spring, its wheels beside it. Tap it or a wheel, or leave him be.
     origin: inspired
     refs: [world:episode_formula]
   result:

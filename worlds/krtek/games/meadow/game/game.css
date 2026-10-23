@@ -56,3 +56,8 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 @media (any-hover: hover) {
   #world [data-critter] { cursor: pointer; }
 }
+
+/* a bird in flight (poles.js): its wing beats about the shoulder */
+.friend.bullfinch .wing { transform-box: fill-box; transform-origin: 10% 80%; }
+.friend.bullfinch.flying .wing { animation: beat 0.16s ease-in-out infinite alternate; }
+@keyframes beat { from { transform: rotate(0deg); } to { transform: rotate(-55deg); } }

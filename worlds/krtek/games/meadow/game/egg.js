@@ -1,7 +1,7 @@
 // The egg (he helps someone), after Krtek a vejce, and a choice for the
 // child (docs/DESIGN_PRINCIPLES.md: a tap is a choice, not a skip). An egg
-// rolls into the meadow. The hare sits in the grass nearby; further along,
-// past the flowers, the hen pecks about. He knocks on the egg, puts his ear
+// rolls into the meadow; the hare hops in and sits in the grass nearby, and
+// further along, past the flowers, the hen comes pecking her way in. He knocks on the egg, puts his ear
 // to it, holds it up over his head, puzzled: whose is it?
 //
 // Then the child picks whom to show it to, by tapping them:
@@ -26,7 +26,10 @@
   const HOLE_X = 190 // the mouse's hole
   const HARE_AT = 650 // where the hare sits, between the egg and his molehill
   const HEN_AT = 1460 // where the hen pecks about, past his flowers
-  const HEN_LEAVES = 1900 // and where she takes her chick
+  const HEN_FROM = HEN_AT + 900 // she comes pecking her way in from off to the right…
+  const HARE_FROM = -140 // …and the hare hops in from off to the left (nobody just appears)
+  const ARRIVE_MS = 2600
+  const HEN_LEAVES = 1900 // she takes her chick this way, and on off the screen
   const ROLL_MS = 2200
   const ORDER = ['mouse', 'hare', 'hen'] // what he tries himself, left alone
 
@@ -79,11 +82,12 @@
     const hole = choice(el('g', { class: 'mouse-hole' }, document.getElementById('things')), 'mouse')
     el('ellipse', { cx: HOLE_X, cy: Y + 4, rx: 34, ry: 11, fill: '#2b1b0b' }, hole)
     el('path', { d: `M${HOLE_X - 40} ${Y + 6} q40 -24 80 0`, fill: 'none', stroke: '#6e4a24', 'stroke-width': 6, 'stroke-linecap': 'round' }, hole)
-    hare = Friends.make('hare', HARE_AT, -1)
+    hare = Friends.make('hare', HARE_FROM, 1)
     choice(hare.g, 'hare')
-    hen = Friends.make('hen', HEN_AT, -1)
+    Debug.ignoreCut(hare.go(HARE_AT, ARRIVE_MS * 0.8, 30), 'the hare hops in').then(() => hare?.turn(-1))
+    hen = Friends.make('hen', Friends.offscreen(1, HEN_FROM), -1)
     choice(hen.g, 'hen')
-    hen.g.classList.add('pecking')
+    Debug.ignoreCut(hen.go(HEN_AT, ARRIVE_MS), 'the hen comes').then(() => hen?.g.classList.add('pecking'))
     egg.node = drawEgg()
     egg.wrap = el('g', { class: 'thing egg', 'data-thing': 'egg' }, document.getElementById('things'))
     onGround(REST_X)
@@ -138,7 +142,7 @@
   async function askMouse(alive) {
     await m().goTo(HOLE_X + 100)
     if (!alive()) return
-    const mouse = cast.call('mouse', HOLE_X, 1)
+    const mouse = cast.call('mouse', HOLE_X, 1, { hole: true })
     mouse.under()
     Sound.squeak()
     await mouse.rise(true)
@@ -201,7 +205,7 @@
     bottom.appendChild(drawBottom())
     bottom.style.transform = `translate(${at - 30}px, ${Y - 26}px)`
     egg.bottom = bottom
-    egg.chick = Friends.make('chick', at, 1)
+    egg.chick = Friends.make('chick', at, 1, { born: true })
     choice(egg.chick.g, 'hen') // a tap on the chick: to its mother
     await Motion.endAt(egg.chick.g, [{ transform: `translate(${at}px, ${Y - 120}px)` }, { transform: `translate(${at}px, ${Y}px)` }], { duration: 500, easing: 'cubic-bezier(.5,0,.8,1.4)' })
     if (!alive()) return
@@ -227,12 +231,11 @@
     hen.turn(1)
     await Promise.all([hen.go(HEN_LEAVES + 60, 2600), chick.go(HEN_LEAVES, 2600, 10), Mole.cheer()])
     if (!alive()) return
-    hen.gone()
+    hen.leave() // on off the screen, the two of them, then gone
+    chick.leave()
     hen = null
-    chick.gone()
     egg.chick = null
-    egg.where = 'home'
-    if (egg.bottom) Motion.endAt(egg.bottom, [{ opacity: 1 }, { opacity: 0 }], { duration: 1500 }).then(() => egg.bottom.remove(), () => egg.bottom.remove())
+    egg.where = 'home' // the shell's bottom stays in the grass, as the poles stay
     hare.turn(-1)
     await hare.go(-160, 2400, 36) // the hare has seen enough, and hops off home
     if (!alive()) return
@@ -261,7 +264,7 @@
     Sound.say('ooh', true)
   }
 
-  /** Cut short: the mouse ducks home; the egg in his hands goes down in the grass by him; the hare and the hen go back to where they were. */
+  /** Cut short: the mouse ducks home; the egg in his hands goes down in the grass by him; the hare and the hen walk back to where they were. */
   function restore() {
     cast.dismissAll()
     if (egg.where === 'carried') {
@@ -269,15 +272,15 @@
       onGround(Math.max(150, Mole.state.x - 60))
     }
     if (egg.where === 'home' && hare) {
-      hare.gone() // given back, and cut as the hare hopped off: he's home already
+      hare.leave() // given back, and cut as the hare hopped off: on he hops, home
       hare = null
     }
     for (const [f, at] of [[hare, HARE_AT], [hen, HEN_AT]]) {
       if (!f) continue
-      // stop what was moving them (not the hen's own pecking, a CSS animation that keeps going)
+      // stop what was moving them (not the hen's own pecking, a CSS animation that keeps going), and back they walk
       f.g.getAnimations({ subtree: true }).filter((a) => !(a instanceof CSSAnimation)).forEach((a) => a.cancel())
-      f.place(at)
-      f.turn(-1)
+      f.turn(at < f.drawnX() ? -1 : 1)
+      Debug.ignoreCut(f.go(at, 700), 'back to its place').then(() => f.turn(-1))
     }
     if (hen && !egg.chick) hen.g.classList.add('pecking')
     if (egg.chick) {
@@ -289,7 +292,7 @@
   /** Bedtime: everyone goes home; an egg not yet given back waits in the grass. */
   function night() {
     restore()
-    for (const f of [hare, hen, egg.chick]) if (f) f.gone()
+    for (const f of [hare, hen, egg.chick]) if (f) f.gone(true)
     hare = hen = egg.chick = null
     if (egg.bottom) egg.bottom.remove()
   }

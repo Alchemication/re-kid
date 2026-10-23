@@ -1,11 +1,13 @@
 // The meadow's other animals, drawn in code the series' way (flat, outlined,
 // a few round shapes): the mouse, the hare, the hen with her spotted head
-// (Krtek a vejce) and her chick. An encounter calls one in, moves it with
-// Motion.endAt on the Clock, and sends it home (gone()) when it is done, or
-// in its restore() when it is cut short (things.js), so nobody is left
-// standing about.
+// (Krtek a vejce) and her chick, the fox. An encounter calls one in, moves it
+// with Motion.endAt on the Clock, and sends it home when it is done, or in
+// its restore() when it is cut short (things.js), so nobody is left standing
+// about. Nobody vanishes in view: sent home, one walks or hops off the
+// nearer edge of the screen (the mouse ducks into her hole) and only then is
+// gone (leave()); gone() at once is for bedtime, under the closing circle.
 
-/* global Layout, Motion */
+/* global Debug, DOMMatrixReadOnly, Layout, Motion, View */
 /* exported Friends */
 const Friends = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -112,6 +114,22 @@ const Friends = (() => {
       el('path', { d: 'M-80 -66 q18 10 36 -2', fill: '#fff', ...line, 'stroke-width': 2 }, head)
       return head
     },
+    bullfinch(g) {
+      // the films' bird (Krtek a buldozer's opening): grey back, red-orange breast and cheeks, a black cap,
+      // black wings with a white bar and a black tail. Drawn round its body, facing left; its wings beat in flight (game.css)
+      el('path', { d: 'M18 -20 l26 -6 l-4 12 z', fill: '#15140f' }, g)
+      el('ellipse', { cx: 2, cy: -20, rx: 24, ry: 16, fill: '#8d8f96', ...line, 'stroke-width': 2.5 }, g)
+      el('ellipse', { cx: -8, cy: -14, rx: 16, ry: 11, fill: '#e2603a' }, g)
+      const head = el('g', { class: 'head' }, g)
+      el('circle', { cx: -18, cy: -32, r: 12, fill: '#e2603a', ...line, 'stroke-width': 2.5 }, head)
+      el('path', { d: 'M-30 -33 a12 12 0 0 1 24 -4 q-12 -2 -24 4 z', fill: '#15140f' }, head)
+      el('circle', { cx: -22, cy: -31, r: 2.2, fill: '#15140f' }, head)
+      el('path', { d: 'M-29 -30 l-8 3 l8 3 z', fill: '#15140f' }, head)
+      const wing = el('g', { class: 'wing' }, g)
+      el('path', { d: 'M-2 -26 C12 -40 30 -36 34 -24 C24 -20 10 -18 -2 -22 z', fill: '#15140f', ...line, 'stroke-width': 2 }, wing)
+      el('path', { d: 'M8 -30 C16 -32 24 -30 28 -27', stroke: '#fbf8ef', 'stroke-width': 3, fill: 'none' }, wing)
+      return head
+    },
     chick(g) {
       el('ellipse', { cx: 0, cy: -20, rx: 20, ry: 18, fill: '#f6d23b', ...line, 'stroke-width': 2.5 }, g)
       const head = el('g', { class: 'head' }, g)
@@ -128,8 +146,40 @@ const Friends = (() => {
     layer = where
   }
 
-  /** Call one in: drawn at x, facing left (face: 1 turns it right), hidden until shown. */
-  function make(kind, x, face = -1) {
+  const LEAVE_MS = 900 // sent home: off the screen in about this long
+  const OFF = 140 // how far past the screen's edge it goes before it is gone
+
+  /** Off home: down its hole, or off the screen (the nearer edge, or `dir`'s: -1 left, 1 right), and only then gone. */
+  async function goHome(f, hole, dir = 0) {
+    f.leaving = true
+    try {
+      if (hole) await f.rise(false)
+      else {
+        const x = f.drawnX()
+        const leftwards = dir ? dir < 0 : x - View.x < View.x + Layout.VIEW_W - x
+        // on past the edge, and on again if the view has followed the mole that way meanwhile
+        for (let n = 0; n < 6 && (n === 0 || inSight(f.drawnX())); n++) {
+          const at = f.drawnX()
+          const to = leftwards ? Math.min(View.x - OFF, at - OFF) : Math.max(View.x + Layout.VIEW_W + OFF, at + OFF)
+          f.turn(leftwards ? -1 : 1)
+          await f.go(to, LEAVE_MS, f.kind === 'hare' ? 30 : 0)
+        }
+      }
+    } catch { /* cut short by bedtime's gone(): gone already */ }
+    f.gone()
+  }
+
+  /** Whether something at scene x shows on the screen now (with a body's width either side). */
+  const inSight = (x) => x > View.x - 60 && x < View.x + Layout.VIEW_W + 60
+
+  /** Off the screen to the left (-1) or right (1) of the view now, and at least as far as x. */
+  const offscreen = (dir, x = dir < 0 ? Infinity : -Infinity) => (dir < 0 ? Math.min(x, View.x - OFF) : Math.max(x, View.x + Layout.VIEW_W + OFF))
+
+  /** Call one in: drawn at x, facing left (face: 1 turns it right). Nobody appears in view out of
+   * nowhere: it must be out of sight, unless it lives in a hole there (hole: the mouse, who
+   * comes up and goes home down it) or is born there (born: the chick, out of the egg). */
+  function make(kind, x, face = -1, { hole = false, born = false } = {}) {
+    Debug.check('a visitor comes in from out of sight, never appearing in view', hole || born || !inSight(x), { kind, x: Math.round(x), view: Math.round(View.x) })
     const g = el('g', { class: `friend ${kind}` }, layer)
     const riser = el('g', {}, g) // up out of a hole, or down into it
     const inner = el('g', {}, riser) // facing left or right
@@ -145,9 +195,15 @@ const Friends = (() => {
         f.face = dir
         inner.style.transform = dir > 0 ? 'scaleX(-1)' : ''
       },
-      /** Walk (small steps) or hop (high bounces) to x. */
+      /** Where it is drawn now, mid-walk (f.x is where it is going). */
+      drawnX() {
+        const t = getComputedStyle(g).transform
+        return t && t !== 'none' ? new DOMMatrixReadOnly(t).e : f.x
+      },
+      /** Walk (small steps) or hop (high bounces) to x, from where it is drawn now. */
       async go(nx, ms, hop = 0) {
-        const from = f.x
+        const from = f.drawnX()
+        g.getAnimations().forEach((a) => a.cancel()) // a new walk replaces the last: two at once, the older wins on screen
         f.x = nx
         const steps = Math.max(2, Math.round(ms / (hop ? 360 : 200)))
         const frames = []
@@ -194,7 +250,14 @@ const Friends = (() => {
       under() {
         riser.style.transform = 'translateY(110px)'
       },
-      gone() {
+      /** Off home, not to be seen vanishing (goHome). */
+      leave: (dir = 0) => goHome(f, hole, dir),
+      /** Gone: once out of sight (off the screen, down its hole), or at once at bedtime, under the closing circle. */
+      gone(bedtime = false) {
+        const x = f.drawnX()
+        const inView = inSight(x)
+        const down = /translateY\(110px\)/.test(riser.style.transform)
+        Debug.check('a visitor goes home out of sight, never vanishing in view', bedtime || down || !inView || !g.isConnected, { kind, x: Math.round(x), view: Math.round(View.x) })
         g.getAnimations({ subtree: true }).forEach((a) => a.cancel())
         g.remove()
       },
@@ -207,23 +270,31 @@ const Friends = (() => {
   /** A troupe: the visitors one encounter has out, so its restore() can send them all home. */
   function troupe() {
     let out = []
+    let leaving = [] // sent home, walking off
     return {
-      call(kind, x, face) {
-        const f = make(kind, x, face)
+      call(kind, x, face, opts) {
+        const f = make(kind, x, face, opts)
         out.push(f)
         return f
       },
-      dismiss(f) {
+      /** Send one home: it walks off (leave; dir: which way, else the nearer edge), and is no longer
+       * the encounter's (now = gone at once). */
+      dismiss(f, now = false, dir = 0) {
         if (!f) return
-        f.gone()
         out = out.filter((c) => c !== f)
+        leaving.push(f)
+        if (now) f.gone(true)
+        else if (!f.leaving) f.leave(dir).then(() => { leaving = leaving.filter((c) => c !== f) }) // already on its way: let it go
       },
-      dismissAll() {
-        for (const f of [...out]) this.dismiss(f)
+      /** Everyone home: walking off (a cut), or at once (now: bedtime, which also takes those still leaving). */
+      dismissAll(now = false, dir = 0) {
+        for (const f of [...out]) this.dismiss(f, now, dir)
+        if (now) for (const f of leaving) f.gone(true)
+        if (now) leaving = []
       },
       kinds: () => out.map((f) => f.kind),
     }
   }
 
-  return { setup, make, troupe }
+  return { setup, make, troupe, offscreen }
 })()

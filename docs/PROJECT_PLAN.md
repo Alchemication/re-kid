@@ -32,6 +32,11 @@ decided and why.
      watch a chain run on, or tap through it; does he laugh at the shell
      hat, the tumble, the monster, the backwards car; does the closing
      circle read as bedtime.
+   - **Adam judges how the encounters come and go** (2026-10-23): the
+     hare and the mouse carry the paint tins in and out, bullfinches bring
+     the poles, the toy car rolls in and breaks on the way, the hen and the
+     hare walk in for the egg; a tap that cuts one short sends everyone
+     off on their own feet. Before more encounters.
    - **Adam judges the night's look and life** (2026-10-22, built while he
      slept, nothing checked with him): the meadow painted after the
      films' backgrounds (`painting.js`; the night darkens it), the mole

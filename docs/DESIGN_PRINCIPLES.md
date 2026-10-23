@@ -47,6 +47,16 @@ is at the end. Status and next steps are in `docs/PROJECT_PLAN.md`.
   to it, and the hand cursor shows only over what answers a click.
   Nothing is marked for a finger: on a phone or tablet the scene stays as
   drawn (children at a desktop couldn't tell what to click, 2026-10-20).
+- **Nothing comes from nowhere, nothing vanishes.** Every thing in a scene
+  is brought by someone, comes on its own feet, or was always there, and
+  leaves the same way: paint tins carried in and out by the hare and the
+  mouse, the poles brought by birds, the toy car rolling in and breaking on
+  the way. A visitor sent home walks off the screen, or ducks into its hole.
+  A tap that cuts a gag short sends everyone home the same way. Things that
+  fell from the sky and visitors that blinked out made the meadow's
+  encounters feel random (Adam, 2026-10-23). The meadow checks it as it
+  plays (friends.js: a visitor comes in from out of sight and goes home
+  out of sight).
 - **Kindness happens in the story.** Characters help each other: Reksio
   helps, and sometimes he needs help. These are small stories, not lessons
   about being good.

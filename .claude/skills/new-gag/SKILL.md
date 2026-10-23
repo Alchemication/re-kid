@@ -53,6 +53,11 @@ beat many):
   that comes by accident, an unexpected helper, a fix that makes it worse
   before better, or an outcome that depends on who is about this play. The
   core repeats; the surprise is what makes the first time land.
+- **Nothing from nowhere.** Every thing it needs is brought by someone,
+  comes on its own feet, or was always there, and it leaves the same way,
+  even when a tap cuts it short (docs/DESIGN_PRINCIPLES.md). In the meadow,
+  call visitors in from `Friends.offscreen()` and send them home with
+  `leave()`/`dismiss()`, never `gone()` in view: a rule checks both.
 - **Built from what exists.** Reuse his moves, the creatures and the sounds
   before inventing new ones. Reuse parts, not the story: borrowing the bowl's
   `freed` face is fine; borrowing its plot is not.
@@ -158,7 +163,7 @@ elsewhere cuts it short to be picked up at the same step later.
 |---|---|
 | An encounter | its own file (`egg.js`, `poles.js`, `paint.js`, `car.js`) that registers with `Things.add({ name, offer, appear, steps, restore, night, detail, again? })`; `offer` is `help`, `helped` or `discover` (one of each comes a play). Each step is `async (alive) => …` and returns as soon as `alive()` is false after an await. Steps must be safe to run again from the start after a cut: guard what is already done (`if (egg.chick) return`) and bring back whoever it needs (the paint's fox comes back first) |
 | What a cut leaves | `restore()`, called at once when the chain is cut (the meadow's `run` onCut, before he is settled): visitors home, a thing in his hands put down by him, everything it was animating cancelled and left where it ends. Store a thing's end position before animating to it, so a cut leaves it there |
-| Visitors (mouse, hare, hen, fox…) | drawn in `friends.js`; an encounter keeps its own `Friends.troupe()` and calls them with `cast.call(kind, x, face)`, sends them with `cast.dismiss(f)`, all in `restore` with `cast.dismissAll()`; `detail().cast` lists them (a rule checks none is left once he is free) |
+| Visitors (mouse, hare, hen, fox, bullfinch…) | drawn in `friends.js`; an encounter keeps its own `Friends.troupe()` and calls them with `cast.call(kind, x, face)` from out of sight (`Friends.offscreen(dir, x)`; `{ hole }` for one that lives in a hole, `{ born }` for the chick), sends them home with `cast.dismiss(f)` (they walk off), all in `restore` with `cast.dismissAll()`, and at bedtime `dismissAll(true)` (at once). Those who only bring or fetch its things (the tins' porters, the poles' birds) are a troupe of their own, not its `detail().cast` (a rule checks none of that is left once he is free) |
 | His moves | `mole.js`: `goTo` (via `Things.meadow`), `walkTo`, `carry`/`wear`, `lean`, `knock`, `wobble`, `cheer`, `perch`, `glide`, `paint`/`dots`. New moves there, made with `Motion.endAt`, cut by `relax()` |
 | Drawing helpers | `Things.meadow.el` (the SVG helper), the layers in `index.html` (`#things` behind him, `#mole-out` him on the grass, `#friends` in front, `#far-things` up the hill) |
 | A tap on it | `data-thing="<name>"` on what can be tapped; remove it when the thing is done (unless it has `again`), so it stops taking taps meant for what is under it |
