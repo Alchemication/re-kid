@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reksio's yard</title>
+<!-- The front page's card for Reksio's yard (index.html shows it in a frame,
+     so the yard's scripts don't meet the meadow's): the yard as the game
+     paints it (its painting.js), his doghouse, and Reksio drawn by the
+     game's figure.js, under the games' old-print look (filmlook.js). Left
+     to himself he breathes, wags and blinks, and every few seconds does one
+     of a few things, chosen at random. index.html asks him to cheer
+     (postMessage 'cheer') when he is tapped. -->
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #e7a464; }
+  canvas, svg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+<canvas id="paint"></canvas>
+<svg class="view" preserveAspectRatio="none" aria-hidden="true">
+  <g id="cam">
+    <!-- his doghouse, as the yard draws it (game/index.html, game.css) -->
+    <g>
+      <rect x="433" y="640" width="254" height="150" fill="#e3c27c" stroke="#1d1914" stroke-width="6" />
+      <path d="M435 670 H685 M435 700 H685 M435 730 H685 M435 760 H685" fill="none" stroke="#a9844a" stroke-width="3" />
+      <ellipse cx="560" cy="726" rx="44" ry="50" fill="#3b2a1a" stroke="#1d1914" stroke-width="6" />
+      <path d="M403 668 L560 560 L717 668" fill="none" stroke="#1d1914" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M403 668 L560 560 L717 668" fill="none" stroke="#6d4a2b" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+    <g transform="translate(820 812) scale(1.2)"><g id="fig"></g></g>
+  </g>
+</svg>
+<script>
+  // The yard's own parts: on the site, its folder; opened from disk, the repo's.
+  const GAME = location.protocol === 'file:' ? '../worlds/reksio/games/yard/game/' : 'reksio/yard/'
+  const MIDDLE = 700 // the yard's x the view centres on: between his doghouse (560) and him (820)
+  const ACTS = ['perk', 'idea', 'look', 'ponder', 'scratch'] // what he does now and then, one at random
+  const ACT_MS = [2600, 5600] // between them
+  const HOLD_MS = [900, 1800] // each held this long
+  const between = ([a, b]) => a + Math.random() * (b - a)
+  const ease = (t) => 1 - (1 - t) ** 3
+  const load = (src) => new Promise((resolve, reject) => document.head.appendChild(Object.assign(document.createElement('script'), { src: GAME + src, onload: resolve, onerror: reject })))
+
+  async function start() {
+    for (const s of ['debug.js', 'layout.js', 'painting.js', 'figure.js', 'filmlook.js']) await load(s)
+    const canvas = document.getElementById('paint')
+    const fit = () => {
+      Painting.setup(canvas) // the view's width follows the card's shape
+      const camX = Math.max(0, MIDDLE - Painting.VIEW_W / 2)
+      Painting.render(camX)
+      document.getElementById('cam').setAttribute('transform', `translate(${-camX} 0)`)
+    }
+    fit()
+    addEventListener('resize', fit)
+    FilmLook.mount(document.body)
+
+    const { POSES, vary, mix, perked } = Figure
+    const draw = Figure.mount(document.getElementById('fig'))
+    const near = Math.random() < 0.5 // which ear he pricks, this visit
+    let act = null // { name, from, until }
+    let nextAct = performance.now() + between([1200, 3500])
+    let blinkAt = performance.now() + between([800, 3000])
+    let wagFast = 0
+    let cheer = 0
+    addEventListener('message', (e) => { if (e.data === 'cheer') cheer = performance.now() })
+
+    const pose = (name, base) => ({
+      perk: perked(base, near ? [true, false] : [false, true]),
+      idea: POSES.idea,
+      look: vary(base, { head: { turn: Math.random() < 0.5 ? 0.05 : 0.75 } }),
+      ponder: POSES.pawOnChin,
+      scratch: POSES.scratchHead,
+    })[name]
+
+    const frame = (now) => {
+      const wag = Math.sin(now / (now < wagFast ? 60 : 120)) * (now < wagFast ? 14 : 9)
+      let p = vary(POSES.stand, {
+        chest: [POSES.stand.chest[0], POSES.stand.chest[1] - 1.5 * Math.sin(now / 420)], // breathing
+        tail: [POSES.stand.tail[0] - 4 + wag * 0.4, POSES.stand.tail[1] - wag],
+      })
+      if (!act && now > nextAct) {
+        const name = ACTS[Math.floor(Math.random() * ACTS.length)]
+        act = { name, to: pose(name, p), from: now, until: now + between(HOLD_MS) }
+        if (Math.random() < 0.4) wagFast = now + 1200 // and sometimes a happy wag
+      }
+      if (act) {
+        const k = now < act.until ? ease(Math.min(1, (now - act.from) / 220)) : 1 - ease(Math.min(1, (now - act.until) / 260))
+        p = mix(p, { ...act.to, tail: p.tail }, k)
+        if (now > act.until + 260) { act = null; nextAct = now + between(ACT_MS) }
+      }
+      if (now > blinkAt) {
+        const t = (now - blinkAt) / 160
+        p = vary(p, { face: { blink: t < 1 ? Math.sin(t * Math.PI) : 0 } })
+        if (t >= 1) blinkAt = now + between([1800, 5200])
+      }
+      if (cheer) p = mix(p, POSES.armsWide, ease(Math.min(1, (now - cheer) / 180)))
+      draw(p)
+      requestAnimationFrame(frame)
+    }
+    requestAnimationFrame(frame)
+  }
+  start()
+</script>
+</body>
+</html>

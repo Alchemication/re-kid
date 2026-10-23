@@ -10,195 +10,47 @@
 <title>Reksio &amp; Krtek</title>
 <link rel="icon" href="data:,">
 <!-- The site's front page: two scenes to pick from, with no words a child
-     must read. Each card is alive, drawn by its game's own code (Reksio by
-     the yard's figure.js, the mole by the meadow's moleart.js): Reksio
-     breathes, blinks, wags and pricks an ear; the mole pops up out of his
-     molehill, blinks, looks about and waves. A tap on one: he cheers, and the
-     scene opens. Published as the site's index.html by .github/workflows/
-     pages.yml; opened from disk, it finds the games in worlds/. -->
+     must read. Each card is a little page of its own (reksio.html,
+     krtek.html), shown in a frame so each game's scripts stay apart: the
+     scene painted by its game's own painting.js, the character drawn by its
+     own code and alive, the games' old-print look over it. A tap on one: he
+     cheers, and his scene opens. Published as the site's index.html by
+     .github/workflows/pages.yml; opened from disk, it finds the games in
+     worlds/. -->
 <style>
-  :root { --paper: #1d1914; --ink: #1d1914; --cap: #f3ead8; }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-  main { height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
+  html, body { margin: 0; height: 100%; background: #1d1914; overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  main { height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); box-sizing: border-box; }
   @media (orientation: portrait) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } }
-  a.card { position: relative; display: block; border-radius: 22px; overflow: hidden; cursor: pointer; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); transition: transform 0.25s cubic-bezier(.3,1.5,.5,1); }
-  a.card:active, a.card.going { transform: scale(0.97); }
-  @media (any-hover: hover) { a.card:hover { transform: scale(1.015); } }
-  a.card svg { display: block; width: 100%; height: 100%; }
-  .name { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font: 600 15px/1 ui-rounded, system-ui, sans-serif; letter-spacing: 0.04em; color: var(--cap); text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); opacity: 0.85; pointer-events: none; }
+  .card { position: relative; overflow: hidden; border-radius: 6px; box-shadow: 0 0 0 3px #3a2c1c, 0 6px 22px rgba(0, 0, 0, 0.5); transition: transform 0.25s cubic-bezier(.3,1.5,.5,1); }
+  .card.going { transform: scale(0.97); }
+  .card iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .card a { position: absolute; inset: 0; cursor: pointer; }
+  @media (any-hover: hover) { .card:hover { transform: scale(1.012); } }
 </style>
 </head>
 <body>
 <main>
-  <a class="card" id="reksio" aria-label="Reksio's yard">
-    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
-      <defs>
-        <linearGradient id="r-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3c08a" /><stop offset="1" stop-color="#e7a464" /></linearGradient>
-      </defs>
-      <rect width="400" height="300" fill="url(#r-sky)" />
-      <circle cx="320" cy="62" r="26" fill="#f7d6a6" opacity="0.9" />
-      <rect y="150" width="400" height="80" fill="#8d9884" />
-      <g fill="#77856f" opacity="0.7"><rect x="0" y="150" width="400" height="5" /><path d="M0 178h400M0 204h400" stroke="#77856f" stroke-width="2" /></g>
-      <rect y="226" width="400" height="74" fill="#e2cd9b" />
-      <!-- his doghouse -->
-      <g transform="translate(62 234)">
-        <path d="M-46 0 V-62 L0 -100 L46 -62 V0 Z" fill="#b07a3c" stroke="#1d1914" stroke-width="2.5" />
-        <path d="M-56 -58 L0 -106 L56 -58" fill="none" stroke="#7a4f22" stroke-width="9" stroke-linecap="round" />
-        <path d="M-20 0 V-30 a20 20 0 0 1 40 0 V0 Z" fill="#2b1d10" />
-      </g>
-      <g transform="translate(232 274) scale(0.98)"><g id="reksio-fig"></g></g>
-    </svg>
-    <span class="name">Reksio</span>
-  </a>
-  <a class="card" id="krtek" aria-label="Krtek's meadow">
-    <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice">
-      <defs>
-        <linearGradient id="k-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#94b8ea" /><stop offset="1" stop-color="#e4e8f6" /></linearGradient>
-      </defs>
-      <rect width="400" height="300" fill="url(#k-sky)" />
-      <g fill="#ffffff" opacity="0.35"><ellipse cx="90" cy="60" rx="70" ry="18" /><ellipse cx="300" cy="90" rx="90" ry="20" /></g>
-      <g fill="#7fa38a" opacity="0.8">
-        <ellipse cx="30" cy="190" rx="50" ry="60" /><ellipse cx="110" cy="200" rx="46" ry="50" /><ellipse cx="300" cy="196" rx="54" ry="56" /><ellipse cx="380" cy="186" rx="50" ry="64" />
-        <path d="M200 120 L222 210 H178 Z" /><path d="M250 140 L268 210 H232 Z" />
-      </g>
-      <path d="M0 214 C80 200 160 210 240 204 S360 200 400 208 V300 H0 Z" fill="#a3cc82" />
-      <path d="M0 246 C100 240 220 250 400 242 V300 H0 Z" fill="#86bb60" />
-      <!-- his flower bed -->
-      <g id="tulips"></g>
-      <clipPath id="above-hill"><rect x="-120" y="-200" width="240" height="204" /></clipPath>
-      <g transform="translate(160 262)">
-        <g clip-path="url(#above-hill)"><g id="mole-at"><g transform="scale(0.8)"><g id="mole-fig"></g></g></g></g>
-        <path d="M-70 4 C-60 -30 -30 -44 0 -44 C30 -44 60 -30 70 4 Z" fill="#6e4a24" stroke="#2b1b0b" stroke-width="2.5" />
-        <g fill="#3b250e"><circle cx="-30" cy="-14" r="5" /><circle cx="8" cy="-28" r="4" /><circle cx="34" cy="-10" r="5" /><circle cx="-6" cy="-6" r="3.5" /></g>
-      </g>
-    </svg>
-    <span class="name">Krtek</span>
-  </a>
+  <div class="card"><iframe src="reksio.html" title="Reksio's yard" tabindex="-1"></iframe><a id="reksio" aria-label="Reksio's yard"></a></div>
+  <div class="card"><iframe src="krtek.html" title="Krtek's meadow" tabindex="-1"></iframe><a id="krtek" aria-label="Krtek's meadow"></a></div>
 </main>
 <script>
   // Where the games are: on the site, <world>/<game>/; opened from disk, in the repo.
   const LOCAL = location.protocol === 'file:'
-  const game = (world, name) => (LOCAL ? `../worlds/${world}/games/${name}/game/` : `${world}/${name}/`)
-  const GAMES = { reksio: game('reksio', 'yard'), krtek: game('krtek', 'meadow') }
-  const load = (src) => new Promise((resolve, reject) => {
-    const s = Object.assign(document.createElement('script'), { src, onload: resolve, onerror: reject })
-    document.head.appendChild(s)
-  })
-  const SVG = 'http://www.w3.org/2000/svg'
-  const el = (tag, attrs, parent) => {
-    const e = document.createElementNS(SVG, tag)
-    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v)
-    parent.appendChild(e)
-    return e
+  const GAMES = {
+    reksio: LOCAL ? '../worlds/reksio/games/yard/game/index.html' : 'reksio/yard/',
+    krtek: LOCAL ? '../worlds/krtek/games/meadow/game/index.html' : 'krtek/meadow/',
   }
-  const ease = (t) => 1 - (1 - t) ** 3
-
-  for (const [id, href] of Object.entries(GAMES)) document.getElementById(id).href = LOCAL ? `${href}index.html` : href
-
-  // ---------------------------------------------------------------- Reksio
-
-  let reksioCheer = 0 // when a tap made him cheer
-  async function reksio() {
-    await load(`${GAMES.reksio}figure.js`)
-    const { POSES, vary, mix, perked } = Figure
-    const draw = Figure.mount(document.getElementById('reksio-fig'))
-    let blinkAt = 1500
-    let perkAt = 3000
-    const frame = (now) => {
-      let pose = POSES.stand
-      const wag = Math.sin(now / 110) * 10
-      pose = vary(pose, {
-        chest: [pose.chest[0], pose.chest[1] - 1.5 * Math.sin(now / 420)], // breathing
-        tail: [pose.tail[0] - 4 + wag * 0.4, pose.tail[1] - wag], // wagging
-        head: { turn: 0.35 + 0.15 * Math.sin(now / 2300) }, // looking about, slowly
-      })
-      if (now > blinkAt) {
-        const t = (now - blinkAt) / 160
-        pose = vary(pose, { face: { blink: t < 1 ? Math.sin(t * Math.PI) : 0 } })
-        if (t >= 1) blinkAt = now + 2200 + Math.random() * 3000
-      }
-      if (now > perkAt) { // now and then one ear springs up: he has heard something
-        const t = (now - perkAt) / 1400
-        const k = t < 0.15 ? t / 0.15 : t > 0.75 ? Math.max(0, 1 - (t - 0.75) / 0.25) : 1
-        pose = mix(pose, perked(pose, [true, false]), k)
-        if (t >= 1) perkAt = now + 3500 + Math.random() * 4000
-      }
-      if (reksioCheer) pose = mix(pose, POSES.armsWide, ease(Math.min(1, (now - reksioCheer) / 180)))
-      draw(pose)
-      requestAnimationFrame(frame)
-    }
-    requestAnimationFrame(frame)
-  }
-
-  // ---------------------------------------------------------------- the mole
-
-  let moleCheer = 0
-  const UP = 8 // up out of his molehill to his middle: his feet this far below its foot (hidden)
-  async function krtek() {
-    const bed = document.getElementById('tulips')
-    for (let i = 0; i < 6; i++) {
-      const x = 232 + i * 22
-      el('path', { d: `M${x} 262 V${226 - (i % 2) * 8}`, stroke: '#3f7d22', 'stroke-width': 3 }, bed)
-      el('path', { d: `M${x - 7} ${222 - (i % 2) * 8} c0 -12 3 -18 7 -18 c4 0 7 6 7 18 z`, fill: ['#e0453a', '#f08fa6', '#f2c94c'][i % 3], stroke: '#7a1f17', 'stroke-width': 1.5 }, bed)
-    }
-    await load(`${GAMES.krtek}moleart.js`)
-    const views = MoleArt.draw(document.getElementById('mole-fig'), [])
-    const at = document.getElementById('mole-at')
-    const show = (name) => { for (const [k, v] of Object.entries(views)) v.view.style.display = k === name ? '' : 'none' }
-    show('front')
-    for (const v of Object.values(views)) for (const f of v.feet) f.style.visibility = 'hidden' // in his molehill
-    let up = 0 // from 0 (down in it) to 1 (up to his middle)
-    let popAt = 600 // he pops up, a moment after the page opens
-    let blinkAt = 2400
-    let waveAt = 4200
-    let lookAt = 6500
-    const frame = (now) => {
-      up = Math.min(1, Math.max(0, (now - popAt) / 420))
-      const bounce = up < 1 ? ease(up) * 1.08 : 1 + 0.03 * Math.sin(now / 380)
-      at.style.transform = `translateY(${(1 - Math.min(1, bounce)) * 130 + UP}px)`
-      const v = views.front
-      // blinking
-      const b = (now - blinkAt) / 160
-      for (const w of Object.values(views)) w.lids.style.transform = `scaleY(${b > 0 && b < 1 ? Math.sin(b * Math.PI) : 0})`
-      if (b >= 1) blinkAt = now + 2000 + Math.random() * 3000
-      // a wave hello, now and then; his arms on the rim otherwise
-      const wv = (now - waveAt) / 1400
-      const [l, r] = v.arms
-      l.style.transform = 'rotate(60deg)'
-      r.style.transform = wv > 0 && wv < 1 ? `rotate(${-100 + 18 * Math.sin(wv * Math.PI * 6)}deg)` : 'rotate(-60deg)'
-      if (wv >= 1) waveAt = now + 6000 + Math.random() * 4000
-      // a look to the side, and back
-      const lk = (now - lookAt) / 1800
-      show(lk > 0 && lk < 1 ? 'three' : 'front')
-      if (lk >= 1) lookAt = now + 5000 + Math.random() * 4000
-      if (moleCheer) {
-        show('front')
-        const k = ease(Math.min(1, (now - moleCheer) / 180))
-        l.style.transform = `rotate(${60 + 60 * k}deg)`
-        r.style.transform = `rotate(${-60 - 60 * k}deg)`
-        for (const w of Object.values(views)) { w.smile.style.display = 'none'; w.laugh.style.display = '' }
-        at.style.transform = `translateY(${UP - 26 * Math.sin(k * Math.PI / 2)}px)`
-      }
-      requestAnimationFrame(frame)
-    }
-    requestAnimationFrame(frame)
-  }
-
-  // A tap: he cheers, then his scene opens.
-  for (const id of Object.keys(GAMES)) {
-    const card = document.getElementById(id)
-    card.addEventListener('click', (e) => {
+  // A tap: he cheers (his card hears it), then his scene opens.
+  for (const [id, href] of Object.entries(GAMES)) {
+    const a = document.getElementById(id)
+    a.href = href
+    a.addEventListener('click', (e) => {
       e.preventDefault()
-      card.classList.add('going')
-      if (id === 'reksio') reksioCheer = performance.now()
-      else moleCheer = performance.now()
-      setTimeout(() => { location.href = card.href }, 450)
+      a.parentElement.classList.add('going')
+      a.parentElement.querySelector('iframe').contentWindow.postMessage('cheer', '*')
+      setTimeout(() => { location.href = href }, 450)
     })
   }
-
-  reksio().catch(() => {}) // a game's drawing that won't load leaves its card as a picture: still a way in
-  krtek().catch(() => {})
 </script>
 </body>
 </html>
