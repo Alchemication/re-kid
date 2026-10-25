@@ -129,6 +129,34 @@ const Sound = (() => {
     for (let t = 0; t < seconds; t += 0.07) hiss(t, 0.1, 2600 + Math.random() * 1800, 3, 0.08)
   }
 
+  // A church bell, far off: its strike note and the partials a bell has (hum an octave below,
+  // a minor third, a fifth, the nominal an octave up, and a few above), each fading at its own
+  // pace, the low ones longest. Tuned to E (the meadow's key: beds.js), soft, and dulled by distance.
+  const BELL_HZ = 164.8 // E3
+  const BELL_PARTIALS = [[0.5, 0.5, 4.5], [1, 0.9, 3.4], [1.2, 0.45, 2.6], [1.5, 0.3, 2.1], [2, 0.5, 2.4], [2.51, 0.18, 1.4], [3.01, 0.12, 1.1]] // [ratio, loudness, seconds]
+  const BELL_VOLUME = 0.09
+
+  /** One stroke of the far church bell. */
+  function bell() {
+    if (!ready()) return
+    const far = ctx.createBiquadFilter() // far off: the top dulled
+    far.type = 'lowpass'
+    far.frequency.value = 2400
+    far.connect(master)
+    const t = ctx.currentTime
+    for (const [ratio, loud, secs] of BELL_PARTIALS) {
+      const o = ctx.createOscillator()
+      o.frequency.value = BELL_HZ * ratio
+      const g = ctx.createGain()
+      g.gain.setValueAtTime(0.0001, t)
+      g.gain.exponentialRampToValueAtTime(BELL_VOLUME * loud, t + 0.008)
+      g.gain.exponentialRampToValueAtTime(0.0001, t + secs)
+      o.connect(g).connect(far)
+      o.start(t)
+      o.stop(t + secs + 0.05)
+    }
+  }
+
   /** Something round rolling through the grass. */
   function roll(seconds) {
     if (!ready()) return
@@ -252,5 +280,5 @@ const Sound = (() => {
     bus() { ensure(); return { ctx, master } },
     /** The game's hook: fn(word) as he says each word. */
     listen(fn) { heard = fn },
-    say, dig, pop, water, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
+    say, dig, pop, water, bell, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
 })()

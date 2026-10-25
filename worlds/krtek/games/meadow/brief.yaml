@@ -156,6 +156,16 @@ scenes:
   sound:
     text: His "ooh", now and then.
     origin: invented
+- id: church-bell
+  action:
+    text: Nothing; the hours pass.
+    origin: invented
+  result:
+    text: Far off on a hill behind the meadow stands a white village church with a red roof, so far away that it hardly moves as he walks, so it is always in sight. On each hour from 09:00 its bell swings in the open belfry and rings twice, ding... dong, rings of sound spreading from it, and the mole, if he is free, looks up at it, hairs springing up. At sunset it rings longer, the evening bell, before the cricket comes out. It is the meadow's sign that the day goes on, as the cuckoo clock is the yard's (Adam, 2026-10-25).
+    origin: invented
+  sound:
+    text: A deep far-off bell, made in the browser, in the meadow music's key.
+    origin: invented
 - id: dusk
   action:
     text: Nothing; the sun goes down at 19:00.

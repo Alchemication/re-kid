@@ -612,3 +612,21 @@ class TestMeadowTapsWait:
         assert m.state()["x"] == 400
         assert m.state()["things"]["poles"] == "step 1", "the step was not kept"
         m.assert_settled()
+
+
+class TestMeadowChurch:
+    """The church bell on the hour (church.js): twice each hour from 09:00,
+    longer at sunset; he looks up at it when free; nobody is left stuck."""
+
+    def test_the_bell_rings_each_hour_and_the_evening_bell(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&props=&day=40")
+        m.wake()
+        m.wait("meadowGame.state().ended && !meadowGame.state().busy", 50_000)
+        bells = m.page.evaluate(
+            "meadowGame.trace().split('\\n').filter((l) => l.includes(' bell ')).map((l) => JSON.parse(l.slice(l.indexOf('{'))))"
+        )
+        assert [b["hour"] for b in bells] == list(range(9, 20)), bells
+        assert bells[-1]["strokes"] > bells[0]["strokes"], "no evening bell"
+        assert not m.errors, m.errors

@@ -33,6 +33,12 @@ decided and why.
      watch a chain run on, or tap through it; does he laugh at the shell
      hat, the tumble, the monster, the backwards car; does the closing
      circle read as bedtime.
+   - **Adam judges the church bell** (2026-10-25): the village church on a
+     far hill, its bell ringing twice each hour and longer at sunset, the
+     mole looking up. Its sound is made in the browser: if it falls flat,
+     takes through `new-sound`. Then: watering as an encounter that comes
+     now and then (Adam: the always-there flower bed hides things), and the
+     meadow's edges (perhaps a loop back to the start).
    - **Adam judges how the encounters come and go** (2026-10-23): the
      hare and the mouse carry the paint tins in and out, bullfinches bring
      the poles, the toy car rolls in and breaks on the way, the hen and the

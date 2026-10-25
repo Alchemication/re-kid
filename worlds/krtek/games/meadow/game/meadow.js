@@ -13,7 +13,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Bed, Clock, Critters, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View */
+/* global Bed, Church, Clock, Critters, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -162,6 +162,7 @@ const meadowGame = (() => {
       t.right.style.transform = `rotate(${34 * open}deg)`
     }
     if (!game.ended) Things.tick(h)
+    Church.tick(h)
     if (Day.cricket(h) && !cricket.classList.contains('out')) {
       cricket.classList.add('out')
       Debug.trace('cricket', { hour: Day.clock(h) })
@@ -527,6 +528,12 @@ const meadowGame = (() => {
   Sound.listen((word) => Mole.express(word)) // each word he says comes with its face
   View.setup(() => Mole.drawnX(), (camX) => irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX))))
   Friends.setup(document.getElementById('friends'))
+  // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
+  Church.setup(document.getElementById('distant'), () => {
+    if (!(game.awake && !game.ended && !game.gesture)) return
+    Mole.perk(1.2)
+    Mole.lookAt(View.fromDistant(Church.X))
+  })
   // the flowers a butterfly may settle on: the bed, the bluebells and the yellow spike (painting.js)
   const flowerTops = [...[0, 1, 2, 3, 4].map((i) => ({ x: BED.from + 30 + i * 60, y: 690 })), { x: 380, y: 545 }, { x: HOME - 210, y: 555 }, { x: HOME + 150, y: 570 }, { x: HOME - 128, y: 480 }, { x: 2780, y: 545 }, { x: 3420, y: 545 }]
   Critters.setup(document.getElementById('critters'), () => game.hour, () => flowerTops, { now: Layout.flags.critters === 'now', still: Debug.still })
