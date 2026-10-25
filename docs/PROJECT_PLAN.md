@@ -67,11 +67,28 @@ decided and why.
    - Once both scenes play: a plain page to pick one (two pictures), which
      loads the scene in place, so the tap that picks it also lets sound
      play. Not a platform.
-2. **A third cartoon, and the platform with it:** two worlds will have
+2. **The world-model spike, in the meadow** (`docs/DECISIONS.md`, Scope),
+   each step judged in play before the next:
+   1. Agree the vocabulary first, on paper: the world state's fields, what
+      things can offer, the creatures' drives. It is where this works or
+      doesn't.
+   2. The world state and a critter kit (moving with momentum: wander,
+      arrive, flee, perch; when it is about: hours, weather, how many,
+      how long) with drives and offerings, in `shared/`. The butterflies
+      moved onto it, and two or three new creatures that use it (one drawn
+      to the rain cloud's wet flowers, one scared off by the car). The
+      encounters stay as they are.
+   3. A local director picking the ambient moments, keeping "the same
+      again, and a bit more".
+   4. If the meadow feels more alive: the LLM director behind the player's
+      own key, on Adam's devices, replies recorded for replay, a stub in
+      the tests. Then decide whether it is worth a proxy for the site.
+   Then the yard's fly, bee and weather move onto it, if it held up.
+3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
-   it takes shape, and its needs shape it (how scenes are found, picked and
-   shared). Keep the platform as small as the third scene needs, so it
-   doesn't hold the scene up.
+   it takes shape (the world model among it), and its needs shape it (how
+   scenes are found, picked and shared). Keep the platform as small as the
+   third scene needs, so it doesn't hold the scene up.
 
 ## Reksio's yard: parked
 

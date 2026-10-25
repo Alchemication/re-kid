@@ -22,9 +22,46 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   frees the work for more cartoons: next, a second cartoon with its own
   scene; later, perhaps a mish-mash scene with characters from several.
 - **No platform yet.** One scene per cartoon and a short parent card. No catalogue,
-  country map or memory sharing.
-- **No live AI in the finished game.** AI is for research, design and
-  building.
+  country map or memory sharing. One exception, the world model below.
+- **A world model, tried in the meadow** (Adam, 2026-10-25: the more
+  cartoons and gags, the more each creature hand-wired to the others and
+  the weather "screams for generalisation, just like in nature"; he wants
+  the world much richer in the end). Each creature was its own state
+  machine reading the weather and the hero directly, and the meadow's
+  butterflies were written fresh rather than built on the yard's fly. The
+  spike: one world state every part reads (hour, light, weather, wind,
+  noises, where the hero is and what he does); things that offer what can
+  be done with them (a flower nectar and a landing, a puddle a drink and a
+  splash); creatures with drives (hunger, curiosity, fear, tiredness,
+  home) that go for what is on offer; a local director that picks the
+  ambient moments. The look, the gags' beats and the hero's acting stay
+  hand-made: that is where the films are, and the heroes keep their own
+  rigs (Reksio blends layered poses, the mole snaps pose to pose, as in
+  each film). Relationships that are one gag (the spider and the fly)
+  stay code. Judged in play; reverted if it doesn't make the meadow feel
+  more alive. The risk to watch: a toddler loves exact repetition, so a
+  world that is always different can be worse, and the director keeps
+  "the same again, and a bit more".
+- **Live AI only as an optional director, behind the player's own key**
+  (Adam, 2026-10-25, replacing "no live AI in the finished game"). Now
+  and then an LLM may pick the next moment from the director's menu of
+  authored beats, given the world state; it never invents a beat, a
+  drawing or a sound, and a reply naming anything off the menu is
+  dropped. The key never ships in a page: a player pastes their own into
+  the parent card, kept in that device's localStorage, and the page calls
+  the API itself (a separate key with a low spend limit). The game asks
+  ahead, never on a tap, and without a key, network or a reply within a
+  few seconds the local director plays on. Replies are inputs: recorded
+  in the trace, read back by a replay, stubbed in tests. Only world state
+  is sent. The model is Claude Haiku 5.5 (`claude-haiku-5-5`): picking
+  from a menu needs speed and price more than depth. The call is one
+  function with a small adapter per provider, chosen on the parent card
+  with the key, so swapping models or providers is one more adapter, with
+  no library or server (LiteLLM is Python and needs a server; it is a
+  candidate for the proxy). A proxy for the public site (a Cloudflare Worker that takes
+  only the world state and builds the prompt itself, with a rate limit
+  and a daily cap) waits until the director is shown to be worth
+  shipping. AI is otherwise for research, design and building.
 
 ## The games
 
@@ -47,7 +84,8 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   when someone helps Reksio, none of them a task. No encounter registry or
   session director: `layout.js` `OFFERS` tags each prop and `pickProps`
   guarantees one of each. Each helped gag gets a different helper and a
-  different way out, and a surprise.
+  different way out, and a surprise. (The meadow's world-model spike,
+  under Scope, has a director for its ambient life only.)
 - **The day runs on a clock** (2026-10-13). Before, six things done or 10
   minutes set the sun, so a curious child got an earlier bedtime and nobody
   could tell when the day would end. Now 08:00–20:00 takes 5 minutes of
