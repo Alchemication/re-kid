@@ -14,7 +14,7 @@
 // (things.js): a wheel in his hands goes down by him, and if he was riding,
 // he climbs out where the car stopped.
 
-/* global Debug, Friends, Layout, Mole, Motion, Sound, Things */
+/* global Debug, Friends, Layout, Mole, Motion, Sound, Things, World */
 ;(() => {
   const Y = Layout.GROUND
   const LIES_AT = 3000 // where it lies broken, in the grass beyond the spring
@@ -70,6 +70,7 @@
   /** Move the car to x over ms, and him with it if he's riding, with the whirr for as long. */
   async function drive(x, ms, easing = 'ease-in-out') {
     const from = carAt(car.x)
+    World.noise('vroom', (car.x + x) / 2, Math.abs(x - car.x) / 2 + 250) // along the way it goes
     car.x = x
     Sound.vroom(ms / 1000)
     const rides = car.riding ? [Mole.glide(x - car.face * 10, ms, SEAT, easing)] : []
@@ -100,6 +101,7 @@
     const at = (x, tilt = 0, dy = 0) => carAt(x, 1, tilt, dy)
     try {
       Sound.vroom(ARRIVE_MS / 1000)
+      World.noise('vroom', (from + POPS_AT[0]) / 2, Math.abs(from - POPS_AT[0]) / 2 + 250)
       await move([at(from), at(POPS_AT[1] + 40, 0, 0), at(POPS_AT[1], 0, 10)], { duration: ARRIVE_MS * 0.6, easing: 'linear' })
       loseWheel(1, POPS_AT[1] + 66)
       await move([at(POPS_AT[1], 0, 10), at(POPS_AT[0], 4, 0), at(POPS_AT[0] - 10, 4, 12)], { duration: ARRIVE_MS * 0.3, easing: 'linear' })

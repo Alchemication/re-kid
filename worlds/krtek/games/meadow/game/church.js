@@ -14,7 +14,7 @@
 // over most of the trees. Its bell moves only with Motion.endAt on the Clock,
 // and comes back to hang still.
 
-/* global Clock, Debug, Motion, Sound */
+/* global Clock, Debug, Motion, Sound, World */
 /* exported Church */
 const Church = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -78,6 +78,7 @@ const Church = (() => {
     for (let i = 0; i < n; i++) {
       const side = i % 2 ? -1 : 1
       Sound.bell()
+      World.noise('bell', 0, Infinity) // heard all over the meadow
       ring()
       await Debug.ignoreCut(Motion.endAt(bell, [
         { transform: 'rotate(0deg)' },

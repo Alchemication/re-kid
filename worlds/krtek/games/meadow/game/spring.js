@@ -9,17 +9,25 @@
 // - a frog, some plays: it sits on a lily pad, croaks now and then, and now
 //   and then plops into the pool, surfacing a while later; a tap on it, and in
 //   it plops;
-// - one or two dragonflies, now and then: they dart in, hover over the pool,
-//   and dart off;
+// - one or two dragonflies, now and then: they dart in, hover here and there
+//   over the pool, and dart off;
 // - a fish, some plays: now and then it leaps out of the pool and back in;
 // - a bullfinch, now and then: it flies down to the pool's edge, drinks and
 //   flies off;
 // and rings spread on the water where anything touches it.
 //
-// Drawn once; its life moves only on the Clock (Motion.endAt), with its own
-// random stream, so it doesn't shift the rest of the play. Nothing at night.
+// They live on the world model (docs/WORLD_MODEL.md): the pool offers a
+// drink at its edges, which is what brings the bullfinch down; the finch is
+// off at the church bell, a splash or the car, the dragonflies at a splash;
+// and the frog, sitting on its pad, plops in at a splash near it (the fish,
+// the mole paddling) or the car going by. Their splashes are noises the
+// others hear in turn.
+//
+// Drawn once; its life moves only on the Clock (Motion.endAt for the frog and
+// the fish, ambient.js for the flyers), with its own random stream, so it
+// doesn't shift the rest of the play. Nothing at night.
 
-/* global Clock, Debug, Friends, Layout, Motion, Sound */
+/* global Ambient, Clock, Creature, Debug, Friends, Layout, Motion, Sound, World */
 /* exported Spring */
 const Spring = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -30,6 +38,27 @@ const Spring = (() => {
   const PAD = { x: S - 60, y: 712 } // the frog's lily pad
   const EVERY_MS = [9000, 20000] // between one bit of life and the next
   const NIGHT_FROM = 18.8 // they all go quiet by sunset
+  const FROG_HEARS = ['splash', 'vroom'] // what has the frog plop in: a splash near it, the car going by
+  const FROG_LISTENS_MS = 250
+  const DRINK_Y = POOL.y + 8 // where a bird stands to drink, at the water's edge
+  const BULLFINCH = {
+    speed: 300, flee: 1.6, turn: 4,
+    stayMs: [3000, 5000], // over by the time it has drunk: down, a drink, and off (a drink under way is always finished)
+    hours: [8.4, NIGHT_FROM], dark: 0.5, wet: 'avoid',
+    feeds: 'drink', hungerMs: [0, 0], feedMs: [2200, 3000], // comes thirsty; two dips
+    startledBy: ['bell', 'splash', 'vroom'],
+    band: [POOL.y - 320, POOL.y - 160], roam: 1400, // sees the pool from out of sight
+    haunt: [POOL.x - 700, POOL.x + 700],
+  }
+  const DRAGONFLY = {
+    speed: 260, flee: 2, turn: 7, // a dart, quick to turn
+    stayMs: [6000, 11000],
+    hours: [8.4, NIGHT_FROM], dark: 0.5, wet: 'avoid',
+    startledBy: ['splash'],
+    band: [POOL.y - 110, POOL.y - 40], roam: 300, // low over the water
+    haunt: [POOL.x - POOL.rx * 0.8, POOL.x + POOL.rx * 0.8],
+    pauseMs: [500, 1300], // hovering
+  }
   const life = Debug.random('spring-life')
   const pick = (list) => list[Math.floor(life() * list.length)]
   const between = ([a, b]) => a + life() * (b - a)
@@ -37,8 +66,8 @@ const Spring = (() => {
   let water = null // the pool's surface group (rings go on it)
   let frog = null // { g, in: boolean }
   let fish = false
-  let flies = 0
   let hourNow = () => 9
+  let ids = 0
 
   const el = (tag, attrs = {}, parent) => {
     const e = document.createElementNS(SVG, tag)
@@ -117,6 +146,7 @@ const Spring = (() => {
     const to = PAD.x + 50
     await Debug.ignoreCut(Motion.endAt(frog.g, [{ transform: `translate(${PAD.x}px, ${PAD.y}px)` }, { transform: `translate(${PAD.x + 25}px, ${PAD.y - 50}px)`, offset: 0.5 }, { transform: `translate(${to}px, ${PAD.y + 10}px) scale(0.4)`, opacity: 0 }], { duration: 520, easing: 'ease-in' }), 'the frog plops in')
     Sound.splash()
+    World.noise('splash', to, 250)
     rings(to)
     Clock.after(between([6000, 12000]), () => {
       if (!frog) return
@@ -127,32 +157,18 @@ const Spring = (() => {
   }
 
   /** A dragonfly darts in from out of sight, hovers here and there over the pool, and darts off. */
-  async function dragonfly() {
-    flies += 1
+  function dragonfly() {
     const g = el('g', { class: 'dragonfly' }, layer)
     el('path', { d: 'M-16 0 H14', stroke: '#2f6fae', 'stroke-width': 4, 'stroke-linecap': 'round' }, g)
     el('circle', { cx: 15, cy: 0, r: 4, fill: '#2f6fae' }, g)
     const wings = el('g', { class: 'dwings' }, g)
     for (const s of [-1, 1]) el('ellipse', { cx: 4, cy: s * 8, rx: 10, ry: 4, fill: '#dbeafc', opacity: 0.8, stroke: '#7aa0cc', 'stroke-width': 1 }, wings)
-    const from = Friends.offscreen(life() < 0.5 ? -1 : 1, POOL.x)
-    const at = (x, y) => ({ transform: `translate(${x}px, ${y}px)` })
-    let x = from
-    let y = 560
-    try {
-      for (let k = 0; k < 4; k++) {
-        const nx = POOL.x + (life() - 0.5) * POOL.rx * 1.6
-        const ny = POOL.y - 40 - life() * 70
-        await Motion.endAt(g, [at(x, y), at(nx, ny)], { duration: k ? 500 : 1400, easing: 'ease-in-out' })
-        x = nx
-        y = ny
-        await Clock.wait(between([500, 1300]))
-      }
-      await Motion.endAt(g, [at(x, y), at(Friends.offscreen(life() < 0.5 ? -1 : 1, x), 480)], { duration: 1300, easing: 'ease-in' })
-    } catch {
-      // bedtime came first
-    }
-    g.remove()
-    flies -= 1
+    const c = Creature.make(DRAGONFLY, Friends.offscreen(life() < 0.5 ? -1 : 1, POOL.x), 560, Clock.now(), life)
+    Ambient.add(c, {
+      name: 'dragonfly', id: ++ids, rnd: life,
+      draw: () => { g.style.transform = `translate(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px) scaleX(${c.vx < 0 ? -1 : 1})` },
+      gone: () => g.remove(),
+    })
   }
 
   /** The fish leaps out of the pool in an arc and back in, with a splash. */
@@ -162,6 +178,7 @@ const Spring = (() => {
     const x0 = POOL.x - 60 + life() * 80
     rings(x0)
     Sound.splash()
+    World.noise('splash', x0, 250)
     await Debug.ignoreCut(Motion.endAt(g, [
       { transform: `translate(${x0}px, ${POOL.y}px) rotate(-40deg)` },
       { transform: `translate(${x0 + 40}px, ${POOL.y - 90}px) rotate(0deg)`, offset: 0.5 },
@@ -173,26 +190,38 @@ const Spring = (() => {
   }
 
   /** A bullfinch flies down to the pool's edge, dips its head to drink twice, and flies off. */
-  async function drink() {
+  function bullfinch() {
     const dir = life() < 0.5 ? -1 : 1
     const bird = Friends.make('bullfinch', Friends.offscreen(dir, POOL.x), -dir)
     bird.g.classList.add('flying')
-    const edge = POOL.x + dir * (POOL.rx - 10)
-    try {
-      await Motion.endAt(bird.g, [{ transform: `translate(${bird.x}px, ${POOL.y - 260}px)` }, { transform: `translate(${edge}px, ${POOL.y + 8}px)` }], { duration: 1500, easing: 'ease-out' })
-      bird.x = edge
-      bird.g.classList.remove('flying')
-      for (let k = 0; k < 2; k++) {
-        await bird.bob(1)
-        rings(edge - dir * 18, POOL.y + 4)
-      }
-      bird.g.classList.add('flying')
-      bird.turn(dir)
-      await Motion.endAt(bird.g, [{ transform: `translate(${edge}px, ${POOL.y + 8}px)` }, { transform: `translate(${Friends.offscreen(dir, edge)}px, ${POOL.y - 320}px)` }], { duration: 1500, easing: 'ease-in' })
-    } catch {
-      // bedtime came first
-    }
-    if (bird.g.isConnected) bird.gone(true)
+    const c = Creature.make(BULLFINCH, bird.x, POOL.y - 260, Clock.now(), life)
+    Ambient.add(c, {
+      name: 'bullfinch', id: ++ids, rnd: life,
+      draw: () => {
+        bird.g.style.transform = `translate(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px)`
+        if (Math.abs(c.vx) > 30) bird.turn(Math.sign(c.vx))
+        bird.g.classList.toggle('flying', !Creature.feeding(c))
+      },
+      arrived: async (_, kind) => {
+        if (kind !== 'feed') return
+        bird.turn(Math.sign(POOL.x - c.x)) // to the water
+        for (let k = 0; k < 2 && Creature.feeding(c); k++) {
+          await Debug.ignoreCut(bird.bob(1), 'the bullfinch drinks')
+          rings(c.x + bird.face * 18, POOL.y + 4)
+        }
+      },
+      gone: () => bird.gone(true),
+    })
+  }
+
+  /** The frog hears what goes on round it: a splash near it, or the car, and in it plops. */
+  function listen() {
+    let since = Clock.now()
+    Clock.every(FROG_LISTENS_MS, () => {
+      const heard = World.heard(PAD.x, since).some((n) => FROG_HEARS.includes(n.kind))
+      since = Clock.now()
+      if (heard && frog && !frog.in) plop()
+    })
   }
 
   /** Every so often, one bit of the spring's life, from those this play has. */
@@ -203,13 +232,13 @@ const Spring = (() => {
       const can = ['drink']
       if (frog && !frog.in) can.push('frog', 'frog')
       if (fish) can.push('fish')
-      if (flies < 2) can.push('dragonfly')
+      if (Ambient.count('dragonfly') < 2) can.push('dragonfly')
       const what = pick(can)
       Debug.trace('spring', { what })
       if (what === 'frog') { Sound.croak(); Clock.after(900, () => plop()) }
       else if (what === 'fish') leap()
       else if (what === 'dragonfly') dragonfly()
-      else drink()
+      else if (!Ambient.count('bullfinch')) bullfinch()
     })
   }
 
@@ -218,10 +247,15 @@ const Spring = (() => {
     layer = into
     hourNow = hour
     draw()
+    // a drink at either edge of the pool: what brings the birds down
+    for (const side of [-1, 1]) World.offer(`pool-${side < 0 ? 'left' : 'right'}`, 'drink', POOL.x + side * (POOL.rx - 10), DRINK_Y)
     // this play's life (drawn either way, so the stream stays put)
     const hasFrog = life() < 0.75
     fish = life() < 0.6
-    if (hasFrog) frog = drawFrog()
+    if (hasFrog) {
+      frog = drawFrog()
+      listen()
+    }
     next()
   }
 

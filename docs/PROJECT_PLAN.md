@@ -69,18 +69,28 @@ decided and why.
      play. Not a platform.
 2. **The world-model spike, in the meadow** (`docs/DECISIONS.md`, Scope),
    each step judged in play before the next:
-   1. Agree the vocabulary first, on paper: the world state's fields, what
-      things can offer, the creatures' drives. It is where this works or
-      doesn't.
-   2. The world state and a critter kit (moving with momentum: wander,
-      arrive, flee, perch; when it is about: hours, weather, how many,
-      how long) with drives and offerings, in `shared/`. The butterflies
-      moved onto it, and two or three new creatures that use it (one drawn
-      to the rain cloud's wet flowers, one scared off by the car). The
-      encounters stay as they are.
-   3. A local director picking the ambient moments, keeping "the same
+   1. **Adam watches the meadow's small life** (built 2026-10-25, on the
+      world model, `docs/WORLD_MODEL.md`). The butterflies go to flowers
+      near them (the tulips only while open, the wild patch only while it
+      stands), keep out of the rain and leave when it reaches them, and
+      fly off from the car and a splash. At the spring the bullfinch comes
+      down because the pool offers a drink and is off at the bell, a
+      splash or the car; the frog plops in when the mole paddles or the
+      fish leaps. New: the snail (invented), up out of the wet grass under
+      the wild flowers after the cloud, into its shell at a tap.
+      `?critters=now` for a butterfly at once, `?critters=snail` for the
+      snail. Judge: does the meadow feel more alive, is anything too busy.
+   2. The rest of the vocabulary, as it is needed: `hero` and what may
+      touch him (from the films: Adam, 2026-10-25), the encounter's
+      `stage` (watched from a distance, never walked onto), `sight`,
+      `perch`, `sun`; tired and curious drives. The encounters stay as
+      they are.
+   3. Wind, then a storm (a cartoon one: everyone to shelter, thunder far
+      off and soft, sunshine after) and an eclipse (the light dips, the
+      hour doesn't: the meadow behaves as at dusk for a minute).
+   4. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
-   4. If the meadow feels more alive: the LLM director behind the player's
+   5. If the meadow feels more alive: the LLM director behind the player's
       own key, on Adam's devices, replies recorded for replay, a stub in
       the tests. Then decide whether it is worth a proxy for the site.
    Then the yard's fly, bee and weather move onto it, if it held up.

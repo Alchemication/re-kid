@@ -10,6 +10,8 @@ one Polish world, Reksio, and one short game for a parent and a young child.
   original brief.
 - [docs/DESIGN_PRINCIPLES.md](docs/DESIGN_PRINCIPLES.md): how the games should feel and
   what they must never do, with research on short play for toddlers.
+- [docs/WORLD_MODEL.md](docs/WORLD_MODEL.md): the world state and the creature rules a
+  scene's ambient life runs on.
 - [CLAUDE.md](CLAUDE.md) (same as [AGENTS.md](AGENTS.md)): working rules for
   coding agents and people.
 - [`.claude/skills/`](.claude/skills/): procedures for breaking down an
@@ -46,7 +48,8 @@ src/
   shared.py             copies shared/ scripts into the games that load them
 shared/                 game scripts every game uses (debug.js: the clock, the recorder, the rules;
                         filmlook.js: the old-print look; takes.js: the music's recorded takes;
-                        bed.js and ensemble.js: the music bed's rules and the band that plays it);
+                        bed.js and ensemble.js: the music bed's rules and the band that plays it;
+                        world.js, creature.js and ambient.js: the world model, docs/WORLD_MODEL.md);
                         `main.py shared` copies each into the games whose page loads it
 worlds/<id>/
   world.yaml            series dossier (schema.world.WorldDossier)
@@ -206,7 +209,8 @@ In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 `?day=S` (a day S seconds long: `?day=60` to see the evening and the
 ending in a minute) and `?film=0` work the same; `?props=egg` says which encounters come
 (`?props=` for none) and `?soon` brings the first at once; `?critters=now` brings a butterfly at
-once, even in a `?still` play (which otherwise has none). In the console, `meadowGame.state()`,
+once, even in a `?still` play (which otherwise has none), and `?critters=snail` the snail, the grass
+under the wild flowers wet from the start. In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 
 In the yard's console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,

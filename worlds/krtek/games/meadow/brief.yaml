@@ -103,7 +103,7 @@ scenes:
     text: Nothing, or tap the frog.
     origin: invented
   result:
-    text: The spring pours over a little cliff of mossy boulders into a pool with lily pads and reeds (after the spring in Krtek a buldozer's opening, made bigger). Its life is chosen fresh each play and comes and goes - a frog on a lily pad that croaks and plops in, dragonflies that dart in and hover, a fish that leaps, a bullfinch that comes down to drink - with rings spreading on the water. Tapped, the frog plops in, and later climbs back on its pad.
+    text: The spring pours over a little cliff of mossy boulders into a pool with lily pads and reeds (after the spring in Krtek a buldozer's opening, made bigger). Its life is chosen fresh each play and comes and goes - a frog on a lily pad that croaks and plops in, dragonflies that dart in and hover, a fish that leaps, a bullfinch that comes down to drink - with rings spreading on the water. They answer to what goes on round them - the bullfinch comes down because the pool's edge offers a drink, and is off at the church bell, a splash or the car; the dragonflies dart off at a splash; the frog plops in at a splash near it (the fish leaping, the mole paddling) or the car going by. Tapped, the frog plops in, and later climbs back on its pad.
     origin: inspired
     refs: ['world:places[molehill].description']
   sound:
@@ -171,10 +171,20 @@ scenes:
     text: Nothing, or tap a butterfly.
     origin: invented
   result:
-    text: Now and then through the day, one or two butterflies flutter in, wander over the meadow, settle on a flower a moment and flutter on; they go at sunset. Tapped, one flutters up and away, and the mole looks up after it, hairs springing up - ooh.
+    text: Now and then through the day, one or two butterflies flutter in, wander over the meadow, settle on a flower near them a moment and flutter on - the tulips only while they are open, the wild patch only while it isn't drooping. They keep out of the rain cloud's rain and leave when it drifts over them, fly off from the toy car going by and from a splash near them, and go at sunset. Tapped, one flutters up and away, and the mole looks up after it, hairs springing up - ooh.
     origin: invented
   sound:
     text: His "ooh", now and then.
+    origin: invented
+- id: snail
+  action:
+    text: Nothing, or tap the snail.
+    origin: invented
+  result:
+    text: After the rain cloud has rained on the wild flowers, a snail comes up out of the wet grass under their leaves, crawls about near them while the grass stays wet, and goes back down into it as it dries. Tapped, or at the car or a splash, it pulls into its shell a moment and comes out again; tapped, the mole looks at it - ooh.
+    origin: invented
+  sound:
+    text: His "ooh".
     origin: invented
 - id: church-bell
   action:

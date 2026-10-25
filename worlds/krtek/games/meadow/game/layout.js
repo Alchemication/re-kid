@@ -8,7 +8,8 @@
 // Flags (README): `?day=N` makes the day N seconds long instead of five
 // minutes, for trying the evening and the ending; `?props=egg,poles` says
 // which encounters come (things.js), and `?soon` brings the first at once;
-// `?critters=now` brings a butterfly at once (critters.js), even in a still play.
+// `?critters=now` brings a butterfly at once (critters.js), even in a still play;
+// `?critters=snail` the snail, its shelter under the wild flowers wet from the start.
 
 /* exported Layout */
 const Layout = (() => {

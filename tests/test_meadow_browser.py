@@ -561,6 +561,31 @@ class TestMeadowCritters:
         assert not m.errors, m.errors
 
 
+class TestMeadowSnail:
+    """The snail (critters.js): it comes up out of the grass where its shelter
+    is wet, a tap tucks it into its shell and has him look at it; and in a
+    play without rain it never comes."""
+
+    def test_a_tap_tucks_it_in_and_he_looks(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&critters=snail")
+        m.wake()
+        m.do("go to 1450")
+        m.wait("Critters.snail !== null", 6_000)
+        m.page.wait_for_timeout(5000)  # up out of the grass
+        m.page.locator("[data-critter=snail]").click(force=True)
+        m.wait("Critters.snail && Critters.snail.tucked", 3_000)
+        m.wait("Critters.snail && !Critters.snail.tucked", 8_000)  # and out again
+        m.wait_free()
+        m.assert_settled()
+
+    def test_none_without_rain(self, meadow: callable) -> None:
+        m = meadow("seed=3&props=&day=30")
+        m.wake()
+        m.wait("meadowGame.state().ended", 40_000)
+        assert '"snail"' not in m.page.evaluate("meadowGame.trace()")
+        assert not m.errors, m.errors
+
+
 class TestMeadowTapHim:
     """A tap on him: every answer in turn (wave, peekaboo, a jump of joy, a
     think, a laugh behind his hands), never the same twice running; each
@@ -644,6 +669,18 @@ class TestMeadowSpring:
         m.wait("meadowGame.trace().includes('\"plop\":true')", 3_000)
         m.wait("Spring.frog", 20_000)  # and later it climbs back on its pad
         assert not m.errors, m.errors
+
+    def test_a_splash_near_the_frog_and_it_plops_in(self, meadow: callable) -> None:
+        """The world model: the frog hears his paddling (a splash) and plops in."""
+        m = meadow("seed=2&still&props=")
+        m.wake()
+        assert m.page.evaluate("Spring.frog"), "no frog this play: pick another seed"
+        m.do("paddle")
+        m.wait(
+            'meadowGame.trace().includes(\'"plop":true,"tapped":false\')', 20_000
+        )  # he walks to the spring first
+        m.wait_free()
+        m.assert_settled()
 
     def test_its_life_comes_and_goes_all_day(self, meadow: callable) -> None:
         m = meadow("seed=3&props=&day=45")

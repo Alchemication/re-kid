@@ -14,7 +14,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Bed, Church, Clock, Critters, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View */
+/* global Bed, Church, Clock, Critters, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -132,6 +132,7 @@ const meadowGame = (() => {
   function tick() {
     if (!game.awake) return
     const h = (game.hour = Day.hour(Clock.now() - game.dayStart, Layout.dayMs || Day.DAY_MS))
+    World.set({ hour: h })
     drawSky(h)
     drawMeadow(h)
     if (!game.ended) evening(h)
@@ -146,6 +147,7 @@ const meadowGame = (() => {
     stops[1].setAttribute('stop-color', s.bottom)
     const [cr, cg, cb] = [1, 3, 5].map((i) => parseInt(s.top.slice(i, i + 2), 16) / 255)
     const light = Math.max(0, Math.min(1, (0.3 * cr + 0.59 * cg + 0.11 * cb - 0.2) / 0.4)) // 1 by day, 0 at night
+    World.set({ light })
     Painting.cloudsAt(light) // the wash of cloud fades as the sky darkens
     night.setAttribute('opacity', String(NIGHT_TINT * (1 - light))) // and the painted meadow darkens with it
     const pos = Day.sun(h)
@@ -325,6 +327,7 @@ const meadowGame = (() => {
   async function paddle() {
     await goTo(Spring.POOL.x - 40)
     Sound.splash()
+    World.noise('splash', Spring.POOL.x, 250)
     await Mole.lean(-12, 500)
     Sound.splash()
     await Mole.lean(12, 500)
@@ -407,11 +410,17 @@ const meadowGame = (() => {
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
     [/^tap butterfly (\d+)$/, (m) => tapButterfly(Number(m[1]))],
     [/^tap frog$/, () => Spring.tapFrog()],
+    [/^tap snail$/, () => tapSnail()],
   ]
 
   /** A tap on a butterfly: it flutters off, and, if he is free, he looks up after it, hairs up: "ooh". */
-  function tapButterfly(id) {
-    const at = Critters.tap(id)
+  const tapButterfly = (id) => lookAfter(Critters.tap(id))
+
+  /** A tap on the snail: into its shell it goes, and, if he is free, he looks at it: "ooh". */
+  const tapSnail = () => lookAfter(Critters.tapSnail())
+
+  /** He looks at a little creature tapped where it is, if he is free: "ooh". */
+  function lookAfter(at) {
     if (!at || !(game.awake && !game.ended && !game.gesture)) return
     Mole.lookAt(at.x)
     Sound.say('ooh', true)
@@ -427,7 +436,7 @@ const meadowGame = (() => {
   function waits(intent) {
     const busy = Things.stepping
     if (!busy || game.gesture !== busy) return false
-    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent === 'tap frog') return false
+    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent === 'tap frog' || intent === 'tap snail') return false
     game.queued = intent
     const to = intent.match(/^(?:go|dig) to (\d+)$/)
     if (to) Mole.lookAt(Number(to[1]))
@@ -468,11 +477,22 @@ const meadowGame = (() => {
     return p.matrixTransform(svg.getScreenCTM().inverse())
   }
 
-  /** What a tap at this point means. */
-  function intentAt(target, p) {
-    const critter = target.closest('[data-critter]')
-    if (critter?.dataset.critter === 'frog') return 'tap frog'
-    if (critter) return `tap butterfly ${critter.dataset.critter}`
+  const CRITTER_TAPS = { frog: 'tap frog', snail: 'tap snail' } // the rest are butterflies, by number
+  const CRITTER_MIDDLE = 0.3 // behind something (the snail among the wild flowers' stems), a creature wins the tap this near its middle, a share of its tap circle across: as in the yard
+
+  /** The little creature tapped: on top, or behind something but tapped near its middle. */
+  function critterAt(e) {
+    const on = e.target.closest('[data-critter]')
+    if (on) return on
+    const under = document.elementsFromPoint(e.clientX, e.clientY).map((el) => el.closest('[data-critter]')).find(Boolean)
+    if (!under) return null
+    const r = under.getBoundingClientRect()
+    return Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) < r.width * CRITTER_MIDDLE ? under : null
+  }
+
+  /** What a tap at this point means (critter: the little creature tapped, if any). */
+  function intentAt(target, p, critter) {
+    if (critter) return CRITTER_TAPS[critter.dataset.critter] || `tap butterfly ${critter.dataset.critter}`
     const thing = target.closest('[data-thing]')
     const choice = target.closest('[data-choice]')
     if (thing) return choice ? `use ${thing.dataset.thing} ${choice.dataset.choice}` : `use ${thing.dataset.thing}`
@@ -493,7 +513,7 @@ const meadowGame = (() => {
       press = Clock.after(HOLD_NEW_DAY_MS, () => location.reload())
       return
     }
-    perform(intentAt(e.target, scenePoint(e)))
+    perform(intentAt(e.target, scenePoint(e), critterAt(e)))
   })
   svg.addEventListener('pointerup', () => {
     if (press) Clock.cancel(press)
@@ -516,10 +536,14 @@ const meadowGame = (() => {
 
   // ------------------------------------------------------------ start
 
+  World.setup(Clock.now)
   makeScene()
   Mole.setFree(() => game.awake && !game.ended && !game.gesture)
   Sound.listen((word) => Mole.express(word)) // each word he says comes with its face
-  View.setup(() => Mole.drawnX(), (camX) => irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX))))
+  View.setup(() => Mole.drawnX(), (camX) => {
+    irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX)))
+    World.set({ view: { x0: camX, x1: camX + Layout.VIEW_W } })
+  })
   Friends.setup(document.getElementById('friends'))
   Spring.setup(document.getElementById('spring'), () => game.hour)
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
@@ -528,9 +552,10 @@ const meadowGame = (() => {
     Mole.perk(1.2)
     Mole.lookAt(View.fromDistant(Church.X))
   })
-  // the flowers a butterfly may settle on: the bed, the bluebells and the yellow spike (painting.js)
-  const flowerTops = [...[0, 1, 2, 3, 4].map((i) => ({ x: BED.from + 30 + i * 60, y: 620 })), { x: 380, y: 545 }, { x: HOME - 210, y: 555 }, { x: HOME + 150, y: 570 }, { x: HOME - 128, y: 480 }, { x: 2780, y: 545 }, { x: 3420, y: 545 }]
-  Critters.setup(document.getElementById('critters'), () => game.hour, () => flowerTops, { now: Layout.flags.critters === 'now', still: Debug.still })
+  // nectar: the tulips in the bed while they are open, the bluebells and the yellow spike (painting.js)
+  for (const i of [0, 1, 2, 3, 4]) World.offer(`tulip-${i}`, 'nectar', BED.from + 30 + i * 60, 620, () => Day.tulips(game.hour) > 0.5)
+  for (const [i, [x, y]] of [[380, 545], [HOME - 210, 555], [HOME + 150, 570], [HOME - 128, 480], [2780, 545], [3420, 545]].entries()) World.offer(`flower-${i}`, 'nectar', x, y)
+  Critters.setup(document.getElementById('critters'), document.getElementById('low-critters'), { now: Layout.flags.critters === 'now', snail: Layout.flags.critters === 'snail', still: Debug.still })
   const things = Things.setup({
     run,
     goTo,

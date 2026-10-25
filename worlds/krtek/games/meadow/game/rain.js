@@ -19,7 +19,7 @@
 // Nothing comes from nowhere: the flowers were always there, the cloud and
 // the hare come in from out of sight and go off again, the rainbow fades.
 
-/* global Clock, Debug, DOMMatrixReadOnly, Friends, Layout, Mole, Motion, Sound, Things */
+/* global Clock, Debug, DOMMatrixReadOnly, Friends, Layout, Mole, Motion, Sound, Things, World */
 ;(() => {
   const Y = Layout.GROUND
   const PATCH = { x: 1640, w: 190 } // the wild flowers, in the middle of the meadow
@@ -30,6 +30,7 @@
   const DRIFT_MS = 6000
   const RAIN_MS = 1800
   const QUICK = 0.5 // picked up after a cut: everyone hurries
+  const WET_AFTER_MS = 45000 // the grass under it stays wet this long after it rains: long enough for the snail's outing
 
   const flowers = [] // { g, head, x }
   const cast = Friends.troupe()
@@ -62,6 +63,7 @@
       el('circle', { cx: x, cy: top, r: 7, fill: '#f2c230', stroke: '#7a1f17', 'stroke-width': 1.2 }, head)
       g.style.transformOrigin = `${x}px ${Y + 6}px`
       flowers.push({ g, x })
+      World.offer(`wild-${i}`, 'nectar', x, top, () => !state.drooped || state.watered) // drooping, nothing for a butterfly
     }
   }
 
@@ -93,6 +95,7 @@
     const drops = document.getElementById('drops')
     const n = Math.round(ms / 22)
     Sound.water(ms / 1000)
+    World.wet(state.x - 110, state.x + 110, ms + WET_AFTER_MS) // under the cloud, and wet underfoot a while after
     for (let i = 0; i < n; i++) {
       Clock.after(i * 22, () => {
         if (!state.cloud) return
@@ -264,6 +267,7 @@
   }
 
   plant()
+  World.offer('wild-leaves', 'shelter', PATCH.x - 40, Y + 40) // down in the grass under the wild flowers' leaves: the snail's
 
   Things.add({
     name: 'rain',
