@@ -13,7 +13,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Clock, Critters, Day, Debug, FilmLook, Friends, Layout, Mole, Motion, Music, Painting, Sound, Things, View */
+/* global Bed, Clock, Critters, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -28,6 +28,7 @@ const meadowGame = (() => {
   const MAX_HILLS = 6 // molehills he has left about the meadow; the oldest sinks back
   const TULIPS = 9
   const TICK_MS = 100
+  const BED_STEER_MS = 200 // how often the music bed hears the moment and how busy the child is
   const NIGHT_TINT = 0.6 // how dark the night's blue makes the meadow at its darkest (multiplied over it)
   const words = Debug.random('meadow-words')
   const paint = Debug.random('meadow-paint')
@@ -43,7 +44,7 @@ const meadowGame = (() => {
   const cricket = document.getElementById('cricket')
   const den = layers.den
 
-  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], grow: 1 }
+  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], grow: 1, busy: 0.3 }
   let tulipHeads = []
 
   const el = (tag, attrs = {}, parent) => {
@@ -453,6 +454,7 @@ const meadowGame = (() => {
     Debug.input(intent)
     if (game.ended) return
     game.lastInput = Clock.now()
+    game.busy = Bed.livelier(game.busy) // the bed livens up with each tap
     if (!game.awake) return wake()
     if (waits(intent)) return
     run1(intent)
@@ -543,6 +545,10 @@ const meadowGame = (() => {
   Debug.record(stateNow)
   FilmLook.mount(document.body) // the old print over the whole page
   Clock.every(TICK_MS, tick)
+  Clock.every(BED_STEER_MS, () => { // the bed: the moment of the day, and how busy the child is, calming as time passes
+    game.busy = Bed.calmer(game.busy, BED_STEER_MS / 1000)
+    Music.setBed({ mood: MeadowBeds.moodAt({ hour: game.hour }), energy: game.busy })
+  })
   Clock.after(WAKE_ANYWAY_MS, () => { if (!game.awake) perform('wake') })
 
   return { perform, state: stateNow, trace: () => Debug.dump(), music: () => Music.part, things: Things.names(), detail: (name) => Things.get(name).detail() }

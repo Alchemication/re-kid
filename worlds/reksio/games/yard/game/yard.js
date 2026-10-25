@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots, Bed */
+/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots, Bed, YardBeds */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -810,13 +810,13 @@
   function stirBed() {
     if (!Layout.layered) return
     busyness = Bed.livelier(busyness)
-    Music.bed.start()
+    Music.bed.start(YardBeds)
   }
   if (Layout.layered) {
     Clock.every(BED_STEER_MS, () => {
       busyness = Bed.calmer(busyness, BED_STEER_MS / 1000)
       const resting = asleep || Reksio.lying
-      Music.bed.set({ mood: Bed.moodAt({ hour: day.hour(Clock.now()), raining: Weather.raining, resting, dusk: day.dusk }), energy: busyness })
+      Music.bed.set({ mood: YardBeds.moodAt({ hour: day.hour(Clock.now()), raining: Weather.raining, resting, dusk: day.dusk }), energy: busyness })
     })
   }
 

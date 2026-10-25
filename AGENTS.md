@@ -144,8 +144,8 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     curious, sad, happy) and the cricket's fiddle. Small touches for
     what Reksio does play note by note from CC0 instrument samples
     (`samples.yaml`, packed into `samples.js` by `main.py samples`), and a
-    quiet bed under everything (`bed.js`, a bed for each moment, played
-    from the same samples; `?music=takes` turns it off).
+    quiet bed under everything (the game's `beds.js` on the shared
+    `bed.js`, a bed for each moment, played from the game's samples; `?music=takes` turns it off).
   - `effects.js`, `tunes.js` and `samples.js` are generated: rebuild them,
     don't edit. So are the copies of `shared/` scripts (`main.py shared`).
   - Original audio: never committed, except the bark (see Project), packed
@@ -169,8 +169,10 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   `shared/`, and `main.py shared` copies it into each game whose page
   loads it, so every game folder still opens, tests and publishes on its
   own. Edit `shared/`, never a copy (its first line says so;
-  `test_shared.py` fails on a stale one). `debug.js`, `filmlook.js` and
-  `takes.js` are there so far.
+  `test_shared.py` fails on a stale one). `debug.js`, `filmlook.js`,
+  `takes.js`, `bed.js` (a music bed's rules; each game has its score,
+  `beds.js`) and `ensemble.js` (samples and the bed, played) are there so
+  far.
 - **Game debuggability (`debug.js`, loaded first):** every bug must be
   replayable, so:
   - randomness comes from `Debug.random('<part>')`, never `Math.random`
@@ -227,7 +229,7 @@ the edge cases that would let bad data pass silently.
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
-  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js`): the part that draws tells them what
+  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js` and each game's `beds.js`): the part that draws tells them what
   happened and does what they say. Drawing parts are tested here too, on a
   pretend page and clock: `load(…, { dom: true, globals })`, then
   `await page.advance(ms)` runs the timers and animation frames due (all

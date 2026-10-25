@@ -1,0 +1,52 @@
+licence: 'Samples from Versilian Studios: VSCO-2 Community Edition, CC0 1.0 (public domain).'
+instruments:
+# Harp: the meadow bed's plucked notes, soft and pastoral (worlds/krtek/MUSIC_DIRECTION.md: calm, close to nature).
+- id: harp
+  library: vsco2ce
+  max_seconds: 2.4
+  files:
+  - Strings/Harp/KSHarp_B1_mf.wav
+  - Strings/Harp/KSHarp_E3_mf.wav
+  - Strings/Harp/KSHarp_B3_mf.wav
+  - Strings/Harp/KSHarp_E5_mf.wav
+  - Strings/Harp/KSHarp_B5_mf.wav
+# Flute, held with vibrato: the bed's little melodic turns (the films' flute over strings).
+- id: flute
+  library: vsco2ce
+  max_seconds: 1.6
+  gain: 0.8
+  files:
+  - Woodwinds/Flute/expvib/LDFlute_expvib_E4_v1_1.wav
+  - Woodwinds/Flute/expvib/LDFlute_expvib_A4_v1_1.wav
+  - Woodwinds/Flute/expvib/LDFlute_expvib_C5_v1_1.wav
+  - Woodwinds/Flute/expvib/LDFlute_expvib_E5_v1_1.wav
+# Staccato flute: birdsong (quick high trills).
+- id: birdflute
+  library: vsco2ce
+  max_seconds: 0.5
+  gain: 0.7
+  files:
+  - Woodwinds/Flute/stac/LDFlute_stac_A4_v2_rr1.wav
+  - Woodwinds/Flute/stac/LDFlute_stac_C5_v2_rr1.wav
+  - Woodwinds/Flute/stac/LDFlute_stac_E5_v2_rr1.wav
+# Violins, bowed and held, softly: a long chord under the bed.
+- id: strings
+  library: vsco2ce
+  max_seconds: 3.5
+  gain: 0.6
+  files:
+  - Strings/Violin Section/susVib/VlnEns_susVib_G2_v1.wav
+  - Strings/Violin Section/susVib/VlnEns_susVib_B2_v1.wav
+  - Strings/Violin Section/susVib/VlnEns_susVib_D3_v1.wav
+  - Strings/Violin Section/susVib/VlnEns_susVib_F#3_v1.wav
+  - Strings/Violin Section/susVib/VlnEns_susVib_A3_v1.wav
+  - Strings/Violin Section/susVib/VlnEns_susVib_E4_v1.wav
+# Clarinet, held: a warm low line at dusk.
+- id: clarinet
+  library: vsco2ce
+  max_seconds: 2.2
+  gain: 0.7
+  files:
+  - Woodwinds/Clarinet/susLong/DCClar_susLong_D3_v1_rr1_sum.wav
+  - Woodwinds/Clarinet/susLong/DCClar_susLong_A#3_v1_rr1_sum.wav
+  - Woodwinds/Clarinet/susLong/DCClar_susLong_D4_v1_rr1_sum.wav

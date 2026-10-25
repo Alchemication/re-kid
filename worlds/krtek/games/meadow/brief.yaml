@@ -49,7 +49,7 @@ sound:
 - text: The cricket fiddles at dusk, and his tune is the day's lullaby.
   origin: inspired
   refs: ['world:characters[krtek].moves[lies-listening].claim']
-- text: The meadow has one theme of its own, recorded (generated, picked by Adam's ear), which turns with what happens, as the films' music does. It plays as the mole comes up in the morning; curious as something arrives; sad at its trouble (a lost egg, the poles marching at his flowers); happy as it comes right. When the fox comes it steps back and the sounds lead. Quiet between. From dusk the cricket's fiddle plays, quick, rough and a little out of tune, until the circle closes. What it should be and what Adam said of it is in worlds/krtek/MUSIC_DIRECTION.md.
+- text: The meadow has one theme of its own, recorded (generated, picked by Adam's ear), which turns with what happens, as the films' music does. It plays as the mole comes up in the morning; curious as something arrives; sad at its trouble (a lost egg, the poles marching at his flowers); happy as it comes right. When the fox comes it steps back and the sounds lead. Between the takes a quiet bed plays, in their key and pulse, made from instrument samples - a harp with birdsong in the morning, a little flute now and then, the harp strolling while the child plays, soft violins in the afternoon - and steps back under each take. From dusk the cricket's fiddle plays, quick, rough and a little out of tune, until the circle closes. What it should be and what Adam said of it is in worlds/krtek/MUSIC_DIRECTION.md.
   origin: inspired
   refs: [world:sound.music_role, world:sound.overview]
 - text: Small sounds made in the browser for digging, popping up and water, quiet and short.

@@ -45,7 +45,8 @@ src/
   mark_ui/              its page: HTML, CSS, JS, vendored wavesurfer.js
   shared.py             copies shared/ scripts into the games that load them
 shared/                 game scripts every game uses (debug.js: the clock, the recorder, the rules;
-                        filmlook.js: the old-print look; takes.js: the music's recorded takes);
+                        filmlook.js: the old-print look; takes.js: the music's recorded takes;
+                        bed.js and ensemble.js: the music bed's rules and the band that plays it);
                         `main.py shared` copies each into the games whose page loads it
 worlds/<id>/
   world.yaml            series dossier (schema.world.WorldDossier)
@@ -199,7 +200,7 @@ Flags in the page address (`main.py play` takes the first three):
 | `?mouse-at=S`, `?visitor-at=S`, `?hen-at=S`, `?mushrooms=S` | When the mouse, the tree's visitor, and the hen (up to lay on the wall) come out, and when the mushrooms come up (rain or not). |
 | `?fruit=apple\|plum\|nut` | The tree's fruit. |
 | `?film=0` | Without the old-print look (on by default: grain, faded warm colours, a soft vignette, a rare speck of dust or hair; `filmlook.js`). `main.py look` takes its frames without it. |
-| `?music=takes` | The yard without its music bed (`bed.js`: quiet music under everything, a bed for each moment, picked on `experiments/music/bed.html`): only the recorded takes, with quiet between, as before. |
+| `?music=takes` | The yard without its music bed (`beds.js` on `shared/bed.js`: quiet music under everything, a bed for each moment, picked on `experiments/music/bed.html`): only the recorded takes, with quiet between, as before. |
 
 In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 `?day=S` (a day S seconds long: `?day=60` to see the evening and the

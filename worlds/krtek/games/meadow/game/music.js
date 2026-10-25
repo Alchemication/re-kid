@@ -10,8 +10,12 @@
 //   circle closes.
 // A mood plays over quiet, or cuts short a weaker one (happy over sad over
 // curious over the morning), never the same or a stronger one.
+// Between takes, a quiet bed (beds.js: harp, flute, birds, violins, in the
+// takes' key and pulse; ensemble.js plays it) steps back under each take
+// and comes back after; the game says the moment and how busy the child is
+// (bed.set). It stops at dusk, for the cricket.
 
-/* global Debug, Sound, Takes, TUNES */
+/* global Debug, Ensemble, MeadowBeds, SAMPLES, Sound, Takes, TUNES */
 /* exported Music */
 const Music = (() => {
   const VOLUME = 0.45 // the music under his voice and the effects
@@ -22,6 +26,8 @@ const Music = (() => {
   const PARTS = ['morning', 'curious', 'sad', 'happy', 'lullaby'] // the parts it plays (tunes.yaml)
 
   let takes = null // the takes' player (takes.js)
+  let band = null // the samples and the bed (ensemble.js)
+  let bed = null
   let ctx = null
   let loading = null
   let ready = false
@@ -37,9 +43,11 @@ const Music = (() => {
       const out = ctx.createGain()
       out.gain.value = VOLUME
       out.connect(bus.master)
-      takes = Takes.player(ctx, out, { volume: TAKE_VOLUME })
+      band = Ensemble.make(ctx, out, typeof SAMPLES !== 'undefined' ? SAMPLES : {})
+      bed = band.bed(MeadowBeds, { quiet: () => takes.playing, stream: 'meadow-bed' })
+      takes = Takes.player(ctx, out, { volume: TAKE_VOLUME, onStart: (t) => bed.away(t), onEnd: () => { if (!night) bed.back() } })
       random = Debug.random('music')
-      loading = Promise.resolve(typeof TUNES !== 'undefined' && takes.load(TUNES)).then(() => { ready = true })
+      loading = Promise.all([band.loaded, typeof TUNES !== 'undefined' && takes.load(TUNES)]).then(() => { ready = true })
     }
     return loading
   }
@@ -53,6 +61,7 @@ const Music = (() => {
   async function morning() {
     await prepare()
     if (!night && !takes.playing) play('morning')
+    if (!night) bed.start()
   }
 
   /**
@@ -80,6 +89,7 @@ const Music = (() => {
     if (night) return
     night = true
     await prepare()
+    bed.stop() // the cricket's alone from dusk
     const wait = takes.playing ? takes.FADE_S + 0.2 : LEAD_S
     takes.fade()
     const fiddle = (gap) => { if (!ended) play('lullaby', gap, () => fiddle(CRICKET_GAP_S)) }
@@ -90,10 +100,15 @@ const Music = (() => {
   function quiet() {
     ended = true
     takes?.fade()
+    bed?.stop()
   }
 
   return {
     PARTS, prepare, morning, cue, evening, quiet,
+    /** The bed's moment and how busy the child is (the meadow steers it). */
+    setBed(change) { bed?.set(change) },
+    /** The bed now, for the overlay and the tests. */
+    get bed() { return bed ? { on: bed.on, style: bed.style, mood: bed.mood } : null },
     /** The part playing now, or null (for the overlay and the tests). */
     get part() { return takes?.part ?? null },
   }

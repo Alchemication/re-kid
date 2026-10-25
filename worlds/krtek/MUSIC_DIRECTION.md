@@ -4,9 +4,13 @@ What the meadow's music should sound like, and why. Read it before
 wording a take or making a bed (`new-music` skill). Three parts, kept
 apart: what the films show, what we chose, and what Adam's ears said.
 
-**Status: in the meadow (2026-10-22), not yet judged in play.** The
-takes Adam kept play at their moments (`game/music.js`), with quiet
-between; no bed yet.
+**Status: in the meadow, not yet judged in play.** The takes Adam kept
+play at their moments (`game/music.js`, 2026-10-22). Between them a quiet
+bed (`game/beds.js`, 2026-10-25) in the takes' key and pulse (E major,
+103): a harp with birdsong in the morning, the harp with a flute turn
+while the child watches, the harp strolling while the child plays, soft
+held violins in the afternoon. It stops at dusk for the cricket. Built,
+not yet picked by ear.
 
 ## From the films
 

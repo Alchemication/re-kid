@@ -4,8 +4,8 @@ const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 const { load } = require('./load')
 
-const page = load(['debug.js', 'bed.js'], { query: '?seed=5' })
-const Bed = page.get('Bed')
+const page = load(['debug.js', 'bed.js', 'beds.js'], { query: '?seed=5' })
+const Bed = page.get('YardBeds')
 const Debug = page.get('Debug')
 const MOODS = Object.keys(Bed.MOODS)
 

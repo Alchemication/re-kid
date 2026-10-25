@@ -93,6 +93,7 @@
 
 <script src="../../worlds/reksio/games/yard/game/samples.js"></script>
 <script src="../../worlds/reksio/games/yard/game/bed.js"></script>
+<script src="../../worlds/reksio/games/yard/game/beds.js"></script>
 <script>
 const TONIC = 58 // B-flat3, the touches' key
 const SCALE = [0, 2, 4, 5, 7, 9, 11]
@@ -312,11 +313,11 @@ function startBed(bed, card, tour = true) {
     while (next < ctx.currentTime + 0.6) {
       if (bed.game) {
         // the game's own: bed.js picks the bed for the moment, and plays it
-        const pick = Bed.style(now.mood, now.energy, wasPlaying)
+        const pick = YardBeds.style(now.mood, now.energy, wasPlaying)
         if (pick.style !== style) n = 0
         style = pick.style
         wasPlaying = pick.playing
-        const bar = Bed.bar(style, now.mood, now.energy, n, rnd)
+        const bar = YardBeds.bar(style, now.mood, now.energy, n, rnd)
         for (const note of bar.notes) play(note.inst, note.midi, next + note.at, note.vol, gain)
         next += bar.seconds
       } else {

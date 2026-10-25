@@ -17,10 +17,11 @@ decided and why.
      `worlds/krtek/MUSIC_DIRECTION.md`): the theme as he wakes, curious as
      a thing arrives, sad at its trouble (the egg found, the poles at his
      flowers), happy as it comes right, the music stepping back for the
-     fox, the cricket's fiddle from dusk; quiet between. Judge: the
-     levels, where each mood comes, whether the silence between wants a
-     meadow bed (E major at 103, the takes' key and pulse; flute, bowed
-     strings, birds), as the films play all through.
+     fox, the cricket's fiddle from dusk, and between them a quiet bed
+     (2026-10-25: harp, flute, birds, held violins; `game/beds.js`).
+     Judge: the levels, where each mood comes, and the bed's four moments.
+     Then: two more takes each of curious and happy (each comes four
+     times a day from two takes now).
    - **Adam, then Eliot, play the meadow** (`main.py play krtek meadow`;
      `?day=60` for the ending, `?props=egg&soon` for one encounter at
      once, `?critters=now` for a butterfly). Built: the day from the den
