@@ -5,8 +5,12 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 #world { display: block; width: 100vw; height: 100vh; height: 100dvh; cursor: pointer; }
 
 /* the spring runs all day */
-#spring .flow { stroke-dasharray: 10 14; animation: flow 0.9s linear infinite; }
-@keyframes flow { to { stroke-dashoffset: -24; } }
+#spring .fall { stroke-dasharray: 14 22; animation: flow 0.7s linear infinite; }
+#spring .foam { transform-box: fill-box; transform-origin: center bottom; animation: heave 0.9s ease-in-out infinite alternate; }
+@keyframes heave { from { transform: scale(1, 1); } to { transform: scale(1.08, 0.85); } }
+.dragonfly .dwings { animation: buzz 0.06s linear infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes buzz { from { transform: scaleY(1); } to { transform: scaleY(0.3); } }
+@keyframes flow { to { stroke-dashoffset: -36; } }
 
 /* the cricket is out only at dusk, fiddling */
 #cricket { visibility: hidden; }
@@ -36,7 +40,7 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 #debug { position: fixed; left: 8px; top: 8px; margin: 0; padding: 6px 8px; max-width: 46vw; max-height: 60vh; overflow: auto; font: 11px/1.3 ui-monospace, monospace; color: #fff; background: #000a; border-radius: 6px; pointer-events: none; white-space: pre-wrap; }
 #bug-button { position: fixed; right: 8px; top: 8px; font: 12px system-ui; }
 
-@media (prefers-reduced-motion: reduce) { #spring .flow, #den .z { animation: none; } }
+@media (prefers-reduced-motion: reduce) { #spring .fall, #spring .foam, #den .z { animation: none; } }
 
 /* On a computer, what can be tapped glows warm under the mouse, as in the yard
    (people there found the things hard to find): a thing of an encounter, a

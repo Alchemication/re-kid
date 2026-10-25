@@ -5,7 +5,7 @@ audience: Eliot, about 3, playing with a parent; Adam first, for a rough feel of
 length: One day, 08:00 to 20:00 on the meadow's sun, in five minutes of play, as long as a day in Reksio's yard; it ends when the mole goes down to sleep.
 
 pitch:
-  text: The child is the little mole in his meadow. He wakes in his den under the molehill and comes up into the morning. Tap the meadow and he waddles there, the view following him along a meadow about two and a half screens wide; tap him and he giggles or says hello. By his molehill is his flower bed and a little spring, and he waters the flowers. The day passes on its own, the sun crossing the sky whatever he does. At dusk the tulips close, the cricket comes out and fiddles, and the mole settles in his molehill to listen; then he goes down into his molehill, the picture closes in a circle around it, and we see him asleep in his den.
+  text: The child is the little mole in his meadow. He wakes in his den under the molehill and comes up into the morning. Tap the meadow and he waddles there, the view following him along a meadow about two and a half screens wide; tap him and he giggles or says hello. Behind his molehill is his flower bed; further along, a spring pours over a little rock cliff into a pool, with its own life (a frog, dragonflies, a fish, birds coming to drink). Now and then a little rain cloud comes, and he gets it to water a patch of wild flowers. The day passes on its own, the sun crossing the sky whatever he does. At dusk the tulips close, the cricket comes out and fiddles, and the mole settles in his molehill to listen; then he goes down into his molehill, the picture closes in a circle around it, and we see him asleep in his den.
   origin: inspired
   refs: ['world:places[molehill].description', 'world:characters[krtek].moves[pops-up-from-molehill].claim', 'world:characters[krtek].moves[asleep-in-den].claim', 'world:design_notes[0]']
 
@@ -28,7 +28,7 @@ principles:
   origin: invented
 
 controls:
-  text: 'Tap or click: on the meadow, he waddles there; on the mole, an answer with a word (a jump of joy, a wave, peekaboo, a think, a laugh behind his hands); on a butterfly, it flutters off and he looks up after it; on the flower bed, he fetches water from the spring and waters it; on a thing that has come, he goes to it. Keyboard for the grown-up: arrows walk a little way left or right, space does whatever is nearest, any other key gets a word from him.'
+  text: 'Tap or click: on the meadow, he waddles there; on the mole, an answer with a word (a jump of joy, a wave, peekaboo, a think, a laugh behind his hands); on a butterfly, it flutters off and he looks up after it; on the flower bed, he goes and sniffs a flower; on the spring, he paddles in its pool; on the frog, it plops into the water; on a thing that has come, he goes to it. Keyboard for the grown-up: arrows walk a little way left or right, space does whatever is nearest, any other key gets a word from him.'
   origin: invented
 
 look:
@@ -88,16 +88,36 @@ scenes:
   sound:
     text: One of his kept voice takes.
     origin: invented
-- id: water-flowers
+- id: flower-bed
   action:
-    text: Tap the flower bed.
+    text: Tap the flower bed, or the spring.
     origin: invented
   result:
-    text: He fetches the watering can, fills it at the spring and waters the flowers, which perk up. Done again, it plays again; the tulips stand a little taller each time.
-    origin: inspired
-    refs: ['world:characters[krtek].moves[waters-the-flowers].claim']
+    text: His flower bed stands behind his molehill, low enough that nothing hides behind it (Adam, 2026-10-25). Tapped, he goes over and sniffs a flower, and giggles. Tapped, the spring has him paddle in its pool, splashing.
+    origin: invented
   sound:
-    text: Water filling the can, a sprinkle.
+    text: A giggle; splashes.
+    origin: invented
+- id: spring
+  action:
+    text: Nothing, or tap the frog.
+    origin: invented
+  result:
+    text: The spring pours over a little cliff of mossy boulders into a pool with lily pads and reeds (after the spring in Krtek a buldozer's opening, made bigger). Its life is chosen fresh each play and comes and goes - a frog on a lily pad that croaks and plops in, dragonflies that dart in and hover, a fish that leaps, a bullfinch that comes down to drink - with rings spreading on the water. Tapped, the frog plops in, and later climbs back on its pad.
+    origin: inspired
+    refs: ['world:places[molehill].description']
+  sound:
+    text: The frog's croak, splashes.
+    origin: invented
+- id: rain
+  action:
+    text: Tap the cloud or the drooping flowers, or leave him be.
+    origin: invented
+  result:
+    text: A patch of wild flowers stands in the middle of the meadow; when this encounter's hour comes the sun beats down and they droop, and a small cloud drifts in. He sighs and looks up at it. He blows at it, and it drifts the wrong way, over him, and rains on him. He tries from the other side just as the hare hops by, and it rains on the hare, who shakes the drops all over him. Then he gets right under it and pushes it with both hands over the flowers, and it rains on them - up they stand, one after another - and a rainbow arches over the meadow. The meadow's watering, now and then (Adam's pick of three, 2026-10-25). He helps someone.
+    origin: invented
+  sound:
+    text: His sigh, a whoosh of breath, rain, a splash, his giggle.
     origin: invented
 - id: egg
   action:

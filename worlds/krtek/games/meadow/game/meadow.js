@@ -1,19 +1,20 @@
 // Krtek's meadow: the scene, what a tap means, and the day from waking to
 // sleep (brief.yaml). He wakes in his den under the molehill; a tap on the
 // meadow sends him waddling there (the view follows him, view.js), a tap on
-// him gets a word and a hop, a tap on the flower bed or the spring has him
-// water the flowers. The day
+// him gets a word and a hop, a tap on the flower bed (behind his molehill)
+// has him sniff a flower, a tap on the spring has him paddle in its pool;
+// watering comes with the rain cloud (rain.js), now and then. The day
 // runs on its own (day.js); at dusk the tulips close and the cricket
 // fiddles, through the last hour the picture closes in a circle round his
 // molehill, and at 20:00 he goes down to sleep in his den. After that only
 // a grown-up's long press starts a new day.
 //
-// Every input is an intent ("go to 900", "tap mole", "water", "wake"), run
+// Every input is an intent ("go to 900", "tap mole", "sniff", "wake"), run
 // by perform() so the recorder (debug.js) keeps it. A new intent cuts the
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Bed, Church, Clock, Critters, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View */
+/* global Bed, Church, Clock, Critters, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -44,7 +45,7 @@ const meadowGame = (() => {
   const cricket = document.getElementById('cricket')
   const den = layers.den
 
-  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], grow: 1, busy: 0.3 }
+  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3 }
   let tulipHeads = []
 
   const el = (tag, attrs = {}, parent) => {
@@ -94,6 +95,7 @@ const meadowGame = (() => {
       back: document.getElementById('back-ground'),
       front: frontGround,
       bed: document.getElementById('bed'),
+      rocks: document.getElementById('rocks'),
     }, (ctm ? ctm.a : 1) * (window.devicePixelRatio || 1))
     hill(HOME, true, false)
     makeBed()
@@ -107,8 +109,8 @@ const meadowGame = (() => {
     tulipHeads = []
     for (let i = 0; i < TULIPS; i++) {
       const x = BED.from + 20 + (i * (BED.to - BED.from - 40)) / (TULIPS - 1) + (paint() - 0.5) * 14
-      const base = 812 + (i % 2) * 22
-      const height = 96 + paint() * 40
+      const base = 700 + (i % 2) * 10 // behind him, at the meadow's back: nothing hides behind it
+      const height = 66 + paint() * 26
       const stem = el('g', { class: 'tulip' }, bed)
       stem.style.transformOrigin = `${x}px ${base}px`
       el('path', { d: `M${x} ${base} V${base - height}`, stroke: '#3f7d22', 'stroke-width': 5 }, stem)
@@ -122,7 +124,7 @@ const meadowGame = (() => {
       for (const p of [left, right]) p.style.transformOrigin = `${x}px ${base - height}px`
       tulipHeads.push({ left, right, stem })
     }
-    el('rect', { class: 'tap-bed', x: BED.from - 20, y: 640, width: BED.to - BED.from + 40, height: 230, fill: 'transparent' }, bed)
+    el('rect', { class: 'tap-bed', x: BED.from - 20, y: 590, width: BED.to - BED.from + 40, height: 125, fill: 'transparent' }, bed)
   }
 
   // ------------------------------------------------------------ the day
@@ -189,7 +191,6 @@ const meadowGame = (() => {
     Debug.check('the mole is in the meadow', m.x >= DIG.from - 1 && m.x <= DIG.to + 1, { x: m.x })
     if (game.awake && !game.ended && !game.gesture) {
       Debug.check('a free mole stands', m.pose !== 'down', { pose: m.pose })
-      Debug.check('a free mole has put the can down', !m.can, {})
       Debug.check('a free mole holds nothing up, unless an encounter waits on it', !m.holdsUp || Things.holding(), {})
       Debug.check('a free mole stands on the ground', m.lift === 0, { lift: m.lift })
       Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
@@ -251,7 +252,6 @@ const meadowGame = (() => {
   /** After a cut: he stands where he was going, with a molehill under him if he is in the ground. */
   function settle() {
     const m = Mole.state
-    if (m.carrying) Mole.hold(false)
     if (m.pose === 'out') return Mole.put(m.x, 'out')
     if (!hillAt(m.x)) hill(m.x, false, false)
     Mole.put(m.x, m.pose === 'listen' ? 'listen' : 'hill')
@@ -312,35 +312,24 @@ const meadowGame = (() => {
     await act()
   }
 
-  async function water() {
-    const m = Mole.state
-    const fill = SPRING - 110
-    if (m.pose !== 'out' || Math.abs(m.x - fill) > 40) await goTo(fill)
-    Mole.hold(true)
-    Sound.water(0.9)
-    await Mole.tip(55, 1000)
-    await Mole.walkTo((BED.from + BED.to) / 2 + 60)
-    Sound.water(1.3)
-    sprinkle(1500)
-    await Mole.tip(-40, 1500)
-    Mole.hold(false)
-    game.grow = Math.min(1.3, game.grow + 0.08)
-    await Promise.all(tulipHeads.map((t) => Motion.endAt(t.stem, [{ transform: `scaleY(${game.grow})` }], { duration: 500, easing: 'cubic-bezier(.3,1.6,.5,1)' })))
-    Debug.trace('watered', { grow: game.grow })
+  /** A tap on the flower bed: he goes over and sniffs a flower, eyes shut a moment. */
+  async function sniff() {
+    await goTo((BED.from + BED.to) / 2)
+    Mole.show('three', 1)
+    await Mole.lean(18, 1200)
+    Sound.say('giggle', true)
     await Mole.cheer()
   }
 
-  /** Drops falling from the can's spout onto the flowers while he tips it. */
-  function sprinkle(ms) {
-    const drops = document.getElementById('drops')
-    for (let i = 0; i < 14; i++) {
-      Clock.after(300 + (i * (ms - 600)) / 14, () => {
-        const { x, y } = Mole.spout()
-        const d = el('circle', { r: 5, fill: '#7fb3ea', stroke: '#2f5d94', 'stroke-width': 1.5 }, drops)
-        const dx = (paint() - 0.5) * 30
-        Motion.endAt(d, [{ transform: `translate(${x}px, ${y}px)` }, { transform: `translate(${x + 30 + dx}px, ${y + 150}px)`, opacity: 0.2 }], { duration: 520, easing: 'ease-in' }).then(() => d.remove(), () => d.remove())
-      })
-    }
+  /** A tap on the spring: he paddles in the pool, splashing, and giggles. */
+  async function paddle() {
+    await goTo(Spring.POOL.x - 40)
+    Sound.splash()
+    await Mole.lean(-12, 500)
+    Sound.splash()
+    await Mole.lean(12, 500)
+    Sound.say('giggle', true)
+    await Mole.cheer()
   }
 
   async function homeToListen() {
@@ -410,12 +399,14 @@ const meadowGame = (() => {
   const INTENTS = [
     [/^wake$/, () => wake()],
     [/^tap mole$/, () => run('tap mole', tapMole)],
-    [/^water$/, () => run('water', water)],
+    [/^sniff$/, () => run('sniff', sniff)],
+    [/^paddle$/, () => run('paddle', paddle)],
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || run('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => run('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
     [/^tap butterfly (\d+)$/, (m) => tapButterfly(Number(m[1]))],
+    [/^tap frog$/, () => Spring.tapFrog()],
   ]
 
   /** A tap on a butterfly: it flutters off, and, if he is free, he looks up after it, hairs up: "ooh". */
@@ -436,7 +427,7 @@ const meadowGame = (() => {
   function waits(intent) {
     const busy = Things.stepping
     if (!busy || game.gesture !== busy) return false
-    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly')) return false
+    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent === 'tap frog') return false
     game.queued = intent
     const to = intent.match(/^(?:go|dig) to (\d+)$/)
     if (to) Mole.lookAt(Number(to[1]))
@@ -480,6 +471,7 @@ const meadowGame = (() => {
   /** What a tap at this point means. */
   function intentAt(target, p) {
     const critter = target.closest('[data-critter]')
+    if (critter?.dataset.critter === 'frog') return 'tap frog'
     if (critter) return `tap butterfly ${critter.dataset.critter}`
     const thing = target.closest('[data-thing]')
     const choice = target.closest('[data-choice]')
@@ -488,7 +480,8 @@ const meadowGame = (() => {
     // a tap on that encounter (it plays on, not cut short)
     if (target.closest('.mole-carry') && Things.holder()) return `use ${Things.holder()}`
     if (target.closest('.mole')) return game.gesture && Things.get(game.gesture) ? `use ${game.gesture}` : 'tap mole'
-    if (target.closest('#bed') || target.closest('#spring')) return 'water'
+    if (target.closest('#bed')) return 'sniff'
+    if (target.closest('#spring')) return 'paddle'
     if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`
     return 'tap mole' // the sky: he answers anyway
   }
@@ -514,7 +507,7 @@ const meadowGame = (() => {
     if (e.repeat) return // a key held down repeats: he is already going
     // an arrow held: he walks that way until it is let go (keyup)
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform(`go to ${e.key === 'ArrowLeft' ? DIG.from : DIG.to}`)
-    else if (e.key === ' ') perform(x > BED.from - 120 && x < SPRING + 60 ? 'water' : 'tap mole')
+    else if (e.key === ' ') perform(Math.abs(x - SPRING) < 300 ? 'paddle' : x > BED.from - 120 && x < BED.to + 120 ? 'sniff' : 'tap mole')
     else perform('tap mole')
   })
   document.addEventListener('keyup', (e) => {
@@ -528,6 +521,7 @@ const meadowGame = (() => {
   Sound.listen((word) => Mole.express(word)) // each word he says comes with its face
   View.setup(() => Mole.drawnX(), (camX) => irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX))))
   Friends.setup(document.getElementById('friends'))
+  Spring.setup(document.getElementById('spring'), () => game.hour)
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
   Church.setup(document.getElementById('distant'), () => {
     if (!(game.awake && !game.ended && !game.gesture)) return
@@ -535,7 +529,7 @@ const meadowGame = (() => {
     Mole.lookAt(View.fromDistant(Church.X))
   })
   // the flowers a butterfly may settle on: the bed, the bluebells and the yellow spike (painting.js)
-  const flowerTops = [...[0, 1, 2, 3, 4].map((i) => ({ x: BED.from + 30 + i * 60, y: 690 })), { x: 380, y: 545 }, { x: HOME - 210, y: 555 }, { x: HOME + 150, y: 570 }, { x: HOME - 128, y: 480 }, { x: 2780, y: 545 }, { x: 3420, y: 545 }]
+  const flowerTops = [...[0, 1, 2, 3, 4].map((i) => ({ x: BED.from + 30 + i * 60, y: 620 })), { x: 380, y: 545 }, { x: HOME - 210, y: 555 }, { x: HOME + 150, y: 570 }, { x: HOME - 128, y: 480 }, { x: 2780, y: 545 }, { x: 3420, y: 545 }]
   Critters.setup(document.getElementById('critters'), () => game.hour, () => flowerTops, { now: Layout.flags.critters === 'now', still: Debug.still })
   const things = Things.setup({
     run,

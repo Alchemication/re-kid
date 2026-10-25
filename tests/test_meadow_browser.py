@@ -30,7 +30,7 @@ CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 5, "poles": 5}
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 5, "poles": 5, "rain": 5}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
 SOLVE = {"egg": ["use egg mouse", "use egg hare", "use egg hen"]}
@@ -108,10 +108,10 @@ class TestMeadowCoverage:
 
 
 class TestMeadowDay:
-    def test_wakes_digs_answers_and_waters(self, meadow: callable) -> None:
+    def test_wakes_walks_answers_sniffs_and_paddles(self, meadow: callable) -> None:
         m = meadow()
         m.wake()
-        for intent in ("go to 1100", "tap mole", "water", "go to 300"):
+        for intent in ("go to 1100", "tap mole", "sniff", "paddle", "go to 300"):
             m.do(intent)
             m.wait_free()
             m.assert_settled()
@@ -120,7 +120,7 @@ class TestMeadowDay:
     def test_a_tap_cuts_any_move_short(self, meadow: callable) -> None:
         m = meadow()
         m.wake()
-        for first in ("go to 2300", "water", "tap mole", "dig to 1800"):
+        for first in ("go to 2300", "sniff", "paddle", "tap mole", "dig to 1800"):
             m.do(first)
             m.page.wait_for_timeout(CUT_MS)
             m.do("go to 400")
@@ -629,4 +629,25 @@ class TestMeadowChurch:
         )
         assert [b["hour"] for b in bells] == list(range(9, 20)), bells
         assert bells[-1]["strokes"] > bells[0]["strokes"], "no evening bell"
+        assert not m.errors, m.errors
+
+
+class TestMeadowSpring:
+    """The spring's life (spring.js): the frog plops in when tapped, and its
+    life comes and goes through the day without breaking a rule."""
+
+    def test_a_tap_on_the_frog_and_it_plops_in(self, meadow: callable) -> None:
+        m = meadow("seed=2&still&props=")  # seed 2: this play has a frog
+        m.wake()
+        assert m.page.evaluate("Spring.frog"), "no frog this play: pick another seed"
+        m.do("tap frog")
+        m.wait("meadowGame.trace().includes('\"plop\":true')", 3_000)
+        m.wait("Spring.frog", 20_000)  # and later it climbs back on its pad
+        assert not m.errors, m.errors
+
+    def test_its_life_comes_and_goes_all_day(self, meadow: callable) -> None:
+        m = meadow("seed=3&props=&day=45")
+        m.wake()
+        m.wait("meadowGame.state().ended && !meadowGame.state().busy", 60_000)
+        assert "spring" in m.page.evaluate("meadowGame.trace()")
         assert not m.errors, m.errors

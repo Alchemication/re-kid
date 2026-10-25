@@ -157,6 +157,15 @@ const Sound = (() => {
     }
   }
 
+  /** The frog: a low ribbit, twice. */
+  function croak() {
+    if (!ready()) return
+    for (const at of [0, 0.32]) {
+      note(150, at, 0.16, 0.12, 'square', 0.8)
+      hiss(at, 0.12, 700, 4, 0.05)
+    }
+  }
+
   /** Something round rolling through the grass. */
   function roll(seconds) {
     if (!ready()) return
@@ -280,5 +289,5 @@ const Sound = (() => {
     bus() { ensure(); return { ctx, master } },
     /** The game's hook: fn(word) as he says each word. */
     listen(fn) { heard = fn },
-    say, dig, pop, water, bell, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
+    say, dig, pop, water, bell, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
 })()

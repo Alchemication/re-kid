@@ -43,12 +43,12 @@ const Mole = (() => {
   }
   const life = Debug.random('mole-life') // blinks, glances and looking about: their own stream
 
-  const state = { x: 0, pose: 'down', busy: null, carrying: false, can: false, holdsUp: false, lift: 0, painted: null, facing: 1, view: 'front', mouth: 'smile' }
+  const state = { x: 0, pose: 'down', busy: null, carrying: false, holdsUp: false, lift: 0, painted: null, facing: 1, view: 'front', mouth: 'smile' }
   const skin = [] // what paint colours: his body, snout and arms in every view
   let lift = 0 // how far up he stands (on someone's shoulders, in the car)
   let views = null // moleart.js's three views
   let free = () => false // the meadow says when he is free to look about by himself
-  let root, body, tilt, can, tunnel, inLayer, outLayer, carrySlot, hatSlot
+  let root, body, tilt, tunnel, inLayer, outLayer, carrySlot, hatSlot
 
   const el = (tag, attrs = {}, parent) => {
     const e = document.createElementNS(SVG, tag)
@@ -71,12 +71,6 @@ const Mole = (() => {
     const art = el('g', {}, tilt)
     art.style.transform = `scale(${SCALE})`
     views = MoleArt.draw(art, skin)
-    can = el('g', { class: 'mole-can' }, art)
-    el('path', { d: 'M36 -66 h46 l-6 40 h-34 z', fill: '#3a67ad', stroke: '#15140f', 'stroke-width': 3 }, can)
-    el('path', { d: 'M80 -56 l34 -22 l4 6 l-32 24 z', fill: '#3a67ad', stroke: '#15140f', 'stroke-width': 2.5 }, can)
-    el('path', { d: 'M44 -66 q15 -22 30 0', stroke: '#15140f', 'stroke-width': 4, fill: 'none' }, can)
-    can.style.transformOrigin = '58px -46px'
-    can.style.display = 'none'
     carrySlot = el('g', { class: 'mole-carry' }, art) // what he holds up over his head
     hatSlot = el('g', { class: 'mole-hat' }, art) // what sits on his head
     tunnel = el('g', { class: 'tunnel' }, ground)
@@ -179,7 +173,7 @@ const Mole = (() => {
   function relax() {
     const moving = root.getAnimations().length > 0
     const x = moving ? drawnX() : state.x
-    const parts = [root, body, tilt, can, carrySlot]
+    const parts = [root, body, tilt, carrySlot]
     for (const v of all()) parts.push(...v.arms, ...v.feet, v.lids, v.hair)
     for (const e of parts) e.getAnimations().forEach((a) => a.cancel())
     if (moving) {
@@ -188,7 +182,6 @@ const Mole = (() => {
     }
     for (const b of [...tunnel.children]) b.remove()
     for (const v of all()) for (const a of v.arms) a.style.transform = ''
-    can.style.transform = ''
     tilt.style.transform = ''
     laugh(false)
     show(state.pose === 'out' ? 'three' : 'front')
@@ -447,13 +440,6 @@ const Mole = (() => {
     }
   }
 
-  /** Take up the watering can, or put it down. */
-  function holdCan(on) {
-    can.style.display = on ? '' : 'none'
-    state.can = on
-    state.carrying = on || state.holdsUp
-  }
-
   /** Where he is drawn now, mid-move (state.x is where he is going): for the view to follow. */
   function drawnX() {
     const t = getComputedStyle(root).transform
@@ -463,10 +449,6 @@ const Mole = (() => {
   /** The middle of his head, in scene units: where something lands on it. */
   const head = () => ({ x: state.x, y: Y - lift + SINK[state.pose] - 150 * SCALE })
 
-  /** Tip the can: filling it at the spring (down) or watering (forward). */
-  async function tip(deg, ms) {
-    await Motion.endAt(can, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${deg}deg)`, offset: 0.25 }, { transform: `rotate(${deg}deg)`, offset: 0.8 }, { transform: 'rotate(0deg)' }], { duration: ms })
-  }
 
   /** Lie in his molehill to listen (dusk), or stop. */
   function listen(on) {
@@ -488,7 +470,7 @@ const Mole = (() => {
     if (had) had.remove()
     if (node) carrySlot.appendChild(node)
     state.holdsUp = !!node
-    state.carrying = !!node || state.can
+    state.carrying = !!node
     armsUp(!!node)
     if (!node && (state.pose === 'hill' || state.pose === 'listen')) onRim()
     return had
@@ -554,8 +536,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  /** Where the can's spout is now, in scene units, while he waters. */
-  const spout = () => ({ x: state.x + 116 * SCALE, y: Y + SINK[state.pose] - 70 * SCALE })
-
-  return { SCALE, state, drawnX, face, show, lookAt, perk, express, setFree, spout, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, hold: holdCan, tip, listen }
+  return { SCALE, state, drawnX, face, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
 })()

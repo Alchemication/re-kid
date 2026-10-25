@@ -393,6 +393,54 @@ const Painting = (() => {
     for (const x of [380, 2780, 3420]) bluebell(ctx, x, 690, r(130, 180))
   }
 
+  /** The spring's rock cliff (spring.js draws the water over it): boulders piled up, sponged in
+   * greys and browns, darker below and wet behind the waterfall, moss on their tops, ferns at
+   * their feet. Each stone: [x, foot y, half width, height]. */
+  function rocks(ctx) {
+    const S = Layout.SPRING
+    const stones = [[S + 330, 712, 190, 270], [S + 470, 700, 110, 190], [S + 170, 714, 120, 150], [S + 290, 540, 120, 150, true], [S + 60, 716, 70, 70]]
+    for (const [x, foot, w, h, whole] of stones) {
+      // a lumpy dome standing on the ground, or (whole) a lumpy round stone up on the others
+      const pts = []
+      const n = whole ? 24 : 16
+      for (let k = 0; k <= n; k++) {
+        const a = whole ? (k / n) * Math.PI * 2 : Math.PI + (k / n) * Math.PI
+        const wob = 0.88 + r(0.14)
+        pts.push([x + Math.cos(a) * w * wob, (whole ? foot - h / 2 : foot) + Math.sin(a) * (whole ? h / 2 : h) * wob])
+      }
+      const outline = () => {
+        ctx.beginPath()
+        pts.forEach(([px, py], k) => (k ? ctx.lineTo(px, py) : ctx.moveTo(px, py)))
+        ctx.closePath()
+      }
+      outline()
+      ctx.save()
+      ctx.clip()
+      const g = ctx.createLinearGradient(0, foot - h, 0, foot)
+      g.addColorStop(0, '#a89d88')
+      g.addColorStop(1, '#5f574a')
+      ctx.fillStyle = g
+      ctx.fillRect(x - w - 10, foot - h - 10, w * 2 + 20, h + 20)
+      for (let i = 0; i < (w * h) / 40; i++) dab(ctx, x + r(-w, w), foot - r(h), r(4, 12), pick(['#8b8170', '#b3a892', '#6f6656', '#9a8c6a', '#c2b8a2']), r(0.25, 0.6))
+      for (let i = 0; i < w / 2; i++) dab(ctx, x + r(-w * 0.8, w * 0.8), foot - h + r(h * 0.25), r(5, 13), pick(['#5d7a3a', '#6f8f45', '#4c6a30']), r(0.5, 0.85)) // moss on top
+      ctx.restore()
+      outline() // the dabs used the path: draw the stone's own again for its line
+      ctx.strokeStyle = '#2f2a22'
+      ctx.lineWidth = 3
+      ctx.stroke()
+    }
+    // wet, dark stone where the water runs down
+    ctx.globalAlpha = 0.45
+    ctx.fillStyle = '#3d4a58'
+    ctx.beginPath()
+    ctx.ellipse(S + 205, 600, 46, 120, 0, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.globalAlpha = 1
+    // ferns and leaves at their feet
+    for (const [x, len, lean] of [[S - 150, 120, -0.6], [S - 120, 140, -0.3], [S + 560, 150, 0.4], [S + 590, 120, 0.7], [S + 520, 130, 0.2]]) fern(ctx, x, 716, len, lean, pick(['#2f5a3a', '#3d6c46', '#28503a']))
+    for (const x of [S - 170, S + 610]) fan(ctx, x, 716, 60, '#4b7a3a', '#2a4a25')
+  }
+
   /** In front: grass strokes, denser and darker towards the bottom, and low clumps of flowers along the edge. */
   function front(ctx) {
     const W = Layout.WORLD_W
@@ -404,10 +452,10 @@ const Painting = (() => {
 
   /** The flower bed: a dense mass of pink daisies, cornflowers and leaves round the tulips (drawn on top: meadow.js). */
   function bed(ctx, x0, x1) {
-    for (let i = 0; i < 70; i++) fan(ctx, r(x0, x1), r(800, 850), r(18, 32), pick(['#3f7d22', '#4d6d1f', '#5a8a35']), '#2a4a17')
+    for (let i = 0; i < 60; i++) fan(ctx, r(x0, x1), r(690, 712), r(14, 24), pick(['#3f7d22', '#4d6d1f', '#5a8a35']), '#2a4a17')
     for (let i = 0; i < 90; i++) {
       const x = r(x0, x1)
-      const y = r(745, 845)
+      const y = r(650, 708)
       if (r() < 0.55) daisy(ctx, x, y, r(6, 10), pick(['#f08fa6', '#f6b3c4', '#e46f8e']), '#f2c230')
       else cornflower(ctx, x, y, r(7, 10))
     }
@@ -420,7 +468,7 @@ const Painting = (() => {
   /**
    * Paint the meadow into its layers: the clouds into the sky, the far
    * trees, the back and the front, and the flower bed's mass.
-   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element}} into
+   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element, rocks: Element}} into
    * @param {number} pxPerUnit how many screen pixels a scene unit is
    */
   function paint(into, pxPerUnit) {
@@ -429,9 +477,10 @@ const Painting = (() => {
     cloudImg = place(into.sky, layer(-200, -100, 2000, 740, clouds))
     place(into.far, layer(-60, 380, farW + 120, 290, (ctx) => far(ctx, farW)))
     place(into.back, layer(-60, 140, Layout.WORLD_W + 120, 590, back))
+    if (into.rocks) place(into.rocks, layer(Layout.SPRING - 240, 360, 900, 370, rocks))
     place(into.front, layer(-60, 690, Layout.WORLD_W + 120, 210, front))
     const { from, to } = Layout.BED
-    place(into.bed, layer(from - 30, 720, to - from + 60, 150, (ctx) => bed(ctx, from - 10, to + 10)))
+    place(into.bed, layer(from - 30, 610, to - from + 60, 110, (ctx) => bed(ctx, from - 10, to + 10)))
     Debug.trace('painted', { res: Math.round(res * 100) / 100 })
   }
 

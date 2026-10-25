@@ -36,9 +36,15 @@ decided and why.
    - **Adam judges the church bell** (2026-10-25): the village church on a
      far hill, its bell ringing twice each hour and longer at sunset, the
      mole looking up. Its sound is made in the browser: if it falls flat,
-     takes through `new-sound`. Then: watering as an encounter that comes
-     now and then (Adam: the always-there flower bed hides things), and the
-     meadow's edges (perhaps a loop back to the start).
+     takes through `new-sound`. Then the meadow's edges (perhaps a loop
+     back to the start).
+   - **Adam judges the rain cloud, the bed and the spring** (2026-10-25,
+     not yet seen by him): watering is now the rain cloud encounter (five
+     encounters a day, a little closer together); the flower bed stands
+     behind his molehill, a tap has him sniff a flower; the spring is a
+     painted rock cliff with a waterfall, a pool and its own life (frog,
+     dragonflies, fish, a bird drinking). The spring's life is hand-wired:
+     it is a candidate for the world-model spike's critter kit.
    - **Adam judges how the encounters come and go** (2026-10-23): the
      hare and the mouse carry the paint tins in and out, bullfinches bring
      the poles, the toy car rolls in and breaks on the way, the hen and the

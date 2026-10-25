@@ -46,7 +46,7 @@
 /* global Clock, Day, Debug, Layout */
 /* exported Things */
 const Things = (() => {
-  const HOURS = [9, 11, 13, 15.2] // when the chosen ones arrive, in their (seeded) order: one every 2 hours or so, about 50 s of play apart
+  const HOURS = [9, 10.7, 12.4, 14.1, 15.8] // when the chosen ones arrive, in their (seeded) order: one every hour and three quarters or so, about 40 s of play apart
   const SOON_HOUR = 8 // ?soon: the first arrives as he wakes, for trying it
   const ENGAGE_MS = 7000 // a thing out and the mole left alone this long: he goes to it himself
   const BETWEEN_MS = 1300 // a breath between steps, so each reads (a tap on the thing skips it)
