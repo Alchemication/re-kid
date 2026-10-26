@@ -13,21 +13,25 @@ function yard(query) {
   const reksio = { x: 1500, nose: { x: 1560, y: 640 } }
   const weather = { phase: 'dry', raining: false, puddles: [], sinceRain: null }
   const sounds = []
+  const bowl = { dx: 0, down: true } // the bowl (bowl.js): where it stands this play, and whether it is on the ground
   const page = load(['debug.js', 'layout.js', 'world.js', 'creature.js', 'creatures.js'], {
     query: `?seed=1&${query}`,
     dom: true,
     globals: {
       Reksio: { get x() { return reksio.x }, mouth: () => reksio.nose },
       Weather: weather,
+      Bowl: { get x() { return 880 + bowl.dx }, get down() { return bowl.down } },
       Sound: new Proxy({}, { get: (_, name) => (name === 'from' ? (_d, play) => play() : () => sounds.push(name)) }),
     },
   })
   const Creatures = page.get('Creatures')
   const World = page.get('World')
+  bowl.dx = page.get('Layout').x('bowl')
   Creatures.init()
   return {
     Creatures,
     World,
+    bowl,
     reksio,
     weather,
     sounds,
@@ -256,5 +260,58 @@ describe('after the rain', () => {
     assert.ok(Math.abs(w.x - 2000) < 100 + 60 + 1)
     w.eat()
     assert.equal(y.Creatures.worm, null)
+  })
+})
+
+describe('sparrows, in winter', () => {
+  /** A winter play with his bowl out at x 880, as the yard's weather tells the world (cold). */
+  const winter = () => {
+    const y = yard('creatures=&rain=0&season=winter&props=bowl')
+    y.World.set({ cold: 1 })
+    return y
+  }
+  const atBowl = (y) => y.Creatures.sparrows.filter((s) => s.pecking).length
+
+  it('come in a little flock to peck at his bowl, the ground being under snow', () => {
+    const y = winter()
+    y.reksio.x = -1000 // far off
+    y.reksio.nose = { x: -1000, y: 0 }
+    assert.ok(y.until(() => atBowl(y) >= 1, 60) != null, 'none came to peck')
+    assert.ok(y.Creatures.sparrows.length >= 2)
+  })
+
+  it('never come in summer', () => {
+    const y = yard('creatures=&rain=0&season=summer&props=bowl')
+    y.run(90)
+    assert.equal(y.Creatures.sparrows.length, 0)
+  })
+
+  it('burst up at a bark, and keep off while his nose is at the bowl', () => {
+    const y = winter()
+    y.reksio.x = -1000
+    y.reksio.nose = { x: -1000, y: 0 }
+    y.until(() => atBowl(y) >= 1, 60)
+    const bowl = y.Creatures.sparrows.find((s) => s.pecking)
+    y.Creatures.notice('bark', bowl.x)
+    y.run(0.3)
+    assert.equal(atBowl(y), 0, 'still pecking after a bark')
+    assert.ok(y.Creatures.sparrows.every((s) => s.y < bowl.y - 30), 'they burst up, not along the ground')
+    y.reksio.nose = { x: bowl.x + 60, y: 700 } // his nose by the bowl
+    y.run(8)
+    assert.equal(atBowl(y), 0, 'pecking with his nose right there')
+    y.reksio.nose = { x: bowl.x + 400, y: 700 } // and off he goes
+    assert.ok(y.until(() => atBowl(y) >= 1, 15) != null, 'never came back')
+  })
+})
+
+describe('sparrows and the bowl', () => {
+  it('never peck at the bowl while it is on his head', () => {
+    const y = yard('creatures=&rain=0&season=winter&props=bowl')
+    y.World.set({ cold: 1 })
+    y.bowl.down = false
+    y.reksio.x = -1000
+    y.reksio.nose = { x: -1000, y: 0 }
+    y.run(60)
+    assert.equal(y.Creatures.sparrows.filter((s) => s.pecking).length, 0)
   })
 })

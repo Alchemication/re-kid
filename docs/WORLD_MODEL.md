@@ -68,7 +68,9 @@ shelter is wet; the wind gets up with it.
 Offer kinds in use: `nectar`, `drink`, `shelter` (a creature's home to
 come out of: the snail comes out where one is wet), `perch` (somewhere to
 land: the yard's roof, tap, bowl, flower), `sight` (something on show a
-curious creature comes to look at: Reksio's nose, the web's edge). A new kind is a word
+curious creature comes to look at: Reksio's nose, the web's edge), `food`
+(the yard's bowl, in the cold: the sparrows come to it in winter, shy of
+his nose, so they keep off while he is at it). A new kind is a word
 both the thing and the creature use; add it to this list.
 
 ## A creature

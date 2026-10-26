@@ -150,8 +150,12 @@ decided and why.
       read cold, not the season), and each prop and creature lists the
       seasons it belongs to (`layout.js` `IN_SEASON`), so autumn and spring
       are a share and their own things, not edits everywhere.
-      Still to come, each a `new-gag`: the sparrows at his bowl (the ground
-      under snow, the bowl is the food on offer), slipping on the ice (a new
+      The sparrows at his bowl (built 2026-10-26): a little flock comes to
+      peck at it, the ground under snow (the bowl offers food in the cold);
+      shy of his nose, they burst up at a bark and come back; left alone he
+      guards his bowl, they come back behind his back, and he gives in and
+      watches them eat (`sparrows.js`). Judge: how often, their size, the
+      guard's timing. Still to come, each a `new-gag`: slipping on the ice (a new
       gesture: moving him without walking breaks the `sliding` rule),
       footprints in the snow, snowflakes on his tongue.
 3. **A third cartoon, and the platform with it:** two worlds will have

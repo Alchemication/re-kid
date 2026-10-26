@@ -127,6 +127,7 @@ NOT_GESTURES = {
 }
 
 ACTS = [
+    "guardBowl",
     "fogSniff",
     "wish",
     "sniff",
@@ -178,7 +179,11 @@ THINGS = [
 POOL = {"bowl", "dig", "film", "trap", "tree", "berries", "hen"}  # layout.js PROP_POOL
 
 CRITTERS = {"fly": "fly", "bee": "bee", "spider": "spider"}
-CRITTER_NEEDS = {"snail": "a snail, after rain", "worm": "worms, after rain"}
+CRITTER_NEEDS = {
+    "snail": "a snail, after rain",
+    "worm": "worms, after rain",
+    "sparrow": "sparrows, in winter (TestSparrows)",
+}
 
 
 class Yard:
@@ -1388,3 +1393,46 @@ class TestWinter:
             "getComputedStyle(document.getElementById('rainbow')).opacity"
         ) in ("0", "")
         assert not y.errors, y.errors
+
+
+class TestSparrows:
+    """The sparrows at his bowl in winter (creatures.js, sparrows.js): they
+    come to peck at it; he guards it, they come back behind him, and he gives
+    in and watches them eat; a tap on one sends them all up."""
+
+    QUERY = "seed=3&still&creatures=&season=winter&rain=0&props=bowl"
+    PECKING = "Creatures.sparrows.some((s) => s.pecking)"
+
+    def test_he_guards_his_bowl_and_gives_in(self, yard: callable) -> None:
+        y = yard(self.QUERY)
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_function(self.PECKING, timeout=60_000)
+        y.run("yardGame.act('guardBowl')")
+        y.page.wait_for_function(
+            "yardGame.trace().includes('shares the bowl')", timeout=40_000
+        )
+        y.settled()
+
+    def test_a_tap_mid_guard_ends_it(self, yard: callable) -> None:
+        """Review, 2026-10-26: a tap on a sparrow while he walked to guard did
+        not stop the guard, which ran on beside the chase."""
+        y = yard(self.QUERY)
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_function(self.PECKING, timeout=60_000)
+        y.page.evaluate("() => { yardGame.act('guardBowl') }")
+        y.page.wait_for_timeout(300)  # on his way to the bowl
+        y.page.evaluate("yardGame.perform('chase sparrow')")
+        y.settled()
+        y.page.wait_for_timeout(6000)
+        assert "shares the bowl" not in y.page.evaluate("yardGame.trace()")
+        assert not y.errors, y.errors
+
+    def test_a_tap_sends_them_all_up(self, yard: callable) -> None:
+        y = yard(self.QUERY)
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_function(self.PECKING, timeout=60_000)
+        y.page.evaluate(
+            "() => { yardGame.chase('sparrow') }"
+        )  # not awaited: once up, they come back
+        y.page.wait_for_function(f"!({self.PECKING})", timeout=1_500)
+        y.settled()

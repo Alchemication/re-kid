@@ -46,7 +46,8 @@ const Creature = (() => {
    *   reach: a list, or { kind: range } to mind each only this near), shy
    *   ({ at, odds }: the hero's nose this near scares it, with these odds a
    *   frame), dart (scared, it darts this far off and carries on, instead of
-   *   fleeing), freezeMs [lo, hi] (scared, it keeps still this long instead);
+   *   fleeing; dartsUp: always upwards, as a bird bursts up from the ground),
+   *   freezeMs [lo, hi] (scared, it keeps still this long instead);
    * - band [top, bottom] (where it wanders, scene y), roam (how far it
    *   wanders at a time), haunt [x0, x1] (it keeps to this stretch),
    *   pauseMs [lo, hi] (it hovers this long where it wandered to), curious
@@ -137,7 +138,8 @@ const Creature = (() => {
   /** Scared from `from`: a dart a short way off (at full speed at once), still a while if it freezes, else off out of sight. */
   function fright(c, world, t, rnd, from) {
     if (c.traits.dart) {
-      const a = Math.atan2(c.y - from.y, c.x - from.x) + (rnd() - 0.5) * 1.2
+      const away = Math.atan2(c.y - from.y, c.x - from.x) + (rnd() - 0.5) * 1.2
+      const a = c.traits.dartsUp ? Math.atan2(-Math.abs(Math.sin(away)) - 0.6, Math.cos(away)) : away // a bird bursts up, whichever side the fright
       const [lo, hi] = reach(c, world)
       const x = Math.max(lo, Math.min(hi, c.x + Math.cos(a) * c.traits.dart))
       const top = c.traits.speed * c.traits.flee

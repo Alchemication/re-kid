@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots, Bed, YardBeds */
+/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, FilmLook, Nap, Spots, Bed, YardBeds */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -209,6 +209,12 @@
         await visiting
       }
     },
+  }
+
+  /** A tap on a sparrow: up they all go, and he looks up after them. */
+  CRITTERS.sparrow = async () => {
+    Creatures.scatterSparrows()
+    await Reksio.lookUp(1200)
   }
 
   async function chase(name) {
@@ -587,6 +593,8 @@
   const FOG_DIM = 0.3 // the morning fog dims the light this much at its thickest (the world model's light)
   const FOG_SNIFF = 0.3 // fog this thick: left alone, he sniffs his way about in it
   const ACTS = {
+    // sparrows at his bowl (winter): he guards it, they come back behind him, and he gives in (sparrows.js)
+    guardBowl: { weight: 6, ok: () => Sparrows.ok(), run: () => Sparrows.guard() },
     // in the morning fog: nose down, he sniffs his way along a little, and stops to look about
     fogSniff: {
       weight: 8,

@@ -195,5 +195,9 @@ const Bowl = (() => {
     eatSupper,
     /** How often the bowl has stuck on his head this play. */
     get stuckTimes() { return stuckTimes },
+    /** Where the bowl's middle is now, nosed along or not (the sparrows peck there). */
+    get x() { return 880 + X() + bowlPushed },
+    /** Is it down on the ground, where it belongs (not on his head)? */
+    get down() { return !Layout.hidden.includes('bowl') && !Reksio.wearing('bowl') },
   }
 })()

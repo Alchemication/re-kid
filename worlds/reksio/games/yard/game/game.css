@@ -170,6 +170,13 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .fly-wing { fill: rgba(220, 235, 245, 0.75); stroke: rgba(40, 40, 40, 0.5); stroke-width: 0.8; animation: buzz 60ms linear infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
 .fly-eye { fill: #b23a26; }
 .cocoon { fill: #f4f1e8; stroke: #b9b2a1; stroke-width: 1.5; }
+.sparrow-body { fill: #9a7048; stroke: var(--ink); stroke-width: 1.6; }
+.sparrow-wing { fill: #6e4b2c; }
+.sparrow-tail { fill: #6e4b2c; stroke: var(--ink); stroke-width: 1.4; stroke-linejoin: round; }
+.sparrow-cap { fill: #8f8f8a; stroke: var(--ink); stroke-width: 1.4; }
+.sparrow-bib { fill: #2a2622; }
+.sparrow.flying .sparrow-wing { animation: sparrow-flap 0.12s linear infinite alternate; transform-box: fill-box; transform-origin: 80% 80%; }
+@keyframes sparrow-flap { from { transform: rotate(-30deg); } to { transform: rotate(25deg); } }
 .bee-body { fill: #f2c330; stroke: var(--ink); stroke-width: 2; }
 .bee-stripes { fill: none; stroke: var(--ink); stroke-width: 3.5; }
 .bee-sting { fill: var(--ink); }

@@ -16,7 +16,7 @@
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Clock, Creature, Debug, Motion, Sound, Reksio, Layout, World */
+/* global Bowl, Clock, Creature, Debug, Motion, Sound, Reksio, Layout, World */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -679,6 +679,108 @@ const Creatures = (() => {
     get up() { return this.list.find((w) => !w.eaten && w.h > 12) || null },
   }
 
+  // ------------------------------------------------------------ in winter: sparrows
+
+  // In a winter play (Reksiowa zima: birds try to feed from Reksio's bowl;
+  // the birds sparrows, ours), a little flock now and then. With the ground
+  // under snow, his bowl is the food on offer ('food'), so down they come to
+  // it, pecking, fluttering up and back. A bark or a snap near them, or his
+  // nose close, and up they burst (a dart), and back once it's quiet; a tap on
+  // one, and up they all go. They leave while it snows and at dusk.
+  const SPARROW = {
+    speed: 220, flee: 1.8, turn: 5, blown: 0.2, // quick, flitting
+    stayMs: [40000, 80000], hours: [0, 24], dark: 0.5, wet: 'avoid',
+    feeds: 'food', hungerMs: [0, 3000], feedMs: [2000, 4000], // they come for it: hungry at once; a peck or two at the bowl, up, and back
+    startledBy: { bark: 400, snap: 200 }, shy: { at: 150, odds: 1 }, dart: 260, dartsUp: true, // up onto the wall
+    band: [340, 790], roam: 1600, exitY: 280, // from the wall's top down to the ground; they spot the bowl from far off
+  }
+  const FLOCK = [2, 3] // how many come together
+  const SPARROWS_FIRST_S = [8, 25] // the first flock comes this long into the play…
+  const SPARROWS_GONE_S = [20, 45] // …and the next this long after the last has gone
+  const SPARROW_HAUNT = 800 // they keep this near the bowl they came for
+  const SPARROW_SIZE = 1.8 // drawn this much bigger than its shapes: a toddler sees them at the bowl
+  const CHIRP_EVERY_S = 6 // at the bowl, a chirp about this often
+  const SPARROW_SPREAD = 22 // at the bowl, each pecks a little to one side, not all on one spot
+  const BOWL_RIM = 762 // where they peck: the bowl's rim (its x is the bowl's own: Bowl.x)
+
+  const chirps = Debug.random('sparrow-chirps')
+  const sparrows = {
+    list: [], // { c, g, body, slot }
+    nextAt: rnd(...SPARROWS_FIRST_S),
+    make() {},
+    /** A sparrow drawn at 0,0, facing right: plump with cold, brown with a grey cap, a dark bib. */
+    draw(i) {
+      const g = el('g', { class: 'critter sparrow', 'data-critter': 'sparrow', 'data-n': String(i) })
+      el('circle', { r: HIT_R / SPARROW_SIZE, cy: -8, class: 'critter-hit' }, g)
+      const body = el('g', {}, g)
+      el('path', { d: 'M-15 -6 L-24 -11 L-22 -4 Z', class: 'sparrow-tail' }, body)
+      el('ellipse', { cx: 0, cy: -8, rx: 13, ry: 10, class: 'sparrow-body' }, body)
+      el('path', { d: 'M-8 -12 Q0 -16 6 -9 Q-1 -6 -8 -12 Z', class: 'sparrow-wing' }, body)
+      const head = el('g', { class: 'sparrow-head' }, body)
+      el('circle', { cx: 10, cy: -16, r: 7, class: 'sparrow-cap' }, head)
+      el('path', { d: 'M13 -12 Q16 -9 12 -7 Q9 -9 13 -12 Z', class: 'sparrow-bib' }, head)
+      el('path', { d: 'M16 -17 L22 -15.5 L16 -14 Z', class: 'beak' }, head)
+      el('circle', { cx: 12, cy: -18, r: 1.4, class: 'fly-eye' }, head)
+      return { g, body, head }
+    },
+    /** Is there food for them (his bowl, the ground being under snow: the world's cold), and is it a time they come? */
+    canCome() {
+      return !staysAway() && World.offered('food').length > 0
+    },
+    /** A little flock comes in over the wall, above the food they come for. */
+    come() {
+      const n = Math.round(rnd(...FLOCK))
+      const food = World.offered('food')[0]
+      const traits = { ...SPARROW, haunt: [food.x - SPARROW_HAUNT, food.x + SPARROW_HAUNT] } // they keep about the bowl, wherever the camera is
+      for (let i = 0; i < n; i++) {
+        const c = Creature.make(traits, food.x + rnd(-400, 400), rnd(260, 320), T(), random)
+        this.list.push({ c, slot: (i - (n - 1) / 2) * SPARROW_SPREAD, ...this.draw(i) })
+      }
+      Debug.trace('sparrows', { come: n })
+    },
+    update(dt) {
+      if (!this.list.length) {
+        if (world.t >= this.nextAt && this.canCome()) this.come()
+        return
+      }
+      for (const s of [...this.list]) {
+        const was = s.c.goal?.kind
+        const goal = Creature.think(s.c, World, T(), random)
+        if (goal.kind === 'dart' && was !== 'dart') hear(s.c.x, () => Sound.flutter()) // up they burst
+        else if (Creature.feeding(s.c) && chirps() < dt / CHIRP_EVERY_S) hear(s.c.x, () => Sound.chirp()) // a chirp now and then as they peck (its own stream: drawn every frame)
+        if (Creature.move(s.c, World, Math.min(dt, FLY_DT_MAX) * 1000, T(), random) === 'gone') {
+          s.g.remove()
+          this.list.splice(this.list.indexOf(s), 1)
+          continue
+        }
+        this.place(s, dt)
+      }
+      if (!this.list.length) this.nextAt = world.t + rnd(...SPARROWS_GONE_S)
+    },
+    /** Drawn where it is: hopping and pecking on the ground, wings a blur in the air. */
+    place(s, dt) {
+      const c = s.c
+      const pecking = Creature.feeding(c)
+      const x = (pecking ? Bowl.x : c.x) + (pecking ? s.slot : 0) // at the bowl where it is now, nosed along or not
+      const onGround = c.y > GROUND - 70
+      s.hop = (s.hop || 0) + dt
+      const up = pecking || !onGround ? 0 : Math.abs(Math.sin(s.hop * 9)) * 6 // little hops along the ground
+      s.head.setAttribute('transform', pecking ? `rotate(${Math.max(0, Math.sin(s.hop * 7)) * 28} 6 -10)` : '') // a peck now and then
+      s.g.classList.toggle('flying', !onGround)
+      const face = Math.abs(c.vx) > 8 ? Math.sign(c.vx) : s.face || 1
+      s.face = face
+      s.g.setAttribute('transform', `translate(${x.toFixed(1)} ${(c.y - up).toFixed(1)}) scale(${face * SPARROW_SIZE} ${SPARROW_SIZE})`)
+    },
+    /** A tap on one: up they all go. */
+    scatter() {
+      for (const s of this.list) s.c.tapped = true
+    },
+    /** Dusk: off home. */
+    evening() {
+      for (const s of this.list) s.c.leaves = 0
+    },
+  }
+
   // ------------------------------------------------------------ public
 
   const BY_NAME = { fly, bee, spider }
@@ -689,7 +791,10 @@ const Creatures = (() => {
   function offer() {
     World.offer('roof', 'perch', 480, 612) // the doghouse roof
     World.offer('tap', 'perch', 1321 + Layout.x('tap'), 556) // the tap's spout
-    if (!Layout.hidden.includes('bowl')) World.offer('bowl', 'perch', 880 + Layout.x('bowl'), 760)
+    if (!Layout.hidden.includes('bowl')) {
+      World.offer('bowl', 'perch', 880 + Layout.x('bowl'), 760)
+      World.offer('bowl-food', 'food', 880 + Layout.x('bowl'), BOWL_RIM, () => World.state.cold >= 0.5 && Bowl.down) // with the ground under snow, his bowl is the birds' food (Reksiowa zima); not while it's on his head
+    }
     if (Layout.flowers) {
       World.offer('flower', 'perch', 1648 + Layout.x('flowers'), 646)
       bee.FLOWERS.forEach((f, i) => World.offer(`flower-${i}`, 'nectar', f.x, f.y - 26)) // where a bee hovers at a flower
@@ -713,6 +818,7 @@ const Creatures = (() => {
     }
     if (names.includes('fly')) fly.make()
     if (names.includes('bee')) bee.make()
+    all.push(sparrows) // they come whenever his bowl is the food on offer (in the cold)
   }
   const active = (c) => all.includes(c)
 
@@ -741,6 +847,7 @@ const Creatures = (() => {
       dusk = true
       fly.evening()
       bee.evening()
+      sparrows.evening()
     },
     /** Where the snail is, once it's out, and which way she's heading. */
     get snail() { return snail.out ? { x: snail.x, y: snail.y, dir: snail.dir } : null },
@@ -773,6 +880,10 @@ const Creatures = (() => {
     get flowers() { return bee.FLOWERS },
     /** Where the bee is. */
     get bee() { return active(bee) && bee.state !== 'away' ? { x: bee.x, y: bee.y } : null },
+    /** The sparrows about now (winter): where each is, and whether it is pecking at the bowl. */
+    get sparrows() { return sparrows.list.map((s) => ({ x: s.c.x, y: s.c.y, pecking: Creature.feeding(s.c) })) },
+    /** A tap on a sparrow: up they all go. */
+    scatterSparrows() { sparrows.scatter() },
     /** Where the fly is, if it's about and free. */
     get fly() {
       return active(fly) && fly.state === 'out' ? { x: fly.x, y: fly.y } : null
