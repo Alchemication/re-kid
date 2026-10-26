@@ -56,6 +56,24 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 /* butterflies (critters.js): the wings beat about the body; slowly, settled on a flower */
 .butterfly .wing { animation: wings 0.2s ease-in-out infinite alternate; }
 .butterfly.resting .wing { animation-duration: 1.1s; }
+/* The wind: what is drawn to move leans with it, each a little out of step
+   (weather.js sets --sway from the wind, so they lean further in a gust),
+   and his hairs flutter (--flutter). Each sets its own transform-origin, at
+   its foot or root. */
+@keyframes sway {
+  0%, 100% { transform: rotate(calc(-0.4 * var(--sway, 2deg))); }
+  50% { transform: rotate(var(--sway, 2deg)); }
+}
+@keyframes flutter {
+  0%, 100% { transform: rotate(calc(-0.3 * var(--flutter, 1deg))); }
+  50% { transform: rotate(var(--flutter, 1deg)); }
+}
+.sway { animation: sway 3.4s ease-in-out infinite; }
+.sway:nth-of-type(2n) { animation-duration: 4.1s; animation-delay: -1.3s; }
+.sway:nth-of-type(3n) { animation-duration: 3.7s; animation-delay: -2.2s; }
+.mole-hair path { animation: flutter 0.9s ease-in-out infinite; }
+.mole-hair path:nth-of-type(2) { animation-duration: 0.75s; animation-delay: -0.3s; }
+.tufts { pointer-events: none; }
 .snail .soft { transition: transform 0.25s ease-in; transform-box: fill-box; transform-origin: 100% 100%; }
 .snail.tucked .soft { transform: scale(0); } /* pulled into its shell */
 @keyframes wings { from { transform: scaleX(1); } to { transform: scaleX(0.2); } }

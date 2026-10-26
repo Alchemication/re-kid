@@ -103,7 +103,7 @@ const MoleArt = (() => {
   /** His three hairs, in a group that can perk up from where they grow (mole.js perk). */
   function hairs(parent, list, root) {
     const g = el('g', { class: 'mole-hair' }, parent)
-    for (const d of list) line(d, g)
+    for (const d of list) line(d, g).style.transformOrigin = `${root[0]}px ${root[1]}px` // each flutters in the wind (game.css)
     g.style.transformOrigin = `${root[0]}px ${root[1]}px`
     return g
   }

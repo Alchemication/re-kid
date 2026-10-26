@@ -172,9 +172,9 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   own. Edit `shared/`, never a copy (its first line says so;
   `test_shared.py` fails on a stale one). `debug.js`, `filmlook.js`,
   `takes.js`, `bed.js` (a music bed's rules; each game has its score,
-  `beds.js`), `ensemble.js` (samples and the bed, played), and `world.js`,
-  `creature.js` and `ambient.js` (the world model, `docs/WORLD_MODEL.md`)
-  are there so far.
+  `beds.js`), `ensemble.js` (samples and the bed, played), `world.js`,
+  `creature.js` and `ambient.js` (the world model, `docs/WORLD_MODEL.md`),
+  and `wind.js` (the breeze and its gusts) are there so far.
 - **Game debuggability (`debug.js`, loaded first):** every bug must be
   replayable, so:
   - randomness comes from `Debug.random('<part>')`, never `Math.random`
@@ -231,7 +231,7 @@ the edge cases that would let bad data pass silently.
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
-  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js` and each game's `beds.js`, `world.js`, `creature.js`): the part that draws tells them what
+  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js` and each game's `beds.js`, `world.js`, `creature.js`, `wind.js`): the part that draws tells them what
   happened and does what they say. Drawing parts are tested here too, on a
   pretend page and clock: `load(…, { dom: true, globals })`, then
   `await page.advance(ms)` runs the timers and animation frames due (all

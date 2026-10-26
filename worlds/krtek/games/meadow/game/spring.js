@@ -42,7 +42,7 @@ const Spring = (() => {
   const FROG_LISTENS_MS = 250
   const DRINK_Y = POOL.y + 8 // where a bird stands to drink, at the water's edge
   const BULLFINCH = {
-    speed: 300, flee: 1.6, turn: 4,
+    speed: 300, flee: 1.6, turn: 4, blown: 0.15,
     stayMs: [3000, 5000], // over by the time it has drunk: down, a drink, and off (a drink under way is always finished)
     hours: [8.4, NIGHT_FROM], dark: 0.5, wet: 'avoid',
     feeds: 'drink', hungerMs: [0, 0], feedMs: [2200, 3000], // comes thirsty; two dips
@@ -51,7 +51,7 @@ const Spring = (() => {
     haunt: [POOL.x - 700, POOL.x + 700],
   }
   const DRAGONFLY = {
-    speed: 260, flee: 2, turn: 7, // a dart, quick to turn
+    speed: 260, flee: 2, turn: 7, blown: 0.3, // a dart, quick to turn; a gust nudges it
     stayMs: [6000, 11000],
     hours: [8.4, NIGHT_FROM], dark: 0.5, wet: 'avoid',
     startledBy: ['splash'],
@@ -104,8 +104,10 @@ const Spring = (() => {
     }
     el('circle', { cx: S + 60, cy: 712, r: 6, fill: '#f6b3c4', stroke: '#b5577a', 'stroke-width': 1.5 }, g)
     for (const [x, h, lean] of [[POOL.x - POOL.rx + 10, 120, -6], [POOL.x - POOL.rx + 26, 150, -2], [POOL.x - POOL.rx + 40, 110, 4], [POOL.x + POOL.rx - 20, 100, 6]]) {
-      el('path', { d: `M${x} ${POOL.y + 8} q${lean} -${h / 2} ${lean * 2} -${h}`, stroke: '#4f7a33', 'stroke-width': 4, fill: 'none' }, g)
-      if (h > 115) el('rect', { x: x + lean * 2 - 5, y: POOL.y + 8 - h, width: 10, height: 30, rx: 5, fill: '#7a4a24', transform: `rotate(${lean} ${x + lean * 2} ${POOL.y + 8 - h})` }, g)
+      const reed = el('g', { class: 'sway' }, g) // leans in the wind (weather.js)
+      reed.style.transformOrigin = `${x}px ${POOL.y + 8}px`
+      el('path', { d: `M${x} ${POOL.y + 8} q${lean} -${h / 2} ${lean * 2} -${h}`, stroke: '#4f7a33', 'stroke-width': 4, fill: 'none' }, reed)
+      if (h > 115) el('rect', { x: x + lean * 2 - 5, y: POOL.y + 8 - h, width: 10, height: 30, rx: 5, fill: '#7a4a24', transform: `rotate(${lean} ${x + lean * 2} ${POOL.y + 8 - h})` }, reed)
     }
     el('rect', { class: 'tap-spring', x: POOL.x - POOL.rx, y: 470, width: POOL.rx * 2 + 140, height: 260, fill: 'transparent' }, g)
   }

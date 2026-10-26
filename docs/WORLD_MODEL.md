@@ -5,13 +5,17 @@ that go about their own business between the encounters. Why it exists, and
 what it is not for, is in `docs/DECISIONS.md` (Scope: "A world model, tried
 in the meadow").
 
-It is three shared parts. The first two are plain rules with no drawing
-and no clock, tested in node (`worlds/krtek/games/meadow/tests/creature.test.js`):
+It is four shared parts. The first three are plain rules with no drawing
+and no clock, tested in node (`worlds/krtek/games/meadow/tests/creature.test.js`,
+`wind.test.js`):
 
 - `shared/world.js` (`World`): the world state. Parts write their own piece
   of it; creatures read it and never reach into another part.
 - `shared/creature.js` (`Creature`): how a creature decides what to do, and
   moves there.
+- `shared/wind.js` (`Wind`): the breeze and its gusts, plain rules too;
+  each game's weather steps it and writes its level here. The yard's
+  `weather.js` uses it as well.
 - `shared/ambient.js` (`Ambient`): runs them, a frame at a time on the
   Clock: each thinks and moves, the game draws it, and takes it away once
   it is gone. Goals taken up go in the trace.
@@ -27,6 +31,7 @@ noise. The yard's creatures are still wired by hand.
 |---|---|---|
 | `hour` | 08–20, moves only with the day | `meadow.js` tick |
 | `light` | 1 broad day to 0 night | `meadow.js` sky |
+| `wind` | 0 still to 1 a full gust, blowing left to right (`shared/wind.js`: a breeze, now and then a gust, calm from sunset) | `weather.js` |
 | `view` | `{x0, x1}`: what the child sees | `meadow.js`, from the view |
 | `offer(id, kind, x, y, open)` | a thing offers something while `open()` | `meadow.js` (nectar: the tulips while open, the bluebells, the yellow spike), `rain.js` (nectar: the wild patch, not while drooping; shelter under its leaves), `spring.js` (a drink at either edge of the pool) |
 | `wet(x0, x1, ms)` | rain, or wet underfoot, there and for so long | `rain.js`, under the cloud and for 45 s after |
@@ -65,6 +70,10 @@ What it goes for, first that applies:
    under way is finished: going home waits for it, fear doesn't.
 4. **Wander**: somewhere within its reach (its `haunt`, or the view),
    `band` (scene y) and `roam`; with `pauseMs`, it hovers where it gets to.
+
+Whatever it goes for, the wind pushes it downwind as much as its `blown`
+(0 to 1; the butterflies 0.8, the dragonflies 0.3, the finch 0.15), except
+while it feeds.
 
 ## Adding one
 

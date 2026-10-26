@@ -226,6 +226,22 @@ test.describe('a creature', () => {
     assert.equal(c.goal.kind, 'home')
   })
 
+  test('the wind pushes a light one downwind, but not while it feeds', () => {
+    const w = load()
+    const rnd = stream()
+    w.World.set({ wind: 1 })
+    const still = w.Creature.make({ ...BUTTERFLY, feeds: null }, 800, 500, 0, rnd)
+    const light = w.Creature.make({ ...BUTTERFLY, feeds: null, blown: 1 }, 800, 500, 0, stream())
+    for (const c of [still, light]) c.goal = { kind: 'pause', x: 800, y: 500, until: 1e9 } // hovering where it is
+    run(w, still, 1000, rnd)
+    run(w, light, 1000, stream())
+    assert.ok(light.x - still.x > 40, `pushed ${light.x - still.x}`)
+    const feeding = w.Creature.make({ ...BUTTERFLY, blown: 1 }, 800, 500, 0, rnd)
+    feeding.goal = { kind: 'feed', x: 800, y: 500, until: 1e9 }
+    run(w, feeding, 1000, rnd)
+    assert.ok(Math.abs(feeding.x - 800) < 2)
+  })
+
   test('the same stream makes the same flight', () => {
     const flight = () => {
       const w = load()

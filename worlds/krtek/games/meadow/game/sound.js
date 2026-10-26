@@ -277,6 +277,27 @@ const Sound = (() => {
   }
 
   /** A clockwork toy car whizzing along: a whirr that rises. */
+  /** Wind in the background, always on and very quiet, as the yard's. Returns set(level), level 0
+   * (still) to 1 (a gust): louder, and a little higher. */
+  function wind() {
+    const c = ensure()
+    const src = c.createBufferSource()
+    src.buffer = noise
+    src.loop = true
+    const bp = c.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.Q.value = 0.7
+    const g = c.createGain()
+    g.gain.value = 0.0001
+    src.connect(bp).connect(g).connect(master)
+    src.start()
+    return (level) => {
+      const now = c.currentTime
+      g.gain.setTargetAtTime(0.004 + level * 0.03, now, 0.4)
+      bp.frequency.setTargetAtTime(320 + level * 520, now, 0.4)
+    }
+  }
+
   function vroom(seconds) {
     if (!ready()) return
     note(180, 0, seconds, 0.07, 'sawtooth', 1.8)
@@ -289,5 +310,7 @@ const Sound = (() => {
     bus() { ensure(); return { ctx, master } },
     /** The game's hook: fn(word) as he says each word. */
     listen(fn) { heard = fn },
-    say, dig, pop, water, bell, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom }
+    /** Is sound on (after the first tap, and not held)? */
+    get running() { return ready() && ctx.state === 'running' },
+    say, dig, pop, water, bell, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom, wind }
 })()

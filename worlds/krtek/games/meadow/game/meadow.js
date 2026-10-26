@@ -14,7 +14,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Bed, Church, Clock, Critters, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View, World */
+/* global Bed, Church, Clock, Critters, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -28,11 +28,13 @@ const meadowGame = (() => {
   const HOLD_NEW_DAY_MS = 2000 // after the end, a press held this long starts a new day
   const MAX_HILLS = 6 // molehills he has left about the meadow; the oldest sinks back
   const TULIPS = 9
+  const TUFTS = 22 // tufts of long grass along the front, across the whole meadow
   const TICK_MS = 100
   const BED_STEER_MS = 200 // how often the music bed hears the moment and how busy the child is
   const NIGHT_TINT = 0.6 // how dark the night's blue makes the meadow at its darkest (multiplied over it)
   const words = Debug.random('meadow-words')
   const paint = Debug.random('meadow-paint')
+  const tufts = Debug.random('meadow-tufts') // where the front's tufts stand: its own, so the tulips stay put
 
   const svg = document.getElementById('world')
   const layers = Object.fromEntries(['sky', 'back', 'mole', 'front', 'top', 'den'].map((id) => [id, document.getElementById(id)]))
@@ -99,6 +101,7 @@ const meadowGame = (() => {
     }, (ctm ? ctm.a : 1) * (window.devicePixelRatio || 1))
     hill(HOME, true, false)
     makeBed()
+    makeTufts()
     Mole.make(layers.mole, document.getElementById('mole-out'), document.getElementById('tunnels'))
     Mole.put(HOME, 'down')
   }
@@ -111,7 +114,7 @@ const meadowGame = (() => {
       const x = BED.from + 20 + (i * (BED.to - BED.from - 40)) / (TULIPS - 1) + (paint() - 0.5) * 14
       const base = 700 + (i % 2) * 10 // behind him, at the meadow's back: nothing hides behind it
       const height = 66 + paint() * 26
-      const stem = el('g', { class: 'tulip' }, bed)
+      const stem = el('g', { class: 'tulip sway' }, bed) // leans in the wind (weather.js)
       stem.style.transformOrigin = `${x}px ${base}px`
       el('path', { d: `M${x} ${base} V${base - height}`, stroke: '#3f7d22', 'stroke-width': 5 }, stem)
       el('path', { d: `M${x} ${base - 20} c-28 -10 -36 -36 -30 -58 c16 12 28 30 30 50`, fill: '#4d6d1f' }, stem)
@@ -125,6 +128,25 @@ const meadowGame = (() => {
       tulipHeads.push({ left, right, stem })
     }
     el('rect', { class: 'tap-bed', x: BED.from - 20, y: 590, width: BED.to - BED.from + 40, height: 125, fill: 'transparent' }, bed)
+  }
+
+  /** Tufts of long grass along the front, some with a daisy: what leans in the wind there (the painted grass can't). */
+  function makeTufts() {
+    const g = el('g', { class: 'tufts' }, document.getElementById('front'))
+    for (let i = 0; i < TUFTS; i++) {
+      const x = 60 + ((i + tufts()) * (Layout.WORLD_W - 120)) / TUFTS
+      const y = 770 + tufts() * 100
+      const tuft = el('g', { class: 'sway' }, g)
+      tuft.style.transformOrigin = `${x}px ${y}px`
+      for (const [dx, h, lean] of [[-6, 34, -10], [0, 46, 3], [6, 30, 12], [3, 40, -4]]) {
+        el('path', { d: `M${x + dx} ${y} q${lean / 2} ${-h / 2} ${lean} ${-h}`, stroke: '#4f8a2e', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, tuft)
+      }
+      if (tufts() < 0.4) {
+        el('path', { d: `M${x + 2} ${y} q2 -26 -2 -52`, stroke: '#4f8a2e', 'stroke-width': 2.5, fill: 'none' }, tuft)
+        for (let k = 0; k < 8; k++) el('ellipse', { cx: x + Math.cos((k / 8) * 6.283) * 7, cy: y - 52 + Math.sin((k / 8) * 6.283) * 7, rx: 5, ry: 2.6, fill: '#fbf8ef', transform: `rotate(${k * 45} ${x + Math.cos((k / 8) * 6.283) * 7} ${y - 52 + Math.sin((k / 8) * 6.283) * 7})` }, tuft)
+        el('circle', { cx: x, cy: y - 52, r: 3.6, fill: '#f2c230' }, tuft)
+      }
+    }
   }
 
   // ------------------------------------------------------------ the day
@@ -355,6 +377,7 @@ const meadowGame = (() => {
     await Debug.ignoreCut(Motion.endAt(den, [{ opacity: 1 }, { opacity: 0 }], { duration: 700 }), 'den fades')
     den.style.display = 'none'
     game.dayStart = Clock.now()
+    if (Layout.flags.wind === 'gust') Weather.gustSoon()
     tick()
     if (game.token !== mine) return // a tap has him busy already
     Sound.pop()
@@ -555,6 +578,14 @@ const meadowGame = (() => {
   // nectar: the tulips in the bed while they are open, the bluebells and the yellow spike (painting.js)
   for (const i of [0, 1, 2, 3, 4]) World.offer(`tulip-${i}`, 'nectar', BED.from + 30 + i * 60, 620, () => Day.tulips(game.hour) > 0.5)
   for (const [i, [x, y]] of [[380, 545], [HOME - 210, 555], [HOME + 150, 570], [HOME - 128, 480], [2780, 545], [3420, 545]].entries()) World.offer(`flower-${i}`, 'nectar', x, y)
+  // the wind: a strong gust's leaves or seeds, and he turns to watch them go by, if he is free
+  Weather.setup(document.getElementById('critters'), {
+    onWatch: () => {
+      if (!(game.awake && !game.ended && !game.gesture)) return
+      Mole.perk(1.2)
+      Mole.lookAt(World.state.view.x1)
+    },
+  })
   Critters.setup(document.getElementById('critters'), document.getElementById('low-critters'), { now: Layout.flags.critters === 'now', snail: Layout.flags.critters === 'snail', still: Debug.still })
   const things = Things.setup({
     run,

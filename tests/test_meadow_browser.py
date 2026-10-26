@@ -536,8 +536,10 @@ class TestMeadowCritters:
     def test_a_tap_sends_it_off_and_he_looks_up(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&props=&critters=now")
         m.wake()
-        m.wait("document.querySelector('[data-critter]') !== null", 10_000)
-        m.page.wait_for_timeout(1500)  # in view, over the meadow
+        m.wait(  # in view, over the meadow: one that comes in upwind takes longer
+            "Critters.out.some((b) => b.x > World.state.view.x0 + 150 && b.x < World.state.view.x1 - 150)",
+            15_000,
+        )
         m.page.locator("[data-critter]").first.click(force=True)
         m.wait("meadowGame.trace().includes('\"tapped\":true')", 5_000)
         m.wait("document.querySelector('[data-critter]') === null", 15_000)
@@ -583,6 +585,35 @@ class TestMeadowSnail:
         m.wake()
         m.wait("meadowGame.state().ended", 40_000)
         assert '"snail"' not in m.page.evaluate("meadowGame.trace()")
+        assert not m.errors, m.errors
+
+
+class TestMeadowWind:
+    """The wind (weather.js on wind.js): a strong gust carries leaves or seeds
+    across from out of sight and off out of sight, the plants lean further,
+    and it is all in the world state; nothing is left behind."""
+
+    SWAY = "parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sway'))"
+
+    def test_a_gust_carries_something_across_and_the_plants_lean(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&props=&wind=gust")
+        m.wake()
+        breeze = m.page.evaluate(self.SWAY)
+        m.wait("document.querySelectorAll('.carried').length > 0", 6_000)
+        assert m.page.evaluate("World.state.wind") > 0.7
+        assert m.page.evaluate(self.SWAY) > breeze + 2
+        m.wait("document.querySelectorAll('.carried').length === 0", 10_000)
+        assert '"carries"' in m.page.evaluate("meadowGame.trace()")
+        m.wait_free()
+        m.assert_settled()
+
+    def test_it_drops_at_sunset(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&day=20")
+        m.wake()
+        m.wait("meadowGame.state().ended", 40_000)
+        m.wait("World.state.wind < 0.1", 15_000)
         assert not m.errors, m.errors
 
 

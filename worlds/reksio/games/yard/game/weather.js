@@ -17,7 +17,7 @@
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
 
-/* global Debug, Layout, Motion, Painting, Shower, Sound, Music */
+/* global Debug, Layout, Motion, Painting, Shower, Sound, Music, Wind */
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -26,10 +26,6 @@ const Weather = (() => {
   const RAIN_S = [22, 30] // and lasts this long
   const DROPS = 220 // raindrops on screen at full rain
   const PUDDLE_DROP = 6 // puddles sit this far below Reksio's feet line: paws in the water
-  const BREEZE = [0.08, 0.38] // wind level most of the time (0 still, 1 a gust)
-  const GUST = [0.6, 1] // …and in a gust
-  const GUST_CHANCE = 0.2 // of each change of wind, this many are gusts
-  const WIND_CHANGE_S = [3, 10] // the wind changes this often
   const STORMY = 0.25 // extra wind while the clouds are in
   const SWAY_DEG = [1, 6] // plants' sway at still and at a full gust
   const DRIFT = 6 // a fair day's clouds drift across this fast (sky units a second), each a little faster or slower
@@ -227,20 +223,13 @@ const Weather = (() => {
 
   // ------------------------------------------------------------ wind
 
-  let wind = 0.2
-  let windTarget = 0.2
-  let windChangeAt = 0
+  const air = Wind.make(random) // the breeze and its gusts (wind.js), on this part's stream
+  let wind = air.level
   let windSound = null
   let calm = false // evening: the wind drops
 
   function blow(dt, cover) {
-    if (t >= windChangeAt) {
-      const gust = !calm && random() < GUST_CHANCE
-      windTarget = calm ? BREEZE[0] : rnd(...(gust ? GUST : BREEZE))
-      windChangeAt = t + (gust ? rnd(2, 4) : rnd(...WIND_CHANGE_S)) // gusts pass quickly
-    }
-    const target = Math.min(1, windTarget + cover * STORMY)
-    wind += (target - wind) * Math.min(1, dt * 0.7)
+    wind = Wind.step(air, dt, cover * STORMY)
     if (!windSound && Sound.running) windSound = Sound.wind()
     if (windSound) windSound(wind)
     const sway = SWAY_DEG[0] + (SWAY_DEG[1] - SWAY_DEG[0]) * wind
@@ -311,7 +300,7 @@ const Weather = (() => {
     /** End any shower now (evening). */
     stop() {
       calm = true
-      windChangeAt = t
+      Wind.calm(air)
       shower.stop().forEach(entered)
     },
   }

@@ -176,6 +176,16 @@ scenes:
   sound:
     text: His "ooh", now and then.
     origin: invented
+- id: wind
+  action:
+    text: Nothing; the wind blows.
+    origin: invented
+  result:
+    text: A light breeze comes and goes all day, now and then a gust, and drops at sunset. The tulips, the wild flowers, the reeds at the pool and tufts of long grass along the front lean further in a gust, and his three hairs flutter. Butterflies are blown off their way. Now and then a strong gust carries a few leaves or dandelion seeds across the meadow, in from out of sight and off out of sight, and the mole, if he is free, turns to watch them go by. Not checked against the films (Adam's pick, 2026-10-26).
+    origin: invented
+  sound:
+    text: The wind, very quiet, louder and a little higher in a gust.
+    origin: invented
 - id: snail
   action:
     text: Nothing, or tap the snail.

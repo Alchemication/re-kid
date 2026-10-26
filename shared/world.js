@@ -1,7 +1,7 @@
 // Shared by every game: the world state, what every living part of a scene
 // reads instead of reaching into the others (docs/WORLD_MODEL.md). Each part
 // of it has one writer: the day its hour and light, the camera the view, the
-// weather its wet places, whatever makes a sound its noise, and each thing
+// weather its wind and wet places, whatever makes a sound its noise, and each thing
 // what it offers (a flower nectar, a pool a drink). A field joins it when
 // something reads it. A creature reads it and goes
 // for what it wants (creature.js); it never asks the frog or the rain cloud
@@ -25,6 +25,7 @@ const World = (() => {
   const state = {
     hour: 8,
     light: 1, // 1 broad day, 0 night
+    wind: 0, // 0 still, 1 a full gust; it blows from left to right
     view: { x0: 0, x1: 1600 }, // the stretch of the scene the child sees
   }
 

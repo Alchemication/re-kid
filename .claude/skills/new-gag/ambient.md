@@ -63,6 +63,15 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
   a feed under way always finishes.
 - **Complexity.** `think` and `move` grow a branch per trait: split them
   (eslint warnings are the hotspot list: add none).
+- **A timed flag counted from the wrong moment.** `?wind=gust` first
+  counted its three seconds from the page loading, so it blew before he
+  woke. Something timed from waking is asked for in the meadow's `wake()`.
+- **Lost against the background.** White dandelion seeds against the pale
+  sky were invisible: look at a photo of it against what it actually
+  crosses, and draw it bigger and outlined if it must be seen.
+- **The wind changes everyone's timing.** A butterfly coming in upwind took
+  longer to reach the view, and a test that waited a fixed 1.5 s clicked
+  off-screen. Browser tests wait for a state (it is in view), never a time.
 
 ## 4. Look, test, review
 

@@ -52,9 +52,11 @@
       const x = PATCH.x - PATCH.w / 2 + (i * PATCH.w) / (FLOWERS - 1)
       const top = Y - 78 - (i % 3) * 18
       const g = el('g', { class: 'wild-flower', 'data-thing': 'rain' }, layer)
-      el('path', { d: `M${x} ${Y + 6} Q${x + 5} ${(Y + top) / 2} ${x} ${top}`, stroke: '#3f7d22', 'stroke-width': 5, fill: 'none' }, g)
-      el('path', { d: `M${x} ${Y - 10} c-22 -8 -28 -24 -22 -38 c12 8 20 20 22 34`, fill: '#4d6d1f' }, g)
-      const head = el('g', {}, g)
+      const sway = el('g', { class: 'sway' }, g) // leans in the wind (weather.js); g droops
+      sway.style.transformOrigin = `${x}px ${Y + 6}px`
+      el('path', { d: `M${x} ${Y + 6} Q${x + 5} ${(Y + top) / 2} ${x} ${top}`, stroke: '#3f7d22', 'stroke-width': 5, fill: 'none' }, sway)
+      el('path', { d: `M${x} ${Y - 10} c-22 -8 -28 -24 -22 -38 c12 8 20 20 22 34`, fill: '#4d6d1f' }, sway)
+      const head = el('g', {}, sway)
       const colour = ['#e0453a', '#f2c94c', '#f08fa6'][i % 3]
       for (let k = 0; k < 6; k++) {
         const a = (k / 6) * Math.PI * 2

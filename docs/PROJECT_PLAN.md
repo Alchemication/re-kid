@@ -85,12 +85,15 @@ decided and why.
       `stage` (watched from a distance, never walked onto), `sight`,
       `perch`, `sun`; tired and curious drives. The encounters stay as
       they are.
-   3. Wind, then a storm (a cartoon one: everyone to shelter, thunder far
-      off and soft, sunshine after) and an eclipse (the light dips, the
-      hour doesn't: the meadow behaves as at dusk for a minute).
+   3. An eclipse (the light dips, the hour doesn't: the meadow behaves as
+      at dusk for a minute), then a storm (a cartoon one:
+      everyone to shelter, thunder far off and soft, sunshine after), each
+      judged before the next (Adam, 2026-10-26).
    4. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
-   5. If the meadow feels more alive: the LLM director behind the player's
+   5. **Adam plays the meadow with Eliot** before any LLM work (Adam,
+      2026-10-26).
+   6. If the meadow feels more alive: the LLM director behind the player's
       own key, on Adam's devices, replies recorded for replay, a stub in
       the tests. Then decide whether it is worth a proxy for the site.
    Then the yard's fly, bee and weather move onto it, if it held up.

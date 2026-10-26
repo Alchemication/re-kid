@@ -36,6 +36,7 @@ const Critters = (() => {
     speed: 140, // scene units a second, wandering
     flee: 3, // scared, it flies off this much quicker
     turn: 3, // eases into a turn: a lazy flutter, not a dart
+    blown: 0.8, // light: a gust carries it off its way
     stayMs: [18000, 30000], // how long one wanders before it goes
     hours: [8.3, 18.6], // the hours they are about
     dark: 0.5, // gone once the light is down to this (at dusk, or under a storm)

@@ -4,7 +4,8 @@
 // traits (what it feeds on, what scares it, its hours, how it takes the
 // wet) and drives that rise and fall; each frame think() picks what it goes
 // for from what the world offers (world.js), and move() carries it there
-// with a little momentum, so it eases into a turn instead of snapping. Its
+// with a little momentum, so it eases into a turn instead of snapping, and
+// the wind pushes it about as much as it is light (`blown`). Its
 // look, and the few moves that are its own, stay with the game that draws
 // it; so do encounters, which are hand-made.
 //
@@ -24,12 +25,14 @@ const Creature = (() => {
   const ARRIVED = 6 // this near its goal, it is there
   const EASE_IN = 60 // it slows down over this last stretch
   const OFF = 400 // gone once this far out of the view
+  const BLOW = 120 // a full gust pushes a creature that is all blown (blown: 1) this far a second, downwind
   const between = ([a, b], r) => a + r * (b - a)
 
   /**
    * A creature with these traits at x, y, out from time t. Traits:
    * - speed (scene units a second), flee (how much quicker it flees), turn
-   *   (how quickly it changes course, per second);
+   *   (how quickly it changes course, per second), blown (0 to 1: how much
+   *   the wind pushes it, unless it is feeding: it holds on);
    * - stayMs [lo, hi], hours [from, to], dark (it goes home below this
    *   light), wet ('avoid', 'likes' or null);
    * - feeds (an offer kind), hungerMs [lo, hi] (from fed to hungry),
@@ -160,7 +163,7 @@ const Creature = (() => {
     const speed = g.kind === 'flee' || (g.kind === 'home' && !c.home) ? top : top * Math.min(1, d / EASE_IN)
     c.vx += ((dx / (d || 1)) * speed - c.vx) * k
     c.vy += ((dy / (d || 1)) * speed - c.vy) * k
-    c.x += c.vx * s
+    c.x += c.vx * s + (g.kind === 'feed' ? 0 : (c.traits.blown || 0) * world.state.wind * BLOW * s)
     c.y += c.vy * s
     if (gone(c, world, d)) return 'gone'
     if (d >= ARRIVED || g.until !== undefined || g.kind === 'home') return null

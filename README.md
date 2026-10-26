@@ -49,7 +49,8 @@ src/
 shared/                 game scripts every game uses (debug.js: the clock, the recorder, the rules;
                         filmlook.js: the old-print look; takes.js: the music's recorded takes;
                         bed.js and ensemble.js: the music bed's rules and the band that plays it;
-                        world.js, creature.js and ambient.js: the world model, docs/WORLD_MODEL.md);
+                        world.js, creature.js and ambient.js: the world model, docs/WORLD_MODEL.md;
+                        wind.js: the breeze and its gusts);
                         `main.py shared` copies each into the games whose page loads it
 worlds/<id>/
   world.yaml            series dossier (schema.world.WorldDossier)
@@ -210,7 +211,8 @@ In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 ending in a minute) and `?film=0` work the same; `?props=egg` says which encounters come
 (`?props=` for none) and `?soon` brings the first at once; `?critters=now` brings a butterfly at
 once, even in a `?still` play (which otherwise has none), and `?critters=snail` the snail, the grass
-under the wild flowers wet from the start. In the console, `meadowGame.state()`,
+under the wild flowers wet from the start; `?wind=gust` brings a strong gust that carries leaves or
+seeds three seconds after he wakes. In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 
 In the yard's console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,

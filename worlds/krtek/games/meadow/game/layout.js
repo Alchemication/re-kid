@@ -9,7 +9,8 @@
 // minutes, for trying the evening and the ending; `?props=egg,poles` says
 // which encounters come (things.js), and `?soon` brings the first at once;
 // `?critters=now` brings a butterfly at once (critters.js), even in a still play;
-// `?critters=snail` the snail, its shelter under the wild flowers wet from the start.
+// `?critters=snail` the snail, its shelter under the wild flowers wet from the start;
+// `?wind=gust` a strong gust that carries something, three seconds after he wakes.
 
 /* exported Layout */
 const Layout = (() => {
@@ -24,7 +25,7 @@ const Layout = (() => {
   const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
   const daySeconds = Number(params.get('day'))
   const props = params.has('props') ? params.get('props').split(',').filter(Boolean) : null
-  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters') }
+  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind') }
 
   return { WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, DIG, flags, dayMs: flags.day ? flags.day * 1000 : null }
 })()
