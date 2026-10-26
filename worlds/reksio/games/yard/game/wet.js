@@ -4,7 +4,7 @@
 // shakes himself dry, like every dog (yard.js decides when). While he stands
 // in a puddle, its near edge is drawn in front of his paws.
 
-/* global Clock, Debug, Sound, Reksio, Weather, Things */
+/* global Clock, Debug, Sound, Reksio, Weather, Things, Layout */
 /* exported Wet */
 const Wet = (() => {
   const SOAK_PER_SPLASH = 0.15 // each splashing step through a puddle (about 3 per puddle)
@@ -63,7 +63,7 @@ const Wet = (() => {
   function frame(t) {
     const dt = Math.min(0.1, (t - lastFrame) / 1000)
     lastFrame = t
-    if (Weather.raining) soak = 1
+    if (Weather.raining && !Layout.winter) soak = 1 // snow doesn't soak him: he stays white
     else soak = Math.max(0, soak - dt / DRY_S)
     const inPuddle = Weather.puddleAt(Reksio.x)
     pawWater.classList.toggle('on', !!inPuddle)

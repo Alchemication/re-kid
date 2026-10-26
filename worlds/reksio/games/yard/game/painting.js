@@ -34,9 +34,23 @@ const Painting = (() => {
   const WALL_TOP = 330
   const GROUND_TOP = 700
 
-  const SKY = { base: '#e7a464', dabs: ['#f3c08a', '#d98a52', '#f7d6a6', '#e9b277'], density: 0.17 }
-  const WALL = { base: '#8d9884', dabs: ['#a9b39b', '#77856f', '#bcc2aa', '#93a3a2', '#6c7a69'], density: 0.27 }
-  const GROUND = { base: '#e2cd9b', dabs: ['#cbb17a', '#f0e2b9', '#bb9f68', '#d8bf88'], density: 0.17 }
+  const SUMMER = {
+    sky: { base: '#e7a464', dabs: ['#f3c08a', '#d98a52', '#f7d6a6', '#e9b277'], density: 0.17 },
+    wall: { base: '#8d9884', dabs: ['#a9b39b', '#77856f', '#bcc2aa', '#93a3a2', '#6c7a69'], density: 0.27 },
+    ground: { base: '#e2cd9b', dabs: ['#cbb17a', '#f0e2b9', '#bb9f68', '#d8bf88'], density: 0.17 },
+  }
+  // Winter (layout.js): a pale winter sky, the wall greyer and cold, the ground under snow, sponged as the summer's,
+  // the snow painted soft and streaky as Reksio taternik's snowfields (3:30), with a snow cap along the wall's top.
+  const WINTER = {
+    sky: { base: '#c7d3de', dabs: ['#dbe4ec', '#b3c2d0', '#e9eff4', '#bfccd8'], density: 0.17 },
+    wall: { base: '#8a918f', dabs: ['#a3aaa8', '#767e7c', '#b6bcba', '#90a0a6', '#6f7775'], density: 0.27 },
+    ground: { base: '#eef2f5', dabs: ['#dbe3ea', '#f9fbfc', '#c9d4de', '#e4ebf0'], density: 0.17 },
+  }
+  const SEASON = Layout.winter ? WINTER : SUMMER
+  const SKY = SEASON.sky
+  const WALL = SEASON.wall
+  const GROUND = SEASON.ground
+  const SNOW_CAP = 12 // in winter, snow lies this deep along the wall's top
 
   let canvas = null
   let sky = null
@@ -117,6 +131,21 @@ const Painting = (() => {
     wallTop.forEach(([x, y], i) => (i ? ctx.lineTo(x, y + 2) : ctx.moveTo(x, y + 2)))
     ctx.stroke()
     ctx.globalAlpha = 1
+    if (Layout.winter) snowCap(ctx, wallTop) // drawn after everything, so the yard's own draws stay as they were
+  }
+
+  /** In winter, snow lying along the wall's top: a soft white cap, a little uneven. */
+  function snowCap(ctx, wallTop) {
+    const lumps = rng(1981)
+    ctx.fillStyle = '#f4f7f9'
+    ctx.beginPath()
+    wallTop.forEach(([x, y], i) => (i ? ctx.lineTo(x, y - 2 - lumps() * 6) : ctx.moveTo(x, y - 4)))
+    for (let i = wallTop.length - 1; i >= 0; i--) ctx.lineTo(wallTop[i][0], wallTop[i][1] + SNOW_CAP * (0.6 + lumps() * 0.5))
+    ctx.closePath()
+    ctx.fill()
+    ctx.strokeStyle = '#b8c6d2'
+    ctx.lineWidth = 2
+    ctx.stroke()
   }
 
   /**

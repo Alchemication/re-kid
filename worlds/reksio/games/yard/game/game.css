@@ -214,6 +214,7 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .crumb { fill: #8a5a2e; }
 .clod { fill: #7a5530; }
 .drop { fill: #8cc3ec; }
+.winter .drop { fill: #f4f7f9; stroke: #c3cfda; stroke-width: 1; } /* in winter, what he shakes off and snaps at is snow */
 .petal { fill: #d8432b; }
 .twinkle { fill: #fff3b8; stroke: #c9962a; stroke-width: 2; }
 
@@ -228,6 +229,10 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   opacity: 0;
 }
 /* the morning fog (weather.js): a pale wash over the yard's things, mist drifting slowly, and a light haze over all */
+/* winter (layout.js): snow on the doghouse roof, the grass tufts dry and wintry */
+.winter-snow { display: none; fill: #f4f7f9; stroke: #b8c6d2; stroke-width: 2.5; stroke-linejoin: round; }
+.winter .winter-snow { display: inline; }
+.winter .grass { stroke: #a8a089; }
 .fog-haze { position: absolute; inset: 0; pointer-events: none; background: #eef1f2; opacity: 0; }
 #fog { pointer-events: none; } /* over the things: taps and the pointer go through to them */
 .mist { fill: #f1f4f5; } /* still: drifting, these big shapes repainted every frame cost a phone about 2% (perf) */
@@ -236,6 +241,8 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .rainbow-band { fill: none; stroke-width: 14; opacity: 0.85; }
 .puddle-water { fill: #8fb3c9; stroke: #5d7e94; stroke-width: 3; opacity: 0.9; }
 .puddle-shine { fill: #e6f1f7; opacity: 0.7; }
+.winter .puddle-water { fill: #dce9f1; stroke: #9cb4c6; opacity: 1; } /* in winter, ice */
+.winter .puddle-shine { fill: #ffffff; opacity: 0.95; }
 .ripple { fill: none; stroke: #e9f3f8; stroke-width: 1.6; }
 
 /* ---- the setting sun and the evening ---- */

@@ -48,6 +48,8 @@ SCENARIOS = {
     ),  # rain, splashes, puddles: the busiest drawing
     # the morning fog: a wash over the yard's things, mist drifting, a haze over all
     "fog": (YARD, "rain=0&fog=1", None),
+    # winter: the snow falling (the rain's canvas, as flakes)
+    "snow": (YARD, "season=winter&rain=1&rain-at=0", None),
     # the meadow: its painted layers, the far trees at half speed (view.js)
     "meadow-idle": (MEADOW, "props=", None),
     "meadow-walking": (

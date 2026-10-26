@@ -61,10 +61,34 @@ describe('a play', () => {
     }
   })
 
-  it('brings two different creatures', () => {
+  it('brings two different creatures in summer', () => {
     for (const seed of SEEDS) {
-      const L = layout(`?seed=${seed}`)
+      const L = layout(`?seed=${seed}&season=summer`)
       assert.equal(new Set(L.creatures).size, 2, `seed ${seed}`)
+    }
+  })
+
+  it('makes some plays winter, without the summer things: no flowers, no fly, bee or spider, no fruit tree or bramble', () => {
+    let winters = 0
+    for (let seed = 1; seed <= 200; seed++) if (layout(`?seed=${seed}`).winter) winters += 1
+    assert.ok(winters > 25 && winters < 80, `${winters} of 200`)
+    for (const seed of SEEDS) {
+      const L = layout(`?seed=${seed}&season=winter`)
+      assert.equal(L.season, 'winter')
+      assert.equal(L.flowers, false, `seed ${seed}`)
+      assert.deepEqual([...L.creatures], [], `seed ${seed}`)
+      assert.ok(!L.props.includes('tree') && !L.props.includes('berries'), `seed ${seed}: ${L.props}`)
+      assert.ok(L.hidden.includes('flowers'), `seed ${seed}`)
+    }
+  })
+
+  it('forced to its own season, a play keeps the rest of what it drew', () => {
+    for (const seed of SEEDS) {
+      const plain = layout(`?seed=${seed}`)
+      const forced = layout(`?seed=${seed}&season=${plain.season}`)
+      assert.deepEqual([...forced.props], [...plain.props], `seed ${seed}`)
+      assert.equal(forced.rain, plain.rain, `seed ${seed}`)
+      assert.equal(forced.fruit, plain.fruit, `seed ${seed}`)
     }
   })
 

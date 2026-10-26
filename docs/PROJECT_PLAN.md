@@ -139,13 +139,17 @@ decided and why.
       fly and the bee keep closer; it lifts between 09:00 and 10:30.
       `?fog=1`. Its perf: about 1-2 points over the plain yard, measured on
       a busy machine (the mist bands lie still: drifting cost more).
-   2. **A winter play** (designed with Adam, 2026-10-26, from the sourced
-      synopses of Reksiowa zima and Reksio łyżwiarz, 1981, not public, so no
-      frames yet; snow painted after Taternik's snowfields): one play in four
-      is winter: a snowy yard, no flowers, bee or fly; snow falling now and
-      then instead of the shower; sparrows at his bowl (the ground under
-      snow, the bowl is the food on offer); frozen puddles he slips on;
-      snowflakes on his tongue, rolling in the snow, footprints.
+   2. **Adam judges the winter play** (built 2026-10-26, from the sourced
+      synopses of Reksiowa zima and Reksio łyżwiarz, 1981, not public, so
+      no frames; snow painted after Taternik's snowfields): one play in four
+      is winter: the yard under snow, the wall and the doghouse roof capped,
+      a pale sun, dry grass; no flowers, fly, bee, spider, fruit tree or
+      bramble; the shower falls as snow, the puddles are ice, he stays white
+      and dry; no rainbow, mushrooms or snail after. `?season=winter`.
+      Still to come, each a `new-gag`: the sparrows at his bowl (the ground
+      under snow, the bowl is the food on offer), slipping on the ice (a new
+      gesture: moving him without walking breaks the `sliding` rule),
+      footprints in the snow, snowflakes on his tongue.
 3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how

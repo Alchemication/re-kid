@@ -1344,3 +1344,46 @@ def assert_moves_standing(y: Yard) -> None:
         last_x = d["x"]
         y.page.wait_for_timeout(40)
     assert not wrong, f"moved while drawn resting or posed: {wrong}"
+
+
+class TestWinter:
+    """A winter play (layout.js, from Reksiowa zima and Reksio łyżwiarz): the
+    yard under snow, the shower falling as snow; he stays white and dry, the
+    puddles are ice (none to jump in), and after it no rainbow, no mushrooms,
+    no snail."""
+
+    QUERY = "seed=1&still&creatures=&season=winter&rain=1&rain-at=1"
+
+    def test_it_snows_and_he_stays_dry_with_nothing_to_jump_in(
+        self, yard: callable
+    ) -> None:
+        y = yard(self.QUERY)
+        assert y.page.evaluate("Layout.winter && !Layout.flowers")
+        assert y.page.evaluate(
+            "document.getElementById('stage').classList.contains('winter')"
+        )
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_function("Weather.raining", timeout=30_000)
+        y.page.wait_for_timeout(4000)
+        assert y.page.evaluate("Wet.soak") == 0, "snow soaked him"
+        assert y.page.evaluate("Weather.puddles.length") == 0, "a puddle to jump in"
+        assert y.page.evaluate("Weather.puddleAt(Reksio.x)") is None
+        y.settled()
+
+    def test_after_the_snow_no_rainbow_no_mushrooms_no_snail(
+        self, yard: callable
+    ) -> None:
+        y = yard(self.QUERY)
+        y.page.mouse.click(640, 650)
+        y.page.wait_for_function("Weather.phase === 'after'", timeout=90_000)
+        y.page.wait_for_timeout(
+            8000
+        )  # past when the mushrooms and the snail would come
+        assert (
+            y.page.evaluate("document.getElementById('mushrooms').children.length") == 0
+        )
+        assert y.page.evaluate("Creatures.snail") is None
+        assert y.page.evaluate(
+            "getComputedStyle(document.getElementById('rainbow')).opacity"
+        ) in ("0", "")
+        assert not y.errors, y.errors

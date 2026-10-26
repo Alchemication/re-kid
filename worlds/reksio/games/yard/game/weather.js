@@ -23,6 +23,9 @@ const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const GROUND_Y = 812
   const START_S = [25, 55] // the shower starts this long into the play
+  const SNOW_FALL = 0.12 // a flake falls this much slower than a raindrop
+  const SNOW_SWAY = 40 // and sways side to side this much (scene units a second)…
+  const SNOW_BLOWN = 120 // …and the wind blows it along this much at a full gust
   const WET_MS = 300 // the world is told where it's wet this far ahead, again every frame while it is
   const FOG_WASH = 0.85 // the fog's wash over the yard's things, at its thickest (a level of 1)
   const FOG_HAZE = 0.22 // …and the haze over everything, Reksio too: he stays clear, the yard fades
@@ -130,6 +133,7 @@ const Weather = (() => {
     const wanted = Math.round(DROPS * shower.intensity)
     while (drops.length < wanted) drops.push(newDrop(true))
     if (drops.length > wanted) drops.length = wanted
+    if (Layout.winter) return drawSnow(ctx, dt)
     ctx.strokeStyle = 'rgba(214, 230, 245, 0.75)'
     ctx.lineWidth = 2
     ctx.lineCap = 'round'
@@ -163,6 +167,24 @@ const Weather = (() => {
     }
   }
 
+  /** Winter: the shower falls as snow, flakes drifting down slowly, swaying, blown along by the wind; no splashes. */
+  function drawSnow(ctx, dt) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
+    ctx.beginPath()
+    for (const d of drops) {
+      d.y += d.v * SNOW_FALL * dt
+      d.x += (Math.sin(d.y / 38 + d.len) * SNOW_SWAY + wind * SNOW_BLOWN) * dt
+      if (d.y > GROUND_Y + fxRnd(0, 70)) {
+        Object.assign(d, newDrop(true))
+        continue
+      }
+      const r = 2.5 + (d.len - 18) / 4 // 2.5 to 5.5: some near, some far; big enough to see falling
+      ctx.moveTo(d.x + r, d.y)
+      ctx.arc(d.x, d.y, r, 0, Math.PI * 2)
+    }
+    ctx.fill()
+  }
+
   // ------------------------------------------------------------ puddles
 
   const puddleLayer = $('puddles')
@@ -181,7 +203,7 @@ const Weather = (() => {
       p.shine.setAttribute('rx', p.rx * 0.35 * k)
       p.shine.setAttribute('ry', 3 * k)
       // drops land in the puddle: rings
-      if (shower.intensity > 0.2 && k > 0.3 && sparkle() < shower.intensity * 0.12) ring(p, k)
+      if (!Layout.winter && shower.intensity > 0.2 && k > 0.3 && sparkle() < shower.intensity * 0.12) ring(p, k) // frozen in winter: no rings
     }
   }
 
@@ -190,9 +212,9 @@ const Weather = (() => {
     r.animate([{ rx: 2, ry: 1, opacity: 0.9 }, { rx: 26, ry: 7, opacity: 0 }], { duration: 700, easing: 'ease-out' }).finished.then(() => r.remove())
   }
 
-  /** The puddle Reksio's feet are in, if any (and if there is water in it). */
+  /** The puddle Reksio's feet are in, if any (and if there is water in it: none in winter, they are ice). */
   function puddleAt(x) {
-    if (shower.wet < 0.25) return null
+    if (Layout.winter || shower.wet < 0.25) return null
     return puddles.find((p) => Math.abs(p.x - x) < p.rx * Math.min(1, shower.wet) * 0.9) || null
   }
 
@@ -245,13 +267,13 @@ const Weather = (() => {
   /** A new phase of the shower: what starts and stops with it, then the listeners. */
   function entered(p) {
     if (p === 'raining') {
-      rainSound = Sound.rain()
+      if (!Layout.winter) rainSound = Sound.rain() // snow falls without a sound
       Music.setRain(true)
-    } else if (p === 'clearing' && rainSound) {
-      rainSound()
+    } else if (p === 'clearing') {
+      if (rainSound) rainSound()
       rainSound = null
       Music.setRain(false)
-    } else if (p === 'after') {
+    } else if (p === 'after' && !Layout.winter) { // no rainbow after snow
       rainbow.animate([{ opacity: 0 }, { opacity: 0.75, offset: 0.2 }, { opacity: 0.75, offset: 0.75 }, { opacity: 0 }], { duration: 14000 })
       growFlowers()
     }
@@ -324,7 +346,7 @@ const Weather = (() => {
 
   function init() {
     // each puddle offers a drink while it holds water (world.js): the snail and the worms come out by them after rain
-    puddles.forEach((p, i) => World.offer(`puddle-${i}`, 'drink', p.x, GROUND_Y, () => shower.wet > 0.25))
+    puddles.forEach((p, i) => World.offer(`puddle-${i}`, 'drink', p.x, GROUND_Y, () => !Layout.winter && shower.wet > 0.25)) // ice in winter: no drink
     makeFog()
     makeClouds()
     makeRainbow()
@@ -348,7 +370,7 @@ const Weather = (() => {
     puddleAt,
     splash,
     /** Puddles with water in them now, for creatures and for Reksio. */
-    get puddles() { return shower.wet > 0.25 ? puddles.map((p) => ({ x: p.x, rx: p.rx * Math.min(1, shower.wet) })) : [] },
+    get puddles() { return !Layout.winter && shower.wet > 0.25 ? puddles.map((p) => ({ x: p.x, rx: p.rx * Math.min(1, shower.wet) })) : [] }, // ice in winter: none to jump in
     /** End any shower now (evening). */
     stop() {
       calm = true

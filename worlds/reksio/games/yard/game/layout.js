@@ -31,6 +31,11 @@ const Layout = (() => {
   const PROP_POOL = Object.keys(OFFERS)
   const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do
   const CREATURE_POOL = ['fly', 'bee', 'spider']
+  // Winter (Reksiowa zima, Reksio łyżwiarz, 1981: Adam's pick, 2026-10-26): some plays are winter, from their own
+  // stream so ?season shifts nothing else. Out of season then: the fruit tree and the bramble (whose flower brings
+  // the bee), the flowers, and the fly, the bee and the spider; the shower falls as snow (weather.js).
+  const WINTER_CHANCE = 0.25
+  const OUT_OF_WINTER = { props: ['tree', 'berries'], creatures: ['fly', 'bee', 'spider'] }
   const CREATURES_PER_PLAY = 2
   const MEMORY_KEY = 'reksio-yard-last-play'
   const RAIN_CHANCE = 0.6 // most plays have a shower; after one, the next leans dry
@@ -101,6 +106,20 @@ const Layout = (() => {
     }
   }
 
+  /** This play's season, from its own stream (drawn either way); ?season=winter (or summer) forces it. */
+  function seasonOf(params) {
+    const drawn = Debug.random('season')() < WINTER_CHANCE ? 'winter' : 'summer'
+    return ['winter', 'summer'].includes(params.get('season')) ? params.get('season') : drawn
+  }
+
+  /** Are the flowers out: as drawn, or ?flowers=1 (or 0); never in winter. */
+  const flowersOut = (params, drawn, winter) => !winter && (params.has('flowers') ? params.get('flowers') !== '0' : drawn)
+
+  /** Leave out of `list` what is out of season. */
+  function inSeason(list, out) {
+    list.splice(0, list.length, ...list.filter((n) => !out.includes(n)))
+  }
+
   /** Pick n from pool, preferring ones not seen last time (3 to 1). */
   function pick(pool, n, seenBefore = []) {
     const left = [...pool]
@@ -116,14 +135,15 @@ const Layout = (() => {
 
   const shuffled = (list) => pick(list, list.length)
 
-  /** The play's props: one that offers help, one that helps (unless the first already does), then the rest. */
-  function pickProps(seenBefore) {
+  /** The play's props: one that offers help, one that helps (unless the first already does), then the rest; none of `out` (out of season). */
+  function pickProps(seenBefore, out = []) {
+    const pool = PROP_POOL.filter((n) => !out.includes(n))
     const chosen = []
     for (const kind of ['help', 'helped']) {
       if (chosen.some((n) => OFFERS[n].includes(kind))) continue
-      chosen.push(...pick(PROP_POOL.filter((n) => OFFERS[n].includes(kind)), 1, seenBefore))
+      chosen.push(...pick(pool.filter((n) => OFFERS[n].includes(kind)), 1, seenBefore))
     }
-    return [...chosen, ...pick(PROP_POOL.filter((n) => !chosen.includes(n)), PROPS_PER_PLAY - chosen.length, seenBefore)]
+    return [...chosen, ...pick(pool.filter((n) => !chosen.includes(n)), PROPS_PER_PLAY - chosen.length, seenBefore)]
   }
 
   // Flags in the page address force parts of a play, for trying them out and
@@ -133,14 +153,17 @@ const Layout = (() => {
   const listed = (name, pool) => (params.get(name) || '').split(',').filter((n) => pool.includes(n))
 
   const last = remembered()
-  const props = pickProps(last.props)
+  const season = seasonOf(params)
+  const winter = season === 'winter'
+  const props = pickProps(last.props, winter ? OUT_OF_WINTER.props : [])
   const creatures = pick(CREATURE_POOL, CREATURES_PER_PLAY, last.creatures)
   // ?creatures=fly,spider picks the creatures
   if (params.has('creatures')) creatures.splice(0, creatures.length, ...listed('creatures', CREATURE_POOL))
+  inSeason(creatures, winter ? OUT_OF_WINTER.creatures : [])
   // ?flowers=1 (or 0) puts the flowers out (or not)
   const flowerCoin = random() < 0.5
   const flowersDrawn = creatures.includes('bee') || flowerCoin
-  const flowers = params.has('flowers') ? params.get('flowers') !== '0' : flowersDrawn
+  const flowers = flowersOut(params, flowersDrawn, winter)
   // ?rain=1 (or 0) and ?rain-at=SECONDS force the weather
   const rainDrawn = random() < (last.rain ? RAIN_CHANCE / 2 : RAIN_CHANCE)
   const rain = params.has('rain') ? params.get('rain') !== '0' : rainDrawn
@@ -222,11 +245,11 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, fog, mouseAt, fruit, visitorAt, henAt, mushroomsAt, layered, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, fog, season, winter, mouseAt, fruit, visitorAt, henAt, mushroomsAt, layered, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */
-  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, fruit, ...(dayS ? { day: dayS } : {}), ...(hour !== null ? { hour } : {}), ...(layered ? {} : { music: 'takes' }) })
+  const replayFlags = () => ({ props: props.join(','), creatures: creatures.join(','), flowers: flowers ? 1 : 0, rain: rain ? 1 : 0, season, fruit, ...(dayS ? { day: dayS } : {}), ...(hour !== null ? { hour } : {}), ...(layered ? {} : { music: 'takes' }) })
   Debug.pin({ flags: replayFlags(), layout }) // a replay builds this same yard (debug.js)
   return layout
 })()

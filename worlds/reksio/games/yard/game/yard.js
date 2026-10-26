@@ -882,6 +882,7 @@
 
   // laid out: show the drawing from the next frame (game.css, .starting)
   Clock.after(0, () => $('stage').classList.remove('starting'))
+  $('stage').classList.toggle('winter', Layout.winter) // the winter play's look (game.css .winter)
 
   Things.init({ ended: () => day.ended })
   Spots.init()
