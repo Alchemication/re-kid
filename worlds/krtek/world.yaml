@@ -187,6 +187,13 @@ characters:
       - cs-wikipedia-seznam-dilu
       observed_by: claude-frames
   moves:
+  - id: face-acts
+    claim:
+      text: 'His face acts mostly with his mouth. The teal patch runs right up under the red nose as a muzzle, and the mouth is drawn on it in a thin dark line, a short line under it for the chin. Glad, facing us, it is a wide open smile nearly as wide as the patch (Autíčko 7:13); delighted, a small open "D" with a dark red-brown inside (11:41.5); worried, a longer open mouth, slanted in three-quarter view, with the inner ends of thin light brow lines raised and the lids half down (11:42-11:43); squeezing his eyes shut, a small down-turned arch, the eyes drawn as curved light lines with no white (11:44.5-11:46). Thin light brow lines show only while they act.'
+      status: observed
+      sources:
+      - krtek-youtube
+      observed_by: claude-frames
   - id: pops-up-from-molehill
     claim:
       text: Comes up through the top of a molehill, head and hands first, and leans his elbows on it to look about (Vejce 0:36, Hodinářem 0:20, Autíčko 1:20).

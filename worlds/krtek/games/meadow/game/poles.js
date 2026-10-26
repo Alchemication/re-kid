@@ -133,6 +133,7 @@
     if (p.where === 'line') {
       await m().goTo(p.x - 50)
       if (!alive()) return
+      Mole.feel('squeezed', stuck ? 1900 : 900) // an effort: eyes shut tight, mouth pinched (Krtek a autíčko 11:44.5)
       for (let i = 0; i < (stuck ? 3 : 1); i++) {
         Sound.tug()
         await Mole.lean(-16, stuck ? 600 : 800)

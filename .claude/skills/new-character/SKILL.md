@@ -83,6 +83,18 @@ Things that bit:
 
 ## 4. The face: parts that act, then expressions
 
+First find, from the films' close-ups, which feature carries his feeling:
+for Reksio the brows, for Krtek the mouth (Krtek a autíčko 11:41-11:46:
+the mouth on the teal muzzle does most of it; his brows show only while
+they act). Build that feature first and best. On a black character, lines
+on the face (brows, the squeeze by shut eyes) are drawn light, as the
+films draw them: ink vanishes there. Each character gets its own face
+parameters, from his own frames, not another hero's.
+
+Krtek's (`moleart.js` `mouth`, `eyes`; his faces in `mole.js` `FACES`, a
+quiet moment's face with `Mole.feel`): the mouth's open, curve, width,
+round and chin; brows' lift and tilt. Reksio's follow.
+
 Give the face parameters, not drawings (`figure.js` `FACE`): eyes (with an
 upper lid that comes down and slopes with the brows), joy (shut eyes
 curving up or down), brows (inner ends up: worried; down: cross), lift,

@@ -138,6 +138,7 @@
 
   /** Holding it up, he looks this way and that: whose? */
   async function puzzled(alive) {
+    Mole.feel('worried', 1300) // whose is it?
     await Mole.lean(10, 600)
     if (!alive()) return
     await Mole.lean(-10, 600)
@@ -163,6 +164,7 @@
     if (!alive()) return
     await mouse.rise(false)
     cast.dismiss(mouse)
+    Mole.feel('glum', 900)
     await Mole.lean(8, 700) // a little glum
   }
 
@@ -178,6 +180,7 @@
     await hare.no() // ...and a shake of the head
     if (!alive()) return
     hare.turn(-1)
+    Mole.feel('glum', 900)
     await Mole.lean(-8, 700)
   }
 

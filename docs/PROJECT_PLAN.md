@@ -98,11 +98,28 @@ decided and why.
       thunder, and left alone he waves the next friend in after 2.5 s, not
       7 (they stood in the rain too long). The storm's perf measures 21–25%
       of the 25% budget: win some back before more is drawn in it.
-   4. A local director picking the ambient moments, keeping "the same
+   4. **Adam judges Krtek's new face** (built 2026-10-26 after Krtek a
+      autíčko's close-ups, 7:13 and 11:41–11:46): the teal muzzle up under
+      the nose, the mouth on it drawn from numbers (open, corners up or
+      down, an oval ooh, a chin line), light brow lines that act, and seven
+      faces (content, delighted, ooh, worried, glum, squeezed, fright) on
+      his words and on the meadow's quiet moments (squeezed tugging a pole
+      and pushing the cloud, worried over the egg, glum at "not mine").
+      Still off against the films: shut eyes are white lids, where the
+      films draw curved light lines (11:44.5); our eyes are bigger and
+      rounder, and our outline heavier.
+   5. **The cast's sizes, and the fox** (Adam: in the films the fox is
+      much bigger than him, and stands like a person, he remembers;
+      check in frames, Krtek malířem 1:44–3:28): each character's height
+      against the mole measured in frames, as observed claims in
+      world.yaml, and friends.js drawn from them; the fox redrawn if the
+      frames say so. A bigger fox is scarier: follow the films, judge it
+      with Eliot.
+   6. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
-   5. **Adam plays the meadow with Eliot** before any LLM work (Adam,
+   7. **Adam plays the meadow with Eliot** before any LLM work (Adam,
       2026-10-26).
-   6. If the meadow feels more alive: the LLM director behind the player's
+   8. If the meadow feels more alive: the LLM director behind the player's
       own key, on Adam's devices, replies recorded for replay, a stub in
       the tests. Then decide whether it is worth a proxy for the site.
    Then the yard's fly, bee and weather move onto it, if it held up.

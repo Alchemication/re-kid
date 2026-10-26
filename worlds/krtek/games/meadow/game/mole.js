@@ -33,17 +33,29 @@ const Mole = (() => {
   const ARMS = { down: 0, up: 150, wide: 120, rim: 60, face: 172 }
   const IDLE_MS = [2600, 5200] // left standing, now and then he looks about: another view, the other way
   const PERK_MS = 650 // his hairs springing up when he notices something, and settling
-  // the face each of his words comes with, held this long (the films act with the mouth, lids and hairs):
-  // mouth, how far the lids come down (0 open, 1 shut), how hard his hairs perk
+  // His faces, after Krtek a autíčko's close-ups (moleart.js face): the mouth's numbers (open 0-1, curve
+  // -1 corners down to +1 up, width, round, chin) and the brows' (lift, tilt > 0 worried), in plain numbers so
+  // a word or a moment names one. The mouth carries most of it, as in the films (Adam, 2026-10-26).
   const FACES = {
-    ooh: { mouth: 'oh', perk: 1, ms: 1000 },
-    fright: { mouth: 'oh', perk: 1.6, ms: 900 },
-    achJo: { mouth: 'frown', lids: 0.45, ms: 1400 },
-    ahoj: { perk: 0.7, ms: 600 },
+    content: { open: 0, curve: 0.7, width: 0.75 }, // at rest: a small closed smile
+    delighted: { open: 0.75, curve: 0.9, width: 1, chin: 1, brows: { lift: 4 } }, // 7:13, 11:41.5
+    ooh: { open: 0.8, curve: 0, width: 0.5, round: 1.3, brows: { lift: 6 } }, // wonder: a round little mouth
+    worried: { open: 0.55, curve: -0.35, width: 0.75, chin: 1, brows: { tilt: 1 } }, // 11:43
+    glum: { open: 0, curve: -0.8, width: 0.65, brows: { tilt: 1 } }, // ach jo
+    squeezed: { open: 0, curve: -1, width: 0.42, brows: { tilt: -1, lift: -2 } }, // 11:44.5: eyes shut tight, an effort
+    fright: { open: 0.95, curve: -0.2, width: 0.6, round: 0.6, brows: { tilt: 1, lift: 7 } },
+  }
+  // the face each of his words comes with, held this long; how far the lids come down (0 open, 1 shut), how hard his hairs perk
+  const WORDS = {
+    ooh: { face: 'ooh', perk: 1, ms: 1000 },
+    fright: { face: 'fright', perk: 1.6, ms: 900 },
+    achJo: { face: 'glum', lids: 0.45, ms: 1400 },
+    ahoj: { face: 'delighted', perk: 0.7, ms: 700 },
+    giggle: { face: 'delighted', ms: 800 },
   }
   const life = Debug.random('mole-life') // blinks, glances and looking about: their own stream
 
-  const state = { x: 0, pose: 'down', busy: null, carrying: false, holdsUp: false, lift: 0, painted: null, facing: 1, view: 'front', mouth: 'smile' }
+  const state = { x: 0, pose: 'down', busy: null, carrying: false, holdsUp: false, lift: 0, painted: null, facing: 1, view: 'front', face: 'content' }
   const skin = [] // what paint colours: his body, snout and arms in every view
   let lift = 0 // how far up he stands (on someone's shoulders, in the car)
   let views = null // moleart.js's three views
@@ -71,6 +83,7 @@ const Mole = (() => {
     const art = el('g', {}, tilt)
     art.style.transform = `scale(${SCALE})`
     views = MoleArt.draw(art, skin)
+    mood('content')
     carrySlot = el('g', { class: 'mole-carry' }, art) // what he holds up over his head
     hatSlot = el('g', { class: 'mole-hat' }, art) // what sits on his head
     tunnel = el('g', { class: 'tunnel' }, ground)
@@ -189,14 +202,19 @@ const Mole = (() => {
     state.busy = null
   }
 
-  /** Show one of his mouths in every view: 'smile', 'laugh', 'oh' or 'frown'. */
-  function mouth(name) {
-    state.mouth = name
-    for (const v of all()) for (const m of ['smile', 'laugh', 'oh', 'frown']) v[m].style.display = m === name ? '' : 'none'
+  let laughing = false // a gesture's laugh: a word's face waits for it
+
+  /** Show one of his FACES in every view. */
+  function mood(name) {
+    state.face = name
+    for (const v of all()) v.face(FACES[name])
   }
 
-  /** Open his mouth in a laugh (or close it again). */
-  const laugh = (on) => mouth(on ? 'laugh' : 'smile')
+  /** Open his mouth in a laugh (or close it again, back to content). */
+  function laugh(on) {
+    laughing = on
+    mood(on ? 'delighted' : 'content')
+  }
 
   /** His hairs spring up and settle: he has noticed something (k: how hard). */
   function perk(k = 1) {
@@ -212,20 +230,31 @@ const Mole = (() => {
 
   let faceToken = null
 
-  /** The face that goes with a word he says (FACES), held a moment, then his smile back. */
+  /** The face that goes with a word he says (WORDS), held a moment, then content again. */
   function express(word) {
-    const f = FACES[word]
+    const f = WORDS[word]
     if (!f || state.pose === 'down') return
     if (f.perk) perk(f.perk)
-    if (!f.mouth && !f.lids) return
+    if (!f.face && !f.lids) return
     const mine = (faceToken = Symbol(word))
-    if (f.mouth && state.mouth !== 'laugh') mouth(f.mouth)
+    if (f.face && !laughing) mood(f.face)
     if (f.lids) for (const v of all()) v.lids.style.transform = `scaleY(${f.lids})`
     Clock.after(f.ms, () => {
       if (faceToken !== mine) return
-      if (state.mouth === f.mouth) mouth('smile')
+      if (state.face === f.face && !laughing) mood('content')
       // the lids back only where they are still as the word left them (a stretch or peekaboo since has its own)
       if (f.lids) for (const v of all()) if (v.lids.style.transform === `scaleY(${f.lids})`) v.lids.style.transform = state.pose === 'listen' ? 'scaleY(0.55)' : 'scaleY(0)'
+    })
+  }
+
+  /** A face (FACES) held ms, then content again: a moment's feeling with no word (an effort, a worry). A word
+   * or a newer feeling takes over; a cut (relax) ends it. */
+  function feel(name, ms) {
+    if (state.pose === 'down' || laughing) return
+    const mine = (faceToken = Symbol(name))
+    mood(name)
+    Clock.after(ms, () => {
+      if (faceToken === mine && state.face === name) mood('content')
     })
   }
 
@@ -536,5 +565,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
+  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
 })()

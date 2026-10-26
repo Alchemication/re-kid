@@ -197,7 +197,9 @@
     try {
       const to = PATCH.x
       Sound.say('ooh')
-      await Promise.all([Mole.walkTo(to), drift(to, Math.abs(to - state.x) * 4.5 + 300, 'linear')])
+      const ms = Math.abs(to - state.x) * 4.5 + 300
+      Mole.feel('squeezed', ms) // pushing hard
+      await Promise.all([Mole.walkTo(to), drift(to, ms, 'linear')])
       if (!alive()) return
     } finally {
       Mole.carry(null)
