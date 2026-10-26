@@ -96,6 +96,15 @@ const Music = (() => {
     fiddle(wait)
   }
 
+  /** The cricket's fiddle once in the day (an eclipse's dusk): one take, over whatever plays. */
+  function fiddle() {
+    if (!loading || night) return // no tap yet, or the evening has it already
+    if (!ready) return void loading.then(fiddle)
+    const wait = takes.playing ? takes.FADE_S + 0.2 : LEAD_S
+    takes.fade()
+    play('lullaby', wait)
+  }
+
   /** The circle has closed: the music fades and stays away. */
   function quiet() {
     ended = true
@@ -104,7 +113,7 @@ const Music = (() => {
   }
 
   return {
-    PARTS, prepare, morning, cue, evening, quiet,
+    PARTS, prepare, morning, cue, evening, fiddle, quiet,
     /** The bed's moment and how busy the child is (the meadow steers it). */
     setBed(change) { bed?.set(change) },
     /** The bed now, for the overlay and the tests. */

@@ -231,7 +231,7 @@ the edge cases that would let bad data pass silently.
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
-  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js` and each game's `beds.js`, `world.js`, `creature.js`, `wind.js`): the part that draws tells them what
+  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js` and each game's `beds.js`, `world.js`, `creature.js`, `wind.js`, the meadow's `eclipse.js`): the part that draws tells them what
   happened and does what they say. Drawing parts are tested here too, on a
   pretend page and clock: `load(…, { dom: true, globals })`, then
   `await page.advance(ms)` runs the timers and animation frames due (all

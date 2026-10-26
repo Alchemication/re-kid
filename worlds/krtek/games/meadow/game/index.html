@@ -33,7 +33,7 @@
     <g mask="url(#iris)">
       <g id="sky">
         <rect x="-200" y="-200" width="2000" height="1000" fill="url(#sky-grad)" />
-        <g id="sun"><circle r="58" fill="#f08a2c" /><circle r="58" fill="none" stroke="#f6b25a" stroke-width="6" opacity="0.6" /></g>
+        <g id="sun"><circle r="58" fill="#f08a2c" /><circle r="58" fill="none" stroke="#f6b25a" stroke-width="6" opacity="0.6" /><clipPath id="sun-disc"><circle r="58" /></clipPath><circle id="eclipse-moon" r="58" fill="#2e3150" clip-path="url(#sun-disc)" visibility="hidden" /></g><!-- the moon slides over it in an eclipse (eclipse.js) -->
         <g id="moon"><path d="M0 -42 A42 42 0 1 0 0 42 A32 32 0 1 1 0 -42 Z" fill="#f4f1d8" /></g>
       </g>
       <g id="distant-view"><g id="distant"></g></g>
@@ -109,6 +109,7 @@
   <script src="layout.js"></script>
   <script src="painting.js"></script>
   <script src="day.js"></script>
+  <script src="eclipse.js"></script>
   <script src="world.js"></script>
   <script src="creature.js"></script>
   <script src="ambient.js"></script>

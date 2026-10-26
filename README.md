@@ -212,7 +212,8 @@ ending in a minute) and `?film=0` work the same; `?props=egg` says which encount
 (`?props=` for none) and `?soon` brings the first at once; `?critters=now` brings a butterfly at
 once, even in a `?still` play (which otherwise has none), and `?critters=snail` the snail, the grass
 under the wild flowers wet from the start; `?wind=gust` brings a strong gust that carries leaves or
-seeds three seconds after he wakes. In the console, `meadowGame.state()`,
+seeds three seconds after he wakes; `?eclipse=11` an eclipse at 11:00 (with `?day=60`, 15 s in), `?eclipse=now` one as he
+wakes (the sun is still behind the trees then). In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 
 In the yard's console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,

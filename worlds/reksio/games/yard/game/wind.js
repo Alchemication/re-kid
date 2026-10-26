@@ -27,7 +27,8 @@ const Wind = (() => {
 
   /**
    * Move it on dt seconds; `extra` adds to where it's heading (clouds coming
-   * in make it stronger). Returns its level, 0 still to 1 a full gust.
+   * in make it stronger, a dim light weaker). Returns its level, 0 still to 1
+   * a full gust.
    */
   function step(w, dt, extra = 0) {
     w.t += dt
@@ -36,7 +37,7 @@ const Wind = (() => {
       w.target = w.calm ? BREEZE[0] : rnd(w, ...(w.gust ? GUST : BREEZE))
       w.changeAt = w.t + (w.gust ? rnd(w, ...GUST_S) : rnd(w, ...CHANGE_S))
     }
-    const target = Math.min(1, w.target + extra)
+    const target = Math.max(0, Math.min(1, w.target + extra))
     w.level += (target - w.level) * Math.min(1, dt * EASE)
     return w.level
   }

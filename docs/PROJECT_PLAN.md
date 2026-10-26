@@ -85,8 +85,7 @@ decided and why.
       `stage` (watched from a distance, never walked onto), `sight`,
       `perch`, `sun`; tired and curious drives. The encounters stay as
       they are.
-   3. An eclipse (the light dips, the hour doesn't: the meadow behaves as
-      at dusk for a minute), then a storm (a cartoon one:
+   3. A storm (a cartoon one:
       everyone to shelter, thunder far off and soft, sunshine after), each
       judged before the next (Adam, 2026-10-26).
    4. A local director picking the ambient moments, keeping "the same

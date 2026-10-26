@@ -186,6 +186,16 @@ scenes:
   sound:
     text: The wind, very quiet, louder and a little higher in a gust.
     origin: invented
+- id: eclipse
+  action:
+    text: Nothing, or tap the sun.
+    origin: invented
+  result:
+    text: Some plays, once, around midday, the moon slides over the sun. The light falls to about dusk for a while, never to night, while the hour goes on as ever, and everything that answers to the light behaves as at dusk - the tulips close, the butterflies and the birds go home, the wind eases, and the cricket comes out and fiddles. The mole looks up at it - ooh. A tap on the sun has him call up to it and wave (ahoj!); it comes back in its own time. Then the sun comes out, the tulips open, the cricket goes in and the meadow's life comes back. Not from the films (Adam's pick, 2026-10-26).
+    origin: invented
+  sound:
+    text: The music steps back; one take of the cricket's fiddle; his "ooh" and "ahoj".
+    origin: invented
 - id: snail
   action:
     text: Nothing, or tap the snail.

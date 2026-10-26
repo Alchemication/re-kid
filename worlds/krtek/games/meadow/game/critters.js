@@ -160,7 +160,7 @@ const Critters = (() => {
   function snailLooks(asked) {
     Clock.every(SNAIL_LOOKS_MS, () => {
       const [from, to] = SNAIL.hours
-      if (snail || (!asked && World.state.hour < from) || World.state.hour >= to) return
+      if (snail || (!asked && World.state.hour < from) || World.state.hour >= to || World.state.light < SNAIL.dark) return
       const home = World.offered('shelter').find((o) => asked || World.isWet(o.x))
       if (!home) return
       if (asked) World.wet(home.x - 120, home.x + 120, SNAIL.stayMs[0]) // ?critters=snail: wet there now
@@ -185,7 +185,7 @@ const Critters = (() => {
     const next = (ms) => Clock.after(ms, () => {
       const [from, to] = BUTTERFLY.hours
       const h = World.state.hour
-      if (out.length < MAX && h > from && h < to) come()
+      if (out.length < MAX && h > from && h < to && World.state.light >= BUTTERFLY.dark) come() // not in an eclipse's dim
       next(between(EVERY_MS, comings()))
     })
     next(first)

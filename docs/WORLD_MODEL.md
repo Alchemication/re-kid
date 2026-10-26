@@ -30,7 +30,7 @@ noise. The yard's creatures are still wired by hand.
 | Field / call | What | Written by (meadow) |
 |---|---|---|
 | `hour` | 08–20, moves only with the day | `meadow.js` tick |
-| `light` | 1 broad day to 0 night | `meadow.js` sky |
+| `light` | 1 broad day to 0 night; in an eclipse down to 0.3 while the hour goes on (`eclipse.js`) | `meadow.js` sky |
 | `wind` | 0 still to 1 a full gust, blowing left to right (`shared/wind.js`: a breeze, now and then a gust, calm from sunset) | `weather.js` |
 | `view` | `{x0, x1}`: what the child sees | `meadow.js`, from the view |
 | `offer(id, kind, x, y, open)` | a thing offers something while `open()` | `meadow.js` (nectar: the tulips while open, the bluebells, the yellow spike), `rain.js` (nectar: the wild patch, not while drooping; shelter under its leaves), `spring.js` (a drink at either edge of the pool) |
@@ -39,8 +39,11 @@ noise. The yard's creatures are still wired by hand.
 
 A field joins only when something reads it. Hour and light are apart on
 purpose: the day is the same length for every child, so an eclipse or a
-storm may dim the light but never move the hour, and creatures answer to the
-light.
+storm may dim the light but never move the hour. What answers to the light
+answers to an eclipse with no case of its own: the creatures go home and
+none come (their `dark`), the tulips close and the cricket comes out
+(`meadow.js`, by the light as well as the hour), the wind eases
+(`weather.js`).
 
 Offer kinds in use: `nectar`, `drink`, `shelter` (a creature's home to
 come out of: the snail comes out where one is wet). A new kind is a word

@@ -14,7 +14,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Bed, Church, Clock, Critters, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View, Weather, World */
+/* global Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -31,9 +31,15 @@ const meadowGame = (() => {
   const TUFTS = 22 // tufts of long grass along the front, across the whole meadow
   const TICK_MS = 100
   const BED_STEER_MS = 200 // how often the music bed hears the moment and how busy the child is
+  const TULIPS_LIGHT = [0.4, 0.8] // the tulips close as the light falls from this to this (at dusk, or in an eclipse)
+  const CRICKET_LIGHT = 0.4 // the cricket comes out in a light this low, by day too (an eclipse)
+  const ECLIPSE_LOOK_MS = 9000 // into an eclipse, this long (in a full-length day): he notices, and looks up
   const NIGHT_TINT = 0.6 // how dark the night's blue makes the meadow at its darkest (multiplied over it)
   const words = Debug.random('meadow-words')
   const paint = Debug.random('meadow-paint')
+  const planned = Eclipse.plan(Debug.random('meadow-eclipse')) // drawn either way, so ?eclipse= shifts nothing
+  const eclipseAt = Layout.flags.eclipse ?? planned // the hour this play's eclipse starts, or null
+  const DAY_PACE = Day.DAY_MS / (Layout.dayMs || Day.DAY_MS) // an eclipse lasts as long in the day's hours whatever the day's length (?day=)
   const tufts = Debug.random('meadow-tufts') // where the front's tufts stand: its own, so the tulips stay put
 
   const svg = document.getElementById('world')
@@ -42,12 +48,14 @@ const meadowGame = (() => {
   const irisCircle = document.getElementById('iris-circle')
   const night = document.getElementById('night')
   const sun = document.getElementById('sun')
+  const eclipseMoon = document.getElementById('eclipse-moon')
+  let sunX = 800 // where the sun is across the sky (the sky's units: it stays put as the view moves)
   const moon = document.getElementById('moon')
   const stops = [...document.querySelectorAll('#sky-grad stop')]
   const cricket = document.getElementById('cricket')
   const den = layers.den
 
-  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3 }
+  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3, eclipse: null, evening: false } // eclipse: when it began (Clock); evening: the cricket's dusk has come
   let tulipHeads = []
 
   const el = (tag, attrs = {}, parent) => {
@@ -155,45 +163,82 @@ const meadowGame = (() => {
     if (!game.awake) return
     const h = (game.hour = Day.hour(Clock.now() - game.dayStart, Layout.dayMs || Day.DAY_MS))
     World.set({ hour: h })
-    drawSky(h)
+    if (eclipseAt !== null && game.eclipse === null && h >= eclipseAt) startEclipse()
+    drawSky(h, eclipseCover())
     drawMeadow(h)
     if (!game.ended) evening(h)
     checkRules()
     Debug.show(stateNow())
   }
 
-  /** The sky's colour, the sun and the moon at this hour. */
-  function drawSky(h) {
-    const s = Day.sky(h)
+  /** The eclipse begins: the moon slides over the sun, and he looks up at it a little later. */
+  function startEclipse() {
+    game.eclipse = Clock.now()
+    Debug.trace('eclipse', { starts: Day.clock(game.hour) })
+    Music.cue('hush') // the music steps back: the cricket will have the dim
+    Clock.after(ECLIPSE_LOOK_MS / DAY_PACE, () => {
+      if (!(game.awake && !game.ended && !game.gesture)) return
+      Mole.perk(1.4)
+      Mole.lookAt(View.x + sunX) // the sky stays put as the view moves
+      Sound.say('ooh', true)
+    })
+  }
+
+  /** How far the moon covers the sun now: 0 with no eclipse on. */
+  const eclipseCover = () => (game.eclipse === null ? 0 : Eclipse.cover(eclipseMs()))
+
+  /** How long the eclipse has been on, in a full-length day's ms. */
+  const eclipseMs = () => (Clock.now() - game.eclipse) * DAY_PACE
+
+  /** The sky's colour, the sun and the moon at this hour, the moon covering this much of the sun (an eclipse): the
+   * sky drawn as later in the day, so the light falls as at dusk, and everything that answers to it answers. */
+  function drawSky(h, k = 0) {
+    const s = Day.sky(Eclipse.skyHour(h, k))
     stops[0].setAttribute('stop-color', s.top)
     stops[1].setAttribute('stop-color', s.bottom)
     const [cr, cg, cb] = [1, 3, 5].map((i) => parseInt(s.top.slice(i, i + 2), 16) / 255)
-    const light = Math.max(0, Math.min(1, (0.3 * cr + 0.59 * cg + 0.11 * cb - 0.2) / 0.4)) // 1 by day, 0 at night
+    const light = Math.min(Eclipse.light(k), Math.max(0, Math.min(1, (0.3 * cr + 0.59 * cg + 0.11 * cb - 0.2) / 0.4))) // 1 by day, 0 at night
     World.set({ light })
     Painting.cloudsAt(light) // the wash of cloud fades as the sky darkens
     night.setAttribute('opacity', String(NIGHT_TINT * (1 - light))) // and the painted meadow darkens with it
     const pos = Day.sun(h)
     sun.style.visibility = pos ? 'visible' : 'hidden'
-    if (pos) sun.style.transform = `translate(${pos.across * 1600}px, ${640 - pos.up * 470}px)`
+    if (pos) sunX = pos.across * 1600
+    if (pos) sun.style.transform = `translate(${sunX}px, ${640 - pos.up * 470}px)`
+    const on = game.eclipse !== null && !Eclipse.over(eclipseMs())
+    eclipseMoon.setAttribute('visibility', on ? 'visible' : 'hidden')
+    if (on) eclipseMoon.setAttribute('cx', (Eclipse.across(eclipseMs()) * 124).toFixed(1))
     const m = Day.moon(h)
     moon.style.visibility = m ? 'visible' : 'hidden'
     if (m) moon.style.transform = `translate(1180px, ${600 - m.up * 380}px)`
   }
 
-  /** The tulips opening or closing, and the cricket coming out at dusk. */
+  /** The tulips opening or closing, and the cricket coming out at dusk: by the hour and the light, so in an
+   * eclipse's dim too (and out of it, back as they were). */
   function drawMeadow(h) {
-    const open = Day.tulips(h)
+    const light = World.state.light
+    const byLight = Math.max(0, Math.min(1, (light - TULIPS_LIGHT[0]) / (TULIPS_LIGHT[1] - TULIPS_LIGHT[0])))
+    const open = Math.min(Day.tulips(h), byLight)
     for (const t of tulipHeads) {
       t.left.style.transform = `rotate(${-34 * open}deg)`
       t.right.style.transform = `rotate(${34 * open}deg)`
     }
     if (!game.ended) Things.tick(h)
     Church.tick(h)
-    if (Day.cricket(h) && !cricket.classList.contains('out')) {
+    if (Day.cricket(h) && !game.evening) {
+      game.evening = true
       cricket.classList.add('out')
       Debug.trace('cricket', { hour: Day.clock(h) })
       Music.evening()
-    }
+    } else if (!game.evening) dimCricket(light < CRICKET_LIGHT)
+  }
+
+  /** In an eclipse's dim, the cricket comes out and fiddles once, as at dusk; it goes in as the light comes back. */
+  function dimCricket(dim) {
+    if (dim === cricket.classList.contains('out')) return
+    cricket.classList.toggle('out', dim)
+    Debug.trace('cricket', { dim })
+    if (dim) Music.fiddle()
   }
 
   /** The circle closing through the last hour; at dusk, left alone, he goes home to listen; then bedtime. */
@@ -207,7 +252,7 @@ const meadowGame = (() => {
 
   function stateNow() {
     const m = Mole.state
-    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state() }
+    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), eclipse: Math.round(eclipseCover() * 100) / 100 }
   }
 
   function checkRules() {
@@ -434,10 +479,22 @@ const meadowGame = (() => {
     [/^tap butterfly (\d+)$/, (m) => tapButterfly(Number(m[1]))],
     [/^tap frog$/, () => Spring.tapFrog()],
     [/^tap snail$/, () => tapSnail()],
+    [/^tap sun$/, () => run('tap sun', callSun)],
   ]
 
   /** A tap on a butterfly: it flutters off, and, if he is free, he looks up after it, hairs up: "ooh". */
   const tapButterfly = (id) => lookAfter(Critters.tap(id))
+
+  /** A tap on the sun in an eclipse: he looks up and calls to it, waving ("ahoj!"); it comes back in its own
+   * time, the same for every child. Out of an eclipse, a tap on the sun is a tap on the sky: he answers. */
+  async function callSun() {
+    if (!eclipseCover()) return tapMole()
+    Mole.perk(1.2)
+    Mole.lookAt(View.x + sunX) // the sky stays put as the view moves
+    Sound.say('ahoj')
+    Debug.trace('calls the sun', {})
+    await Mole.wave()
+  }
 
   /** A tap on the snail: into its shell it goes, and, if he is free, he looks at it: "ooh". */
   const tapSnail = () => lookAfter(Critters.tapSnail())
@@ -524,6 +581,7 @@ const meadowGame = (() => {
     if (target.closest('.mole-carry') && Things.holder()) return `use ${Things.holder()}`
     if (target.closest('.mole')) return game.gesture && Things.get(game.gesture) ? `use ${game.gesture}` : 'tap mole'
     if (target.closest('#bed')) return 'sniff'
+    if (target.closest('#sun') && eclipseCover()) return 'tap sun'
     if (target.closest('#spring')) return 'paddle'
     if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`
     return 'tap mole' // the sky: he answers anyway

@@ -10,7 +10,9 @@
 // which encounters come (things.js), and `?soon` brings the first at once;
 // `?critters=now` brings a butterfly at once (critters.js), even in a still play;
 // `?critters=snail` the snail, its shelter under the wild flowers wet from the start;
-// `?wind=gust` a strong gust that carries something, three seconds after he wakes.
+// `?wind=gust` a strong gust that carries something, three seconds after he wakes;
+// `?eclipse=11` an eclipse at 11:00 (and none other), `?eclipse=now` as he wakes
+// (the sun is low then, behind the trees: 11 shows the moon over it).
 
 /* exported Layout */
 const Layout = (() => {
@@ -25,7 +27,7 @@ const Layout = (() => {
   const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
   const daySeconds = Number(params.get('day'))
   const props = params.has('props') ? params.get('props').split(',').filter(Boolean) : null
-  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind') }
+  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind'), eclipse: params.get('eclipse') === 'now' ? 0 : Number(params.get('eclipse')) || null }
 
   return { WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, DIG, flags, dayMs: flags.day ? flags.day * 1000 : null }
 })()

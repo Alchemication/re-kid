@@ -617,6 +617,52 @@ class TestMeadowWind:
         assert not m.errors, m.errors
 
 
+class TestMeadowEclipse:
+    """The eclipse (eclipse.js): the light falls to dusk while the hour goes
+    on, and what answers to the light answers (the tulips close, the cricket
+    comes out, the butterflies go home); a tap on the sun has him call to it;
+    then it all comes back."""
+
+    TULIP_OPEN = "parseFloat(getComputedStyle(document.querySelector('.tulip g path')).transform.split(',')[1]) || 0"
+
+    def test_the_meadow_dims_answers_and_comes_back(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&critters=now&eclipse=11&day=60")
+        m.wake()
+        m.wait("meadowGame.state().eclipse === 1", 25_000)
+        m.wait("World.state.light < 0.35", 3_000)
+        assert m.page.evaluate(
+            "document.getElementById('cricket').classList.contains('out')"
+        )
+        assert abs(m.page.evaluate(self.TULIP_OPEN)) < 0.05, "the tulips closed"
+        assert m.page.evaluate("Critters.out.every((b) => b.leaving)")
+        m.do("tap sun")
+        m.wait("meadowGame.trace().includes('calls the sun')", 3_000)
+        m.wait("meadowGame.state().eclipse === 0 && World.state.light > 0.9", 15_000)
+        assert not m.page.evaluate(
+            "document.getElementById('cricket').classList.contains('out')"
+        )
+        assert abs(m.page.evaluate(self.TULIP_OPEN)) > 0.3, "the tulips opened again"
+        m.wait_free()
+        m.assert_settled()
+
+    def test_now_starts_one_as_he_wakes(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&eclipse=now")
+        m.wake()
+        m.wait("meadowGame.state().eclipse > 0", 5_000)
+        assert not m.errors, m.errors
+
+    def test_a_tap_on_the_sun_without_one_is_a_tap_on_him(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&props=")
+        m.wake()
+        m.do("tap sun")
+        m.wait("meadowGame.trace().includes(' says ')", 3_000)
+        assert "calls the sun" not in m.page.evaluate("meadowGame.trace()")
+        m.wait_free()
+        m.assert_settled()
+
+
 class TestMeadowTapHim:
     """A tap on him: every answer in turn (wave, peekaboo, a jump of joy, a
     think, a laugh behind his hands), never the same twice running; each

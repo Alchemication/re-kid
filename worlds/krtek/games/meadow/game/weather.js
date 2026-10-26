@@ -6,7 +6,7 @@
 // hairs flutter (--flutter). You hear it, quietly. A strong gust now and then
 // carries a few leaves or dandelion seeds across the meadow, in from out of
 // sight upwind and off out of sight downwind, and he turns to watch them go
-// if he is free. Creatures read its level in the world state (world.js):
+// if he is free. It eases in an eclipse's dim. Creatures read its level in the world state (world.js):
 // the butterflies are blown about (creature.js, `blown`).
 //
 // The wind and whether a gust carries anything draw from their own streams;
@@ -29,6 +29,7 @@ const Weather = (() => {
   const CARRY_Y = [440, 650] // how high they go: low, against the trees and the grass, where they show (white seeds were lost in the sky)
   const CARRY_SIZE = 2 // drawn this much bigger than their shapes: a toddler sees them go by
   const CALM_FROM = 18.6 // the wind drops as the sun goes down
+  const HUSH = 0.5 // in a dim light (an eclipse) the wind eases, by this much at no light
   const FORCED_AFTER_MS = 3000 // ?wind=gust: this long after he wakes
   const LEAVES = ['#6a9a3a', '#8bb24a', '#b88a2e'] // green, and the odd brown one
   const random = Debug.random('meadow-wind')
@@ -100,7 +101,7 @@ const Weather = (() => {
 
   function tick() {
     if (World.state.hour >= CALM_FROM && !air.calm) Wind.calm(air)
-    const level = Wind.step(air, TICK_MS / 1000)
+    const level = Wind.step(air, TICK_MS / 1000, -HUSH * (1 - World.state.light))
     World.set({ wind: level })
     show(level)
     if (!sound && Sound.running) sound = Sound.wind()

@@ -38,6 +38,7 @@ const Spring = (() => {
   const PAD = { x: S - 60, y: 712 } // the frog's lily pad
   const EVERY_MS = [9000, 20000] // between one bit of life and the next
   const NIGHT_FROM = 18.8 // they all go quiet by sunset
+  const DIM = 0.5 // none of it comes in a light this low (an eclipse)
   const FROG_HEARS = ['splash', 'vroom'] // what has the frog plop in: a splash near it, the car going by
   const FROG_LISTENS_MS = 250
   const DRINK_Y = POOL.y + 8 // where a bird stands to drink, at the water's edge
@@ -230,7 +231,7 @@ const Spring = (() => {
   function next() {
     Clock.after(between(EVERY_MS), () => {
       next()
-      if (hourNow() >= NIGHT_FROM || hourNow() < 8.4) return
+      if (hourNow() >= NIGHT_FROM || hourNow() < 8.4 || World.state.light < DIM) return
       const can = ['drink']
       if (frog && !frog.in) can.push('frog', 'frog')
       if (fish) can.push('fish')
