@@ -70,7 +70,7 @@ describe('a play', () => {
 
   it('makes some plays winter, without the summer things: no flowers, no fly, bee or spider, no fruit tree or bramble', () => {
     let winters = 0
-    for (let seed = 1; seed <= 200; seed++) if (layout(`?seed=${seed}`).winter) winters += 1
+    for (let seed = 1; seed <= 200; seed++) if (layout(`?seed=${seed}`).season === 'winter') winters += 1
     assert.ok(winters > 25 && winters < 80, `${winters} of 200`)
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}&season=winter`)

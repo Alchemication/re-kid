@@ -146,6 +146,10 @@ decided and why.
       a pale sun, dry grass; no flowers, fly, bee, spider, fruit tree or
       bramble; the shower falls as snow, the puddles are ice, he stays white
       and dry; no rainbow, mushrooms or snail after. `?season=winter`.
+      The season is in the world state (`season`, and `cold`: snow and ice
+      read cold, not the season), and each prop and creature lists the
+      seasons it belongs to (`layout.js` `IN_SEASON`), so autumn and spring
+      are a share and their own things, not edits everywhere.
       Still to come, each a `new-gag`: the sparrows at his bowl (the ground
       under snow, the bowl is the food on offer), slipping on the ice (a new
       gesture: moving him without walking breaks the `sliding` rule),

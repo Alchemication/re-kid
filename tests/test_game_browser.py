@@ -1358,9 +1358,10 @@ class TestWinter:
         self, yard: callable
     ) -> None:
         y = yard(self.QUERY)
-        assert y.page.evaluate("Layout.winter && !Layout.flowers")
+        assert y.page.evaluate("Layout.season === 'winter' && !Layout.flowers")
+        assert y.page.evaluate("World.state.cold === 1 && Weather.frozen")
         assert y.page.evaluate(
-            "document.getElementById('stage').classList.contains('winter')"
+            "document.getElementById('stage').classList.contains('season-winter')"
         )
         y.page.mouse.click(640, 650)
         y.page.wait_for_function("Weather.raining", timeout=30_000)

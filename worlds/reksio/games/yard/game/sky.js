@@ -66,7 +66,7 @@ const Sky = (() => {
     placeMoon()
   }
 
-  const WINTER_SUN = '#f6ecc8' // in winter, the sun pale and low on warmth
+  const SUNS = { winter: '#f6ecc8' } // a season's own sun: in winter, pale and low on warmth
   const LIGHT_FALL = 0.6 // the light falls by this much by sunset...
   const LIGHT_FALL_H = 0.5 // ...over this last half hour
   let hour = Day.FROM
@@ -108,7 +108,7 @@ const Sky = (() => {
     for (const c of document.querySelectorAll('#sun circle')) {
       c.setAttribute('cx', l.x.toFixed(1))
       c.setAttribute('cy', y.toFixed(1))
-      c.style.fill = Layout.winter ? WINTER_SUN : l.color // a pale winter sun
+      c.style.fill = SUNS[Layout.season] ?? l.color // a season's own sun (a pale winter one), else the hour's
     }
     $('sunset').style.opacity = mix(l.tint, Math.max(l.tint, DAWN_TINT), dawnK).toFixed(3)
     moonUp = l.moonUp

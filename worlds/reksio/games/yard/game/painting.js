@@ -45,8 +45,9 @@ const Painting = (() => {
     sky: { base: '#c7d3de', dabs: ['#dbe4ec', '#b3c2d0', '#e9eff4', '#bfccd8'], density: 0.17 },
     wall: { base: '#8a918f', dabs: ['#a3aaa8', '#767e7c', '#b6bcba', '#90a0a6', '#6f7775'], density: 0.27 },
     ground: { base: '#eef2f5', dabs: ['#dbe3ea', '#f9fbfc', '#c9d4de', '#e4ebf0'], density: 0.17 },
+    snowCap: true,
   }
-  const SEASON = Layout.winter ? WINTER : SUMMER
+  const SEASON = { summer: SUMMER, winter: WINTER }[Layout.season] ?? SUMMER // each season's look
   const SKY = SEASON.sky
   const WALL = SEASON.wall
   const GROUND = SEASON.ground
@@ -131,7 +132,7 @@ const Painting = (() => {
     wallTop.forEach(([x, y], i) => (i ? ctx.lineTo(x, y + 2) : ctx.moveTo(x, y + 2)))
     ctx.stroke()
     ctx.globalAlpha = 1
-    if (Layout.winter) snowCap(ctx, wallTop) // drawn after everything, so the yard's own draws stay as they were
+    if (SEASON.snowCap) snowCap(ctx, wallTop) // drawn after everything, so the yard's own draws stay as they were
   }
 
   /** In winter, snow lying along the wall's top: a soft white cap, a little uneven. */

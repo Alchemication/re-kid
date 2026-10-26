@@ -31,11 +31,15 @@ const Layout = (() => {
   const PROP_POOL = Object.keys(OFFERS)
   const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do
   const CREATURE_POOL = ['fly', 'bee', 'spider']
-  // Winter (Reksiowa zima, Reksio łyżwiarz, 1981: Adam's pick, 2026-10-26): some plays are winter, from their own
-  // stream so ?season shifts nothing else. Out of season then: the fruit tree and the bramble (whose flower brings
-  // the bee), the flowers, and the fly, the bee and the spider; the shower falls as snow (weather.js).
-  const WINTER_CHANCE = 0.25
-  const OUT_OF_WINTER = { props: ['tree', 'berries'], creatures: ['fly', 'bee', 'spider'] }
+  // The seasons (the series has Reksiowa jesień, wiosna, zima; Adam, 2026-10-26: the season is a big factor in how
+  // the world behaves). Each play is one season from start to bed, drawn from its own stream so ?season shifts
+  // nothing else; each one's share of plays here (autumn and spring to come). What follows from the season is read
+  // from the world state (world.js: `season`, and `cold`, which the weather writes): the snow, the ice.
+  const SEASONS = { summer: 0.75, winter: 0.25 }
+  // The seasons each prop and creature belongs to; one not listed belongs to all. The layout puts out only what is
+  // in season: in winter no fruit tree, no bramble (its flower brings the bee), no flowers, no fly, bee or spider.
+  const IN_SEASON = { tree: ['summer'], berries: ['summer'], flowers: ['summer'], fly: ['summer'], bee: ['summer'], spider: ['summer'] }
+  const inSeason = (name, season) => !IN_SEASON[name] || IN_SEASON[name].includes(season)
   const CREATURES_PER_PLAY = 2
   const MEMORY_KEY = 'reksio-yard-last-play'
   const RAIN_CHANCE = 0.6 // most plays have a shower; after one, the next leans dry
@@ -106,18 +110,20 @@ const Layout = (() => {
     }
   }
 
-  /** This play's season, from its own stream (drawn either way); ?season=winter (or summer) forces it. */
+  /** This play's season, by each one's share, from its own stream (drawn either way); ?season=winter forces it. */
   function seasonOf(params) {
-    const drawn = Debug.random('season')() < WINTER_CHANCE ? 'winter' : 'summer'
-    return ['winter', 'summer'].includes(params.get('season')) ? params.get('season') : drawn
+    let left = Debug.random('season')()
+    const names = Object.keys(SEASONS)
+    const drawn = names.find((n) => (left -= SEASONS[n]) < 0) ?? names[names.length - 1]
+    return names.includes(params.get('season')) ? params.get('season') : drawn
   }
 
-  /** Are the flowers out: as drawn, or ?flowers=1 (or 0); never in winter. */
-  const flowersOut = (params, drawn, winter) => !winter && (params.has('flowers') ? params.get('flowers') !== '0' : drawn)
+  /** Are the flowers out: as drawn, or ?flowers=1 (or 0); never out of their season. */
+  const flowersOut = (params, drawn, season) => inSeason('flowers', season) && (params.has('flowers') ? params.get('flowers') !== '0' : drawn)
 
-  /** Leave out of `list` what is out of season. */
-  function inSeason(list, out) {
-    list.splice(0, list.length, ...list.filter((n) => !out.includes(n)))
+  /** Keep in `list` only what is in season. */
+  function keepInSeason(list, season) {
+    list.splice(0, list.length, ...list.filter((n) => inSeason(n, season)))
   }
 
   /** Pick n from pool, preferring ones not seen last time (3 to 1). */
@@ -135,9 +141,9 @@ const Layout = (() => {
 
   const shuffled = (list) => pick(list, list.length)
 
-  /** The play's props: one that offers help, one that helps (unless the first already does), then the rest; none of `out` (out of season). */
-  function pickProps(seenBefore, out = []) {
-    const pool = PROP_POOL.filter((n) => !out.includes(n))
+  /** The play's props: one that offers help, one that helps (unless the first already does), then the rest; only those in `season`. */
+  function pickProps(seenBefore, season) {
+    const pool = PROP_POOL.filter((n) => inSeason(n, season))
     const chosen = []
     for (const kind of ['help', 'helped']) {
       if (chosen.some((n) => OFFERS[n].includes(kind))) continue
@@ -154,16 +160,15 @@ const Layout = (() => {
 
   const last = remembered()
   const season = seasonOf(params)
-  const winter = season === 'winter'
-  const props = pickProps(last.props, winter ? OUT_OF_WINTER.props : [])
+  const props = pickProps(last.props, season)
   const creatures = pick(CREATURE_POOL, CREATURES_PER_PLAY, last.creatures)
   // ?creatures=fly,spider picks the creatures
   if (params.has('creatures')) creatures.splice(0, creatures.length, ...listed('creatures', CREATURE_POOL))
-  inSeason(creatures, winter ? OUT_OF_WINTER.creatures : [])
+  keepInSeason(creatures, season)
   // ?flowers=1 (or 0) puts the flowers out (or not)
   const flowerCoin = random() < 0.5
   const flowersDrawn = creatures.includes('bee') || flowerCoin
-  const flowers = flowersOut(params, flowersDrawn, winter)
+  const flowers = flowersOut(params, flowersDrawn, season)
   // ?rain=1 (or 0) and ?rain-at=SECONDS force the weather
   const rainDrawn = random() < (last.rain ? RAIN_CHANCE / 2 : RAIN_CHANCE)
   const rain = params.has('rain') ? params.get('rain') !== '0' : rainDrawn
@@ -245,7 +250,7 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, fog, season, winter, mouseAt, fruit, visitorAt, henAt, mushroomsAt, layered, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, fog, season, mouseAt, fruit, visitorAt, henAt, mushroomsAt, layered, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */

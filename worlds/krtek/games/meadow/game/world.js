@@ -30,6 +30,8 @@ const World = (() => {
     wind: 0, // 0 still, 1 a full gust; it blows from left to right
     view: { x0: 0, x1: 1600 }, // the stretch of the scene the child sees
     fog: 0, // 0 clear, 1 thickest: creatures keep closer (the yard's morning fog)
+    season: 'summer', // the play's season, from start to bed (the yard's layout.js picks it)
+    cold: 0, // 0 warm, 1 winter: from 0.5 the rain falls as snow and water is ice
   }
 
   /** Run on this clock. */

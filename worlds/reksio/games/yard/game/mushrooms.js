@@ -278,7 +278,7 @@ const Mushrooms = (() => {
     isEnded = ended
     if (Layout.mushroomsAt != null) Clock.after(Layout.mushroomsAt * 1000, comeUp)
     Weather.on((phase) => {
-      if (phase === 'after' && !Layout.winter) Clock.after(AFTER_RAIN_S * 1000, comeUp) // none after snow
+      if (phase === 'after' && !Weather.frozen) Clock.after(AFTER_RAIN_S * 1000, comeUp) // none after snow
     })
   }
 
