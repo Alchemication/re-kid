@@ -49,18 +49,9 @@ Read `worlds/<id>/MUSIC_DIRECTION.md`. It has three parts, kept apart:
 The wordings, the bed and the board note all come from it.
 
 If the world has no direction file, or its film facts are still
-`unknown`, start with a listening kit, not with generation:
-
-1. Make a kit like `listen.html`: 6–8 clips of the films, about 15
-   minutes, each with questions taken from the open `sound` claims.
-   Set the volume low at the start.
-2. Adam fills it in and saves his answers.
-3. His answers become `observed_by: adam` claims in `world.yaml`.
-4. Write the direction from those claims, and mark it untested until
-   his first verdicts.
-
-Claude can't hear (`CLAUDE.md`), so never describe the films' music from
-frames or memory.
+`unknown`, start with a listening kit, not with generation: follow
+`listening.md` in this skill's folder. Claude can't hear (`CLAUDE.md`),
+so never describe the films' music from frames or memory.
 
 ## 0b. Measure the moment before wording it
 

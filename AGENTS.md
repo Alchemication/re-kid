@@ -103,7 +103,7 @@ and fix what you find before reporting done.
 | `docs/WORLD_MODEL.md` | The world state and creature rules (`shared/world.js`, `creature.js`, `ambient.js`) that ambient life runs on, and how to add a creature. |
 | `README.md` | Layout, commands, the site, performance, debugging the yard, a note for parents. |
 | `CLAUDE.md` / `AGENTS.md` | Working rules (this file). |
-| `.claude/skills/*/SKILL.md` | Procedures: `new-world`, `new-episode`, `new-character`, `new-gag`, `new-sound`, `new-music`. |
+| `.claude/skills/*/SKILL.md` | Procedures: `new-world`, `new-episode`, `new-character`, `new-gag`, `new-sound`, `new-music`. A branch not every run needs is a file beside it, read when needed (`new-gag`: `yard.md`, `meadow.md`, `ambient.md`; `new-music`: `listening.md`). |
 | `experiments/sound/README.md` | The sound-generation experiment and its board. |
 | `experiments/music/README.md` | The music-generation experiment and its board. |
 | `worlds/<id>/games/<game>/brief.yaml` | A game's parts, each `original`, `inspired` or `invented`. |
