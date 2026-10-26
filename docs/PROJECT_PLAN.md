@@ -126,9 +126,12 @@ decided and why.
    call: "far more superior already"): the fly and the bee decide by the
    creature rules from what the yard tells the world (light, rain coming,
    wet, his bark and snap, his nose, the roof, tap, bowl and flowers to land
-   on, the flowers' nectar). They should play as before; judge whether they
-   do. Next for the yard, his call: the snail and worms onto it, then the
-   meadow's world events (the eclipse, perhaps the storm).
+   on, the flowers' nectar), and so do the snail and the worms (out by the
+   puddles once the rain stops: each puddle offers a drink while it holds
+   water; the snail freezes in her shell at his nose and goes to a porcino
+   put down for her). They should play as before; judge whether they do.
+   Next for the yard: the meadow's world events (the eclipse, perhaps the
+   storm).
 3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how

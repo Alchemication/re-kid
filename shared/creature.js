@@ -143,7 +143,10 @@ const Creature = (() => {
       c.vy = Math.sin(a) * top
       return { kind: 'dart', x, y: clampY(c, c.y + Math.sin(a) * c.traits.dart * 0.5) }
     }
-    if (c.traits.freezeMs) return { kind: 'freeze', x: c.x, y: c.y, until: t + between(c.traits.freezeMs, rnd()) }
+    if (c.traits.freezeMs) {
+      c.vx = c.vy = 0 // still, at once
+      return { kind: 'freeze', x: c.x, y: c.y, until: t + between(c.traits.freezeMs, rnd()) }
+    }
     return away(c, world, 'flee')
   }
 
@@ -217,6 +220,7 @@ const Creature = (() => {
    */
   function move(c, world, dt, t, rnd) {
     const g = c.goal
+    if (g.kind === 'freeze') return null // stock still, wind or not
     const s = dt / 1000
     const k = Math.min(1, c.traits.turn * s)
     const dx = g.x - c.x

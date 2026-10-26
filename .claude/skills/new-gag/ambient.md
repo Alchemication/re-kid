@@ -7,10 +7,10 @@ the world model; read `docs/WORLD_MODEL.md` first. The worked example is the
 snail (`critters.js` `snailComes`, `rain.js` its shelter and wet grass,
 `TestMeadowSnail`).
 
-In the yard, the fly and the bee are on the world model (`creatures.js`,
-stepped from the yard's own tick, so its unit tests drive them); a new
-yard creature follows them. The spider, the snail and the worms are still
-machines of their own.
+In the yard, the fly, the bee, the snail and the worms are on the world
+model (`creatures.js`, stepped from the yard's own tick, so its unit tests
+drive them); a new yard creature follows them. The spider is still a
+machine of its own.
 
 ## 1. Design, on paper
 

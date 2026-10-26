@@ -16,7 +16,7 @@
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Clock, Creature, Debug, Motion, Sound, Reksio, Layout, Weather, World */
+/* global Clock, Creature, Debug, Motion, Sound, Reksio, Layout, World */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -63,7 +63,6 @@ const Creatures = (() => {
    * noises when they do something. */
   const hear = (x, play) => Sound.from(Math.abs(x - world.reksio.x), play)
   const SNAIL_NOSE = 22 // a snail's nose, ahead of her middle
-  const SNAIL_REACH = 26 // she eats food this close to her nose
   const SNAIL_BITE_S = 1.3 // a bite this often…
   const SNAIL_BITES = 6 // …and it's gone after this many
   const WHINE_EVERY_S = 9 // on average, a passing fly whines this often
@@ -505,15 +504,44 @@ const Creatures = (() => {
 
   // ------------------------------------------------------------ after the rain: the snail
 
+  // Once the rain has stopped and a puddle still holds water ('drink'),
+  // the snail comes out by it after a little while. For the world model
+  // (creature.js): it creeps about at a snail's pace, pulls into its shell
+  // when Reksio's nose comes close (shy, and it freezes), peeks out again
+  // once he's gone, and goes to food put down for it ('snail-food', a
+  // porcino: mushrooms.js) and eats it bite by bite. It stays out all day.
+  const FOR_GOOD = 1e12 // ms: longer than any play (Infinity would make the creature rules' random draws NaN)
+  const SNAIL = {
+    speed: 9, flee: 1, turn: 4, // a snail's pace
+    stayMs: [FOR_GOOD, FOR_GOOD], hours: [0, 24], dark: 0, // out for good, dusk and all
+    feeds: 'snail-food', hungerMs: [0, 0], feedMs: [FOR_GOOD, FOR_GOOD], // eating: until the food is gone (this file ends it)
+    shy: { at: 120, odds: 1 }, freezeMs: [3000, 6000], // into her shell, and peeking out a while after
+    band: [GROUND + 20, GROUND + 20], roam: 1200, haunt: [420, Layout.MAX_X],
+  }
+  const SNAIL_AFTER_S = 3 // the rain stopped and the puddles still wet this long: out she comes
+  const WORMS_AFTER_S = 1.5 // …and the worms before her
+  const SNAIL_FROM = 120 // she comes out this near a puddle
+
+  /** How long the rain has been over with puddles still wet (seconds), counted here from what the world says; 0 while it isn't. */
+  const afterRain = { s: 0 }
+  function countAfterRain(dt) {
+    const wet = World.offered('drink').filter((p) => World.isWet(p.x))
+    afterRain.s = (World.state.overcast || 0) < 0.5 && wet.length ? afterRain.s + dt : 0
+    afterRain.puddles = wet
+  }
+
   const snail = {
-    x: 0, y: GROUND + 20, dir: 1,
+    c: null,
     out: false, // has it come out yet
     tucked: false, // hiding in its shell
     food: null, // a porcino Reksio has put down for her (mushrooms.js): {x, bite(k), done()}
     bites: 0,
     biteAt: 0,
+    dir: 1,
     trail: [],
     g: null,
+    get x() { return this.c ? this.c.x : 0 },
+    get y() { return GROUND + 20 },
     make() {
       this.trailPath = el('path', { class: 'snail-trail' })
       this.g = el('g', { class: 'critter snail', 'data-critter': 'snail' })
@@ -530,10 +558,10 @@ const Creatures = (() => {
       this.g.style.display = 'none'
     },
     comeOut() {
-      // from beside a puddle (or the flowers), heading across the yard
-      const ps = Weather.puddles
-      const near = ps.length ? ps[Math.floor(random() * ps.length)].x : 1700 + Layout.x('flowers')
-      this.x = near + rnd(-120, 120)
+      // from beside a puddle, out of her shell
+      const ps = afterRain.puddles
+      const p = ps[Math.floor(random() * ps.length)]
+      this.c = Creature.make(SNAIL, p.x + rnd(-SNAIL_FROM, SNAIL_FROM), this.y, T(), random)
       this.dir = random() < 0.5 ? -1 : 1
       this.out = true
       this.g.style.display = ''
@@ -547,60 +575,66 @@ const Creatures = (() => {
         on ? [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }] : [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }],
         { duration: on ? 250 : 1600, easing: 'ease-out' },
       )
-      if (on) {
-        this.peekAt = world.t + rnd(3, 6)
-        hear(this.x, () => Sound.schlup())
-      }
+      if (on) hear(this.x, () => Sound.schlup())
     },
-    /** On along the ground at a snail's pace, leaving her shiny trail. */
-    creep(dt) {
-      this.x += this.dir * 9 * dt
-      if (this.x < 420 || this.x > Layout.MAX_X) this.dir *= -1
+    /** At her food: a bite now and then, and it shrinks; gone after SNAIL_BITES, and she's free again. */
+    eat() {
+      if (world.t < this.biteAt) return
+      this.biteAt = world.t + SNAIL_BITE_S
+      this.bites += 1
+      hear(this.x, () => Sound.nibble())
+      this.food.bite(1 - this.bites / SNAIL_BITES)
+      if (this.bites >= SNAIL_BITES) this.fed()
+    },
+    /** The food is gone (eaten, or another put down instead): done with it. */
+    fed() {
+      if (!this.food) return
+      this.food.done()
+      this.food = null
+      this.bites = 0
+      World.withdraw('snail-food')
+      if (this.c?.goal?.kind === 'feed') this.c.goal = null
+    },
+    /** Food put down for her: offered (world.js), on the side she'll come at it from, so her nose is at it. */
+    feed(food) {
+      this.fed() // one still being eaten: finished, not left half-eaten
+      this.food = food
+      const side = food.x > this.x ? -1 : 1
+      World.offer('snail-food', 'snail-food', food.x + side * SNAIL_NOSE, this.y)
+    },
+    update(dt) {
+      if (!this.out) {
+        if (afterRain.s > SNAIL_AFTER_S) this.comeOut()
+        return
+      }
+      const c = this.c
+      Creature.think(c, World, T(), random)
+      Creature.move(c, World, dt * 1000, T(), random)
+      c.y = this.y
+      this.tuck(c.goal.kind === 'freeze')
+      if (this.food && Creature.feeding(c)) {
+        this.dir = this.food.x > c.x ? 1 : -1
+        this.eat()
+      } else if (Math.abs(c.vx) > 0.5) this.dir = Math.sign(c.vx)
+      this.creep()
+      this.flip.setAttribute('transform', `scale(${this.dir} 1)`)
+      this.g.setAttribute('transform', `translate(${this.x} ${this.y})`)
+    },
+    /** Her shiny trail behind her, and her eye stalks swaying. */
+    creep() {
       const last = this.trail[this.trail.length - 1]
       if (!last || Math.abs(last - this.x) > 4) this.trail.push(this.x)
       if (this.trail.length > 90) this.trail.shift()
       this.stalks.setAttribute('transform', `rotate(${Math.sin(world.t * 1.5) * 6} 18 -8)`)
-    },
-    /** Is she at the food (then a bite now and then, and it shrinks)? Turned
-     * towards it if not. */
-    eat() {
-      const f = this.food
-      const nose = this.x + this.dir * SNAIL_NOSE
-      if (Math.abs(f.x - nose) > SNAIL_REACH) {
-        this.dir = f.x > this.x ? 1 : -1
-        return false
-      }
-      if (world.t < this.biteAt) return true
-      this.biteAt = world.t + SNAIL_BITE_S
-      this.bites += 1
-      hear(this.x, () => Sound.nibble())
-      f.bite(1 - this.bites / SNAIL_BITES)
-      if (this.bites >= SNAIL_BITES) {
-        f.done()
-        this.food = null
-        this.bites = 0
-      }
-      return true
-    },
-    update(dt) {
-      if (!this.out) {
-        const since = Weather.sinceRain
-        if (since != null && since > 3) this.comeOut()
-        return
-      }
-      const nose = world.reksio.nose
-      if (dist(nose.x, nose.y, this.x, this.y - 10) < 120) this.tuck(true)
-      else if (this.tucked && world.t > this.peekAt) this.tuck(false)
-      if (!this.tucked && !(this.food && this.eat())) this.creep(dt) // eating, she stays put
       if (this.trail.length > 1) {
         this.trailPath.setAttribute('d', `M${this.trail[0]} ${this.y + 2} ` + this.trail.map((x) => `L${x} ${this.y + 2}`).join(' '))
       }
-      this.flip.setAttribute('transform', `scale(${this.dir} 1)`)
-      this.g.setAttribute('transform', `translate(${this.x} ${this.y})`)
     },
   }
 
   // ------------------------------------------------------------ after the rain: worms
+
+  const WORM_SIDE = [120, 160] // how far from a puddle's middle a worm comes up
 
   const worms = {
     list: [],
@@ -608,8 +642,8 @@ const Creatures = (() => {
     make() {},
     comeUp() {
       this.made = true
-      for (const p of Weather.puddles.slice(0, 2)) {
-        const x = p.x + (random() < 0.5 ? -1 : 1) * (p.rx + rnd(20, 60))
+      for (const p of afterRain.puddles.slice(0, 2)) {
+        const x = p.x + (random() < 0.5 ? -1 : 1) * rnd(...WORM_SIDE)
         const g = el('g', { class: 'critter worm', 'data-critter': 'worm', transform: `translate(${x} ${GROUND + 26})` })
         const hit = el('circle', { r: HIT_R, cy: -20, class: 'critter-hit', display: 'none' }, g)
         const path = el('path', { class: 'worm-body' }, g)
@@ -617,7 +651,7 @@ const Creatures = (() => {
       }
     },
     update(dt) {
-      if (!this.made && Weather.phase === 'after' && Weather.sinceRain > 1.5) this.comeUp()
+      if (!this.made && afterRain.s > WORMS_AFTER_S) this.comeUp()
       for (const w of this.list) {
         if (w.eaten) continue
         w.age += dt
@@ -693,6 +727,7 @@ const Creatures = (() => {
       spiderHeard = World.heardUpTo
       if (bark) spider.hide()
     }
+    countAfterRain(dt)
     for (const c of all) c.update(dt)
   }
 
@@ -711,11 +746,7 @@ const Creatures = (() => {
     get snail() { return snail.out ? { x: snail.x, y: snail.y, dir: snail.dir } : null },
     /** Food put down for the snail (a porcino: mushrooms.js): she goes to it
      * and eats it bite by bite, bite(k) as it shrinks (k: what's left), done() at the end. */
-    feedSnail(food) {
-      snail.food?.done() // one still being eaten: finished, not left half-eaten
-      snail.food = food
-      snail.bites = 0
-    },
+    feedSnail(food) { snail.feed(food) },
     /** A worm that's up out of the ground (for the bird): {x, y, eat()}. */
     get worm() {
       const w = worms.up

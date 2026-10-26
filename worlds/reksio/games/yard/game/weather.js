@@ -286,6 +286,8 @@ const Weather = (() => {
   // ------------------------------------------------------------ public
 
   function init() {
+    // each puddle offers a drink while it holds water (world.js): the snail and the worms come out by them after rain
+    puddles.forEach((p, i) => World.offer(`puddle-${i}`, 'drink', p.x, GROUND_Y, () => shower.wet > 0.25))
     makeClouds()
     makeRainbow()
     new ResizeObserver(sizeCanvas).observe(canvas)

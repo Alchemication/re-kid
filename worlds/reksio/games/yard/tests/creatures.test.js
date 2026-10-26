@@ -27,6 +27,7 @@ function yard(query) {
   Creatures.init()
   return {
     Creatures,
+    World,
     reksio,
     weather,
     sounds,
@@ -206,10 +207,12 @@ describe('the spider', () => {
 })
 
 describe('after the rain', () => {
+  /** The rain stopped `sinceRain` seconds ago, a puddle still wet: as the yard's weather tells the world (weather.js). */
   const afterRain = (y, sinceRain) => {
-    y.weather.phase = 'after'
-    y.weather.sinceRain = sinceRain
-    y.weather.puddles = [{ x: 2000, rx: 100 }]
+    y.World.set({ overcast: 0 })
+    y.World.offer('puddle-0', 'drink', 2000, 812)
+    y.World.wet(1900, 2100, 1e9)
+    y.run(sinceRain)
   }
 
   it('brings no snail and no worms to a dry play', () => {

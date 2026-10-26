@@ -29,8 +29,12 @@ In the yard (Adam, 2026-10-26: "far more superior already"), the fly and
 the bee live on it too (`creatures.js`). The yard steps them from its own
 tick, not through the runner, so its unit tests can drive them frame by
 frame; the world runs on the creatures' clock there (`World.setup` in
-`Creatures.init`). The spider, the snail and the worms stay small machines
-of their own; the spider hears Reksio's bark as a world noise. Gags still
+`Creatures.init`). The snail is on it as well: she comes out by a puddle
+that still offers a `drink` a few seconds after the rain stops, creeps
+about, freezes in her shell when his nose comes close, and goes to food put
+down for her (`snail-food`, a porcino) to eat it bite by bite. The worms
+come up beside the puddles by the same signs. The spider stays a small
+machine of its own; it hears Reksio's bark as a world noise. Gags still
 reach them as before (`beeTo`, the web), and a gag's errand comes before
 everything else the bee would do.
 
@@ -44,7 +48,7 @@ everything else the bee would do.
 | `hero` | `{x, nose}`: where the hero is, and his nose (a shy creature darts from it) | the yard's `creatures.js` |
 | `wind` | 0 still to 1 a full gust, blowing left to right (`shared/wind.js`: a breeze, now and then a gust, calm from sunset) | `weather.js` |
 | `view` | `{x0, x1}`: what the child sees | `meadow.js`, from the view |
-| `offer(id, kind, x, y, open)` | a thing offers something while `open()` | `meadow.js` (nectar: the tulips while open, the bluebells, the yellow spike), `rain.js` (nectar: the wild patch, not while drooping; shelter under its leaves), `spring.js` (a drink at either edge of the pool) |
+| `offer(id, kind, x, y, open)` | a thing offers something while `open()`; in the yard, each puddle a `drink` while it holds water (`weather.js`) | `meadow.js` (nectar: the tulips while open, the bluebells, the yellow spike), `rain.js` (nectar: the wild patch, not while drooping; shelter under its leaves), `spring.js` (a drink at either edge of the pool) |
 | `wet(x0, x1, ms)` | rain, or wet underfoot, there and for so long | `rain.js`, under the cloud and for 45 s after; `storm.js`, the whole meadow while it rains and 45 s after |
 | `noise(kind, x, reach)` | a sound, heard within `reach`. Noises are numbered: a listener keeps `World.heardUpTo` and hears each once | `car.js` (`vroom`, along its way), `spring.js` and the paddle (`splash`), `church.js` (`bell`, everywhere), `storm.js` (`thunder`, everywhere); the yard: Reksio's `bark` and `snap` |
 
@@ -81,8 +85,8 @@ What it goes for, first that applies:
    `startledBy` (a list, or `{ kind: range }`), or, if `shy`, the hero's
    nose came too close. Off out of sight at `flee` times its speed; or,
    with `dart`, a startled burst a short way off, then on as before (the
-   fly's dodge, the bee's huff); or, with `freezeMs`, still that long (the
-   snail into its shell).
+   fly's dodge, the bee's huff); or, with `freezeMs`, stock still at once,
+   that long (a snail into her shell).
 2. **Home**: its stay is over, it is out of its `hours`, the `light` is below
    its `dark`, rain coming or the wet if it minds it (`wet: 'avoid'`), or
    the dry if it likes the wet (`'likes'`). To its own `home` if made with
