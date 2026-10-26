@@ -231,7 +231,7 @@ const Spring = (() => {
   function next() {
     Clock.after(between(EVERY_MS), () => {
       next()
-      if (hourNow() >= NIGHT_FROM || hourNow() < 8.4 || World.state.light < DIM) return
+      if (hourNow() >= NIGHT_FROM || hourNow() < 8.4 || World.state.light < DIM || World.isWet(POOL.x)) return // not at night, in a dim, nor in the rain
       const can = ['drink']
       if (frog && !frog.in) can.push('frog', 'frog')
       if (fish) can.push('fish')

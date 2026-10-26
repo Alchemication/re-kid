@@ -185,7 +185,8 @@ const Critters = (() => {
     const next = (ms) => Clock.after(ms, () => {
       const [from, to] = BUTTERFLY.hours
       const h = World.state.hour
-      if (out.length < MAX && h > from && h < to && World.state.light >= BUTTERFLY.dark) come() // not in an eclipse's dim
+      const { x0, x1 } = World.state.view
+      if (out.length < MAX && h > from && h < to && World.state.light >= BUTTERFLY.dark && !World.isWet((x0 + x1) / 2)) come() // not in an eclipse's dim, nor in the rain
       next(between(EVERY_MS, comings()))
     })
     next(first)

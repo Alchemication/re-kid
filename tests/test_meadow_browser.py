@@ -30,10 +30,13 @@ CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 5, "poles": 5, "rain": 5}
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 5, "poles": 5, "rain": 5, "storm": 2}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
-SOLVE = {"egg": ["use egg mouse", "use egg hare", "use egg hen"]}
+SOLVE = {
+    "egg": ["use egg mouse", "use egg hare", "use egg hen"],
+    "storm": ["use storm hare", "use storm mouse", "use storm hen"],
+}
 
 
 class Meadow:
@@ -189,7 +192,7 @@ class TestMeadowEncounters:
         last = SOLVE.get(name, [f"use {name}"])[
             -1
         ]  # a choice encounter: its answer, tapped again and again
-        for _ in range(40):
+        for _ in range(150):  # long enough for the storm's clouds to come in first
             m.do(last)
             m.page.wait_for_timeout(300)
             if m.state()["things"][name] == "done":
@@ -661,6 +664,96 @@ class TestMeadowEclipse:
         assert "calls the sun" not in m.page.evaluate("meadowGame.trace()")
         m.wait_free()
         m.assert_settled()
+
+
+class TestMeadowStorm:
+    """The storm and the umbrella (umbrella.js, storm.js): the child picks
+    whom he waves in; the last in squeezes him out into the rain, and he pops
+    up in a molehill in the middle; the rain stops, everyone goes home, the
+    umbrella stays, closed. No rain falls under it."""
+
+    def test_the_child_picks_and_the_last_squeezes_him_out(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&soon&props=storm")
+        m.wake()
+        arrived(m, "storm")
+        m.do("use storm")
+        m.wait("meadowGame.state().things.storm === 'choosing'", 40_000)
+        assert m.page.evaluate("Storm.phase") == "raining"
+        for who in ("hen", "hare", "hen"):  # the hen again: the next one still out
+            m.do(f"use storm {who}")
+            m.wait("!meadowGame.state().busy", 15_000)
+        m.wait("meadowGame.state().things.storm === 'done'", 40_000)
+        trace = m.page.evaluate("meadowGame.trace()")
+        assert trace.index('"who":"hen","under":"hen"') < trace.index(
+            '"under":"hen hare"'
+        )
+        assert "squeezed out" in trace
+        assert m.page.evaluate("meadowGame.detail('storm').umbrella.open") is False
+        assert m.state()["pose"] == "hill", "he popped up in a molehill"
+        m.wait("Storm.phase === null", 15_000)
+        m.wait_free()
+        m.assert_settled()
+
+    def test_another_friend_tapped_mid_wave_keeps_the_sheltered(
+        self, meadow: callable
+    ) -> None:
+        """Review, 2026-10-26: a tap on another friend while one was waved in
+        cut the try, and the cut sent everyone home, the sheltered too."""
+        m = meadow(f"{STILL}&soon&props=storm")
+        m.wake()
+        arrived(m, "storm")
+        m.do("use storm")
+        m.wait("meadowGame.state().things.storm === 'choosing'", 40_000)
+        m.do("use storm mouse")
+        m.wait("meadowGame.detail('storm').under.includes('mouse')", 10_000)
+        m.wait("!meadowGame.state().busy", 5_000)
+        m.do("use storm hare")
+        m.page.wait_for_timeout(400)  # the hare's wave under way
+        m.do("use storm hen")
+        m.wait("meadowGame.detail('storm').under.length >= 2", 10_000)
+        assert "mouse" in m.page.evaluate("meadowGame.detail('storm').under")
+        assert m.page.evaluate("meadowGame.detail('storm').out.length") == 3
+
+    def test_a_cut_while_he_carries_it_puts_it_down_and_he_picks_it_up(
+        self, meadow: callable
+    ) -> None:
+        """Review, 2026-10-26: a cut on his way planted the umbrella wherever
+        he was (by his den, in his flower bed), for the rest of the day."""
+        m = meadow(f"{STILL}&soon&props=storm")
+        m.wake()
+        arrived(m, "storm")
+        m.do("use storm")
+        m.wait("meadowGame.state().carrying", 20_000)
+        m.page.wait_for_timeout(CUT_MS)
+        m.do(
+            "stop"
+        )  # a tap would wait for the step to end; an arrow let go (or bedtime) cuts at once
+        m.wait_free()
+        m.assert_settled()
+        detail = m.page.evaluate("meadowGame.detail('storm')")
+        assert detail["umbrella"] is None and detail["lying"] is not None, detail
+        m.do("use storm")
+        m.wait("meadowGame.detail('storm').umbrella?.open", 30_000)
+        assert m.page.evaluate("meadowGame.detail('storm')")["umbrella"]["x"] == 1420
+        assert m.page.evaluate("meadowGame.detail('storm').lying") is None
+
+    def test_no_rain_falls_under_the_umbrella(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=storm")
+        m.wake()
+        arrived(m, "storm")
+        m.do("use storm")
+        m.wait(
+            "Storm.phase === 'raining' && meadowGame.detail('storm').umbrella?.open",
+            40_000,
+        )
+        assert m.page.evaluate("World.isWet(1420)"), "the meadow is wet"
+        assert (
+            m.page.evaluate("getComputedStyle(document.getElementById('rain')).display")
+            == "block"
+        )
+        assert not m.errors, m.errors
 
 
 class TestMeadowTapHim:

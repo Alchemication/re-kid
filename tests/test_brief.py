@@ -104,7 +104,13 @@ class TestValidateBrief:
         (base / "games" / "intro" / "brief.yaml").write_text(yaml.safe_dump(brief))
 
     def test_valid_refs(self, worlds_root: Path) -> None:
-        refs = ["intro:b1", "mark:bark", "world:premise", "world:aesthetics.palette"]
+        refs = [
+            "intro:b1",
+            "mark:bark",
+            "world:premise",
+            "world:aesthetics.palette",
+            "episode:ep-1",
+        ]
         brief = minimal_brief(
             pitch=_el("inspired", refs), scenes=[_scene("s1", moment="b1")]
         )
@@ -114,7 +120,14 @@ class TestValidateBrief:
         assert set(report.briefs) == {"intro"}
 
     @pytest.mark.parametrize(
-        "ref", ["intro:nope", "mark:nope", "world:nope", "world:aesthetics.nope"]
+        "ref",
+        [
+            "intro:nope",
+            "mark:nope",
+            "world:nope",
+            "world:aesthetics.nope",
+            "episode:nope",
+        ],
     )
     def test_unknown_ref(self, worlds_root: Path, ref: str) -> None:
         self._write(worlds_root, minimal_brief(pitch=_el("inspired", [ref])))

@@ -16,7 +16,7 @@ then cuts it short to be picked up at the next step later. Keep each step
 
 | Piece | Where |
 |---|---|
-| An encounter | its own file (`egg.js`, `poles.js`, `paint.js`, `car.js`) that registers with `Things.add({ name, offer, appear, steps, restore, night, detail, again? })`; `offer` is `help`, `helped` or `discover` (one of each comes a play). Each step is `async (alive) => …` and returns as soon as `alive()` is false after an await. Steps must be safe to run again from the start after a cut: guard what is already done (`if (egg.chick) return`) and bring back whoever it needs (the paint's fox comes back first) |
+| An encounter | its own file (`egg.js`, `poles.js`, `paint.js`, `car.js`, `umbrella.js`; one with `instead` and `chance` comes in that share of plays in place of another, as the storm for the rain cloud) that registers with `Things.add({ name, offer, appear, steps, restore, night, detail, again? })`; `offer` is `help`, `helped` or `discover` (one of each comes a play). Each step is `async (alive) => …` and returns as soon as `alive()` is false after an await. Steps must be safe to run again from the start after a cut: guard what is already done (`if (egg.chick) return`) and bring back whoever it needs (the paint's fox comes back first) |
 | What a cut leaves | `restore()`, called at once when the chain is cut (the meadow's `run` onCut, before he is settled): visitors home, a thing in his hands put down by him, everything it was animating cancelled and left where it ends. Store a thing's end position before animating to it, so a cut leaves it there |
 | Visitors (mouse, hare, hen, fox, bullfinch…) | drawn in `friends.js`; an encounter keeps its own `Friends.troupe()` and calls them with `cast.call(kind, x, face)` from out of sight (`Friends.offscreen(dir, x)`; `{ hole }` for one that lives in a hole, `{ born }` for the chick), sends them home with `cast.dismiss(f)` (they walk off), all in `restore` with `cast.dismissAll()`, and at bedtime `dismissAll(true)` (at once). Those who only bring or fetch its things (the tins' porters, the poles' birds) are a troupe of their own, not its `detail().cast` (a rule checks none of that is left once he is free) |
 | His moves | `mole.js`: `goTo` (via `Things.meadow`), `walkTo`, `carry`/`wear`, `lean`, `knock`, `wobble`, `cheer`, `perch`, `glide`, `paint`/`dots`. New moves there, made with `Motion.endAt`, cut by `relax()` |
@@ -27,9 +27,19 @@ then cuts it short to be picked up at the next step later. Keep each step
 | Sounds | `sound.js` (the meadow's); reuse first |
 | What must always hold | a `Debug.check` in `meadow.js` `checkRules` |
 | Trying it | `?soon&props=<name>` (it arrives as he wakes); `?day=60` for the evening |
-| Words | its scene in `brief.yaml`, and the plan |
+| Words | its scene in `brief.yaml` (after a film's scene: `episode:<catalogue id>` among its refs), and the plan |
 
 ## Traps the meadow has hit
+
+- A tap mid-step waits for the step to end (meadow.js `waits`), so a test
+  that must cut a step in the middle (the umbrella in his hands) does
+  `stop` (an arrow let go) instead; bedtime cuts mid-step too.
+- An encounter that runs on world time (the storm's rain) must handle the
+  world moving on without it: the rain stopping before the friends come,
+  or before he can be squeezed out into it.
+- Those who wait to be picked (the egg's hare and hen, the storm's friends)
+  are the meadow's, not a troupe's cast: a free mole may have them about,
+  and a cut leaves them where they are.
 
 - A game object made with a top-level `const` (`meadowGame`) is not on
   `window`: wait for it in tests with `typeof meadowGame !== 'undefined'`.

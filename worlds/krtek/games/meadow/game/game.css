@@ -74,6 +74,8 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 .mole-hair path { animation: flutter 0.9s ease-in-out infinite; }
 .mole-hair path:nth-of-type(2) { animation-duration: 0.75s; animation-delay: -0.3s; }
 .tufts { pointer-events: none; }
+#rain { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; pointer-events: none; display: none; }
+.storm-cloud { cursor: pointer; }
 .snail .soft { transition: transform 0.25s ease-in; transform-box: fill-box; transform-origin: 100% 100%; }
 .snail.tucked .soft { transform: scale(0); } /* pulled into its shell */
 @keyframes wings { from { transform: scaleX(1); } to { transform: scaleX(0.2); } }

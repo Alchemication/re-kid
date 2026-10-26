@@ -53,6 +53,12 @@ SCENARIOS = {
         "props=",
         "setInterval(() => meadowGame.perform(meadowGame.state().x < 2000 ? 'go to 3400' : 'go to 600'), 5000); meadowGame.perform('go to 3400')",
     ),
+    # the storm's rain over the whole view (storm.js, a canvas), measured once it rains
+    "meadow-storm": (
+        MEADOW,
+        "props=",
+        "new Promise((done) => { Storm.gather(); const t = setInterval(() => { if (Storm.phase === 'raining') { clearInterval(t); done() } }, 200) })",
+    ),
 }
 READY = {YARD: "window.yardGame", MEADOW: "typeof meadowGame !== 'undefined'"}
 FRAME_TIMES = """() => { window.__frames = []; let last = performance.now()

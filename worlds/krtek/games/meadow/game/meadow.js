@@ -14,7 +14,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Things, View, Weather, World */
+/* global Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -38,7 +38,7 @@ const meadowGame = (() => {
   const words = Debug.random('meadow-words')
   const paint = Debug.random('meadow-paint')
   const planned = Eclipse.plan(Debug.random('meadow-eclipse')) // drawn either way, so ?eclipse= shifts nothing
-  const eclipseAt = Layout.flags.eclipse ?? planned // the hour this play's eclipse starts, or null
+  let eclipseAt = Layout.flags.eclipse ?? planned // the hour this play's eclipse starts, or null (none in a storm's play: start)
   const DAY_PACE = Day.DAY_MS / (Layout.dayMs || Day.DAY_MS) // an eclipse lasts as long in the day's hours whatever the day's length (?day=)
   const tufts = Debug.random('meadow-tufts') // where the front's tufts stand: its own, so the tulips stay put
 
@@ -197,7 +197,7 @@ const meadowGame = (() => {
     stops[0].setAttribute('stop-color', s.top)
     stops[1].setAttribute('stop-color', s.bottom)
     const [cr, cg, cb] = [1, 3, 5].map((i) => parseInt(s.top.slice(i, i + 2), 16) / 255)
-    const light = Math.min(Eclipse.light(k), Math.max(0, Math.min(1, (0.3 * cr + 0.59 * cg + 0.11 * cb - 0.2) / 0.4))) // 1 by day, 0 at night
+    const light = Math.min(Eclipse.light(k), Storm.light, Math.max(0, Math.min(1, (0.3 * cr + 0.59 * cg + 0.11 * cb - 0.2) / 0.4))) // 1 by day, 0 at night
     World.set({ light })
     Painting.cloudsAt(light) // the wash of cloud fades as the sky darkens
     night.setAttribute('opacity', String(NIGHT_TINT * (1 - light))) // and the painted meadow darkens with it
@@ -619,6 +619,7 @@ const meadowGame = (() => {
 
   World.setup(Clock.now)
   makeScene()
+  Storm.setup({ sky: layers.sky, picture: svg, rain: document.getElementById('rain'), over: night.parentNode })
   Mole.setFree(() => game.awake && !game.ended && !game.gesture)
   Sound.listen((word) => Mole.express(word)) // each word he says comes with its face
   View.setup(() => Mole.drawnX(), (camX) => {
@@ -648,6 +649,7 @@ const meadowGame = (() => {
   const things = Things.setup({
     run,
     goTo,
+    digTo,
     el,
     free: () => game.awake && !game.ended && !game.gesture,
     alone: () => Clock.now() - game.lastInput,
@@ -656,6 +658,7 @@ const meadowGame = (() => {
     notice: () => Mole.perk(1.3), // something has arrived: his hairs spring up
     stepped,
   })
+  if (things.includes('storm') && !Layout.flags.eclipse) eclipseAt = null // one big weather a day: the storm or the eclipse
   Debug.pin({ flags: { ...(Layout.flags.day ? { day: Layout.flags.day } : {}), props: things.join(',') }, layout: { home: HOME, spring: SPRING, things } })
   Debug.record(stateNow)
   FilmLook.mount(document.body) // the old print over the whole page

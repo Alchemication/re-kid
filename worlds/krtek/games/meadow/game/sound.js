@@ -124,9 +124,11 @@ const Sound = (() => {
   }
 
   /** Water: filling the can at the spring, or sprinkling it on the flowers. */
-  function water(seconds = 0.8) {
+  function water(seconds = 0.8, { soft = false } = {}) {
     if (!ready()) return
-    for (let t = 0; t < seconds; t += 0.07) hiss(t, 0.1, 2600 + Math.random() * 1800, 3, 0.08)
+    // soft: rain on the whole meadow, a high patter under everything (storm.js plays it again and again)
+    const [step, length, low, spread, q, peak] = soft ? [0.12, 0.2, 3000, 2500, 1.5, 0.02] : [0.07, 0.1, 2600, 1800, 3, 0.08]
+    for (let t = 0; t < seconds; t += step) hiss(t, length, low + Math.random() * spread, q, peak)
   }
 
   // A church bell, far off: its strike note and the partials a bell has (hum an octave below,
@@ -276,7 +278,6 @@ const Sound = (() => {
     }
   }
 
-  /** A clockwork toy car whizzing along: a whirr that rises. */
   /** Wind in the background, always on and very quiet, as the yard's. Returns set(level), level 0
    * (still) to 1 (a gust): louder, and a little higher. */
   function wind() {
@@ -298,6 +299,7 @@ const Sound = (() => {
     }
   }
 
+  /** A clockwork toy car whizzing along: a whirr that rises. */
   function vroom(seconds) {
     if (!ready()) return
     note(180, 0, seconds, 0.07, 'sawtooth', 1.8)

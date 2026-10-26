@@ -85,9 +85,19 @@ decided and why.
       `stage` (watched from a distance, never walked onto), `sight`,
       `perch`, `sun`; tired and curious drives. The encounters stay as
       they are.
-   3. A storm (a cartoon one:
-      everyone to shelter, thunder far off and soft, sunshine after), each
-      judged before the next (Adam, 2026-10-26).
+   3. **Adam judges the storm** (built 2026-10-26, his pick B, after the
+      end of Krtek a paraplíčko): one play in four, instead of the rain
+      cloud and never with the eclipse. Clouds roll in, he fetches his
+      umbrella from his den and plants it, rain and soft far thunder, the
+      mouse, the hare and the hen come running; the child picks whom he
+      waves in, the last squeezes him out into the rain and he pops up in
+      a molehill in the middle; then the rainbow. `?props=storm&soon`.
+      Judge: is the thunder soft enough, is the dim too much, does the
+      squeeze read as funny. Adam, 2026-10-26: thunder good, length good,
+      the umbrella fine; added since: lightning behind the hill with each
+      thunder, and left alone he waves the next friend in after 2.5 s, not
+      7 (they stood in the rain too long). The storm's perf measures 21–25%
+      of the 25% budget: win some back before more is drawn in it.
    4. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
    5. **Adam plays the meadow with Eliot** before any LLM work (Adam,

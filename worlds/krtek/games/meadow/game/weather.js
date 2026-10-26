@@ -6,7 +6,7 @@
 // hairs flutter (--flutter). You hear it, quietly. A strong gust now and then
 // carries a few leaves or dandelion seeds across the meadow, in from out of
 // sight upwind and off out of sight downwind, and he turns to watch them go
-// if he is free. It eases in an eclipse's dim. Creatures read its level in the world state (world.js):
+// if he is free. It eases in an eclipse's dim, and gets up in a storm (storm.js). Creatures read its level in the world state (world.js):
 // the butterflies are blown about (creature.js, `blown`).
 //
 // The wind and whether a gust carries anything draw from their own streams;
@@ -14,14 +14,14 @@
 // a tick at a time. `?wind=gust` (layout.js) brings a strong gust that
 // carries something three seconds after he wakes, for trying it.
 
-/* global Clock, Debug, Motion, Sound, Wind, World */
+/* global Clock, Debug, Motion, Sound, Storm, Wind, World */
 /* exported Weather */
 const Weather = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const TICK_MS = 100
   const SWAY_DEG = [1, 7] // the plants' lean, still and in a full gust
   const FLUTTER_DEG = [1, 16] // his hairs' flutter, still and in a full gust
-  const SHOWN_STEP = 0.1 // the lean is set on the page only when it changes by this much (degrees): fewer style changes a frame
+  const SHOWN_STEP = 0.5 // the lean is set on the page only when it changes by this much (degrees): each change restyles the whole page (perf: 0.1 cost a storm about 5% of a phone's main thread)
   const CARRY_FROM = 0.75 // a gust this strong may carry something...
   const CARRY_CHANCE = 0.5 // ...this often
   const CARRY_COUNT = [3, 6] // how many leaves or seeds
@@ -29,7 +29,8 @@ const Weather = (() => {
   const CARRY_Y = [440, 650] // how high they go: low, against the trees and the grass, where they show (white seeds were lost in the sky)
   const CARRY_SIZE = 2 // drawn this much bigger than their shapes: a toddler sees them go by
   const CALM_FROM = 18.6 // the wind drops as the sun goes down
-  const HUSH = 0.5 // in a dim light (an eclipse) the wind eases, by this much at no light
+  const HUSH = 0.5 // in a dim light (an eclipse) the wind eases, by this much at no light...
+  const STORMY = 0.45 // ...but under a storm it gets up, by this much in the full storm
   const FORCED_AFTER_MS = 3000 // ?wind=gust: this long after he wakes
   const LEAVES = ['#6a9a3a', '#8bb24a', '#b88a2e'] // green, and the odd brown one
   const random = Debug.random('meadow-wind')
@@ -101,7 +102,8 @@ const Weather = (() => {
 
   function tick() {
     if (World.state.hour >= CALM_FROM && !air.calm) Wind.calm(air)
-    const level = Wind.step(air, TICK_MS / 1000, -HUSH * (1 - World.state.light))
+    const extra = Storm.cover > 0 ? STORMY * Storm.cover : -HUSH * (1 - World.state.light)
+    const level = Wind.step(air, TICK_MS / 1000, extra)
     World.set({ wind: level })
     show(level)
     if (!sound && Sound.running) sound = Sound.wind()

@@ -19,7 +19,7 @@
 // Nothing comes from nowhere: the flowers were always there, the cloud and
 // the hare come in from out of sight and go off again, the rainbow fades.
 
-/* global Clock, Debug, DOMMatrixReadOnly, Friends, Layout, Mole, Motion, Sound, Things, World */
+/* global AfterRain, Clock, Debug, DOMMatrixReadOnly, Friends, Layout, Mole, Motion, Sound, Things, World */
 ;(() => {
   const Y = Layout.GROUND
   const PATCH = { x: 1640, w: 190 } // the wild flowers, in the middle of the meadow
@@ -112,17 +112,6 @@
     return Clock.wait(ms)
   }
 
-  /** A spray of drops shaken off at x, flying out to either side. */
-  function shakeDrops(x, y) {
-    const drops = document.getElementById('drops')
-    for (let k = 0; k < 10; k++) {
-      const d = el('circle', { r: 3.5, fill: '#6f9ad6' }, drops)
-      const a = Math.PI + (k / 9) * Math.PI
-      Motion.endAt(d, [{ transform: `translate(${x}px, ${y}px)` }, { transform: `translate(${x + Math.cos(a) * 110}px, ${y + Math.sin(a) * 50 + 60}px)`, opacity: 0 }], { duration: 600, easing: 'ease-out' })
-        .then(() => d.remove(), () => d.remove())
-    }
-  }
-
   /** A shake, as a wet dog does: side to side, quick. */
   async function shake(alive) {
     for (const deg of [-10, 10, -8, 8]) {
@@ -172,7 +161,7 @@
     await rain(pace(RAIN_MS))
     if (!alive()) return
     state.wet = true
-    shakeDrops(Mole.state.x, Y - 120)
+    AfterRain.shake(Mole.state.x, Y - 120)
     await shake(alive)
     if (!alive()) return
     Sound.say('giggle')
@@ -192,7 +181,7 @@
     await rain(pace(RAIN_MS))
     if (!alive()) return
     Sound.splash()
-    shakeDrops(h.x, Y - 90)
+    AfterRain.shake(h.x, Y - 90)
     await Promise.all([h.jolt(), shake(alive)])
     if (!alive()) return
     state.hare = true
@@ -230,14 +219,7 @@
 
   /** A rainbow arches over the meadow; he cheers; the cloud drifts off. */
   async function rainbow(alive) {
-    const bow = el('g', { class: 'rainbow' }, document.getElementById('far-things'))
-    ;['#e0453a', '#f0913a', '#f2c94c', '#6fae4c', '#4d79c7', '#7a5bb5'].forEach((c, k) => {
-      el('path', { d: `M${PATCH.x - 620 + k * 9} 640 A${620 - k * 9} ${430 - k * 9} 0 0 1 ${PATCH.x + 620 - k * 9} 640`, stroke: c, 'stroke-width': 9, fill: 'none', opacity: 0.55 }, bow)
-    })
-    Motion.endAt(bow, [{ opacity: 0 }, { opacity: 1 }], { duration: 1500 })
-      .then(() => Clock.wait(9000))
-      .then(() => Motion.endAt(bow, [{ opacity: 1 }, { opacity: 0 }], { duration: 3000 })) // a rainbow fades
-      .then(() => bow.remove(), () => bow.remove())
+    AfterRain.rainbow(document.getElementById('far-things'), PATCH.x)
     Sound.say('ooh')
     const off = Friends.offscreen(1, state.x + 900) // on its way, off to the right
     await Promise.all([Mole.cheer(), drift(off, DRIFT_MS, 'ease-in')])

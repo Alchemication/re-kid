@@ -176,6 +176,17 @@ scenes:
   sound:
     text: His "ooh", now and then.
     origin: invented
+- id: storm
+  action:
+    text: Nothing; then tap a friend, or the umbrella, or leave him be.
+    origin: invented
+  result:
+    text: One play in four, instead of the little rain cloud and never on an eclipse's day, big grey clouds roll in, the wind gets up and the light dims a little. He looks up - ach jo - goes down into his den and comes up with his umbrella, takes it out to the open grass past his flowers, plants it and up it pops. The rain comes over the whole meadow, with thunder far off behind the hill, soft. The mouse, the hare and the hen come running through it and stand near, dripping and glum. The child picks whom he waves in (ahoj!), and in each one runs under the umbrella; left alone he waves them in himself. The hen squeezes in last, they shuffle, and he is squeezed out into the rain (ach jo); down he goes and pops up in a new molehill right in the middle, under the umbrella. The rain stops, they shake off the drops, a rainbow, they nod and go home, and he closes the umbrella, which stays planted there all day. No rain falls under it. In the film the mole and the animals shelter under his umbrella when it rains at the end; the storm, the squeeze and the molehill are ours. He helps someone.
+    origin: inspired
+    refs: ['episode:krtek-a-paraplicko', 'world:characters[krtek].moves[pops-up-from-molehill].claim', 'world:characters[myska].description', 'world:characters[zajic].description']
+  sound:
+    text: His "ach jo", "ooh", "ahoj" and giggle; the rain's patter; a far, soft rumble after each faint flash; the umbrella's pop; a squeak as they shuffle; drops shaken off.
+    origin: invented
 - id: wind
   action:
     text: Nothing; the wind blows.

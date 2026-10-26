@@ -46,3 +46,12 @@ test('forcing them makes the same draws, so the rest of the play is unchanged', 
 test('an empty ?props brings none', () => {
   assert.equal(Things.choose(ENCOUNTERS, seq(0.5), { props: [] }).length, 0)
 })
+
+test('one with a chance comes in that share of plays, instead of the one it replaces, never both', () => {
+  const withStorm = [...ENCOUNTERS, { name: 'rain', offer: 'help' }, { name: 'storm', offer: 'help', instead: 'rain', chance: 0.25 }]
+  const names = (first) => [...Things.choose(withStorm, seq(first, 0.5)).map((p) => p.name)]
+  assert.ok(names(0.1).includes('storm') && !names(0.1).includes('rain'))
+  assert.ok(names(0.9).includes('rain') && !names(0.9).includes('storm'))
+  const forced = [...Things.choose(withStorm, seq(0.9), { props: ['storm'] }).map((p) => p.name)]
+  assert.deepEqual(forced, ['storm']) // ?props=storm brings it whatever the draw
+})

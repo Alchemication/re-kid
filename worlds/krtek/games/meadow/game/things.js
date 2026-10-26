@@ -38,6 +38,11 @@
 //     happy as it comes right, stepping back at a fright). The theme comes
 //     curious as any encounter arrives, and happy as it is done unless a
 //     step has had it already.
+//   engageMs (optional): left alone this long, he goes to it, or tries its
+//     next choice, himself (default ENGAGE_MS; the storm's friends stand in
+//     the rain, so he doesn't keep them waiting);
+//   instead, chance (optional): it comes in this share of plays, and in
+//     those its `instead` doesn't (the storm, instead of the rain cloud);
 //   detail(): its own state, for the overlay and the tests; `cast`, the
 //     visitors it has out now (none once the mole is free: checkRules).
 // It draws on the meadow's helpers (Things.meadow: goTo) for the mole's
@@ -74,8 +79,9 @@ const Things = (() => {
   }
 
   /**
-   * Which encounters come this play, and at what hour: one of each offer
-   * there is, then the others, chosen from `rand` (pure: the unit tests call it). `props`
+   * Which encounters come this play, and at what hour: one with a `chance`
+   * comes in that share of plays, instead of its `instead`; then one of each
+   * offer there is, then the others, chosen from `rand` (pure: the unit tests call it). `props`
    * (the ?props flag) forces a list instead; `soon` brings the first now.
    * The draws are made either way, so forcing one doesn't shift the rest.
    */
@@ -87,13 +93,18 @@ const Things = (() => {
       }
       return list
     }
+    let pool = encounters
+    for (const e of encounters.filter((c) => c.instead)) {
+      const comes = rand() < e.chance // drawn either way
+      pool = pool.filter((c) => c.name !== (comes ? e.instead : e.name))
+    }
     const byOffer = {}
-    for (const e of encounters) (byOffer[e.offer] ||= []).push(e.name)
+    for (const e of pool) (byOffer[e.offer] ||= []).push(e.name)
     const first = Object.keys(byOffer).sort().map((offer) => {
       const list = byOffer[offer]
       return list[Math.floor(rand() * list.length)]
     })
-    const rest = encounters.map((e) => e.name).filter((n) => !first.includes(n))
+    const rest = pool.map((e) => e.name).filter((n) => !first.includes(n))
     let names = [...shuffle(first), ...shuffle(rest)]
     if (props) names = props.filter((n) => encounters.some((e) => e.name === n))
     return names.slice(0, HOURS.length).map((name, i) => ({ name, at: soon && i === 0 ? SOON_HOUR : HOURS[i] }))
@@ -129,7 +140,7 @@ const Things = (() => {
     // when he goes home to listen
     const waiting = plan.map((p) => all[p.name]).find((e) => e.out && !e.done)
     const waited = waiting && Math.min(api.alone(), Clock.now() - Math.max(waiting.arrived, waiting.tried || 0))
-    if (waiting && hour < Day.SUNSET && !Debug.still && api.free() && waited > ENGAGE_MS) use(waiting.name, false)
+    if (waiting && hour < Day.SUNSET && !Debug.still && api.free() && waited > (waiting.engageMs ?? ENGAGE_MS)) use(waiting.name, false)
   }
 
   /** Its steps, from where they stopped; true once they are all done. */

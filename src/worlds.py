@@ -230,7 +230,9 @@ def validate_world(world_id: str, root: Path = WORLDS_DIR) -> WorldReport:
             _check_episode_breakdown(episode_id, breakdown, report.catalogue)
         )
     for name, brief in report.briefs.items():
-        report.errors.extend(_check_brief(name, brief, report.intro, report.dossier))
+        report.errors.extend(
+            _check_brief(name, brief, report.intro, report.dossier, report.catalogue)
+        )
 
     for file, attr in (
         (EPISODES_FILE, "catalogue"),
@@ -305,7 +307,11 @@ def _check_episode_breakdown(
 
 
 def _check_brief(
-    name: str, brief: GameBrief, intro: Breakdown | None, dossier: WorldDossier
+    name: str,
+    brief: GameBrief,
+    intro: Breakdown | None,
+    dossier: WorldDossier,
+    catalogue: EpisodeCatalogue | None,
 ) -> list[str]:
     """The brief's id matches its folder, and every scene moment and every ref
     points at something that exists."""
@@ -318,8 +324,14 @@ def _check_brief(
     moments = {b.id for b in intro.beats} if intro else set()
     marks = {m.id for m in intro.marks} if intro else set()
     claims = {path for path, _ in iter_claims(dossier)}
-    known = {"intro": moments, "mark": marks, "world": claims}
-    where = {"intro": INTRO_FILE, "mark": INTRO_FILE, "world": WORLD_FILE}
+    episodes = {e.id for e in catalogue.episodes} if catalogue else set()
+    known = {"intro": moments, "mark": marks, "world": claims, "episode": episodes}
+    where = {
+        "intro": INTRO_FILE,
+        "mark": INTRO_FILE,
+        "world": WORLD_FILE,
+        "episode": EPISODES_FILE,
+    }
     for scene in brief.scenes:
         if scene.moment is not None and scene.moment not in moments:
             errors.append(

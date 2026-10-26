@@ -69,6 +69,11 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
 - **Lost against the background.** White dandelion seeds against the pale
   sky were invisible: look at a photo of it against what it actually
   crosses, and draw it bigger and outlined if it must be seen.
+- **A CSS variable on the page root restyles the whole page.** The wind's
+  `--sway` set every tenth of a degree cost a storm about 5% of a phone's
+  main thread; set it in half-degree steps. When perf sits at its edge,
+  switch one part off at a time and measure (a probe at the perf test's
+  settings) before guessing.
 - **The wind changes everyone's timing.** A butterfly coming in upwind took
   longer to reach the view, and a test that waited a fixed 1.5 s clicked
   off-screen. Browser tests wait for a state (it is in view), never a time.

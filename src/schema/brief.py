@@ -13,7 +13,9 @@ references checked by ``worlds.validate_world``:
 
 - ``intro:<beat id>`` — a moment of the intro breakdown;
 - ``mark:<mark id>`` — a sound or melody the listener marked;
-- ``world:<claim path>`` — a dossier claim, as ``main.py show`` prints it.
+- ``world:<claim path>`` — a dossier claim, as ``main.py show`` prints it;
+- ``episode:<catalogue id>`` — an episode in the catalogue, by what its
+  synopsis says happens in it (a game part after a film's scene).
 
 Example:
     brief = GameBrief.model_validate(yaml.safe_load(path.read_text()))
@@ -30,8 +32,9 @@ from schema.common import SLUG_PATTERN, Model
 
 Origin = Literal["original", "inspired", "invented"]
 
-REF_PATTERN = re.compile(r"^(intro|mark|world):\S+$")
-"""``kind:target``, e.g. ``intro:cymbals``, ``mark:bark``, ``world:premise``."""
+REF_PATTERN = re.compile(r"^(intro|mark|world|episode):\S+$")
+"""``kind:target``, e.g. ``intro:cymbals``, ``mark:bark``, ``world:premise``,
+``episode:krtek-a-paraplicko``."""
 
 
 class Element(Model):
@@ -41,7 +44,7 @@ class Element(Model):
     origin: Origin
     refs: list[str] = Field(
         default_factory=list,
-        description="What the part is based on: intro:, mark: or world: refs.",
+        description="What the part is based on: intro:, mark:, world: or episode: refs.",
     )
 
     @model_validator(mode="after")
@@ -50,8 +53,8 @@ class Element(Model):
         for ref in self.refs:
             if not REF_PATTERN.match(ref):
                 raise ValueError(
-                    f"bad ref {ref!r} — use intro:<beat id>, mark:<mark id> "
-                    "or world:<claim path>"
+                    f"bad ref {ref!r} — use intro:<beat id>, mark:<mark id>, "
+                    "world:<claim path> or episode:<catalogue id>"
                 )
         if self.origin != "invented" and not self.refs:
             raise ValueError(
