@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots, Bed, YardBeds */
+/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, FilmLook, Nap, Spots, Bed, YardBeds */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -825,7 +825,8 @@
     const dt = Math.min(0.05, (t - last) / 1000)
     last = t
     Reksio.tick(dt)
-    if (day.hurrying(t)) Sky.show(day.hour(t)) // the sun hurrying down: every frame, not every idle tick
+    if (day.hurrying(t)) Sky.show(day.hour(t))
+    World.set({ hour: day.hour(t), light: Sky.light, view: { x0: camX, x1: camX + Painting.VIEW_W } }) // the world state (world.js): the creatures read it // the sun hurrying down: every frame, not every idle tick
     Creatures.tick(dt)
     Weather.tick(dt, camX)
     Wet.frame(t)

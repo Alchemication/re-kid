@@ -5,15 +5,18 @@
 // send the bee on an errand (beeTo: the bramble's flower by Reksio's caught
 // tail); it comes even if it isn't out this play, and goes home after.
 //
-// Each creature is a small state machine stepped every frame, with cartoon
-// physics: steering with momentum, damped pendulums for threads, quick
-// startled darts. They share a "world" they can sense (Reksio's position and
-// nose, his barks and snaps, the web) so more creatures and weather can be
-// added the same way.
+// The fly and the bee live on the world model (docs/WORLD_MODEL.md): what
+// they go for, what scares them and when they leave comes from creature.js,
+// reading the world state (world.js) the yard writes: the light, the weather
+// (rain coming, wet places), Reksio's bark and snap as noises, his nose, and
+// what the yard offers (the flowers' nectar, places to land, things to look
+// at). Their look, sounds and the web are this file's. The spider and the
+// snail are small state machines of their own, with cartoon physics: damped
+// pendulums for threads; they hear the world too.
 //
 // Subtle by design: small, mostly quiet, and never in the way of a tap.
 
-/* global Clock, Debug, Motion, Sound, Reksio, Layout, Weather */
+/* global Clock, Creature, Debug, Motion, Sound, Reksio, Layout, Weather, World */
 /* exported Creatures */
 const Creatures = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -35,12 +38,14 @@ const Creatures = (() => {
     return node
   }
 
-  // What creatures can sense. Updated every frame from Reksio.
+  // Where Reksio is, and the creatures' time, updated every frame; the rest they sense is the world state (world.js).
   const world = {
     t: 0,
     reksio: { x: 0, nose: { x: 0, y: 0 } },
-    events: [], // this frame's {type, x, y}: 'bark', 'snap'
   }
+  const T = () => world.t * 1000 // the creatures' time, in ms: the world model runs on it (World.setup in init)
+  const NOISES = { bark: 500, snap: 150 } // how far each of Reksio's noises carries (the spider minds a bark this near; the fly less far)
+  const SIGHT_AT_WEB = { x: 382, y: 405 } // something to look at by the web: a curious fly may blunder in
 
   // ------------------------------------------------------------ the web
 
@@ -75,7 +80,8 @@ const Creatures = (() => {
   const ERRAND_SPEED = 260 // sent on an errand, it comes straight and quick: a slow bee across the yard keeps the gag waiting
   const ERRAND_HUM_S = 0.8 // and hums as it comes, so Reksio (and the child) hear it coming
   let dusk = false // the sun has set: the visitors go home
-  const staysAway = () => dusk || Weather.phase === 'clouding' || Weather.raining
+  /** Is it no time for a visitor to come: dusk, dim, rain coming or raining where Reksio is? */
+  const staysAway = () => dusk || World.state.light < 0.5 || (World.state.overcast || 0) >= 0.5 || World.isWet(world.reksio.x)
 
   /** Is a point inside the web's triangle (where things get stuck)? */
   function inWeb(x, y) {
@@ -133,15 +139,28 @@ const Creatures = (() => {
 
   // ------------------------------------------------------------ the fly
 
+  // What the fly is, for the world model (creature.js): it wanders about
+  // the yard, now and then lands on something to sit on (the doghouse roof,
+  // the tap, the bowl, a flower: 'perch' offers), pesters Reksio's nose and
+  // blunders near the web (it is curious: 'sight' offers), darts off from a
+  // bark or a snap near it or his nose too close, and leaves before the rain
+  // and at dusk.
+  const FLY = {
+    speed: 260, flee: 3.5, turn: 3, // a dart is about 900 a second, at once
+    stayMs: [30000, 80000], hours: [0, 24], dark: 0.5, wet: 'avoid',
+    feeds: 'perch', hungerMs: [3000, 10000], feedMs: [2500, 6000], // landing now and then, a while
+    startledBy: { bark: 260, snap: 120 }, shy: { at: 45, odds: 0.05 }, dart: 400,
+    band: [380, 760], roam: 1400, curious: 0.2, exitY: 400, // leaves sideways, at its own height
+  }
+  const FLY_DT_MAX = 0.05
+
   const fly = {
-    x: 900, y: 520, vx: 0, vy: 0,
-    target: null,
-    state: 'away', // fly | land | stuck | wrapped | away
+    c: null, // its Creature (creature.js) while it is out
+    state: 'away', // out | stuck | wrapped | away
     stateUntil: rnd(...FLY_FIRST_S),
-    leaveAt: 0,
-    leaving: false,
-    landedOn: null,
     g: null,
+    get x() { return this.c ? this.c.x : 0 },
+    get y() { return this.c ? this.c.y : 0 },
     make() {
       this.g = el('g', { class: 'critter fly', 'data-critter': 'fly' })
       el('circle', { r: HIT_R / 1.5, class: 'critter-hit' }, this.g) // the fly is drawn at 1.5×
@@ -154,133 +173,49 @@ const Creatures = (() => {
       this.cocoon = el('ellipse', { rx: 6, ry: 8, class: 'cocoon', opacity: 0 }, this.g)
       this.g.style.display = 'none' // not here yet
     },
-    /** Time to go: off past the edge of the screen. */
-    leave() {
-      this.leaving = true
-      this.state = 'fly'
-      this.landedOn = null
-      const side = this.x < world.reksio.x ? -1 : 1
-      this.target = { x: world.reksio.x + side * 1150, y: rnd(320, 460) }
-    },
+    /** Gone (home, off out of sight): away a while before it may come back. */
     goAway(until) {
       this.g.style.display = 'none'
       this.state = 'away'
-      this.leaving = false
+      this.c = null
       this.stateUntil = world.t + until
-    },
-    /** Where next: mostly wandering about, sometimes a place to land. */
-    pick() {
-      const r = random()
-      const spots = [
-        { x: 480, y: 612, name: 'roof' }, // the doghouse roof
-        { x: 1321 + Layout.x('tap'), y: 556, name: 'tap' }, // the tap's spout
-      ]
-      if (!Layout.hidden.includes('bowl')) spots.push({ x: 880 + Layout.x('bowl'), y: 760, name: 'bowl' })
-      if (Layout.flowers) spots.push({ x: 1648 + Layout.x('flowers'), y: 646, name: 'flower' })
-      if (r < 0.25) {
-        this.target = { ...spots[Math.floor(random() * spots.length)], land: true }
-      } else if (r < 0.35 && web.built && !spider.busy) {
-        this.target = { x: rnd(345, 420), y: rnd(370, 440) } // drifts near the web…
-      } else if (r < 0.45) {
-        const n = world.reksio.nose // …or comes to bother Reksio
-        this.target = { x: n.x + rnd(-40, 40), y: n.y - rnd(20, 70) }
-      } else {
-        const x = clamp(world.reksio.x + rnd(-700, 700), 200, Layout.MAX_X)
-        this.target = { x, y: rnd(380, 760) }
-      }
-    },
-    /** Startled: dart away from (x, y). */
-    dodge(x, y) {
-      if (this.state === 'stuck' || this.state === 'wrapped' || this.state === 'away') return
-      const a = Math.atan2(this.y - y, this.x - x) + rnd(-0.6, 0.6)
-      this.vx = Math.cos(a) * 900
-      this.vy = Math.sin(a) * 900 - 200
-      this.state = 'fly'
-      this.landedOn = null
-      this.target = { x: clamp(this.x + Math.cos(a) * 400, 200, Layout.MAX_X), y: clamp(this.y - 150, 360, 760) }
-      if (this.leaving) this.leave()
-      hear(this.x, () => Sound.zip())
     },
     update(dt) {
       const now = world.t
       if (this.state === 'away') return this.arrive(now)
       if (this.state === 'wrapped') return
-      if (!this.leaving && (this.state === 'fly' || this.state === 'land') && (now > this.leaveAt || staysAway())) this.leave()
       if (this.state === 'stuck') {
         // struggles, buzzing its wings, until the spider comes
         this.body.setAttribute('transform', `rotate(${Math.sin(now * 40) * 18})`)
         return
       }
-      if (this.state === 'land') return this.landed(now)
-      this.flying(dt, now)
+      const c = this.c
+      const was = c.goal?.kind
+      const goal = Creature.think(c, World, T(), random)
+      if (goal.kind === 'dart' && was !== 'dart') hear(c.x, () => Sound.zip())
+      const moved = Creature.move(c, World, Math.min(dt, FLY_DT_MAX) * 1000, T(), random)
+      if (moved === 'gone') return this.goAway(rnd(...FLY_GONE_S))
+      c.y = clamp(c.y, 300, 800)
+      if (Creature.feeding(c)) this.body.setAttribute('transform', `translate(0 ${Math.sin(now * 30) * 0.6})`) // rubbing its hands
+      else {
+        if (random() < dt / WHINE_EVERY_S) hear(c.x, () => Sound.whine())
+        this.body.setAttribute('transform', c.vx < 0 ? 'scale(-1 1)' : '')
+        this.sense()
+      }
+      this.place()
     },
-    /** Away: after a while (and not in the rain), it arrives from the side of the screen. */
+    /** Away: after a while (and not when the yard sends it home), it arrives from the side of the screen. */
     arrive(now) {
       if (now <= this.stateUntil || staysAway()) return
-      this.state = 'fly'
-      this.leaveAt = now + rnd(...FLY_STAY_S)
-      this.x = world.reksio.x + (random() < 0.5 ? -900 : 900)
-      this.y = rnd(400, 600)
+      this.state = 'out'
+      this.c = Creature.make(FLY, world.reksio.x + (random() < 0.5 ? -900 : 900), rnd(400, 600), T(), random)
+      if (dusk) this.c.leaves = 0
       this.g.style.display = ''
       this.cocoon.setAttribute('opacity', '0')
       this.body.style.display = ''
-      this.pick()
     },
-    /** Landed: rubs its hands, keeps an eye out, and takes off when it's had enough or Reksio comes close. */
-    landed(now) {
-      this.body.setAttribute('transform', `translate(0 ${Math.sin(now * 30) * 0.6})`)
-      const near = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y)
-      if (now > this.stateUntil || (near < 70 && random() < 0.03)) {
-        this.state = 'fly'
-        this.landedOn = null
-        this.vy = -260
-        this.pick()
-      }
-      this.place()
-    },
-    /** Flying: steer towards the target with a little zig-zag, now and then whining. */
-    flying(dt, now) {
-      if (random() < dt / WHINE_EVERY_S) hear(this.x, () => Sound.whine())
-      const d = this.steer(dt, now)
-      if (d < 18) this.reached(now)
-      this.sense()
-      this.body.setAttribute('transform', this.vx < 0 ? 'scale(-1 1)' : '')
-      this.place()
-    },
-    /** One frame's steering; how far it still is from the target. */
-    steer(dt, now) {
-      const tx = this.target.x + Math.sin(now * 7) * 30
-      const ty = this.target.y + Math.cos(now * 9) * 22
-      const dx = tx - this.x
-      const dy = ty - this.y
-      const d = Math.hypot(dx, dy) || 1
-      const speed = 260
-      this.vx += ((dx / d) * speed - this.vx) * Math.min(1, dt * 3)
-      this.vy += ((dy / d) * speed - this.vy) * Math.min(1, dt * 3)
-      this.x += this.vx * dt
-      this.y = clamp(this.y + this.vy * dt, 300, 800)
-      return d
-    },
-    /** At the target: leaving, gone (off screen) or on again; else land, or pick another. */
-    reached(now) {
-      if (this.leaving) {
-        if (Math.abs(this.x - world.reksio.x) > 1000) this.goAway(rnd(...FLY_GONE_S))
-        else this.leave()
-      } else if (this.target.land) {
-        this.state = 'land'
-        this.landedOn = this.target.name
-        this.x = this.target.x
-        this.y = this.target.y
-        this.stateUntil = now + rnd(2.5, 6)
-      } else {
-        this.pick()
-      }
-    },
-    /** Startled by Reksio's nose close by; stuck if it flies into the web. */
+    /** Stuck if it flies into the web. */
     sense() {
-      if (dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 45 && random() < 0.05) {
-        this.dodge(world.reksio.nose.x, world.reksio.nose.y)
-      }
       if (inWeb(this.x, this.y) && !spider.busy && random() < 0.15) {
         this.state = 'stuck'
         web.shiver()
@@ -300,21 +235,39 @@ const Creatures = (() => {
     later() {
       Clock.after(15000, () => this.goAway(rnd(12, 25)))
     },
+    /** Dusk: off home. */
+    evening() {
+      if (this.c) this.c.leaves = 0
+    },
   }
 
   // ------------------------------------------------------------ the bumblebee
 
+  // What the bee is, for the world model: it works the flowers (nectar),
+  // hovering at each a while; huffy, it darts off if Reksio puts his nose in;
+  // and it leaves before the rain and at dusk. A gag may send it on an
+  // errand (beeTo), and then nothing else counts until it is let go.
+  const FLOWERS = [{ x: 1604, y: 668 }, { x: 1648, y: 640 }, { x: 1706, y: 680 }].map((f) => ({ x: f.x + Layout.x('flowers'), y: f.y }))
+  const BEE_HAUNT = 600 // it keeps this near its flowers, wherever the camera is
+  const BEE = {
+    speed: 120, flee: 1.8, turn: 2.5, errandSpeed: ERRAND_SPEED, // heavy, bumbling
+    stayMs: [35000, 90000], hours: [0, 24], dark: 0.5, wet: 'avoid',
+    feeds: 'nectar', hungerMs: [0, 0], feedMs: [2000, 4000], // flower to flower, hovering at each
+    shy: { at: 110, odds: 1 }, dart: 220, // a huffy loop away
+    band: [480, 640], roam: 900, haunt: [FLOWERS[0].x - BEE_HAUNT, FLOWERS[FLOWERS.length - 1].x + BEE_HAUNT],
+  }
+  const OVER_THE_WALL = 240 // where it comes in from, and goes home over
+
   const bee = {
-    x: 1700, y: 560, vx: 0, vy: 0,
-    flower: 0,
-    state: 'away', // fly | hover | huff | away
+    c: null,
+    state: 'away', // out | away
     stateUntil: rnd(...BEE_FIRST_S),
-    leaveAt: 0,
-    leaving: false,
-    errand: null, // {x, y, arrived}: sent somewhere by a gag, it goes there and stays, whatever else it would do
+    errand: null, // {x, y, arrived}: sent somewhere by a gag
     guest: false, // not out this play: came only for an errand, and doesn't come back
-    FLOWERS: [{ x: 1604, y: 668 }, { x: 1648, y: 640 }, { x: 1706, y: 680 }].map((f) => ({ x: f.x + Layout.x('flowers'), y: f.y })),
+    FLOWERS,
     g: null,
+    get x() { return this.c ? this.c.x : 0 },
+    get y() { return this.c ? this.c.y : 0 },
     make() {
       this.g = el('g', { class: 'critter bee', 'data-critter': 'bee' })
       el('circle', { r: HIT_R / 1.3, class: 'critter-hit' }, this.g) // the bee is drawn at 1.3×
@@ -329,111 +282,71 @@ const Creatures = (() => {
     },
     update(dt) {
       const now = world.t
-      if (this.errand) return this.onErrand(dt, now)
-      if (this.state === 'away') return this.arrive(now)
-      this.moods(now)
-      const to = this.heading(now)
-      if (!to) return // gone home
-      const d = this.steer(dt, now, to)
-      if (this.state === 'fly' && random() < dt / HUM_EVERY_S) hear(this.x, () => Sound.buzz(0.6))
-      if (this.state === 'fly' && d < 8 && !this.leaving) {
-        this.state = 'hover'
-        this.stateUntil = now + rnd(2, 4)
+      if (this.state === 'away') {
+        if (this.errand) this.appear(this.errand.x)
+        else return this.arrive(now)
       }
+      const c = this.c
+      const was = c.goal?.kind
+      const goal = Creature.think(c, World, T(), random)
+      if (goal.kind === 'dart' && was !== 'dart') hear(c.x, () => Sound.buzz(0.8)) // huffy
+      const moved = Creature.move(c, World, Math.min(dt, FLY_DT_MAX) * 1000, T(), random)
+      if (moved === 'gone') return this.home(now)
+      if (moved === 'arrived' && goal.kind === 'errand') this.there()
+      const going = goal.kind !== 'feed' || !Creature.feeding(c)
+      this.hum(goal, going, dt)
+      if (!going || goal.reached) c.y += Math.sin(now * 6) * 0.25 // bobbing as it hovers
       this.draw()
+    },
+    /** Now and then a hum as it flies: often coming on an errand, so Reksio (and the child) hear it coming. */
+    hum(goal, going, dt) {
+      const c = this.c
+      if (goal.kind === 'errand') {
+        if (Math.hypot(goal.x - c.x, goal.y - c.y) > 60 && random() < dt / ERRAND_HUM_S) hear(c.x, () => Sound.buzz(0.5))
+      } else if (going && random() < dt / HUM_EVERY_S) hear(c.x, () => Sound.buzz(0.6))
     },
     draw() {
-      this.body.setAttribute('transform', this.vx < -5 ? 'scale(-1 1)' : '')
+      this.body.setAttribute('transform', this.c.vx < -5 ? 'scale(-1 1)' : '')
       this.g.setAttribute('transform', `translate(${this.x} ${this.y}) scale(1.3)`)
     },
-    /** Away: after a while (and not in the rain), over the wall to the flowers. */
+    /** Away: after a while (and not when the yard sends it home), over the wall to the flowers. */
     arrive(now) {
       if (now <= this.stateUntil || staysAway() || this.guest) return
-      this.appear(now, this.FLOWERS[0].x)
+      this.appear(this.FLOWERS[0].x)
     },
     /** Over the wall, somewhere near x. */
-    appear(now, x) {
-      this.state = 'fly'
-      this.leaving = false
-      this.leaveAt = now + rnd(...BEE_STAY_S)
-      this.x = x + (random() < 0.5 ? -1 : 1) * rnd(300, 600)
-      this.y = 240
-      this.vx = this.vy = 0
+    appear(x) {
+      this.state = 'out'
+      this.c = Creature.make(BEE, x + (random() < 0.5 ? -1 : 1) * rnd(300, 600), OVER_THE_WALL, T(), random)
+      if (this.errand) this.c.errand = { x: this.errand.x, y: this.errand.y }
+      if (dusk || this.guest) this.c.leaves = 0
       this.g.style.display = ''
     },
-    /** On an errand: straight there (from over the wall, if it was away), a
-     * hum as it comes, and it hovers there, bobbing, until let go. */
-    onErrand(dt, now) {
+    /** Home over the wall: away a while before it may come back. */
+    home(now) {
+      this.g.style.display = 'none'
+      this.state = 'away'
+      this.c = null
+      this.stateUntil = now + rnd(...BEE_GONE_S)
+    },
+    /** There on its errand: whoever waits on it hears. */
+    there() {
       const e = this.errand
-      if (this.state === 'away') this.appear(now, e.x)
-      this.state = 'errand'
-      const d = this.steer(dt, now, { x: e.x, y: e.y + Math.sin(now * 6) * 4 })
-      if (d > 60 && random() < dt / ERRAND_HUM_S) hear(this.x, () => Sound.buzz(0.5))
-      if (d < 12 && e.arrived) {
-        e.arrived()
-        e.arrived = null
-      }
-      this.draw()
+      if (e?.arrived) e.arrived()
+      if (e) e.arrived = null
     },
     /** Let go of its errand: back to its flowers, or home if it was a guest. */
     letGo() {
       const e = this.errand
       this.errand = null
       if (e?.arrived) e.arrived() // nobody waits on an errand that's over
-      if (this.state === 'away') return
-      this.state = 'fly'
-      if (this.guest) this.leaveAt = 0
+      if (!this.c) return
+      this.c.errand = null
+      if (this.guest) this.c.leaves = 0
     },
-    /** Time to go home (or the rain is coming); huffy if Reksio puts his nose in. */
-    moods(now) {
-      if (!this.leaving && (now > this.leaveAt || staysAway())) {
-        // off home, back over the wall
-        this.leaving = true
-        this.state = 'fly'
-        this.away = { x: this.x + (random() < 0.5 ? -1 : 1) * rnd(400, 700), y: 180 }
-      }
-      const reksioNear = dist(world.reksio.nose.x, world.reksio.nose.y, this.x, this.y) < 110
-      if (reksioNear && this.state !== 'huff' && !this.leaving) {
-        // a huffy loop up and away, with a buzz
-        this.state = 'huff'
-        this.stateUntil = now + rnd(4, 7)
-        hear(this.x, () => Sound.buzz(0.8))
-      }
-    },
-    /** Where it is heading this frame, or null once it has gone home. */
-    heading(now) {
-      const f = this.FLOWERS[this.flower]
-      if (this.leaving) {
-        if (dist(this.away.x, this.away.y, this.x, this.y) >= 30) return this.away
-        this.g.style.display = 'none'
-        this.state = 'away'
-        this.stateUntil = now + rnd(...BEE_GONE_S)
-        return null
-      }
-      if (this.state === 'huff') {
-        if (now > this.stateUntil) this.state = 'fly'
-        return { x: f.x + Math.cos(now * 2.2) * 140, y: 470 + Math.sin(now * 2.2) * 60 }
-      }
-      if (this.state === 'hover') {
-        if (now > this.stateUntil) {
-          this.state = 'fly'
-          this.flower = (this.flower + 1 + Math.floor(random() * 2)) % this.FLOWERS.length
-        }
-        return { x: f.x, y: f.y - 26 + Math.sin(now * 6) * 5 } // bobbing in the flower
-      }
-      return { x: f.x, y: f.y - 26 }
-    },
-    /** One frame of heavy, bumbling flight towards `to`; how far it still is. */
-    steer(dt, now, to) {
-      const dx = to.x - this.x
-      const dy = to.y - this.y
-      const d = Math.hypot(dx, dy) || 1
-      const speed = this.state === 'huff' ? 220 : this.state === 'errand' ? ERRAND_SPEED : 120
-      this.vx += ((dx / d) * Math.min(speed, d * 3) - this.vx) * Math.min(1, dt * 2.5)
-      this.vy += ((dy / d) * Math.min(speed, d * 3) - this.vy) * Math.min(1, dt * 2.5)
-      this.x += this.vx * dt
-      this.y += this.vy * dt + Math.sin(now * 4) * 0.4
-      return d
+    /** Dusk: off home. */
+    evening() {
+      if (this.c && !this.errand) this.c.leaves = 0
     },
   }
 
@@ -736,9 +649,24 @@ const Creatures = (() => {
 
   const BY_NAME = { fly, bee, spider }
   let all = []
+  let spiderHeard = 0 // the last noise the spider has heard (World.heardUpTo)
+
+  /** What the yard offers its creatures: places to land, the flowers' nectar, the web's edge to look at. */
+  function offer() {
+    World.offer('roof', 'perch', 480, 612) // the doghouse roof
+    World.offer('tap', 'perch', 1321 + Layout.x('tap'), 556) // the tap's spout
+    if (!Layout.hidden.includes('bowl')) World.offer('bowl', 'perch', 880 + Layout.x('bowl'), 760)
+    if (Layout.flowers) {
+      World.offer('flower', 'perch', 1648 + Layout.x('flowers'), 646)
+      bee.FLOWERS.forEach((f, i) => World.offer(`flower-${i}`, 'nectar', f.x, f.y - 26)) // where a bee hovers at a flower
+    }
+    World.offer('web', 'sight', SIGHT_AT_WEB.x, SIGHT_AT_WEB.y, () => web.built && !spider.busy)
+  }
 
   /** Bring in this play's creatures (see layout.js). */
   function init(names = Layout.creatures) {
+    World.setup(T)
+    offer()
     all = names.map((n) => BY_NAME[n])
     if (Layout.rain) {
       snail.make()
@@ -758,24 +686,27 @@ const Creatures = (() => {
     world.t += dt
     world.reksio.x = Reksio.x
     world.reksio.nose = Reksio.mouth()
-    for (const e of world.events) {
-      if (e.type === 'bark') {
-        if (active(spider) && dist(e.x, GROUND - 120, WEB.hub.x, WEB.hub.y) < 500) spider.hide()
-        if (active(fly) && dist(e.x, e.y, fly.x, fly.y) < 260) fly.dodge(e.x, e.y)
-      }
-      if (e.type === 'snap' && active(fly) && dist(e.x, e.y, fly.x, fly.y) < 120) fly.dodge(e.x, e.y)
+    World.set({ hero: { x: world.reksio.x, nose: world.reksio.nose } })
+    World.offer('nose', 'sight', world.reksio.nose.x, world.reksio.nose.y) // a curious fly comes to bother him
+    if (active(spider)) {
+      const bark = World.heard(WEB.hub.x, spiderHeard).some((n) => n.kind === 'bark' && Math.abs(n.x - WEB.hub.x) < NOISES.bark)
+      spiderHeard = World.heardUpTo
+      if (bark) spider.hide()
     }
-    world.events.length = 0
     for (const c of all) c.update(dt)
   }
 
   return {
     init,
     tick,
-    /** Tell the creatures what Reksio just did: 'bark' or 'snap', where. */
-    notice(type, x, y) { world.events.push({ type, x, y }) },
+    /** Tell the creatures what Reksio just did: 'bark' or 'snap', where (a noise in the world, world.js). */
+    notice(type, x) { World.noise(type, x, NOISES[type] ?? 200) },
     /** The sun has set: the fly and the bee go home, and don't come back. */
-    evening() { dusk = true },
+    evening() {
+      dusk = true
+      fly.evening()
+      bee.evening()
+    },
     /** Where the snail is, once it's out, and which way she's heading. */
     get snail() { return snail.out ? { x: snail.x, y: snail.y, dir: snail.dir } : null },
     /** Food put down for the snail (a porcino: mushrooms.js): she goes to it
@@ -800,7 +731,10 @@ const Creatures = (() => {
         all.push(bee)
       }
       bee.letGo()
-      return new Promise((arrived) => (bee.errand = { x, y, arrived }))
+      return new Promise((arrived) => {
+        bee.errand = { x, y, arrived }
+        if (bee.c) bee.c.errand = { x, y }
+      })
     },
     /** The errand is over: the bee goes back to its own business. */
     beeFree() { bee.letGo() },
@@ -810,7 +744,7 @@ const Creatures = (() => {
     get bee() { return active(bee) && bee.state !== 'away' ? { x: bee.x, y: bee.y } : null },
     /** Where the fly is, if it's about and free. */
     get fly() {
-      return active(fly) && (fly.state === 'fly' || fly.state === 'land') ? { x: fly.x, y: fly.y } : null
+      return active(fly) && fly.state === 'out' ? { x: fly.x, y: fly.y } : null
     },
     /** Where Reksio should stand under the web, facing left, nose below it. */
     webSpot: () => ({ x: WEB.hub.x + 125, hub: WEB.hub }),

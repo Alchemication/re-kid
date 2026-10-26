@@ -17,12 +17,13 @@
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
 
-/* global Debug, Layout, Motion, Painting, Shower, Sound, Music, Wind */
+/* global Debug, Layout, Motion, Painting, Shower, Sound, Music, Wind, World */
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const GROUND_Y = 812
   const START_S = [25, 55] // the shower starts this long into the play
+  const WET_MS = 300 // the world is told where it's wet this far ahead, again every frame while it is
   const RAIN_S = [22, 30] // and lasts this long
   const DROPS = 220 // raindrops on screen at full rain
   const PUDDLE_DROP = 6 // puddles sit this far below Reksio's feet line: paws in the water
@@ -258,11 +259,20 @@ const Weather = (() => {
     c.g.setAttribute('transform', `translate(${c.x.toFixed(1)} ${c.y}) scale(${c.size.toFixed(3)})`)
   }
 
+  /** The world state (world.js): how overcast it is (rain coming), the wind, and where it's wet: all the yard
+   * while it rains, and each puddle while it holds water. */
+  function tellTheWorld(cover) {
+    World.set({ overcast: cover, wind })
+    if (shower.phase === 'raining') World.wet(-500, Layout.WORLD_W + 500, WET_MS)
+    if (shower.wet > 0.25) for (const p of puddles) World.wet(p.x - p.rx, p.x + p.rx, WET_MS)
+  }
+
   function tick(dt, camX) {
     t += dt
     shower.step(dt).forEach(entered)
 
     const cover = shower.cover
+    tellTheWorld(cover)
     clouds.forEach((c, i) => moveCloud(c, (i * Layout.sky.clouds) % clouds.length < Layout.sky.clouds, cover, dt)) // spread out: 3 of 5 are the 1st, 3rd and 5th
     $('overcast').style.opacity = String(Math.max(Layout.sky.haze, cover * 0.42))
     blow(dt, cover)

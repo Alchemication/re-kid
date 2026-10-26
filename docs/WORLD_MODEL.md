@@ -23,19 +23,30 @@ and no clock, tested in node (`worlds/krtek/games/meadow/tests/creature.test.js`
 Used in the meadow by the butterflies and the snail (`critters.js`), the
 bullfinch and the dragonflies (`spring.js`). The frog sits still, so it
 needs no steering: it reads the world's noises itself. The fish only makes
-noise. The yard's creatures are still wired by hand.
+noise.
+
+In the yard (Adam, 2026-10-26: "far more superior already"), the fly and
+the bee live on it too (`creatures.js`). The yard steps them from its own
+tick, not through the runner, so its unit tests can drive them frame by
+frame; the world runs on the creatures' clock there (`World.setup` in
+`Creatures.init`). The spider, the snail and the worms stay small machines
+of their own; the spider hears Reksio's bark as a world noise. Gags still
+reach them as before (`beeTo`, the web), and a gag's errand comes before
+everything else the bee would do.
 
 ## The world state
 
 | Field / call | What | Written by (meadow) |
 |---|---|---|
 | `hour` | 08–20, moves only with the day | `meadow.js` tick |
-| `light` | 1 broad day to 0 night; in an eclipse down to 0.3, under a storm to 0.55, while the hour goes on (`eclipse.js`, `storm.js`) | `meadow.js` sky |
+| `light` | 1 broad day to 0 night; in an eclipse down to 0.3, under a storm to 0.55, while the hour goes on (`eclipse.js`, `storm.js`) | `meadow.js` sky; the yard's `sky.js` (falling the half hour before sunset) |
+| `overcast` | 0 to 1: rain coming. A creature that minds the wet goes home from 0.5 | the yard's `weather.js` (its shower's clouds) |
+| `hero` | `{x, nose}`: where the hero is, and his nose (a shy creature darts from it) | the yard's `creatures.js` |
 | `wind` | 0 still to 1 a full gust, blowing left to right (`shared/wind.js`: a breeze, now and then a gust, calm from sunset) | `weather.js` |
 | `view` | `{x0, x1}`: what the child sees | `meadow.js`, from the view |
 | `offer(id, kind, x, y, open)` | a thing offers something while `open()` | `meadow.js` (nectar: the tulips while open, the bluebells, the yellow spike), `rain.js` (nectar: the wild patch, not while drooping; shelter under its leaves), `spring.js` (a drink at either edge of the pool) |
 | `wet(x0, x1, ms)` | rain, or wet underfoot, there and for so long | `rain.js`, under the cloud and for 45 s after; `storm.js`, the whole meadow while it rains and 45 s after |
-| `noise(kind, x, reach)` | a sound, heard within `reach` | `car.js` (`vroom`, along its way), `spring.js` and the paddle (`splash`), `church.js` (`bell`, everywhere), `storm.js` (`thunder`, everywhere) |
+| `noise(kind, x, reach)` | a sound, heard within `reach`. Noises are numbered: a listener keeps `World.heardUpTo` and hears each once | `car.js` (`vroom`, along its way), `spring.js` and the paddle (`splash`), `church.js` (`bell`, everywhere), `storm.js` (`thunder`, everywhere); the yard: Reksio's `bark` and `snap` |
 
 A field joins only when something reads it. Hour and light are apart on
 purpose: the day is the same length for every child, so an eclipse or a
@@ -48,7 +59,9 @@ home and none come while it rains, and the snail comes out, since its
 shelter is wet; the wind gets up with it.
 
 Offer kinds in use: `nectar`, `drink`, `shelter` (a creature's home to
-come out of: the snail comes out where one is wet). A new kind is a word
+come out of: the snail comes out where one is wet), `perch` (somewhere to
+land: the yard's roof, tap, bowl, flower), `sight` (something on show a
+curious creature comes to look at: Reksio's nose, the web's edge). A new kind is a word
 both the thing and the creature use; add it to this list.
 
 ## A creature
@@ -62,19 +75,25 @@ moves that are the creature's own (`arrived`: the finch's dip to drink).
 
 What it goes for, first that applies:
 
-1. **Fear**: it was tapped (`c.tapped`), or heard a noise of a kind in its
-   `startledBy`. Off out of sight at `flee` times its speed, or, with
-   `freezeMs`, still that long (the snail into its shell).
+0. **An errand**: a gag set `c.errand` = {x, y}. It goes there at
+   `errandSpeed` and stays until the gag clears it (the yard's bee).
+1. **Fear**: it was tapped (`c.tapped`), heard a noise of a kind in its
+   `startledBy` (a list, or `{ kind: range }`), or, if `shy`, the hero's
+   nose came too close. Off out of sight at `flee` times its speed; or,
+   with `dart`, a startled burst a short way off, then on as before (the
+   fly's dodge, the bee's huff); or, with `freezeMs`, still that long (the
+   snail into its shell).
 2. **Home**: its stay is over, it is out of its `hours`, the `light` is below
-   its `dark`, or the wet if it minds it (`wet: 'avoid'`), or the dry if it
-   likes the wet (`'likes'`). To its own `home` if made with one, else off
-   out of sight.
+   its `dark`, rain coming or the wet if it minds it (`wet: 'avoid'`), or
+   the dry if it likes the wet (`'likes'`). To its own `home` if made with
+   one, else off out of sight (at `exitY`, or up and away).
 3. **Hunger**: once `hungerMs` has passed since it last fed, something on
    offer that it `feeds` on, within its reach and half its `roam`, and dry
    if it minds the wet. It sits there `feedMs`. Whatever it is doing, a feed
    under way is finished: going home waits for it, fear doesn't.
 4. **Wander**: somewhere within its reach (its `haunt`, or the view),
-   `band` (scene y) and `roam`; with `pauseMs`, it hovers where it gets to.
+   `band` (scene y) and `roam`; with `pauseMs`, it hovers where it gets to;
+   if `curious`, that share of its wanders go to something on show.
 
 Whatever it goes for, the wind pushes it downwind as much as its `blown`
 (0 to 1; the butterflies 0.8, the dragonflies 0.3, the finch 0.15), except

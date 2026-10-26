@@ -219,10 +219,10 @@ const Spring = (() => {
 
   /** The frog hears what goes on round it: a splash near it, or the car, and in it plops. */
   function listen() {
-    let since = Clock.now()
+    let since = World.heardUpTo
     Clock.every(FROG_LISTENS_MS, () => {
       const heard = World.heard(PAD.x, since).some((n) => FROG_HEARS.includes(n.kind))
-      since = Clock.now()
+      since = World.heardUpTo
       if (heard && frog && !frog.in) plop()
     })
   }

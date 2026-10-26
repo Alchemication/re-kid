@@ -13,7 +13,7 @@ function yard(query) {
   const reksio = { x: 1500, nose: { x: 1560, y: 640 } }
   const weather = { phase: 'dry', raining: false, puddles: [], sinceRain: null }
   const sounds = []
-  const page = load(['debug.js', 'layout.js', 'creatures.js'], {
+  const page = load(['debug.js', 'layout.js', 'world.js', 'creature.js', 'creatures.js'], {
     query: `?seed=1&${query}`,
     dom: true,
     globals: {
@@ -23,6 +23,7 @@ function yard(query) {
     },
   })
   const Creatures = page.get('Creatures')
+  const World = page.get('World')
   Creatures.init()
   return {
     Creatures,
@@ -41,9 +42,12 @@ function yard(query) {
       }
       return cond() ? seconds : null
     },
+    /** It rains: as the yard's weather tells the world (weather.js), the sky over and the whole yard wet. */
     rain() {
       weather.phase = 'raining'
       weather.raining = true
+      World.set({ overcast: 1 })
+      World.wet(-500, 4500, 1e9)
     },
   }
 }

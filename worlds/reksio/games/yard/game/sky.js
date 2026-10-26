@@ -66,6 +66,8 @@ const Sky = (() => {
     placeMoon()
   }
 
+  const LIGHT_FALL = 0.6 // the light falls by this much by sunset...
+  const LIGHT_FALL_H = 0.5 // ...over this last half hour
   let hour = Day.FROM
   let dawnK = 0 // 1 at dawn … 0 once the sun is up
   let musicDusk = -1
@@ -160,5 +162,9 @@ const Sky = (() => {
     render()
   }
 
-  return { look, moonPath, init, show, dawn, sunrise, dusk, night, get moonUp() { return moonUp } }
+  /** The light, 1 broad day: it falls through the half hour before sunset, to 0.4 as the sun goes behind the wall
+   * (the world model's: creatures go home below their `dark`, as they did at sunset). */
+  const light = () => 1 - LIGHT_FALL * clamp01((hour - (Day.SUNSET - LIGHT_FALL_H)) / LIGHT_FALL_H)
+
+  return { look, moonPath, init, show, dawn, sunrise, dusk, night, get moonUp() { return moonUp }, get light() { return light() } }
 })()

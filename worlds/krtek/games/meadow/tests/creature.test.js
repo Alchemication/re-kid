@@ -82,7 +82,9 @@ test.describe('the world state', () => {
     World.noise('vroom', 1000, 300)
     assert.equal(World.heard(1200, 0).length, 1)
     assert.equal(World.heard(1400, 0).length, 0) // out of reach
-    assert.equal(World.heard(1200, 100).length, 0) // heard already
+    assert.equal(World.heard(1200, World.heardUpTo).length, 0) // heard already
+    World.noise('vroom', 1000, 300) // in the same ms: still news
+    assert.equal(World.heard(1200, 1).length, 1)
   })
 })
 
@@ -240,6 +242,69 @@ test.describe('a creature', () => {
     feeding.goal = { kind: 'feed', x: 800, y: 500, until: 1e9 }
     run(w, feeding, 1000, rnd)
     assert.ok(Math.abs(feeding.x - 800) < 2)
+  })
+
+  test('startled, one that darts goes a short way off at once, then carries on', () => {
+    const w = load()
+    const rnd = stream()
+    const c = w.Creature.make({ ...BUTTERFLY, feeds: null, speed: 260, flee: 3.5, startledBy: { bark: 260 }, dart: 400 }, 800, 500, 0, rnd) // the yard's fly
+    run(w, c, 500, rnd)
+    const at = { x: c.x, y: c.y }
+    w.World.noise('bark', at.x + 100, 500)
+    run(w, c, 250, rnd)
+    assert.ok(Math.hypot(c.x - at.x, c.y - at.y) > 120, 'a dart, at once')
+    run(w, c, 1500, rnd)
+    assert.notEqual(c.goal?.kind ?? 'wander', 'flee', 'and on it goes, not off out of sight')
+  })
+
+  test('a noise minded only within its range', () => {
+    const w = load()
+    const rnd = stream()
+    const c = w.Creature.make({ ...BUTTERFLY, feeds: null, startledBy: { bark: 260 }, dart: 400 }, 800, 500, 0, rnd)
+    w.clock.t = 10
+    w.World.noise('bark', 1500, 1000)
+    w.Creature.think(c, w.World, w.clock.t, rnd)
+    assert.notEqual(c.goal.kind, 'dart')
+  })
+
+  test('a shy one darts from the hero\'s nose when it comes close', () => {
+    const w = load()
+    const rnd = stream()
+    const c = w.Creature.make({ ...BUTTERFLY, feeds: null, shy: { at: 100, odds: 1 }, dart: 200 }, 800, 500, 0, rnd)
+    w.World.set({ hero: { x: 800, nose: { x: 810, y: 505 } } })
+    w.Creature.think(c, w.World, 1, rnd)
+    assert.equal(c.goal.kind, 'dart')
+  })
+
+  test('sent on an errand it goes there whatever else, stays, and when let go carries on', () => {
+    const w = load()
+    const rnd = stream()
+    const c = w.Creature.make({ ...BUTTERFLY, errandSpeed: 300, startledBy: ['vroom'] }, 200, 500, 0, rnd)
+    c.errand = { x: 900, y: 600 }
+    const said = run(w, c, 4000, rnd, () => w.World.noise('vroom', c.x, 500)) // scary all the way: no matter
+    assert.ok(said.some((x) => x.r === 'arrived' && x.goal === 'errand'))
+    assert.ok(Math.hypot(c.x - 900, c.y - 600) < 10)
+    c.errand = null
+    w.Creature.think(c, w.World, w.clock.t, rnd)
+    assert.notEqual(c.goal.kind, 'errand')
+  })
+
+  test('one that minds the wet goes home when the sky clouds over, before the rain', () => {
+    const w = load()
+    const rnd = stream()
+    const c = w.Creature.make(BUTTERFLY, 800, 500, 0, rnd)
+    w.World.set({ overcast: 0.8 })
+    w.Creature.think(c, w.World, 1, rnd)
+    assert.equal(c.goal.kind, 'home')
+  })
+
+  test('a curious one wanders now and then to something on show', () => {
+    const w = load()
+    const rnd = stream(3)
+    w.World.offer('nose', 'sight', 1000, 600)
+    const c = w.Creature.make({ ...BUTTERFLY, feeds: null, curious: 1 }, 800, 500, 0, rnd)
+    w.Creature.think(c, w.World, 1, rnd)
+    assert.ok(Math.abs(c.goal.x - 1000) < 40 && c.goal.y <= 600)
   })
 
   test('the same stream makes the same flight', () => {

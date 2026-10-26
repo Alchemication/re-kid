@@ -122,7 +122,13 @@ decided and why.
    8. If the meadow feels more alive: the LLM director behind the player's
       own key, on Adam's devices, replies recorded for replay, a stub in
       the tests. Then decide whether it is worth a proxy for the site.
-   Then the yard's fly, bee and weather move onto it, if it held up.
+   **Adam judges the yard on the world model** (built 2026-10-26, his
+   call: "far more superior already"): the fly and the bee decide by the
+   creature rules from what the yard tells the world (light, rain coming,
+   wet, his bark and snap, his nose, the roof, tap, bowl and flowers to land
+   on, the flowers' nectar). They should play as before; judge whether they
+   do. Next for the yard, his call: the snail and worms onto it, then the
+   meadow's world events (the eclipse, perhaps the storm).
 3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how
@@ -237,7 +243,12 @@ scene:
   `TestRealInput::test_a_key_tap_barks` fails about 1 run in 5 under
   `-n 8` (a quick key tap can count as a hold when frames are slow).
   `TestScreens::test_turning_the_phone_refits_it` failed once under `-n 8`
-  (2026-10-22) and passed alone: not yet looked into.
+  (2026-10-22) and passed alone: not yet looked into. In one heavily
+  loaded run (2026-10-26, 17 minutes instead of 13), four more failed and
+  passed alone: `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`,
+  the meadow's `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]`
+  and `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`, and
+  one whose name the log lost: timing bugs to look into.
 
 ## Later
 

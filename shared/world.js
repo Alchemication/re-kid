@@ -21,7 +21,8 @@ const World = (() => {
   let now = () => 0
   const offers = new Map() // id -> { id, kind, x, y, open() }
   let wets = [] // { x0, x1, until }
-  let noises = [] // { kind, x, reach, t }
+  let noises = [] // { kind, x, reach, t, n }
+  let count = 0 // noises made so far: each is numbered, so a listener hears each once (a time can't tell two in one ms)
   const state = {
     hour: 8,
     light: 1, // 1 broad day, 0 night
@@ -68,11 +69,11 @@ const World = (() => {
   function noise(kind, x, reach = 300) {
     const t = now()
     noises = noises.filter((n) => t - n.t < HEARD_MS)
-    noises.push({ kind, x, reach, t })
+    noises.push({ kind, x, reach, t, n: ++count })
   }
 
-  /** The noises heard at x since `since` (ms on the clock). */
-  const heard = (x, since) => noises.filter((n) => n.t > since && Math.abs(n.x - x) <= n.reach)
+  /** The noises heard at x made after noise number `since` (a listener keeps World.heardUpTo from its last listen). */
+  const heard = (x, since) => noises.filter((n) => n.n > since && Math.abs(n.x - x) <= n.reach)
 
-  return { setup, set, offer, withdraw, offered, wet, isWet, noise, heard, state }
+  return { setup, set, offer, withdraw, offered, wet, isWet, noise, heard, state, /** The number of the last noise made. */ get heardUpTo() { return count } }
 })()
