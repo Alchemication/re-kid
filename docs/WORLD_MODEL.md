@@ -45,6 +45,7 @@ everything else the bee would do.
 | `hour` | 08–20, moves only with the day | `meadow.js` tick |
 | `light` | 1 broad day to 0 night; in an eclipse down to 0.3, under a storm to 0.55, while the hour goes on (`eclipse.js`, `storm.js`) | `meadow.js` sky; the yard's `sky.js` (falling the half hour before sunset) |
 | `overcast` | 0 to 1: rain coming. A creature that minds the wet goes home from 0.5 | the yard's `weather.js` (its shower's clouds) |
+| `fog` | 0 to 1: creatures keep closer in it (their wanders shorter) | the yard's `weather.js` (`fog.js`: some mornings, lifting by 10:30) |
 | `hero` | `{x, nose}`: where the hero is, and his nose (a shy creature darts from it) | the yard's `creatures.js` |
 | `wind` | 0 still to 1 a full gust, blowing left to right (`shared/wind.js`: a breeze, now and then a gust, calm from sunset) | `weather.js` |
 | `view` | `{x0, x1}`: what the child sees | `meadow.js`, from the view |

@@ -16,7 +16,7 @@
 // dark, rain coming or the wet if it minds it, the dry if it likes the
 // wet), then hunger (to something on offer that it feeds on, a while there,
 // and full again), and otherwise it wanders, over the view or about its
-// haunt, now and then to something on show if it is curious, hovering a
+// haunt (closer in fog), now and then to something on show if it is curious, hovering a
 // moment where it gets to if it is one that hovers.
 //
 // Plain rules, no drawing and no clock: the game passes the time and its
@@ -29,6 +29,7 @@ const Creature = (() => {
   const OFF = 400 // gone once this far out of the view
   const BLOW = 120 // a full gust pushes a creature that is all blown (blown: 1) this far a second, downwind
   const RAIN_COMING = 0.5 // overcast this much, one that minds the wet goes home before the rain
+  const FOG_KEEPS_CLOSE = 0.6 // in the thickest fog its wanders are this much shorter
   const between = ([a, b], r) => a + r * (b - a)
 
   /**
@@ -92,7 +93,8 @@ const Creature = (() => {
         return { kind: 'wander', x: o.x + (rnd() - 0.5) * 60, y: o.y - rnd() * 40 }
       }
     }
-    const x = Math.max(lo, Math.min(hi, c.x + (rnd() - 0.5) * c.traits.roam))
+    const roam = c.traits.roam * (1 - FOG_KEEPS_CLOSE * (world.state.fog || 0)) // in fog it keeps closer
+    const x = Math.max(lo, Math.min(hi, c.x + (rnd() - 0.5) * roam))
     return { kind: 'wander', x, y: between(c.traits.band, rnd()) }
   }
 

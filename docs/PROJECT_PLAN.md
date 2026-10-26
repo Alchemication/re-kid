@@ -130,8 +130,22 @@ decided and why.
    puddles once the rain stops: each puddle offers a drink while it holds
    water; the snail freezes in her shell at his nose and goes to a porcino
    put down for her). They should play as before; judge whether they do.
-   Next for the yard: the meadow's world events (the eclipse, perhaps the
-   storm).
+   The yard keeps world events of its own (Adam, 2026-10-26: some events
+   distinct to a world), from its films' seasons and weather:
+   1. **Adam judges the morning fog** (built 2026-10-26, invented, painted
+      after Reksio taternik's mist, 4:00-4:40): about one play in three
+      wakes in fog, a pale wash over the yard's things and low mist while
+      Reksio stays clear; he sniffs his way about in it; the light dims, the
+      fly and the bee keep closer; it lifts between 09:00 and 10:30.
+      `?fog=1`. Its perf: about 1-2 points over the plain yard, measured on
+      a busy machine (the mist bands lie still: drifting cost more).
+   2. **A winter play** (designed with Adam, 2026-10-26, from the sourced
+      synopses of Reksiowa zima and Reksio łyżwiarz, 1981, not public, so no
+      frames yet; snow painted after Taternik's snowfields): one play in four
+      is winter: a snowy yard, no flowers, bee or fly; snow falling now and
+      then instead of the shower; sparrows at his bowl (the ground under
+      snow, the bowl is the food on offer); frozen puddles he slips on;
+      snowflakes on his tongue, rolling in the snow, footprints.
 3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how

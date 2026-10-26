@@ -513,6 +513,9 @@
 
         </g>
 
+        <!-- the morning fog, over the yard's things and behind Reksio (weather.js, fog.js) -->
+        <g id="fog" style="display: none"></g>
+
         <!-- ============ Reksio: drawn by figure.js from his pose (reksio.js); feet at y=0 ============ -->
         <g id="reksio" style="transform: translate(1000px, 812px)">
           <g id="rk-scale" style="transform: scale(1.2)">
@@ -565,6 +568,7 @@
 
     <canvas id="rain" aria-hidden="true"></canvas>
     <div id="overcast" class="overcast" aria-hidden="true"></div>
+    <div id="fog-haze" class="fog-haze" aria-hidden="true"></div>
     <div id="sunset" class="sunset" aria-hidden="true"></div>
     <div id="evening" class="evening" aria-hidden="true"></div>
     <div id="night-blue" class="night-blue" aria-hidden="true"></div>
@@ -637,6 +641,7 @@
   <script src="creatures.js"></script>
   <script src="shower.js"></script>
   <script src="wind.js"></script>
+  <script src="fog.js"></script>
   <script src="weather.js"></script>
   <script src="tree.js"></script>
   <script src="bramble.js"></script>

@@ -17,13 +17,17 @@
 // goes, now and then a gust, stronger when the clouds come. You hear it and
 // see it, since the grass and flowers lean further in a gust.
 
-/* global Debug, Layout, Motion, Painting, Shower, Sound, Music, Wind, World */
+/* global Debug, Fog, Layout, Motion, Painting, Shower, Sound, Music, Wind, World */
 /* exported Weather */
 const Weather = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const GROUND_Y = 812
   const START_S = [25, 55] // the shower starts this long into the play
   const WET_MS = 300 // the world is told where it's wet this far ahead, again every frame while it is
+  const FOG_WASH = 0.85 // the fog's wash over the yard's things, at its thickest (a level of 1)
+  const FOG_HAZE = 0.22 // …and the haze over everything, Reksio too: he stays clear, the yard fades
+  const FOG_SHOWN_STEP = 0.01 // its opacity is set on the page only when it changes this much
+  const MISTS = [[300, 620, 760], [1300, 700, 820], [2300, 600, 700], [3300, 680, 760]] // the mist's lying bands: x, y, half their width
   const RAIN_S = [22, 30] // and lasts this long
   const DROPS = 220 // raindrops on screen at full rain
   const PUDDLE_DROP = 6 // puddles sit this far below Reksio's feet line: paws in the water
@@ -41,6 +45,38 @@ const Weather = (() => {
     for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v)
     parent.appendChild(n)
     return n
+  }
+
+  // this play's morning fog (fog.js), from its own stream so ?fog shifts nothing else
+  const fogPlan = Fog.plan(Debug.random('fog'), Layout.fog)
+  let fog = 0
+  let fogShown = -1
+
+  /** The fog, drawn once: a pale wash down over the yard (clear in the sky), and lying mist bands (game.css .mist). */
+  function makeFog() {
+    const g = $('fog')
+    if (!fogPlan || !g) return
+    const grad = el('linearGradient', { id: 'fog-grad', x1: 0, y1: 0, x2: 0, y2: 1 }, el('defs', {}, g))
+    el('stop', { offset: 0, 'stop-color': '#eef1f2', 'stop-opacity': 0 }, grad) // from nothing at the top: no edge
+    el('stop', { offset: 0.3, 'stop-color': '#eef1f2', 'stop-opacity': 0.6 }, grad)
+    el('stop', { offset: 0.55, 'stop-color': '#eef1f2', 'stop-opacity': 0.82 }, grad)
+    el('stop', { offset: 1, 'stop-color': '#eef1f2', 'stop-opacity': 0.9 }, grad)
+    el('rect', { x: -200, y: 120, width: Layout.WORLD_W + 400, height: 780, fill: 'url(#fog-grad)' }, g)
+    for (const [x, y, half] of MISTS) el('ellipse', { class: 'mist', cx: x, cy: y, rx: half, ry: 70, opacity: 0.7 }, g)
+    Debug.trace('fog', { thick: Math.round(fogPlan.thick * 100) / 100 })
+  }
+
+  /** The fog's level for the hour: shown (only when it changed enough), hidden altogether once it has lifted. */
+  function showFog() {
+    fog = Fog.level(fogPlan, World.state.hour)
+    const lifted = fog === 0 && fogShown !== 0 // the last little step to none is always shown: hidden, it costs nothing
+    if (!fogPlan || (Math.abs(fog - fogShown) < FOG_SHOWN_STEP && !lifted)) return
+    fogShown = fog
+    const g = $('fog')
+    g.style.display = fog > 0 ? '' : 'none' // gone: not drawn at all
+    g.style.opacity = (fog * FOG_WASH).toFixed(3)
+    $('fog-haze').style.opacity = (fog * FOG_HAZE).toFixed(3)
+    if (fog === 0) Debug.trace('fog', { lifted: true })
   }
 
   // the shower's timeline (shower.js); the start is drawn even when ?rain-at sets it
@@ -262,7 +298,7 @@ const Weather = (() => {
   /** The world state (world.js): how overcast it is (rain coming), the wind, and where it's wet: all the yard
    * while it rains, and each puddle while it holds water. */
   function tellTheWorld(cover) {
-    World.set({ overcast: cover, wind })
+    World.set({ overcast: cover, wind, fog })
     if (shower.phase === 'raining') World.wet(-500, Layout.WORLD_W + 500, WET_MS)
     if (shower.wet > 0.25) for (const p of puddles) World.wet(p.x - p.rx, p.x + p.rx, WET_MS)
   }
@@ -272,6 +308,7 @@ const Weather = (() => {
     shower.step(dt).forEach(entered)
 
     const cover = shower.cover
+    showFog()
     tellTheWorld(cover)
     clouds.forEach((c, i) => moveCloud(c, (i * Layout.sky.clouds) % clouds.length < Layout.sky.clouds, cover, dt)) // spread out: 3 of 5 are the 1st, 3rd and 5th
     $('overcast').style.opacity = String(Math.max(Layout.sky.haze, cover * 0.42))
@@ -288,6 +325,7 @@ const Weather = (() => {
   function init() {
     // each puddle offers a drink while it holds water (world.js): the snail and the worms come out by them after rain
     puddles.forEach((p, i) => World.offer(`puddle-${i}`, 'drink', p.x, GROUND_Y, () => shower.wet > 0.25))
+    makeFog()
     makeClouds()
     makeRainbow()
     new ResizeObserver(sizeCanvas).observe(canvas)
@@ -303,6 +341,8 @@ const Weather = (() => {
     get raining() { return shower.phase === 'raining' },
     /** How windy it is now: 0 still, 1 a gust. */
     get wind() { return wind },
+    /** How thick the morning fog is now: 0 none. */
+    get fog() { return fog },
     /** Seconds since the rain stopped, or null if it hasn't rained yet. */
     get sinceRain() { return shower.sinceRain },
     puddleAt,

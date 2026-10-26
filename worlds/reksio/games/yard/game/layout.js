@@ -145,6 +145,7 @@ const Layout = (() => {
   const rainDrawn = random() < (last.rain ? RAIN_CHANCE / 2 : RAIN_CHANCE)
   const rain = params.has('rain') ? params.get('rain') !== '0' : rainDrawn
   const rainAt = Number(params.get('rain-at')) || null
+  const fog = params.has('fog') ? params.get('fog') !== '0' : null // ?fog=1 (or 0) forces this play's morning fog (fog.js draws its own)
   // ?props=trap,bowl picks the props, and ?mouse-at=SECONDS brings the mouse out, likewise
   const asked = listed('props', PROP_POOL)
   if (asked.length) props.splice(0, props.length, ...asked)
@@ -221,7 +222,7 @@ const Layout = (() => {
   }
 
   const layout = {
-    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, mouseAt, fruit, visitorAt, henAt, mushroomsAt, layered, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
+    WORLD_W, MIN_X, MAX_X, ROW_FROM, ROW_TO, MIN_GAP, FOOTPRINTS, OFFERS, props, creatures, flowers, rain, rainAt, fog, mouseAt, fruit, visitorAt, henAt, mushroomsAt, layered, gaps, dayS, hour, shift, hidden, puddles, perches, sun, moon, sky, morning, wakeAfter,
     x: (name) => shift[name] || 0,
   }
   /** The page-address flags that build this same yard again. */

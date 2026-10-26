@@ -584,7 +584,18 @@
 
   const idleFor = () => (Clock.now() - lastTap) / 1000
 
+  const FOG_DIM = 0.3 // the morning fog dims the light this much at its thickest (the world model's light)
+  const FOG_SNIFF = 0.3 // fog this thick: left alone, he sniffs his way about in it
   const ACTS = {
+    // in the morning fog: nose down, he sniffs his way along a little, and stops to look about
+    fogSniff: {
+      weight: 8,
+      ok: () => Weather.fog > FOG_SNIFF,
+      async run() {
+        const dir = random() < 0.5 ? -1 : 1
+        if (await Reksio.walkTo(Reksio.x + dir * rnd(150, 320), { sniffing: true })) await Reksio.lookAround(700)
+      },
+    },
     wish: { weight: 2, quiet: true, ok: () => wishFor() && Clock.now() - lastWishAt > WISH_GAP_MS, run: () => showWish(wishFor()), ms: WISH_SHOW_MS + 600 },
     sniff: { weight: 5, run: () => Reksio.sniff() }, // he sniffs about a lot (Adam)
     wander: {
@@ -826,7 +837,7 @@
     last = t
     Reksio.tick(dt)
     if (day.hurrying(t)) Sky.show(day.hour(t))
-    World.set({ hour: day.hour(t), light: Sky.light, view: { x0: camX, x1: camX + Painting.VIEW_W } }) // the world state (world.js): the creatures read it // the sun hurrying down: every frame, not every idle tick
+    World.set({ hour: day.hour(t), light: Sky.light * (1 - FOG_DIM * Weather.fog), view: { x0: camX, x1: camX + Painting.VIEW_W } }) // the world state (world.js): the creatures read it // the sun hurrying down: every frame, not every idle tick
     Creatures.tick(dt)
     Weather.tick(dt, camX)
     Wet.frame(t)

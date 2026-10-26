@@ -28,6 +28,7 @@ const World = (() => {
     light: 1, // 1 broad day, 0 night
     wind: 0, // 0 still, 1 a full gust; it blows from left to right
     view: { x0: 0, x1: 1600 }, // the stretch of the scene the child sees
+    fog: 0, // 0 clear, 1 thickest: creatures keep closer (the yard's morning fog)
   }
 
   /** Run on this clock. */

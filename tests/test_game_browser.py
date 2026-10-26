@@ -127,6 +127,7 @@ NOT_GESTURES = {
 }
 
 ACTS = [
+    "fogSniff",
     "wish",
     "sniff",
     "wander",
@@ -1039,6 +1040,16 @@ class TestRealInput:
         y.page.click("#things [data-thing='house']")  # in view from the start
         y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
         assert self.intents(y) == ["go to house"]
+        y.settled()
+
+    def test_a_tap_on_a_thing_goes_through_the_fog(self, yard: callable) -> None:
+        """The fog lies over the yard's things: a tap and the pointer must
+        reach them through it (2026-10-26: in a foggy play no thing could be
+        tapped)."""
+        y = yard(f"{STILL}&fog=1")
+        assert y.page.evaluate("Weather.fog") > 0.5
+        y.page.click("#things [data-thing='house']")
+        y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
         y.settled()
 
     def test_a_tap_on_open_sky_walks_there(self, yard: callable) -> None:

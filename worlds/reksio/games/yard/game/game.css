@@ -227,6 +227,10 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   mix-blend-mode: multiply;
   opacity: 0;
 }
+/* the morning fog (weather.js): a pale wash over the yard's things, mist drifting slowly, and a light haze over all */
+.fog-haze { position: absolute; inset: 0; pointer-events: none; background: #eef1f2; opacity: 0; }
+#fog { pointer-events: none; } /* over the things: taps and the pointer go through to them */
+.mist { fill: #f1f4f5; } /* still: drifting, these big shapes repainted every frame cost a phone about 2% (perf) */
 .cloud-puff { fill: #e9ecef; stroke: none; }
 .cloud { filter: drop-shadow(0 3px 0 rgba(60, 70, 80, 0.35)); }
 .rainbow-band { fill: none; stroke-width: 14; opacity: 0.85; }
