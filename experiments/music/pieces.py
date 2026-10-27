@@ -67,6 +67,41 @@ def adam(wording: str) -> list[str]:
 
 
 PIECES: dict[str, dict] = {
+    # Winter (Adam, 2026-10-27: each season its own themes): his form, the
+    # middle changed for a snowy yard. Made while he slept, for his ear.
+    "morning-winter": {
+        "for": "A winter play: Reksio wakes in his doghouse and the yard is white with snow; the first thing the child hears.",
+        "seconds": 12,
+        "now": ["morning"],
+        "style": False,
+        "models": ADAM_MODELS,
+        "takes": 2,
+        "prompts": adam(
+            "A short, gentle wake-up tune reminiscent of 1970s Eastern European children's cartoons, featuring a light, rising melody with a soft wintry sparkle and whimsical motifs suitable for a small dog waking in his doghouse to find the yard white with fresh snow, capturing the nostalgic and charming vibe of vintage animated shows from that era."
+        ),
+    },
+    "phrase-winter": {
+        "for": "A winter play: a short phrase now and then, while a boy and his dog build a snowman and throw snowballs.",
+        "seconds": 15,
+        "now": ["phrase"],
+        "style": False,
+        "models": ADAM_MODELS,
+        "takes": 2,
+        "prompts": adam(
+            "A catchy, playful instrumental theme reminiscent of 1970s Eastern European children's cartoons, featuring lighthearted melodies and whimsical motifs suitable for a boy and his small dog building a snowman and playing in the snow in a winter yard, capturing the nostalgic and charming vibe of vintage animated shows from that era."
+        ),
+    },
+    "lullaby-winter": {
+        "for": "A winter play, at evening: snow on the doghouse roof, Reksio curling up inside as the picture closes.",
+        "seconds": 15,
+        "now": ["lullaby"],
+        "style": False,
+        "models": ADAM_MODELS,
+        "takes": 2,
+        "prompts": adam(
+            "A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children's cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog curling up in his snowy doghouse on a quiet winter evening as snowflakes fall, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era."
+        ),
+    },
     # Adam's two wordings from the ElevenLabs page (2026-10-13), where Music
     # v1 made "a nice tune" from each: sent as written, on each model, to
     # hear what the model changes.

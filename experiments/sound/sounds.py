@@ -6,6 +6,61 @@ from __future__ import annotations
 # Each of the game's effects (sound.js) with what it is for, and wordings
 # for the model: cartoon-like, gentle (small ears), short.
 SOUNDS: dict[str, dict] = {
+    # winter (2026-10-27): the snowman's encounters and the ice
+    "pat": {
+        "for": "Snow patted in mittened hands: the boy packing a snowball, or a snowman's head (snowplay.js, snowman.js). Called every 0.2-0.26 s, four or five times running.",
+        "seconds": 0.5,
+        "prompts": [
+            "fresh snow pressed and patted between two gloved hands, one soft crunchy pat",
+            "packing a snowball with wool mittens, a single muffled crunch",
+            "a handful of powdery snow squeezed once, soft and close",
+        ],
+    },
+    "whoosh": {
+        "for": "A snowball thrown, lobbed over the snowman to Reksio, or flat into its head.",
+        "seconds": 0.6,
+        "prompts": [
+            "a snowball thrown past, a short soft whoosh of air",
+            "a small ball tossed through the air, a gentle swish",
+            "a quick light whoosh of something thrown underarm",
+        ],
+    },
+    "poof": {
+        "for": "A snowball bursting on Reksio's nose as he snaps at it, or on the snowman's head.",
+        "seconds": 0.6,
+        "prompts": [
+            "a snowball hitting something and bursting into powder, a soft crunchy poof",
+            "a ball of loose snow breaking apart on impact, a muffled splat",
+            "a handful of snow thrown against a wall, a soft puff and crumble",
+        ],
+    },
+    "thud": {
+        "for": "The snowman's head knocked off, landing in the snow and breaking into lumps.",
+        "seconds": 0.8,
+        "prompts": [
+            "a heavy ball of snow falling into deep snow and breaking apart, a muffled thump and crumble",
+            "a big snowball dropped onto snowy ground, a dull soft thud",
+            "a lump of packed snow hitting the ground and crumbling, close",
+        ],
+    },
+    "pluck": {
+        "for": "A sparrow tugging the snowman's carrot nose out: it comes out of the packed snow with a pop.",
+        "seconds": 0.5,
+        "prompts": [
+            "a carrot pulled out of packed snow, a short squeaky pop",
+            "a cork pulled gently out of a bottle, a small soft pop",
+            "a stick pulled out of firm snow, a quick crunchy pop",
+        ],
+    },
+    "bump": {
+        "for": "Slipping on the ice and landing on your bottom: Reksio or the boy (ice.js).",
+        "seconds": 0.6,
+        "prompts": [
+            "someone sitting down hard on snowy ice, a soft bump with a crunch of snow",
+            "a child plopping onto a snowy ground, a muffled bump",
+            "a small body landing on packed snow, a dull soft thump",
+        ],
+    },
     "boing": {
         "for": "His tail stretched like elastic snaps him back (the bramble).",
         "seconds": 1.2,
