@@ -466,7 +466,7 @@
     await actTo(FEET_UP, 160)
     blend(add, 'dy', 0, 170, k.EASE_IN)
     await actTo(PLONKED, 170)
-    Sound.plop()
+    Sound.bump()
     await pause(500)
     await faceTo({ eyes: 1, lift: 0.8, brows: 0.5, small: 1, smile: 0, look: 1 }, 120) // seeing stars
     await pause(900)

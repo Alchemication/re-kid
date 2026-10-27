@@ -325,7 +325,7 @@ const Snowman = (() => {
       await holding(inHands(head), async () => {
         for (let r = 6; r <= R.head; r += 5) {
           setBall(head, head.x, head.y, r)
-          Sound.scrape()
+          Sound.pat()
           await Boy.pause(220)
         }
         await Boy.settle('heave', 600)
@@ -380,11 +380,12 @@ const Snowman = (() => {
     if (ways) boyDo('wonders', ways[Math.floor(mind() * ways.length)])
   }
 
-  /** He takes what Reksio brought and puts it in. */
-  async function takeAndPut(what) {
+  /** He takes what Reksio brought (picked() takes it from where it lay) and puts it in. */
+  async function takeAndPut(what, picked = () => {}) {
     if (stage === 'evening') return
     Boy.face(-1)
     await Boy.settle('crouch', 350)
+    picked() // up from where it lay (if it lay somewhere): now it's in his hand
     await holding(inHand(what), async () => {
       await Boy.stand(350)
       Boy.face(1)
@@ -492,7 +493,7 @@ const Snowman = (() => {
     await holding(inHands(head), async () => {
       for (let r = 6; r <= R.head; r += 5) {
         setBall(head, head.x, head.y, r)
-        Sound.scrape()
+        Sound.pat()
         await Boy.pause(200)
       }
       await Boy.settle('heave', 500)
@@ -524,7 +525,7 @@ const Snowman = (() => {
     if (has.eyes) g.lumps.insertAdjacentHTML('beforeend', STONE(-44, -2) + STONE(50, -1))
     if (has.carrot) g.lumps.insertAdjacentHTML('beforeend', '<path class="carrot" d="M-2 -4 L26 0 L-2 4 Z" transform="translate(18 -26) rotate(-35)" />')
     if (has.hat) BoyFigure.cap(g.lumps).setAttribute('transform', `translate(-4 ${(40 - R.head).toFixed(0)}) rotate(-20) scale(${CAP_ON.scale})`)
-    Sound.plop()
+    Sound.thud()
     Debug.trace('snowman head broken', { x: Math.round(fallenAt) })
     boyDo('mends it', rebuild)
   }

@@ -41,7 +41,7 @@ const Ice = (() => {
 
   const reksio = rule('reksio', () => Reksio.slipped())
   const boy = rule('boy', () => {
-    Clock.after(BOY_BUMP_MS, () => Sound.plop()) // bump
+    Clock.after(BOY_BUMP_MS, () => Sound.bump())
     return Boy.slipped()
   })
   Reksio.slipOn(reksio)

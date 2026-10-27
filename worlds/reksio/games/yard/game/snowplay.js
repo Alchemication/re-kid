@@ -83,7 +83,7 @@ const SnowPlay = (() => {
     const t0 = Clock.now()
     let done
     flight = { n: ++thrown, last, arrives: t0 + ms, landed: new Promise((resolve) => (done = resolve)) }
-    Sound.toss()
+    Sound.whoosh()
     const stop = k.follow(ballNode(), () => {
       const t = Math.min(1, (Clock.now() - t0) / ms)
       const p = to()
@@ -93,7 +93,7 @@ const SnowPlay = (() => {
       stop()
       const p = to()
       Things.burst(p.x, p.y, last ? 8 : 6, 'drop', { height: 30, reach: 45, size: 4 }) // snow (game.css: .frozen .drop)
-      Sound.plop()
+      Sound.poof()
       flight = null
       if (last && Snowman.stage === 'done') k.knockOff(1).then(done)
       else done()
@@ -118,7 +118,7 @@ const SnowPlay = (() => {
     await k.holding(letGo, async () => {
       for (let i = 1; i <= PATS; i++) {
         ball.setAttribute('r', (3 + ((BALL_R - 3) * i) / PATS).toFixed(1)) // …patted bigger and rounder
-        Sound.scrape()
+        Sound.pat()
         await Boy.pause(PAT_MS)
       }
       await Boy.stand(300)
@@ -238,6 +238,13 @@ const SnowPlay = (() => {
     Sound.plop()
   }
 
+  /** The carrot taken up from the snow. */
+  function unlay() {
+    lying?.remove()
+    lying = null
+    carrotAt = null
+  }
+
   /** The sparrow's part, on its own: in, onto the cap, down to the carrot,
    * tugs it out, off with it, and drops it in the snow. Then away. */
   async function steal() {
@@ -275,7 +282,7 @@ const SnowPlay = (() => {
         await Clock.wait(TUG_MS)
       }
       k.takeOff('carrot') // out it comes
-      Sound.pop()
+      Sound.pluck()
       theft = 'pulled'
       Debug.trace('sparrow steals the carrot', {})
       k.boyDo('sees the sparrow', seesIt)
@@ -348,9 +355,7 @@ const SnowPlay = (() => {
       Reksio.face(-side)
       await Reksio.sniff(1)
       await Reksio.nod(24, 400)
-      lying.remove()
-      lying = null
-      carrotAt = null
+      unlay()
       held = k.follow(k.carried('carrot'), () => {
         const m = Reksio.mouth()
         return { x: m.x, y: m.y + 4 }
@@ -359,12 +364,14 @@ const SnowPlay = (() => {
       if (!(await k.giveToBoy())) return
       held()
       held = null
+      lay(Reksio.mouth().x) // put down at the boy's feet: always somewhere to be seen, never between mouth and hand
       given = true
       k.boyDo('puts the carrot back', async () => {
+        if (carrotAt === null) return // fetched off again meanwhile
         try {
-          await k.takeAndPut('carrot')
+          await k.takeAndPut('carrot', unlay)
         } finally {
-          if (!Snowman.has.carrot) lay(Boy.x + Boy.facing * 30) // cut short (dusk): dropped in the snow, not gone
+          if (!Snowman.has.carrot && carrotAt === null) lay(Boy.x + Boy.facing * 30) // cut short in his hand (dusk): dropped in the snow, not gone
         }
       })
       await Reksio.hop()

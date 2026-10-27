@@ -526,6 +526,18 @@ const Sound = (() => {
     toss() { tone('sine', 420, 1100, 0, 0.1, 0.01, 0.18) },
     /** A tail stretched like elastic, letting go: boing. */
     boing() { tone('sine', 150, 420, 0, 0.16, 0.004, 0.09); tone('triangle', 430, 170, 0.07, 0.14, 0.004, 0.32); tone('sine', 220, 300, 0.12, 0.05, 0.01, 0.25) },
+    /** Snow patted in mittened hands: a snowball, a snowman's head. */
+    pat() { hiss(0, 0.06, 0.004, 0.06, 'lowpass', 1400, 0.8) },
+    /** A snowball thrown. */
+    whoosh() { hiss(0, 0.22, 0.05, 0.14, 'bandpass', 1200, 1.5) },
+    /** A snowball bursting on a nose (or a snowman's head). */
+    poof() { hiss(0, 0.12, 0.002, 0.12, 'lowpass', 2200, 1); tone('sine', 300, 150, 0, 0.08, 0.002, 0.06) },
+    /** A snowman's head landing in the snow and breaking. */
+    thud() { tone('sine', 140, 60, 0, 0.3, 0.003, 0.18); hiss(0.02, 0.1, 0.004, 0.16, 'lowpass', 900, 1) },
+    /** A carrot pulled out of packed snow: a pop. */
+    pluck() { tone('sine', 420, 900, 0, 0.14, 0.003, 0.05); hiss(0, 0.03, 0.002, 0.03, 'bandpass', 2500) },
+    /** Down on your bottom on the ice. */
+    bump() { tone('sine', 180, 80, 0, 0.26, 0.003, 0.12); hiss(0, 0.05, 0.002, 0.06, 'lowpass', 1100) },
     /** Fruit on the head: bonk. */
     bonk() { tone('triangle', 520, 190, 0, 0.25, 0.002, 0.16); hiss(0, 0.06, 0.002, 0.04, 'bandpass', 1400) },
     /** Paws in a puddle. */
