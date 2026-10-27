@@ -106,6 +106,19 @@ Then a few expressions as poses, each matched to a frame Adam chose
 (Reksio's: puzzled, eager, worried, content, cross). Put them in the
 scene's moments (`antics.js`), and give the gags' faces names from them.
 
+Before wiring him into a gag, show Adam a close-up sheet of every
+expression, front-on and side-on, at the size they will be seen in the
+scene. The boy's first faces (2026-10-26) were too weak to act: small
+eyes, faint brows, a mouth that slid off his cheek side-on. A close-up
+catches this; a full-scene screenshot hides it.
+
+Hair, a cap, a big ear: anything large on the head must hold the head in
+every pose and turn, never sit on it like a wig ("looks ridiculous",
+Adam, on the boy). Make it a unit test early, as `boy.test.js` does: walk
+the head's outline and check that the curls cover its top, and its back
+once he is turned. The test found bare patches at half-turn that no
+render had shown.
+
 ## 5. Look at him: a scratch page, then the scene
 
 `main.py look` is too slow for a pose or a stride (a frame every quarter
@@ -114,7 +127,9 @@ second). Draw straight from the figure:
 - a scratch HTML page that loads `figure.js` (and `gait.js`), mounts the
   figure several times (`Figure.mount`), each in a pose (rest, front,
   three-quarter, side, each expression, on all fours, sitting), or eight
-  points of one stride (`Gait.stride`);
+  points of one stride (`Gait.stride`). To move him with his engine
+  (gestures, blends), load `debug.js` first: the engine runs on its
+  Clock and random streams;
 - screenshot it with Playwright (`channel="chrome"`), at 1.5–3x;
 - tile it under the film frames with Pillow (`uv run --with pillow`).
 
