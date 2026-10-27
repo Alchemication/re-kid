@@ -111,6 +111,24 @@ describe('timers on game time', () => {
     assert.equal(n, at)
   })
 
+  it('go on when one throws: the others run, and so does game time (a part\'s bug never freezes the game)', async () => {
+    const { Clock, page } = clock()
+    let ran = 0
+    let ticks = 0
+    Clock.after(50, () => {
+      throw new Error('a part broke')
+    })
+    Clock.after(50, () => ran++)
+    Clock.every(0, () => {
+      ticks++
+      if (ticks === 2) throw new Error('broke once')
+    })
+    await page.advance(500)
+    assert.equal(ran, 1)
+    assert.ok(ticks > 5, `${ticks}`)
+    assert.ok(Clock.now() >= 400, `${Clock.now()}`)
+  })
+
   it('stop from inside every(), the run that stops it being its last', async () => {
     const { Clock, page } = clock()
     let n = 0

@@ -21,21 +21,24 @@ const Ambient = (() => {
     const t = Clock.now()
     const dt = Math.min(MAX_DT, t - last)
     last = t
-    for (const a of [...all]) {
-      const was = a.c.goal?.kind
-      const goal = Creature.think(a.c, World, t, a.rnd)
-      if (goal.kind !== was && NOTED.includes(goal.kind)) Debug.trace(a.name, { id: a.id, [goal.kind]: true })
-      const moved = Creature.move(a.c, World, dt, t, a.rnd)
-      if (moved === 'gone') {
-        all.splice(all.indexOf(a), 1)
-        a.gone(a.c)
-        continue
-      }
-      if (moved === 'arrived') a.arrived(a.c, a.c.goal?.kind)
-      a.draw(a.c, dt)
-    }
+    for (const a of [...all]) Clock.safely(() => step(a, t, dt)) // each on its own: one creature's bug never stops the others
     if (all.length) Clock.after(0, frame)
     else last = null
+  }
+
+  /** One creature's frame: it thinks, moves, and is drawn (or has gone). */
+  function step(a, t, dt) {
+    const was = a.c.goal?.kind
+    const goal = Creature.think(a.c, World, t, a.rnd)
+    if (goal.kind !== was && NOTED.includes(goal.kind)) Debug.trace(a.name, { id: a.id, [goal.kind]: true })
+    const moved = Creature.move(a.c, World, dt, t, a.rnd)
+    if (moved === 'gone') {
+      all.splice(all.indexOf(a), 1)
+      a.gone(a.c)
+      return
+    }
+    if (moved === 'arrived') a.arrived(a.c, a.c.goal?.kind)
+    a.draw(a.c, dt)
   }
 
   /**

@@ -328,7 +328,8 @@ scene:
   `TestScreens::test_turning_the_phone_refits_it` failed under `-n 8`
   (2026-10-22, again 2026-10-27) and passed alone: not yet looked into;
   nor the meadow's `TestMeadowWind::test_a_gust_carries_something_across_and_the_plants_lean`
-  (once, 2026-10-27). In one heavily
+  (once, 2026-10-27) or `TestMeadowEgg::test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it`
+  (once, 2026-10-27, the machine also busy measuring music). In one heavily
   loaded run (2026-10-26, 17 minutes instead of 13), four more failed and
   passed alone: `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`,
   the meadow's `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]`

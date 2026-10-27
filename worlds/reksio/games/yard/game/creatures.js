@@ -611,7 +611,7 @@ const Creatures = (() => {
       Creature.think(c, World, T(), random)
       Creature.move(c, World, dt * 1000, T(), random)
       c.y = this.y
-      this.tuck(c.goal.kind === 'freeze')
+      this.tuck(c.goal?.kind === 'freeze') // arrived where she was going, she has no goal until think() picks the next
       if (this.food && Creature.feeding(c)) {
         this.dir = this.food.x > c.x ? 1 : -1
         this.eat()

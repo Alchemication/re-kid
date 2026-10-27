@@ -845,16 +845,18 @@
   }
 
   function frame() {
+    requestAnimationFrame(frame) // first: whatever breaks below, the next frame comes
     const t = Clock.now() // game time: stands still while the page is hidden
     const dt = Math.min(0.05, (t - last) / 1000)
     last = t
-    Reksio.tick(dt)
-    if (day.hurrying(t)) Sky.show(day.hour(t))
+    // each part on its own (Clock.safely): one part's bug is reported, and never freezes the rest (Adam's report, 2026-10-27: the snail froze the whole yard)
+    Clock.safely(() => Reksio.tick(dt))
+    if (day.hurrying(t)) Clock.safely(() => Sky.show(day.hour(t)))
     World.set({ hour: day.hour(t), light: Sky.light * (1 - FOG_DIM * Weather.fog), view: { x0: camX, x1: camX + Painting.VIEW_W } }) // the world state (world.js): the creatures read it // the sun hurrying down: every frame, not every idle tick
-    Creatures.tick(dt)
-    Weather.tick(dt, camX)
-    Wet.frame(t)
-    Spots.frame()
+    Clock.safely(() => Creatures.tick(dt))
+    Clock.safely(() => Weather.tick(dt, camX))
+    Clock.safely(() => Wet.frame(t))
+    Clock.safely(() => Spots.frame())
     const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
     if (Math.abs(camX - shownCam) > 0.05) {
@@ -862,7 +864,6 @@
       cam.style.transform = `translateX(${-camX}px)`
       Painting.render(camX)
     }
-    requestAnimationFrame(frame)
   }
 
   const paint = () => {

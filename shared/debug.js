@@ -52,11 +52,29 @@ const Clock = (() => {
   const holds = new Set() // why the game is paused now: 'hidden' (the page), or a reason given to hold()
 
   function frame(t) {
+    requestAnimationFrame(frame) // first: whatever a timer does, the game goes on
     if (last !== null && !holds.size) now += Math.max(0, Math.min(MAX_STEP_MS, t - last))
     last = t
     const before = seq // timers set during this frame wait for the next one
-    while (due.length && due[0].at <= now && due[0].seq < before) due.shift().fn()
-    requestAnimationFrame(frame)
+    while (due.length && due[0].at <= now && due[0].seq < before) safely(due.shift().fn)
+  }
+
+  const reported = new Set() // errors already reported (by message): one broken every frame is reported once, not sixty times a second
+
+  /** Run fn; if it throws, report it (as uncaught: Debug hears it, once for
+   * each kind of error) and carry on. Each timer runs so, and each part of a
+   * game's frame: one part's bug must never stop the others or the game's
+   * time, freezing everything (Adam's report, 2026-10-27: a snail's). */
+  function safely(fn) {
+    try {
+      fn()
+    } catch (e) {
+      const key = String(e?.message ?? e)
+      if (reported.has(key)) return
+      reported.add(key)
+      if (typeof globalThis.reportError === 'function') globalThis.reportError(e) // the browser's own: as if uncaught
+      else console.error(e)
+    }
   }
   if (typeof requestAnimationFrame === 'function') requestAnimationFrame(frame)
 
@@ -104,13 +122,17 @@ const Clock = (() => {
     /** Game time, ms since the page started. */
     now: () => now,
     after,
+    safely,
     /** Run fn every ms of game time until the returned stop() is called (by fn itself too). */
     every(ms, fn) {
       let timer = null
       let stopped = false
       const tick = () => {
-        fn()
-        if (!stopped) timer = after(ms, tick) // fn may have stopped it
+        try {
+          fn()
+        } finally {
+          if (!stopped) timer = after(ms, tick) // fn may have stopped it; one that threw still runs next time
+        }
       }
       timer = after(ms, tick)
       return () => {

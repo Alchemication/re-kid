@@ -252,6 +252,21 @@ describe('after the rain', () => {
     assert.notEqual(y.Creatures.snail.x, x, 'never came out again')
   })
 
+  it('lets the snail crawl about for minutes, arriving and setting off again (Adam\'s bug, 2026-10-27)', () => {
+    // arriving where she wandered to clears her goal (creature.js): reading it
+    // then threw on every frame, and the whole yard froze with Reksio in it
+    const y = yard('creatures=&rain=1')
+    afterRain(y, 4)
+    y.run(DT)
+    y.reksio.nose = { x: -1000, y: 0 }
+    const xs = new Set()
+    for (let i = 0; i < 300; i++) {
+      y.run(1)
+      xs.add(Math.round(y.Creatures.snail.x / 10))
+    }
+    assert.ok(xs.size > 3, 'she never went anywhere')
+  })
+
   it('brings worms up by the puddles, which the bird can eat', () => {
     const y = yard('creatures=&rain=1')
     afterRain(y, 2)

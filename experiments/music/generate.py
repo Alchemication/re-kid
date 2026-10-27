@@ -33,7 +33,9 @@ MODEL = "music_v2_5"  # the newest music model (2026-10), for pieces that name n
 TAKES = int(
     os.environ.get("TAKES", "3")
 )  # takes of each wording: enough to hear the spread
-PARALLEL = int(os.environ.get("PARALLEL", "2"))  # calls at once: the plan allows 2 (2026-10-27: 3 got 429s on the new key)
+PARALLEL = int(
+    os.environ.get("PARALLEL", "2")
+)  # calls at once: the plan allows 2 (2026-10-27: 3 got 429s on the new key)
 
 
 def body(

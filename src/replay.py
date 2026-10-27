@@ -197,7 +197,9 @@ def replay(
             "console",
             lambda m: m.type == "error" and result.errors.append(m.text),
         )
-        page.on("pageerror", lambda e: result.errors.append(f"uncaught: {e}"))
+        page.on(
+            "pageerror", lambda e: result.errors.append(f"uncaught: {e}\n{e.stack}")
+        )
         page.goto(replay_url(report))
         page.wait_for_function("window.yardGame && typeof Debug !== 'undefined'")
         page.evaluate(

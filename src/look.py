@@ -123,7 +123,9 @@ def look(
                 and result.errors.append(m.text)
             ),
         )
-        page.on("pageerror", lambda e: result.errors.append(f"uncaught: {e}"))
+        page.on(
+            "pageerror", lambda e: result.errors.append(f"uncaught: {e}\n{e.stack}")
+        )
         page.goto(url)
         page.wait_for_function("window.yardGame")
         try:
