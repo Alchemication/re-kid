@@ -38,7 +38,7 @@ const Layout = (() => {
   const SEASONS = { summer: 0.75, winter: 0.25 }
   // The seasons each prop and creature belongs to; one not listed belongs to all. The layout puts out only what is
   // in season: in winter no fruit tree, no bramble (its flower brings the bee), no flowers, no fly, bee or spider.
-  const IN_SEASON = { tree: ['summer'], berries: ['summer'], flowers: ['summer'], fly: ['summer'], bee: ['summer'], spider: ['summer'] }
+  const IN_SEASON = { snowman: ['winter'], tree: ['summer'], berries: ['summer'], flowers: ['summer'], fly: ['summer'], bee: ['summer'], spider: ['summer'] }
   const inSeason = (name, season) => !IN_SEASON[name] || IN_SEASON[name].includes(season)
   const CREATURES_PER_PLAY = 2
   const MEMORY_KEY = 'reksio-yard-last-play'
@@ -66,7 +66,8 @@ const Layout = (() => {
   const PUDDLE_RX = [85, 120] // half-width range of a puddle
   // Each thing on the ground as drawn: from the left of its drawing or action
   // spot (whichever is further left) to the right of the other.
-  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650], hen: [990, 1360] }
+  // the snowman's: the boy beside it on its left, its stick arm on its right, and snow round them (snowman.js)
+  const FOOTPRINTS = { bowl: [710, 970], tap: [1140, 1380], flowers: [1440, 1765], dig: [1930, 2210], film: [2210, 2685], trap: [890, 1290], tree: [1480, 1840], berries: [2220, 2650], hen: [990, 1360], snowman: [0, 325] }
 
   const random = Debug.random('layout') // this part's own random stream (debug.js)
 
@@ -191,9 +192,11 @@ const Layout = (() => {
   // props that aren't out this time
   const hidden = PROP_POOL.filter((n) => !props.includes(n))
   if (!flowers) hidden.push('flowers')
+  if (!inSeason('snowman', season)) hidden.push('snowman')
 
   // the row: things in a new order, the spare room shared out unevenly as gaps
-  const row = shuffled(Object.keys(FOOTPRINTS).filter((n) => !hidden.includes(n)))
+  const row = shuffled(Object.keys(FOOTPRINTS).filter((n) => !hidden.includes(n) && n !== 'snowman'))
+  if (!hidden.includes('snowman')) row.unshift('snowman') // first out from the house: the boy is soon out to it, and in view
   const width = (n) => FOOTPRINTS[n][1] - FOOTPRINTS[n][0]
   const spare = ROW_TO - ROW_FROM - row.reduce((sum, n) => sum + width(n), 0) - (row.length + 1) * MIN_GAP
   const weights = [...row, null].map(() => rnd(0.4, 1.6))

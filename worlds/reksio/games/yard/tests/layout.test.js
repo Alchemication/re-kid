@@ -82,6 +82,18 @@ describe('a play', () => {
     }
   })
 
+  // Adam, 2026-10-27: the snowman was crammed between the doghouse and the film
+  it('keeps the snowman its own ground in winter, first out from the house, with no ice on it', () => {
+    for (const seed of SEEDS) {
+      const L = layout(`?seed=${seed}&season=winter`)
+      const [first] = placed(L)
+      assert.equal(first.n, 'snowman', `seed ${seed}`)
+      assert.ok(first.from >= L.ROW_FROM + L.MIN_GAP, `seed ${seed}: it starts at ${first.from}`)
+      for (const p of L.puddles) assert.ok(p.x + p.rx < first.from || p.x - p.rx > first.to, `seed ${seed}: ice at ${p.x}`)
+      assert.ok(layout(`?seed=${seed}&season=summer`).hidden.includes('snowman'), `seed ${seed}`)
+    }
+  })
+
   it('forced to its own season, a play keeps the rest of what it drew', () => {
     for (const seed of SEEDS) {
       const plain = layout(`?seed=${seed}`)

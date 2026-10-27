@@ -80,7 +80,7 @@ const BoyFigure = (() => {
     [[-44, 16, 13], [-44, 20, 18]],
     [[44, 16, 13], [-28, 32, 13]],
   ]
-  const UNDER_CAP = [7, 8] // the topmost curls, flattened under a winter cap
+  const UNDER_CAP = [1, 2, 7, 8] // the upper curls, pressed flat under a winter cap: no puffs sticking out above his ears (Adam, 2026-10-27)
   const COVER_ABOVE = -60 // the curls higher than this are drawn again over the fringe's top, so it joins the cloud
   const FRINGE = [
     [[-28, -33, 16], [-4, -33, 16]],
@@ -95,6 +95,7 @@ const BoyFigure = (() => {
     [[-50, -26], [-56, -22]],
   ]
   const CAP = { band: -60, top: -128, half: 62, pom: 9 } // the winter cap, a knitted beanie low over the crown; the curls spill out below its band
+  const CAP_LOW = 8 // worn this far down over his curls, pressing them in
 
   // ------------------------------------------------------------ poses
 
@@ -298,7 +299,7 @@ const BoyFigure = (() => {
       face: faceOutline(p), eyes: es, brows: brows(p, es), mouth: mouth(p), ear: ear(p),
       crown: curls(CROWN, p), fringe: curls(FRINGE, p),
       curls: CURLS.map(([front, side]) => onHead(p, Figure.mix(front, side, p.turn))),
-      cap: { at: onHead(p, [-12 * p.turn, 0]), tilt: p.tilt },
+      cap: { at: onHead(p, [-12 * p.turn, CAP_LOW]), tilt: p.tilt },
       scarf: p.scarf, u, n,
     }
   }

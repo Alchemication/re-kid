@@ -3,56 +3,66 @@
 // out from behind the house and rolls a snowman: a big ball pushed along
 // until it is as big as it gets, a middle one lifted onto it, a head patted
 // together and heaved on top. Then he calls Reksio ("come here!", patting his
-// knees) and waits for a face and arms. The child chooses: a tap on the
-// stones poking out of the snow, or on the stick, and Reksio digs them out
-// or picks it up and brings it over; the boy puts in the eyes, and snaps the
-// stick over his knee for two arms. Left alone a while, Reksio goes for the
-// next one himself.
+// knees) and stands by it, at a loss: he scratches his curls, shakes his
+// head. A tap on him or on the snowman, and Reksio runs for something: a
+// stick (the boy snaps it over his knee for two arms), stones dug out of the
+// snow for eyes, in an order of the play's own. Left alone a while, Reksio
+// goes for the next one himself.
 //
-// Then the boy touches his own nose: a nose! Reksio has an idea, runs to his
-// doghouse and brings his bone, and the boy puts it in. He steps back, looks,
+// Then the boy touches his own nose: a nose! At the next tap Reksio brings
+// his bone from the doghouse, and the boy puts it in. He steps back, looks,
 // and laughs (the joke: a snowman with a bone for a nose), tosses the bone
 // back by the doghouse, goes in, and comes out with a carrot. Last, he takes
 // off his own cap and puts it on the snowman's head, his curls springing up,
-// and cheers. The snowman stays for the rest of the play: a tap on it and
-// Reksio comes to sniff it and look up at it.
+// and cheers. He stays out with it until dusk.
+//
+// A tap on the finished snowman, and Reksio, proud, hops up to sniff its
+// carrot: the head topples onto his own. He shakes, takes a few blind steps,
+// and shakes it off; it breaks in the snow. The boy laughs, gathers it up,
+// pats a new head together and puts it back, with its eyes, its carrot and
+// his cap (Adam, 2026-10-27: an accident, nobody's doing).
 //
 // Everything is in scene units, in the #snowman layer among the things. The
 // boy's part runs on his own (Boy, boy.js), one step at a time in a queue;
-// Reksio's part is a thing (stones, stick, snowman) or a left-alone move
-// (help), each cut short by a tap like any other.
+// Reksio's part is a thing (the snowman, or the boy beside it) or a
+// left-alone move (help), each cut short by a tap like any other.
 
 /* global Clock, Debug, Layout, Sound, Music, Reksio, Boy, BoyFigure */
 /* exported Snowman */
 const Snowman = (() => {
   const GROUND = 812
   const AT_S = [20, 45] // the boy comes out this long into a winter play
-  const R = { base: 76, middle: 54, head: 38 } // the balls' radii as finished: nearly as tall as the boy
-  const SINK = 8 // each ball sits this far into the one under it
+  const R = { base: 58, middle: 41, head: 29 } // the balls' radii as finished: up to the boy's chin
+  const SINK = 6 // each ball sits this far into the one under it
   const HOUSE_X = 230 // he comes out from behind the house, here (its wall is at 310)
-  const BOY_SIDE = 125 // he stands this far left of the snowman's middle, facing it
-  const GIVE_FROM = 125 // Reksio brings things to this far left of the boy
+  const BOY_SIDE = 95 // he stands this far left of the snowman's middle, facing it
+  const LEFT_ROOM = 210 // its middle is this far into its ground (layout.js keeps it clear): the boy on its left (Adam, 2026-10-27: it was crammed against the doghouse)
+  const GIVE_FROM = 115 // Reksio brings things to this far left of the boy
   const PUSH_SPEED = 70 // pushing a ball along, slowly
-  const HAND_REACH = 30 // a ball he holds sits this far ahead of his hands
+  const HAND_REACH = 22 // a ball he holds sits this far ahead of his hands
   const HELP_AFTER_MS = 9000 // asked and left alone this long, Reksio goes for the next thing himself
-  const IDEA_AFTER_MS = 1500 // the boy touched his nose: Reksio has his idea after this long
+  const IDEA_AFTER_MS = 4000 // the boy touched his nose: left alone, Reksio has his idea after this long
   const CARROT_FETCH_MS = 2500 // inside, finding a carrot
-  const STAY_MS = 15000 // done, he admires it this long, then goes in
+  const WONDER_MS = 2500 // waiting by it, the boy may scratch his head (or, done, look it over) this often
   const SPOT_ROOM = 70 // a pile or the stick wants this much clear ground either side
-  const PIECES = ['eyes', 'arms'] // what Reksio brings, the child's choice of order
-  const PILE = { eyes: 'stones', arms: 'stick' } // where each comes from (a thing to tap)
+  const PILE = { eyes: 'stones', arms: 'stick' } // where each comes from
   const FETCH_FROM = 60 // he stands this far left of a pile to pick from it
   const ROLL_LEFT = 300 // the base is rolled from this far left of where it ends up…
   const ROLL_RIGHT = 420 // …and the middle ball from this far right
-  const FIRST_X = 560 // the snowman's rolling starts no nearer the house than this: past the doghouse
+  const FIRST_X = 560 // its base is rolled from no nearer the house than this: the doghouse
   const GREET_FROM = 300 // the boy out and Reksio further off than this: left alone, he runs over to him
   const GREET_AT = 170 // he sits this far from the boy to watch
   const BONE_FROM = 90 // he puts his head in at the doghouse door from this far left of it
   const TOSS_PAST_DOOR = 80 // the bone lands this far right of the door
+  const AT_RIGHT = 75 // Reksio stands this far right of its base, facing it
+  const FALL_MS = 380 // the head toppling onto Reksio's
+  const ON_HIS_HEAD = { back: 26, up: 30 } // where the head sits on him, from his mouth: back along his head, and up
+  const CAP_ON = { y: 44, scale: 0.47 } // the boy's cap on its head: down from its top, and how big (boyfigure.js draws it for him)
 
   const SVG_NS = 'http://www.w3.org/2000/svg'
   const $ = (id) => document.getElementById(id)
   const random = Debug.random('snowman') // this part's own random stream (debug.js)
+  const mind = Debug.random('snowman-boy') // the boy's idle ways, drawn now and then: their own stream
   const rnd = (lo, hi) => lo + random() * (hi - lo)
   const el = (tag, attrs, parent) => {
     const n = document.createElementNS(SVG_NS, tag)
@@ -65,7 +75,9 @@ const Snowman = (() => {
   let S = 1500 // the snowman's middle
   let stonesX = 1000
   let stickX = 2000
-  // the story so far: none, rolling, asking, nose, carrot, hat, done
+  // what Reksio brings, in this play's order (a tap, or left alone, brings the next)
+  const PIECES = random() < 0.5 ? ['arms', 'eyes'] : ['eyes', 'arms']
+  // the story so far: none, rolling, asking, nose, carrot, hat, done, fallen (its head knocked off), evening
   let stage = 'none'
   const has = { eyes: false, arms: false, bone: false, carrot: false, hat: false }
   let askedAt = 0 // when the boy asked for what he's waiting for
@@ -75,6 +87,8 @@ const Snowman = (() => {
   let doghouse = () => 560 // its door's x: the game says (init)
   let isEnded = () => false
   let layer = null
+  let headBall = null // the head ball, once it's on: it can fall
+  let fallenAt = 0 // where it broke
   let g = {} // the drawing's parts
 
   // ------------------------------------------------------------ where
@@ -92,15 +106,11 @@ const Snowman = (() => {
     return null
   }
 
-  /** The snowman in the first free place out from the house with room to
-   * roll its balls either side (so the boy is soon out to it, and in view),
-   * the stones and the stick in the gaps nearest it. */
+  /** The snowman on its own ground (layout.js keeps it, first out from the
+   * house); the stones and the stick in the gaps nearest it. */
   function where() {
-    const byX = [...Layout.gaps].sort((p, q) => p[0] - q[0])
-    const fits = (x) => x !== null && x - ROLL_LEFT >= FIRST_X && x + ROLL_RIGHT <= Layout.MAX_X
-    const i = byX.findIndex((gap) => fits(spotIn(gap, R.base + 10)))
-    S = i >= 0 ? spotIn(byX[i], R.base + 10) : FIRST_X + ROLL_LEFT
-    const others = byX.filter((_, j) => j !== i).map((gap) => spotIn(gap, SPOT_ROOM)).filter((x) => x !== null && Math.abs(x - S) > R.base + SPOT_ROOM + BOY_SIDE)
+    S = Layout.FOOTPRINTS.snowman[0] + Layout.x('snowman') + LEFT_ROOM
+    const others = Layout.gaps.map((gap) => spotIn(gap, SPOT_ROOM)).filter((x) => x !== null)
     others.sort((p, q) => Math.abs(p - S) - Math.abs(q - S))
     ;[stonesX, stickX] = [others[0] ?? S - 420, others[1] ?? S + 420].sort((p, q) => p - q)
   }
@@ -133,17 +143,18 @@ const Snowman = (() => {
   const headY = () => top('head')
 
   function drawPieces() {
-    // the stones poking out of the snow
-    g.stones = el('g', { class: 'thing', 'data-thing': 'stones', transform: `translate(${stonesX} ${GROUND})` }, layer)
-    el('circle', { class: 'hit', cx: 0, cy: -16, r: 44 }, g.stones)
+    // the stones poking out of the snow, and a stick: Reksio's to fetch
+    g.stones = el('g', { transform: `translate(${stonesX} ${GROUND})` }, layer)
     for (const [x, y, rx] of [[-14, -4, 9], [2, -6, 10], [16, -3, 8]]) el('ellipse', { class: 'stone', cx: x, cy: y, rx, ry: rx * 0.7 }, g.stones)
     el('path', { class: 'snow-drift', d: 'M-30 2 Q-14 -6 0 -1 Q14 -7 30 2 Z' }, g.stones)
     // the stick, lying in the snow
-    g.stick = el('g', { class: 'thing', 'data-thing': 'stick', transform: `translate(${stickX} ${GROUND})` }, layer)
-    el('circle', { class: 'hit', cx: 0, cy: -16, r: 50 }, g.stick)
+    g.stick = el('g', { transform: `translate(${stickX} ${GROUND})` }, layer)
     el('path', { class: 'stick', d: STICK }, g.stick)
-    g.balls = el('g', { class: 'thing', 'data-thing': 'snowman' }, layer)
-    g.face = el('g', {}, layer) // what goes on the snowman, over its balls
+    // the snowman, and the boy standing by it: one thing to tap
+    g.balls = el('g', { class: 'thing', 'data-thing': 'snowman', 'data-hint-y': GROUND - 2 * R.base - 2 * R.middle }, layer)
+    el('rect', { class: 'hit', x: S - BOY_SIDE - 50, y: GROUND - 330, width: BOY_SIDE + 50 + R.base + 20, height: 330 }, g.balls)
+    g.head = el('g', {}, layer) // its head ball and what's on it: it can fall
+    g.face = el('g', {}, layer) // its arms, over its balls
   }
   const STICK = 'M-40 -4 L40 -9 M10 -7 L22 -20 M-18 -5 L-28 -15'
   const STONE = (x, y) => `<ellipse class="stone" cx="${x}" cy="${y}" rx="5" ry="4" />`
@@ -177,36 +188,50 @@ const Snowman = (() => {
     return n
   }
 
+  /** What goes on its head, drawn about the head's middle. */
+  const ON_HEAD = {
+    eyes: `${STONE(-8, -5)}${STONE(9, -5)}`,
+    bone: `<g data-piece="bone">${BONE('M14 2 H38 M42 -4 a5 5 0 1 1 0 10')}</g>`,
+    carrot: '<path class="carrot" d="M11 -3 L40 3 L11 6 Z" />',
+  }
+
   /** The snowman gets a piece. */
   function put(what) {
     has[what] = true
-    const h = headY()
     const mid = top('middle')
-    const parts = {
-      eyes: `${STONE(S - 10, h - 6)}${STONE(S + 12, h - 7)}`,
-      arms: `<path class="stick" d="M${S - R.middle + 6} ${mid - 6} L${S - R.middle - 46} ${mid - 34} M${S - R.middle - 30} ${mid - 24} l-6 -16" /><path class="stick" d="M${S + R.middle - 6} ${mid - 6} L${S + R.middle + 46} ${mid - 36} M${S + R.middle + 30} ${mid - 26} l8 -14" />`,
-      bone: `<g data-piece="bone">${BONE(`M${S + 18} ${h + 2} H${S + 50} M${S + 54} ${h - 4} a5 5 0 1 1 0 10`)}</g>`,
-      carrot: `<path class="carrot" d="M${S + 14} ${h - 4} L${S + 52} ${h + 4} L${S + 14} ${h + 8} Z" />`,
-    }
-    if (what === 'hat') {
+    if (what === 'arms') {
+      g.face.insertAdjacentHTML('beforeend', `<path class="stick" d="M${S - R.middle + 5} ${mid - 5} L${S - R.middle - 36} ${mid - 27} M${S - R.middle - 23} ${mid - 19} l-5 -12" /><path class="stick" d="M${S + R.middle - 5} ${mid - 5} L${S + R.middle + 36} ${mid - 28} M${S + R.middle + 23} ${mid - 20} l6 -11" />`)
+    } else if (what === 'hat') {
       // the boy's own cap, as he wore it (boyfigure.js), on its head
-      const cap = BoyFigure.cap(g.face)
-      cap.setAttribute('transform', `translate(${S} ${h - R.head + 46}) scale(0.62)`)
-    } else g.face.insertAdjacentHTML('beforeend', parts[what])
+      BoyFigure.cap(g.head).setAttribute('transform', `translate(0 ${CAP_ON.y - R.head}) scale(${CAP_ON.scale})`)
+    } else g.head.insertAdjacentHTML('beforeend', ON_HEAD[what])
     Sound.plop()
     Debug.trace('snowman gets', { what })
   }
 
   function takeOff(what) {
     has[what] = false
-    g.face.querySelector(`[data-piece="${what}"]`)?.remove()
+    g.head.querySelector(`[data-piece="${what}"]`)?.remove()
+  }
+
+  /** The head ball on top, at its place, carrying what's put on it. */
+  function mountHead(b) {
+    headBall = b
+    g.head.prepend(b.g)
+    setBall(b, 0, 0)
+    g.head.setAttribute('transform', `translate(${S} ${headY().toFixed(1)})`)
   }
 
   // ------------------------------------------------------------ the boy's part
 
   let queue = Promise.resolve()
+  let pending = 0 // steps queued or under way
   /** One step of the boy's part after another, never two at once. */
-  const boyDo = (what, fn) => (queue = queue.then(() => Debug.ignoreCut(fn(), `boy ${what}`)))
+  function boyDo(what, fn) {
+    pending += 1
+    queue = queue.then(() => Debug.ignoreCut(fn(), `boy ${what}`)).finally(() => (pending -= 1))
+    return queue
+  }
 
   const cutShort = () => Object.assign(new Error('cut short'), { name: 'AbortError' })
 
@@ -280,7 +305,7 @@ const Snowman = (() => {
     const head = ball(4)
     head.g.style.display = 'none'
     try {
-      await roll(base, S - ROLL_LEFT + 40, S, R.base * 0.2, R.base)
+      await roll(base, Math.max(FIRST_X, S - ROLL_LEFT + 40), S, R.base * 0.2, R.base)
       // the middle ball, from the other side, then lifted on
       middle.g.style.display = ''
       await roll(middle, S + ROLL_RIGHT - 90, S + 150, R.middle * 0.25, R.middle)
@@ -308,6 +333,7 @@ const Snowman = (() => {
         await go(S + R.middle + HAND_REACH + 34)
       })
       await settleBall(head, S, headY())
+      mountHead(head)
       await Boy.stand()
     } catch (e) {
       ;[base, middle, head].forEach(drop) // the evening came: left as they are, on the ground
@@ -331,6 +357,28 @@ const Snowman = (() => {
     await Boy.call(3)
     Boy.face(1)
     askedAt = Clock.now()
+  }
+
+  /** Waiting by it, at a loss (what does a snowman need?), or, done, pleased with it. */
+  const AT_A_LOSS = [
+    () => Boy.scratch(),
+    async () => {
+      await Boy.look({ brows: 1, o: 0.4 }, 700)
+      await Boy.nod(true)
+    },
+    async () => {
+      Boy.face(Reksio.x > Boy.x ? 1 : -1) // you, Reksio?
+      await Boy.look({ brows: 1 }, 900)
+      Boy.face(1)
+    },
+  ]
+  const PLEASED = [() => Boy.look({ smile: 1 }, 1200), () => Boy.nod(), () => Boy.wave()]
+
+  /** Now and then, while he waits by it with nothing else to do. */
+  function wonder() {
+    if (pending || Boy.busy || Boy.walking || !Boy.out || fetching || mind() < 0.5) return
+    const ways = stage === 'asking' || stage === 'nose' ? AT_A_LOSS : stage === 'done' ? PLEASED : null
+    if (ways) boyDo('wonders', ways[Math.floor(mind() * ways.length)])
   }
 
   /** He takes what Reksio brought and puts it in. */
@@ -408,9 +456,6 @@ const Snowman = (() => {
     Music.react.done()
     await Boy.cheer()
     await Boy.wave(2)
-    await Boy.pause(STAY_MS)
-    await go(HOUSE_X)
-    Boy.goIn()
   }
 
   /** The bone, tossed back by his doghouse: an arc, then it's gone. */
@@ -428,6 +473,100 @@ const Snowman = (() => {
       await Boy.stand(300)
       await Boy.pause(1400)
     })
+  }
+
+  /** "Ha!": the head fell on Reksio. */
+  async function laughsAtIt() {
+    if (stage === 'evening') return
+    Boy.face(Reksio.x > Boy.x ? 1 : -1)
+    await Boy.look({ o: 1, open: 0.5, brows: 1 }, 400)
+    await Boy.laugh(5)
+  }
+
+  /** It broke where it fell: he gathers it up, pats a new head together and
+   * puts it back, with what was on it. */
+  async function rebuild() {
+    if (stage !== 'fallen') return
+    await go(fallenAt - 50)
+    Boy.face(1)
+    await Boy.settle('crouch', 400)
+    g.lumps?.remove() // gathered up
+    g.lumps = null
+    for (const n of [...g.head.children]) if (n !== headBall.g) n.remove()
+    g.head.removeAttribute('transform')
+    g.head.style.display = ''
+    layer.insertBefore(g.head, g.face)
+    const head = headBall
+    await holding(inHands(head), async () => {
+      for (let r = 6; r <= R.head; r += 5) {
+        setBall(head, head.x, head.y, r)
+        Sound.scrape()
+        await Boy.pause(200)
+      }
+      await Boy.settle('heave', 500)
+      await go(S + R.middle + HAND_REACH + 30)
+    })
+    await settleBall(head, S, headY())
+    mountHead(head)
+    await Boy.stand()
+    Boy.face(-1)
+    for (const what of ['eyes', 'carrot', 'hat']) {
+      if (!has[what]) continue
+      await Boy.reach(250)
+      put(what)
+    }
+    stage = 'done'
+    Debug.trace('snowman mended', {})
+    await Boy.nod()
+  }
+
+  /** Where its fallen head lies, broken, with what was on it. */
+  function breakHead(x) {
+    fallenAt = Math.max(Layout.MIN_X + 60, x)
+    layer.appendChild(g.head) // out of #fx, and hidden: what's left of it is on the ground
+    g.head.style.display = 'none'
+    g.lumps = el('g', { transform: `translate(${fallenAt.toFixed(0)} ${GROUND})` }, layer)
+    for (const [cx, r] of [[-24, 11], [-6, 15], [14, 12], [30, 8]]) el('circle', { class: 'snow-ball', cx, cy: 4 - r, r }, g.lumps)
+    if (has.eyes) g.lumps.insertAdjacentHTML('beforeend', STONE(-34, -3) + STONE(40, -2))
+    if (has.carrot) g.lumps.insertAdjacentHTML('beforeend', '<path class="carrot" d="M-2 -4 L26 0 L-2 4 Z" transform="translate(-50 -2)" />')
+    if (has.hat) BoyFigure.cap(g.lumps).setAttribute('transform', `translate(18 ${(30 - R.head).toFixed(0)}) rotate(70) scale(${CAP_ON.scale})`)
+    Sound.plop()
+    Debug.trace('snowman head broken', { x: Math.round(fallenAt) })
+    boyDo('mends it', rebuild)
+  }
+
+  /** Proud of it, he hops up to sniff its carrot, and its head topples onto
+   * his: he shakes, a few blind steps, and shakes it off. However that ends
+   * (a tap), it falls and breaks at his feet. */
+  async function headOnHim() {
+    stage = 'fallen'
+    Debug.trace('snowman head falls on him', {})
+    let riding = null
+    try {
+      await Reksio.lookUp(700)
+      Reksio.kit.perk('both', 600)
+      await Reksio.hop(34, 1)
+      $('fx').appendChild(g.head) // in front of him
+      const t0 = Clock.now()
+      const from = { x: S, y: headY() }
+      riding = Clock.every(0, () => {
+        const k = Math.min(1, (Clock.now() - t0) / FALL_MS)
+        const m = Reksio.mouth()
+        const to = { x: m.x - Reksio.facing * ON_HIS_HEAD.back, y: m.y - ON_HIS_HEAD.up }
+        g.head.setAttribute('transform', `translate(${(from.x + (to.x - from.x) * k).toFixed(1)} ${(from.y + (to.y - from.y) * k).toFixed(1)}) rotate(${(k * -25 * Reksio.facing).toFixed(0)})`)
+      })
+      boyDo('laughs', laughsAtIt)
+      await Reksio.kit.pause(FALL_MS)
+      Sound.plop()
+      await Reksio.bowlShake(4)
+      await Reksio.walkTo(Reksio.x - Reksio.facing * rnd(60, 100)) // blind steps, away from it
+      await Reksio.lookAround(600)
+      await Reksio.shake()
+    } finally {
+      riding?.()
+      breakHead(Reksio.x + Reksio.facing * 40)
+    }
+    await Reksio.freed()
   }
 
   // ------------------------------------------------------------ Reksio's part
@@ -536,16 +675,23 @@ const Snowman = (() => {
     if (stage === 'done') await Reksio.aww()
   }
 
-  /** A pile to fetch from, for a piece: tapped, he brings it if the boy still wants it. */
-  const pileThing = (what, x) => ({ at: () => x() - FETCH_FROM, face: 1, run: () => fetch(what), ready: () => wanted(what) })
+  /** Tapped (the snowman, or the boy by it): the next piece, his bone, the
+   * head knocked off it, or a sniff and a look up at it. */
+  function tapped() {
+    const what = next()
+    if (what === 'bone') return fetchBone()
+    if (what) return fetch(what)
+    if (stage === 'done') return headOnHim()
+    return admire()
+  }
+
   const things = {
-    stones: pileThing('eyes', () => stonesX),
-    stick: pileThing('arms', () => stickX),
     snowman: {
-      at: () => S - R.base - 70,
-      face: 1,
-      run: () => (next() === 'bone' ? fetchBone() : admire()),
-      ready: () => stage !== 'none' && stage !== 'rolling',
+      // to the pile for the next piece, or to the snowman: on its right, the boy being on its left
+      at: () => (PILE[next()] ? (PILE[next()] === 'stones' ? stonesX : stickX) - FETCH_FROM : S + R.base + AT_RIGHT),
+      get face() { return PILE[next()] ? 1 : -1 },
+      run: tapped,
+      ready: () => stage !== 'none' && stage !== 'rolling' && stage !== 'evening',
     },
   }
 
@@ -559,16 +705,16 @@ const Snowman = (() => {
     if (Layout.season !== 'winter') return // no snowman, and no boy out to make it
     drawPieces()
     Boy.init({ parent: $('boy-layer'), winter: true, watch: () => Reksio.x })
+    Clock.every(WONDER_MS, wonder)
     if (Layout.snowmanAt === 'built') return builtAtOnce()
     Clock.after((Layout.snowmanAt ?? rnd(...AT_S)) * 1000, () => isEnded() || boyDo('build', build))
   }
 
   /** ?snowman=built: there already, the boy beside it (tests, and a quick look). */
   function builtAtOnce() {
-    const base = ball(R.base)
-    setBall(base, S, GROUND - R.base)
+    setBall(ball(R.base), S, GROUND - R.base)
     setBall(ball(R.middle), S, top('middle'))
-    setBall(ball(R.head), S, headY())
+    mountHead(ball(R.head))
     Boy.comeOut(S - BOY_SIDE - 200, 1)
     built()
   }
@@ -598,11 +744,11 @@ const Snowman = (() => {
     help() {
       const what = next()
       if (what === 'bone') return fetchBone()
-      return what && Reksio.walkTo(things[PILE[what]].at()).then((ok) => ok && next() === what && fetch(what))
+      return what && Reksio.walkTo(things.snowman.at()).then((ok) => ok && next() === what && fetch(what))
     },
     get stage() { return stage },
     get has() { return { ...has } },
     /** Where its action spot is (spots.js). */
-    spotX: (name) => ({ stones: stonesX - 30, stick: stickX - 30, snowman: S - R.base - 30 })[name],
+    spotX: () => S + R.base + AT_RIGHT - 20,
   }
 })()

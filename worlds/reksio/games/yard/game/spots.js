@@ -25,12 +25,10 @@ const Spots = (() => {
     hen: () => ({ x: Things.THINGS.hen.at() + 20, r: 100 }), // by the ladder, wherever it leans now
     porcino: () => ({ x: Mushrooms.spotX('porcino'), r: 60 }), // by the nearest porcino
     agaric: () => ({ x: Mushrooms.spotX('agaric'), r: 60 }),
-    stones: () => ({ x: Snowman.spotX('stones'), r: 70 }), // the snowman's, in winter
-    stick: () => ({ x: Snowman.spotX('stick'), r: 70 }),
-    snowman: () => ({ x: Snowman.spotX('snowman'), r: 90 }),
+    snowman: () => ({ x: Snowman.spotX(), r: 90 }), // in winter
   }
   const MOVING = ['trap', 'hen', 'porcino'] // these spots move (the mouse fed, the ladder moved, a porcino picked)
-  const WAITING = ['trap', 'tree', 'hen', 'porcino', 'agaric', 'stones', 'stick', 'snowman'] // hidden until there's something to do there
+  const WAITING = ['trap', 'tree', 'hen', 'porcino', 'agaric', 'snowman'] // hidden until there's something to do there
   const els = {}
 
   /** Make the spots of the things out this play. */

@@ -18,7 +18,7 @@
 /* exported Boy */
 const Boy = (() => {
   const GROUND = 812 // y of his feet, in scene units (Reksio's ground)
-  const SCALE = 1.2 // about one and a half Reksios tall, as in the films (Kompan 4:00, 7:24)
+  const SCALE = 0.9 // a child of seven by the house and the doghouse: about one and a half doghouses tall with his curls (Adam, 2026-10-27: at 1.2 he looked as big as the house)
   const SPEED = 165 // walking, units/s: a little slower than Reksio's trot
   const ACCEL = 900
   const STEP = 58 // ground covered by one step
