@@ -16,18 +16,17 @@
 // off his own cap and puts it on the snowman's head, his curls springing up,
 // and cheers. He stays out with it until dusk.
 //
-// A tap on the finished snowman, and Reksio, proud, hops up to sniff its
-// carrot: the head topples onto his own. He shakes, takes a few blind steps,
-// and shakes it off; it breaks in the snow. The boy laughs, gathers it up,
-// pats a new head together and puts it back, with its eyes, its carrot and
-// his cap (Adam, 2026-10-27: an accident, nobody's doing).
+// A tap on the finished snowman, and something happens around it, a
+// different thing each time (snowplay.js). If its head is knocked off, it
+// breaks in the snow, and the boy gathers it up, pats a new head together and
+// puts it back, with its eyes, its carrot and his cap.
 //
 // Everything is in scene units, in the #snowman layer among the things. The
 // boy's part runs on his own (Boy, boy.js), one step at a time in a queue;
 // Reksio's part is a thing (the snowman, or the boy beside it) or a
 // left-alone move (help), each cut short by a tap like any other.
 
-/* global Clock, Debug, Layout, Sound, Music, Reksio, Boy, BoyFigure */
+/* global Clock, Debug, Layout, Sound, Music, Reksio, Boy, BoyFigure, SnowPlay */
 /* exported Snowman */
 const Snowman = (() => {
   const GROUND = 812
@@ -55,8 +54,8 @@ const Snowman = (() => {
   const BONE_FROM = 90 // he puts his head in at the doghouse door from this far left of it
   const TOSS_PAST_DOOR = 80 // the bone lands this far right of the door
   const AT_RIGHT = 75 // Reksio stands this far right of its base, facing it
-  const FALL_MS = 380 // the head toppling onto Reksio's
-  const ON_HIS_HEAD = { back: 26, up: 30 } // where the head sits on him, from his mouth: back along his head, and up
+  const KNOCKED_MS = 520 // its head, knocked off, flying to the ground
+  const KNOCKED_TO = 95 // …landing this far from its middle
   const CAP_ON = { y: 44, scale: 0.47 } // the boy's cap on its head: down from its top, and how big (boyfigure.js draws it for him)
 
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -475,20 +474,13 @@ const Snowman = (() => {
     })
   }
 
-  /** "Ha!": the head fell on Reksio. */
-  async function laughsAtIt() {
-    if (stage === 'evening') return
-    Boy.face(Reksio.x > Boy.x ? 1 : -1)
-    await Boy.look({ o: 1, open: 0.5, brows: 1 }, 400)
-    await Boy.laugh(5)
-  }
-
   /** It broke where it fell: he gathers it up, pats a new head together and
    * puts it back, with what was on it. */
   async function rebuild() {
     if (stage !== 'fallen') return
-    await go(fallenAt - 50)
-    Boy.face(1)
+    const side = Math.sign(fallenAt - S) || 1 // he kneels on its far side from the snowman, not in its base
+    await go(fallenAt + side * 50)
+    Boy.face(-side)
     await Boy.settle('crouch', 400)
     g.lumps?.remove() // gathered up
     g.lumps = null
@@ -520,53 +512,46 @@ const Snowman = (() => {
     await Boy.nod()
   }
 
-  /** Where its fallen head lies, broken, with what was on it. */
-  function breakHead(x) {
-    fallenAt = Math.max(Layout.MIN_X + 60, x)
+  /** Where its fallen head lies, broken, with what was on it; `away` (1 or
+   * -1) is the side it flew to, where the carrot ends up. */
+  function breakHead(x, away) {
+    fallenAt = Math.min(Layout.MAX_X - 60, Math.max(Layout.MIN_X + 60, x))
     layer.appendChild(g.head) // out of #fx, and hidden: what's left of it is on the ground
     g.head.style.display = 'none'
-    g.lumps = el('g', { transform: `translate(${fallenAt.toFixed(0)} ${GROUND})` }, layer)
-    for (const [cx, r] of [[-24, 11], [-6, 15], [14, 12], [30, 8]]) el('circle', { class: 'snow-ball', cx, cy: 4 - r, r }, g.lumps)
-    if (has.eyes) g.lumps.insertAdjacentHTML('beforeend', STONE(-34, -3) + STONE(40, -2))
-    if (has.carrot) g.lumps.insertAdjacentHTML('beforeend', '<path class="carrot" d="M-2 -4 L26 0 L-2 4 Z" transform="translate(-50 -2)" />')
-    if (has.hat) BoyFigure.cap(g.lumps).setAttribute('transform', `translate(18 ${(30 - R.head).toFixed(0)}) rotate(70) scale(${CAP_ON.scale})`)
+    g.lumps = el('g', { transform: `translate(${fallenAt.toFixed(0)} ${GROUND}) scale(${away} 1)` }, layer)
+    el('ellipse', { class: 'snow-ball', cx: 0, cy: 2, rx: 46, ry: 6 }, g.lumps) // the splat
+    for (const [cx, r] of [[-26, 12], [4, 15], [32, 9]]) el('circle', { class: 'snow-ball', cx, cy: 3 - r, r }, g.lumps) // lumps apart, not a row of beads
+    if (has.eyes) g.lumps.insertAdjacentHTML('beforeend', STONE(-44, -2) + STONE(50, -1))
+    if (has.carrot) g.lumps.insertAdjacentHTML('beforeend', '<path class="carrot" d="M-2 -4 L26 0 L-2 4 Z" transform="translate(18 -26) rotate(-35)" />')
+    if (has.hat) BoyFigure.cap(g.lumps).setAttribute('transform', `translate(-4 ${(40 - R.head).toFixed(0)}) rotate(-20) scale(${CAP_ON.scale})`)
     Sound.plop()
     Debug.trace('snowman head broken', { x: Math.round(fallenAt) })
     boyDo('mends it', rebuild)
   }
 
-  /** Proud of it, he hops up to sniff its carrot, and its head topples onto
-   * his: he shakes, a few blind steps, and shakes it off. However that ends
-   * (a tap), it falls and breaks at his feet. */
-  async function headOnHim() {
+  /** Its head knocked off towards `dir` (1: right): it flies in an arc, tumbling,
+   * lands and breaks, and the boy will mend it. Resolves as it lands; nothing
+   * stops it on the way. */
+  function knockOff(dir) {
     stage = 'fallen'
-    Debug.trace('snowman head falls on him', {})
-    let riding = null
-    try {
-      await Reksio.lookUp(700)
-      Reksio.kit.perk('both', 600)
-      await Reksio.hop(34, 1)
-      $('fx').appendChild(g.head) // in front of him
-      const t0 = Clock.now()
-      const from = { x: S, y: headY() }
-      riding = Clock.every(0, () => {
-        const k = Math.min(1, (Clock.now() - t0) / FALL_MS)
-        const m = Reksio.mouth()
-        const to = { x: m.x - Reksio.facing * ON_HIS_HEAD.back, y: m.y - ON_HIS_HEAD.up }
-        g.head.setAttribute('transform', `translate(${(from.x + (to.x - from.x) * k).toFixed(1)} ${(from.y + (to.y - from.y) * k).toFixed(1)}) rotate(${(k * -25 * Reksio.facing).toFixed(0)})`)
+    Debug.trace('snowman head knocked off', { dir })
+    $('fx').appendChild(g.head) // in front of everyone, on its way
+    const [x0, y0] = [S, headY()]
+    const x1 = S + dir * KNOCKED_TO
+    const y1 = GROUND - R.head * 0.7
+    const t0 = Clock.now()
+    return new Promise((resolve) => {
+      const stop = Clock.every(0, () => {
+        const k = Math.min(1, (Clock.now() - t0) / KNOCKED_MS)
+        const x = x0 + (x1 - x0) * k
+        const y = y0 + (y1 - y0) * k * k - 40 * Math.sin(Math.PI * k) // up a little, then down faster
+        g.head.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(dir * 200 * k).toFixed(0)})`)
+        if (k < 1) return
+        stop()
+        breakHead(x1, dir)
+        resolve()
       })
-      boyDo('laughs', laughsAtIt)
-      await Reksio.kit.pause(FALL_MS)
-      Sound.plop()
-      await Reksio.bowlShake(4)
-      await Reksio.walkTo(Reksio.x - Reksio.facing * rnd(60, 100)) // blind steps, away from it
-      await Reksio.lookAround(600)
-      await Reksio.shake()
-    } finally {
-      riding?.()
-      breakHead(Reksio.x + Reksio.facing * 40)
-    }
-    await Reksio.freed()
+    })
   }
 
   // ------------------------------------------------------------ Reksio's part
@@ -675,13 +660,13 @@ const Snowman = (() => {
     if (stage === 'done') await Reksio.aww()
   }
 
-  /** Tapped (the snowman, or the boy by it): the next piece, his bone, the
-   * head knocked off it, or a sniff and a look up at it. */
+  /** Tapped (the snowman, or the boy by it): the next piece, his bone,
+   * something around the finished snowman, or a sniff and a look up at it. */
   function tapped() {
     const what = next()
     if (what === 'bone') return fetchBone()
     if (what) return fetch(what)
-    if (stage === 'done') return headOnHim()
+    if (stage === 'done') return SnowPlay.run()
     return admire()
   }
 
@@ -748,6 +733,8 @@ const Snowman = (() => {
     },
     get stage() { return stage },
     get has() { return { ...has } },
+    /** What the finished snowman's encounters (snowplay.js) work with. */
+    kit: { R, GROUND, BOY_SIDE, AT_RIGHT, boyDo, go, holding, follow, inHand, knockOff, put, takeOff, at: () => S, headY },
     /** Where its action spot is (spots.js). */
     spotX: () => S + R.base + AT_RIGHT - 20,
   }

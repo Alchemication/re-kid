@@ -166,6 +166,10 @@ const BoyFigure = (() => {
     laugh: vary(STAND, { head: [4, -236], tilt: -12, arms: { near: [[-14, -148], [-6, -118]], far: [[26, -150], [24, -122]] }, face: { smile: 1, open: 0.8, joy: 1 } }),
     // reaching ahead with the near hand at chest height (putting a stone in a snowman's face)
     reach: vary(STAND, { turn: 0.85, chest: [8, -182], head: [14, -232], arms: { near: [[18, -160], [52, -170]] } }),
+    // winding up to throw: leaning back, the far hand up behind his head
+    windup: vary(STAND, { turn: 0.85, chest: [-6, -180], head: [-4, -232], tilt: -6, arms: { far: [[-8, -184], [-30, -214]], near: [[14, -156], [36, -160]] }, face: { smile: 0.3, brows: 0.3, open: 0.2 } }),
+    // the throw: leaning in, the far arm swung forward and up, let go
+    throw: vary(STAND, { turn: 0.85, chest: [10, -180], head: [16, -230], tilt: 4, arms: { far: [[36, -176], [66, -196]], near: [[-12, -150], [-22, -118]] }, face: { smile: 0.6, open: 0.5 } }),
   }
 
   // ------------------------------------------------------------ points

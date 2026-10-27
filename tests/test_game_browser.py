@@ -1456,8 +1456,9 @@ class TestSnowman:
     stands by it at a loss; each tap on it (or him) and Reksio brings the next
     piece: the stones for eyes and a stick for arms, in the play's order,
     then his bone for a nose, swapped for a carrot; the boy's cap on its
-    head. A tap on the finished snowman knocks its head onto Reksio's; it
-    breaks, and the boy mends it."""
+    head. A tap on the finished snowman brings something around it
+    (snowplay.js): snowballs, the last one knocking its head off; it breaks,
+    and the boy mends it."""
 
     BUILT = f"seed=3&still&creatures=&rain=0{SNOWMAN}"
 
@@ -1483,9 +1484,9 @@ class TestSnowman:
             "hat": True,
         }
         y.page.wait_for_function("!Boy.busy", timeout=20_000)
-        y.run("yardGame.use('snowman')")  # its head falls on Reksio
+        y.run("yardGame.use('snowman')")  # snowballs, and its head knocked off
         trace = y.page.evaluate("yardGame.trace()")
-        assert "snowman head falls on him" in trace
+        assert "snowballs" in trace
         assert "snowman head broken" in trace
         y.page.wait_for_function("Snowman.stage === 'done'", timeout=40_000)
         assert "snowman mended" in y.page.evaluate("yardGame.trace()")
@@ -1522,19 +1523,42 @@ class TestSnowman:
         assert y.page.evaluate("!Snowman.has.eyes && !Snowman.has.arms")
         assert y.page.evaluate("Things.ready('snowman')")
 
-    def test_dusk_while_its_head_is_on_him(self, yard: callable) -> None:
+    def test_dusk_mid_snowballs(self, yard: callable) -> None:
+        """At dusk mid-game, the boy goes in; no snowball left in his hand
+        or in the air, nor its head stuck in the air."""
         y = yard(self.BUILT)
         self.finish(y)
         y.page.wait_for_function("!Boy.busy", timeout=20_000)
         y.start("yardGame.use('snowman')")
         y.page.wait_for_function(
-            "yardGame.trace().includes('snowman head falls on him')", timeout=20_000
+            "yardGame.trace().includes('snowballs')", timeout=20_000
         )
-        y.page.wait_for_timeout(800)
+        y.page.wait_for_timeout(2500)  # packing, or a ball in the air
         y.page.evaluate("yardGame.perform('evening now')")
         y.page.wait_for_function("!Boy.out", timeout=40_000)
-        assert "snowman head broken" in y.page.evaluate("yardGame.trace()")
-        assert "snowman mended" not in y.page.evaluate("yardGame.trace()")
+        y.page.wait_for_timeout(1000)
+        assert (
+            y.page.evaluate(
+                "document.querySelectorAll('#fx .snow-ball, #fx .snowball').length"
+            )
+            == 0
+        )
+        assert not y.errors, y.errors
+
+    def test_dusk_as_its_head_flies(self, yard: callable) -> None:
+        """Dusk as the last ball hits: its head lands and stays broken; the boy goes in."""
+        y = yard(self.BUILT)
+        self.finish(y)
+        y.page.wait_for_function("!Boy.busy", timeout=20_000)
+        y.start("yardGame.use('snowman')")
+        y.page.wait_for_function(
+            "yardGame.trace().includes('snowman head knocked off')", timeout=40_000
+        )
+        y.page.evaluate("yardGame.perform('evening now')")
+        y.page.wait_for_function("!Boy.out", timeout=40_000)
+        trace = y.page.evaluate("yardGame.trace()")
+        assert "snowman head broken" in trace
+        assert "snowman mended" not in trace
         assert y.page.evaluate("document.querySelectorAll('#fx .snowball').length") == 0
         assert not y.errors, y.errors
 

@@ -1,7 +1,7 @@
 // Reksio's boy (world.yaml, characters[boy]): where he is, which way he
 // faces, his walk, what keeps him alive standing about (blinks, breathing, a
 // glance at Reksio), and his gestures: calling Reksio, waving, pointing,
-// crouching, pushing, lifting, reaching, laughing, cheering, scratching his
+// crouching, pushing, lifting, reaching, throwing, laughing, cheering, scratching his
 // curls, nodding and shaking his head. Drawn by boyfigure.js. A gag brings him
 // out (comeOut), uses his gestures, and sends him in (goIn); what he holds is
 // the gag's to draw, at handAt().
@@ -315,6 +315,16 @@ const Boy = (() => {
         }
       }
       await blend(add, no ? 'turn' : 'tilt', 0, 150)
+    },
+    /** A throw: winding up, then the arm swung forward; release() is called
+     * as the ball leaves his hand. */
+    async throw(release) {
+      await actTo(P.windup, 320)
+      await pause(160)
+      await actTo(P.throw, 110)
+      release()
+      await pause(260)
+      await actOff(350)
     },
     /** Reaching ahead with his near hand (to put something in place), and back. */
     async reach(ms = 500) {

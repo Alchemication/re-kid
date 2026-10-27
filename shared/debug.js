@@ -104,15 +104,19 @@ const Clock = (() => {
     /** Game time, ms since the page started. */
     now: () => now,
     after,
-    /** Run fn every ms of game time until the returned stop() is called. */
+    /** Run fn every ms of game time until the returned stop() is called (by fn itself too). */
     every(ms, fn) {
       let timer = null
+      let stopped = false
       const tick = () => {
         fn()
-        timer = after(ms, tick)
+        if (!stopped) timer = after(ms, tick) // fn may have stopped it
       }
       timer = after(ms, tick)
-      return () => cancel(timer)
+      return () => {
+        stopped = true
+        cancel(timer)
+      }
     },
     /** Stop a timer `after` returned, if it hasn't run. */
     cancel,

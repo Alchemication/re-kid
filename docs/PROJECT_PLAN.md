@@ -167,14 +167,19 @@ decided and why.
       tap on the snowman or the boy and Reksio brings the next piece (the
       stick and the stones, in a drawn order), then his bone for a nose;
       the boy laughs, fetches a carrot and puts his cap on it, and stays
-      out until dusk. A tap on the finished snowman: Reksio hops up to
-      sniff its carrot and its head topples onto his; he shakes it off, it
-      breaks, the boy laughs and mends it. The boy is a quarter smaller
-      than at first (he was as big as the house), his cap lower over his
-      curls. Judge: his size, his look and faces, the head on Reksio, how
-      long the build takes (about 30 s). Not yet: the sparrows coming to
-      the snowman's cap, the bowl as its hat, a sound for his call (a
-      voice needs Adam's ear).
+      out until dusk. A tap on the finished snowman brings something
+      around it, a different one each time (`snowplay.js`): so far
+      snowballs (the boy pats one up and lobs it, Reksio snaps it and it
+      bursts on his nose; then one goes flat into the snowman's head, it
+      flies off and breaks, both freeze, the boy laughs and mends it).
+      Being built, in this order, each shown to Adam before the next
+      (agreed 2026-10-27): a sparrow pulling out the carrot (Reksio brings
+      it back), then a rare slip on the ice for whoever walks over it,
+      anywhere in the winter yard. The boy is a quarter smaller than at
+      first (he was as big as the house), his cap lower over his curls.
+      Judge: his size, his look and faces, the snowballs, how long the
+      build takes (about 30 s). Not yet: the bowl as its hat, a sound for
+      his call (a voice needs Adam's ear).
    3. **Winter's weather varies per play** (Adam, 2026-10-26: "randomness
       as in life is welcome if it doesn't overcomplicate things"): each
       winter play picks one sky, the way fog is picked now: a crisp clear

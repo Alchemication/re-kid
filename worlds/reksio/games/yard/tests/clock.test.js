@@ -111,6 +111,17 @@ describe('timers on game time', () => {
     assert.equal(n, at)
   })
 
+  it('stop from inside every(), the run that stops it being its last', async () => {
+    const { Clock, page } = clock()
+    let n = 0
+    const stop = Clock.every(0, () => {
+      n++
+      if (n === 3) stop()
+    })
+    await page.advance(500)
+    assert.equal(n, 3)
+  })
+
   it('set from inside a timer wait for the next frame, so a frame always ends', async () => {
     const { Clock, page } = clock()
     let n = 0
