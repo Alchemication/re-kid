@@ -14,7 +14,7 @@
 // from where he was drawn, so nothing is left frozen part-way.
 
 // Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
-/* global Clock, Debug, Figure, BoyFigure */
+/* global Clock, Debug, Figure, Motion, BoyFigure */
 /* exported Boy */
 const Boy = (() => {
   const GROUND = 812 // y of his feet, in scene units (Reksio's ground)
@@ -55,36 +55,8 @@ const Boy = (() => {
 
   // ------------------------------------------------------------ blends
 
-  const EASE = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
-  const blends = []
-  const cutShort = () => Object.assign(new Error('cut short'), { name: 'AbortError' })
-
-  /** Move obj[key] to `to` over ms of game time; rejects (AbortError) if relax() cuts it short. */
-  function blend(obj, key, to, ms, ease = EASE) {
-    for (const b of blends.filter((b) => b.obj === obj && b.key === key)) {
-      blends.splice(blends.indexOf(b), 1)
-      b.resolve()
-    }
-    const p = new Promise((resolve, reject) => {
-      blends.push({ obj, key, from: obj[key], to, start: Clock.now(), ms: Math.max(1, ms), ease, resolve, reject })
-    })
-    p.catch(() => {}) // cut short, unawaited: nothing to do
-    return p
-  }
-  /** A gesture's pause, cut short by relax() like any blend. */
-  const pause = (ms) => blend({ k: 0, waiting: true }, 'k', 1, ms)
-
-  function runBlends() {
-    const now = Clock.now()
-    for (const b of [...blends]) {
-      const k = Math.min(1, (now - b.start) / b.ms)
-      b.obj[b.key] = b.from + (b.to - b.from) * b.ease(k)
-      if (k >= 1) {
-        blends.splice(blends.indexOf(b), 1)
-        b.resolve()
-      }
-    }
-  }
+  const blends = Motion.blends() // moved in step(), every frame
+  const { blend, pause } = blends
 
   // ------------------------------------------------------------ his state
 
@@ -175,7 +147,7 @@ const Boy = (() => {
       blinkUntil = t + BLINK_MS
       nextBlink = t + BLINK_MS + BLINK_EVERY_MS[0] + life() * (BLINK_EVERY_MS[1] - BLINK_EVERY_MS[0])
     }
-    const still = target === null && v === 0 && !blends.some((b) => !b.obj.waiting) // a pause moves nothing
+    const still = target === null && v === 0 && !blends.moving() // a pause moves nothing
     const shown = `${x} ${facing} ${breathAt(t)} ${t < blinkUntil} ${glancing(t)}`
     if (still && shown === drawn) return
     drawn = still ? shown : ''
@@ -191,7 +163,7 @@ const Boy = (() => {
     const t = Clock.now()
     const dt = Math.min(0.05, (t - lastT) / 1000)
     lastT = t
-    runBlends()
+    blends.run()
     if (!root || root.style.display === 'none') {
       if (target !== null) arrived(false) // gone in: a walk he was on ends
       return
@@ -249,7 +221,7 @@ const Boy = (() => {
   /** Cut every gesture short and blend back to standing from where he is. */
   function relax() {
     if (arrive) arrived(false)
-    for (const b of blends.splice(0)) b.reject(cutShort())
+    blends.cut()
     rest.from = last
     rest.to = P.stand
     rest.k = 0

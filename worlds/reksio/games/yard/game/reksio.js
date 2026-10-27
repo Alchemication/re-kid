@@ -78,54 +78,18 @@ const Reksio = (() => {
 
   // ------------------------------------------------------------ blends
 
-  const EASE = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
+  const EASE = Motion.EASE
   const EASE_OUT = (t) => 1 - (1 - t) ** 3
   const EASE_IN = (t) => t * t * t
   /** Lands a little past its mark and settles: a move with some snap. */
   const OVERSHOOT = (t) => 1 + (t - 1) ** 2 * (2.4 * (t - 1) + 1.4)
 
-  const blends = [] // {obj, key, from, to, start, ms, ease, resolve, reject}
-  const cutShort = () => Object.assign(new Error('cut short'), { name: 'AbortError' })
-
-  /** Move obj[key] to `to` over ms of game time. Resolves when it gets there;
-   * rejects (an AbortError) if relax() cuts it short. A newer blend of the
-   * same number takes over from wherever this one got to. */
-  function blend(obj, key, to, ms, ease = EASE) {
-    for (const b of blends.filter((b) => b.obj === obj && b.key === key)) {
-      blends.splice(blends.indexOf(b), 1)
-      b.resolve()
-    }
-    return loose(new Promise((resolve, reject) => {
-      blends.push({ obj, key, from: obj[key], to, start: Clock.now(), ms: Math.max(1, ms), ease, resolve, reject })
-    }))
-  }
-
-  /** A gesture's pause: ms of game time that relax() cuts short like any
-   * blend, so a gesture never carries on after a tap (a plain Clock.wait
-   * would let it, and pose him as he walks off). */
-  const pause = (ms) => blend({ k: 0 }, 'k', 1, ms)
-
-  /** A promise that may be cut short with nobody waiting on it: whoever
-   * awaits it hears; nobody else need. */
-  function loose(promise) {
-    promise.catch(() => {}) // cut short, unawaited: nothing to do
-    return promise
-  }
-
   // Blends move with the game's clock, every frame, whether or not he is being
-  // drawn: a gesture always reaches its end (or is cut short).
-  Clock.every(0, runBlends)
-  function runBlends() {
-    const now = Clock.now()
-    for (const b of [...blends]) {
-      const k = Math.min(1, (now - b.start) / b.ms)
-      b.obj[b.key] = b.from + (b.to - b.from) * b.ease(k)
-      if (k >= 1) {
-        blends.splice(blends.indexOf(b), 1)
-        b.resolve()
-      }
-    }
-  }
+  // drawn: a gesture always reaches its end (or is cut short by relax()).
+  const blends = Motion.blends()
+  const { blend, pause } = blends
+  const loose = Motion.loose
+  Clock.every(0, blends.run)
 
   // ------------------------------------------------------------ his state
 
@@ -367,7 +331,7 @@ const Reksio = (() => {
     }
     stepLife(dt)
     const wagFast = target !== null || stretching
-    if (!blends.some((b) => b.key === 'wag')) add.wag = Math.sin(Clock.now() / (wagFast ? 80 : 260)) * (wagFast ? 1.2 : 0.8)
+    if (!blends.moving((b) => b.key === 'wag')) add.wag = Math.sin(Clock.now() / (wagFast ? 80 : 260)) * (wagFast ? 1.2 : 0.8)
     place()
     draw(walking)
   }
@@ -431,7 +395,7 @@ const Reksio = (() => {
     const was = last ?? compose()
     // drawn low (resting, or a gesture's sit or bow): up on his feet before he goes
     const fromRest = current !== 'stand' || root.getAttribute('data-up') === '0'
-    for (const b of blends.splice(0)) b.reject(cutShort())
+    blends.cut()
     act.w = 0
     act.moving = false
     face.w = 0

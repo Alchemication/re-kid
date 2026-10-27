@@ -13,6 +13,9 @@
 // - Motion.endAt: animate something to where it ends up, setting the end on
 //   the element first, so the drawing never depends on an animation frozen on
 //   its last frame (fill: 'forwards'), which a cut-short gag can leave behind.
+// - Motion.blends: a character's numbers moved to a target over game time,
+//   all cut short at once when he is asked to do something else (Reksio's
+//   and the boy's engines both move only through one).
 //
 // - Random numbers: every part of the game draws from its own stream, made
 //   from one seed. `?seed=N` in the page address replays a play: the layout
@@ -147,7 +150,58 @@ const Motion = (() => {
     return done
   }
 
-  return { endAt }
+  const EASE = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
+  const cutShort = () => Object.assign(new Error('cut short'), { name: 'AbortError' })
+
+  /** A promise that may be cut short with nobody waiting on it: whoever
+   * awaits it hears; nobody else need. */
+  function loose(promise) {
+    promise.catch(() => {}) // cut short, unawaited: nothing to do
+    return promise
+  }
+
+  /**
+   * A character's blends: `blend(obj, key, to, ms, ease)` moves obj[key] to
+   * `to` over ms of game time, resolving when it gets there; a newer blend of
+   * the same number takes over from wherever this one got to. `run()` moves
+   * them, once a frame; `cut()` rejects every one with an AbortError (his
+   * relax). `pause(ms)` is a gesture's wait that cut() cuts short like any
+   * blend (a plain Clock.wait would let a gesture carry on after a tap);
+   * `moving(test)` says whether a blend (not a pause) that passes the test is
+   * under way.
+   */
+  function blends() {
+    const list = [] // {obj, key, from, to, start, ms, ease, resolve, reject}
+    function blend(obj, key, to, ms, ease = EASE) {
+      for (const b of list.filter((b) => b.obj === obj && b.key === key)) {
+        list.splice(list.indexOf(b), 1)
+        b.resolve()
+      }
+      return loose(new Promise((resolve, reject) => {
+        list.push({ obj, key, from: obj[key], to, start: Clock.now(), ms: Math.max(1, ms), ease, resolve, reject })
+      }))
+    }
+    function run() {
+      const now = Clock.now()
+      for (const b of [...list]) {
+        const k = Math.min(1, (now - b.start) / b.ms)
+        b.obj[b.key] = b.from + (b.to - b.from) * b.ease(k)
+        if (k >= 1) {
+          list.splice(list.indexOf(b), 1)
+          b.resolve()
+        }
+      }
+    }
+    return {
+      blend,
+      run,
+      pause: (ms) => blend({ k: 0, waiting: true }, 'k', 1, ms),
+      cut: () => list.splice(0).forEach((b) => b.reject(cutShort())),
+      moving: (test = () => true) => list.some((b) => !b.obj.waiting && test(b)),
+    }
+  }
+
+  return { endAt, blends, loose, EASE }
 })()
 
 const Debug = (() => {
