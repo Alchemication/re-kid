@@ -47,6 +47,12 @@ films.
   | Rain | drips | high notes at odd moments |
   | A nap | hush | a low note now and then |
 
+- **Seasons.** Each season has its own takes and its own bed (Adam,
+  2026-10-27), picked by the play's season, and the same later for
+  Krtek's meadow. Winter's first try is a quieter, sparkling version of the
+  same small band: bells drifting down like snow, a lighter plucked bounce
+  while the child plays. These are candidates on the boards, not yet
+  chosen.
 - **Feel.** Gentle, cheeky, played by people: a little loose, never
   crisp. Through the same old-film recipe as the effects.
 - **Wording takes.** Name the feel, not the notes. Use Adam's form ("A

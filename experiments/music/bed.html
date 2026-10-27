@@ -221,6 +221,35 @@ const BEDS = [
       return out
     },
   },
+  // winter candidates (2026-10-27, made while Adam slept): a season's own bed
+  {
+    id: 'snowfall', name: 'Snowfall (winter)', emoji: '❄️', bpm: 66,
+    what: 'Winter: high bell notes drifting down a chord at odd moments, over a soft plucked root. Slow and sparse, like snow coming down.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      if (n % 2 === 0) out.push({ i: 'pizz', midi: c[0] - 12, at: 0, v: 0.26 })
+      const down = [c[2] + 24, c[1] + 24, c[0] + 24, c[2] + 12]
+      const k = 1 + Math.round((2 + 2 * e) * (m.dens[1] / 5))
+      const from = 0.5 + rnd() * 1.2
+      for (let j = 0; j < Math.min(k, down.length); j++) out.push({ i: 'glock', midi: down[j], at: from + j * (0.6 + rnd() * 0.3), v: 0.11 - j * 0.015 })
+      return out
+    },
+  },
+  {
+    id: 'snowplay', name: 'Snow play (winter)', emoji: '⛄', bpm: 92,
+    what: 'Winter, while the child plays: a light plucked bounce on the beat, bells skittering on top now and then.',
+    bar(m, e, n, rnd) {
+      const c = triad(m.chords[n % m.chords.length]), out = []
+      ;[c[0], c[2], c[1], c[2]].forEach((midi, k) => {
+        if (k % 2 === 0 || e > 0.3) out.push({ i: 'pizz', midi: midi - 12, at: k, v: k === 0 ? 0.26 : 0.18 })
+      })
+      if (rnd() < 0.35 + 0.5 * e) {
+        const at = 2 + Math.floor(rnd() * 3) / 2
+        ;[c[0], c[1], c[2]].forEach((midi, k) => out.push({ i: 'glock', midi: midi + 24 + m.lift, at: at + k * 0.25, v: 0.1 }))
+      }
+      return out
+    },
+  },
 ]
 
 
