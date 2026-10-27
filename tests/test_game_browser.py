@@ -1494,6 +1494,58 @@ class TestSnowman:
         assert y.page.evaluate("Boy.out")
         y.settled()
 
+    @staticmethod
+    def play(y: object, what: str) -> None:
+        """Tap the finished snowman until `what` happens (the pool gives each in two taps)."""
+        for _ in range(2):
+            y.page.wait_for_function(
+                "Snowman.stage === 'done' && Things.ready('snowman') && !Boy.busy"
+                " && !Boy.walking && !yardGame.state().busy",
+                timeout=60_000,
+            )
+            plays = y.page.evaluate("yardGame.trace().split('snow play').length")
+            y.start("yardGame.use('snowman')")
+            y.page.wait_for_function(
+                f"yardGame.trace().split('snow play').length > {plays}",
+                timeout=20_000,
+            )
+            if what in y.page.evaluate("yardGame.trace()"):
+                return
+            y.page.wait_for_function("!yardGame.state().busy", timeout=60_000)
+        raise AssertionError(f"{what} never came")
+
+    def test_the_sparrow_takes_the_carrot(self, yard: callable) -> None:
+        """It pulls the carrot out and drops it; Reksio brings it back."""
+        y = yard(self.BUILT)
+        self.finish(y)
+        self.play(y, 'snow play {"what":"carrot"}')
+        y.page.wait_for_function(
+            "yardGame.trace().includes('carrot in the snow')", timeout=30_000
+        )
+        assert not y.page.evaluate("Snowman.has.carrot")
+        y.page.wait_for_function("Snowman.has.carrot", timeout=40_000)
+        y.settled()
+        assert y.page.evaluate("document.querySelectorAll('#fx .sparrow').length") == 0
+
+    def test_dusk_as_he_brings_the_carrot(self, yard: callable) -> None:
+        """Dusk while the carrot is in the snow or in his mouth: the boy goes
+        in, and the carrot lies in the snow (not stuck to him, nor in the air)."""
+        y = yard(self.BUILT)
+        self.finish(y)
+        self.play(y, 'snow play {"what":"carrot"}')
+        y.page.wait_for_function(
+            "yardGame.trace().includes('carrot in the snow')", timeout=30_000
+        )
+        y.page.evaluate("yardGame.perform('evening now')")
+        y.page.wait_for_function("!Boy.out", timeout=40_000)
+        y.settled()
+        assert not y.page.evaluate("Snowman.has.carrot")
+        assert y.page.evaluate("document.querySelectorAll('#fx .carrot').length") == 0
+        assert (
+            y.page.evaluate("document.querySelectorAll('#snowman .carrot').length") == 1
+        )
+        assert not y.errors, y.errors
+
     def test_the_boy_builds_it(self, yard: callable) -> None:
         y = yard("seed=3&still&creatures=&rain=0&season=winter&snowman=0")
         y.page.wait_for_function("Boy.out", timeout=5_000)

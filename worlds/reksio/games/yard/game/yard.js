@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, FilmLook, Nap, Spots, Bed, YardBeds */
+/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -597,7 +597,7 @@
     // sparrows at his bowl (winter): he guards it, they come back behind him, and he gives in (sparrows.js)
     guardBowl: { weight: 6, ok: () => Sparrows.ok(), run: () => Sparrows.guard() },
     // the boy is waiting for something for his snowman (winter): left alone, he goes for it himself (snowman.js)
-    helpSnowman: { weight: 0, due: true, ok: () => Snowman.helpDue(), run: () => Snowman.help() },
+    helpSnowman: { weight: 0, due: true, ok: () => Snowman.helpDue() || SnowPlay.helpDue(), run: () => (SnowPlay.helpDue() ? SnowPlay.fetchCarrot() : Snowman.help()) },
     // …and when the boy comes out to make it, he runs over to him and sits to watch
     greetBoy: { weight: 0, due: true, ok: () => Snowman.greetDue(), run: () => Snowman.greet() },
     // in the morning fog: nose down, he sniffs his way along a little, and stops to look about

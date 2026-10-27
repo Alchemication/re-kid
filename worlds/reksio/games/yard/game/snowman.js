@@ -191,7 +191,7 @@ const Snowman = (() => {
   const ON_HEAD = {
     eyes: `${STONE(-8, -5)}${STONE(9, -5)}`,
     bone: `<g data-piece="bone">${BONE('M14 2 H38 M42 -4 a5 5 0 1 1 0 10')}</g>`,
-    carrot: '<path class="carrot" d="M11 -3 L40 3 L11 6 Z" />',
+    carrot: '<path class="carrot" data-piece="carrot" d="M11 -3 L40 3 L11 6 Z" />',
   }
 
   /** The snowman gets a piece. */
@@ -734,7 +734,7 @@ const Snowman = (() => {
     get stage() { return stage },
     get has() { return { ...has } },
     /** What the finished snowman's encounters (snowplay.js) work with. */
-    kit: { R, GROUND, BOY_SIDE, AT_RIGHT, boyDo, go, holding, follow, inHand, knockOff, put, takeOff, at: () => S, headY },
+    kit: { R, GROUND, BOY_SIDE, AT_RIGHT, boyDo, go, holding, follow, carried, inHand, giveToBoy, takeAndPut, knockOff, put, takeOff, at: () => S, headY, layer: () => layer },
     /** Where its action spot is (spots.js). */
     spotX: () => S + R.base + AT_RIGHT - 20,
   }

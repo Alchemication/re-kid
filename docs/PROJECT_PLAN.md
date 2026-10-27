@@ -168,17 +168,18 @@ decided and why.
       stick and the stones, in a drawn order), then his bone for a nose;
       the boy laughs, fetches a carrot and puts his cap on it, and stays
       out until dusk. A tap on the finished snowman brings something
-      around it, a different one each time (`snowplay.js`): so far
-      snowballs (the boy pats one up and lobs it, Reksio snaps it and it
-      bursts on his nose; then one goes flat into the snowman's head, it
-      flies off and breaks, both freeze, the boy laughs and mends it).
-      Being built, in this order, each shown to Adam before the next
-      (agreed 2026-10-27): a sparrow pulling out the carrot (Reksio brings
-      it back), then a rare slip on the ice for whoever walks over it,
-      anywhere in the winter yard. The boy is a quarter smaller than at
+      around it, a different one each time (`snowplay.js`): snowballs
+      (the boy pats one up and lobs it, Reksio snaps it and it bursts on
+      his nose; then one goes flat into the snowman's head, it flies off
+      and breaks, both freeze, the boy laughs and mends it), or a sparrow
+      that lands on its cap, tugs the carrot out, carries it wobbling over
+      Reksio's head and drops it in the snow, and Reksio brings it back to
+      the boy. Next (agreed 2026-10-27, shown to Adam before building on):
+      a rare slip on the ice for whoever walks over it, anywhere in the
+      winter yard. The boy is a quarter smaller than at
       first (he was as big as the house), his cap lower over his curls.
-      Judge: his size, his look and faces, the snowballs, how long the
-      build takes (about 30 s). Not yet: the bowl as its hat, a sound for
+      Judge: his size, his look and faces, the snowballs, the sparrow,
+      how long the build takes (about 30 s). Not yet: the bowl as its hat, a sound for
       his call (a voice needs Adam's ear).
    3. **Winter's weather varies per play** (Adam, 2026-10-26: "randomness
       as in life is welcome if it doesn't overcomplicate things"): each
@@ -189,6 +190,24 @@ decided and why.
       `layout.js`, read by the weather and the painting; no new systems.
    4. **Autumn**, the same way (after Reksiowa jesień): its share of
       plays, falling leaves on the wind, its own things and weather draws.
+   5. **Slow enough for a toddler** (Adam, 2026-10-27: "slowly enough that
+      the toddler can register"): every beat of a gag held long enough to
+      see what happened before the next, the comic moment longest. Done
+      for the snowman's encounters (their `*_MS` constants); a pass over
+      the other gags follows, with Adam judging by eye.
+   6. **Sound for what happens, and voices for every creature** (Adam,
+      2026-10-27: sounds will add value; a new ElevenLabs key with about
+      90K credits, in `.env`): the `new-sound` skill, Adam picking by ear.
+      First the winter's new moments (a snowball patted, thrown, bursting;
+      the snowman's head thudding down; the sparrow's tug and the carrot
+      popping out), then every creature its own sounds, several takes
+      each, played at random as in nature (when, how often, which take),
+      not on cue.
+   7. **A theme for each season** (Adam, 2026-10-27): the music's takes
+      (ElevenLabs Music, `new-music`) and the synth bed (`beds.js`) each
+      get a version per season, picked by the play's season, after
+      `worlds/reksio/MUSIC_DIRECTION.md` and Adam's ear. Krtek's meadow
+      gets the same (6 and 7) once the yard's way of doing it has settled.
 3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how

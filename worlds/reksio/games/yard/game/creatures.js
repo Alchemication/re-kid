@@ -771,6 +771,15 @@ const Creatures = (() => {
       s.face = face
       s.g.setAttribute('transform', `translate(${x.toFixed(1)} ${(c.y - up).toFixed(1)}) scale(${face * SPARROW_SIZE} ${SPARROW_SIZE})`)
     },
+    /** One to act in a gag (snowplay.js), drawn like the flock's in `parent`:
+     * not one of them, and not for tapping. Placed by the gag, at `size`. */
+    actor(parent) {
+      const s = this.draw(0)
+      s.g.querySelector('.critter-hit').remove()
+      s.g.removeAttribute('data-critter')
+      parent.appendChild(s.g)
+      return { ...s, size: SPARROW_SIZE }
+    },
     /** A tap on one: up they all go. */
     scatter() {
       for (const s of this.list) s.c.tapped = true
@@ -882,6 +891,8 @@ const Creatures = (() => {
     get bee() { return active(bee) && bee.state !== 'away' ? { x: bee.x, y: bee.y } : null },
     /** The sparrows about now (winter): where each is, and whether it is pecking at the bowl. */
     get sparrows() { return sparrows.list.map((s) => ({ x: s.c.x, y: s.c.y, pecking: Creature.feeding(s.c) })) },
+    /** A sparrow to act in a gag, in `parent` (sparrows.actor). */
+    sparrow: (parent) => sparrows.actor(parent),
     /** A tap on a sparrow: up they all go. */
     scatterSparrows() { sparrows.scatter() },
     /** Where the fly is, if it's about and free. */
