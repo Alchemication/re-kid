@@ -248,8 +248,8 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .rainbow-band { fill: none; stroke-width: 14; opacity: 0.85; }
 .puddle-water { fill: #8fb3c9; stroke: #5d7e94; stroke-width: 3; opacity: 0.9; }
 .puddle-shine { fill: #e6f1f7; opacity: 0.7; }
-.frozen .puddle-water { fill: #dce9f1; stroke: #9cb4c6; opacity: 1; } /* in the cold, ice */
-.frozen .puddle-shine { fill: #ffffff; opacity: 0.95; }
+.frozen .puddle-water { fill: #b9d5e6; stroke: #6f97b3; stroke-width: 2.5; opacity: 1; } /* in the cold, ice: blue enough to see on the snow (what he slips on) */
+.frozen .puddle-shine { fill: #ffffff; opacity: 1; }
 .ripple { fill: none; stroke: #e9f3f8; stroke-width: 1.6; }
 
 /* ---- the setting sun and the evening ---- */

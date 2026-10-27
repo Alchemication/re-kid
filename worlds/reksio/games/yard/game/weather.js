@@ -202,7 +202,7 @@ const Weather = (() => {
 
   function drawPuddles() {
     for (const p of puddles) {
-      const k = Math.min(1, shower.wet)
+      const k = frozen ? 1 : Math.min(1, shower.wet) // in the cold, ice lies there whatever the weather: what he slips on (ice.js)
       p.water.setAttribute('rx', p.rx * k)
       p.water.setAttribute('ry', 13 * k)
       p.shine.setAttribute('rx', p.rx * 0.35 * k)

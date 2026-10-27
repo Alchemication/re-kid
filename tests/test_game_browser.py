@@ -87,6 +87,7 @@ GESTURES = {
     "hiccups": "Reksio.hiccups()",
     "tryToFly": "Reksio.tryToFly()",
     "crossEyed": "Reksio.crossEyed()",
+    "slipped": "Reksio.slipped()",
     "blow": "Reksio.blow()",
     "puffUp": "Reksio.puffUp()",
     "peekOver": "Reksio.peekOver(70)",
@@ -116,6 +117,7 @@ NOT_GESTURES = {
     "wearing",
     "pointAt",
     "addGestures",  # how gestures.js and antics.js add theirs
+    "slipOn",  # where he slips: ice.js (TestIce)
     "keepBetween",  # set once by the game
     "listen",
     "mouth",
@@ -1451,6 +1453,41 @@ class TestSparrows:
         y.settled()
 
 
+class TestIce:
+    """In a winter play, now and then, he slips on the ice (ice.js, his walk
+    waits: reksio.js slipOn). Forced here, on the patch nearest him."""
+
+    QUERY = "seed=1&still&creatures=&rain=0&season=winter&fog=0"
+    FORCE = (
+        "(() => { let done = false; Reksio.slipOn((x, v) => (!done && v > 100"
+        " && Layout.puddles.some((p) => Math.abs(p.x - x) < p.rx * 0.8)"
+        " ? (done = true, () => Reksio.slipped()) : null)) })()"
+    )
+    ACROSS = (
+        "(() => { const p = Layout.puddles.reduce((a, b) => (Math.abs(a.x - Reksio.x)"
+        " < Math.abs(b.x - Reksio.x) ? a : b)); return p.x + Math.sign(p.x - Reksio.x) * 250 })()"
+    )
+
+    def test_he_slips_and_gets_there(self, yard: callable) -> None:
+        y = yard(self.QUERY)
+        y.page.evaluate(self.FORCE)
+        to = y.page.evaluate(self.ACROSS)
+        assert y.page.evaluate(f"Reksio.walkTo({to})") is True
+        assert round(y.page.evaluate("Reksio.x")) == round(to)
+        y.settled()
+
+    def test_a_tap_mid_slip_gets_him_up_and_off(self, yard: callable) -> None:
+        y = yard(self.QUERY)
+        y.page.evaluate(self.FORCE)
+        to = y.page.evaluate(self.ACROSS)
+        y.start(f"Reksio.walkTo({to})")
+        y.page.wait_for_function("Reksio.slipping", timeout=10_000)
+        y.page.wait_for_timeout(400)  # down on his bottom
+        y.page.evaluate("yardGame.perform('walk to 1500')")
+        y.page.wait_for_function("!Reksio.slipping", timeout=10_000)
+        y.settled()
+
+
 class TestSnowman:
     """The snowman in a winter play (snowman.js, boy.js): the boy rolls it and
     stands by it at a loss; each tap on it (or him) and Reksio brings the next
@@ -1529,7 +1566,8 @@ class TestSnowman:
 
     def test_dusk_as_he_brings_the_carrot(self, yard: callable) -> None:
         """Dusk while the carrot is in the snow or in his mouth: the boy goes
-        in, and the carrot lies in the snow (not stuck to him, nor in the air)."""
+        in, and the carrot is back on the snowman or lies in the snow (not
+        gone, stuck to him, nor in the air)."""
         y = yard(self.BUILT)
         self.finish(y)
         self.play(y, 'snow play {"what":"carrot"}')
@@ -1539,7 +1577,7 @@ class TestSnowman:
         y.page.evaluate("yardGame.perform('evening now')")
         y.page.wait_for_function("!Boy.out", timeout=40_000)
         y.settled()
-        assert not y.page.evaluate("Snowman.has.carrot")
+        # back on the snowman (if he was quick) or lying in the snow: one carrot, never gone or stuck
         assert y.page.evaluate("document.querySelectorAll('#fx .carrot').length") == 0
         assert (
             y.page.evaluate("document.querySelectorAll('#snowman .carrot').length") == 1

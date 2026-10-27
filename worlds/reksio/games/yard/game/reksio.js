@@ -32,6 +32,7 @@ const Reksio = (() => {
   const GAITS = Gait.GAITS // walk, run, sniff: gait.js
   const SNIFF_EVERY_MS = [380, 650] // on a sniffing trot, a sniff this often
   const ACCEL = 1500 // how quickly he speeds up and slows down (units/s²)
+  const SKID = 900 // slipping, how quickly his skid slows (units/s²): a short slide on, not a glide
   const MAX_STRETCH = 230 // longest dachshund stretch, in his own units
   const STRETCH_RATE = 210 // how fast he stretches while held (units/s)
   const RELAX_MS = 220 // how fast he springs up from a rest when asked to do something
@@ -63,6 +64,9 @@ const Reksio = (() => {
   let v = 0 // current speed
   let stretch = 0 // how far his front half is pulled forward
   let stretching = false
+  let slipsHere = () => null // the game says (slipOn): walking at x, does he slip here? a gesture to play if so
+  let slipping = false // a slip under way: his walk waits for it, skidding on a little
+  let skid = 0 // the skid's speed
 
   const clamp = (v) => Math.max(minX, Math.min(maxX, v))
   const random = Debug.random('reksio') // this part's own random stream (debug.js)
@@ -317,10 +321,15 @@ const Reksio = (() => {
 
   function tick(dt) {
     let walking = 0
-    if (target !== null && !stretching) {
+    if (slipping) {
+      // down on the ice: the walk waits, and he slides on a little
+      x = clamp(x + facing * skid * dt)
+      skid = Math.max(0, skid - SKID * dt)
+    } else if (target !== null && !stretching) {
       // a walking dog is up on his feet: from a rest pose, up first, then off
       if (current !== 'stand') relax()
       if (!springing()) walking = stepAlong(dt)
+      if (walking) slip()
     } else if (stretching || stretch !== 0) {
       // front legs walk on the spot as his front half pulls forward
       phase += dt * 8
@@ -334,6 +343,21 @@ const Reksio = (() => {
     if (!blends.moving((b) => b.key === 'wag')) add.wag = Math.sin(Clock.now() / (wagFast ? 80 : 260)) * (wagFast ? 1.2 : 0.8)
     place()
     draw(walking)
+  }
+
+  /** On ice, now and then (the game says, slipOn): his walk waits while the
+   * gesture plays (it lands him and gets him up), then carries on. A tap
+   * cutting it short ends it the same way. */
+  function slip() {
+    const act = slipsHere(x, v)
+    if (!act) return
+    slipping = true
+    skid = v
+    v = 0
+    Debug.ignoreCut(busyWith(act)(), 'slip').then(() => {
+      slipping = false
+      skid = 0
+    })
   }
 
   // ------------------------------------------------------------ the stretch
@@ -553,6 +577,12 @@ const Reksio = (() => {
      * his body still drawn resting. Read from what was drawn, not from the
      * state's names, so a drawing that has come apart from the state shows
      * up here (yard.js checks it as a rule). */
+    /** Down on the ice: his walk waits for him to get up. */
+    get slipping() { return slipping },
+    /** Where he slips: test(x, speed) → a gesture (kit-made) to play, or null. */
+    slipOn(test) {
+      slipsHere = test
+    },
     get sliding() {
       return target !== null && !springing() && (root.getAttribute('data-posed') === '1' || root.getAttribute('data-up') === '0')
     },

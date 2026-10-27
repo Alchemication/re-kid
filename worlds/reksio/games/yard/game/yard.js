@@ -792,7 +792,7 @@
   let busySince = 0
   function checkRules(now) {
     busySince = busy && !hold ? busySince || now : 0
-    Debug.check('walks only standing up', !Reksio.walking || (Reksio.pose === 'stand' && !Reksio.sliding), { pose: Reksio.pose, sliding: Reksio.sliding })
+    Debug.check('walks only standing up', !Reksio.walking || Reksio.slipping || (Reksio.pose === 'stand' && !Reksio.sliding), { pose: Reksio.pose, sliding: Reksio.sliding }) // down on the ice, his walk waits for him
     Debug.check('never busy for long', !busySince || now - busySince < BUSY_STUCK_MS, { lastAct })
     Debug.check('a waiting ask runs once he is free', !pending || busy || day.ended)
     Debug.check('nothing a gag put on him outlasts it', !Reksio.worn.length || busy || acting, { worn: Reksio.worn })

@@ -85,6 +85,16 @@ describe('walking', () => {
     assert.equal(Math.round(r.R.x), 900)
   })
 
+  it('slips on the way (slipOn) and still gets there: his walk waits for him, then carries on', async () => {
+    const r = reksio(['antics.js'])
+    let slips = 0
+    r.R.slipOn((x) => (x > 1300 && !slips ? (slips++, () => r.R.slipped()) : null))
+    assert.equal(await r.walk(1800), true)
+    assert.equal(slips, 1)
+    assert.equal(r.R.slipping, false)
+    assert.equal(Math.round(r.R.x), 1800)
+  })
+
   it('stops where he is when told, and the walk says he did not get there', async () => {
     const r = reksio()
     let result = null

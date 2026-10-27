@@ -270,7 +270,7 @@ before a commit.
 | a gesture or pose in `reksio.js`, `gestures.js`, `antics.js`, `figure.js`, `life.js` or `gait.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | `creatures.js` | `"TestCritters"` |
-| `weather.js` / `shower.js` / `wet.js` | `"drops or shakeOff or puddle or snail"` |
+| `weather.js` / `shower.js` / `wet.js` / `ice.js` | `"drops or shakeOff or puddle or snail or TestIce"` |
 | `day.js` / `sky.js` / `grownup.js` / the end | `"TestWholePlay or TestEvening"` |
 | `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay"` |
 | `input.js`, taps and keys | `"TestRealInput"` |

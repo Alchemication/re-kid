@@ -166,6 +166,20 @@ const BoyFigure = (() => {
     laugh: vary(STAND, { head: [4, -236], tilt: -12, arms: { near: [[-14, -148], [-6, -118]], far: [[26, -150], [24, -122]] }, face: { smile: 1, open: 0.8, joy: 1 } }),
     // reaching ahead with the near hand at chest height (putting a stone in a snowman's face)
     reach: vary(STAND, { turn: 0.85, chest: [8, -182], head: [14, -232], arms: { near: [[18, -160], [52, -170]] } }),
+    // his feet going on the ice: leaning back, arms flung up and wide, a foot kicked up
+    flail: vary(STAND, {
+      chest: [-8, -180], head: [-6, -230], tilt: -10, turn: 0.4,
+      arms: { near: [[-30, -196], [-50, -226]], far: [[34, -198], [56, -228]] },
+      legs: { near: [[12, -60], [34, -40]], far: [[-4, -56], [-6, -12]] },
+      face: { o: 1, open: 0.6, brows: 1, smile: 0 },
+    }),
+    // sat down hard on the ice: on his bottom, legs out in front, hands behind him
+    seat: vary(STAND, {
+      hip: [0, -24], chest: [-4, -92], head: [2, -144], turn: 0.5, tilt: -6,
+      arms: { near: [[-18, -66], [-30, -26]], far: [[14, -66], [4, -28]] },
+      legs: { near: [[30, -40], [58, -14]], far: [[24, -36], [52, -12]] },
+      feet: { near: -20, far: -20 },
+    }),
     // winding up to throw: leaning back, the far hand up behind his head
     windup: vary(STAND, { turn: 0.85, chest: [-6, -180], head: [-4, -232], tilt: -6, arms: { far: [[-8, -184], [-30, -214]], near: [[14, -156], [36, -160]] }, face: { smile: 0.3, brows: 0.3, open: 0.2 } }),
     // the throw: leaning in, the far arm swung forward and up, let go

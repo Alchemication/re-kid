@@ -21,6 +21,7 @@ const Boy = (() => {
   const SCALE = 0.9 // a child of seven by the house and the doghouse: about one and a half doghouses tall with his curls (Adam, 2026-10-27: at 1.2 he looked as big as the house)
   const SPEED = 165 // walking, units/s: a little slower than Reksio's trot
   const ACCEL = 900
+  const SKID = 700 // slipping, how quickly his skid slows (units/s²)
   const STEP = 58 // ground covered by one step
   const STRIDE = { reach: 22, lift: 16, knee: 12, swing: 16, bob: 3 } // a step's numbers: how far a foot goes ahead, how high it lifts, the knee's bend, the arms' swing, the body's bob
   const BLINK_EVERY_MS = [2200, 5200]
@@ -43,6 +44,9 @@ const Boy = (() => {
   let arrive = null // resolves the current walk: true if he got there
   let v = 0
   let speed = SPEED // this walk's
+  let slipsHere = () => null // the game says (slipOn): walking at x, does he slip here? a gesture to play if so
+  let slipping = false // down on the ice: his walk waits for him, skidding on a little
+  let skid = 0
   let phase = 0
   let watching = () => null // where Reksio is: the game says (init)
   let nextBlink = 0
@@ -168,20 +172,11 @@ const Boy = (() => {
       if (target !== null) arrived(false) // gone in: a walk he was on ends
       return
     }
-    if (target !== null) {
-      const d = target - x
-      const want = Math.sign(d) * speed
-      v += Math.sign(want - v) * Math.min(Math.abs(want - v), ACCEL * dt)
-      // slow down to arrive
-      const brake = Math.sqrt(2 * ACCEL * Math.abs(d))
-      if (Math.abs(v) > brake) v = Math.sign(v) * brake
-      x += v * dt
-      phase += (Math.abs(v) * dt * Math.PI) / STEP
-      if (Math.abs(d) < 2 || Math.sign(target - x) !== Math.sign(d)) {
-        x = target
-        arrived(true)
-      }
-    } else if (v !== 0) v = 0
+    if (slipping) {
+      x += facing * skid * dt
+      skid = Math.max(0, skid - SKID * dt)
+    } else if (target !== null) walkOn(dt)
+    else if (v !== 0) v = 0
     // free and still: now and then a glance to Reksio, or out at the child
     if (!doing && target === null && t >= nextGlance) {
       nextGlance = t + rnd(...GLANCE_EVERY_MS)
@@ -191,6 +186,36 @@ const Boy = (() => {
       glanceUntil = t + rnd(900, 1800)
     }
     draw(t)
+  }
+
+  /** One step along his walk: up to speed, slowing to arrive; he may slip. */
+  function walkOn(dt) {
+    const d = target - x
+    const want = Math.sign(d) * speed
+    v += Math.sign(want - v) * Math.min(Math.abs(want - v), ACCEL * dt)
+    // slow down to arrive
+    const brake = Math.sqrt(2 * ACCEL * Math.abs(d))
+    if (Math.abs(v) > brake) v = Math.sign(v) * brake
+    x += v * dt
+    phase += (Math.abs(v) * dt * Math.PI) / STEP
+    if (Math.abs(d) < 2 || Math.sign(target - x) !== Math.sign(d)) {
+      x = target
+      arrived(true)
+    } else slip()
+  }
+
+  /** On ice, now and then (the game says, slipOn): his walk waits while the
+   * gesture plays, then carries on. */
+  function slip() {
+    const act = slipsHere(x, Math.abs(v))
+    if (!act) return
+    slipping = true
+    skid = Math.abs(v)
+    v = 0
+    Debug.ignoreCut(act(), 'boy slips').then(() => {
+      slipping = false
+      skid = 0
+    })
   }
 
   function arrived(ok) {
@@ -326,6 +351,20 @@ const Boy = (() => {
       await pause(260)
       await actOff(350)
     },
+    /** On the ice: his arms fly up, down he sits with a bump, and laughs; up again. */
+    async slipped() {
+      await actTo(P.flail, 180)
+      await actTo(P.seat, 200) // bump (the game's sound: ice.js)
+      await pause(500)
+      await faceTo({ smile: 1, open: 0.8, joy: 1 }, 150)
+      for (let i = 0; i < 4; i++) {
+        await blend(add, 'dy', -3, 110)
+        await blend(add, 'dy', 0, 120)
+      }
+      await pause(300)
+      await faceOff(300)
+      await actOff(800) // up again
+    },
     /** Reaching ahead with his near hand (to put something in place), and back. */
     async reach(ms = 500) {
       await actTo(P.reach, 350)
@@ -390,6 +429,12 @@ const Boy = (() => {
     get facing() { return facing },
     get walking() { return target !== null },
     get busy() { return doing > 0 },
+    /** Down on the ice: his walk waits for him to get up. */
+    get slipping() { return slipping },
+    /** Where he slips: test(x, speed) → a gesture to play, or null. */
+    slipOn(test) {
+      slipsHere = test
+    },
     /** Where his hand is in the scene: for what he holds (which: 'near', 'far'). */
     handAt(which = 'near') {
       const [hx, hy] = BoyFigure.handAt(last, which)

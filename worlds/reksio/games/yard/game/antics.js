@@ -455,6 +455,38 @@
     await faceOff(200)
   }
 
+  /** On the ice (a winter play: ice.js): his feet shoot out from under him,
+   * arms flung up, and down he plonks on his bottom, legs out straight, as he
+   * skids on; a dazed, cross-eyed blink; then up, slowly and carefully. Slow
+   * enough to see (Adam, 2026-10-27). */
+  async function slipped() {
+    faceTo({ o: 1, open: 0.5, lift: 1, brows: 0.9, smile: 0 }, 50)
+    k.perk('both', 250)
+    blend(add, 'dy', -18, 160, k.EASE_OUT)
+    await actTo(FEET_UP, 160)
+    blend(add, 'dy', 0, 170, k.EASE_IN)
+    await actTo(PLONKED, 170)
+    Sound.plop()
+    await pause(500)
+    await faceTo({ eyes: 1, lift: 0.8, brows: 0.5, small: 1, smile: 0, look: 1 }, 120) // seeing stars
+    await pause(900)
+    await faceOff(250)
+    await pause(300)
+    await actOff(900) // up, carefully
+  }
+  // his feet out from under him: leaning back, legs kicked up in front, arms flung up
+  const FEET_UP = Figure.vary(k.POSES.stand, {
+    pelvis: [0, -64], chest: [-16, -96], head: { x: -14, y: -140, tilt: -22 },
+    nearArm: [[-2, -112], [10, -138]], farArm: [[-26, -110], [-36, -134]],
+    nearLeg: [[30, -60], [56, -70]], farLeg: [[22, -56], [48, -58]],
+  })
+  // down on his bottom, legs out straight in front, a paw behind him on the ice
+  const PLONKED = Figure.vary(k.POSES.sitUp, {
+    pelvis: [-4, -24], chest: [-8, -60], head: { x: 0, y: -104, tilt: -10, turn: 0.4 },
+    nearArm: [[10, -44], [26, -36]], farArm: [[-20, -42], [-30, -14]],
+    nearLeg: [[26, -14], [52, -8]], farLeg: [[20, -12], [46, -4]],
+  })
+
   /** His tongue out, a long cross-eyed look down at it (it's gone purple:
    * the page colours it), and a grin. */
   async function lookAtTongue() {
@@ -468,7 +500,7 @@
     await faceOff(300)
   }
 
-  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp }
+  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
   Reksio.addGestures(gestures)
 
 })()

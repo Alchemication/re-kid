@@ -155,8 +155,14 @@ decided and why.
       shy of his nose, they burst up at a bark and come back; left alone he
       guards his bowl, they come back behind his back, and he gives in and
       watches them eat (`sparrows.js`). Judge: how often, their size, the
-      guard's timing. Still to come, each a `new-gag`: slipping on the ice (a new
-      gesture: moving him without walking breaks the `sliding` rule),
+      guard's timing. Slipping on the ice (built 2026-10-27, `ice.js`):
+      the frozen puddles always show in winter, and now and then (once
+      in a while stepping onto a patch at a trot, never in the first half
+      minute, nobody twice within two minutes) Reksio's feet shoot out and
+      he plonks onto his bottom, dazed, and gets up carefully; the boy
+      flails, sits down hard and laughs. Their walk waits for them
+      (`slipOn` in each), so it can come in the middle of any gag. Judge:
+      how rare, the boy's flail. Still to come, each a `new-gag`:
       footprints in the snow, snowflakes on his tongue.
       **Adam judges the snowman and the boy** (built 2026-10-26, reworked
       2026-10-27 after his first look; `?season=winter&snowman=built` for
@@ -174,9 +180,7 @@ decided and why.
       and breaks, both freeze, the boy laughs and mends it), or a sparrow
       that lands on its cap, tugs the carrot out, carries it wobbling over
       Reksio's head and drops it in the snow, and Reksio brings it back to
-      the boy. Next (agreed 2026-10-27, shown to Adam before building on):
-      a rare slip on the ice for whoever walks over it, anywhere in the
-      winter yard. The boy is a quarter smaller than at
+      the boy. The boy is a quarter smaller than at
       first (he was as big as the house), his cap lower over his curls.
       Judge: his size, his look and faces, the snowballs, the sparrow,
       how long the build takes (about 30 s). Not yet: the bowl as its hat, a sound for
@@ -321,8 +325,10 @@ scene:
   timing bugs to find;
   `TestRealInput::test_a_key_tap_barks` fails about 1 run in 5 under
   `-n 8` (a quick key tap can count as a hold when frames are slow).
-  `TestScreens::test_turning_the_phone_refits_it` failed once under `-n 8`
-  (2026-10-22) and passed alone: not yet looked into. In one heavily
+  `TestScreens::test_turning_the_phone_refits_it` failed under `-n 8`
+  (2026-10-22, again 2026-10-27) and passed alone: not yet looked into;
+  nor the meadow's `TestMeadowWind::test_a_gust_carries_something_across_and_the_plants_lean`
+  (once, 2026-10-27). In one heavily
   loaded run (2026-10-26, 17 minutes instead of 13), four more failed and
   passed alone: `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`,
   the meadow's `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]`
