@@ -50,6 +50,12 @@ SCENARIOS = {
     "fog": (YARD, "rain=0&fog=1", None),
     # winter: the snow falling (the rain's canvas, as flakes)
     "snow": (YARD, "season=winter&rain=1&rain-at=0", None),
+    # the boy by his snowman, taking the stones Reksio brings him (boy.js, drawn every frame)
+    "snowman": (
+        YARD,
+        "season=winter&rain=0&snowman=built",
+        "yardGame.walk(Snowman.spotX('snowman') - 250); setTimeout(() => yardGame.tap('stones'), 1500)",
+    ),
     # the meadow: its painted layers, the far trees at half speed (view.js)
     "meadow-idle": (MEADOW, "props=", None),
     "meadow-walking": (

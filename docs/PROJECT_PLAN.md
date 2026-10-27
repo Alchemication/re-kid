@@ -158,6 +158,31 @@ decided and why.
       guard's timing. Still to come, each a `new-gag`: slipping on the ice (a new
       gesture: moving him without walking breaks the `sliding` rule),
       footprints in the snow, snowflakes on his tongue.
+      **Adam judges the snowman and the boy** (built 2026-10-26, option A;
+      `?season=winter&snowman=built` for it ready to dress, `snowman=0` to
+      watch him make it): every winter play, 20-45 s in, the boy comes out
+      from behind the house, rolls it, and calls Reksio; the child taps the
+      stones (eyes) and the stick (arms, snapped over his knee), or Reksio
+      goes for them himself; the boy touches his nose, Reksio brings his
+      bone, the boy laughs and fetches a carrot; his own cap goes on its
+      head. The boy (`boyfigure.js`, `boy.js`) is drawn after Kompan's
+      frames and built to be reused: poses, a walk, blinks and glances, and
+      gestures (call, wave, point, touch his nose, scratch his curls, laugh,
+      cheer, nod, reach, crouch, push, lift, heave), dressed for summer or
+      winter (winter clothes ours). Judge: his look and faces, how long the
+      build takes (about 30 s, longer when the snowman's place is far from
+      the house), where it stands. Not yet: the sparrows coming to the
+      snowman's cap, the bowl as its hat (the cap was simpler and kinder to
+      the bowl gag), a sound for his call (a voice needs Adam's ear).
+   3. **Winter's weather varies per play** (Adam, 2026-10-26: "randomness
+      as in life is welcome if it doesn't overcomplicate things"): each
+      winter play picks one sky, the way fog is picked now: a crisp clear
+      day (blue sky, sparkling snow, icicles, more ice), a grey day with a
+      snowfall coming (what we have), steady flurries now and then, or a
+      windy one with snow blown off the roofs. One draw per play in
+      `layout.js`, read by the weather and the painting; no new systems.
+   4. **Autumn**, the same way (after Reksiowa jesień): its share of
+      plays, falling leaves on the wind, its own things and weather draws.
 3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how

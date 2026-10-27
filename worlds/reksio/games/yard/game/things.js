@@ -11,7 +11,7 @@
 // first.
 //
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle, Hen, Mushrooms, Mouse, Mound, Film */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Bowl, Tree, Bramble, Bird, Cuckoo, Nap, Figure, Idle, Hen, Mushrooms, Mouse, Mound, Film, Snowman */
 /* exported Things */
 const Things = (() => {
   const DOOR = { x: 560, y: 726 } // doghouse door, scene units
@@ -351,6 +351,8 @@ const Things = (() => {
     // after the rain (mushrooms.js): each a thing of its own, so the child chooses
     porcino: varied('porcino', Mushrooms.things.porcino),
     agaric: varied('agaric', Mushrooms.things.agaric),
+    // a winter play (snowman.js): the stones and the stick for the boy's snowman, and the snowman
+    ...Snowman.things,
     berries: varied('berries', Bramble.thing),
     trap: varied('trap', Mouse.thing),
   }
@@ -411,6 +413,7 @@ const Things = (() => {
     Tree.init({ ended, effects: { burst, twinkle } })
     Hen.init({ ended, effects: { heart } })
     Mushrooms.init({ ended })
+    Snowman.init({ ended, door: DOOR })
     document.querySelectorAll('.icon-fruit').forEach((u) => u.setAttribute('href', `#fruit-${Layout.fruit}`))
   }
 

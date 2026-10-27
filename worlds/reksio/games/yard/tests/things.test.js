@@ -39,7 +39,7 @@ function yard(query = '') {
   const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'mouse.js', 'mound.js', 'film.js', 'hen.js', 'mushrooms.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
-    globals: { Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {}, noseTipAt() {} }, Tree: { init() {}, ready: false, VARIATIONS: ['stuck', 'leaves'], thing: { at: () => 1600, async run() {} } } },
+    globals: { Snowman: { things: {}, init() {} }, Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {}, noseTipAt() {} }, Tree: { init() {}, ready: false, VARIATIONS: ['stuck', 'leaves'], thing: { at: () => 1600, async run() {} } } },
   })
   const Things = page.get('Things')
   Things.init({ ended: () => ended })

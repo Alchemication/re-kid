@@ -459,3 +459,13 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
   50%, 85% { transform: rotate(-90deg); }
   100% { transform: rotate(0); }
 }
+
+/* the snowman, in a winter play (snowman.js) */
+.snow-ball { fill: #f7f8f5; stroke: var(--ink); stroke-width: 2.5; }
+.snow-curl { fill: none; stroke: #d3dbe0; stroke-width: 5; stroke-linecap: round; }
+.trail { fill: #b4bc9e; } /* the grass showing where a ball rolled */
+.stone { fill: #57524c; stroke: var(--ink); stroke-width: 2; }
+.snow-drift { fill: #f7f8f5; }
+.stick { fill: none; stroke: #6f4b2c; stroke-width: 5; stroke-linecap: round; }
+.carrot { fill: #e8792b; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.carrot-top { fill: none; stroke: #5f8f3a; stroke-width: 3; stroke-linecap: round; }

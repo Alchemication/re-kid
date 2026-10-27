@@ -128,6 +128,8 @@ NOT_GESTURES = {
 
 ACTS = [
     "guardBowl",
+    "helpSnowman",
+    "greetBoy",
     "fogSniff",
     "wish",
     "sniff",
@@ -157,7 +159,13 @@ ACTS = [
 # (and shown as skipped) when it isn't there.
 ACT_NEEDS = {"puddle": "puddles, after rain", "snail": "a snail, after rain"}
 # What each move needs in the page address.
-ACT_QUERY = {"fly": "&creatures=fly", "bramble": "&props=berries"}
+SNOWMAN = "&season=winter&snowman=built"  # the snowman built, the boy waiting by it (snowman.js)
+ACT_QUERY = {
+    "fly": "&creatures=fly",
+    "bramble": "&props=berries",
+    "helpSnowman": SNOWMAN,
+    "greetBoy": SNOWMAN,
+}
 
 THINGS = [
     "doghouse",
@@ -175,7 +183,11 @@ THINGS = [
     "hen",
     "porcino",
     "agaric",
+    "stones",
+    "stick",
+    "snowman",
 ]
+THING_QUERY = {"stones": SNOWMAN, "stick": SNOWMAN, "snowman": SNOWMAN}
 POOL = {"bowl", "dig", "film", "trap", "tree", "berries", "hen"}  # layout.js PROP_POOL
 
 CRITTERS = {"fly": "fly", "bee": "bee", "spider": "spider"}
@@ -325,7 +337,10 @@ class TestActs:
 
 def open_for_thing(yard: callable, name: str) -> Yard:
     props = f"&props={name}" if name in POOL else ""
-    y = yard(f"{STILL}&flowers=1&mouse-at=0&visitor-at=0&hen-at=0&mushrooms=0{props}")
+    query = THING_QUERY.get(name, "")
+    y = yard(
+        f"{STILL}&flowers=1&mouse-at=0&visitor-at=0&hen-at=0&mushrooms=0{props}{query}"
+    )
     try:
         y.page.wait_for_function(f"Things.ready('{name}')", timeout=20_000)
     except playwright.TimeoutError:
@@ -1436,3 +1451,94 @@ class TestSparrows:
         )  # not awaited: once up, they come back
         y.page.wait_for_function(f"!({self.PECKING})", timeout=1_500)
         y.settled()
+
+
+class TestSnowman:
+    """The snowman in a winter play (snowman.js, boy.js): the boy rolls it and
+    calls Reksio; a tap on the stones or the stick and Reksio brings them for
+    its eyes and arms; his bone for a nose, swapped for a carrot; the boy's
+    cap on its head."""
+
+    BUILT = f"seed=3&still&creatures=&rain=0{SNOWMAN}"
+
+    def test_the_whole_story(self, yard: callable) -> None:
+        y = yard(self.BUILT)
+        y.page.wait_for_function("Things.ready('stones')", timeout=20_000)
+        y.run("yardGame.use('stones')")
+        y.page.wait_for_function("Snowman.has.eyes", timeout=20_000)
+        y.page.wait_for_function("Things.ready('stick') && !Boy.busy", timeout=20_000)
+        y.run("yardGame.use('stick')")
+        y.page.wait_for_function(
+            "Snowman.stage === 'nose' && !Boy.busy", timeout=30_000
+        )
+        y.run("yardGame.use('snowman')")
+        y.page.wait_for_function("Snowman.has.bone", timeout=30_000)
+        y.page.wait_for_function("Snowman.stage === 'done'", timeout=60_000)
+        has = y.page.evaluate("Snowman.has")
+        assert has == {
+            "eyes": True,
+            "arms": True,
+            "bone": False,
+            "carrot": True,
+            "hat": True,
+        }
+        y.settled()
+
+    def test_the_boy_builds_it(self, yard: callable) -> None:
+        y = yard("seed=3&still&creatures=&rain=0&season=winter&snowman=0")
+        y.page.wait_for_function("Boy.out", timeout=5_000)
+        y.page.wait_for_function(
+            "yardGame.trace().includes('snowman built')", timeout=60_000
+        )
+        assert y.page.evaluate("Things.ready('stones') && Things.ready('stick')")
+        y.settled()
+
+    def test_left_alone_he_fetches_the_next_piece(self, yard: callable) -> None:
+        y = yard(self.BUILT)
+        y.page.wait_for_function("Things.ready('stones')", timeout=20_000)
+        y.run("yardGame.act('helpSnowman')")
+        y.page.wait_for_function("Snowman.has.eyes || Snowman.has.arms", timeout=20_000)
+        y.settled()
+
+    def test_cut_short_the_stones_go_back(self, yard: callable) -> None:
+        y = yard(self.BUILT)
+        y.page.wait_for_function("Things.ready('stones')", timeout=20_000)
+        y.start("yardGame.act('helpSnowman')")  # left alone: a tap cuts it short
+        y.page.wait_for_function(
+            "yardGame.trace().includes('fetches for the snowman')", timeout=20_000
+        )
+        y.page.wait_for_timeout(1500)  # digging them out
+        y.page.evaluate("yardGame.walk(Layout.MIN_X + 100)")
+        y.settled()
+        assert y.page.evaluate("!Snowman.has.eyes && Things.ready('stones')")
+
+    def test_at_dusk_the_boy_goes_in(self, yard: callable) -> None:
+        y = yard(self.BUILT)
+        y.page.wait_for_function("Boy.out", timeout=5_000)
+        y.page.evaluate("yardGame.perform('evening now')")
+        y.page.wait_for_function("!Boy.out", timeout=40_000)
+        assert not y.errors, y.errors
+
+    def test_dusk_mid_build_sends_him_in(self, yard: callable) -> None:
+        """Review, 2026-10-26: at dusk the build carried on (a cut-short walk
+        doesn't throw), a ball could stay stuck to his hands, and a walk on
+        a hidden boy never ended, hanging his queue."""
+        y = yard("seed=3&still&creatures=&rain=0&season=winter&snowman=0")
+        y.page.wait_for_function("Boy.out && Boy.x > 600", timeout=20_000)
+        y.page.evaluate("yardGame.perform('evening now')")
+        y.page.wait_for_function("!Boy.out", timeout=40_000)
+        y.page.wait_for_timeout(3000)
+        assert "snowman built" not in y.page.evaluate("yardGame.trace()")
+        assert (
+            y.page.evaluate(
+                "document.getElementById('fx').querySelectorAll('.snowball, .stone, .stick, .carrot, .bone').length"
+            )
+            == 0
+        )
+        assert not y.errors, y.errors
+
+    def test_only_in_winter(self, yard: callable) -> None:
+        y = yard("seed=3&still&creatures=&rain=0&season=summer&snowman=0")
+        y.page.wait_for_timeout(1500)
+        assert not y.page.evaluate("Boy.out")
+        assert not y.page.evaluate("Things.ready('stones') || Things.ready('snowman')")

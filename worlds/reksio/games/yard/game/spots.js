@@ -3,7 +3,7 @@
 // over its thing. Generous on purpose. Every spot looks the same: nothing is
 // a goal. yard.js decides when one lights up; this says where they are.
 
-/* global Layout, Things, Bird, Reksio, Mushrooms */
+/* global Layout, Things, Bird, Reksio, Mushrooms, Snowman */
 /* exported Spots */
 const Spots = (() => {
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -25,9 +25,12 @@ const Spots = (() => {
     hen: () => ({ x: Things.THINGS.hen.at() + 20, r: 100 }), // by the ladder, wherever it leans now
     porcino: () => ({ x: Mushrooms.spotX('porcino'), r: 60 }), // by the nearest porcino
     agaric: () => ({ x: Mushrooms.spotX('agaric'), r: 60 }),
+    stones: () => ({ x: Snowman.spotX('stones'), r: 70 }), // the snowman's, in winter
+    stick: () => ({ x: Snowman.spotX('stick'), r: 70 }),
+    snowman: () => ({ x: Snowman.spotX('snowman'), r: 90 }),
   }
   const MOVING = ['trap', 'hen', 'porcino'] // these spots move (the mouse fed, the ladder moved, a porcino picked)
-  const WAITING = ['trap', 'tree', 'hen', 'porcino', 'agaric'] // hidden until there's something to do there
+  const WAITING = ['trap', 'tree', 'hen', 'porcino', 'agaric', 'stones', 'stick', 'snowman'] // hidden until there's something to do there
   const els = {}
 
   /** Make the spots of the things out this play. */
