@@ -15,6 +15,8 @@
 <script src="../../worlds/reksio/games/yard/game/takes.js"></script>
 <script src="../../worlds/reksio/games/yard/game/music.js"></script>
 <script src="out/manifest.js"></script>
+<script src="../../worlds/reksio/games/yard/game/figure.js"></script>
+<script src="../../worlds/krtek/games/meadow/game/moleart.js"></script>
 <script src="../board/board.js"></script>
 <script>
   // Each piece with what the game plays today (a random take of that part, as
@@ -46,8 +48,9 @@
   Board.mount({
     title: 'Music board',
     worldNote: WORLD_NOTE,
-    lead: 'What the game plays today, and takes made by ElevenLabs Music, levelled to the same loudness. <b>▶</b> plays a take as made, <b>R</b> through the retro recipe the sound effects use (mono, narrower, a little saturated). Mark each <b>keep</b>, <b>maybe</b> or <b>no</b>, with a note on what is right or wrong. Marks stay in this browser; <b>Save picks</b> downloads them for Claude.',
+    lead: 'What the game plays today, and takes made by ElevenLabs Music, levelled to the same loudness. Pick a <b>folder</b> to see only a run\'s new takes. <b>▶</b> plays a take as made, <b>R</b> through the retro recipe the sound effects use (mono, narrower, a little saturated). Mark each <b>keep</b>, <b>maybe</b> or <b>no</b>, with a note on what is right or wrong. Marks stay in this browser; <b>Save picks</b> downloads them for Claude.',
     storageKey: 'music-board-picks',
+    stopCode: () => Music.audition('none'), // fades the take playing, plays nothing new
     saveName: 'music-picks.json',
     nameKey: 'piece',
     volumeLabel: 'Takes',

@@ -4,97 +4,75 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Background music</title>
+<link rel="stylesheet" href="../board/board.css">
 <style>
-  :root { --ink: #1d1914; --paper: #f7f2e7; --card: #fffdf8; --line: #ddd2bd; --accent: #b5652b; --muted: #6d6458; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
-  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 80px; }
-  h1 { font-size: 24px; margin: 0 0 6px; }
-  .lead { color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
-  .lead b { color: var(--ink); }
-  .bar { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 10px 0; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
-  .bar label { color: var(--muted); }
-  button { font: inherit; border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
-  button:hover { border-color: var(--accent); }
-  button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
-  select, input[type=range] { font: inherit; }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
-  .card.playing { border-color: var(--accent); box-shadow: 0 0 0 2px #b5652b33; }
-  .card h2 { font-size: 17px; margin: 0; }
-  .what { color: var(--muted); margin: 0; }
-  .listen { margin: 0; font-size: 14px; }
-  .listen b { color: var(--accent); }
-  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-  .uses { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 13px; color: var(--muted); }
-  textarea { font: inherit; font-size: 13px; width: 100%; min-height: 44px; border: 1px solid var(--line); border-radius: 8px; padding: 6px; resize: vertical; }
-  .verdict button.keep.on { background: #4f7a3a; border-color: #4f7a3a; }
-  .verdict button.maybe.on { background: #c08a2d; border-color: #c08a2d; }
-  .verdict button.no.on { background: #9a3b2c; border-color: #9a3b2c; }
-  .note { font-size: 13px; color: var(--muted); }
-
-  .hero { display: flex; gap: 16px; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 14px 0 18px; position: sticky; top: 8px; z-index: 3; box-shadow: 0 4px 14px #0000000f; }
-  .hero .big { font-size: 34px; width: 46px; text-align: center; }
-  .hero .scene { font-weight: 600; font-size: 17px; }
-  .hero .ask { color: var(--muted); font-size: 14px; }
-  .hero .timeline { display: flex; gap: 3px; margin-top: 6px; }
-  .hero .timeline span { height: 5px; flex: 1; border-radius: 3px; background: var(--line); }
-  .hero .timeline span.done { background: var(--accent); }
+  /* the bed board's own parts, on the shared boards' look (board.css) */
+  .hero { display: flex; gap: 14px; align-items: center; flex: 1; min-width: 260px; }
+  .hero .big { font-size: 28px; width: 38px; text-align: center; }
+  .hero .scene-now { font-weight: 700; }
+  .hero .ask { font-size: 13px; color: #f3ead6; }
+  .hero .timeline { display: flex; gap: 3px; margin-top: 5px; }
+  .hero .timeline span { height: 5px; flex: 1; border-radius: 3px; background: #ffffff33; }
+  .hero .timeline span.done { background: var(--sun); }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); padding: 20px 24px 20px; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+  .card.hidden { display: none; }
+  .card.playing { border-color: var(--ink); box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--sun); }
+  .card.keep { border-color: var(--keep); background: #f3faea; }
+  .card.maybe { border-color: var(--maybe); background: #fff7e6; }
+  .card.no { border-color: var(--no); opacity: 0.6; }
   .card .top { display: flex; align-items: center; gap: 10px; }
   .card .em { font-size: 26px; }
-  .card .play { font-size: 16px; padding: 8px 14px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { font-size: 13px; padding: 4px 10px; border-radius: 999px; }
-  .chip.on { background: #e9dcc5; border-color: var(--accent); color: var(--ink); }
-  .q { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .verdict button { flex: 1; }
-  .verdict .keep.on { background: #4f7a3a; border-color: #4f7a3a; color: #fff; }
-  .verdict .maybe.on { background: #c08a2d; border-color: #c08a2d; color: #fff; }
-  .verdict .no.on { background: #9a3b2c; border-color: #9a3b2c; color: #fff; }
-  .footer { margin-top: 22px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-  .footer .count { color: var(--muted); }
-  details { margin-top: 18px; color: var(--muted); }
-  details summary { cursor: pointer; }
+  .card h2 { margin: 0; font: 700 20px/1.2 var(--hand); }
+  .card .what { color: var(--soft); margin: 0; }
+  .card .listen { align-self: flex-start; display: inline-flex; gap: 8px; align-items: center; border: 0; border-radius: 999px; background: var(--mole); color: #fff; font-weight: 700; padding: 8px 16px 8px 10px; }
+  .card .listen svg { width: 16px; height: 16px; }
+  .card .listen::after { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--nose); }
+  .card .verdict button { padding: 5px 0; }
+  .card .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .card .chip, .manual .chip { font-size: 13px; padding: 3px 10px; border-radius: 999px; border: 2px solid var(--line); background: #fff; color: var(--ink); font-weight: 600; }
+  .card .chip.on, .manual .chip.on { background: var(--ochre); border-color: var(--wood-dk); }
+  .card textarea { width: 100%; font-size: 13px; border: 2px solid var(--line); border-radius: 8px; padding: 4px 6px; min-height: 44px; resize: vertical; }
+  .q { font-size: 13px; color: var(--soft); }
+  .footer { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 0 24px; color: var(--soft); }
+  details.manual { margin: 18px 24px 60px; color: var(--soft); }
+  details.manual summary { cursor: pointer; }
+  @media (max-width: 760px) { .grid { padding: 16px; } .footer { padding: 0 16px; } details.manual { margin: 18px 16px 60px; } }
 </style>
 </head>
 <body>
-<main>
-  <h1>Background music for the yard</h1>
-  <p class="lead">Today the yard is silent between music clips. These are ideas for <b>quiet music that's always there underneath</b>, changing with what's happening. Press <b>▶</b> on one: you'll hear 45 seconds of a pretend day, with what's happening shown below. Then say if you like it, and what it's good for. Ask yourself too: <b>does it belong to Reksio's yard</b> (<code>worlds/reksio/MUSIC_DIRECTION.md</code>), or could it be any cartoon's?</p>
-
-  <div class="hero" id="hero">
-    <div class="big" id="heroEmoji">🎧</div>
-    <div style="flex:1">
-      <div class="scene" id="heroScene">Press ▶ on any card below</div>
-      <div class="ask" id="heroAsk">Each one plays a short pretend day: morning, playing, quiet, rain, evening, a nap.</div>
-      <div class="timeline" id="timeline"></div>
-    </div>
-    <label class="note" title="As the game plays it: the old-film sound the sound effects have, a slight tape wobble, notes a little loose"><input id="old" type="checkbox" checked> 🎞 Old film sound</label>
-    <label class="note">🔈 <input id="volume" type="range" min="0" max="1" step="0.05" value="0.4"> 🔊</label>
-    <button id="stop">■ Stop</button>
-  </div>
-
-  <div class="grid" id="cards"></div>
-
-  <div class="footer">
-    <span class="count" id="count">0 rated</span>
-    <button id="save">⬇ Download my picks</button>
-    <span class="note">then put <b>bed-picks.json</b> in <code>experiments/music/</code>, or just tell Claude.</span>
-  </div>
-
-  <details>
-    <summary>Try it by hand (optional)</summary>
-    <p>While one plays, pick what's happening in the yard, and hear it change.</p>
-    <div class="chips" id="manual"></div>
-    <p><button id="touch">✨ He does something new</button> <button id="take">🎵 A recorded clip comes in</button></p>
-    <p class="note">The recorded clips are in their own keys, so a jump between this music and a clip is expected for now; the next step ties them together.</p>
-  </details>
-</main>
 
 <script src="../../worlds/reksio/games/yard/game/samples.js"></script>
 <script src="../../worlds/reksio/games/yard/game/bed.js"></script>
 <script src="../../worlds/reksio/games/yard/game/beds.js"></script>
+<script src="../../worlds/reksio/games/yard/game/figure.js"></script>
+<script src="../../worlds/krtek/games/meadow/game/moleart.js"></script>
+<script src="../board/board.js"></script>
 <script>
+// The page, on the boards' shared frame (board.js): the scene, a bar with
+// what plays now, the folders, then a card for each bed.
+const frame = Board.frame({
+  title: 'Bed board',
+  lead: 'Quiet music that is always there underneath, changing with what happens. Press <b>▶ Listen</b> on a card: 45 seconds of a pretend day, with what happens shown in the bar. Pick a <b>folder</b> to see only the new beds. Ask yourself: <b>does it belong to Reksio\'s yard</b> (<code>worlds/reksio/MUSIC_DIRECTION.md</code>), or could it be any cartoon\'s?',
+})
+frame.bar.innerHTML = `
+  <div class="hero"><div class="big" id="heroEmoji">🎧</div>
+    <div style="flex:1"><div class="scene-now" id="heroScene">Press ▶ on any card below</div>
+      <div class="ask" id="heroAsk">Each one plays a short pretend day: morning, playing, quiet, rain, evening, a nap.</div>
+      <div class="timeline" id="timeline"></div></div></div>
+  <label title="As the game plays it: the yard's old-film sound (beds.js SOUND), notes a little loose"><input id="old" type="checkbox" checked> 🎞 Old film sound</label>
+  <label>Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="0.4"></label>
+  <button class="btn" id="stop" title="Stop (Esc)">■ Stop</button>
+  <span class="progress" id="count"></span>
+  <button class="btn primary" id="save" title="Download the picks for Claude">Save picks</button>`
+frame.main.innerHTML = `<div class="grid" id="cards"></div>
+  <div class="footer">Saving downloads <b>bed-picks.json</b>: put it in <code>experiments/music/</code>, or just tell Claude.</div>
+  <details class="manual"><summary>Try it by hand (optional)</summary>
+    <p>While one plays, pick what's happening in the yard, and hear it change.</p>
+    <div class="chips" id="manual"></div>
+    <p><button class="btn" id="touch">✨ He does something new</button> <button class="btn" id="take">🎵 A recorded clip comes in</button></p>
+    <p>The recorded clips are in their own keys, so a jump between this music and a clip is expected for now.</p></details>`
+
 const TONIC = 58 // B-flat3, the touches' key
 const SCALE = [0, 2, 4, 5, 7, 9, 11]
 const deg = (s) => TONIC + 12 * Math.floor(s / 7) + SCALE[((s % 7) + 7) % 7]
@@ -223,7 +201,7 @@ const BEDS = [
   },
   // winter candidates (2026-10-27, made while Adam slept): a season's own bed
   {
-    id: 'snowfall', name: 'Snowfall (winter)', emoji: '❄️', bpm: 66,
+    id: 'snowfall', name: 'Snowfall (winter)', emoji: '❄️', bpm: 66, folder: '27 Oct: winter beds', made: '2026-10-27',
     what: 'Winter: high bell notes drifting down a chord at odd moments, over a soft plucked root. Slow and sparse, like snow coming down.',
     bar(m, e, n, rnd) {
       const c = triad(m.chords[n % m.chords.length]), out = []
@@ -236,7 +214,7 @@ const BEDS = [
     },
   },
   {
-    id: 'snowplay', name: 'Snow play (winter)', emoji: '⛄', bpm: 92,
+    id: 'snowplay', name: 'Snow play (winter)', emoji: '⛄', bpm: 92, folder: '27 Oct: winter beds', made: '2026-10-27',
     what: 'Winter, while the child plays: a light plucked bounce on the beat, bells skittering on top now and then.',
     bar(m, e, n, rnd) {
       const c = triad(m.chords[n % m.chords.length]), out = []
@@ -293,21 +271,28 @@ function play(inst, midi, t, vol, out) {
   src.connect(g).connect(out)
   src.start(Math.max(t, ctx.currentTime))
 }
-// the old-film sound, as the game's bed has it (music.js RETRO, WOW)
+// the old-film sound, as the game's bed has it (beds.js SOUND, played by ensemble.js)
 let bedOut = null, retroIn = null
 function chain() {
+  const s = YardBeds.SOUND
   bedOut = ctx.createGain()
-  const low = ctx.createBiquadFilter(); low.type = 'highpass'; low.frequency.value = 120
-  const high = ctx.createBiquadFilter(); high.type = 'lowpass'; high.frequency.value = 5500
+  const vol = ctx.createGain(); vol.gain.value = s.volume / 0.9 // as quiet against the other beds as in the game
+  const low = ctx.createBiquadFilter(); low.type = 'highpass'; low.frequency.value = s.highpass
+  const high = ctx.createBiquadFilter(); high.type = 'lowpass'; high.frequency.value = s.lowpass
   const shaper = ctx.createWaveShaper(), curve = new Float32Array(1024)
-  for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh((i / 511.5 - 1) * 1.6) / Math.tanh(1.6)
+  for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh((i / 511.5 - 1) * (1 + s.saturation)) / Math.tanh(1 + s.saturation)
   shaper.curve = curve
   const wow = ctx.createDelay(0.05); wow.delayTime.value = 0.012
-  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.45
-  const depth = ctx.createGain(); depth.gain.value = 0.0018
+  const lfo = ctx.createOscillator(); lfo.frequency.value = s.wow.hz
+  const depth = ctx.createGain(); depth.gain.value = s.wow.depth
   lfo.connect(depth).connect(wow.delayTime); lfo.start()
-  low.connect(high).connect(shaper).connect(wow).connect(master)
-  retroIn = low
+  if (s.hiss) {
+    const noise = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate), d = noise.getChannelData(0)
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * s.hiss
+    const h = ctx.createBufferSource(); h.buffer = noise; h.loop = true; h.connect(low); h.start()
+  }
+  vol.connect(low).connect(high).connect(shaper).connect(wow).connect(master)
+  retroIn = vol
   route()
 }
 const old = () => $('old').checked
@@ -321,19 +306,22 @@ function stream(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 10
 const now = { mood: 'day', energy: 0.5 } // what's happening in the pretend yard
 let playing = null // { bed, card, gain, timer, tour: [timeouts] }
 
-function stopAll() {
+// one thing plays at a time, on this board and the others (Board.claim)
+function stopBed() {
   if (!playing) return
+  Board.release(stopBed)
   clearInterval(playing.timer)
   playing.tour.forEach(clearTimeout)
   playing.gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.15)
   playing.card.classList.remove('playing')
-  playing.card.querySelector('.play').textContent = '▶ Listen'
+  playing.card.querySelector('.listen').innerHTML = LISTEN
   playing = null
   showScene({ emoji: '🎧', scene: 'Stopped', ask: 'Press ▶ on any card to listen.' }, -1)
 }
 
 function startBed(bed, card, tour = true) {
-  stopAll()
+  stopBed()
+  Board.claim(stopBed)
   const gain = ctx.createGain()
   gain.connect(bedOut)
   const rnd = stream(7)
@@ -373,12 +361,12 @@ function startBed(bed, card, tour = true) {
   tick()
   playing.timer = setInterval(tick, 150)
   card.classList.add('playing')
-  card.querySelector('.play').textContent = '■ Stop'
+  card.querySelector('.listen').textContent = '■ Stop'
 }
 
 function finish() {
   const card = playing?.card
-  stopAll()
+  stopBed()
   showScene({ emoji: '👂', scene: 'That was the whole day', ask: 'Now rate it on its card: do you like it, and what is it good for?' }, TOUR.length)
   card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
@@ -436,27 +424,44 @@ const keep = () => {
   $('count').textContent = `${Object.values(picks).filter((p) => p.verdict).length} of ${BEDS.length} rated`
 }
 const VERDICTS = [['keep', '👍 Like it'], ['maybe', '🤷 Not sure'], ['no', '👎 No']]
+const LISTEN = '<svg viewBox="0 0 20 20"><path d="M6 3.5v13l11-6.5z" fill="currentColor"/></svg> Listen'
+const view = (() => { try { return JSON.parse(localStorage.getItem(`${KEY}-view`)) || { folder: '' } } catch { return { folder: '' } } })()
+const cards = [] // { card, bed, p }
+function folders() {
+  Board.folderChips(frame.folders, cards.filter((c) => !c.bed.game).map((c) => ({ folder: c.bed.folder, made: c.bed.made, unmarked: !c.p.verdict })), view.folder, (name) => {
+    view.folder = name
+    try { localStorage.setItem(`${KEY}-view`, JSON.stringify(view)) } catch { /* private window: only for this visit */ }
+    folders()
+  })
+  // the game's own bed is always there, to compare with
+  for (const c of cards) c.card.classList.toggle('hidden', !c.bed.game && !!view.folder && (c.bed.folder || Board.EARLIER) !== view.folder)
+}
 
 for (const bed of BEDS) {
   const p = (picks[bed.id] ??= { verdict: null, uses: [], note: '' })
   const card = document.createElement('section')
   card.className = 'card'
+  cards.push({ card, bed, p })
   card.innerHTML = `
     <div class="top"><span class="em">${bed.emoji}</span><h2>${bed.name}</h2></div>
     <p class="what">${bed.what}</p>
-    <button class="play">▶ Listen</button>
+    <button class="listen">${LISTEN}</button>
     <div class="row verdict">${VERDICTS.map(([v, label]) => `<button class="${v}" data-v="${v}">${label}</button>`).join('')}</div>
     <div class="q">Good for:</div>
     <div class="chips">${SCENES.map(([v, label]) => `<button class="chip" data-use="${v}">${label}</button>`).join('')}</div>
     <textarea placeholder="Anything to add? (optional)"></textarea>`
-  card.querySelector('.play').onclick = async () => {
+  card.querySelector('.listen').onclick = async () => {
     await prepare()
-    if (playing?.bed === bed) return stopAll()
+    if (playing?.bed === bed) return Board.stopAll()
     startBed(bed, card)
   }
   const verdicts = card.querySelectorAll('.verdict button')
-  const showVerdict = () => verdicts.forEach((x) => x.classList.toggle('on', p.verdict === x.dataset.v))
-  verdicts.forEach((b) => (b.onclick = () => { p.verdict = p.verdict === b.dataset.v ? null : b.dataset.v; showVerdict(); keep() }))
+  const showVerdict = () => {
+    verdicts.forEach((x) => x.classList.toggle('on', p.verdict === x.dataset.v))
+    card.classList.remove('keep', 'maybe', 'no')
+    if (p.verdict) card.classList.add(p.verdict)
+  }
+  verdicts.forEach((b) => (b.onclick = () => { p.verdict = p.verdict === b.dataset.v ? null : b.dataset.v; showVerdict(); keep(); folders() }))
   showVerdict()
   card.querySelectorAll('.chip').forEach((c) => {
     c.classList.toggle('on', p.uses.includes(c.dataset.use))
@@ -487,7 +492,9 @@ for (const [v, label] of SCENES) {
   }
   $('manual').appendChild(b)
 }
-$('stop').onclick = stopAll
+$('stop').onclick = Board.stopAll
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !e.target.matches('textarea')) Board.stopAll() })
+folders()
 $('old').onchange = () => bedOut && route()
 $('volume').oninput = () => { if (master) master.gain.setTargetAtTime(Number($('volume').value), ctx.currentTime, 0.05) }
 $('touch').onclick = touch

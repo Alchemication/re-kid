@@ -10,28 +10,33 @@
 <script src="../../worlds/reksio/games/yard/game/debug.js"></script>
 <script src="../../worlds/reksio/games/yard/game/sound.js"></script>
 <script src="out/manifest.js"></script>
+<script src="../../worlds/reksio/games/yard/game/figure.js"></script>
+<script src="../../worlds/krtek/games/meadow/game/moleart.js"></script>
 <script src="../board/board.js"></script>
 <script>
   // Each sound with what the game plays today (the yard's synth, for Reksio's
   // sounds) and the takes a model made. Picks keep the shape adopt.py reads.
+  const repeats = [] // the ×3's waiting plays, cut when something else plays
   const items = Object.entries(window.CANDIDATES || {}).map(([name, s]) => {
     const world = s.world || 'reksio'
     const synth = () => { Sound.ensure(); Sound[name]() }
+    const thrice = () => { synth(); repeats.push(setTimeout(synth, 900), setTimeout(synth, 1800)) } // a page of its own: plain timers are fine here
     const silent = (s.for || '').includes('Silent')
     const yard = world === 'reksio' && typeof Sound !== 'undefined' && typeof Sound[name] === 'function'
     return {
       name, world, for: s.for, candidates: s.candidates,
       now: yard ? [
         { label: '▶ Now (synth)', run: synth, disabled: silent },
-        { label: '▶ Now ×3', run: () => { synth(); setTimeout(synth, 900); setTimeout(synth, 1800) }, disabled: silent }, // a page of its own: plain timers are fine here
+        { label: '▶ Now ×3', run: thrice, disabled: silent },
       ] : [],
       nowNote: silent ? 'silent in the game now' : yard ? 'what the game plays today' : 'not in a game yet',
     }
   })
   Board.mount({
     title: 'Sound board',
-    lead: 'Each sound, and takes made by a model. Play one, then mark it <b>keep</b>, <b>maybe</b> or <b>no</b>, with a note if something is right or wrong. Marks stay in this browser; <b>Save picks</b> downloads them for Claude.',
+    lead: 'Each sound, and takes made by a model. Pick a <b>folder</b> to see only a run\'s new takes. Play one, then mark it <b>keep</b>, <b>maybe</b> or <b>no</b>, with a note if something is right or wrong. Marks stay in this browser; <b>Save picks</b> downloads them for Claude.',
     storageKey: 'sound-board-picks',
+    stopCode: () => repeats.splice(0).forEach(clearTimeout),
     saveName: 'picks.json',
     nameKey: 'sound',
     volumeLabel: 'Volume',

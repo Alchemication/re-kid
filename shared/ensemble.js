@@ -8,40 +8,58 @@
 /* global Clock, Debug */
 /* exported Ensemble */
 const Ensemble = (() => {
-  const BED_VOLUME = 0.9 // the bed against the takes and touches (its notes are soft already)
-  // the retro recipe the effects are packed with (config.EFFECT_*), live on the bed
-  const RETRO = { highpass: 120, lowpass: 5500, saturation: 0.6 }
-  const WOW = { hz: 0.45, depth: 0.0018, delay: 0.012 } // tape wobble: a slow drift of a hair of pitch
+  // How a bed sounds, unless the game's score says otherwise (bed.js `sound`: each world its own):
+  // its level against the takes and touches (its notes are soft already); the retro recipe the
+  // effects are packed with (config.EFFECT_*), live; a tape wobble, a slow drift of a hair of
+  // pitch; and tape hiss under it (none here).
+  const SOUND = { volume: 0.9, highpass: 120, lowpass: 5500, saturation: 0.6, wow: { hz: 0.45, depth: 0.0018 }, hiss: 0 }
+  const WOW_DELAY = 0.012
+  const HISS_S = 2 // the hiss loops a noise this long
   const AHEAD_S = 0.6 // bars are scheduled this far ahead on the audio clock
   const BACK_S = 1.6 // after a take, the bed comes back over about this long
   const TICK_MS = 200 // how often it schedules more bars
 
   const bytes = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer
 
+  /** A loop of quiet noise, hiss off old tape, into to; its own stream, drawn once. */
+  function hissInto(ctx, to, level) {
+    const random = Debug.random('bed-hiss')
+    const buffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * HISS_S), ctx.sampleRate)
+    const data = buffer.getChannelData(0)
+    for (let i = 0; i < data.length; i++) data[i] = (random() * 2 - 1) * level
+    const src = ctx.createBufferSource()
+    src.buffer = buffer
+    src.loop = true
+    src.connect(to)
+    src.start()
+    return src
+  }
+
   /** The bed's bus: its gain, then the retro recipe and a tape wobble, into out. */
-  function bedBus(ctx, out) {
+  function bedBus(ctx, out, s) {
     const gain = ctx.createGain()
-    gain.gain.value = BED_VOLUME
+    gain.gain.value = s.volume
     const low = ctx.createBiquadFilter()
     low.type = 'highpass'
-    low.frequency.value = RETRO.highpass
+    low.frequency.value = s.highpass
     const high = ctx.createBiquadFilter()
     high.type = 'lowpass'
-    high.frequency.value = RETRO.lowpass
+    high.frequency.value = s.lowpass
     const shaper = ctx.createWaveShaper()
     const curve = new Float32Array(1024)
-    for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh((i / 511.5 - 1) * (1 + RETRO.saturation)) / Math.tanh(1 + RETRO.saturation)
+    for (let i = 0; i < curve.length; i++) curve[i] = Math.tanh((i / 511.5 - 1) * (1 + s.saturation)) / Math.tanh(1 + s.saturation)
     shaper.curve = curve
     const wow = ctx.createDelay(0.05)
-    wow.delayTime.value = WOW.delay
+    wow.delayTime.value = WOW_DELAY
     const lfo = ctx.createOscillator()
-    lfo.frequency.value = WOW.hz
+    lfo.frequency.value = s.wow.hz
     const depth = ctx.createGain()
-    depth.gain.value = WOW.depth
+    depth.gain.value = s.wow.depth
     lfo.connect(depth).connect(wow.delayTime)
     lfo.start()
     gain.connect(low).connect(high).connect(shaper).connect(wow).connect(out)
-    return { gain, lfo }
+    const hiss = s.hiss ? hissInto(ctx, gain, s.hiss) : null // under the bed, so it steps back and stops with it
+    return { gain, lfo, hiss }
   }
 
   /**
@@ -51,6 +69,7 @@ const Ensemble = (() => {
    * goes; away(t)/back() around a take; stop() for good (the lullaby).
    */
   function bedOf({ ctx, out, play, loaded, isReady }, score, { quiet = () => false, stream = 'music-bed' } = {}) {
+    const sound = { ...SOUND, ...score.SOUND }
     const b = { on: false, mood: Object.keys(score.MOODS)[0], energy: 0.3, style: null, playing: false, n: 0, next: 0, bus: null, random: null, timer: () => {} }
 
     function bars() {
@@ -81,7 +100,7 @@ const Ensemble = (() => {
           return
         }
         b.random ??= Debug.random(stream)
-        b.bus = bedBus(ctx, out)
+        b.bus = bedBus(ctx, out, sound)
         if (quiet()) this.away(ctx.currentTime)
         b.timer = Clock.every(TICK_MS, bars)
       },
@@ -95,7 +114,7 @@ const Ensemble = (() => {
       },
       /** No take now: the bed comes back. */
       back() {
-        if (b.bus && b.on) b.bus.gain.gain.setTargetAtTime(BED_VOLUME, ctx.currentTime, BACK_S / 3)
+        if (b.bus && b.on) b.bus.gain.gain.setTargetAtTime(sound.volume, ctx.currentTime, BACK_S / 3)
       },
       /** The bed off: its bars stop, its sound fades, its wobble stops; it may start again. */
       stop() {
@@ -105,6 +124,7 @@ const Ensemble = (() => {
         bus?.gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.3)
         Clock.after(1500, () => {
           bus?.lfo.stop()
+          bus?.hiss?.stop()
           bus?.gain.disconnect()
         })
         b.on = false

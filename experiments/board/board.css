@@ -1,20 +1,25 @@
-/* Shared by the sound and music boards: a meadow in Krtek's colours
-   (sampled from the films: worlds/krtek/world.yaml, aesthetics). */
+/* Shared by the sound, music and bed boards: Reksio's yard and Krtek's
+   meadow side by side. Reksio's colours are figure.js's (his ochre patch,
+   ink, the yard's fence wood); Krtek's are sampled from his films
+   (worlds/krtek/world.yaml, aesthetics): the meadow, the tulips, his nose. */
 :root {
   --sky: #9cc0f3;
-  --sky-hi: #d7e7fb;
+  --sky-hi: #e3eefb;
   --meadow: #80b068;
   --meadow-dk: #4d6d1f;
   --grass: #a9cf7c;
   --earth: #38250a;
   --earth-mid: #6e4a24;
   --mole: #15140f;
-  --nose: #d8322b;
+  --nose: #e0442c;
   --tulip: #e0453a;
+  --ochre: #d29e5a;
+  --wood: #c99a5b;
+  --wood-dk: #6b4a26;
   --sun: #e7a33b;
   --paper: #fbf6e9;
   --card: #fffdf6;
-  --ink: #1d1a14;
+  --ink: #1d1914;
   --soft: #6a604f;
   --line: #e4dac3;
   --keep: #3f7d22;
@@ -24,37 +29,58 @@
   --round: ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html { scroll-padding-top: 120px; }
+html { scroll-padding-top: 130px; }
 body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.45 var(--round); }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 button:disabled { opacity: 0.4; cursor: default; }
 :focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 
-/* The header: sky, a painted meadow, tulips, and the mole in his molehill */
-.sky {
-  position: relative; overflow: hidden; padding: 22px 24px 64px;
+/* The scene: the yard (fence, doghouse, Reksio) on the left, the meadow (tulips, molehill, Krtek) on the right */
+.scene {
+  position: relative; overflow: hidden; min-height: 210px; padding: 22px 24px 110px;
   background:
-    radial-gradient(60px 22px at 18% 30%, #fff8 60%, transparent 62%),
-    radial-gradient(90px 26px at 24% 34%, #fff7 60%, transparent 62%),
-    radial-gradient(70px 20px at 70% 22%, #fff7 60%, transparent 62%),
-    linear-gradient(var(--sky-hi), var(--sky) 80%);
+    radial-gradient(60px 22px at 42% 26%, #fff9 60%, transparent 62%),
+    radial-gradient(90px 26px at 48% 30%, #fff8 60%, transparent 62%),
+    radial-gradient(70px 20px at 70% 18%, #fff8 60%, transparent 62%),
+    linear-gradient(var(--sky-hi), var(--sky) 85%);
 }
-.sky h1 { margin: 0; font: 700 34px/1.1 var(--hand); color: var(--mole); letter-spacing: 0.5px; }
-.sky h1 .dot { color: var(--nose); }
-.sky .lead { margin: 6px 0 0; max-width: 62ch; color: #24324a; }
-.sky .meadow { position: absolute; left: 0; right: 0; bottom: 0; height: 56px; width: 100%; }
-.sky .mole { position: absolute; right: 4%; bottom: 6px; width: 120px; height: 100px; }
-.mole .him { transform: translateY(22px); transition: transform 0.35s cubic-bezier(.3,1.6,.5,1); }
-body.playing .mole .him { transform: translateY(0); }
-body.playing .mole .hair { animation: wiggle 0.5s ease-in-out infinite alternate; transform-origin: 60px 30px; }
-@keyframes wiggle { to { transform: rotate(6deg); } }
-@media (prefers-reduced-motion: reduce) { .mole .him, .mole .hair { transition: none; animation: none; } }
+.scene .words { position: relative; z-index: 2; max-width: 64ch; margin: 0 auto; text-align: center; }
+.scene h1 { margin: 0; font: 700 36px/1.1 var(--hand); color: var(--mole); letter-spacing: 0.5px; }
+.scene h1 .dot { color: var(--nose); }
+.scene .lead { margin: 6px auto 0; color: #24324a; background: #ffffffa8; border-radius: 12px; padding: 6px 12px; display: inline-block; text-align: left; }
+.scene .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 96px; width: 100%; }
+.scene .cast { position: absolute; bottom: 4px; pointer-events: none; overflow: visible; }
+.cast.dog { left: max(2%, 12px); height: 190px; width: 125px; }
+.cast.mole { right: max(5%, 12px); height: 130px; width: 128px; }
+body.playing .cast > g { animation: bob 0.45s ease-in-out infinite alternate; }
+body.playing .cast.mole > g { animation-delay: 0.22s; }
+@keyframes bob { to { translate: 0 -6px; } }
+@media (prefers-reduced-motion: reduce) { body.playing .cast > g { animation: none; } }
+@media (max-width: 760px) { .scene { padding: 16px 16px 130px; } .scene h1 { font-size: 28px; } .cast.dog { height: 140px; width: 92px; } .cast.mole { height: 96px; width: 94px; } }
+
+/* The folders: each generation run, newest first; a click shows only its takes */
+.folders {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 24px;
+  background: #f3ecda; border-bottom: 2px solid var(--line);
+}
+.folders .label { font: 700 12px var(--round); text-transform: uppercase; letter-spacing: 1px; color: var(--soft); margin-right: 4px; }
+.folder {
+  display: inline-flex; gap: 8px; align-items: baseline; border: 2px solid var(--line); background: var(--card);
+  border-radius: 10px 10px 10px 2px; padding: 4px 10px; font-weight: 600;
+}
+.folder .n { font-size: 12px; color: var(--soft); font-weight: 500; }
+.folder.fresh .n { color: var(--nose); font-weight: 700; }
+.folder.old .n { color: var(--soft); font-weight: 500; }
+.folder[aria-pressed=true] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.folder[aria-pressed=true] .n { color: var(--ochre); }
+@media (max-width: 760px) { .folders { padding: 10px 16px; } }
 
 /* The bar: worlds, filters, volume, progress, save */
 .bar {
   position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
-  padding: 10px 24px; background: var(--meadow-dk); color: #fff; box-shadow: 0 2px 0 var(--earth);
+  padding: 10px 24px; color: #fff; box-shadow: 0 2px 0 var(--earth);
+  background: linear-gradient(90deg, var(--wood-dk), #4a3a1c 45%, var(--meadow-dk));
 }
 .bar label { display: flex; gap: 6px; align-items: center; font-size: 14px; }
 .bar select { border-radius: 8px; border: 0; padding: 4px 6px; color: var(--ink); }
@@ -78,14 +104,14 @@ body.playing .mole .hair { animation: wiggle 0.5s ease-in-out infinite alternate
 .btn.primary { background: var(--sun); border-color: var(--sun); color: var(--mole); position: relative; }
 .btn.primary.unsaved::after {
   content: ""; position: absolute; top: -4px; right: -4px; width: 12px; height: 12px; border-radius: 50%;
-  background: var(--nose); border: 2px solid var(--meadow-dk);
+  background: var(--nose); border: 2px solid var(--ink);
 }
 .keys { font-size: 12px; color: #e9f3dd; }
 .keys kbd { font: 600 11px var(--round); background: #ffffff22; border-radius: 4px; padding: 1px 5px; }
 
 /* Layout: the list of sounds on the left, the board on the right */
 .layout { display: grid; grid-template-columns: 220px 1fr; gap: 24px; padding: 20px 24px 60px; }
-@media (max-width: 760px) { .layout { grid-template-columns: 1fr; padding: 16px; } nav.list { display: none; } .sky .mole { width: 84px; height: 70px; } }
+@media (max-width: 760px) { .layout { grid-template-columns: 1fr; padding: 16px; } nav.list { display: none; } }
 nav.list { position: sticky; top: 70px; align-self: start; max-height: calc(100vh - 90px); overflow: auto; }
 nav.list a {
   display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; padding: 5px 8px;
@@ -95,13 +121,15 @@ nav.list a:hover { background: #efe6d0; }
 nav.list a.done { color: var(--soft); }
 nav.list a .n { font-size: 12px; color: var(--soft); }
 .dot-world { width: 10px; height: 10px; border-radius: 50%; background: var(--meadow); }
-.dot-world.reksio { background: #b07a3c; } .dot-world.krtek { background: var(--mole); box-shadow: 3px 0 0 -1px var(--nose); }
+.dot-world.reksio { background: var(--ochre); box-shadow: inset 0 0 0 2px #f6f8f6; outline: 1.5px solid var(--ink); } .dot-world.krtek { background: var(--mole); box-shadow: 3px 0 0 -1px var(--nose); }
 
 /* One sound or piece */
 section.item { margin: 0 0 34px; }
 .item > header { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; border-bottom: 3px dotted var(--earth-mid); padding-bottom: 6px; }
 .item h2 { margin: 0; font: 700 24px/1.2 var(--hand); }
-.item .world { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--soft); }
+.item .world { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--soft); border-radius: 999px; padding: 1px 8px; background: #efe6d0; }
+.item .world.reksio { background: var(--ochre); color: var(--ink); }
+.item .world.krtek { background: var(--mole); color: #fff; box-shadow: inset -6px 0 0 -3px var(--nose); }
 .item .count { margin-left: auto; font-size: 13px; color: var(--soft); }
 .item .for { margin: 6px 0 10px; color: var(--soft); max-width: 80ch; }
 .item .world-note { border-left: 3px solid var(--line); padding-left: 8px; }
@@ -153,4 +181,4 @@ body.unmarked .take.keep, body.unmarked .take.maybe, body.unmarked .take.no { di
 .bar .btn:not(.primary) { color: var(--ink); }
 .take .plays { display: flex; gap: 6px; align-items: center; }
 .take .label b { white-space: nowrap; }
-@media (max-width: 760px) { .bar { position: static; padding: 10px 16px; } .bar .keys { display: none; } .sky { padding: 18px 16px 60px; } }
+@media (max-width: 760px) { .bar { position: static; padding: 10px 16px; } .bar .keys { display: none; } }

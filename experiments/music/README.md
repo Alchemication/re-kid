@@ -13,7 +13,9 @@ Outputs (`out/`) are not committed.
   retro recipe; run after each `generate.py`.
 - `board.html` — open from disk; ▶ plays a take as made, R retro, "Today"
   plays a random take of that part from the game (`Music.audition`); mark
-  keep/maybe/no, Save picks. Built on `../board/`, shared with the sound board.
+  keep/maybe/no, Save picks. Built on `../board/`, shared with the sound and
+  bed boards (folders: each `generate.py` run under its `--folder` name;
+  one thing playing at a time across the boards).
 - `picks.json` — Adam's latest verdicts. Each world's card on the board says
   what its music should be (from `worlds/<id>/MUSIC_DIRECTION.md`) and asks
   whether a take belongs to that world; a world other than Reksio gets a
@@ -27,8 +29,8 @@ Outputs (`out/`) are not committed.
   from the open `sound` claims in `world.yaml`, about 15 minutes. Answers stay
   in the browser; "Download answers" saves `listen-answers.json` for Claude,
   who turns them into `observed_by: adam` claims.
-- `adopt.py` — the keeps into each world's game (`tunes/`, `tunes.yaml`;
-  `--world`, `--also` for a maybe); then `main.py tunes <world> <game>`.
+- `adopt.py` — the keeps into one world's game (`tunes/`, `tunes.yaml`;
+  `--world`, `--also` for a maybe, `--skip`); then `main.py tunes <world> <game>`.
   Procedure: the `new-music` skill.
 - `bed.html` — the music bed board (2026-10-21): eight beds of quiet
   music under the yard, played live from the yard's samples in B-flat,

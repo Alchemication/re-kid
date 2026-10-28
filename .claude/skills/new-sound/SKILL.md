@@ -15,7 +15,7 @@ sound" to takes playing in the game. Written from the first run (2026-10-12:
 | What to ask for: each sound, what it is for, length, wordings | `experiments/sound/sounds.py` |
 | Generate takes (ElevenLabs, calls in parallel) | `experiments/sound/generate_eleven.py` (key: `ELEVENLABS_API_KEY` in `.env`, never in chat or git) |
 | Pick by ear | `experiments/sound/board.html` (Adam); his verdicts end in `picks.json` |
-| Bring the keeps into the game | `experiments/sound/adopt.py` → `games/<game>/effects/`, `effects.yaml` |
+| Bring the keeps into the game | `experiments/sound/adopt.py <sound> ...` → `games/<game>/effects/`, `effects.yaml` (only the sounds named, only the game's world's) |
 | The retro recipe, pack | `main.py effects <world> [game]` → `game/effects.js` (`config.EFFECT_*`) |
 | How the game plays them | `sound.js` `recorded()`: a random take, never twice running, 0.94–1.06 speed, one take of a sound at a time; a sound marked `steady: true` in `effects.yaml` (a thing that always sounds the same: the cuckoo clock) has one take, always played at its own speed; one marked `overlaps: true` (called quicker than its takes last: the boy's pats) plays every call, over the last |
 
@@ -47,6 +47,9 @@ the tools and reads what the files measure, but every keep is Adam's.
   length and where their notes start (`librosa` onsets, a lead) and fit
   that code to them. Takes come padded to the length asked for, and only
   their start is trimmed, so a 0.8 s take blocks the next call for 0.8 s.
+- A sound belongs to one world (`sounds.py` `world`, Reksio's if unset)
+  and is never shared with another (`docs/DECISIONS.md`); `adopt.py`
+  refuses another world's sound.
 - Original audio is never used or committed (the barks are the one
   exception). Generated takes are ours and are committed.
 
@@ -84,7 +87,8 @@ TAKES=6 python3 generate_eleven.py <sound> ...         # more of a sound
 
 Tell Adam what to listen for, and how many keeps are enough: **2–3 per
 sound**, not every take. On the board: **reload** (it reads the list when it
-opens), tick "Only unmarked", choose the source, mark, **Save picks**, and
+opens), click the run's folder (`generate_eleven.py --folder NAME`, else
+the day and the sounds), mark, **Save picks**, and
 send the file. Marks live in his browser until saved: a screenshot of marks
 is not the file. Compare a new `picks.json` with the last before believing
 it changed anything.
@@ -96,7 +100,7 @@ take repeats audibly.
 
 ```sh
 cp "<Downloads>/picks (N).json" experiments/sound/picks.json
-python3 experiments/sound/adopt.py          # keeps → effects/, effects.yaml (gains kept)
+python3 experiments/sound/adopt.py pat whoosh   # the sounds just picked: keeps → effects/, effects.yaml (settings kept, other sounds untouched)
 uv run python main.py effects reksio         # trims, levels, retro recipe → effects.js
 ```
 

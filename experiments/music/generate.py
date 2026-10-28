@@ -10,7 +10,10 @@ out/<piece>/<n>.mp3 and adds them to out/manifest.js. The key comes from the
 sound experiment's generate_eleven.py (ELEVENLABS_API_KEY in the project's
 .env). Standard library only: run it with any Python 3.
 
-Run: python3 generate.py [--test] [piece ...]
+Each run's takes go in a folder on the board (--folder NAME, else the day
+and the pieces made), so Adam can see only what is new.
+
+Run: python3 generate.py [--test] [--folder NAME] [piece ...]
 """
 
 from __future__ import annotations
@@ -25,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "sound"))
-from generate_eleven import API, RETRIES, credits_used, key
+from generate_eleven import API, RETRIES, credits_used, folder_of, key, today
 from pieces import NEGATIVE, PIECES, STYLE
 
 OUT = Path(__file__).parent / "out"
@@ -120,7 +123,9 @@ def main(args: list[str]) -> None:
             f"ok: {len(audio)} bytes, song {song}, in {time.time() - started:.0f} s; credits used {before} -> {credits_used()}"
         )
         return
-    names = [a for a in args if not a.startswith("-")] or list(PIECES)
+    given = args[args.index("--folder") + 1] if "--folder" in args else None
+    names = [a for a in args if not a.startswith("-") and a != given] or list(PIECES)
+    folder = folder_of(args, names)
     found = manifest()
     # the board in pieces.py's order
     found = {n: found.pop(n) for n in PIECES if n in found} | found
@@ -196,6 +201,8 @@ def main(args: list[str]) -> None:
                     "prompt": j["prompt"],
                     "wording": j["wording"],
                     "seed": j["take"],
+                    "folder": folder,
+                    "made": today().isoformat(),
                 }
                 | (
                     {"from": j["seed"]["from"], "strength": j["strength"]}

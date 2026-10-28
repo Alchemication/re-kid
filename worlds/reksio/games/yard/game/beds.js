@@ -20,6 +20,9 @@
 /* exported YardBeds */
 const YardBeds = (() => {
   const TONIC = 58 // B-flat3: the key the touches are in (music.js CHORD)
+  // older than the effects' recipe (Adam, 2026-10-28: "a bit too modern"; quiet in the background):
+  // a narrower band, more saturation, a wider tape wobble, a faint hiss, and softer
+  const SOUND = { volume: 0.7, highpass: 200, lowpass: 3800, saturation: 1, wow: { hz: 0.6, depth: 0.0035 }, hiss: 0.006 }
   const HOURS = { morning: 10, afternoon: 15, dusk: 18 } // a day from 8 to 20: morning until 10, afternoon from 15, dusk from 18 (when he gets sleepy)
 
   // each moment: its chords (scale degrees, a bar each), how far up it sits
@@ -149,6 +152,7 @@ const YardBeds = (() => {
     moods: MOODS,
     styles: STYLES,
     hours: HOURS,
+    sound: SOUND,
     // the child playing: the tiptoe walk; watching, or another moment: that moment's bed
     pick: (mood, playing) => (season === 'winter' ? (playing ? 'snowplay' : WINTER[mood] ?? 'snowfall') : playing ? 'tiptoe' : BY_MOOD[mood] ?? 'musicbox'),
   })

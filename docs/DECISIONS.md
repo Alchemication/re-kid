@@ -130,6 +130,11 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   beat the synth and a local model on every sound tried; findings in
   `experiments/sound/README.md`, procedure in the `new-sound` skill. Retro,
   not clean: Adam preferred the roughened version of all 13 sounds.
+- **Each world its own sounds and music** (Adam, 2026-10-28: "keep
+  worlds authentic with their own personality"). A take, a bed's sound or
+  a sound effect belongs to one world and is never shared with another,
+  even where it would fit; the code that plays them is shared. Within a
+  world, a gag reuses the sounds it has before new ones are made.
 - **Music: generated takes with quiet between, not a code loop**
   (2026-10-13). The note-by-note oom-pah with three themes taking turns
   played all day and wore on a grown-up (Adam: "repeated constantly does get

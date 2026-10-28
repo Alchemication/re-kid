@@ -80,6 +80,9 @@ run flat.
   5+ phrases: phrases are what a child hears most.
 - Length is page weight: about 6 KB a second in `tunes.js`, loaded at the
   first tap. The yard's 11 takes are 1.4 MB.
+- Music belongs to one world, never shared with another
+  (`docs/DECISIONS.md`): its takes, and its bed's sound (`beds.js`
+  `SOUND`, over `ensemble.js`'s default). `adopt.py` runs for one world.
 - Original music is never asked for or used: no cartoon or composer names
   in a wording, and no original audio as a reference (ElevenLabs screens
   uploads for copyright anyway).
@@ -142,7 +145,8 @@ note for the world (`WORLD_NOTE` in `board.html`, from the direction) asks
 the question that matters beyond "is it nice": **does this belong to this
 world?** A world other than Reksio gets a "Reksio's yard, for contrast"
 button. A good tune that would fit any cartoon is a maybe at best. On the board:
-**reload**, use "Only unmarked", ▶ as made, R retro (the game plays retro),
+**reload**, click the run's folder (`generate.py --folder NAME`, else the
+day and the pieces), ▶ as made, R retro (the game plays retro),
 the "Today" button for what the game has now; mark, add a note where he has
 an opinion, **Save picks**, and send the file. The board keeps every verdict
 across rounds, so the latest `music-picks*.json` in Downloads (with the
@@ -159,7 +163,7 @@ he kept, what he rejected and why.
 
 ```sh
 cd experiments/music
-python3 adopt.py [--world krtek] [--also FILE ...] [--skip FILE ...]   # keeps (and maybes named) → each game's tunes/, tunes.yaml (rewritten)
+python3 adopt.py --world krtek [--also FILE ...] [--skip FILE ...]   # keeps (and maybes named) → the world's game's tunes/, tunes.yaml (rewritten)
 cd ../.. && uv run python main.py tunes krtek meadow   # retro recipe, levelled, faded out → tunes.js
 ```
 

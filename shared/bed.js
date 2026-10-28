@@ -33,7 +33,8 @@ const Bed = (() => {
    * - pick(mood, playing): which style for a moment; busy: [down, up], the child playing from up,
    *   back to watching from down (no flipping to and fro), for the moods where playing counts
    *   (playsIn: the mood names);
-   * - hours: { morning, afternoon, dusk } (moodAt).
+   * - hours: { morning, afternoon, dusk } (moodAt);
+   * - sound: how the bed sounds, where it differs from ensemble.js's SOUND (each world its own).
    */
   function score(def) {
     const { tonic, moods, styles, pick, busy = [0.35, 0.55], playsIn = ['day'], hours } = def
@@ -80,7 +81,7 @@ const Bed = (() => {
       return { notes, seconds: BEATS * beat }
     }
 
-    return { MOODS: moods, STYLES: styles, TONIC: tonic, SCALE: scale, CALM_S, degree, moodAt, livelier, calmer, style, bar }
+    return { SOUND: def.sound, MOODS: moods, STYLES: styles, TONIC: tonic, SCALE: scale, CALM_S, degree, moodAt, livelier, calmer, style, bar }
   }
 
   return { score, livelier, calmer, CALM_S }

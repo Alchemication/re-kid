@@ -11,7 +11,10 @@ each sound's first wording (STYLES), as its own labelled wording.
 
 Sounds in VOICES (Krtek's voice) are made only when named.
 
-Run: python3 generate_eleven.py [--test] [--style NAME] [sound ...]
+Each run's takes go in a folder on the board (--folder NAME, else the day
+and the sounds made), so Adam can see only what is new.
+
+Run: python3 generate_eleven.py [--test] [--style NAME] [--folder NAME] [sound ...]
 """
 
 from __future__ import annotations
@@ -23,6 +26,7 @@ import time
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from sounds import SOUNDS, VOICES
@@ -109,6 +113,19 @@ def generate(prompt: str, seconds: float) -> bytes:
     )
 
 
+def today() -> date:
+    """Today, where the run is (the folder's day)."""
+    return datetime.now(UTC).astimezone().date()
+
+
+def folder_of(args: list[str], names: list[str]) -> str:
+    """The run's folder on the board: --folder NAME, else the day and what was made."""
+    if "--folder" in args:
+        return args[args.index("--folder") + 1]
+    shown = ", ".join(names[:3]) + (f" +{len(names) - 3}" if len(names) > 3 else "")
+    return f"{today():%d %b}: {shown}"
+
+
 def main(args: list[str]) -> None:
     before = credits_used()
     if "--test" in args:
@@ -118,7 +135,11 @@ def main(args: list[str]) -> None:
         print(f"ok: {len(audio)} bytes; credits used {before} -> {after}")
         return
     style = args[args.index("--style") + 1] if "--style" in args else None
-    names = [a for a in args if not a.startswith("-") and a != style] or list(SOUNDS)
+    given = {style, args[args.index("--folder") + 1] if "--folder" in args else None}
+    names = [a for a in args if not a.startswith("-") and a not in given] or list(
+        SOUNDS
+    )
+    folder = folder_of(args, names)
     found = manifest()
     jobs = []  # (name, wording label, prompt, take): everything still to make
     for name in names:
@@ -172,6 +193,8 @@ def main(args: list[str]) -> None:
                     "prompt": prompt,
                     "wording": w,
                     "seed": take,  # no seed in the API: the take's number
+                    "folder": folder,
+                    "made": today().isoformat(),
                 }
             )
             save(found)  # after each, so a stop loses nothing

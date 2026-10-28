@@ -11,11 +11,16 @@ board, keep the picks. Outputs (`out/`) and model caches are not committed.
   Needs its own env: `uv venv --python 3.13 .venv-moss && uv pip install --python .venv-moss/bin/python mlx-speech`.
 - `normalise.py` — evens out the MOSS takes' loudness.
 - `board.html` — open from disk; play, mark keep/maybe/no, Save picks. Built on
-  `../board/` (shared with the music board): a world filter, one wording's
-  prompt above its takes, keys (←/→ move, space play, 1/2/3 keep, maybe, no,
-  N note, U next unmarked).
-- `adopt.py` — copies the kept takes from `picks.json` into the game (`effects/`,
-  `effects.yaml`); then `main.py effects reksio` packs them.
+  `../board/` (shared with the music and bed boards): Reksio's yard and
+  Krtek's meadow in the header, drawn by the games' own art; folders (each
+  run of `generate_eleven.py` under its `--folder` name, else the day and
+  the sounds made: a click shows only that run's takes); one thing playing
+  at a time, across every board open; a world filter, one wording's prompt
+  above its takes, keys (←/→ move, space play, 1/2/3 keep, maybe, no, N
+  note, U next unmarked, Esc stop).
+- `adopt.py` — copies the kept takes of the sounds named from `picks.json`
+  into the game (`effects/`, `effects.yaml`), only its own world's sounds;
+  then `main.py effects reksio` packs them.
 
 ## Findings (2026-10-12)
 

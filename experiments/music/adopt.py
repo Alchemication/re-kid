@@ -4,10 +4,12 @@ each was made from (the wording as sent, the model, its song id). A take's
 game is its piece's world's (GAMES), its part the piece's (pieces.py `part`,
 `parts` by wording, else the first of `now`), and a piece's `season` makes
 its takes that season's own (tunes/<part>-<season>/). Rewrites a game's list from the
-picks, so a take dropped from the keeps drops out. Then `main.py tunes`
-packs them.
+picks, so a take dropped from the keeps drops out; one world a run, so
+another world's list is never touched (each world keeps its own music).
+Compare the list with git before packing: a keep left out by hand before
+needs --skip again. Then `main.py tunes` packs them.
 
-Run: python3 adopt.py [--world ID] [--also FILE ...] [--skip FILE ...]
+Run: python3 adopt.py --world ID [--also FILE ...] [--skip FILE ...]
   (FILE as on the board, e.g. siblings/12.mp3; --also takes a maybe too)
 """
 
@@ -80,6 +82,8 @@ def part_of(piece: dict, c: dict) -> str:
 def main(args: list[str]) -> None:
     skip, also = set(flag(args, "--skip")), set(flag(args, "--also"))
     only = flag(args, "--world")
+    if len(only) != 1 or only[0] not in GAMES:
+        sys.exit(f"Name one world: --world {' or '.join(GAMES)}")
     picks = json.loads((Path(__file__).parent / "picks.json").read_text())["picks"]
     known = {
         c["file"]: (name, c) for name, p in manifest().items() for c in p["candidates"]
