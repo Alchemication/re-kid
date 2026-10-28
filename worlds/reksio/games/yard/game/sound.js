@@ -62,7 +62,7 @@ const Sound = (() => {
       }
       if (typeof EFFECTS !== 'undefined') {
         for (const [name, e] of Object.entries(EFFECTS)) {
-          const mine = (effects[name] = { gain: e.gain, steady: !!e.steady, buffers: [], last: -1, until: 0 })
+          const mine = (effects[name] = { gain: e.gain, steady: !!e.steady, overlaps: !!e.overlaps, buffers: [], last: -1, until: 0 })
           for (const b64 of e.takes) {
             ctx.decodeAudioData(bytes(b64)).then((buffer) => mine.buffers.push(buffer), () => {}) // a take that won't decode is left out: the others (or the synth) play
           }
@@ -80,12 +80,14 @@ const Sound = (() => {
    * not the last one played, a little higher or lower (a steady sound: its
    * one take, always as it is). One take of a sound at
    * a time: asked again while one plays (munching, a chew at a time), it lets
-   * that one play on. False if it has none: the synthesised sound plays. */
+   * that one play on (a sound marked `overlaps`, called quicker than its
+   * takes last, plays every call). False if it has none: the synthesised
+   * sound plays. */
   function recorded(name, out = null) {
     const e = effects[name]
     if (!e || !e.buffers.length) return false
     const c = ensure()
-    if (c.currentTime < e.until) return true
+    if (c.currentTime < e.until && !e.overlaps) return true
     let i = Math.floor(Math.random() * e.buffers.length)
     if (i === e.last && e.buffers.length > 1) i = (i + 1) % e.buffers.length
     e.last = i

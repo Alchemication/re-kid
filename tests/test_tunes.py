@@ -42,6 +42,23 @@ class TestSchema:
         with pytest.raises(ValidationError, match="parts listed twice"):
             TuneSet.model_validate({"source": "made", "tunes": [_tune(), _tune()]})
 
+    def test_a_part_again_for_a_season(self) -> None:
+        tunes = TuneSet.model_validate(
+            {"source": "made", "tunes": [_tune(), _tune(season="winter")]}
+        )
+        assert [t.key for t in tunes.tunes] == ["phrase", "phrase.winter"]
+        with pytest.raises(ValidationError, match="parts listed twice"):
+            TuneSet.model_validate(
+                {
+                    "source": "made",
+                    "tunes": [_tune(season="winter"), _tune(season="winter")],
+                }
+            )
+
+    def test_only_seasons_there_are(self) -> None:
+        with pytest.raises(ValidationError):
+            Tune.model_validate(_tune(season="winterr"))
+
     def test_take_listed_twice(self) -> None:
         take = {"file": "a.mp3", "prompt": "p", "model": "m"}
         with pytest.raises(ValidationError, match="takes listed twice"):
@@ -101,7 +118,7 @@ class TestGameTunes:
         text = (game / "game/tunes.js").read_text()
         table = json.loads(text.split("const TUNES = ", 1)[1])
         assert {k: len(v) for k, v in table.items()} == {
-            t.id: len(t.takes) for t in tunes.tunes
+            t.key: len(t.takes) for t in tunes.tunes
         }
 
 

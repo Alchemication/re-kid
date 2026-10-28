@@ -136,3 +136,64 @@ effects:
   takes:
   - file: cuckoo/08.mp3
     prompt: 'a gentle cuckoo call from a Black Forest cuckoo clock, two falling notes, warm and soft'
+- id: bark
+  takes:
+  - file: bark/05.mp3
+    prompt: 'a little terrier puppy gives two quick high yappy barks'
+  - file: bark/07.mp3
+    prompt: 'a little terrier puppy gives two quick high yappy barks'
+  - file: bark/12.mp3
+    prompt: 'a small dog''s two sharp barks in a row, woof woof, cheerful'
+- id: pat
+  overlaps: true # patted every 200 ms, quicker than a take lasts
+  takes:
+  - file: pat/01.mp3
+    prompt: 'packing a snowball with wool mittens, a single muffled crunch'
+  - file: pat/04.mp3
+    prompt: 'fresh snow pressed and patted between two gloved hands, one soft crunchy pat'
+  - file: pat/08.mp3
+    prompt: 'a handful of powdery snow squeezed once, soft and close'
+- id: whoosh
+  takes:
+  - file: whoosh/02.mp3
+    prompt: 'a snowball thrown past, a short soft whoosh of air'
+  - file: whoosh/03.mp3
+    prompt: 'a snowball thrown past, a short soft whoosh of air'
+  - file: whoosh/05.mp3
+    prompt: 'a quick light whoosh of something thrown underarm'
+- id: poof
+  takes:
+  - file: poof/03.mp3
+    prompt: 'a ball of loose snow breaking apart on impact, a muffled splat'
+  - file: poof/05.mp3
+    prompt: 'a ball of loose snow breaking apart on impact, a muffled splat'
+  - file: poof/07.mp3
+    prompt: 'a handful of snow thrown against a wall, a soft puff and crumble'
+  - file: poof/09.mp3
+    prompt: 'a handful of snow thrown against a wall, a soft puff and crumble'
+- id: thud
+  takes:
+  - file: thud/03.mp3
+    prompt: 'a heavy ball of snow falling into deep snow and breaking apart, a muffled thump and crumble'
+  - file: thud/06.mp3
+    prompt: 'a big snowball dropped onto snowy ground, a dull soft thud'
+  - file: thud/09.mp3
+    prompt: 'a lump of packed snow hitting the ground and crumbling, close'
+- id: pluck
+  takes:
+  - file: pluck/06.mp3
+    prompt: 'a stick pulled out of firm snow, a quick crunchy pop'
+  - file: pluck/08.mp3
+    prompt: 'a stick pulled out of firm snow, a quick crunchy pop'
+  - file: pluck/09.mp3
+    prompt: 'a stick pulled out of firm snow, a quick crunchy pop'
+- id: bump
+  takes:
+  - file: bump/01.mp3
+    prompt: 'someone sitting down hard on snowy ice, a soft bump with a crunch of snow'
+  - file: bump/02.mp3
+    prompt: 'someone sitting down hard on snowy ice, a soft bump with a crunch of snow'
+  - file: bump/06.mp3
+    prompt: 'a child plopping onto a snowy ground, a muffled bump'
+  - file: bump/07.mp3
+    prompt: 'a small body landing on packed snow, a dull soft thump'

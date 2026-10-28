@@ -242,6 +242,18 @@ class TestScript:
         table = json.loads(text.split("const EFFECTS = ", 1)[1])
         assert table == {"splash": {"gain": 0.5, "takes": ["YWI=", "Y2Q="]}}
 
+    def test_a_sound_that_overlaps_says_so(self, tmp_path: Path) -> None:
+        effect_set = EffectSet.model_validate(
+            {"source": "Made for a test.", "effects": [_effect(overlaps=True)]}
+        )
+        out = write_js(
+            [Packed("splash", "splash/01.mp3", 0.0, b"ab")],
+            effect_set,
+            tmp_path / "e.js",
+        )
+        table = json.loads(out.read_text().split("const EFFECTS = ", 1)[1])
+        assert table == {"splash": {"gain": 1.0, "overlaps": True, "takes": ["YWI="]}}
+
     def test_a_steady_sound_says_so(self, tmp_path: Path) -> None:
         effect_set = EffectSet.model_validate(
             {"source": "Made for a test.", "effects": [_effect(steady=True)]}

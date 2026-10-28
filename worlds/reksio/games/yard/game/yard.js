@@ -897,6 +897,8 @@
   // laid out: show the drawing from the next frame (game.css, .starting)
   Clock.after(0, () => $('stage').classList.remove('starting'))
   $('stage').classList.add(`season-${Layout.season}`) // the season's look (game.css .season-winter)
+  Music.setSeason(Layout.season) // and its music: its own takes and beds where it has them
+  YardBeds.forSeason(Layout.season)
 
   Things.init({ ended: () => day.ended })
   Spots.init()

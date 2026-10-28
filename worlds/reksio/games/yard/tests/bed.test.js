@@ -28,6 +28,21 @@ describe('the bed for each moment', () => {
     assert.equal(Bed.style('rest', 1).style, 'hush')
   })
 
+  it('in winter, snowfall while watching and snow play while playing; evening, rain and a nap keep theirs', () => {
+    Bed.forSeason('winter')
+    try {
+      assert.equal(Bed.style('day', 1).style, 'snowplay')
+      assert.equal(Bed.style('day', 0).style, 'snowfall')
+      assert.equal(Bed.style('morning', 0).style, 'snowfall')
+      assert.equal(Bed.style('dusk', 0.5).style, 'chat')
+      assert.equal(Bed.style('rain', 0.5).style, 'drips')
+      assert.equal(Bed.style('rest', 1).style, 'hush')
+    } finally {
+      Bed.forSeason('summer')
+    }
+    assert.equal(Bed.style('day', 1).style, 'tiptoe')
+  })
+
   it('does not flip to and fro between playing and watching as the child slows down', () => {
     assert.equal(Bed.style('day', 0.45, true).style, 'tiptoe', 'dropped out of playing too soon')
     assert.equal(Bed.style('day', 0.45, false).style, 'musicbox', 'started playing too soon')

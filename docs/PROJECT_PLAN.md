@@ -202,16 +202,16 @@ decided and why.
    6. **Sound for what happens, and voices for every creature** (Adam,
       2026-10-27: sounds will add value; a new ElevenLabs key with about
       90K credits, in `.env`): the `new-sound` skill, Adam picking by ear.
-      First the winter's new moments (a snowball patted, thrown, bursting;
-      the snowman's head thudding down; the sparrow's tug and the carrot
-      popping out), then every creature its own sounds, several takes
-      each, played at random as in nature (when, how often, which take),
-      not on cue.
-   7. **A theme for each season** (Adam, 2026-10-27): the music's takes
-      (ElevenLabs Music, `new-music`) and the synth bed (`beds.js`) each
-      get a version per season, picked by the play's season, after
-      `worlds/reksio/MUSIC_DIRECTION.md` and Adam's ear. Krtek's meadow
-      gets the same (6 and 7) once the yard's way of doing it has settled.
+      The winter's new moments have theirs (picked 2026-10-28). Next,
+      every creature its own sounds, several takes each, played at random
+      as in nature (when, how often, which take), not on cue. Every new gag
+      gets its sounds in the same run (`new-gag`).
+   7. **A theme for each season** (Adam, 2026-10-27): winter has its own
+      takes and beds (2026-10-28). Open: winter has 3 phrases, under the 5
+      a part needs; the beds "a bit too modern" (Adam), to make older by
+      ear on the bed board. Autumn and spring get theirs with their plays.
+      Krtek's meadow gets the same (6 and 7) once the yard's way of doing
+      it has settled.
 3. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how

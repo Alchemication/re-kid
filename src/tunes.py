@@ -66,12 +66,13 @@ def build(tune_set: TuneSet, folder: Path) -> list[Packed]:
         ):
             out = Path(tmp) / f"{i}.mp3"
             gain = prepare(folder / take.file, out, recipe(), TUNE_LOUDNESS_DB)
-            packed.append(Packed(tune.id, take.file, gain, out.read_bytes()))
+            packed.append(Packed(tune.key, take.file, gain, out.read_bytes()))
     return packed
 
 
 def write_js(packed: list[Packed], tune_set: TuneSet, out: Path) -> Path:
-    """Write ``tunes.js``: a global TUNES of {part: [base64 mp3]}."""
+    """Write ``tunes.js``: a global TUNES of {part: [base64 mp3]}, a
+    season's own as 'part.season'."""
     table: dict[str, list[str]] = {}
     for p in packed:
         table.setdefault(p.tune, []).append(base64.b64encode(p.data).decode("ascii"))

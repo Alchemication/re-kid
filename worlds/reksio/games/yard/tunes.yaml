@@ -14,6 +14,21 @@ tunes:
   - file: morning/02.mp3
     prompt: 'A short morning tune, rising and waking up: a flute melody climbing over slow harp chords, sunny and calm, ending on a bright glockenspiel note. Instrumental only. A small chamber ensemble from a 1970s Eastern European children''s animated film: pizzicato strings, clarinet, bassoon, flute, harp, xylophone and glockenspiel. Warm vintage tape sound, gentle and light. No drums, no synthesizers, no modern pop production.'
     model: music_v2_5
+- id: morning
+  season: winter
+  takes:
+  - file: morning-winter/01.mp3
+    prompt: 'A short, gentle wake-up tune reminiscent of 1970s Eastern European children''s cartoons, featuring a light, rising melody with a soft wintry sparkle and whimsical motifs suitable for a small dog waking in his doghouse to find the yard white with fresh snow, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
+    model: music_v1
+    song: I04Tz0TBo57cx7G86LWU
+  - file: morning-winter/02.mp3
+    prompt: 'A short, gentle wake-up tune reminiscent of 1970s Eastern European children''s cartoons, featuring a light, rising melody with a soft wintry sparkle and whimsical motifs suitable for a small dog waking in his doghouse to find the yard white with fresh snow, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v1
+    song: paYsIxwSDs8lgbPIYlkY
+  - file: morning-winter/03.mp3
+    prompt: 'A short, gentle wake-up tune reminiscent of 1970s Eastern European children''s cartoons, featuring a light, rising melody with a soft wintry sparkle and whimsical motifs suitable for a small dog waking in his doghouse to find the yard white with fresh snow, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v2_5
+    song: LzfVwWJBodGj7KMK0cFs
 - id: phrase
   takes:
   - file: phrase/01.mp3
@@ -35,6 +50,21 @@ tunes:
   - file: phrase/05.mp3
     prompt: 'A bouncy, cheeky oom-pah tune for a small dog trotting around a backyard: pizzicato bass and off-beat chords, a playful clarinet melody, a xylophone answer. Instrumental only. A small chamber ensemble from a 1970s Eastern European children''s animated film: pizzicato strings, clarinet, bassoon, flute, harp, xylophone and glockenspiel. Warm vintage tape sound, gentle and light. No drums, no synthesizers, no modern pop production.'
     model: music_v2_5
+- id: phrase
+  season: winter
+  takes:
+  - file: phrase-winter/01.mp3
+    prompt: 'A catchy, playful instrumental theme reminiscent of 1970s Eastern European children''s cartoons, featuring lighthearted melodies and whimsical motifs suitable for a boy and his small dog building a snowman and playing in the snow in a winter yard, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
+    model: music_v2_5
+    song: L9Pvi0T4X5bESSq4ESv0
+  - file: phrase-winter/02.mp3
+    prompt: 'A catchy, playful instrumental theme reminiscent of 1970s Eastern European children''s cartoons, featuring lighthearted melodies and whimsical motifs suitable for a boy and his small dog building a snowman and playing in the snow in a winter yard, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v2_5
+    song: PBMCLGdiR9teFwMo5eSM
+  - file: phrase-winter/03.mp3
+    prompt: 'A catchy, playful instrumental theme reminiscent of 1970s Eastern European children''s cartoons, featuring lighthearted melodies and whimsical motifs suitable for a boy and his small dog building a snowman and playing in the snow in a winter yard, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v2_5
+    song: SGlqrp52XXafmRF2oVfg
 - id: lullaby
   takes:
   - file: lullaby/01.mp3
@@ -53,3 +83,22 @@ tunes:
     prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog licking his chops after supper and curling up in his doghouse, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
     model: music_v1
     song: NZJnT62QeJjPzq1seko0
+- id: lullaby
+  season: winter
+  takes:
+  - file: lullaby-winter/01.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog curling up in his snowy doghouse on a quiet winter evening as snowflakes fall, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
+    model: music_v1
+    song: XnbVqSPbJ98Qr5w9nhlj
+  - file: lullaby-winter/02.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog curling up in his snowy doghouse on a quiet winter evening as snowflakes fall, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era. Keep extremely simple, elegant, and humorous, like the songs used to be in the cartoons of that era.'
+    model: music_v1
+    song: OPXkN0a81esk0t5Qsq1Z
+  - file: lullaby-winter/03.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog curling up in his snowy doghouse on a quiet winter evening as snowflakes fall, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v1
+    song: fhLr4G4mWrDW4qXgP2zM
+  - file: lullaby-winter/04.mp3
+    prompt: 'A short, slow, sleepy goodnight tune reminiscent of 1970s Eastern European children''s cartoons, featuring a soft, simple melody and drowsy whimsical motifs suitable for a small dog curling up in his snowy doghouse on a quiet winter evening as snowflakes fall, slowing down and fading out, capturing the nostalgic and charming vibe of vintage animated shows from that era.'
+    model: music_v1
+    song: JPq5ok9MaTzcGOkUumHg

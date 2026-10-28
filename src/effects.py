@@ -156,15 +156,20 @@ def build(effect_set: EffectSet, folder: Path) -> list[Packed]:
 
 
 def write_js(packed: list[Packed], effect_set: EffectSet, out: Path) -> Path:
-    """Write ``effects.js``: a global EFFECTS of {sound: {gain, steady?, takes:
-    [base64 mp3]}} (steady only where it is set)."""
+    """Write ``effects.js``: a global EFFECTS of {sound: {gain, steady?,
+    overlaps?, takes: [base64 mp3]}} (steady and overlaps only where set)."""
     effects = {e.id: e for e in effect_set.effects}
     table: dict[str, dict[str, object]] = {}
     for p in packed:
         e = effects[p.effect]
         entry = table.setdefault(
             p.effect,
-            {"gain": e.gain, **({"steady": True} if e.steady else {}), "takes": []},
+            {
+                "gain": e.gain,
+                **({"steady": True} if e.steady else {}),
+                **({"overlaps": True} if e.overlaps else {}),
+                "takes": [],
+            },
         )
         entry["takes"].append(base64.b64encode(p.data).decode("ascii"))
     out.parent.mkdir(parents=True, exist_ok=True)

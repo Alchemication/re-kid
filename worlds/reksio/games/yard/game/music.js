@@ -7,6 +7,8 @@
 //   when something is done, or after a long quiet; when is the game's rule (idle.js phraseOk),
 //   so a child left alone mostly gets the yard's own sounds, not a loop.
 // - At evening (supper), a lullaby take; a phrase still playing fades out first.
+// - A season with its own takes of a part (tunes.yaml `season`, 'lullaby.winter'
+//   in tunes.js) plays those in its plays; the game says the season (setSeason).
 // - Rain and the sun going down make it quieter.
 // - Actions play along on samples: a xylophone flourish when a new thing is
 //   done, glockenspiel for a thought bubble, a flute trill for the bird, a
@@ -39,6 +41,7 @@ const Music = (() => {
   let night = false // after the lullaby starts, nothing else plays
   let dusk = 0
   let raining = false
+  let season = null // the play's season, as the game says (setSeason)
 
   // ------------------------------------------------------------ loading
 
@@ -57,7 +60,12 @@ const Music = (() => {
    * time t; false if it has none ready. random: the caller's stream. The bed
    * steps back while it plays (takes.js onStart, onEnd). */
   function playTake(part, random, t) {
-    return ready && takes.play(part, random, t)
+    return ready && (takes.play(`${part}.${season}`, random, t) || takes.play(part, random, t))
+  }
+
+  /** This play's season: its own takes of a part, where it has them. */
+  function setSeason(name) {
+    season = name
   }
 
   // ------------------------------------------------------------ public
@@ -214,7 +222,7 @@ const Music = (() => {
 
   return {
     bed: bedApi,
-    start, startMorning, phrase, audition, setDusk, setRain, react, evening,
+    start, startMorning, phrase, audition, setDusk, setRain, setSeason, react, evening,
     get ready() { return ready },
     get playing() { return !!takes?.playing },
     get buffers() { return band?.buffers ?? {} },

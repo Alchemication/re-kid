@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-15T20:15:59.249Z",
+ "saved": "2026-10-28T08:55:26.611Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1241,6 +1241,213 @@
    "wording": 1,
    "seed": 3,
    "sound": "krtek-ahoj",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bark/07.mp3",
+   "source": "eleven",
+   "prompt": "a little terrier puppy gives two quick high yappy barks",
+   "wording": 2,
+   "seed": 3,
+   "sound": "bark",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bark/05.mp3",
+   "source": "eleven",
+   "prompt": "a little terrier puppy gives two quick high yappy barks",
+   "wording": 2,
+   "seed": 1,
+   "sound": "bark",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bark/12.mp3",
+   "source": "eleven",
+   "prompt": "a small dog's two sharp barks in a row, woof woof, cheerful",
+   "wording": 3,
+   "seed": 3,
+   "sound": "bark",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/pat/01.mp3",
+   "source": "eleven",
+   "prompt": "packing a snowball with wool mittens, a single muffled crunch",
+   "wording": 2,
+   "seed": 1,
+   "sound": "pat",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/pat/04.mp3",
+   "source": "eleven",
+   "prompt": "fresh snow pressed and patted between two gloved hands, one soft crunchy pat",
+   "wording": 1,
+   "seed": 2,
+   "sound": "pat",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/pat/08.mp3",
+   "source": "eleven",
+   "prompt": "a handful of powdery snow squeezed once, soft and close",
+   "wording": 3,
+   "seed": 1,
+   "sound": "pat",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/whoosh/02.mp3",
+   "source": "eleven",
+   "prompt": "a snowball thrown past, a short soft whoosh of air",
+   "wording": 1,
+   "seed": 2,
+   "sound": "whoosh",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/whoosh/03.mp3",
+   "source": "eleven",
+   "prompt": "a snowball thrown past, a short soft whoosh of air",
+   "wording": 1,
+   "seed": 3,
+   "sound": "whoosh",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/whoosh/05.mp3",
+   "source": "eleven",
+   "prompt": "a quick light whoosh of something thrown underarm",
+   "wording": 3,
+   "seed": 1,
+   "sound": "whoosh",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/poof/03.mp3",
+   "source": "eleven",
+   "prompt": "a ball of loose snow breaking apart on impact, a muffled splat",
+   "wording": 2,
+   "seed": 2,
+   "sound": "poof",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/poof/05.mp3",
+   "source": "eleven",
+   "prompt": "a ball of loose snow breaking apart on impact, a muffled splat",
+   "wording": 2,
+   "seed": 1,
+   "sound": "poof",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/poof/07.mp3",
+   "source": "eleven",
+   "prompt": "a handful of snow thrown against a wall, a soft puff and crumble",
+   "wording": 3,
+   "seed": 1,
+   "sound": "poof",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/poof/09.mp3",
+   "source": "eleven",
+   "prompt": "a handful of snow thrown against a wall, a soft puff and crumble",
+   "wording": 3,
+   "seed": 2,
+   "sound": "poof",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/thud/03.mp3",
+   "source": "eleven",
+   "prompt": "a heavy ball of snow falling into deep snow and breaking apart, a muffled thump and crumble",
+   "wording": 1,
+   "seed": 3,
+   "sound": "thud",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/thud/06.mp3",
+   "source": "eleven",
+   "prompt": "a big snowball dropped onto snowy ground, a dull soft thud",
+   "wording": 2,
+   "seed": 3,
+   "sound": "thud",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/thud/09.mp3",
+   "source": "eleven",
+   "prompt": "a lump of packed snow hitting the ground and crumbling, close",
+   "wording": 3,
+   "seed": 3,
+   "sound": "thud",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/pluck/06.mp3",
+   "source": "eleven",
+   "prompt": "a stick pulled out of firm snow, a quick crunchy pop",
+   "wording": 3,
+   "seed": 1,
+   "sound": "pluck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/pluck/08.mp3",
+   "source": "eleven",
+   "prompt": "a stick pulled out of firm snow, a quick crunchy pop",
+   "wording": 3,
+   "seed": 2,
+   "sound": "pluck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/pluck/09.mp3",
+   "source": "eleven",
+   "prompt": "a stick pulled out of firm snow, a quick crunchy pop",
+   "wording": 3,
+   "seed": 3,
+   "sound": "pluck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bump/01.mp3",
+   "source": "eleven",
+   "prompt": "someone sitting down hard on snowy ice, a soft bump with a crunch of snow",
+   "wording": 1,
+   "seed": 1,
+   "sound": "bump",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bump/02.mp3",
+   "source": "eleven",
+   "prompt": "someone sitting down hard on snowy ice, a soft bump with a crunch of snow",
+   "wording": 1,
+   "seed": 2,
+   "sound": "bump",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bump/06.mp3",
+   "source": "eleven",
+   "prompt": "a child plopping onto a snowy ground, a muffled bump",
+   "wording": 2,
+   "seed": 3,
+   "sound": "bump",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/bump/07.mp3",
+   "source": "eleven",
+   "prompt": "a small body landing on packed snow, a dull soft thump",
+   "wording": 3,
+   "seed": 1,
+   "sound": "bump",
    "verdict": "keep"
   }
  ]

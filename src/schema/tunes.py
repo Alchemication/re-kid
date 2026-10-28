@@ -5,7 +5,7 @@ in the game's ``tunes/`` folder, as they were made. ``main.py tunes`` puts
 them through the effects' retro recipe, levels them and packs them into the
 game's ``tunes.js``; the game's music.js plays one take of a part at random
 when that part comes (the morning, a phrase after something new, a mood of
-an encounter, the lullaby).
+an encounter, the lullaby), a season's own takes of it in that season.
 
 Example:
     tunes = TuneSet.model_validate(yaml.safe_load(path.read_text()))
@@ -44,7 +44,19 @@ class Tune(Model):
             "'lullaby' at evening."
         )
     )
+    season: Literal["winter"] | None = Field(
+        default=None,
+        description=(
+            "The season whose plays it belongs to (Adam, 2026-10-27: each "
+            "season its own themes); none: every season without its own."
+        ),
+    )
     takes: list[TuneTake] = Field(min_length=1)
+
+    @property
+    def key(self) -> str:
+        """Its name in tunes.js, which music.js asks for: 'lullaby', 'lullaby.winter'."""
+        return f"{self.id}.{self.season}" if self.season else self.id
 
     @model_validator(mode="after")
     def _check_takes(self) -> Tune:
@@ -66,8 +78,8 @@ class TuneSet(Model):
 
     @model_validator(mode="after")
     def _check_ids(self) -> TuneSet:
-        """Each part is listed once."""
-        ids = [t.id for t in self.tunes]
+        """Each part is listed once (once for each season)."""
+        ids = [t.key for t in self.tunes]
         dupes = {i for i in ids if ids.count(i) > 1}
         if dupes:
             raise ValueError(f"parts listed twice: {sorted(dupes)}")

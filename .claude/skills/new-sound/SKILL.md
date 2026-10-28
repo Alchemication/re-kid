@@ -17,7 +17,7 @@ sound" to takes playing in the game. Written from the first run (2026-10-12:
 | Pick by ear | `experiments/sound/board.html` (Adam); his verdicts end in `picks.json` |
 | Bring the keeps into the game | `experiments/sound/adopt.py` → `games/<game>/effects/`, `effects.yaml` |
 | The retro recipe, pack | `main.py effects <world> [game]` → `game/effects.js` (`config.EFFECT_*`) |
-| How the game plays them | `sound.js` `recorded()`: a random take, never twice running, 0.94–1.06 speed, one take of a sound at a time; a sound marked `steady: true` in `effects.yaml` (a thing that always sounds the same: the cuckoo clock) has one take, always played at its own speed |
+| How the game plays them | `sound.js` `recorded()`: a random take, never twice running, 0.94–1.06 speed, one take of a sound at a time; a sound marked `steady: true` in `effects.yaml` (a thing that always sounds the same: the cuckoo clock) has one take, always played at its own speed; one marked `overlaps: true` (called quicker than its takes last: the boy's pats) plays every call, over the last |
 
 Sound needs a person's ears (`CLAUDE.md`): Claude writes wordings, runs
 the tools and reads what the files measure, but every keep is Adam's.

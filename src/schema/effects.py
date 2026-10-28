@@ -43,6 +43,14 @@ class Effect(Model):
             "Always sounds the same: its one take, at its own speed (a clock's cuckoo)."
         ),
     )
+    overlaps: bool = Field(
+        default=False,
+        description=(
+            "Called quicker than its takes last (the boy patting snow, a pat "
+            "every 200 ms): each call plays, over the one before, instead of "
+            "waiting for it to end."
+        ),
+    )
     takes: list[Take] = Field(min_length=1)
 
     @model_validator(mode="after")

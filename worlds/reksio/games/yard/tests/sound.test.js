@@ -47,10 +47,10 @@ function fakeAudio() {
 /** sound.js with these EFFECTS ({name: number of takes}; `steady` names the
  * steady ones), and `originals` original barks (BARKS, their bytes from 100
  * up), on a stand-in context. */
-function sound(takes, steady = [], originals = 0) {
+function sound(takes, steady = [], originals = 0, overlaps = []) {
   const audio = fakeAudio()
   const EFFECTS = Object.fromEntries(Object.entries(takes).map(([name, n]) => [
-    name, { gain: 1, ...(steady.includes(name) ? { steady: true } : {}), takes: Array.from({ length: n }, (_, i) => btoa(String.fromCharCode(i + 1))) },
+    name, { gain: 1, ...(steady.includes(name) ? { steady: true } : {}), ...(overlaps.includes(name) ? { overlaps: true } : {}), takes: Array.from({ length: n }, (_, i) => btoa(String.fromCharCode(i + 1))) },
   ]))
   const page = load(['debug.js', 'sound.js'], {
     dom: true,
@@ -117,6 +117,16 @@ describe('recorded effects', () => {
     s.clock.now = 1.2 // the take (1 s, at most 6% slower) is over
     s.Sound.munch()
     assert.equal(s.made.takes.length, 2)
+  })
+
+  it('a sound that overlaps plays every call, over the take before (the boy\'s pats)', async () => {
+    const s = sound({ pat: 2 }, [], 0, ['pat'])
+    await decoded()
+    for (let i = 0; i < 4; i++) {
+      s.Sound.pat()
+      s.clock.now += 0.2 // quicker than a take lasts
+    }
+    assert.equal(s.made.takes.length, 4)
   })
 
   it('bring back his voice where it has takes; the rest of it stays silent', async () => {

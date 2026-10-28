@@ -49,10 +49,12 @@ films.
 
 - **Seasons.** Each season has its own takes and its own bed (Adam,
   2026-10-27), picked by the play's season, and the same later for
-  Krtek's meadow. Winter's first try is a quieter, sparkling version of the
-  same small band: bells drifting down like snow, a lighter plucked bounce
-  while the child plays. These are candidates on the boards, not yet
-  chosen.
+  Krtek's meadow. Winter has its own morning, phrases and lullaby
+  (`tunes.yaml`, `season: winter`), and its own beds, a quieter, sparkling
+  version of the same small band: snowfall (bells drifting down like snow)
+  while the child watches, snow play (a lighter plucked bounce) while they
+  play; evening, rain and a nap keep theirs. Other seasons play the plain
+  ones until they have their own.
 - **Feel.** Gentle, cheeky, played by people: a little loose, never
   crisp. Through the same old-film recipe as the effects.
 - **Wording takes.** Name the feel, not the notes. Use Adam's form ("A
@@ -80,5 +82,14 @@ What Adam heard, and what he said, by date.
     were then played looser, through the retro recipe.
 - **2026-10-22: the yard.** The bed under the takes: "it feels good. Can
   be made as a default."
+- **2026-10-28: winter.**
+  - Takes: kept 3 of 8 mornings, 3 of 8 phrases and 4 of 8 lullabies,
+    rejected one lullaby, no notes. Both models and both wordings are among
+    the keeps.
+  - Beds: "The bed melodies sound good, I think they would be great if
+    they are quiet in the background, and obviously turned into 70's style
+    sounding ones (a bit too modern now)." Heard with the board's old-film
+    sound on. In the game since, at the board's levels; how to make them
+    sound older is open.
 - **Never asked:** "Does this belong to Reksio's yard?", against another
   world's music. Ask on the boards from now on.

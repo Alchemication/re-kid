@@ -10,6 +10,11 @@
 // bassoon chatting at evening, drips for rain, almost nothing for a nap.
 // Played a little loose, as real players would (he found them a bit too
 // crisp; music.js also puts them through the retro recipe).
+//
+// Winter has its own (Adam, 2026-10-28: "sound good… quiet in the
+// background"): snowfall while the child watches, snow play while they
+// play; evening, rain and a nap keep theirs. The game says the season
+// (forSeason).
 
 /* global Bed */
 /* exported YardBeds */
@@ -94,6 +99,35 @@ const YardBeds = (() => {
         return out
       },
     },
+    // winter: high bell notes drifting down a chord at odd moments, over a soft plucked root, like snow coming down
+    snowfall: {
+      bpm: 66,
+      bar(m, e, n, random, { triad }) {
+        const c = triad(m.chords[n % m.chords.length])
+        const out = n % 2 === 0 ? [{ inst: 'pizz', midi: c[0] - 12, at: 0, vol: 0.26 }] : []
+        const down = [c[2] + 24, c[1] + 24, c[0] + 24, c[2] + 12]
+        const k = 1 + Math.round((2 + 2 * e) * (m.dens[1] / 5))
+        const from = 0.5 + random() * 1.2
+        for (let j = 0; j < Math.min(k, down.length); j++) out.push({ inst: 'glock', midi: down[j], at: from + j * (0.6 + random() * 0.3), vol: 0.11 - j * 0.015 })
+        return out
+      },
+    },
+    // winter, while the child plays: a light plucked bounce on the beat, bells skittering on top now and then
+    snowplay: {
+      bpm: 92,
+      bar(m, e, n, random, { triad }) {
+        const c = triad(m.chords[n % m.chords.length])
+        const out = []
+        ;[c[0], c[2], c[1], c[2]].forEach((midi, k) => {
+          if (k % 2 === 0 || e > 0.3) out.push({ inst: 'pizz', midi: midi - 12, at: k, vol: k === 0 ? 0.26 : 0.18 })
+        })
+        if (random() < 0.35 + 0.5 * e) {
+          const at = 2 + Math.floor(random() * 3) / 2
+          ;[c[0], c[1], c[2]].forEach((midi, k) => out.push({ inst: 'glock', midi: midi + 24 + m.lift, at: at + k * 0.25, vol: 0.1 }))
+        }
+        return out
+      },
+    },
     // a low note now and then, a rare bell
     hush: {
       bpm: 60,
@@ -107,13 +141,18 @@ const YardBeds = (() => {
   }
 
   const BY_MOOD = { morning: 'musicbox', afternoon: 'patter', dusk: 'chat', rain: 'drips', rest: 'hush' }
+  const WINTER = { morning: 'snowfall', afternoon: 'snowfall', dusk: 'chat', rain: 'drips', rest: 'hush' }
+  let season = null
 
-  return Bed.score({
+  const score = Bed.score({
     tonic: TONIC,
     moods: MOODS,
     styles: STYLES,
     hours: HOURS,
     // the child playing: the tiptoe walk; watching, or another moment: that moment's bed
-    pick: (mood, playing) => (playing ? 'tiptoe' : BY_MOOD[mood] ?? 'musicbox'),
+    pick: (mood, playing) => (season === 'winter' ? (playing ? 'snowplay' : WINTER[mood] ?? 'snowfall') : playing ? 'tiptoe' : BY_MOOD[mood] ?? 'musicbox'),
   })
+  /** This play's season: winter has its own beds. */
+  score.forSeason = (name) => (season = name)
+  return score
 })()

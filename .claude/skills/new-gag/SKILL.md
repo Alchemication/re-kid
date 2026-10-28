@@ -92,7 +92,13 @@ chosen one, write down briefly:
   On every tap, an answer at once: he looks at what was tapped, then goes.
 - **Sound against moments:** name the moment each sound is for (curiosity,
   effort, surprise, relief) and leave quiet between. His voice is for real
-  moments, never on every tap.
+  moments, never on every tap. Every gag gets its sounds (Adam,
+  2026-10-28): for each moment, reuse a sound the game has (`effects.yaml`,
+  `sound.js`) if it fits; otherwise make one in the same run with
+  `new-sound`, a synth stand-in in `sound.js` first so the gag plays
+  before Adam has picked takes. Music only where a moment needs a mood the
+  game has no music for (`new-music`); otherwise the bed and phrases cover
+  it. The report lists what waits on the boards for his ear.
 - **What it offers:** `discover`, `help` (he helps someone) or `helped`
   (someone helps him). If it makes a kind real for a prop, that prop's
   `OFFERS` in `layout.js` gains it, and the layout tests follow.

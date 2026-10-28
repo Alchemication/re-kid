@@ -2,7 +2,8 @@
 made, into games/<game>/tunes/<part>/<n>.mp3 and write tunes.yaml with what
 each was made from (the wording as sent, the model, its song id). A take's
 game is its piece's world's (GAMES), its part the piece's (pieces.py `part`,
-`parts` by wording, else the first of `now`). Rewrites a game's list from the
+`parts` by wording, else the first of `now`), and a piece's `season` makes
+its takes that season's own (tunes/<part>-<season>/). Rewrites a game's list from the
 picks, so a take dropped from the keeps drops out. Then `main.py tunes`
 packs them.
 
@@ -83,8 +84,8 @@ def main(args: list[str]) -> None:
     known = {
         c["file"]: (name, c) for name, p in manifest().items() for c in p["candidates"]
     }
-    games: dict[str, dict[str, list[tuple[dict, dict]]]] = {
-        w: {part: [] for part in ORDER} for w in GAMES if not only or w in only
+    games: dict[str, dict[tuple[str, str | None], list[tuple[dict, dict]]]] = {
+        w: {} for w in GAMES if not only or w in only
     }
     for pick in picks:
         kept = pick.get("verdict") == "keep" or pick["file"] in also
@@ -94,18 +95,23 @@ def main(args: list[str]) -> None:
         piece = PIECES[name]
         world = piece.get("world", "reksio")
         if world in games:
-            games[world][part_of(piece, c)].append((piece, c))
+            slot = (part_of(piece, c), piece.get("season"))
+            games[world].setdefault(slot, []).append((piece, c))
     for world, parts in games.items():
         game = WORLDS / world / "games" / GAMES[world]
         shutil.rmtree(game / "tunes", ignore_errors=True)
         lines = [HEADERS[world].rstrip(), f"source: {quoted(SOURCE)}", "tunes:"]
-        for part, takes in parts.items():
-            if not takes:
-                continue
-            lines += [f"- id: {part}", "  takes:"]
+        for (part, season), takes in sorted(
+            parts.items(), key=lambda s: (ORDER.index(s[0][0]), s[0][1] or "")
+        ):
+            folder = f"{part}-{season}" if season else part
+            lines.append(f"- id: {part}")
+            if season:
+                lines.append(f"  season: {season}")
+            lines.append("  takes:")
             for i, (piece, c) in enumerate(takes, 1):
-                file = f"{part}/{i:02d}.mp3"
-                (game / "tunes" / part).mkdir(parents=True, exist_ok=True)
+                file = f"{folder}/{i:02d}.mp3"
+                (game / "tunes" / folder).mkdir(parents=True, exist_ok=True)
                 shutil.copy(OUT / c["file"], game / "tunes" / file)
                 lines += [
                     f"  - file: {file}",
