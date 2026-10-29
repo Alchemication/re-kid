@@ -24,7 +24,7 @@ const Tap = (() => {
   const UNDER_ICICLE = 110 // back from the spout to huff: the icicle's tip just past his nose
   const PIPE_AT = { x: 1270, y: 545 } // where his paw knocks the pipe, as drawn
   const PIPE = [[0, 0], [0, 70], [30, 70], [48, 92]] // the gurgle's way down the pipe and out of the spout, from its top (1270, 470)
-  const ICICLE_TIP = 636 // y of the icicle's tip, as drawn
+  const ICICLE_TIP = 620 // y of the icicle's tip, as drawn
   const GROUND = 790 // where drops land, under the tap
   const HUFFS = 2 // warm breaths before the icicle lets go
 

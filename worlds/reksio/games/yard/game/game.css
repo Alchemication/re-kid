@@ -111,7 +111,9 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .spout { fill: none; stroke: var(--ink); stroke-width: 14; stroke-linecap: round; }
 .handle { stroke: var(--ink); stroke-width: 9; stroke-linecap: round; }
 .handle-knob { fill: var(--red); stroke: var(--ink); stroke-width: 4; }
-.icicle { fill: #e3f1fa; stroke: var(--ink); stroke-width: 3; transform-box: fill-box; transform-origin: top center; }
+.icicle { transform-box: fill-box; transform-origin: top center; }
+.icicle-ice { fill: #c9e2f2; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.icicle-shine { fill: none; stroke: #ffffff; stroke-width: 3; stroke-linecap: round; opacity: 0.9; }
 .bulge { fill: #9aa3a6; stroke: var(--ink); stroke-width: 4; }
 .breath { fill: #ffffff; stroke: #b8c6d2; stroke-width: 1.5; opacity: 0.8; }
 .water { fill: none; stroke: #7fb8e6; stroke-width: 9; stroke-linecap: round; stroke-dasharray: 26 14; }

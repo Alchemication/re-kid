@@ -296,8 +296,11 @@
                 <path class="handle" d="M1250 528 H1290" />
                 <circle class="handle-knob" cx="1270" cy="528" r="7" />
               </g>
-              <!-- in the cold, the drips freeze on the spout -->
-              <path id="icicle" class="icicle" d="M1310 560 Q1314 600 1320 636 Q1326 600 1330 560 Z" style="display: none" />
+              <!-- in the cold, the drips freeze on the spout: lumpy, as it froze drop by drop -->
+              <g id="icicle" class="icicle" style="display: none">
+                <path class="icicle-ice" d="M1308 560 Q1305 571 1312 578 Q1307 590 1315 600 Q1318 611 1321 620 Q1325 610 1326 599 Q1332 588 1327 578 Q1333 570 1332 560 Z" />
+                <path class="icicle-shine" d="M1314 566 Q1312 579 1317 594" />
+              </g>
             </g>
             <path id="water" class="water" d="M1320 566 Q1316 640 1324 712 Q1320 760 1322 790" opacity="0" />
             <path class="hose" d="M1282 790 C1240 795 1230 772 1262 768 C1302 763 1312 788 1276 786 C1252 785 1252 776 1270 776 M1282 790 C1310 796 1360 794 1380 788" />
