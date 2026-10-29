@@ -148,7 +148,7 @@ const Creatures = (() => {
     speed: 260, flee: 3.5, turn: 3, // a dart is about 900 a second, at once
     stayMs: [30000, 80000], hours: [0, 24], dark: 0.5, wet: 'avoid',
     feeds: 'perch', hungerMs: [3000, 10000], feedMs: [2500, 6000], // landing now and then, a while
-    startledBy: { bark: 260, snap: 120 }, shy: { at: 45, odds: 0.05 }, dart: 400,
+    startledBy: { bark: 260, snap: 120, knock: 200 }, shy: { at: 45, odds: 0.05 }, dart: 400,
     band: [380, 760], roam: 1400, curious: 0.2, exitY: 400, // leaves sideways, at its own height
   }
   const FLY_DT_MAX = 0.05

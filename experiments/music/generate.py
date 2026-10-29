@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[1] / "sound"))
-from generate_eleven import API, RETRIES, credits_used, folder_of, key, today
+from generate_eleven import API, RETRIES, credits_used, folder_of, key, next_take, today
 from pieces import NEGATIVE, PIECES, STYLE
 
 OUT = Path(__file__).parent / "out"
@@ -188,9 +188,7 @@ def main(args: list[str]) -> None:
             except RuntimeError as e:
                 print(f"{name} {j['model']} failed: {e}", flush=True)
                 continue
-            folder = OUT / name
-            folder.mkdir(parents=True, exist_ok=True)
-            file = folder / f"{len(list(folder.glob('*.mp3'))) + 1:02d}.mp3"
+            file = next_take(OUT / name)
             file.write_bytes(audio)
             found[name]["candidates"].append(
                 {

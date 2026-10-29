@@ -84,6 +84,8 @@ GESTURES = {
     # the things' variations (antics.js, things.js)
     "puzzled": "Reksio.puzzled()",
     "waitForDrop": "Reksio.waitForDrop(800)",
+    "knockPipe": "Reksio.knockPipe(true, () => {})",
+    "huff": "Reksio.huff(() => {})",
     "hiccups": "Reksio.hiccups()",
     "tryToFly": "Reksio.tryToFly()",
     "crossEyed": "Reksio.crossEyed()",
@@ -378,7 +380,7 @@ class TestVariations:
     @pytest.mark.parametrize(
         ("name", "uses"),
         [
-            ("tap", 4),
+            ("tap", 7),  # drawn only when the water runs: uses 4 and 7 (tap.js)
             ("flowers", 3),
             ("gate", 5),
             ("bird", 3),
@@ -562,6 +564,59 @@ class TestNap:
         assert y.page.evaluate(
             "getComputedStyle(document.querySelector('#doghouse g[clip-path]')).display !== 'none'"
         ), "not asleep in the doorway this morning"
+
+
+class TestTap:
+    """The tap's story (tap.js): it runs, then only drips, then runs dry
+    until he knocks it going again; in the cold he thaws an icicle instead."""
+
+    QUERY = f"{STILL}&fog=0"
+
+    @staticmethod
+    def stages(y: Yard) -> list[str]:
+        return [e["stage"] for e in y.events("tap") if "stage" in e]
+
+    def test_runs_drips_runs_dry_and_he_knocks_it_going(self, yard: callable) -> None:
+        y = yard(self.QUERY)
+        for _ in range(3):
+            y.run("yardGame.use('tap')")
+            y.settled()
+        assert self.stages(y) == ["flow", "drips", "dry"]
+        assert any(e.get("knocked") for e in y.events("tap"))
+        assert (
+            y.page.evaluate("document.getElementById('water').style.opacity") == "0"
+        ), "the water left running"
+
+    def test_in_the_cold_he_thaws_the_icicle(self, yard: callable) -> None:
+        y = yard(f"{self.QUERY}&season=winter&snowman=0")
+        icicle = "getComputedStyle(document.getElementById('icicle')).display"
+        for n in range(1, 4):
+            y.run("yardGame.use('tap')")
+            y.settled()
+            if n == 2:
+                assert y.page.evaluate("Tap.iced") and y.page.evaluate(icicle) != "none"
+        assert any(e.get("thawed") for e in y.events("tap"))
+        assert not any(e.get("knocked") for e in y.events("tap"))
+        assert y.page.evaluate(icicle) == "none"
+
+    @pytest.mark.parametrize("winter", [False, True], ids=["knock", "thaw"])
+    def test_a_tap_while_it_is_dry_waits_and_he_ends_free(
+        self, yard: callable, winter: bool
+    ) -> None:
+        y = yard(self.QUERY + ("&season=winter&snowman=0" if winter else ""))
+        for _ in range(2):
+            y.run("yardGame.use('tap')")
+            y.settled()
+        y.start("yardGame.use('tap')")
+        y.page.wait_for_function(
+            "yardGame.events().some((e) => e.kind === 'tap' && e.stage === 'dry')",
+            timeout=DONE_MS,
+        )
+        y.page.wait_for_timeout(2500)  # under it, knocking or huffing
+        y.page.evaluate("yardGame.perform('walk to 600')")
+        s = y.settled()
+        assert s["uses"]["tap"] == 3
+        assert not y.page.evaluate("Tap.iced"), "the icicle is still on the spout"
 
 
 class TestBowl:

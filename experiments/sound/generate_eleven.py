@@ -118,6 +118,12 @@ def today() -> date:
     return datetime.now(UTC).astimezone().date()
 
 
+def next_take(where: Path) -> Path:
+    """The next numbered take's file in a sound's (or piece's) directory."""
+    where.mkdir(parents=True, exist_ok=True)
+    return where / f"{len(list(where.glob('*.mp3'))) + 1:02d}.mp3"
+
+
 def folder_of(args: list[str], names: list[str]) -> str:
     """The run's folder on the board: --folder NAME, else the day and what was made."""
     if "--folder" in args:
@@ -182,9 +188,7 @@ def main(args: list[str]) -> None:
             except RuntimeError as e:
                 print(f"{name} failed: {e}", flush=True)
                 continue
-            folder = OUT / "eleven" / name
-            folder.mkdir(parents=True, exist_ok=True)
-            file = folder / f"{len(list(folder.glob('*.mp3'))) + 1:02d}.mp3"
+            file = next_take(OUT / "eleven" / name)
             file.write_bytes(audio)
             found[name]["candidates"].append(
                 {

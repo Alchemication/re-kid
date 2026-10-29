@@ -36,7 +36,7 @@ function yard(query = '') {
   const bee = [] // where the bee was sent, and 'free' when let go
   const Creatures = { async beeTo(x, y) { bee.push({ x, y }) }, beeFree() { bee.push('free') } }
   const Weather = { raining: false, on() {} }
-  const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'mouse.js', 'mound.js', 'film.js', 'hen.js', 'mushrooms.js', 'things.js'], {
+  const page = load(['debug.js', 'layout.js', 'idle.js', 'bird.js', 'bramble.js', 'bowl.js', 'cuckoo.js', 'mouse.js', 'mound.js', 'tap.js', 'film.js', 'hen.js', 'mushrooms.js', 'things.js'], {
     query: `?seed=1&${query}`,
     dom: true,
     globals: { Snowman: { things: {}, init() {} }, Reksio: reksio, Sound, Music, Creatures, Weather, Figure: { bowlTopAt() {}, noseTipAt() {} }, Tree: { init() {}, ready: false, VARIATIONS: ['stuck', 'leaves'], thing: { at: () => 1600, async run() {} } } },
@@ -461,7 +461,8 @@ describe('variations', () => {
   it('after its first use, each thing plays a variation every time, all of them before any comes again, each to its end', async () => {
     const y = yard('flowers=1')
     // the pools named after a thing (the mound's 'bury' is drawn through 'dig', holding the bone)
-    const pools = Object.fromEntries(Object.entries(y.Things.VARIATIONS).filter(([name]) => name in y.Things.THINGS))
+    // (the tap's is drawn only at the first of its three stages: its own tests, below)
+    const pools = Object.fromEntries(Object.entries(y.Things.VARIATIONS).filter(([name]) => name in y.Things.THINGS && name !== 'tap'))
     for (const [name, names] of Object.entries(pools)) {
       for (let n = 1; n <= names.length * 2 + 1; n++) await y.use(name, false, n)
     }
@@ -474,12 +475,64 @@ describe('variations', () => {
     }
   })
 
+})
+
+describe('the tap', () => {
+  /** What the tap's uses so far did (tap.js traces), in order. */
+  const traced = (y) => [...y.page.get('Debug.dump()').matchAll(/tap (\{.*?\})/g)].map((m) => JSON.parse(m[1]))
+
+  it('runs, then only drips, then runs dry until he knocks it going again; and again', async () => {
+    const y = yard()
+    for (let n = 1; n <= 6; n++) await y.use('tap', false, n)
+    assert.deepEqual(traced(y).filter((t) => t.stage).map((t) => t.stage), ['flow', 'drips', 'dry', 'flow', 'drips', 'dry'])
+    assert.equal(traced(y).filter((t) => t.knocked).length, 2, 'knocked going both times it ran dry')
+    assert.equal(y.played.filter((s) => s === 'gurgle').length, 2)
+  })
+
+  it('brings something on top of the running water only from the second round, all of its pool before a repeat', async () => {
+    const y = yard()
+    for (let n = 1; n <= 7; n++) await y.use('tap', false, n)
+    const got = y.variations().tap
+    assert.equal(got.length, 2, `${got}`)
+    assert.deepEqual([...got].sort(), [...y.Things.VARIATIONS.tap].sort())
+  })
+
   it('the first use is plain, unless a variation is asked for', async () => {
     const y = yard()
     await y.use('tap', false, 1)
     assert.equal(y.variations().tap, undefined)
-    await y.use('tap', true, 1)
-    assert.equal(y.variations().tap.length, 1)
+    const asked = yard()
+    await asked.use('tap', true, 1)
+    assert.equal(asked.variations().tap.length, 1)
+  })
+
+  it('in the cold, the drips freeze on the spout, and he thaws the icicle instead of knocking', async () => {
+    const y = yard()
+    y.Weather.frozen = true
+    const Tap = y.page.get('Tap')
+    const icicle = y.page.get("document.getElementById('icicle')")
+    await y.use('tap', false, 1)
+    assert.equal(Tap.iced, false)
+    await y.use('tap', false, 2)
+    assert.equal(Tap.iced, true)
+    assert.equal(icicle.style.display, '')
+    await y.use('tap', false, 3)
+    assert.equal(Tap.iced, false)
+    assert.equal(icicle.style.display, 'none')
+    assert.ok(traced(y).some((t) => t.thawed))
+    assert.ok(!traced(y).some((t) => t.knocked), 'no knocking: the icicle was what stopped it')
+  })
+
+  it('a use cut short tells its stage again: the story never skips one', async () => {
+    const y = yard()
+    await y.use('tap')
+    const walkTo = y.reksio.walkTo
+    y.reksio.walkTo = async () => false // sent elsewhere on his way under it
+    await y.use('tap')
+    y.reksio.walkTo = walkTo
+    await y.use('tap')
+    await y.use('tap')
+    assert.deepEqual(traced(y).filter((t) => t.stage).map((t) => t.stage), ['flow', 'drips', 'drips', 'dry'])
   })
 })
 

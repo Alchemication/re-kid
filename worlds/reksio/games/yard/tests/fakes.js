@@ -33,8 +33,8 @@ function fakeReksio(x = 1500) {
       r.facing = dir
     },
     mouth: () => ({ x: r.x + 60 * r.facing, y: 640 }),
-    /** What a gag reaches in the kit for: an ear perked, his scale. */
-    kit: { perk() {}, SCALE: 1.2 },
+    /** What a gag reaches in the kit for: an ear perked, a noise told, his scale. */
+    kit: { perk() {}, tell() {}, SCALE: 1.2 },
     async stamp(onThump) {
       calls.push('stamp')
       if (onThump) onThump()

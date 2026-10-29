@@ -286,13 +286,18 @@
           <!-- ============ water tap on the wall, red hose below ============ -->
           <g id="tap" class="thing" data-thing="tap" data-hint-y="440">
             <rect class="hit" x="1200" y="450" width="150" height="360" />
-            <rect class="plate" x="1252" y="460" width="36" height="22" rx="4" />
-            <path class="pipe" d="M1270 470 V540 H1300" />
-            <path class="pipe-inner" d="M1270 470 V540 H1300" />
-            <path class="spout" d="M1300 540 Q1320 540 1320 562" />
-            <g id="tap-handle" style="transform-origin: 1270px 528px">
-              <path class="handle" d="M1250 528 H1290" />
-              <circle class="handle-knob" cx="1270" cy="528" r="7" />
+            <!-- the pipe shudders when he knocks on it, a gurgle runs down it (tap.js) -->
+            <g id="tap-pipe">
+              <rect class="plate" x="1252" y="460" width="36" height="22" rx="4" />
+              <path class="pipe" d="M1270 470 V540 H1300" />
+              <path class="pipe-inner" d="M1270 470 V540 H1300" />
+              <path class="spout" d="M1300 540 Q1320 540 1320 562" />
+              <g id="tap-handle" style="transform-origin: 1270px 528px">
+                <path class="handle" d="M1250 528 H1290" />
+                <circle class="handle-knob" cx="1270" cy="528" r="7" />
+              </g>
+              <!-- in the cold, the drips freeze on the spout -->
+              <path id="icicle" class="icicle" d="M1310 560 Q1314 600 1320 636 Q1326 600 1330 560 Z" style="display: none" />
             </g>
             <path id="water" class="water" d="M1320 566 Q1316 640 1324 712 Q1320 760 1322 790" opacity="0" />
             <path class="hose" d="M1282 790 C1240 795 1230 772 1262 768 C1302 763 1312 788 1276 786 C1252 785 1252 776 1270 776 M1282 790 C1310 796 1360 794 1380 788" />
@@ -660,6 +665,7 @@
   <script src="cuckoo.js"></script>
   <script src="mouse.js"></script>
   <script src="mound.js"></script>
+  <script src="tap.js"></script>
   <script src="film.js"></script>
   <script src="hen.js"></script>
   <script src="mushrooms.js"></script>

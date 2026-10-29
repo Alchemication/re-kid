@@ -185,6 +185,14 @@ decided and why.
       Judge: his size, his look and faces, the snowballs, the sparrow,
       how long the build takes (about 30 s). Not yet: the bowl as its hat, a sound for
       his call (a voice needs Adam's ear).
+      **Adam judges the tap's story** (built 2026-10-29, his pick A, after
+      a mum's idea at a playtest; `tap.js`): it runs, then only drips,
+      then runs dry; he knocks on the pipe twice, then hard, a gurgle runs
+      down it, and the water gushes over him; in winter the drips freeze
+      into an icicle he huffs off. Judge: the knock's height and timing,
+      whether the gush reads, the icicle. Its sounds (clonk, gurgle, burp,
+      huff) wait on the sound board, "29 Oct: the dry tap"; synth
+      stand-ins until then, the huff silent.
    3. **Winter's weather varies per play** (Adam, 2026-10-26: "randomness
       as in life is welcome if it doesn't overcomplicate things"): each
       winter play picks one sky, the way fog is picked now: a crisp clear
@@ -252,7 +260,7 @@ scene:
   nap after the first brings one of four things on top, all before any
   repeats (`nap.js`), and one sleeping Reksio in the morning, on a tap and
   at bedtime. Pools built (2026-10-20, Adam to judge in play): the tap
-  (spray, drips on his nose, hiccups), the flowers (bigger sneeze, petal
+  (spray, hiccups; its drips are now a stage of its story), the flowers (bigger sneeze, petal
   on his nose), the gate (a bigger dog barks back), the bird (he tries
   to fly after it; it lands on his head), the gate (also: digging under
   it, tugging a picket, leaping up to peek over). New (2026-10-20): the

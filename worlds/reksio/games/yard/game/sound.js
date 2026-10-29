@@ -216,11 +216,11 @@ const Sound = (() => {
     }
   }
 
-  // His voice, made up in code (yawn, snore, sneeze, yelp, howl, lapping,
+  // His voice, made up in code (yawn, snore, sneeze, yelp, howl, a huff, lapping,
   // slurping, munching, sniffing), is silent: to Adam's ear every one of
   // them sounded awful, and silence beats a bad sound. Where a sound has
   // recorded takes (effects.js) they play instead; the rest stay silent.
-  const HIS_VOICE = ['munch', 'slurp', 'lap', 'snore', 'yawn', 'sneeze', 'sniff', 'yelp', 'howl']
+  const HIS_VOICE = ['munch', 'slurp', 'lap', 'snore', 'yawn', 'sneeze', 'sniff', 'yelp', 'howl', 'huff']
 
   let heard = false // a tap or key has let sound play
 
@@ -542,6 +542,12 @@ const Sound = (() => {
     bump() { tone('sine', 180, 80, 0, 0.26, 0.003, 0.12); hiss(0, 0.05, 0.002, 0.06, 'lowpass', 1100) },
     /** Fruit on the head: bonk. */
     bonk() { tone('triangle', 520, 190, 0, 0.25, 0.002, 0.16); hiss(0, 0.06, 0.002, 0.04, 'bandpass', 1400) },
+    /** A paw knocking on the tap's metal pipe: a hollow clonk. */
+    clonk() { tone('triangle', 420, 340, 0, 0.22, 0.002, 0.2); tone('sine', 1250, 1180, 0, 0.06, 0.002, 0.2) },
+    /** Water and air gurgling down the pipe. */
+    gurgle() { for (let i = 0; i < 6; i++) tone('sine', 260 + i * 25, 520 + i * 30, i * 0.15, 0.1, 0.01, 0.1) },
+    /** A burp of air out of the spout. */
+    burp() { tone('sawtooth', 120, 80, 0, 0.12, 0.01, 0.16); hiss(0, 0.06, 0.01, 0.12, 'lowpass', 700, 1) },
     /** Paws in a puddle. */
     splash() {
       hiss(0, 0.16, 0.004, 0.12, 'bandpass', 1300, 1.2)

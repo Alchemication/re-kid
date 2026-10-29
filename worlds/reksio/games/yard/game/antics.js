@@ -14,6 +14,9 @@
 // The cuckoo clock (cuckoo.js): he barks back up at each call, very pleased;
 // turns his back on it, nose in the air; is spun round by one call more; and
 // gives the shut door a cross look.
+//
+// The dry tap (tap.js): he hops up to knock on its pipe, and huffs warm
+// breath on the icicle that stops it in the cold.
 
 /* global Reksio, Sound, Figure */
 (() => {
@@ -21,6 +24,7 @@
   const GLUM = { smile: -0.7, open: 0 } // what shows of his face under the bowl
   const STEP_OFF = 24 // setting off, he gets this far before his tail yanks him back (his units)
   const STRAIN = 46 // straining hard, this far: the tail stretches like elastic
+  const KNOCK_RISE = 75 // his hop at the dry tap (his units): his paw, reaching up and forward, meets the pipe
   const EFFORT = { eyes: 0, joy: -1, brows: -0.9, lines: 1, smile: 0, grit: 1, open: 0 } // eyes screwed shut, teeth clenched
   const STARTLED = { lift: 1, brows: 0.6, o: 1, open: 0.3, smile: 0 }
   const FRIGHT = { lift: 1, brows: 1, open: 0.8, o: 1, smile: 0, eyes: 1, joy: 0 }
@@ -310,6 +314,36 @@
     await faceOff(200)
   }
 
+  // ------------------------------------------------------------ the dry tap (tap.js)
+
+  /** A hop up to knock on the tap's pipe with his paw, onKnock at the top;
+   * hard: a bigger leap, both paws, eyes screwed shut. */
+  async function knockPipe(hard, onKnock) {
+    const far = hard ? [[30, -116], [62, -146]] : k.basePose().farArm // reaching out ahead of his face, not over it
+    faceTo(hard ? EFFORT : { lift: 0.6, brows: 0.3, small: 1, smile: 0 }, 100)
+    await actTo(Figure.vary(k.basePose(), { nearArm: [[40, -118], [70, -150]], farArm: far }), 140)
+    Sound.hop()
+    await blend(add, 'dy', -(hard ? KNOCK_RISE + 12 : KNOCK_RISE), 220, k.EASE_OUT)
+    onKnock()
+    await pause(120)
+    await blend(add, 'dy', 0, 240, k.EASE_IN)
+    await Promise.all([actOff(200), faceOff(200)])
+  }
+
+  /** A long warm huff at something before his nose (the icicle on the
+   * tap), onHuff as the breath goes out: a deep breath in, then out. */
+  async function huff(onHuff) {
+    faceTo({ o: 0, open: 0, smile: 0, lift: 0.6, eyes: 1, joy: 0 }, 120)
+    await blend(add, 'dy', -4, 260) // the breath in
+    faceTo({ o: 1, open: 0.6, small: 0, lift: 0.8, eyes: 0.4, joy: 0 }, 100)
+    blend(add, 'dy', 0, 400)
+    await blend(add, 'tilt', -8, 120, k.EASE_OUT)
+    onHuff()
+    await pause(700)
+    blend(add, 'tilt', 0, 220)
+    await faceOff(220)
+  }
+
   /** Puffed up, chest out, hands on hips: a bigger bark back. */
   async function puffUp() {
     await Promise.all([actTo(Figure.vary(k.POSES.handsOnHips, { chest: [k.POSES.handsOnHips.chest[0] + 6, k.POSES.handsOnHips.chest[1] - 4] }), 200, k.OVERSHOOT), faceTo({ brows: -0.6, smile: 0.2, open: 0, lift: 0 }, 150)])
@@ -500,7 +534,7 @@
     await faceOff(300)
   }
 
-  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
+  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, knockPipe, huff, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
   Reksio.addGestures(gestures)
 
 })()

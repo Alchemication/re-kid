@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds */
+/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds, Tap */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -798,6 +798,7 @@
     Debug.check('nothing a gag put on him outlasts it', !Reksio.worn.length || busy || acting, { worn: Reksio.worn })
     Debug.check('never walks with his tail caught', !Reksio.wearing('tail') || !Reksio.walking)
     Debug.check('the bird is in front of him only while it is busy', !Bird.front || Bird.flying)
+    Debug.check('a frozen tap shows its icicle', !Tap.iced || $('icicle').style.display !== 'none')
   }
 
   /** The game's state, for tests and the ?debug overlay. */
@@ -807,7 +808,7 @@
       done: day.done, props: Layout.props, uses: { ...uses }, bedtime: day.bedtime, moonUp: Number(Sky.moonUp.toFixed(2)),
       reksio: { x: Math.round(Reksio.x), pose: Reksio.pose, walking: Reksio.walking },
       soak: Number(Wet.soak.toFixed(2)), weather: Weather.phase, camX: Math.round(camX),
-      stamped: Things.stamped, mouse: Things.mouse,
+      stamped: Things.stamped, mouse: Things.mouse, tap: Tap.state,
     }
   }
 

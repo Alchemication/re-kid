@@ -61,6 +61,42 @@ SOUNDS: dict[str, dict] = {
             "a small body landing on packed snow, a dull soft thump",
         ],
     },
+    "clonk": {
+        "for": "Reksio knocks on the dry tap's metal pipe with his paw (tap.js); a third knock harder.",
+        "seconds": 0.6,
+        "prompts": [
+            "knocking once on an old metal water pipe with a knuckle, a hollow clonk",
+            "a single knock on a hollow iron pipe on a wall, a dull metallic bong",
+            "a paw thumping a garden tap's metal pipe, a short hollow clank",
+        ],
+    },
+    "gurgle": {
+        "for": "Water and air gurgling down the tap's pipe after his knock, about a second (tap.js).",
+        "seconds": 1.2,
+        "prompts": [
+            "water gurgling and glugging down an old metal pipe, air bubbles, close up",
+            "an old water pipe gurgling as the water comes back, a bubbly rumble",
+            "a gurgle running down a drainpipe, glug glug, short",
+        ],
+    },
+    "burp": {
+        "for": "A burp of air out of the tap's spout, just before the water gushes (tap.js).",
+        "seconds": 0.6,
+        "prompts": [
+            "an old tap spitting out a burp of air, a short sputter and pop",
+            "air sputtering out of a water tap, a short wet splutter",
+            "a garden tap coughing out air before the water comes, a quick blurp",
+        ],
+    },
+    "huff": {
+        "for": "Reksio huffs warm breath on the icicle on the tap, in winter (tap.js).",
+        "seconds": 1.0,
+        "prompts": [
+            "a small dog breathing out a long warm huff, close up",
+            "a puppy blowing a slow breath out through its mouth, a soft haaah",
+            "a long breathy exhale, warming cold hands, soft and close",
+        ],
+    },
     "boing": {
         "for": "His tail stretched like elastic snaps him back (the bramble).",
         "seconds": 1.2,
