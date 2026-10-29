@@ -305,6 +305,16 @@
     await faceOff(150)
   }
 
+  /** The tickle before a sneeze (the flowers): his head going back, eyes
+   * screwing shut, mouth opening, more for a bigger one (how, 0 to 1): ah… */
+  async function tickle(how) {
+    faceTo({ o: 1, open: 0.3 + 0.5 * how, eyes: 0.7 - 0.6 * how, joy: 0, brows: 0.6, lift: 0.7, lines: how }, 150)
+    await blend(add, 'tilt', -10 - 20 * how, 280, k.EASE_OUT)
+    await pause(220 + 200 * how)
+    blend(add, 'tilt', 0, 140)
+    await faceOff(140)
+  }
+
   /** A puff of breath: blowing something off his nose. */
   async function blow() {
     faceTo({ o: 1, open: 0.35, small: 0, lift: 0.5 }, 60)
@@ -534,7 +544,7 @@
     await faceOff(300)
   }
 
-  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, knockPipe, huff, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
+  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, knockPipe, huff, tickle, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
   Reksio.addGestures(gestures)
 
 })()

@@ -55,6 +55,16 @@ beat many):
   beats several that only play on.
 - **Fun to repeat.** The core stays the same each time (small children love
   exact repetition); something small is added on top now and then.
+- **A story over uses, where the thing allows it.** If it holds an amount
+  the child can see (water, fruit, berries) or a reaction that can build
+  up (a sneeze), consider telling a story across uses instead of drawing a
+  random variation: one visible step per use, ending in a funny reset, then
+  again (the tap: runs, drips, runs dry until he knocks it going, from a
+  mum's idea at a playtest, 2026-10-29; the flowers' sneeze, bigger each
+  time). The story moves on only past a step the child saw, so a use cut
+  short tells it again; a variation can still ride on top from the second
+  round. Keep it to a few things: a yard where everything counts in threes
+  feels mechanical.
 - **New to the place.** It adds what the game doesn't have yet. First list
   the gags of the same kind already in the game (who helps or is helped, how,
   what the comic moment is, how it ends) and make this one differ in the

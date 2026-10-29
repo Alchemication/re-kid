@@ -193,6 +193,12 @@ decided and why.
       whether the gush reads, the icicle. Its sounds (clonk, gurgle, burp,
       huff) wait on the sound board, "29 Oct: the dry tap"; synth
       stand-ins until then, the huff silent.
+      **Adam judges the flowers' sneeze** (built 2026-10-29, the tap's
+      lesson applied): it builds over three sniffs, ah… ah… AH…, a petal
+      on his nose the second time, blown backwards the third, then again.
+      Judge: whether the build-up reads, and whether the flowers miss a
+      random variation on later rounds (none now). Next candidate: the
+      fruit tree running out, after Adam has seen these.
    3. **Winter's weather varies per play** (Adam, 2026-10-26: "randomness
       as in life is welcome if it doesn't overcomplicate things"): each
       winter play picks one sky, the way fog is picked now: a crisp clear
@@ -260,8 +266,7 @@ scene:
   nap after the first brings one of four things on top, all before any
   repeats (`nap.js`), and one sleeping Reksio in the morning, on a tap and
   at bedtime. Pools built (2026-10-20, Adam to judge in play): the tap
-  (spray, hiccups; its drips are now a stage of its story), the flowers (bigger sneeze, petal
-  on his nose), the gate (a bigger dog barks back), the bird (he tries
+  (spray, hiccups; its drips are now a stage of its story), the gate (a bigger dog barks back), the bird (he tries
   to fly after it; it lands on his head), the gate (also: digging under
   it, tugging a picket, leaping up to peek over). New (2026-10-20): the
   hen's egg on the wall, fetched with the garden ladder (hen.js; after

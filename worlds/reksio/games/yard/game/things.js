@@ -30,12 +30,12 @@ const Things = (() => {
   // Each thing's variations, after the first use one every time (Adam,
   // 2026-10-19: "each encounter should be a bit random and different"):
   // the tap's running water (its first stage of three, tap.js) sprays him,
-  // or gives him hiccups; the flowers' bigger sneeze, or a petal on his nose; at the gate a bigger dog
+  // or gives him hiccups; at the gate a bigger dog
   // barks back, or he digs under it, tugs a picket in his teeth, or leaps
   // up to peek over it (the yard's edge stays put); the bird he barks at,
   // he tries to fly after,
   // or it lands on his head.
-  const VARIATIONS = { tap: ['spray', 'hiccups'], flowers: ['blow', 'petal'], gate: ['answer', 'dig', 'gnaw', 'peek'], bird: ['fly', 'head'], hen: Hen.VARIATIONS, ...Mushrooms.VARIATIONS, trap: ['crumb', 'baby', 'hide', 'ride'], dig: ['harder', 'boot', 'molehill'], bury: ['sly', 'watched'], film: ['roll', 'show', 'restamp'], tree: Tree.VARIATIONS, berries: ['miss', 'caught', 'tongue', 'share', 'juggle'] }
+  const VARIATIONS = { tap: ['spray', 'hiccups'], gate: ['answer', 'dig', 'gnaw', 'peek'], bird: ['fly', 'head'], hen: Hen.VARIATIONS, ...Mushrooms.VARIATIONS, trap: ['crumb', 'baby', 'hide', 'ride'], dig: ['harder', 'boot', 'molehill'], bury: ['sly', 'watched'], film: ['roll', 'show', 'restamp'], tree: Tree.VARIATIONS, berries: ['miss', 'caught', 'tongue', 'share', 'juggle'] }
   const variety = Debug.random('variety') // its own stream: how often the pools draw depends on taps
   const pools = Object.fromEntries(Object.entries(VARIATIONS).map(([name, names]) => [name, Idle.pool(names, variety)]))
 
@@ -152,6 +152,42 @@ const Things = (() => {
     }
   }
 
+  // The flowers' story, like the tap's (Adam, 2026-10-29): the sneeze builds
+  // over three sniffs, then starts again. A small sneeze; a bigger one, and
+  // a petal lands on his nose; a huge one that blows him backwards. Each
+  // time his head goes back once more first (ah… ah… AH…), so the child
+  // sees it coming.
+  const SNEEZES = ['small', 'petal', 'blow']
+  const PETALS = { small: 6, petal: 12, blow: 26 } // flung by each sneeze
+  let sneezed = 0 // sneezes so far: the story moves on only past one that came (a cut sniff tells it again)
+
+  async function sniffFlowers() {
+    const stage = SNEEZES[sneezed % SNEEZES.length]
+    const ahs = SNEEZES.indexOf(stage) + 1
+    Debug.trace('flowers', { stage })
+    for (let i = 0; i < 3; i++) {
+      Sound.step()
+      await Reksio.nod(8, 260)
+    }
+    for (let i = 0; i < ahs; i++) await Reksio.tickle(i / 2) // ah… ah… AH…
+    await wait(150)
+    Sound.sneeze()
+    Music.react.sneeze()
+    sneezed += 1
+    await wait(320)
+    Reksio.nod(-24, 380)
+    burst(1640 + X('flowers'), 680, PETALS[stage], 'petal', { height: stage === 'blow' ? 90 : 70, reach: stage === 'blow' ? 150 : 110, size: 5 })
+    if (stage === 'petal') await petalOnNose()
+    if (stage === 'blow') {
+      // blown backwards, and a suspicious look back at them
+      Reksio.walkTo(Reksio.x - 90)
+      Reksio.face(1)
+      await Reksio.startle()
+      await Reksio.squint()
+    }
+    await wait(500)
+  }
+
   // ------------------------------------------------------------ things
 
   let held = null // while a gag holds him (the bowl on his head, his tail caught): a tap's answer (yard.js stuckTap)
@@ -183,31 +219,7 @@ const Things = (() => {
     flowers: {
       at: () => 1483 + X('flowers'),
       face: 1,
-      async run({ extra, n }) {
-        const v = variation('flowers', extra, n)
-        for (let i = 0; i < 3; i++) {
-          Sound.step()
-          await Reksio.nod(8, 260)
-        }
-        await wait(150)
-        Sound.sneeze()
-        Music.react.sneeze()
-        await wait(320)
-        Reksio.nod(-24, 380)
-        burst(1640 + X('flowers'), 680, 12, 'petal', { height: 70, reach: 110, size: 5 })
-        if (v === 'petal') await petalOnNose()
-        if (v === 'blow') {
-          // a second, bigger sneeze blows him backwards
-          await wait(600)
-          Sound.sneeze()
-          Music.react.sneeze()
-          burst(1640 + X('flowers'), 680, 20, 'petal', { height: 90, reach: 150, size: 5 })
-          Reksio.walkTo(Reksio.x - 90)
-          Reksio.face(1)
-          await Reksio.hop(36, 1)
-        }
-        await wait(500)
-      },
+      run: sniffFlowers,
     },
     house: Cuckoo.thing, // the cuckoo clock, through its open window
     gate: {

@@ -86,6 +86,7 @@ GESTURES = {
     "waitForDrop": "Reksio.waitForDrop(800)",
     "knockPipe": "Reksio.knockPipe(true, () => {})",
     "huff": "Reksio.huff(() => {})",
+    "tickle": "Reksio.tickle(1)",
     "hiccups": "Reksio.hiccups()",
     "tryToFly": "Reksio.tryToFly()",
     "crossEyed": "Reksio.crossEyed()",
@@ -381,7 +382,6 @@ class TestVariations:
         ("name", "uses"),
         [
             ("tap", 7),  # drawn only when the water runs: uses 4 and 7 (tap.js)
-            ("flowers", 3),
             ("gate", 5),
             ("bird", 3),
             ("hen", 4),
@@ -415,7 +415,6 @@ class TestVariations:
         "name",
         [
             "tap",
-            "flowers",
             "gate",
             "bird",
             "hen",
@@ -617,6 +616,24 @@ class TestTap:
         s = y.settled()
         assert s["uses"]["tap"] == 3
         assert not y.page.evaluate("Tap.iced"), "the icicle is still on the spout"
+
+
+class TestFlowers:
+    """The flowers' story (things.js sniffFlowers): the sneeze builds over
+    three sniffs, a petal on his nose the second time, blown backwards the
+    third."""
+
+    def test_the_sneeze_builds_and_starts_again(self, yard: callable) -> None:
+        y = open_for_thing(yard, "flowers")
+        for _ in range(4):
+            y.run("yardGame.use('flowers')")
+            y.settled()
+        assert [e["stage"] for e in y.events("flowers")] == [
+            "small",
+            "petal",
+            "blow",
+            "small",
+        ]
 
 
 class TestBowl:

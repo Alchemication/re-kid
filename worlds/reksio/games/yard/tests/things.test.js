@@ -477,6 +477,27 @@ describe('variations', () => {
 
 })
 
+describe('the flowers', () => {
+  const stages = (y) => [...y.page.get('Debug.dump()').matchAll(/flowers \{"stage":"(\w+)"\}/g)].map((m) => m[1])
+
+  it('the sneeze builds over three sniffs, then starts again', async () => {
+    const y = yard('flowers=1')
+    for (let n = 1; n <= 4; n++) await y.use('flowers', false, n)
+    assert.deepEqual(stages(y), ['small', 'petal', 'blow', 'small'])
+  })
+
+  it('a sniff cut short before the sneeze tells it again', async () => {
+    const y = yard('flowers=1')
+    await y.use('flowers')
+    const nod = y.reksio.nod
+    y.reksio.nod = async () => { throw Object.assign(new Error('cut short'), { name: 'AbortError' }) }
+    await y.use('flowers')
+    y.reksio.nod = nod
+    await y.use('flowers')
+    assert.deepEqual(stages(y), ['small', 'petal', 'petal'])
+  })
+})
+
 describe('the tap', () => {
   /** What the tap's uses so far did (tap.js traces), in order. */
   const traced = (y) => [...y.page.get('Debug.dump()').matchAll(/tap (\{.*?\})/g)].map((m) => JSON.parse(m[1]))
