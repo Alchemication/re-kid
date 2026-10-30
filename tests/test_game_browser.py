@@ -1633,9 +1633,15 @@ class TestHelpedUp:
         return y
 
     def test_the_boy_pulls_him_up_and_they_laugh(self, yard: callable) -> None:
-        y = self.slips_by_the_boy(yard)
-        y.settled()
-        assert "boy helps him up" in y.page.evaluate("yardGame.trace()")
+        # the boy may start something of his own (snowman.js wonder) just as
+        # Reksio goes down, and then rightly doesn't come: slip again
+        for _ in range(3):
+            y = self.slips_by_the_boy(yard)
+            y.settled()
+            if "boy helps him up" in y.page.evaluate("yardGame.trace()"):
+                break
+        else:
+            pytest.fail("the boy never came to help him up")
         y.page.wait_for_function(f"{self.FREE} && !Boy.walking", timeout=DONE_MS)
 
     def test_a_tap_mid_help_gets_him_up_and_the_boy_stands(

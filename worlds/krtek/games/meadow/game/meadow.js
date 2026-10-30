@@ -39,6 +39,7 @@ const meadowGame = (() => {
   const NIGHT_TINT = 0.6 // how dark the night's blue makes the meadow at its darkest (multiplied over it)
   const words = Debug.random('meadow-words')
   const paint = Debug.random('meadow-paint')
+  const FROG_HEARS_MS = 1500 // going in gently by the frog, he waits at most this long for it to plop in
   const splashes = Debug.random('meadow-splashes') // drops off his face at the spring: their own, so nothing else shifts
   const planned = Eclipse.plan(Debug.random('meadow-eclipse')) // drawn either way, so ?eclipse= shifts nothing
   let eclipseAt = Layout.flags.eclipse ?? planned // the hour this play's eclipse starts, or null (none in a storm's play: start)
@@ -459,8 +460,9 @@ const meadowGame = (() => {
   async function withFrog(mine) {
     Mole.show('three', 1)
     await Mole.lean(10, 700)
-    Spring.tapFrog()
-    await Clock.wait(450)
+    World.noise('splash', Spring.POOL.x, 250) // the smallest splash: the frog hears it (spring.js) and plops in
+    for (let i = 0; i < FROG_HEARS_MS / 100 && Spring.frog; i++) await Clock.wait(100)
+    await Clock.wait(300)
     if (!mine()) return
     drops(Mole.head(), 8)
     Sound.say('fright', true)

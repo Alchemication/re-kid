@@ -196,7 +196,7 @@ class TestMeadowDay:
     ) -> None:
         m = meadow(f"{STILL}&day=12&props=")
         m.wake()
-        m.page.wait_for_selector("#again:not([hidden])", timeout=40_000)
+        m.page.wait_for_selector("#again:not([hidden])", timeout=60_000)
         m.page.evaluate("window.__sameplay = true")
         m.page.mouse.move(640, 400)
         m.page.mouse.down()  # held, on the picture: nothing
