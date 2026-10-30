@@ -18,7 +18,8 @@
 // Under the gestures, life.js keeps him alive when he is free (how he
 // stands, his glances and moods) and always (blinks, ears and tail swinging
 // after him). Walking adds its stride as he goes. What a gag puts on him (the
-// bowl over his head, his tail caught on a thorn: wear()) goes on last.
+// bowl over his head, his tail caught on a thorn: wear()) goes on last;
+// what he carries goes in his teeth (inMouth), his jaws shut on it.
 // relax() cuts every blend short (whoever awaits one hears an AbortError) and
 // blends him back to standing from exactly where he was drawn, so nothing is
 // ever left frozen part-way.
@@ -53,6 +54,7 @@ const Reksio = (() => {
   let minX = -Infinity // the ends of the scene he may walk to: the game says (keepBetween)
   let maxX = Infinity
   let holding = false // carrying a bone
+  let carrying = null // what else he carries in his teeth (inMouth)
   const worn = new Map() // what gags have put on him, by name: change(pose, toFigure) → the pose with it
   let facing = 1
   let target = null
@@ -127,7 +129,8 @@ const Reksio = (() => {
     if (add.kick) p = Figure.vary(p, { nearLeg: [[p.nearLeg[0][0], p.nearLeg[0][1] - add.kick / 2], [p.nearLeg[1][0], p.nearLeg[1][1] - add.kick]] })
     if (add.dig) p = digging(p, add.dig)
     if (add.wag) p = Figure.vary(p, { tail: [p.tail[0] + add.wag * 6, p.tail[1] - Math.abs(add.wag) * 2] })
-    if (holding) p = Figure.vary(p, { face: { bone: p.face.open < 0.15 && p.face.tongue < 0.1 ? 1 : 0 } })
+    if (carrying) p = Figure.vary(p, { face: { open: Math.min(p.face.open, 0.1), tongue: 0, bone: 1 } }) // jaws shut on it, whatever his face says
+    else if (holding) p = Figure.vary(p, { face: { bone: p.face.open < 0.15 && p.face.tongue < 0.1 ? 1 : 0 } })
     for (const change of worn.values()) p = change(p, toFigure)
     return p
   }
@@ -505,6 +508,15 @@ const Reksio = (() => {
     holding = on
   }
 
+  /** Carry this SVG node in his teeth (drawn about its bite, facing
+   * right), so it turns, tips and mirrors with his head; null, nothing. Whoever
+   * takes it from him puts it elsewhere. */
+  function inMouth(node) {
+    if (carrying && carrying !== node && carrying.parentNode === paint.mouth) carrying.remove()
+    carrying = node
+    if (node) paint.mouth.appendChild(node)
+  }
+
   /** Put on him something a gag brings (change(pose, toFigure) returns the
    * pose with it: the bowl over his head, his tail caught on a thorn), or
    * take it off (null). */
@@ -594,7 +606,7 @@ const Reksio = (() => {
     wearing: (name) => worn.has(name),
     /** The names of everything gags have put on him. */
     get worn() { return [...worn.keys()] },
-    walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, wear, beginStretch, endStretch, sleepIn, floatZ,
+    walkTo, stopWalking, face: face_, tick, relax, setWet, setMuddy, duck, holdBone, inMouth, wear, beginStretch, endStretch, sleepIn, floatZ,
     /** The ends of the scene he may walk to (the yard's house wall and fence). */
     keepBetween(min, max) {
       minX = min

@@ -178,6 +178,15 @@ const Snowman = (() => {
     }
   }
 
+  /** Carried in his teeth (Reksio.inMouth) until stop(), which takes it away. */
+  function inTeeth(node) {
+    Reksio.inMouth(node)
+    return () => {
+      Reksio.inMouth(null)
+      node.remove()
+    }
+  }
+
   function carried(what) {
     const n = document.createElementNS(SVG_NS, 'g')
     if (what === 'eyes') n.innerHTML = STONE(-5, 0) + STONE(6, 1)
@@ -573,10 +582,7 @@ const Snowman = (() => {
       }
       await Reksio.nod(24, 400)
       pile.style.display = 'none'
-      stop = follow(carried(what), () => {
-        const m = Reksio.mouth()
-        return { x: m.x, y: m.y + 4 }
-      })
+      stop = inTeeth(carried(what))
       Reksio.kit.perk('both', 600)
       if (!(await giveToBoy())) return
       stop()
@@ -735,7 +741,7 @@ const Snowman = (() => {
     get stage() { return stage },
     get has() { return { ...has } },
     /** What the finished snowman's encounters (snowplay.js) work with. */
-    kit: { R, GROUND, BOY_SIDE, AT_RIGHT, boyDo, go, holding, follow, carried, inHand, giveToBoy, takeAndPut, knockOff, put, takeOff, at: () => S, headY, layer: () => layer },
+    kit: { R, GROUND, BOY_SIDE, AT_RIGHT, boyDo, go, holding, follow, inTeeth, carried, inHand, giveToBoy, takeAndPut, knockOff, put, takeOff, at: () => S, headY, layer: () => layer },
     /** Where its action spot is (spots.js). */
     spotX: () => S + R.base + AT_RIGHT - 20,
   }

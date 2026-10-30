@@ -160,7 +160,7 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   `debug.js`, sound and music) says so in its header (`// Shared by every
   game`) and uses only other shared parts. It never holds a game's things,
   state or layout: the game reaches in through hooks it sets (for Reksio,
-  `kit`/`addGestures`, `wear`, `pointAt`, `keepBetween`, `listen`;
+  `kit`/`addGestures`, `wear`, `inMouth`, `pointAt`, `keepBetween`, `listen`;
   `Debug.pin`), and a gag's state stays in the gag's file. A character is
   split the same way: an engine (state, drawing, the kit), its everyday
   gestures, and each game's gag moves kept with that game. A part that
@@ -197,7 +197,7 @@ file layout update `README.md` and the `main.py` docstring in the same change.
     stance, a gesture's pose and face, small additions), what life.js adds
     (how he stands and looks about when free; blinks, ears and tail always)
     and walking's stride (gait.js), then what a gag has put on him
-    (`Reksio.wear`: the bowl, his caught tail), and figure.js draws it.
+    (`Reksio.wear`: the bowl, his caught tail; `Reksio.inMouth`: what he carries, drawn in his teeth), and figure.js draws it.
     Gestures (gestures.js, antics.js, made from `Reksio.kit`) move those numbers only with
     `blend()` on the Clock; `relax()` cuts every blend short. Nothing in the
     game is frozen with `fill: 'forwards'`: a frozen animation is a second

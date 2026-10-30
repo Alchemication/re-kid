@@ -751,8 +751,11 @@ const Figure = (() => {
     const crease = el(g, 'path', { fill: 'none', stroke: '#c96a5d', 'stroke-width': 1.4, 'stroke-linecap': 'round' })
     const lips = el(g, 'path', { fill: 'none', stroke: COLOURS.ink, 'stroke-width': 2.6, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' })
     const bone = [11, 5].map((w, i) => el(g, 'path', { fill: 'none', stroke: i ? COLOURS.white : COLOURS.ink, 'stroke-width': w, 'stroke-linecap': 'round' }))
+    // whatever else he carries in his teeth (a game puts it here, drawn
+    // about its bite, facing right): it turns, tips and mirrors with his head
+    const held = el(g, 'g', { class: 'fig-held' })
     const grit = mountGrit(g)
-    return (s) => {
+    const update = (s) => {
       setEllipse(patch, s.patch)
       eyes(s.eyes)
       set(nose, 'd', s.nose)
@@ -766,8 +769,11 @@ const Figure = (() => {
       const out = s.mouth.tongueOut
       showing(tongueOut, out.show, { d: out.d })
       showing(crease, out.show, { d: out.crease })
-      for (const b of bone) showing(b, s.mouth.bone.show, { d: BONE(...s.mouth.bone.at) })
+      for (const b of bone) showing(b, held.firstChild ? 0 : s.mouth.bone.show, { d: BONE(...s.mouth.bone.at) })
+      set(held, 'transform', `translate(${pt(s.mouth.bone.at)})`)
     }
+    update.held = held
+    return update
   }
 
   /** An ear: its flap, then its tip over it, shown only when it is folded. */
@@ -796,7 +802,8 @@ const Figure = (() => {
     })
   }
 
-  /** Make a Reksio inside an SVG group; returns draw(pose). */
+  /** Make a Reksio inside an SVG group; returns draw(pose), with draw.mouth,
+   * the group for what he carries in his teeth. */
   function mount(parent) {
     const id = `fig${++mounted}`
     const clips = { body: `${id}-body`, head: `${id}-head`, mouth: `${id}-mouth`, eye: `${id}-eye` }
@@ -822,7 +829,9 @@ const Figure = (() => {
     const bowl = [el(headG, 'path', { class: 'bowl' }), el(headG, 'path', { class: 'bowl-rim' })]
     const nearArm = tube(root, ARM)
     const nearHand = handOf(root)
-    return function draw(pose) {
+    draw.mouth = face.held
+    return draw
+    function draw(pose) {
       const s = shape(pose)
       farLeg(s.farLeg)
       farArm(s.farArm)

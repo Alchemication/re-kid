@@ -27,6 +27,7 @@ const Mushrooms = (() => {
   const REGROW_S = [12, 25] // a picked porcino grows back after this long…
   const PORCINOS_MAX = 6 // …up to this many in a play
   const PICK_FROM = 48 // he stands this far from a porcino to pick it
+  const PORCINO_BITE = { x: 14, y: 16, scale: 0.8 } // carried, by the stalk: its foot this far from his bite, the cap clear in front of his nose, a little smaller
   const SNAIL_RANGE = [460, 60] // food for the snail no nearer the house, or the fence, than this (she turns back at 420)
   const KEEP_AWAY = 150 // and this far from the fly agaric: down on all fours to sniff, his nose stops short of it
   const SCALE = 1.15
@@ -165,13 +166,17 @@ const Mushrooms = (() => {
 
   const nearestPorcino = () => porcinos.reduce((best, m) => (!best || Math.abs(m.x - Reksio.x) < Math.abs(best.x - Reksio.x) ? m : best), null)
 
-  /** Carry it in his mouth: it follows his mouth until the returned stop(). */
+  /** Carry it in his teeth (Reksio.inMouth), by its stalk, until the
+   * returned stop() takes it out again. */
   function carry(m) {
-    $('fx').appendChild(m.g)
-    return Clock.every(0, () => {
+    m.g.setAttribute('transform', `translate(${PORCINO_BITE.x} ${PORCINO_BITE.y}) scale(${PORCINO_BITE.scale})`)
+    Reksio.inMouth(m.g)
+    return () => {
+      Reksio.inMouth(null)
       const at = Reksio.mouth()
-      place(m, at.x, at.y + 40)
-    })
+      $('fx').appendChild(m.g)
+      place(m, at.x, at.y + PORCINO_BITE.y)
+    }
   }
 
   /** Down on the ground at x (a porcino again, to be picked another time). */

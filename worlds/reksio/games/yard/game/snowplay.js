@@ -356,10 +356,7 @@ const SnowPlay = (() => {
       await Reksio.sniff(1)
       await Reksio.nod(24, 400)
       unlay()
-      held = k.follow(k.carried('carrot'), () => {
-        const m = Reksio.mouth()
-        return { x: m.x, y: m.y + 4 }
-      })
+      held = k.inTeeth(k.carried('carrot'))
       Reksio.kit.perk('both', 600)
       if (!(await k.giveToBoy())) return
       held()

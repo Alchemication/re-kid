@@ -33,6 +33,9 @@ const Hen = (() => {
   const HEN_SCALE = 1.75
   const HELPED_GAP = 90 // a new egg at least this far along the wall from the last
   const CHICKS = 2 // at most this many chicks by the nest: more would crowd the yard
+  const EGG_BITE = { x: 14, y: 3 } // the egg in his teeth, from his bite (his units): held at its end, most of it out in front
+  const EGG = { rx: 13, ry: 17 } // an egg's size, big enough to see up on the wall
+  const EGG_HELD = { rx: 9, ry: 12 } // drawn smaller in his mouth: up on the wall it is big enough to see; held, it must not hide his face
   const VARIATIONS = ['wobble', 'chick', 'dance']
 
   const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -122,7 +125,7 @@ const Hen = (() => {
 
   /** An egg, in the scene's effects layer, at scene point p. */
   function makeEgg(p) {
-    const e = el('ellipse', { class: 'egg', rx: 13, ry: 17 }, $('fx')) // big enough to see up on the wall
+    const e = el('ellipse', { class: 'egg', ...EGG }, $('fx')) // big enough to see up on the wall
     putEgg(e, p)
     return e
   }
@@ -258,15 +261,26 @@ const Hen = (() => {
     await Reksio.climb(rise, RUNGS)
     const egg = eggUp.el
     eggUp = null
-    const inMouth = Clock.every(0, () => putEgg(egg, Reksio.mouth()))
+    putEgg(egg, EGG_BITE) // in his teeth, drawn with him (Reksio.inMouth)
+    egg.setAttribute('rx', EGG_HELD.rx)
+    egg.setAttribute('ry', EGG_HELD.ry)
+    Reksio.inMouth(egg)
+    /** Out of his mouth, back among the scene's effects where it was. */
+    const stop = () => {
+      Reksio.inMouth(null)
+      $('fx').appendChild(egg)
+      putEgg(egg, Reksio.mouth())
+      egg.setAttribute('rx', EGG.rx)
+      egg.setAttribute('ry', EGG.ry)
+    }
     cluck(2)
     try {
       await Reksio.climbDown(RUNGS, wobble ? () => wobbleLadder() : null)
     } catch (e) {
-      inMouth()
+      stop()
       throw e
     }
-    return { egg, stop: inMouth }
+    return { egg, stop }
   }
 
   /** The ladder sways side to side under him. */
