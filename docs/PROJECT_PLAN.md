@@ -198,6 +198,10 @@ decided and why.
       on his nose the second time, blown backwards the third, then again.
       Judge: whether the build-up reads, and whether the flowers miss a
       random variation on later rounds (none now).
+      **Adam judges the boy helping Reksio up on the ice** (built
+      2026-10-30, his pick: help, then laugh together; `ice.js`): Reksio
+      down near the free boy, the boy hurries over, hands out, pulls him
+      up, both laugh. Judge: the boy's reach and the pull, at phone size.
       **Adam judges the fruit tree's story and its winter** (built
       2026-10-30, his pick A): half the fruit, all but one, then the bird
       down for the last one, shaken out, scolding him by his head while

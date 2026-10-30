@@ -740,6 +740,8 @@ const Snowman = (() => {
     },
     get stage() { return stage },
     get has() { return { ...has } },
+    /** The boy out and doing nothing: free for something new (ice.js: helping Reksio up). */
+    get boyFree() { return Boy.out && !pending && !Boy.busy && !Boy.walking && !Boy.slipping && stage !== 'evening' },
     /** What the finished snowman's encounters (snowplay.js) work with. */
     kit: { R, GROUND, BOY_SIDE, AT_RIGHT, boyDo, go, holding, follow, inTeeth, carried, inHand, giveToBoy, takeAndPut, knockOff, put, takeOff, at: () => S, headY, layer: () => layer },
     /** Where its action spot is (spots.js). */

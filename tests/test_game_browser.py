@@ -91,6 +91,7 @@ GESTURES = {
     "hiccups": "Reksio.hiccups()",
     "tryToFly": "Reksio.tryToFly()",
     "crossEyed": "Reksio.crossEyed()",
+    "laughAlong": "Reksio.laughAlong()",
     "slipped": "Reksio.slipped()",
     "blow": "Reksio.blow()",
     "puffUp": "Reksio.puffUp()",
@@ -1604,6 +1605,53 @@ class TestIce:
         y.page.evaluate("yardGame.perform('walk to 1500')")
         y.page.wait_for_function("!Reksio.slipping", timeout=10_000)
         y.settled()
+
+
+class TestHelpedUp:
+    """Down on the ice by the boy, free: he hurries over, pulls Reksio up,
+    and they laugh together (ice.js); busy, he doesn't come. The slip is
+    forced on his first quick step, wherever the ice is."""
+
+    QUERY = f"seed=3&still&creatures=&rain=0{SNOWMAN}"
+    FREE = "Snowman.boyFree"
+    FORCE = (
+        "(() => { let done = false; Reksio.slipOn((x, v) => (!done && v > 100"
+        " ? (done = true, () => Ice.reksioSlips()) : null)) })()"
+    )
+
+    def slips_by_the_boy(self, yard: callable, busy: bool = False) -> Yard:
+        y = yard(self.QUERY)
+        y.page.wait_for_function(self.FREE, timeout=20_000)
+        y.run("Reksio.walkTo(Boy.x + 300)")
+        if busy:
+            y.page.evaluate(
+                "() => { Snowman.kit.boyDo('busy', () => Boy.scratch(6000)) }"
+            )
+        y.page.evaluate(self.FORCE)
+        y.start("Reksio.walkTo(Boy.x + 520)")
+        y.page.wait_for_function("Reksio.slipping", timeout=10_000)
+        return y
+
+    def test_the_boy_pulls_him_up_and_they_laugh(self, yard: callable) -> None:
+        y = self.slips_by_the_boy(yard)
+        y.settled()
+        assert "boy helps him up" in y.page.evaluate("yardGame.trace()")
+        y.page.wait_for_function(f"{self.FREE} && !Boy.walking", timeout=DONE_MS)
+
+    def test_a_tap_mid_help_gets_him_up_and_the_boy_stands(
+        self, yard: callable
+    ) -> None:
+        y = self.slips_by_the_boy(yard)
+        y.page.wait_for_function("Boy.busy || Boy.walking", timeout=10_000)
+        y.page.wait_for_timeout(800)
+        y.page.evaluate("yardGame.perform('walk to 1500')")
+        y.settled()
+        y.page.wait_for_function(self.FREE, timeout=DONE_MS)
+
+    def test_a_busy_boy_does_not_come(self, yard: callable) -> None:
+        y = self.slips_by_the_boy(yard, busy=True)
+        y.settled()
+        assert "boy helps him up" not in y.page.evaluate("yardGame.trace()")
 
 
 class TestSnowman:

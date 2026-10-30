@@ -166,6 +166,13 @@ const BoyFigure = (() => {
     laugh: vary(STAND, { head: [4, -236], tilt: -12, arms: { near: [[-14, -148], [-6, -118]], far: [[26, -150], [24, -122]] }, face: { smile: 1, open: 0.8, joy: 1 } }),
     // reaching ahead with the near hand at chest height (putting a stone in a snowman's face)
     reach: vary(STAND, { turn: 0.85, chest: [8, -182], head: [14, -232], arms: { near: [[18, -160], [52, -170]] } }),
+    // bent to Reksio down on the ice, both hands held out low to pull him up, a worried look
+    helpUp: vary(STAND, {
+      hip: [-18, -106], chest: [22, -162], head: [40, -204], turn: 0.75, tilt: 6,
+      arms: { near: [[34, -126], [62, -92]], far: [[46, -128], [72, -96]] },
+      legs: { near: [[-28, -58], [-40, -12]], far: [[2, -58], [8, -12]] },
+      face: { smile: 0, brows: 0.8, open: 0.2 },
+    }),
     // his feet going on the ice: leaning back, arms flung up and wide, a foot kicked up
     flail: vary(STAND, {
       chest: [-8, -180], head: [-6, -230], tilt: -10, turn: 0.4,

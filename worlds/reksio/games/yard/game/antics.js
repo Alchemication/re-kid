@@ -516,8 +516,10 @@
   /** On the ice (a winter play: ice.js): his feet shoot out from under him,
    * arms flung up, and down he plonks on his bottom, legs out straight, as he
    * skids on; a dazed, cross-eyed blink; then up, slowly and carefully. Slow
-   * enough to see (Adam, 2026-10-27). */
-  async function slipped() {
+   * enough to see (Adam, 2026-10-27). With someone coming to help him up
+   * (helped: () => a promise of being pulled up), he holds a paw up and
+   * waits instead. Resolves to whether he was pulled up. */
+  async function slipped(helped = null) {
     faceTo({ o: 1, open: 0.5, lift: 1, brows: 0.9, smile: 0 }, 50)
     k.perk('both', 250)
     blend(add, 'dy', -18, 160, k.EASE_OUT)
@@ -528,9 +530,30 @@
     await pause(500)
     await faceTo({ eyes: 1, lift: 0.8, brows: 0.5, small: 1, smile: 0, look: 1 }, 120) // seeing stars
     await pause(900)
-    await faceOff(250)
-    await pause(300)
-    await actOff(900) // up, carefully
+    if (!helped) {
+      await faceOff(250)
+      await pause(300)
+      await actOff(900) // up, carefully
+      return false
+    }
+    // someone coming to help: a hopeful look up, a paw held out to him
+    await Promise.all([faceTo({ brows: 0.7, lift: 0.6, smile: 0.3, small: 0.5 }, 250), actTo(REACHING_UP, 300)])
+    const pulled = await helped()
+    await faceOff(200)
+    await actOff(pulled ? 450 : 900) // pulled up, or up by himself
+    return pulled
+  }
+
+  /** Laughing along: a big grin, eyes shut, his head back, bobbing. */
+  async function laughAlong(times = 4) {
+    faceTo({ smile: 1, open: 0.7, eyes: 0, joy: 1, lift: 0.3 }, 150)
+    await blend(add, 'tilt', -10, 200)
+    for (let i = 0; i < times; i++) {
+      await blend(add, 'dy', -4, 110)
+      await blend(add, 'dy', 0, 120)
+    }
+    blend(add, 'tilt', 0, 300)
+    await faceOff(300)
   }
   // his feet out from under him: leaning back, legs kicked up in front, arms flung up
   const FEET_UP = Figure.vary(k.POSES.stand, {
@@ -544,6 +567,8 @@
     nearArm: [[10, -44], [26, -36]], farArm: [[-20, -42], [-30, -14]],
     nearLeg: [[26, -14], [52, -8]], farLeg: [[20, -12], [46, -4]],
   })
+  // still down, his near paw held up and out to whoever helps him up
+  const REACHING_UP = Figure.vary(PLONKED, { head: { x: 2, y: -104, tilt: -16, turn: 0.4 }, nearArm: [[16, -70], [36, -92]] })
 
   /** His tongue out, a long cross-eyed look down at it (it's gone purple:
    * the page colours it), and a grin. */
@@ -558,7 +583,7 @@
     await faceOff(300)
   }
 
-  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, knockPipe, huff, toldOff, tickle, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
+  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, knockPipe, huff, toldOff, tickle, hiccups, tryToFly, crossEyed, blow, puffUp, slipped, laughAlong }
   Reksio.addGestures(gestures)
 
 })()
