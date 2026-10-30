@@ -87,3 +87,13 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 .friend.bullfinch .wing { transform-box: fill-box; transform-origin: 10% 80%; }
 .friend.bullfinch.flying .wing { animation: beat 0.16s ease-in-out infinite alternate; }
 @keyframes beat { from { transform: rotate(0deg); } to { transform: rotate(-55deg); } }
+
+/* after the end, for the grown-up: the corner sun, held for a new day (again.js) */
+.again { position: fixed; left: 10px; bottom: 10px; width: 48px; height: 48px; padding: 0; border: 0; background: rgba(20, 18, 14, 0.45); border-radius: 50%; opacity: 0.6; touch-action: none; z-index: 5; }
+.again[hidden] { display: none; }
+.again svg { width: 100%; height: 100%; display: block; }
+.again-sun { fill: #f2c25c; }
+.again-rays { stroke: #f2c25c; stroke-width: 3; stroke-linecap: round; }
+.again-ring { fill: none; stroke: #f6f0dc; stroke-width: 3; stroke-dasharray: 132; stroke-dashoffset: 132; transform: rotate(-90deg); transform-origin: 24px 24px; }
+.again.holding { opacity: 1; }
+.again.holding .again-ring { stroke-dashoffset: 0; transition: stroke-dashoffset var(--hold, 2s) linear; }

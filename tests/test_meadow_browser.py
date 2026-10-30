@@ -153,6 +153,31 @@ class TestMeadowDay:
         )
         assert not m.errors, m.errors
 
+    # a tester, 2026-10-30: after the end, a held press anywhere started a new day
+    def test_after_the_end_a_held_press_does_nothing_and_only_the_sun_starts_a_new_day(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&day=12&props=")
+        m.wake()
+        m.page.wait_for_selector("#again:not([hidden])", timeout=40_000)
+        m.page.evaluate("window.__sameplay = true")
+        m.page.mouse.move(640, 400)
+        m.page.mouse.down()  # held, on the picture: nothing
+        m.page.wait_for_timeout(3000)
+        m.page.mouse.up()
+        m.page.keyboard.press("Space")
+        m.page.wait_for_timeout(500)
+        assert m.page.evaluate("window.__sameplay === true"), (
+            "a press started a new day"
+        )
+        assert m.page.evaluate("meadowGame.state().ended")
+        box = m.page.locator("#again").bounding_box()
+        m.page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+        m.page.mouse.down()
+        with m.page.expect_navigation(timeout=5000):
+            m.page.wait_for_timeout(2400)
+        m.page.mouse.up()
+
 
 @pytest.mark.parametrize("name", sorted(ENCOUNTERS))
 class TestMeadowEncounters:

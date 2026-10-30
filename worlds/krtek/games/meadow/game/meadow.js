@@ -7,14 +7,15 @@
 // runs on its own (day.js); at dusk the tulips close and the cricket
 // fiddles, through the last hour the picture closes in a circle round his
 // molehill, and at 20:00 he goes down to sleep in his den. After that only
-// a grown-up's long press starts a new day.
+// a grown-up's long press on the corner sun starts a new day (again.js);
+// taps and keys anywhere else do nothing.
 //
 // Every input is an intent ("go to 900", "tap mole", "sniff", "wake"), run
 // by perform() so the recorder (debug.js) keeps it. A new intent cuts the
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
+/* global Again, Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -25,7 +26,7 @@ const meadowGame = (() => {
   const IRIS_CLOSE_MS = 1400 // the last of it, at bedtime
   const WAKE_ANYWAY_MS = 4000 // left asleep this long, he wakes by himself
   const HOME_AT_DUSK_MS = 3000 // left alone this long at dusk, he goes home to listen
-  const HOLD_NEW_DAY_MS = 2000 // after the end, a press held this long starts a new day
+  const HOLD_NEW_DAY_MS = 2000 // after the end, the corner sun held this long starts a new day (as in Reksio's yard)
   const MAX_HILLS = 6 // molehills he has left about the meadow; the oldest sinks back
   const TULIPS = 9
   const TUFTS = 22 // tufts of long grass along the front, across the whole meadow
@@ -462,6 +463,7 @@ const meadowGame = (() => {
     den.classList.add('night')
     await Motion.endAt(den, [{ opacity: 0 }, { opacity: 1 }], { duration: 900 })
     game.gesture = null
+    document.getElementById('again').hidden = false // for the grown-up: a new day, held
     Debug.trace('end')
   }
 
@@ -587,18 +589,10 @@ const meadowGame = (() => {
     return 'tap mole' // the sky: he answers anyway
   }
 
-  let press = null
   svg.addEventListener('pointerdown', (e) => {
     Sound.ensure()
-    if (game.ended) {
-      press = Clock.after(HOLD_NEW_DAY_MS, () => location.reload())
-      return
-    }
+    if (game.ended) return // asleep: only the grown-up's corner sun starts a new day (again.js)
     perform(intentAt(e.target, scenePoint(e), critterAt(e)))
-  })
-  svg.addEventListener('pointerup', () => {
-    if (press) Clock.cancel(press)
-    press = null
   })
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || ['Shift', 'Meta', 'Control', 'Alt', 'Tab', 'CapsLock', 'Escape'].includes(e.key)) return
@@ -620,6 +614,7 @@ const meadowGame = (() => {
   World.setup(Clock.now)
   makeScene()
   Storm.setup({ sky: layers.sky, picture: svg, rain: document.getElementById('rain'), over: night.parentNode })
+  Again.watch(document.getElementById('again'), HOLD_NEW_DAY_MS)
   Mole.setFree(() => game.awake && !game.ended && !game.gesture)
   Sound.listen((word) => Mole.express(word)) // each word he says comes with its face
   View.setup(() => Mole.drawnX(), (camX) => {

@@ -243,7 +243,7 @@ scenes:
     text: Nothing; the last hour runs out at 20:00.
     origin: invented
   result:
-    text: Through the last hour the picture closes slowly in a circle around the molehill. At 20:00 he yawns, goes down into the molehill, the circle closes, and opens again on him asleep in his den. After that a tap does nothing.
+    text: Through the last hour the picture closes slowly in a circle around the molehill. At 20:00 he yawns, goes down into the molehill, the circle closes, and opens again on him asleep in his den. After that a tap, a held press or a key does nothing; a small sun in the corner, held for two seconds, starts a new day, for the grown-up (as in Reksio's yard; a tester found a held press anywhere woke him, 2026-10-30).
     origin: inspired
     refs: [world:episode_formula, 'world:design_notes[0]']
   sound:

@@ -170,7 +170,8 @@ before bed; doctors advise no screens in the hour before sleep
 (`docs/DESIGN_PRINCIPLES.md` has the research). Two things are for grown-ups:
 hold the house for 2 seconds and the sun goes down at once, so the evening
 comes early; after the end, taps do nothing, and holding the sun in the
-bottom-left corner for 2 seconds starts a new morning.
+bottom-left corner for 2 seconds starts a new morning. Krtek's meadow ends the
+same way: asleep in his den, and only the corner sun, held, starts a new day.
 
 ## Performance
 

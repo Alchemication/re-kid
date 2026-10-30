@@ -175,7 +175,8 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   `takes.js`, `bed.js` (a music bed's rules; each game has its score,
   `beds.js`), `ensemble.js` (samples and the bed, played), `world.js`,
   `creature.js` and `ambient.js` (the world model, `docs/WORLD_MODEL.md`),
-  and `wind.js` (the breeze and its gusts) are there so far.
+  `wind.js` (the breeze and its gusts) and `again.js` (the corner sun a
+  grown-up holds for a new play) are there so far.
 - **Game debuggability (`debug.js`, loaded first):** every bug must be
   replayable, so:
   - randomness comes from `Debug.random('<part>')`, never `Math.random`

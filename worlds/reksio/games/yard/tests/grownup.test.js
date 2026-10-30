@@ -1,4 +1,4 @@
-// Unit tests for grownup.js: a grown-up's holds (the house for the evening,
+// Unit tests for grownup.js (and the shared again.js): a grown-up's holds (the house for the evening,
 // the corner sun for a new morning) against a toddler's taps and second
 // fingers, on a pretend page and clock.
 
@@ -7,7 +7,7 @@ const assert = require('node:assert/strict')
 const { load } = require('./load')
 
 function grownUp() {
-  const page = load(['debug.js', 'grownup.js'], { dom: true })
+  const page = load(['debug.js', 'again.js', 'grownup.js'], { dom: true })
   const GrownUp = page.get('GrownUp')
   const done = []
   GrownUp.init({ perform: (intent) => done.push(intent) })
