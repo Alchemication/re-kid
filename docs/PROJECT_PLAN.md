@@ -117,6 +117,13 @@ decided and why.
       with Eliot.
    6. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
+   6b. **Adam judges the meadow's night's work** (built 2026-10-30 while
+      he slept, the yard's lessons applied, nothing checked with him): the
+      end as in the yard (only the corner sun, held, starts a new day; a
+      tester could wake him with a held press); the flower bed and the
+      spring answering a new way each tap (a dreamy sway with eyes shut,
+      a sniff along the row; a splash in his face, the frog plopping in
+      beside him). Judge: whether the new ways read and are fun to repeat.
    7. **Adam plays the meadow with Eliot** before any LLM work (Adam,
       2026-10-26).
    8. If the meadow feels more alive: the LLM director behind the player's

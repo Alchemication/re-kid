@@ -120,6 +120,43 @@ class TestMeadowDay:
             m.assert_settled()
         assert m.state()["x"] == 300
 
+    def traced(self, m: object, kind: str) -> list[str]:
+        return m.page.evaluate(
+            f"meadowGame.trace().split('\\n').filter((l) => l.includes(' {kind} ')).map((l) => JSON.parse(l.slice(l.indexOf('{{'))).how)"
+        )
+
+    def test_the_flower_bed_and_the_spring_answer_a_new_way_each_time(
+        self, meadow: callable
+    ) -> None:
+        m = meadow("seed=2&still&props=")  # a play with the frog
+        m.wake()
+        for intent in ["paddle"] * 4 + [
+            "sniff"
+        ] * 4:  # the paddles first, while the frog sits
+            m.do(intent)
+            m.wait_free()
+            m.assert_settled()
+        sniffs = self.traced(m, "sniffs")
+        assert sorted(sniffs[:3]) == ["along", "dreamy", "giggle"], sniffs
+        assert all(a != b for a, b in pairwise(sniffs)), sniffs
+        paddles = self.traced(m, "paddles")
+        assert paddles[0] == "frog", "the frog on its pad joins the first paddle"
+        assert {"splash", "face"} <= set(paddles), paddles
+        assert all(a != b for a, b in pairwise(paddles)), paddles
+
+    @pytest.mark.parametrize("intent", ["sniff", "paddle"])
+    def test_each_way_cut_short_leaves_him_free(
+        self, meadow: callable, intent: str
+    ) -> None:
+        m = meadow("seed=2&still&props=")
+        m.wake()
+        for _ in range(3):
+            m.do(intent)
+            m.page.wait_for_timeout(2600)  # there, and part way through
+            m.do("go to 400")
+            m.wait_free()
+            m.assert_settled()
+
     def test_a_tap_cuts_any_move_short(self, meadow: callable) -> None:
         m = meadow()
         m.wake()

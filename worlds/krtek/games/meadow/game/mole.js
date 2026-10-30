@@ -513,6 +513,25 @@ const Mole = (() => {
     return had
   }
 
+  /** Dreamy: turned to us, eyes shut, a soft smile, swaying side to side with a scent. */
+  async function sway(ms = 2000) {
+    show('front')
+    const v = cur()
+    v.lids.style.transform = 'scaleY(1)'
+    mood('content')
+    try {
+      await Motion.endAt(tilt, [0, 14, -10, 11, -6, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: ms, easing: 'ease-in-out' })
+    } finally {
+      v.lids.style.transform = state.pose === 'listen' ? 'scaleY(0.55)' : 'scaleY(0)'
+    }
+  }
+
+  /** Water in his face: eyes screwed shut, a quick shake of his whole self (the game's drops fly). */
+  async function shakeOff(ms = 700) {
+    feel('squeezed', ms)
+    await Motion.endAt(tilt, [0, -11, 11, -9, 9, -4, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: ms })
+  }
+
   /** Lean towards (deg > 0: to his right) and back: an ear to something, a tug, a look about. */
   async function lean(deg, ms = 900) {
     await Motion.endAt(tilt, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${deg}deg)`, offset: 0.2 }, { transform: `rotate(${deg}deg)`, offset: 0.8 }, { transform: 'rotate(0deg)' }], { duration: ms })
@@ -565,5 +584,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
+  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
 })()

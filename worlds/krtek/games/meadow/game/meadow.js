@@ -2,7 +2,8 @@
 // sleep (brief.yaml). He wakes in his den under the molehill; a tap on the
 // meadow sends him waddling there (the view follows him, view.js), a tap on
 // him gets a word and a hop, a tap on the flower bed (behind his molehill)
-// has him sniff a flower, a tap on the spring has him paddle in its pool;
+// has him sniff a flower, a tap on the spring has him paddle in its pool,
+// each a different way every time (rounds);
 // watering comes with the rain cloud (rain.js), now and then. The day
 // runs on its own (day.js); at dusk the tulips close and the cricket
 // fiddles, through the last hour the picture closes in a circle round his
@@ -38,6 +39,7 @@ const meadowGame = (() => {
   const NIGHT_TINT = 0.6 // how dark the night's blue makes the meadow at its darkest (multiplied over it)
   const words = Debug.random('meadow-words')
   const paint = Debug.random('meadow-paint')
+  const splashes = Debug.random('meadow-splashes') // drops off his face at the spring: their own, so nothing else shifts
   const planned = Eclipse.plan(Debug.random('meadow-eclipse')) // drawn either way, so ?eclipse= shifts nothing
   let eclipseAt = Layout.flags.eclipse ?? planned // the hour this play's eclipse starts, or null (none in a storm's play: start)
   const DAY_PACE = Day.DAY_MS / (Layout.dayMs || Day.DAY_MS) // an eclipse lasts as long in the day's hours whatever the day's length (?day=)
@@ -354,8 +356,25 @@ const meadowGame = (() => {
     Motion.endAt(g, [{ transform: `translate(${x}px, ${y}px) ${s}` }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, offset: 0.4 }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, opacity: 0 }], { duration: 2400 }).then(() => g.remove(), () => g.remove())
   }
 
-  // What a tap on him does, each with its word: all of them in turn before any comes again, in a
-  // new order each round, never the same twice running (the yard's lesson: repeats need variety)
+  /** A pool of answers drawn from `random`: all of them in turn before any comes again, in a new
+   * order each round, never the same twice running (the yard's lesson: repeats need variety). */
+  function rounds(names, random) {
+    let left = []
+    let last = null
+    return () => {
+      if (!left.length) {
+        left = [...names]
+        for (let i = left.length - 1; i > 0; i--) {
+          const j = Math.floor(random() * (i + 1))
+          ;[left[i], left[j]] = [left[j], left[i]]
+        }
+        if (left[0] === last) left.push(left.shift())
+      }
+      return (last = left.shift())
+    }
+  }
+
+  // What a tap on him does, each with its word (rounds)
   const ANSWERS = {
     cheer: ['giggle', () => Mole.cheer()],
     wave: ['ahoj', () => Mole.wave()],
@@ -363,44 +382,112 @@ const meadowGame = (() => {
     laughs: ['giggle', () => Mole.handsToFace(600)],
     ponder: ['ooh', () => Mole.ponder(900)],
   }
-  let answers = []
-  let lastAnswer = null
+  const nextAnswer = rounds(Object.keys(ANSWERS), words)
 
   async function tapMole() {
-    if (!answers.length) {
-      answers = Object.keys(ANSWERS)
-      for (let i = answers.length - 1; i > 0; i--) {
-        const j = Math.floor(words() * (i + 1))
-        ;[answers[i], answers[j]] = [answers[j], answers[i]]
-      }
-      if (answers[0] === lastAnswer) answers.push(answers.shift())
-    }
-    const how = (lastAnswer = answers.shift())
+    const how = nextAnswer()
     const [said, act] = ANSWERS[how]
     Sound.say(said, true) // a tap on him: a word only now and then, never every tap
     Debug.trace('says', { said, how })
     await act()
   }
 
-  /** A tap on the flower bed: he goes over and sniffs a flower, eyes shut a moment. */
-  async function sniff() {
-    await goTo((BED.from + BED.to) / 2)
+  // A tap on the flower bed: he goes over and sniffs a tulip, a different way each time (rounds)
+  const SNIFFS = {
+    /** A sniff, a giggle and a jump of joy. */
+    async giggle() {
+      Mole.show('three', 1)
+      await Mole.lean(18, 1200)
+      Sound.say('giggle', true)
+      await Mole.cheer()
+    },
+    /** A long sniff, eyes shut, and he sways with the scent, lost in it; then a contented "ooh". */
+    async dreamy() {
+      await Mole.lean(18, 900)
+      await Mole.sway(2200)
+      Sound.say('ooh', true)
+      await Mole.handsToFace(500)
+    },
+    /** One tulip after another along the bed, a quick sniff at each, and at the last a jump of joy. */
+    async along(mine) {
+      for (const [i, x] of [BED.from + 50, (BED.from + BED.to) / 2, BED.to - 50].entries()) {
+        if (!mine()) return // cut short: he stays where the tap sent him
+        if (i) await goTo(x)
+        Mole.show('three', 1)
+        await Mole.lean(16, 600)
+      }
+      Sound.say('giggle', true)
+      await Mole.cheer()
+    },
+  }
+  const nextSniff = rounds(Object.keys(SNIFFS), Debug.random('meadow-sniffs'))
+
+  async function sniff(mine) {
+    const how = nextSniff()
+    Debug.trace('sniffs', { how })
+    await goTo(how === 'along' ? BED.from + 50 : (BED.from + BED.to) / 2)
+    await SNIFFS[how](mine)
+  }
+
+  // A tap on the spring: he paddles in its pool, a different way each time (rounds), or with the frog
+  const PADDLES = {
+    /** Splashing with his feet, leaning this way and that, and a giggle. */
+    async splash() {
+      Sound.splash()
+      World.noise('splash', Spring.POOL.x, 250)
+      await Mole.lean(-12, 500)
+      Sound.splash()
+      await Mole.lean(12, 500)
+      Sound.say('giggle', true)
+      await Mole.cheer()
+    },
+    /** One splash too big: it goes all over his face. Eyes screwed shut, a shake, and a laugh. */
+    async face() {
+      Sound.splash()
+      World.noise('splash', Spring.POOL.x, 250)
+      await Mole.lean(-14, 450)
+      Sound.splash()
+      drops(Mole.head(), 14)
+      await Mole.shakeOff(700)
+      Sound.say('giggle', true)
+      await Mole.handsToFace(600)
+    },
+  }
+
+  /** With the frog on its pad (it joins in, never twice running): gently in, so as not to scare
+   * it; it plops in anyway, right beside him, and splashes him; a start, and a jump of joy. */
+  async function withFrog(mine) {
     Mole.show('three', 1)
-    await Mole.lean(18, 1200)
+    await Mole.lean(10, 700)
+    Spring.tapFrog()
+    await Clock.wait(450)
+    if (!mine()) return
+    drops(Mole.head(), 8)
+    Sound.say('fright', true)
+    await Mole.shakeOff(500)
     Sound.say('giggle', true)
     await Mole.cheer()
   }
+  const nextPaddle = rounds(Object.keys(PADDLES), Debug.random('meadow-paddles'))
+  let lastPaddle = null
 
-  /** A tap on the spring: he paddles in the pool, splashing, and giggles. */
-  async function paddle() {
+  async function paddle(mine) {
+    const how = Spring.frog && lastPaddle !== 'frog' ? 'frog' : nextPaddle()
+    lastPaddle = how
+    Debug.trace('paddles', { how })
     await goTo(Spring.POOL.x - 40)
-    Sound.splash()
-    World.noise('splash', Spring.POOL.x, 250)
-    await Mole.lean(-12, 500)
-    Sound.splash()
-    await Mole.lean(12, 500)
-    Sound.say('giggle', true)
-    await Mole.cheer()
+    if (how === 'frog' && !Spring.frog) return PADDLES.splash() // in the water by the time he got there
+    await (how === 'frog' ? withFrog(mine) : PADDLES[how]())
+  }
+
+  /** Drops of water flung up round a point (his head), falling away. */
+  function drops(at, n) {
+    for (let i = 0; i < n; i++) {
+      const d = el('circle', { class: 'splash-drop', cx: at.x, cy: at.y + 20, r: 4 + splashes() * 4 }, layers.top)
+      const dx = (splashes() - 0.5) * 120
+      const up = 30 + splashes() * 50
+      d.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${dx / 2}px, ${-up}px)`, opacity: 1, offset: 0.4 }, { transform: `translate(${dx}px, 60px)`, opacity: 0 }], { duration: 700, easing: 'ease-out' }).finished.then(() => d.remove(), () => d.remove())
+    }
   }
 
   async function homeToListen() {

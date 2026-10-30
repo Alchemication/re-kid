@@ -97,3 +97,4 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 .again-ring { fill: none; stroke: #f6f0dc; stroke-width: 3; stroke-dasharray: 132; stroke-dashoffset: 132; transform: rotate(-90deg); transform-origin: 24px 24px; }
 .again.holding { opacity: 1; }
 .again.holding .again-ring { stroke-dashoffset: 0; transition: stroke-dashoffset var(--hold, 2s) linear; }
+.splash-drop { fill: #cfe6f2; stroke: #15140f; stroke-width: 1.5; pointer-events: none; } /* off his face at the spring (meadow.js) */
