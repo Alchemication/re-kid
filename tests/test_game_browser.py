@@ -117,6 +117,7 @@ NOT_GESTURES = {
     "setWet",
     "setMuddy",
     "holdBone",
+    "inMouth",
     "wear",  # what a gag puts on him: the bowl (TestBowl), his tail caught (TestBramble)
     "wearing",
     "pointAt",
