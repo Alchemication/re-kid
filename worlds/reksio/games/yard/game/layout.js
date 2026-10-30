@@ -28,6 +28,8 @@ const Layout = (() => {
   // A kind is listed only once a gag gives it (helped: the bowl on his head,
   // his tail caught in the bramble).
   const OFFERS = { bowl: ['discover', 'helped'], dig: ['discover'], film: ['discover'], trap: ['help'], tree: ['help'], berries: ['discover', 'helped'], hen: ['help'] }
+  const WINTER_OFFERS = { tree: ['discover'] } // bare and snowy: no fruit, no one hungry to help
+  const offers = (name, season) => (season === 'winter' && WINTER_OFFERS[name]) || OFFERS[name]
   const PROP_POOL = Object.keys(OFFERS)
   const PROPS_PER_PLAY = 3 // with the five always there (and sometimes the flowers), eight or nine things to do
   const CREATURE_POOL = ['fly', 'bee', 'spider']
@@ -37,8 +39,8 @@ const Layout = (() => {
   // from the world state (world.js: `season`, and `cold`, which the weather writes): the snow, the ice.
   const SEASONS = { summer: 0.75, winter: 0.25 }
   // The seasons each prop and creature belongs to; one not listed belongs to all. The layout puts out only what is
-  // in season: in winter no fruit tree, no bramble (its flower brings the bee), no flowers, no fly, bee or spider.
-  const IN_SEASON = { snowman: ['winter'], tree: ['summer'], berries: ['summer'], flowers: ['summer'], fly: ['summer'], bee: ['summer'], spider: ['summer'] }
+  // in season: in winter no bramble (its flower brings the bee), no flowers, no fly, bee or spider; the tree is bare.
+  const IN_SEASON = { snowman: ['winter'], berries: ['summer'], flowers: ['summer'], fly: ['summer'], bee: ['summer'], spider: ['summer'] }
   const inSeason = (name, season) => !IN_SEASON[name] || IN_SEASON[name].includes(season)
   const CREATURES_PER_PLAY = 2
   const MEMORY_KEY = 'reksio-yard-last-play'
@@ -149,8 +151,8 @@ const Layout = (() => {
     const pool = PROP_POOL.filter((n) => inSeason(n, season))
     const chosen = []
     for (const kind of ['help', 'helped']) {
-      if (chosen.some((n) => OFFERS[n].includes(kind))) continue
-      chosen.push(...pick(pool.filter((n) => OFFERS[n].includes(kind)), 1, seenBefore))
+      if (chosen.some((n) => offers(n, season).includes(kind))) continue
+      chosen.push(...pick(pool.filter((n) => offers(n, season).includes(kind)), 1, seenBefore))
     }
     return [...chosen, ...pick(pool.filter((n) => !chosen.includes(n)), PROPS_PER_PLAY - chosen.length, seenBefore)]
   }

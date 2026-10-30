@@ -394,6 +394,16 @@ body { display: grid; place-items: center; position: fixed; inset: 0; }
 .squirrel-cheek { fill: #d07a46; stroke: var(--ink); stroke-width: 1.2; }
 .squirrel-paws, .squirrel-feet { fill: none; stroke: var(--ink); stroke-width: 2.5; stroke-linecap: round; }
 #tree.not-yet { pointer-events: none; }
+/* the tree in winter (tree.js): bare twigs with snow along them, snow shaken down */
+.winter-tree { display: none; }
+.season-winter .winter-tree { display: inline; }
+.season-winter .leaves-ink, .season-winter .leaves, .season-winter .leaves-dab { display: none; }
+.twig-ink { fill: none; stroke: var(--ink); stroke-width: 11; stroke-linecap: round; }
+.twig { fill: none; stroke: #7a5233; stroke-width: 5; stroke-linecap: round; }
+.twig-snow-ink { fill: none; stroke: #b8c6d2; stroke-width: 12; stroke-linecap: round; transform: translateY(-6px); }
+.twig-snow { fill: none; stroke: #f4f7f9; stroke-width: 8; stroke-linecap: round; transform: translateY(-6px); }
+.snow-bit { fill: #f4f7f9; stroke: #c3cfda; stroke-width: 1; }
+.snow-clump { fill: #f4f7f9; stroke: #b8c6d2; stroke-width: 2.5; }
 /* the hen (hen.js) */
 #hen.not-yet { pointer-events: none; }
 .nest { fill: #c99a52; stroke: var(--ink); stroke-width: 3.5; }

@@ -461,8 +461,8 @@ describe('variations', () => {
   it('after its first use, each thing plays a variation every time, all of them before any comes again, each to its end', async () => {
     const y = yard('flowers=1')
     // the pools named after a thing (the mound's 'bury' is drawn through 'dig', holding the bone)
-    // (the tap's is drawn only at the first of its three stages: its own tests, below)
-    const pools = Object.fromEntries(Object.entries(y.Things.VARIATIONS).filter(([name]) => name in y.Things.THINGS && name !== 'tap'))
+    // (the tap's and the tree's are drawn only at one stage of their stories: their own tests)
+    const pools = Object.fromEntries(Object.entries(y.Things.VARIATIONS).filter(([name]) => name in y.Things.THINGS && name !== 'tap' && name !== 'tree'))
     for (const [name, names] of Object.entries(pools)) {
       for (let n = 1; n <= names.length * 2 + 1; n++) await y.use(name, false, n)
     }

@@ -202,7 +202,7 @@ Flags in the page address (`main.py play` takes the first three):
 | `?flowers=1` / `0` | Flowers out or not. |
 | `?rain=1` / `0`, `?rain-at=S` | Force the shower, and when it starts. |
 | `?fog=1` / `0` | Force the morning fog (some plays wake in it; it lifts by 10:30). |
-| `?season=winter` / `summer` | Force the season. A winter play (one in four): snow on the yard, the shower falls as snow, the puddles are ice; no flowers, fly, bee, spider, fruit tree or bramble. |
+| `?season=winter` / `summer` | Force the season. A winter play (one in four): snow on the yard, the shower falls as snow, the puddles are ice; no flowers, fly, bee, spider or bramble; the fruit tree is bare and snowy. |
 | `?snowman=SECONDS` / `built` | In a winter play, the boy comes out to make the snowman then (`snowman.js`); `built`: it stands there from the start, the boy waiting by it for its eyes and arms. |
 | `?mouse-at=S`, `?visitor-at=S`, `?hen-at=S`, `?mushrooms=S` | When the mouse, the tree's visitor, and the hen (up to lay on the wall) come out, and when the mushrooms come up (rain or not). |
 | `?fruit=apple\|plum\|nut` | The tree's fruit. |

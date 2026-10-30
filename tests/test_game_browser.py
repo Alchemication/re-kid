@@ -86,6 +86,7 @@ GESTURES = {
     "waitForDrop": "Reksio.waitForDrop(800)",
     "knockPipe": "Reksio.knockPipe(true, () => {})",
     "huff": "Reksio.huff(() => {})",
+    "toldOff": "Reksio.toldOff()",
     "tickle": "Reksio.tickle(1)",
     "hiccups": "Reksio.hiccups()",
     "tryToFly": "Reksio.tryToFly()",
@@ -390,7 +391,7 @@ class TestVariations:
             ("trap", 5),
             ("dig", 7),
             ("film", 4),
-            ("tree", 4),
+            # the tree's extra comes only on its second shake (tree.js): TestTree
             ("berries", 6),
         ],
     )
@@ -634,6 +635,50 @@ class TestFlowers:
             "blow",
             "small",
         ]
+
+
+class TestTree:
+    """The fruit tree's story (tree.js): half the fruit, all but one, the last
+    with the bird, shaken out and scolding him; then bare. In winter, snow."""
+
+    @staticmethod
+    def stages(y: Yard) -> list[str]:
+        return [e["stage"] for e in y.events("tree") if "stage" in e]
+
+    def test_the_crown_empties_and_the_bird_scolds_him(self, yard: callable) -> None:
+        y = open_for_thing(yard, "tree")
+        for _ in range(4):
+            y.run("yardGame.use('tree')")
+            y.settled()
+        assert self.stages(y) == ["first", "more", "last", "bare"]
+        assert y.page.evaluate("Tree.hanging") == 0
+        assert "bird shaken out" in y.page.evaluate("yardGame.trace()")
+        assert not y.page.evaluate("Bird.flying"), "the bird never got home"
+
+    def test_a_tap_while_the_bird_is_in_the_tree_waits_and_all_end_home(
+        self, yard: callable
+    ) -> None:
+        y = open_for_thing(yard, "tree")
+        for _ in range(2):
+            y.run("yardGame.use('tree')")
+            y.settled()
+        y.start("yardGame.use('tree')")
+        y.page.wait_for_function(
+            "yardGame.trace().includes('bird to the fruit')", timeout=DONE_MS
+        )
+        y.page.evaluate("yardGame.perform('walk to 600')")
+        y.settled()
+        y.page.wait_for_function("!Bird.flying", timeout=DONE_MS)
+        assert y.page.evaluate("Tree.hanging") == 0
+
+    def test_in_winter_it_snows_down_and_he_shakes_it_off(self, yard: callable) -> None:
+        y = yard(f"{STILL}&fog=0&season=winter&snowman=0&props=tree")
+        for _ in range(4):
+            y.run("yardGame.use('tree')")
+            y.settled()
+        falls = [e["how"] for e in y.events("tree")]
+        assert len(falls) == 4 and all(a != b for a, b in pairwise(falls)), falls
+        assert y.page.evaluate("document.querySelectorAll('.snow-clump').length") == 0
 
 
 class TestBowl:

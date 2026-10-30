@@ -6,17 +6,27 @@
 // squirrel for nuts. Reksio rears up against the trunk and shakes it; leaves
 // fly and fruit drops. The snail creeps to an apple and slowly eats it, and
 // more snails come to share; the squirrel eats one nut and buries another,
-// then runs off up the trunk. Shake again and more falls, and something on
-// top, a different thing each time (VARIATIONS): an apple or plum lands on
-// Reksio's head; one fruit won't come down until he gives up and turns
-// away, then drops right behind him; the squirrel runs up the trunk and
-// drops a nut for him to catch, which he puts down for her; or a shower of
-// leaves lands on his head, and he shakes them off.
+// then runs off up the trunk.
+//
+// A little story over three shakes, the crown emptying as you watch: the
+// first brings down half the fruit, the second all but one. By the third the
+// bird has flown down to peck at that last one; he shakes, and out tumbles
+// the bird with the fruit, cross: it scolds him from over his head, and he
+// shrinks. After that the tree is bare: a shake, a look up, and a tut from
+// the bird. The second shake brings something on top (VARIATIONS): an apple
+// or plum lands on Reksio's head; one fruit won't come down until he gives
+// up and turns away, then drops right behind him; the squirrel runs up the
+// trunk and drops a nut for him to catch, which he puts down for her; or a
+// shower of leaves lands on his head, and he shakes them off.
+//
+// In winter the tree is bare and snowy, with no one waiting under it: each
+// shake brings down snow, a different fall from the last (SNOWFALLS): a
+// sprinkle, a big shower, or a clump right on his head that he shakes off.
 //
 // Everything here lives inside the tree's own group, in the coordinates it
 // is drawn in (index.html); Layout.x('tree') moves the lot.
 
-/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Figure */
+/* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Figure, Bird */
 /* exported Tree */
 const Tree = (() => {
   const TRUNK_X = 1660 // drawn
@@ -41,6 +51,12 @@ const Tree = (() => {
   const VARIATIONS = Layout.fruit === 'nut' ? ['stuck', 'squirrel', 'leaves'] : ['bonk', 'stuck', 'leaves']
   const GIVE_UP = 90 // he turns and walks this far away before the stuck fruit lets go
   const SQUIRREL_UP = 470 // how high up the trunk she runs to drop him a nut
+  const FIRST_FALL = 3 // the first shake brings down half the fruit; the second all but one (the bird's)
+  const BIRD_BY_FRUIT = { x: 22, y: -10 } // where the bird perches by the last fruit, from the fruit
+  const BIRD_SCOLDS = 190 // shaken out, it scolds him from this far behind him, clear of his nose once he turns to it
+  const SNOWFALLS = ['sprinkle', 'shower', 'head'] // what a winter shake brings down, never the same twice running
+  const CROWN = { x: [1550, 1770], y: [290, 460] } // where snow falls from, as drawn
+  const winter = Layout.season === 'winter'
   /** A fruit's transform at (x, y), shrunk to k as it's eaten. */
   const at = (x, y, k = 1) => `translate(${x}px, ${y}px) scale(${k * FRUIT_SCALE})`
 
@@ -67,6 +83,8 @@ const Tree = (() => {
   const snails = []
   let squirrel = null
   let shakes = 0
+  let scolded = false // the bird was shaken out with the last fruit: from then on it tuts at him
+  let lastSnow = null
 
   // ------------------------------------------------------------ drawing
 
@@ -197,7 +215,7 @@ const Tree = (() => {
       { duration: 650, easing: 'ease-out' },
     )
     Sound.rustle()
-    fx.burst(TRUNK_X + X() + rnd(-80, 80), rnd(330, 430), 6, 'leaf', { height: 10, reach: 90, size: 5 })
+    fx.burst(TRUNK_X + X() + rnd(-80, 80), rnd(330, 430), 6, winter ? 'snow-bit' : 'leaf', { height: 10, reach: 90, size: 5 })
   }
 
   /** One fruit falls from the crown to (toX, toY), bounces and settles. */
@@ -255,7 +273,7 @@ const Tree = (() => {
    * catches it, and puts it down for her. False if she can't now. */
   async function squirrelHelps() {
     const q = squirrel
-    if (!q || q.busy || !hanging.length) return false
+    if (!q || q.busy || hanging.length < 2) return false // the last one is the bird's
     q.busy = true
     try {
       q.g.style.opacity = '1'
@@ -286,25 +304,34 @@ const Tree = (() => {
    * shakes them off. */
   async function leaves() {
     fx.burst(Reksio.x, 520, 14, 'leaf', { height: 10, reach: 80, size: 6 })
-    const top = () => Reksio.pointAt(Figure.bowlTopAt)
-    const onHead = [-16, 14].map((dx) => ({ dx, el: el('ellipse', { class: 'leaf head-leaf', rx: 14, ry: 7 }, $('fx')) }))
-    const put = () => onHead.forEach((s) => {
-      const p = top()
-      s.el.setAttribute('cx', p.x + s.dx)
-      s.el.setAttribute('cy', p.y + 4)
-    })
+    const parts = [-16, 14].map((dx) => ({ dx, dy: 4, el: el('ellipse', { class: 'leaf head-leaf', rx: 14, ry: 7 }, $('fx')) }))
+    await onHisHead(parts, () => Reksio.lookUp(900))
+  }
+
+  /** Shapes laid on his head (each s.el at s.dx, s.dy from its top), kept
+   * there each frame while `during()` runs (gone if that is cut short);
+   * then he shakes them off, in a spray of `spray` bits if given. */
+  async function onHisHead(parts, during, spray = null) {
+    const put = () => {
+      const p = Reksio.pointAt(Figure.bowlTopAt)
+      for (const s of parts) {
+        s.el.setAttribute('cx', p.x + s.dx)
+        s.el.setAttribute('cy', p.y + s.dy)
+      }
+    }
     put()
     const stay = Clock.every(0, put)
     try {
-      await Reksio.lookUp(900)
+      await during()
     } catch (e) {
-      onHead.forEach((s) => s.el.remove()) // cut short: no leaves left behind
+      parts.forEach((s) => s.el.remove()) // cut short: nothing left behind
       throw e
     } finally {
       stay()
     }
     Sound.shake()
-    onHead.forEach((s, i) => s.el.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${(i ? 1 : -1) * 40}px, 90px)`, opacity: 0 }], { duration: 700, easing: 'ease-in' }).finished.then(() => s.el.remove()))
+    if (spray) fx.burst(Reksio.x, Reksio.pointAt(Figure.bowlTopAt).y, 16, spray, { height: 40, reach: 80, size: 4 })
+    parts.forEach((s, i) => s.el.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${(i % 2 ? 1 : -1) * 40}px, 90px)`, opacity: 0 }], { duration: 700, easing: 'ease-in' }).finished.then(() => s.el.remove()))
     await Reksio.shake()
   }
 
@@ -325,24 +352,124 @@ const Tree = (() => {
     }),
   )
 
-  async function shake({ v }) {
+  /** A use: what a shake brings down depends on what is left up there.
+   * variation() draws the repeat's extra, only when fruit falls. */
+  async function shake({ variation }) {
     Reksio.face(1)
+    if (winter) return shakeSnow()
+    if (!hanging.length) return bare()
+    if (hanging.length === 1) return lastFruit()
+    return fruitFalls(variation())
+  }
+
+  /** Fruit comes down, all but one; v, the repeat's extra, on top. */
+  async function fruitFalls(v) {
+    Debug.trace('tree', { stage: shakes ? 'more' : 'first' })
     if (v === 'squirrel' && (await squirrelHelps())) return feed()
     for (let i = 0; i < 3; i++) await Reksio.stamp(wobbleCrown)
     shakes += 1
-    const n = Math.min(hanging.length, shakes === 1 ? (nut() ? 3 : 2) : nut() ? 2 : 1)
-    if (!n) {
-      // nothing left up there
-      await Reksio.lookUp(1200)
-      return
-    }
-    const falling = hanging.splice(0, n)
+    const keep = shakes === 1 ? Math.max(1, hanging.length - FIRST_FALL) : 1
+    const falling = hanging.splice(0, hanging.length - keep - (v === 'stuck' ? 1 : 0))
     if (v === 'bonk' && !nut() && falling.length) await bonk(falling.pop())
     await fall(falling)
-    if (v === 'stuck' && hanging.length) await stuck()
+    if (v === 'stuck' && hanging.length > 1) await stuck()
     feed()
     if (v === 'leaves') await leaves()
     await wait(600)
+  }
+
+  /** The last fruit, and the bird has come down to peck at it. He shakes:
+   * out tumbles the bird with the fruit, scolds him from over his head, and
+   * he shrinks. With the bird busy elsewhere, just the fruit. */
+  async function lastFruit() {
+    const f = hanging[0]
+    const spot = { x: f.x + BIRD_BY_FRUIT.x + X(), y: f.y + BIRD_BY_FRUIT.y }
+    const bird = await Bird.toFruit(spot) // he is at the trunk, looking at it: he doesn't see it come
+    Debug.trace('tree', { stage: 'last', bird })
+    let shooed = false
+    try {
+      for (let i = 0; i < 3; i++) await Reksio.stamp(wobbleCrown)
+      shakes += 1
+      hanging.shift()
+      shooed = bird
+      const to = { x: Reksio.x - Reksio.facing * BIRD_SCOLDS, y: Reksio.mouth().y - 60 } // by his head, clear of the crown
+      await Promise.all([
+        fall([f]),
+        bird && Reksio.startle(),
+        bird && Bird.shooed(spot, to, async () => {
+          Reksio.face(-Reksio.facing) // round to it
+          await Reksio.toldOff()
+        }),
+      ])
+      scolded = scolded || bird
+    } finally {
+      if (bird && !shooed) Bird.flyAway(spot) // cut short with it in the tree: off home on its wings
+    }
+    feed()
+    await wait(600)
+  }
+
+  /** Nothing left: a shake, a long look up at the bare crown, and, if he
+   * shook the bird out of it, a tut from its perch that makes him shrink. */
+  async function bare() {
+    Debug.trace('tree', { stage: 'bare' })
+    await Reksio.stamp(wobbleCrown)
+    await Reksio.lookUp(1100)
+    if (!scolded || Bird.flying) return Reksio.puzzled()
+    Reksio.face(Math.sign(Bird.perch.x - Reksio.x) || 1)
+    await Promise.all([Bird.tut(), Reksio.toldOff()])
+  }
+
+  /** In winter: three shakes, and down comes snow, a different fall each
+   * time: a sprinkle (is that all?), a big shower (he hops with delight), or
+   * a clump on his head that he shakes off. */
+  async function shakeSnow() {
+    const choices = SNOWFALLS.filter((s) => s !== lastSnow)
+    const how = choices[Math.floor(random() * choices.length)]
+    lastSnow = how
+    Debug.trace('tree', { stage: 'snow', how })
+    for (let i = 0; i < 3; i++) await Reksio.stamp(wobbleCrown)
+    Sound.poof()
+    if (how === 'sprinkle') {
+      snowFalls(10, 3)
+      await Reksio.lookUp(900)
+      return Reksio.puzzled()
+    }
+    if (how === 'shower') {
+      snowFalls(110, 6)
+      await Reksio.lookUp(1500)
+      return Reksio.hop(40, 1)
+    }
+    snowFalls(24, 4)
+    await snowOnHead()
+  }
+
+  /** Snow falling from the crown to the ground, n bits of about this size. */
+  function snowFalls(n, size) {
+    for (let i = 0; i < n; i++) {
+      const x = rnd(...CROWN.x) + X()
+      const y = rnd(...CROWN.y)
+      const c = el('circle', { class: 'snow-bit', cx: x, cy: y, r: size * rnd(0.6, 1.4) }, $('fx'))
+      c.animate([{ transform: 'translate(0, 0)', opacity: 1 }, { transform: `translate(${rnd(-30, 30)}px, ${GROUND - y}px)`, opacity: 0.3 }], { duration: rnd(900, 1500), delay: rnd(0, 600), easing: 'ease-in', fill: 'backwards' }).finished.then(() => c.remove())
+    }
+  }
+
+  /** A clump of snow drops onto his head: flump. He freezes, eyes up at it,
+   * and shakes it off in a spray. */
+  async function snowOnHead() {
+    const top = Reksio.pointAt(Figure.bowlTopAt)
+    const clump = el('circle', { class: 'snow-clump', cx: top.x, cy: top.y - 8, r: 18 }, $('fx'))
+    try {
+      await clump.animate([{ transform: `translate(0, ${CROWN.y[1] - top.y}px)` }, { transform: 'translate(0, 0)' }], { duration: 380, easing: 'ease-in' }).finished
+    } finally {
+      clump.remove()
+    }
+    Sound.poof()
+    const parts = [[-18, 2, 13], [2, -6, 17], [20, 3, 11]].map(([dx, dy, r]) => ({ dx, dy, el: el('circle', { class: 'snow-clump', r }, $('fx')) }))
+    await onHisHead(parts, async () => {
+      await Reksio.startle()
+      await Reksio.lookUp(800)
+    }, 'snow-bit')
   }
 
   // ------------------------------------------------------------ eating
@@ -516,7 +643,7 @@ const Tree = (() => {
   function init({ ended, effects }) {
     isEnded = ended
     fx = effects
-    if (Layout.hidden.includes('tree')) return
+    if (Layout.hidden.includes('tree') || winter) return // in winter: no fruit, no one hungry
     makeFruit()
     $('tree').classList.add('not-yet')
     Clock.after((Layout.visitorAt ?? rnd(...VISITOR_AT_S)) * 1000, visitorComes)
@@ -527,8 +654,10 @@ const Tree = (() => {
     thing,
     init,
     /** Can the tree be shaken? Once the hungry visitor is there. */
-    get ready() { return visitor !== 'away' },
+    get ready() { return winter || visitor !== 'away' },
     get visitor() { return visitor },
     get snails() { return snails.length },
+    /** Fruit still up in the crown. */
+    get hanging() { return hanging.length },
   }
 })()

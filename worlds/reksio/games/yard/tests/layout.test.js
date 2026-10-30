@@ -27,7 +27,8 @@ describe('a play', () => {
   it('always has someone Reksio can help and someone who helps him', () => {
     for (const seed of SEEDS) {
       const L = layout(`?seed=${seed}`)
-      assert.ok(L.props.some((n) => ['trap', 'tree', 'hen'].includes(n)), `seed ${seed}: ${L.props}`)
+      const helps = L.season === 'winter' ? ['trap', 'hen'] : ['trap', 'tree', 'hen'] // the winter tree has no one hungry under it
+      assert.ok(L.props.some((n) => helps.includes(n)), `seed ${seed}: ${L.season} ${L.props}`)
       assert.ok(L.props.some((n) => ['bowl', 'berries'].includes(n)), `seed ${seed}: ${L.props}`)
       for (const n of L.props) assert.ok(L.OFFERS[n], n)
     }
@@ -68,7 +69,7 @@ describe('a play', () => {
     }
   })
 
-  it('makes some plays winter, without the summer things: no flowers, no fly, bee or spider, no fruit tree or bramble', () => {
+  it('makes some plays winter, without the summer things: no flowers, no fly, bee or spider, no bramble', () => {
     let winters = 0
     for (let seed = 1; seed <= 200; seed++) if (layout(`?seed=${seed}`).season === 'winter') winters += 1
     assert.ok(winters > 25 && winters < 80, `${winters} of 200`)
@@ -77,9 +78,13 @@ describe('a play', () => {
       assert.equal(L.season, 'winter')
       assert.equal(L.flowers, false, `seed ${seed}`)
       assert.deepEqual([...L.creatures], [], `seed ${seed}`)
-      assert.ok(!L.props.includes('tree') && !L.props.includes('berries'), `seed ${seed}: ${L.props}`)
+      assert.ok(!L.props.includes('berries'), `seed ${seed}: ${L.props}`)
       assert.ok(L.hidden.includes('flowers'), `seed ${seed}`)
     }
+  })
+
+  it('puts the bare tree out in some winter plays (Adam, 2026-10-30)', () => {
+    assert.ok(SEEDS.some((seed) => layout(`?seed=${seed}&season=winter`).props.includes('tree')))
   })
 
   // Adam, 2026-10-27: the snowman was crammed between the doghouse and the film

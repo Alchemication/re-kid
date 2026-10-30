@@ -276,7 +276,7 @@ const Things = (() => {
       },
     },
     dig: { ...Mound.thing, run: ({ extra, n }) => Mound.thing.run({ v: variation(Reksio.holdingBone ? 'bury' : 'dig', extra, n) }) },
-    tree: varied('tree', { ...Tree.thing, ready: () => Tree.ready }),
+    tree: { ...Tree.thing, ready: () => Tree.ready, run: ({ extra, n }) => Tree.thing.run({ variation: () => variation('tree', extra, n) }) }, // drawn only when fruit falls (tree.js)
     hen: varied('hen', { ...Hen.thing, ready: () => Hen.ready }),
     // after the rain (mushrooms.js): each a thing of its own, so the child chooses
     porcino: varied('porcino', Mushrooms.things.porcino),

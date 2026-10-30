@@ -197,8 +197,15 @@ decided and why.
       lesson applied): it builds over three sniffs, ah… ah… AH…, a petal
       on his nose the second time, blown backwards the third, then again.
       Judge: whether the build-up reads, and whether the flowers miss a
-      random variation on later rounds (none now). Next candidate: the
-      fruit tree running out, after Adam has seen these.
+      random variation on later rounds (none now).
+      **Adam judges the fruit tree's story and its winter** (built
+      2026-10-30, his pick A): half the fruit, all but one, then the bird
+      down for the last one, shaken out, scolding him by his head while
+      he shrinks; then bare, the bird tutting from its perch. The random
+      extras come only on the second shake now. In winter the tree is out
+      too, bare and snowy: a sprinkle, a shower or a clump on his head,
+      never the same twice running. Judge: whether the emptying crown
+      reads, the scolding, the winter tree's look and the shower's size.
    3. **Winter's weather varies per play** (Adam, 2026-10-26: "randomness
       as in life is welcome if it doesn't overcomplicate things"): each
       winter play picks one sky, the way fog is picked now: a crisp clear

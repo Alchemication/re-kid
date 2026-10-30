@@ -2,6 +2,8 @@
 // when Reksio barks at it, and after rain may come down for a worm. When the
 // bowl gets stuck on his head, it comes and pulls it off; from then on it is
 // his friend, and a tap brings it down to say hello instead of a chase.
+// It goes down for the fruit tree's last fruit, and when he shakes it out of
+// the tree it gives him a piece of its mind.
 
 /* global Clock, Debug, Motion, Layout, Sound, Music, Reksio, Figure */
 /* exported Bird */
@@ -222,6 +224,60 @@ const Bird = (() => {
     }
   }
 
+  /** Down into the fruit tree to peck at its last fruit, at spot (tree.js).
+   * It stays there, busy, until shooed() or home(). False if it's busy. */
+  async function toFruit(spot) {
+    if (flying) return false
+    flying = true
+    Debug.trace('bird to the fruit')
+    try {
+      await flyBetween(PERCHES[perch], spot)
+    } catch (e) {
+      home()
+      throw e
+    }
+    at(spot, -1)
+    await peck()
+    Sound.tok()
+    return true
+  }
+
+  /** Shaken out of the tree from spot: it tumbles out in a flurry, down to
+   * `to` beside his head, and scolds him there with cross chirps while he
+   * takes it (his part, `takeIt`); then it is off to a perch. */
+  async function shooed(spot, to, takeIt) {
+    inFront(true)
+    Debug.trace('bird shaken out')
+    try {
+      Sound.chirp()
+      const facing = await flyBetween(spot, to)
+      at(to, Math.sign(Reksio.x - to.x) || facing) // turned to face him
+      const his = takeIt()
+      await scold(5)
+      await Debug.ignoreCut(his, 'told off') // cut short, he's off: it still flies home on its wings
+      await flyAway(to)
+    } finally {
+      home()
+    }
+  }
+
+  /** Cross chirps, a peck at the air with each. */
+  async function scold(times) {
+    for (let i = 0; i < times; i++) {
+      Sound.chirp()
+      await peck()
+      await wait(rnd(60, 140))
+    }
+  }
+
+  /** From its perch, a cross word at him (he shook it out of the tree):
+   * a hop and two chirps. Not if it's busy. */
+  async function tut() {
+    if (flying) return
+    body.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-14px)' }, { transform: 'translateY(0)' }], { duration: 260 })
+    await scold(2)
+  }
+
   /** His friend now, it comes down to him: a hop and a chirp, his play-bow,
    * and back up to its perch. */
   async function visit() {
@@ -261,7 +317,7 @@ const Bird = (() => {
   }
 
   return {
-    PERCHES, flyAway, hunt, rescue, visit, onHead, watch, home, init,
+    PERCHES, flyAway, hunt, rescue, visit, onHead, watch, toFruit, shooed, tut, home, init,
     get perch() { return PERCHES[perch] },
     get flying() { return flying },
     get friend() { return friend },

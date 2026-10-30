@@ -17,6 +17,8 @@
 //
 // The dry tap (tap.js): he hops up to knock on its pipe, and huffs warm
 // breath on the icicle that stops it in the cold.
+//
+// The fruit tree (tree.js): told off by the bird he shook out of it.
 
 /* global Reksio, Sound, Figure */
 (() => {
@@ -354,6 +356,18 @@
     await faceOff(220)
   }
 
+  /** Told off (the bird he shook out of the fruit tree): he shrinks down,
+   * head tucked and tilted away, brows up in the middle, a sheepish grin. */
+  async function toldOff() {
+    faceTo({ ...WORRIED, smile: 0.25, open: 0 }, 150)
+    blend(add, 'dy', 10, 200)
+    await blend(add, 'tilt', 14, 200)
+    await pause(rnd(1300, 1600))
+    blend(add, 'dy', 0, 300)
+    blend(add, 'tilt', 0, 300)
+    await faceOff(300)
+  }
+
   /** Puffed up, chest out, hands on hips: a bigger bark back. */
   async function puffUp() {
     await Promise.all([actTo(Figure.vary(k.POSES.handsOnHips, { chest: [k.POSES.handsOnHips.chest[0] + 6, k.POSES.handsOnHips.chest[1] - 4] }), 200, k.OVERSHOOT), faceTo({ brows: -0.6, smile: 0.2, open: 0, lift: 0 }, 150)])
@@ -544,7 +558,7 @@
     await faceOff(300)
   }
 
-  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, knockPipe, huff, tickle, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
+  const gestures = { lookAtTongue, bliss, showOff, yuck, wagFinger, wary, peekOver, gnaw, climb, climbDown, aww, bowlShake, slump, mope, bowlBark, tugged, freed, squint, swish, yanked, strain, sulk, hearsBee, leapFright, barkUp, smugTurn, spunRound, glare, puzzled, waitForDrop, knockPipe, huff, toldOff, tickle, hiccups, tryToFly, crossEyed, blow, puffUp, slipped }
   Reksio.addGestures(gestures)
 
 })()

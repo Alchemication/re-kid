@@ -11,10 +11,26 @@ function yard(query = 'props=tree', seed = 1) {
   const reksio = fakeReksio(1600)
   const { Sound, Music, played } = fakeSound()
   let ended = false
+  const birds = []
+  const Bird = {
+    flying: false,
+    perch: { x: 1480, y: 330 },
+    async toFruit() {
+      if (Bird.flying) return false
+      birds.push('toFruit')
+      return true
+    },
+    async shooed(spot, to, takeIt) {
+      birds.push('shooed')
+      await takeIt()
+    },
+    async flyAway() { birds.push('flyAway') },
+    async tut() { birds.push('tut') },
+  }
   const page = load(['debug.js', 'layout.js', 'tree.js'], {
-    query: `?seed=${seed}&${query}`,
+    query: `?seed=${seed}&${query}${query.includes('season=') ? '' : '&season=summer'}`, // summer, unless asked: a winter tree has no fruit
     dom: true,
-    globals: { Reksio: reksio, Sound, Music },
+    globals: { Reksio: reksio, Sound, Music, Bird, Figure: { bowlTopAt: {} } },
   })
   const Tree = page.get('Tree')
   Tree.init({ ended: () => ended, effects: { burst() {}, twinkle() {} } })
@@ -23,13 +39,16 @@ function yard(query = 'props=tree', seed = 1) {
     Tree,
     reksio,
     played,
+    Bird,
+    birds,
+    page,
     advance: page.advance,
     end: () => (ended = true),
     count,
     /** Shake the tree, and let the clock run until he's done. */
     async shake(v = null) {
       let over = false
-      Tree.thing.run({ v }).then(() => (over = true))
+      Tree.thing.run({ variation: () => v }).then(() => (over = true))
       for (let i = 0; i < 300 && !over; i++) await page.advance(100)
       assert.ok(over, 'still shaking after half a minute')
     },
@@ -69,22 +88,55 @@ describe('the hungry visitor', () => {
   })
 })
 
+/** What the tree's shakes so far did (tree.js traces), in order. */
+const traced = (y) => [...y.page.get('Debug.dump()').matchAll(/tree (\{.*?\})/g)].map((m) => JSON.parse(m[1]))
+
 describe('the fruit', () => {
-  it('runs out after five shakes of apples; then he just looks up', async () => {
-    const y = yard(`props=tree&${VISITOR}&fruit=apple`)
-    await y.advance(30000)
-    for (let i = 0; i < 5; i++) await y.shake()
-    assert.equal(y.count(y.reksio.calls, 'lookUp'), 0)
-    await y.shake()
-    assert.equal(y.count(y.reksio.calls, 'lookUp'), 1)
+  const stages = (y) => traced(y).map((t) => t.stage)
+
+  for (const fruit of ['apple', 'plum', 'nut']) {
+    it(`tells a story over three shakes of ${fruit}s: half, all but one, the last with the bird; then bare`, async () => {
+      const y = yard(`props=tree&${VISITOR}&fruit=${fruit}`)
+      await y.advance(30000)
+      await y.shake()
+      assert.equal(y.Tree.hanging, 3)
+      await y.shake()
+      assert.equal(y.Tree.hanging, 1)
+      await y.shake()
+      assert.equal(y.Tree.hanging, 0)
+      assert.deepEqual(y.birds, ['toFruit', 'shooed'])
+      assert.equal(y.count(y.reksio.calls, 'toldOff'), 1)
+      await y.shake()
+      assert.deepEqual(stages(y), ['first', 'more', 'last', 'bare'])
+      assert.deepEqual(y.birds, ['toFruit', 'shooed', 'tut'], 'the bird it shook out tuts at him from its perch')
+      assert.equal(y.count(y.reksio.calls, 'toldOff'), 2)
+    })
+  }
+
+  it('leaves the last fruit for the bird, whatever the second shake brings on top', async () => {
+    for (const v of ['bonk', 'stuck', 'leaves', 'squirrel']) {
+      const y = yard(`props=tree&${VISITOR}&fruit=${v === 'squirrel' ? 'nut' : 'apple'}`)
+      await y.advance(30000)
+      await y.shake()
+      await y.shake(v)
+      if (y.Tree.hanging > 1) await y.shake() // the squirrel took one: another shake brings the rest down
+      assert.equal(y.Tree.hanging, 1, v)
+    }
   })
 
-  it('runs out after three shakes of nuts', async () => {
-    const y = yard(`props=tree&${VISITOR}&fruit=nut`)
+  it('drops the last fruit without the bird when it is busy, and the bare tree only puzzles him', async () => {
+    const y = yard(`props=tree&${VISITOR}&fruit=apple`)
     await y.advance(30000)
-    for (let i = 0; i < 3; i++) await y.shake()
     await y.shake()
-    assert.equal(y.count(y.reksio.calls, 'lookUp'), 1)
+    await y.shake()
+    y.Bird.flying = true
+    await y.shake()
+    assert.equal(y.Tree.hanging, 0)
+    y.Bird.flying = false
+    await y.shake()
+    assert.deepEqual(y.birds, [])
+    assert.equal(y.count(y.reksio.calls, 'toldOff'), 0)
+    assert.equal(y.count(y.reksio.calls, 'puzzled'), 1)
   })
 
   it('lands an apple on his head in the variation (bonk), never a nut', async () => {
@@ -127,5 +179,25 @@ describe('who eats it', () => {
     await y.advance(30000)
     assert.ok(y.count(y.played, 'nibble') >= 5, 'did not eat')
     assert.ok(y.played.includes('dig'), 'did not bury one')
+  })
+})
+
+describe('in winter', () => {
+  it('stands bare and snowy, to be shaken at once, with no one hungry under it', async () => {
+    const y = yard(`props=tree&${VISITOR}&season=winter`)
+    assert.equal(y.Tree.ready, true)
+    await y.advance(30000)
+    assert.equal(y.Tree.visitor, 'away')
+    assert.equal(y.Tree.hanging, 0)
+  })
+
+  it('brings down a different fall of snow each time, and the clump on his head is shaken off', async () => {
+    const y = yard(`props=tree&season=winter`)
+    for (let i = 0; i < 12; i++) await y.shake()
+    const falls = traced(y).map((t) => t.how)
+    assert.equal(new Set(falls).size, 3, `${falls}`)
+    for (let i = 1; i < falls.length; i++) assert.notEqual(falls[i], falls[i - 1], `${falls}`)
+    assert.ok(y.count(y.reksio.calls, 'shake') >= 1, 'never shook the snow off')
+    assert.deepEqual(y.birds, [])
   })
 })
