@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-31T21:19:30.770Z",
+ "saved": "2026-10-31T21:47:51.809Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1470,6 +1470,94 @@
    "folder": "krtek bell, light",
    "made": "2026-10-31",
    "sound": "krtek-bell",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-tam/08.mp3",
+   "source": "eleven",
+   "prompt": "A little girl says \"tam!\" as a cartoon animal would: short, breathy, dry studio recording, no reverb.",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-tam",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-gasp/07.mp3",
+   "source": "eleven",
+   "prompt": "A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.",
+   "wording": 3,
+   "seed": 1,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-gasp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-gasp/08.mp3",
+   "source": "eleven",
+   "prompt": "A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-gasp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-gasp/09.mp3",
+   "source": "eleven",
+   "prompt": "A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-gasp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-hm/02.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl's voice: delighted, short, rising, breathy, a dry studio recording. The sound is a short curious questioning \"hm?\", rising at the end.",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-hm",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-hm/05.mp3",
+   "source": "eleven",
+   "prompt": "Imagine a 70's eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl's delighted, short, rising, breathy, dry studio recording. The word is \"co?\", asked, curious and puzzled.",
+   "wording": 2,
+   "seed": 3,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-hm",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-hm/09.mp3",
+   "source": "eleven",
+   "prompt": "A little girl asks a puzzled \"hmm?\" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-hm",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-hm/08.mp3",
+   "source": "eleven",
+   "prompt": "A little girl asks a puzzled \"hmm?\" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek voice, more",
+   "made": "2026-10-31",
+   "sound": "krtek-hm",
    "verdict": "keep"
   }
  ]

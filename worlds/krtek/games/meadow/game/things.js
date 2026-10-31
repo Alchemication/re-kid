@@ -132,7 +132,7 @@ const Things = (() => {
         Debug.trace('arrives', { thing: e.name })
         e.appear()
         api.music?.('curious')
-        api.notice?.()
+        api.notice?.(e.name)
         break
       }
     }

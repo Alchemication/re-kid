@@ -43,7 +43,7 @@ look:
   refs: ['world:places[molehill].description']
 
 sound:
-- text: The mole's voice is generated, picked by Adam's ear - a giggle, "ahoj", "ach jo", an excited "ooh", a little squeak of fright - played a little higher or lower each time.
+- text: The mole's voice is generated, picked by Adam's ear - a giggle, "ahoj", "ach jo", an excited "ooh", a little squeak of fright, a gasp, a questioning "hm?" or "co?", and "tam!" - played a little higher or lower each time. When something arrives and he is free, he points at it, "tam!". At a sudden surprise he gasps or squeaks, one or the other; wondering, he asks "hm?". Just after his morning "ahoj!" a tap on him never brings a second hello (Adam, 2026-10-31).
   origin: inspired
   refs: ['world:characters[krtek].sound_signature']
 - text: The cricket fiddles at dusk, and his tune is the day's lullaby.

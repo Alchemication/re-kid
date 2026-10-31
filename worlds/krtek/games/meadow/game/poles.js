@@ -142,7 +142,7 @@
       if (stuck) {
         // it pops out of the ground, he tumbles over backwards, and it flies off by itself
         Sound.pop()
-        Sound.say('fright')
+        Sound.say(['gasp', 'fright'])
         await Promise.all([fly(p, far, { x: p.x, y: Y - 80 }, 720), Mole.lean(-55, 1100)])
         if (!alive()) return
         Sound.say('giggle')

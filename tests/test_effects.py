@@ -84,6 +84,8 @@ def sound_names(game: Path) -> set[str]:
         names |= {n.strip() for n in exported[0].split(",")}
         said = "".join(p.read_text() for p in (game / "game").glob("*.js"))
         names |= set(re.findall(r"Sound\.say\('(\w+)'", said))
+        for words in re.findall(r"Sound\.say\(\[([^\]]+)\]", said):  # one of several
+            names |= set(re.findall(r"'(\w+)'", words))
     return names
 
 

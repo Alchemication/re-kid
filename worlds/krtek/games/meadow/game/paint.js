@@ -128,7 +128,7 @@
     await Mole.lean(-24, 900)
     if (!alive()) return
     Sound.splash()
-    Sound.say('fright')
+    Sound.say(['gasp', 'fright'])
     splash(t.x, Y - 60, t.colour)
     Mole.paint(t.colour)
     red = true

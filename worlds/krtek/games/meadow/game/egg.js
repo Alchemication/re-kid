@@ -127,7 +127,7 @@
     }
     await holdIt(alive)
     if (!alive()) return
-    Sound.say('ooh')
+    Sound.say('hm') // whose is it?
     if (hen && henAt !== HEN_NEAR) { // she has heard him, and comes pecking closer
       henAt = HEN_NEAR
       hen.turn(-1)
@@ -205,7 +205,7 @@
     await Mole.wobble(1000)
     if (!alive()) return
     Sound.crack()
-    Sound.say('fright')
+    Sound.say(['gasp', 'fright'])
     Mole.carry(null)
     egg.where = 'hatched'
     Debug.trace('hatched')

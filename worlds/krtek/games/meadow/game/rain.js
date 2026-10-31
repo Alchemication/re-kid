@@ -157,7 +157,7 @@
     if (!alive()) return
     await drift(Mole.state.x, pace(1400)) // off it goes… straight over him
     if (!alive()) return
-    Sound.say('fright')
+    Sound.say(['gasp', 'fright'])
     await rain(pace(RAIN_MS))
     if (!alive()) return
     state.wet = true

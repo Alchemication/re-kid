@@ -10,7 +10,7 @@
 // Its take player does what the yard's sound.js does for recorded effects;
 // both are the next part to move into shared/ (CLAUDE.md, "Shared parts").
 
-/* global EFFECTS, Clock */
+/* global EFFECTS, Clock, Debug */
 /* exported Sound */
 const Sound = (() => {
   const VOLUME = 0.5
@@ -25,6 +25,7 @@ const Sound = (() => {
   const takes = {} // decoded takes, by sound: {gain, overlaps, inTurn, buffers (in the order listed), last, until}
   let lastSaid = -100 // when he last spoke (audio time)
   let heard = () => {} // the game's hook: a word he says, as he says it (his face goes with it)
+  const whichWord = Debug.random('meadow-words') // which of several words he says: it shows on his face, so seeded
 
   Clock.onHold((held) => {
     if (!ctx) return
@@ -57,10 +58,12 @@ const Sound = (() => {
   const bytes = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer
   const ready = () => ctx && ctx.state !== 'closed'
 
-  /** One of the mole's words or noises ('giggle', 'ahoj', 'achJo', 'ooh', 'fright'), if it has takes.
+  /** One of the mole's words or noises ('giggle', 'ahoj', 'achJo', 'ooh', 'fright', 'gasp', 'hm',
+   * 'tam'), if it has takes; given several (['gasp', 'fright']), one of them at random.
    * `casual`: an idle remark (a tap on him, a look at a thing), skipped if he spoke only just now,
    * so his voice is kept for real moments (docs/DESIGN_PRINCIPLES.md). */
-  function say(name, casual = false) {
+  function say(words, casual = false) {
+    const name = Array.isArray(words) ? words[Math.floor(whichWord() * words.length)] : words
     if (casual && ready() && ctx.currentTime - lastSaid < CASUAL_GAP_S) return false
     heard(name) // his face says it even where the sound can't play
     if (!ready()) return false

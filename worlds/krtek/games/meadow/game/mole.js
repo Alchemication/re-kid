@@ -30,8 +30,10 @@ const Mole = (() => {
   const RUN = { step: 64, stepMs: 150, reach: 14, lift: 12, bounce: 10, swing: 40, lean: 9 }
   const RUN_FROM = 650 // a trip longer than this, he runs
   // His arms, in degrees about the shoulder from hanging (left arm first; the right is mirrored)
-  const ARMS = { down: 0, up: 150, wide: 120, rim: 60, face: 172 }
+  const ARMS = { down: 0, up: 150, wide: 120, rim: 60, face: 172, point: 25 } // point: the far arm thrust out at something, about level
   const IDLE_MS = [2600, 5200] // left standing, now and then he looks about: another view, the other way
+  const POINT_MS = 700 // pointing at something, held this long
+  const POINT_REACH = 1.45 // …his arm stretched out this much longer, a cartoon reach: his own short arm read as a wave
   const PERK_MS = 650 // his hairs springing up when he notices something, and settling
   // His faces, after Krtek a autíčko's close-ups (moleart.js face): the mouth's numbers (open 0-1, curve
   // -1 corners down to +1 up, width, round, chin) and the brows' (lift, tilt > 0 worried), in plain numbers so
@@ -44,6 +46,7 @@ const Mole = (() => {
     glum: { open: 0, curve: -0.8, width: 0.65, brows: { tilt: 1 } }, // ach jo
     squeezed: { open: 0, curve: -1, width: 0.42, brows: { tilt: -1, lift: -2 } }, // 11:44.5: eyes shut tight, an effort
     fright: { open: 0.95, curve: -0.2, width: 0.6, round: 0.6, brows: { tilt: 1, lift: 7 } },
+    puzzled: { open: 0.15, curve: -0.1, width: 0.45, round: 1, brows: { tilt: 0.5, lift: 3 } }, // hm? a small pursed mouth, one worry in his brows
   }
   // the face each of his words comes with, held this long; how far the lids come down (0 open, 1 shut), how hard his hairs perk
   const WORDS = {
@@ -52,6 +55,9 @@ const Mole = (() => {
     achJo: { face: 'glum', lids: 0.45, ms: 1400 },
     ahoj: { face: 'delighted', perk: 0.7, ms: 700 },
     giggle: { face: 'delighted', ms: 800 },
+    gasp: { face: 'ooh', perk: 1.5, ms: 700 }, // a quick intake of breath: wonder, a little fright
+    hm: { face: 'puzzled', ms: 1000 },
+    tam: { face: 'delighted', perk: 1, ms: 700 },
   }
   const life = Debug.random('mole-life') // blinks, glances and looking about: their own stream
 
@@ -431,6 +437,28 @@ const Mole = (() => {
     }
   }
 
+  /** Pointing at x ("tam!"): turned three-quarters to it, his far arm
+   * thrust out at it, stretched long, held a moment, then down. */
+  async function point(x, ms = POINT_MS) {
+    if (state.holdsUp) return
+    show('three', x >= state.x ? 1 : -1)
+    lookAt(x)
+    perk(0.7)
+    const v = cur()
+    const hand = v.arms[1]
+    const behind = hand.nextSibling
+    v.view.appendChild(hand) // in front of him, as he reaches out
+    const rest = state.pose === 'out' ? 0 : -ARMS.rim
+    try {
+      await Motion.endAt(hand, [{ transform: `rotate(${rest}deg)` }, { transform: `rotate(${-ARMS.point}deg) scale(${POINT_REACH})` }], { duration: SNAP_MS, easing: 'ease-out' })
+      await hold(ms)
+    } finally {
+      await Motion.endAt(hand, [{ transform: `rotate(${rest}deg)` }], { duration: 180 })
+      hand.style.transform = ''
+      v.view.insertBefore(hand, behind)
+    }
+  }
+
   /** A wave hello: one hand up, waving to and fro, then down. */
   async function wave() {
     if (state.holdsUp) return
@@ -584,5 +612,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
+  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
 })()

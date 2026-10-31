@@ -27,6 +27,7 @@ const meadowGame = (() => {
   const IRIS_CLOSE_MS = 1400 // the last of it, at bedtime
   const WAKE_ANYWAY_MS = 4000 // left asleep this long, he wakes by himself
   const HOME_AT_DUSK_MS = 3000 // left alone this long at dusk, he goes home to listen
+  const HELLO_AGAIN_MS = 30000 // after an "ahoj!", this long before a tap on him is waved hello again: two hellos running felt false (Adam, 2026-10-31)
   const MORNING_AFTER_MS = 2000 // the morning theme starts this long after he pops up: after his "ahoj!" (about 0.9 s up, 1.2 s long)
   const HOLD_NEW_DAY_MS = 2000 // after the end, the corner sun held this long starts a new day (as in Reksio's yard)
   const MAX_HILLS = 6 // molehills he has left about the meadow; the oldest sinks back
@@ -403,12 +404,15 @@ const meadowGame = (() => {
     wave: ['ahoj', () => Mole.wave()],
     peekaboo: ['giggle', () => Mole.peekaboo()],
     laughs: ['giggle', () => Mole.handsToFace(600)],
-    ponder: ['ooh', () => Mole.ponder(900)],
+    ponder: ['hm', () => Mole.ponder(900)],
   }
   const nextAnswer = rounds(Object.keys(ANSWERS), words)
 
+  let helloAt = -Infinity // when he last said "ahoj!"
+
   async function tapMole() {
-    const how = nextAnswer()
+    let how = nextAnswer()
+    if (ANSWERS[how][0] === 'ahoj' && Clock.now() - helloAt < HELLO_AGAIN_MS) how = nextAnswer() // he has just said hello: another answer, the wave in a later round
     const [said, act] = ANSWERS[how]
     Sound.say(said, true) // a tap on him: a word only now and then, never every tap
     Debug.trace('says', { said, how })
@@ -610,6 +614,21 @@ const meadowGame = (() => {
     await Mole.wave()
   }
 
+  /** Something has arrived: his hairs spring up, and, if he is free, he
+   * points at it, "tam!" (Adam, 2026-10-31). */
+  function noticeArrival(name) {
+    Mole.perk(1.3)
+    const thing = document.querySelector(`[data-thing="${name}"]`)
+    if (!thing || !(game.awake && !game.ended && !game.gesture)) return
+    const box = thing.getBoundingClientRect()
+    const at = scenePoint({ clientX: box.left + box.width / 2, clientY: box.top }).x + View.x
+    Debug.trace('points', { at: Math.round(at), thing: name })
+    run('point', async () => {
+      Sound.say('tam')
+      await Mole.point(at)
+    })
+  }
+
   /** A tap on the snail: into its shell it goes, and, if he is free, he looks at it: "ooh". */
   const tapSnail = () => lookAfter(Critters.tapSnail())
 
@@ -731,7 +750,10 @@ const meadowGame = (() => {
   Storm.setup({ sky: layers.sky, picture: svg, rain: document.getElementById('rain'), over: night.parentNode })
   Again.watch(document.getElementById('again'), HOLD_NEW_DAY_MS)
   Mole.setFree(() => game.awake && !game.ended && !game.gesture)
-  Sound.listen((word) => Mole.express(word)) // each word he says comes with its face
+  Sound.listen((word) => {
+    if (word === 'ahoj') helloAt = Clock.now()
+    Mole.express(word) // each word he says comes with its face
+  })
   View.setup(() => Mole.drawnX(), (camX) => {
     irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX)))
     World.set({ view: { x0: camX, x1: camX + Layout.VIEW_W } })
@@ -765,7 +787,7 @@ const meadowGame = (() => {
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
     music: (part) => Music.cue(part),
-    notice: () => Mole.perk(1.3), // something has arrived: his hairs spring up
+    notice: noticeArrival,
     stepped,
   })
   if (things.includes('storm') && !Layout.flags.eclipse) eclipseAt = null // one big weather a day: the storm or the eclipse

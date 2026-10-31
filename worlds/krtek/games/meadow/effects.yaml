@@ -39,3 +39,25 @@ effects:
     prompt: 'a light friendly ding of a small bell heard faintly across a sunny meadow, soft and short'
   - file: bell/23.mp3
     prompt: 'a light friendly ding of a small bell heard faintly across a sunny meadow, soft and short'
+- id: tam
+  takes:
+  - file: tam/08.mp3
+    prompt: 'A little girl says "tam!" as a cartoon animal would: short, breathy, dry studio recording, no reverb.'
+- id: gasp
+  takes:
+  - file: gasp/07.mp3
+    prompt: 'A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.'
+  - file: gasp/08.mp3
+    prompt: 'A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.'
+  - file: gasp/09.mp3
+    prompt: 'A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.'
+- id: hm
+  takes:
+  - file: hm/02.mp3
+    prompt: 'Imagine a 1970s Eastern European cartoon animal character who almost never speaks, only makes short excited noises and the odd simple Czech word. We imitate him with a little girl''s voice: delighted, short, rising, breathy, a dry studio recording. The sound is a short curious questioning "hm?", rising at the end.'
+  - file: hm/05.mp3
+    prompt: 'Imagine a 70''s eastern european cartoon animal character. He speaks only simple short words in czechoslovakian language. We try to imitate it by a little girl''s delighted, short, rising, breathy, dry studio recording. The word is "co?", asked, curious and puzzled.'
+  - file: hm/08.mp3
+    prompt: 'A little girl asks a puzzled "hmm?" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.'
+  - file: hm/09.mp3
+    prompt: 'A little girl asks a puzzled "hmm?" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.'

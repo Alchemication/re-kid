@@ -153,7 +153,7 @@
       Mole.carry(null)
       w.held = false
       document.getElementById('things').appendChild(w.g)
-      Sound.say('fright')
+      Sound.say(['gasp', 'fright'])
       Sound.roll(1.2)
       const from = w.x
       w.x = ROLLS_TO // where it ends up, even if a tap cuts the roll short

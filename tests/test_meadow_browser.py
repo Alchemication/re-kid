@@ -871,7 +871,9 @@ class TestMeadowTapHim:
             m.wait_free()
             m.assert_settled()
         hows = m.page.evaluate(self.HOWS)
-        assert set(hows[:5]) == {"cheer", "wave", "peekaboo", "laughs", "ponder"}, hows
+        # just after his morning "ahoj!", no wave hello: every other answer in turn
+        assert set(hows[:4]) == {"cheer", "peekaboo", "laughs", "ponder"}, hows
+        assert "wave" not in hows, "he waved hello again, just after his morning ahoj"
         assert all(a != b for a, b in pairwise(hows)), hows
 
     def test_each_answer_cut_short(self, meadow: callable) -> None:
