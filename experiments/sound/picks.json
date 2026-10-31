@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-28T08:55:26.611Z",
+ "saved": "2026-10-31T21:19:30.770Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1448,6 +1448,28 @@
    "wording": 3,
    "seed": 1,
    "sound": "bump",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-bell/23.mp3",
+   "source": "eleven",
+   "prompt": "a light friendly ding of a small bell heard faintly across a sunny meadow, soft and short",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek bell, light",
+   "made": "2026-10-31",
+   "sound": "krtek-bell",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-bell/24.mp3",
+   "source": "eleven",
+   "prompt": "a light friendly ding of a small bell heard faintly across a sunny meadow, soft and short",
+   "wording": 3,
+   "seed": 4,
+   "folder": "krtek bell, light",
+   "made": "2026-10-31",
+   "sound": "krtek-bell",
    "verdict": "keep"
   }
  ]

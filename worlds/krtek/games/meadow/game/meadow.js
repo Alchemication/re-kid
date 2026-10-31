@@ -27,6 +27,7 @@ const meadowGame = (() => {
   const IRIS_CLOSE_MS = 1400 // the last of it, at bedtime
   const WAKE_ANYWAY_MS = 4000 // left asleep this long, he wakes by himself
   const HOME_AT_DUSK_MS = 3000 // left alone this long at dusk, he goes home to listen
+  const MORNING_AFTER_MS = 2000 // the morning theme starts this long after he pops up: after his "ahoj!" (about 0.9 s up, 1.2 s long)
   const HOLD_NEW_DAY_MS = 2000 // after the end, the corner sun held this long starts a new day (as in Reksio's yard)
   const MAX_HILLS = 6 // molehills he has left about the meadow; the oldest sinks back
   const TULIPS = 9
@@ -537,7 +538,7 @@ const meadowGame = (() => {
     tick()
     if (game.token !== mine) return // a tap has him busy already
     Sound.pop()
-    Music.morning()
+    Clock.after(MORNING_AFTER_MS, () => Music.morning()) // his "ahoj!" first, on its own: under the theme it was lost
     await Debug.ignoreCut(Mole.comeUp('hill'), 'come up')
     if (game.token !== mine) return
     Sound.say('ahoj')

@@ -279,10 +279,12 @@ _ADAM = (
 )
 
 
-def _voice(what: str, said: str, sound: str) -> dict:
-    """One of the mole's sounds: Adam's wording, then two variants."""
+def _voice(what: str, said: str, sound: str, id: str = "") -> dict:
+    """One of the mole's sounds (`id`: its name in the meadow's sound.js):
+    Adam's wording, then two variants."""
     return {
         "world": "krtek",
+        **({"id": id} if id else {}),
         "for": f"Krtek's voice: {what}.",
         "seconds": 1.2,
         "prompts": [
@@ -298,16 +300,52 @@ def _voice(what: str, said: str, sound: str) -> dict:
 
 VOICES: dict[str, dict] = {
     "krtek-ach-jo": _voice(
-        "a sad or resigned sigh", "ach jo!", 'a sad little "ach jo"'
+        "a sad or resigned sigh", "ach jo!", 'a sad little "ach jo"', "achJo"
     ),
     "krtek-ahoj": _voice(
         "hello, the word Adam remembers most",
         "ahoj!",
         'the word "ahoj!", a cheerful hello',
+        "ahoj",
     ),
-    "krtek-hele": _voice("look, he has found something", "hele!", 'the word "hele!"'),
-    "krtek-je": _voice("delight", "jé!", 'the word "jé!", delighted'),
-    "krtek-ooh": _voice("discovery", "óóó!", 'an excited little "ooh!" of discovery'),
-    "krtek-giggle": _voice("a happy giggle", "hihihi!", "a short happy giggle"),
-    "krtek-fright": _voice("a fright", "jéje!", "a tiny squeak of fright"),
+    "krtek-hele": _voice("look, he has found something", "hele!", 'the word "hele!"', "hele"),
+    "krtek-je": _voice("delight", "jé!", 'the word "jé!", delighted', "je"),
+    "krtek-ooh": _voice("discovery", "óóó!", 'an excited little "ooh!" of discovery', "ooh"),
+    "krtek-giggle": {
+        **_voice("a happy giggle", "hihihi!", "a short happy giggle", "giggle"),
+        # many kinds of giggle (Adam, 2026-10-31): each its own wording
+        "prompts": [
+            *_voice("", "hihihi!", "a short happy giggle")["prompts"],
+            _MOLE + "The sound is a tiny shy giggle through closed lips.",
+            _MOLE + "The sound is a bubbly delighted little laugh, two or three high hee-hees.",
+            _MOLE + "The sound is a ticklish squealing giggle, quick and bright.",
+            _MOLE + "The sound is a soft chuckle at something funny, short and breathy.",
+        ],
+    },
+    "krtek-fright": _voice("a fright", "jéje!", "a tiny squeak of fright", "fright"),
+    # Adam, 2026-10-31: "tam!" as he points at something; gasps; little
+    # questioning sounds
+    "krtek-tam": {
+        **_voice("pointing: there!", "tam!", 'the word "tam!", pointing eagerly: there!'),
+        "id": "tam",
+    },
+    "krtek-gasp": {
+        **_voice("a little gasp", "ach!", "a tiny sharp gasp of surprise"),
+        "id": "gasp",
+        "seconds": 0.8,
+        "prompts": [
+            _MOLE + "The sound is a tiny sharp gasp of surprise, a quick intake of breath.",
+            _MOLE + "The sound is a soft delighted gasp of wonder, a breathy little \"ah!\".",
+            "A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.",
+        ],
+    },
+    "krtek-hm": {
+        **_voice("a little question", "hm?", "a curious questioning hm"),
+        "id": "hm",
+        "prompts": [
+            _MOLE + "The sound is a short curious questioning \"hm?\", rising at the end.",
+            _ADAM + 'The word is "co?", asked, curious and puzzled.',
+            'A little girl asks a puzzled "hmm?" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.',
+        ],
+    },
 }
