@@ -1056,7 +1056,8 @@ class TestEvening:
         y.page.wait_for_timeout(2500)
         assert y.page.evaluate("window.__sameplay === true")
         y.page.mouse.down()
-        with y.page.expect_navigation(timeout=5000):
+        # the reload begun is the new play; its page loading may be slow on a busy machine
+        with y.page.expect_navigation(wait_until="commit", timeout=5000):
             y.page.wait_for_timeout(2400)
         y.page.mouse.up()
 
@@ -1211,13 +1212,17 @@ class TestRealInput:
 
     def test_a_key_tap_barks(self, yard: callable) -> None:
         y = yard(STILL)
-        y.page.keyboard.press("b")
+        # down and up in one go, through the page's own key handlers: under
+        # load, keyboard.press's up can reach the page 400 ms of game time
+        # after its down, which the game rightly takes for a held key
+        y.page.evaluate("""() => { for (const type of ['keydown', 'keyup'])
+            document.dispatchEvent(new KeyboardEvent(type, { key: 'b', bubbles: true })) }""")
         y.settled()
         assert self.intents(y) == ["press", "release"]
-        assert any(
-            e["kind"] == "ask" and e["what"] == "bark"
-            for e in y.page.evaluate("yardGame.events()")
-        )
+        events = y.page.evaluate("yardGame.events()")
+        assert any(e["kind"] == "ask" and e["what"] == "bark" for e in events), [
+            (e["kind"], e.get("t")) for e in events
+        ]
 
 
 class TestScreens:
@@ -1430,24 +1435,36 @@ class TestStretch:
         """A press held `ms` on him; returns the yard, where he stood and which way he faced."""
         y = yard()
         y.page.evaluate("yardGame.perform('press')")
-        y.page.wait_for_timeout(400)  # past a bark: stretching, turned to the roomier side
+        y.page.wait_for_timeout(
+            400
+        )  # past a bark: stretching, turned to the roomier side
         x, facing = y.page.evaluate("[Reksio.x, Reksio.facing]")
         y.page.wait_for_timeout(ms - 400)
         return y, x, facing
 
-    def test_let_go_after_a_long_one_he_gathers_up_forward(self, yard: callable) -> None:
+    def test_let_go_after_a_long_one_he_gathers_up_forward(
+        self, yard: callable
+    ) -> None:
         y, x, facing = self.stretched(yard, 2200)
-        reach = y.page.evaluate("(() => { const r = Reksio.reach; yardGame.perform('release'); return r })()")  # still growing: read as he lets go
+        reach = y.page.evaluate(
+            "(() => { const r = Reksio.reach; yardGame.perform('release'); return r })()"
+        )  # still growing: read as he lets go
         assert reach * facing > 300, f"reached only {reach}"
         s = y.settled()
         assert abs(s["reksio"]["x"] - (x + reach)) < 5, "he ends where his nose was"
 
     def test_let_go_after_a_little_one_he_springs_back(self, yard: callable) -> None:
-        y, x, _ = self.stretched(yard, 500)
-        y.page.evaluate("yardGame.perform('release')")
+        y = yard()
+        x = y.page.evaluate("Reksio.x")
+        # let go after 500 ms of game time: a release sent from here can land late on a busy machine
+        y.page.evaluate(
+            "() => { yardGame.perform('press'); Clock.after(500, () => yardGame.perform('release')) }"
+        )
         assert abs(y.settled()["reksio"]["x"] - x) < 2
 
-    def test_a_tap_as_he_gathers_up_waits_until_he_is_himself(self, yard: callable) -> None:
+    def test_a_tap_as_he_gathers_up_waits_until_he_is_himself(
+        self, yard: callable
+    ) -> None:
         y, x, facing = self.stretched(yard, 2200)
         y.page.evaluate("yardGame.perform('release')")
         y.page.wait_for_timeout(300)
@@ -1457,7 +1474,9 @@ class TestStretch:
         s = y.settled()
         assert abs(s["reksio"]["x"] - back) < 2, "the tap was kept for after, then done"
 
-    def test_a_press_while_he_stretches_alone_lets_go_and_barks(self, yard: callable) -> None:
+    def test_a_press_while_he_stretches_alone_lets_go_and_barks(
+        self, yard: callable
+    ) -> None:
         y = yard()
         y.start("yardGame.act('stretchOut')")
         y.page.wait_for_function("Math.abs(Reksio.reach) > 200", timeout=5000)
@@ -1466,7 +1485,9 @@ class TestStretch:
         y.page.evaluate("yardGame.perform('release')")
         y.settled()
         assert y.events("relax"), "the press cut his stretch short"
-        assert len(y.events("stretch")) == 1, "a press while he stretches alone is a tap, not a second stretch"
+        assert len(y.events("stretch")) == 1, (
+            "a press while he stretches alone is a tap, not a second stretch"
+        )
 
 
 class TestGettingUp:

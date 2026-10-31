@@ -58,14 +58,14 @@ Examples:
 
     uv run python main.py replay
         Replays the newest bug report in ~/Downloads in Chrome: same seed,
-        same inputs at the same times. Saves a screenshot every 0.5 s of the
+        same inputs at the same times. Saves a screenshot every 0.5 s (game time) of the
         last 10 s, a contact sheet, and how the replayed state compares.
 
     uv run python main.py look reksio --flags props=bowl --close \
             --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"
         Opens a seeded, still play (only what you ask moves), eats the bowl
         empty, then photographs the next use (the bowl stuck on his head)
-        every 350 ms until it ends, cut close around Reksio. Saves frames,
+        every 350 ms of game time until it ends, cut close around Reksio. Saves frames,
         a contact sheet and look.json (frame times, trace, events) in
         looks/latest/. --for 20 without --watch photographs the play as it
         goes; --size 844x390 is a phone on its side.
@@ -227,7 +227,7 @@ def main() -> int:
         "--every",
         type=int,
         default=REPLAY_EVERY_MS,
-        help=f"ms between frames (default: {REPLAY_EVERY_MS})",
+        help=f"ms of game time between frames (default: {REPLAY_EVERY_MS})",
     )
     p_replay.add_argument(
         "--out", help="Folder for the frames (default: next to the report)"
@@ -267,7 +267,7 @@ def main() -> int:
         "--every",
         type=int,
         default=LOOK_EVERY_MS,
-        help=f"ms between frames (default: {LOOK_EVERY_MS})",
+        help=f"ms of game time between frames (default: {LOOK_EVERY_MS})",
     )
     p_look.add_argument(
         "--size",

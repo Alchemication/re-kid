@@ -3,9 +3,10 @@
 A report (saved from the game with Ctrl+Shift+B, see the game's ``debug.js``)
 holds the play's seed and flags and every input since the start. The replay
 opens the same play, feeds the inputs in at the same times, and takes a
-screenshot every so often over the last seconds before the report. It then
-compares the replayed state with the recorded one: the game runs on the real
-clock, so a replay is close, not exact, and the comparison says how close.
+screenshot every so often (in game time, held still for each: ``run_to``) over
+the last seconds before the report. It then compares the replayed state with
+the recorded one: the game runs on the real clock until then, so a replay is
+close, not exact, and the comparison says how close.
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ from config import (
     BUG_REPORT_VERSION,
     GAME_PAGE,
     GAMES_DIR,
+    PHOTO_STEP_TIMEOUT_MS,
     REPLAY_PROGRESS_EVERY_MS,
     REPLAY_SHEET_COLUMNS,
     REPLAY_SHEET_WIDTH,
@@ -130,12 +132,38 @@ def layout_flags(layout: dict | None) -> dict:
     return flags
 
 
+def run_to(page: object, t: float) -> float:
+    """Let the game run on to game time `t`, then hold it there
+    (``Clock.hold``) and return the time it stopped at.
+
+    A screenshot taken then shows that moment however long it takes. Shot on
+    the real clock instead, a busy machine took longer over one frame than a
+    short gesture lasts, which then got a single frame. The stop is a game
+    timer, so it comes at its frame: polled from outside, it overshot by
+    seconds on a busy machine.
+    """
+    page.evaluate(
+        """(t) => {
+            window.__stopped = false
+            Clock.after(t - Clock.now(), () => {
+                Clock.hold('photo', true)
+                window.__stopped = true
+            })
+            Clock.hold('photo', false)
+        }""",
+        t,
+    )
+    page.wait_for_function("window.__stopped", timeout=PHOTO_STEP_TIMEOUT_MS)
+    return page.evaluate("Clock.now()")
+
+
 def replay_url(report: dict) -> str:
     """The report's play on the local game page: seeded, its layout pinned, with
     the debug overlay on."""
     query = layout_flags(report.get("layout"))
     query.update(parse_qsl(urlsplit(report["replayUrl"]).query, keep_blank_values=True))
     query["debug"] = ""
+    query["held"] = ""  # paused until its inputs are in (replay)
     return f"{local_page(report['replayUrl']).resolve().as_uri()}?{urlencode(query)}"
 
 
@@ -206,19 +234,26 @@ def replay(
             "(inputs) => inputs.forEach((i) => Clock.after(i.t - Clock.now(), () => yardGame.perform(i.intent)))",  # game time, as recorded
             report["inputs"],
         )
+        page.evaluate(
+            "Clock.hold('held', false)"
+        )  # from game time 0, however slowly it loaded
         start = max(0, at - last_s * 1000)
-        while (now := page.evaluate("Debug.now()")) < start:
+        now = page.evaluate("Clock.now()")
+        while (
+            now < start
+        ):  # in game-time steps: a real-time wait overshot the report on a busy machine
             if progress:
                 progress(now / 1000, at / 1000)
-            page.wait_for_timeout(min(REPLAY_PROGRESS_EVERY_MS, max(10, start - now)))
-        while (now := page.evaluate("Debug.now()")) < at:
+            now = run_to(page, min(start, now + REPLAY_PROGRESS_EVERY_MS))
+        t = start
+        while (now := run_to(page, t)) < at:
             if progress:
                 progress(now / 1000, at / 1000)
             frame = frames_dir / f"{len(result.frames):03d}.jpg"
             page.screenshot(path=frame, type="jpeg", quality=80)
             result.frames.append(frame)
             logger.debug("frame %s at %.1f s", frame.name, now / 1000)
-            page.wait_for_timeout(every_ms)
+            t = now + every_ms
         result.state = page.evaluate("yardGame.state()")
         trace = page.evaluate("yardGame.trace()")
         browser.close()

@@ -211,7 +211,8 @@ class TestMeadowDay:
         box = m.page.locator("#again").bounding_box()
         m.page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
         m.page.mouse.down()
-        with m.page.expect_navigation(timeout=5000):
+        # the reload begun is the new play; its page loading may be slow on a busy machine
+        with m.page.expect_navigation(wait_until="commit", timeout=5000):
             m.page.wait_for_timeout(2400)
         m.page.mouse.up()
 

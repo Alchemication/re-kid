@@ -39,6 +39,9 @@
 // - `?still`: Reksio does nothing unless asked (no left-alone moves or thought
 //   bubbles, no bird hunting), so one gesture or gag can be tried, or tested,
 //   on its own.
+// - `?held`: the game starts paused (Clock.hold('held')) until whoever drives
+//   the page lets it go: `main.py replay`, so a page that loads slowly on a
+//   busy machine still plays the report's inputs from game time 0.
 
 // Shared by every game: it uses only other shared parts (CLAUDE.md, "Shared parts").
 /* exported Clock, Motion, Debug */
@@ -242,6 +245,7 @@ const Debug = (() => {
   const params = new URLSearchParams(location.search)
   const on = params.has('debug')
   const still = params.has('still')
+  if (params.has('held')) Clock.hold('held', true)
   const seeded = params.has('seed')
   const seed = (seeded ? Number(params.get('seed')) : Math.floor(Math.random() * 2 ** 32)) >>> 0
 

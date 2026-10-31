@@ -261,12 +261,17 @@ REPLAY_LAST_S = 10
 to see how the trouble started, short enough to look through."""
 
 REPLAY_EVERY_MS = 500
-"""One replay screenshot this often: a gesture's poses last a few hundred ms,
-so this catches each one without a flood of frames."""
+"""One replay screenshot this often, in game time: a gesture's poses last a
+few hundred ms, so this catches each one without a flood of frames."""
+
+PHOTO_STEP_TIMEOUT_MS = 30_000
+"""Longest a look or replay waits, in real time, for the game to run on to its
+next frame's moment: far more than a busy machine needs for a frame's worth of
+game time, so only a page that stopped (hidden, or held by the game) gets here."""
 
 REPLAY_PROGRESS_EVERY_MS = 5000
-"""How often a replay says how far it has got: it plays in real time, so a
-long play would otherwise sit silent for minutes."""
+"""How often, in game time, a replay says how far it has got: it plays about
+in real time, so a long play would otherwise sit silent for minutes."""
 
 REPLAY_SHEET_COLUMNS = 5
 """Frames per row on the replay's contact sheet."""
@@ -305,7 +310,7 @@ a tap; Reksio's still play starts awake). ``free``: true once he is done; the
 meadow's taps are intents, not promises, so a step ends when this holds."""
 
 LOOK_EVERY_MS = 350
-"""One look screenshot this often: a gag's beats (a freeze, a tug, a pop) are
+"""One look screenshot this often, in game time: a gag's beats (a freeze, a tug, a pop) are
 a few hundred ms each, and a replay's 500 ms steps over some of them."""
 
 LOOK_MAX_S = 90

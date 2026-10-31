@@ -6,6 +6,20 @@ from __future__ import annotations
 # Each of the game's effects (sound.js) with what it is for, and wordings
 # for the model: cartoon-like, gentle (small ears), short.
 SOUNDS: dict[str, dict] = {
+    # Krtek's meadow (2026-10-31): the far church bell, synth now and "crazy
+    # bad" (Adam). Rung every 1.1 s, two strokes on the hour, six at sunset
+    # (church.js): a take rings longer than that, so the meadow plays them
+    # over each other (`overlaps`). Soft and far: calm first.
+    "krtek-bell": {
+        "world": "krtek",
+        "for": "One stroke of the village church bell far off on the hill (church.js): twice each hour, six times at sunset. Called every 1.1 s.",
+        "seconds": 3.5,
+        "prompts": [
+            "a single stroke of a large church bell heard from far across fields, soft and warm, a long ringing fade",
+            "a distant village church bell, one slow deep bong drifting over a quiet meadow, mellow, fading out",
+            "one toll of an old bronze church bell far away across a valley, soft, round and calm, with a long hum dying away",
+        ],
+    },
     # winter (2026-10-27): the snowman's encounters and the ice
     "pat": {
         "for": "Snow patted in mittened hands: the boy packing a snowball, or a snowman's head (snowplay.js, snowman.js). Called every 0.2-0.26 s, four or five times running.",

@@ -3,8 +3,9 @@
 For checking a gag by eye while making it (CLAUDE.md, "Adding a gag"). It opens
 a seeded, still play (the game's ``LOOK_GAMES`` flags, with any flags given on
 top), wakes the hero if the game needs it, awaits the setup steps, then starts
-the step to watch and takes a screenshot every so often until it ends and the
-hero is free. It saves the frames, a contact sheet, and ``look.json``:
+the step to watch and takes a screenshot every so often, in game time and with
+the game held still for each (``replay.run_to``), until it ends and the hero
+is free. It saves the frames, a contact sheet, and ``look.json``:
 each frame's game time, the game's trace and events, its state at the end, and
 any errors.
 """
@@ -25,7 +26,7 @@ from config import (
     LOOK_GAMES,
     WORLDS_DIR,
 )
-from replay import contact_sheet
+from replay import contact_sheet, run_to
 
 logger = logging.getLogger(__name__)
 
@@ -164,8 +165,9 @@ def look(
                 "(try it in the browser console of `main.py play --still`)."
             ) from e
         start = page.evaluate("Clock.now()")
+        t = start
         while True:
-            now = page.evaluate("Clock.now()")
+            now = run_to(page, t)
             state = (
                 page.evaluate(
                     f"window.__look === 'done' && !({free}) ? null : window.__look"
@@ -184,7 +186,7 @@ def look(
             page.screenshot(path=frame, type="jpeg", quality=80, clip=clip)
             result.frames.append(frame)
             result.times.append(round(now - start))
-            page.wait_for_timeout(every_ms)
+            t = now + every_ms
         result.ended = state == "done" or not watch
         result.failed = state if state and state != "done" else None
         record = {

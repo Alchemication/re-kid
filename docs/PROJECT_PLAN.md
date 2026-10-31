@@ -357,23 +357,27 @@ scene:
 - **Code:** the perf budget's slack is thin: walking measures 24–25% busy
   of 25% (2026-10-22, the bed about one point of it). Before adding more
   drawn every frame, win some back (the sky and painting are the biggest).
-  Under `-n 8`, three tests fail now and then and pass alone:
-  `TestRecorder::test_report_saves_and_replays`,
-  `test_look.py::test_photographs_a_gesture_until_it_ends` (both start a
-  second Chrome) and the meadow's `test_a_tap_on_the_egg_while_waiting`:
-  timing bugs to find;
-  `TestRealInput::test_a_key_tap_barks` fails about 1 run in 5 under
-  `-n 8` (a quick key tap can count as a hold when frames are slow).
-  `TestScreens::test_turning_the_phone_refits_it` failed under `-n 8`
-  (2026-10-22, again 2026-10-27) and passed alone: not yet looked into;
-  nor the meadow's `TestMeadowWind::test_a_gust_carries_something_across_and_the_plants_lean`
-  (once, 2026-10-27) or `TestMeadowEgg::test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it`
-  (once, 2026-10-27, the machine also busy measuring music). In one heavily
-  loaded run (2026-10-26, 17 minutes instead of 13), four more failed and
-  passed alone: `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`,
-  the meadow's `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]`
-  and `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`, and
-  one whose name the log lost: timing bugs to look into.
+  Under `-n 8`, these fail now and then and pass alone: timing bugs to
+  look into. `TestScreens::test_turning_the_phone_refits_it` (2026-10-22,
+  10-27); the meadow's `TestMeadowWind::test_a_gust_carries_something_across_and_the_plants_lean`
+  (fails about 1 run in 4 under load, 2026-10-31: the sway hasn't grown
+  yet), `TestMeadowTapsWait::test_a_tap_on_the_meadow_mid_step_waits_then_goes`
+  (the same), `TestMeadowEgg::test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it`,
+  `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]` and `[car]`,
+  `test_a_tap_on_the_egg_while_waiting`, `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`;
+  the yard's `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`.
+  `test_look.py::test_photographs_a_gesture_until_it_ends` failed once more
+  after the fix below (2026-10-31, load 85+), and passed alone and 8 at once.
+  Fixed 2026-10-31 (the tools and tests, not the games): look and replay
+  photograph in held game time, a replay starts `?held`, the key tap and
+  the corner sun tests.
+  **Seen once, not reproduced:** in a replay on an overloaded machine
+  (2026-10-31, load average 150+, before `?held`), the yard's rule "walks
+  only standing up" broke (`pose: stand, sliding: true`) about 9 s into
+  the recorder test's play (walk to 1400, press, release, go to tap),
+  after the new stretch. Not seen in 60 timings of that play, 27 runs
+  with the CPU slowed 10-30x, or 7 replays on a quiet machine. If it
+  comes back, the replay's trace says which pose was drawn.
 
 ## Later
 

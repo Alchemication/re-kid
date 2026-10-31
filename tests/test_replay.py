@@ -113,6 +113,11 @@ class TestReplayHelpers:
         url = replay.replay_url(report())
         assert "props=trap" in url and "seed=3" in url and "debug=" in url
 
+    def test_url_starts_the_play_held_so_a_slow_load_eats_no_game_time(
+        self,
+    ) -> None:
+        assert "held=" in replay.replay_url(report())
+
     def test_url_of_a_site_report_is_the_local_page(self) -> None:
         site = "https://alchemication.github.io/re-kid/reksio/yard/?seed=3&rain=1"
         url = replay.replay_url(report(replayUrl=site))

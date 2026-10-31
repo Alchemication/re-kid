@@ -195,6 +195,7 @@ Flags in the page address (`main.py play` takes the first three):
 | `?seed=N` | Seeds a play: with the layout flags below, the same yard every time, and what happens in it closely. Every play prints the address that replays it in the console. |
 | `?debug` | State overlay, every event in the console, a "report a bug" button. |
 | `?still` | Reksio moves only when asked: try one gesture or gag alone. He starts up, not asleep in his doghouse. |
+| `?held` | The game starts paused until a tool lets it go (`Clock.hold('held', false)`): `main.py replay` uses it, so a slow-loading page still plays a report from its start. |
 | `?morning=1` / `0` | Start asleep in the doghouse at dawn (he wakes by himself after 6–9 s, or at the first tap), or start the day with him up. On unless `?still`. |
 | `?props=trap,bowl` | Which props are out (of bowl, dig, film, trap, tree, berries). |
 | `?sky=clear\|fair\|cloudy\|golden` | The kind of day: no clouds, a few drifting, more with a haze and a softer sun, or warmer light all day. |
@@ -229,13 +230,13 @@ half second. Ctrl+Shift+B (any play) asks what went wrong and downloads
 `yard-bug-<time>.json`; press it right after the moment, since the report
 is timed from the key press. `main.py replay` replays the newest one in
 ~/Downloads: same yard, same seed, same inputs at the same times. It saves a
-screenshot every 0.5 s of the last 10 s (`--last 60` for more), a contact
+screenshot every 0.5 s of game time over the last 10 s (`--last 60` for more), a contact
 sheet, and `replay.json` (recorded vs replayed state, trace). The game runs on the real clock, so a replay is close, not exact; the
 command says when it ended differently.
 
 **Looking at a gag.** `main.py look` opens a seeded, still play (only what you
 ask moves; `--flags` adds or replaces page flags), awaits each `--before`
-step, then photographs `--watch` every 350 ms until it ends and the hero is
+step, then photographs `--watch` every 350 ms of game time until it ends and the hero is
 free (the meadow wakes Krtek first; its taps are intents, so a step there is
 done when he is free). It saves the
 frames, a contact sheet and `look.json` (each frame's time, the trace, events,
