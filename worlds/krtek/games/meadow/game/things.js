@@ -33,6 +33,9 @@
 //       is a try too: next()'s); holds(): he
 //       holds it up as he waits (the egg), which a free mole otherwise
 //       never does (checkRules).
+//   urgent (optional): weather that won't wait for a tap (the storm): as
+//     it arrives he drops whatever he is doing and sees to it at once,
+//     unless he is still waking, or in a ?still play (Adam, 2026-10-31),
 //   music (optional): { [step]: 'sad' | 'happy' | 'hush' }, the music's
 //     moment as that step starts (music.js: the theme sad at its trouble,
 //     happy as it comes right, stepping back at a fright). The theme comes
@@ -132,7 +135,8 @@ const Things = (() => {
         Debug.trace('arrives', { thing: e.name })
         e.appear()
         api.music?.('curious')
-        api.notice?.(e.name)
+        if (e.urgent && !Debug.still && api.canBreakOff()) use(e.name, false)
+        else api.notice?.(e.name)
         break
       }
     }

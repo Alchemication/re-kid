@@ -796,6 +796,35 @@ class TestMeadowStorm:
         m.wait_free()
         m.assert_settled()
 
+    def test_a_storm_coming_breaks_off_his_play_and_he_goes_for_the_umbrella(
+        self, meadow: callable
+    ) -> None:
+        """Weather won't wait for a tap: a child busy tapping him, laughing,
+        and the clouds come in; he stops at once, with a fright, and goes."""
+        m = meadow("seed=1&props=storm")
+        m.wake()
+        for _ in range(60):  # the child taps him on and on, until the clouds come
+            if "arrives" in m.page.evaluate("meadowGame.trace()"):
+                break
+            m.do("tap mole")
+            m.page.wait_for_timeout(1000)
+        arrived(m, "storm")
+        trace = m.page.evaluate("meadowGame.trace()").split("\n")
+        came = next(
+            float(t.split("s")[0])
+            for t in trace
+            if '"thing":"storm"' in t and "arrives" in t
+        )
+        went = next(
+            float(t.split("s")[0])
+            for t in trace
+            if '"name":"storm"' in t and "gesture" in t
+        )
+        assert went - came < 0.5, (
+            f"he went for the umbrella {went - came:.1f} s after the clouds came"
+        )
+        m.wait("meadowGame.state().pose === 'down'", 15_000)  # down into his den for it
+
     def test_another_friend_tapped_mid_wave_keeps_the_sheltered(
         self, meadow: callable
     ) -> None:

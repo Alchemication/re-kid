@@ -784,6 +784,7 @@ const meadowGame = (() => {
     digTo,
     el,
     free: () => game.awake && !game.ended && !game.gesture,
+    canBreakOff: () => game.awake && !game.ended && game.gesture !== 'wake', // whatever he is doing, but not still coming up in the morning
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
     music: (part) => Music.cue(part),

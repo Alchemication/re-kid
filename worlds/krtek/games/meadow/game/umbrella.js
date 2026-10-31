@@ -37,6 +37,7 @@
   const FROM = { mouse: 1, hare: -1, hen: 1 } // which side each comes running from
   const WAITS = { mouse: 340, hare: -360, hen: 470 } // where each stops, dripping, from the umbrella: out in the rain
   const SLOT = { mouse: 95, hare: -110, hen: 150 } // where each stands under it
+  const SCARED_MS = 450 // the storm coming: hands to his cheeks this long before he hurries off
   const SQUEEZED = 290 // how far out he is squeezed, into the rain
   const OUT_IN_THE_RAIN = [12, -8, 8] // out there he leans glum, and shakes his head...
   const OUT_PAUSE_MS = 500 // ...and stands a moment more before he thinks of digging
@@ -52,6 +53,7 @@
     lying: null, // furled in the grass where a cut made him put it down: { g, x }
     friends: {}, // by kind: waiting in the rain, or under the umbrella
     under: new Set(),
+    scared: false, // he has had his fright at the storm coming
     popped: false, // he has popped up in the middle
     rainbow: false,
     resolved: false,
@@ -158,7 +160,7 @@
     for (const c of document.querySelectorAll('.storm-cloud')) c.dataset.thing = 'storm' // a tap on the clouds: he goes to see to it
   }
 
-  /** He looks up (ach jo), fetches his umbrella (from his den, or from the grass where he put it down), takes it
+  /** A storm coming: he gasps, hands to his cheeks, then hurries for his umbrella (ach jo), (from his den, or from the grass where he put it down), takes it
    * out to the open grass, plants it and opens it. */
   async function fetch(alive) {
     if (!state.umbrella) {
@@ -189,6 +191,12 @@
       state.lying = null
       Mole.carry(furled())
       return
+    }
+    if (!state.scared) {
+      state.scared = true // once a storm: picked up after a cut, he just goes on
+      Sound.say(['gasp', 'fright'])
+      await Mole.handsToFace(SCARED_MS)
+      if (!alive()) return
     }
     Mole.perk(1.3)
     Sound.say('achJo')
@@ -320,6 +328,7 @@
     instead: 'rain',
     chance: 0.25, // one play in four (Adam, 2026-10-26)
     engageMs: WAVE_IN_MS,
+    urgent: true, // the sky darkens: he stops at once and goes for his umbrella
     music: { 0: 'sad' }, // a storm coming: ach jo (happy once they are all dry)
     appear,
     steps: [fetch, friendsCome],
