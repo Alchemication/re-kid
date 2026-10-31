@@ -14,7 +14,7 @@ import pytest
 
 import commands
 from config import LOOK_CLOSE
-from look import LookError, close_clip, look_url, parse_size
+from look import LookError, close_clip, look_game, look_url, parse_size
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -41,6 +41,14 @@ class TestLookUrl:
     def test_says_what_to_do_about_an_unknown_game(self) -> None:
         with pytest.raises(LookError, match="main.py list"):
             look_url("reksio", "nope")
+
+    def test_each_game_opens_its_own_play(self) -> None:
+        q = flags(look_url("krtek", "meadow"))
+        assert q["seed"] == ["1"] and "still" in q and "rain" not in q
+
+    def test_says_what_to_do_about_a_game_it_doesnt_know(self) -> None:
+        with pytest.raises(LookError, match="LOOK_GAMES"):
+            look_game("nope")
 
 
 class TestParseSize:
@@ -81,11 +89,13 @@ class TestCmdLook:
         assert "--watch" in caplog.text and "--for" in caplog.text
 
 
-def run_look(out: Path, *args: str) -> subprocess.CompletedProcess:
+def run_look(
+    out: Path, *args: str, game: tuple[str, ...] = ("reksio",)
+) -> subprocess.CompletedProcess:
     """`main.py look` in its own process: the browser tests' session already
     holds Playwright, and a second one can't start alongside it."""
     return subprocess.run(
-        [sys.executable, str(ROOT / "main.py"), "look", "reksio", "--out", str(out),
+        [sys.executable, str(ROOT / "main.py"), "look", *game, "--out", str(out),
          "--size", "800x450", "--every", "150", *args],
         capture_output=True, text=True, timeout=120, check=False,
     )  # fmt: skip
@@ -123,3 +133,14 @@ class TestLookInChrome:
         run = run_look(tmp_path, "--before", "yardGame.nope()", "--for", "1")
         assert run.returncode == 1
         assert "browser console" in run.stderr
+
+    def test_wakes_the_mole_and_waits_until_he_is_free(self, tmp_path: Path) -> None:
+        run = run_look(
+            tmp_path, "--close", "--watch", "meadowGame.perform('sniff')",
+            game=("krtek", "meadow"),
+        )  # fmt: skip
+        assert run.returncode == 0, run.stdout + run.stderr
+        record = json.loads((tmp_path / "look.json").read_text())
+        assert record["ended"] and not record["failed"] and not record["errors"]
+        assert len(record["frames"]) >= 4, "a sniff takes seconds: it waited for him"
+        assert record["state"]["awake"] and not record["state"]["busy"]

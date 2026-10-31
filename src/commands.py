@@ -403,7 +403,7 @@ def cmd_replay(args: argparse.Namespace) -> int:
 
 def cmd_look(args: argparse.Namespace) -> int:
     """Play a gag in Chrome and photograph it as it runs."""
-    from look import LookError, look, look_url, parse_size
+    from look import LookError, look, look_game, look_url, parse_size
 
     if not args.watch and args.seconds is None:
         logger.error(
@@ -419,6 +419,7 @@ def cmd_look(args: argparse.Namespace) -> int:
         result = look(
             url,
             out,
+            game=look_game(args.game),
             before=args.before,
             watch=args.watch,
             seconds=args.seconds if args.seconds is not None else LOOK_MAX_S,

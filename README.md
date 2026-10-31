@@ -215,7 +215,7 @@ In Krtek's meadow (`main.py play krtek meadow`), `?seed=N`, `?debug` and
 ending in a minute) and `?film=0` work the same; `?props=egg` says which encounters come
 (`?props=` for none) and `?soon` brings the first at once; `?critters=now` brings a butterfly at
 once, even in a `?still` play (which otherwise has none), and `?critters=snail` the snail, the grass
-under the wild flowers wet from the start; `?wind=gust` brings a strong gust that carries leaves or
+under the wild flowers wet from the start, `?critters=fireflies` the dusk's fireflies, at once and in daylight too; `?wind=gust` brings a strong gust that carries leaves or
 seeds three seconds after he wakes; `?eclipse=11` an eclipse at 11:00 (with `?day=60`, 15 s in), `?eclipse=now` one as he
 wakes (the sun is still behind the trees then); `?props=storm&soon` brings the storm and the
 umbrella as he wakes. In the console, `meadowGame.state()`,
@@ -235,12 +235,17 @@ command says when it ended differently.
 
 **Looking at a gag.** `main.py look` opens a seeded, still play (only what you
 ask moves; `--flags` adds or replaces page flags), awaits each `--before`
-step, then photographs `--watch` every 350 ms until it ends. It saves the
+step, then photographs `--watch` every 350 ms until it ends and the hero is
+free (the meadow wakes Krtek first; its taps are intents, so a step there is
+done when he is free). It saves the
 frames, a contact sheet and `look.json` (each frame's time, the trace, events,
 end state, errors) to `looks/latest/` (gitignored). `--close` cuts each frame
-around Reksio; `--size 844x390` is a phone on its side. For example, the bowl
+around the hero; `--size 844x390` is a phone on its side. What it knows of
+each game is `LOOK_GAMES` in `src/config.py`. For example, the bowl
 stuck on his head:
-`main.py look reksio --flags props=bowl --close --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"`.
+`main.py look reksio --flags props=bowl --close --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"`;
+Krtek's paddle at the spring:
+`main.py look krtek meadow --close --watch "meadowGame.perform('paddle')"`.
 
 ## Reference media (not in git)
 

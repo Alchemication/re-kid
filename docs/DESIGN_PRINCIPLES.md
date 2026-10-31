@@ -4,6 +4,26 @@ How re-kid's games should feel and what they must never do. They apply to
 every world and game; a game brief may add its own. The research behind them
 is at the end. Status and next steps are in `docs/PROJECT_PLAN.md`.
 
+## Calm and soothing, first
+
+The first thing people outside the family said of the games (2026-10-31,
+via Adam) was that they calm and soothe. That is the effect to keep, and it
+comes before any other aim here: a new gag, creature, sound or feature that
+makes the scene busier, louder or more urgent loses it, however funny.
+
+- **Gentle tempo.** Slow movements, pauses between happenings, room to look.
+  Life goes on in the background at its own pace; nothing demands attention.
+- **Soft surprises.** Mishaps and jokes land as a giggle, not a jolt: no
+  sudden loud sounds, flashes or shaking screen. A fright in the story
+  (a frog plopping in) is small, and settles at once.
+- **One thing at a time.** Never several happenings competing for the eye;
+  ambient life is quieter and slower than what the child chose.
+- **Warm characters.** Kind to each other, never in real danger, never
+  upset for long; every trouble ends in comfort or a shared laugh.
+- **Quiet sound.** Music low and slow, effects soft, long silences fine.
+- **A slow wind-down.** Evening is the calmest part of the day, as
+  the scene gets ready for sleep.
+
 ## Faithful to the original
 
 - **True to the cartoon's character:** its look, pacing, humour, music and

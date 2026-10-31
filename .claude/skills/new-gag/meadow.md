@@ -43,13 +43,22 @@ then cuts it short to be picked up at the next step later. Keep each step
 
 - A game object made with a top-level `const` (`meadowGame`) is not on
   `window`: wait for it in tests with `typeof meadowGame !== 'undefined'`.
+- An answer that needs a creature in a certain state (the frog on its lily
+  pad, for the paddle that makes it plop in) must come whenever that state
+  holds, not on its turn in a rotation (`rounds`): by its turn, other taps
+  have usually changed the state, and it almost never shows. Check it in
+  the first few taps of a seeded play.
 
 ## Look at it
 
-There is no look command for the meadow yet: drive it with Playwright
-(`channel="chrome"`, `?seed=1&soon&props=<name>`, wake him with
-`meadowGame.perform('wake')`, a screenshot every 1.5 s, an ffmpeg tile
-sheet; `?film=0` for clean frames).
+`main.py look krtek meadow` opens a seeded, still play, wakes him, and
+photographs what `--watch` starts until he is free again; `--close` cuts
+around him. A tap is an intent: `--watch "meadowGame.perform('use egg')"`
+(with `--flags "soon&props=egg"`), `"meadowGame.perform('paddle')"`. To see
+the answers a thing varies through, repeat `--before` with the same intent:
+each is played to the end first. `look.json` has the trace (`sniffs`,
+`paddles`: which answer came). A creature's own doing doesn't make him busy:
+photograph it with `--for SECONDS`.
 
 ## Tests
 

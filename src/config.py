@@ -279,11 +279,30 @@ LOOK_DIR = REPO_ROOT / "looks"
 """Where ``main.py look`` saves its frames, unless told otherwise: in the
 repository (gitignored), so a session can read them straight back."""
 
-LOOK_FLAGS = {"seed": "1", "still": "", "rain": "0", "creatures": "", "film": "0"}
-"""The play a look opens unless its flags say otherwise: seeded, Reksio moving
-only when asked, dry, no creatures, and without the old-print look (its grain
-and dust would read as flaws in the drawing). The same play every time,
-nothing else going on, so only the gag being looked at moves."""
+LOOK_GAMES = {
+    "yard": {
+        "api": "yardGame",
+        "hero": "#rk-bob",
+        "flags": {"seed": "1", "still": "", "rain": "0", "creatures": "", "film": "0"},
+        "ready": None,
+        "free": "true",
+    },
+    "meadow": {
+        "api": "meadowGame",
+        "hero": ".mole-body",
+        "flags": {"seed": "1", "still": "", "film": "0"},
+        "ready": "meadowGame.perform('wake')",
+        "free": "meadowGame.state().awake && !meadowGame.state().busy",
+    },
+}
+"""What ``main.py look`` needs to know of each game. ``api``: its game object
+(state, trace). ``hero``: what ``--close`` cuts around. ``flags``: the play it
+opens unless told otherwise: seeded, the hero moving only when asked, without
+the old-print look (its grain and dust would read as flaws in the drawing),
+and for the yard dry and with no creatures; the same play every time, so only
+what is looked at moves. ``ready``: what wakes him first (the mole sleeps until
+a tap; Reksio's still play starts awake). ``free``: true once he is done; the
+meadow's taps are intents, not promises, so a step ends when this holds."""
 
 LOOK_EVERY_MS = 350
 """One look screenshot this often: a gag's beats (a freeze, a tug, a pop) are
@@ -298,6 +317,6 @@ LOOK_SIZE = (1280, 720)
 game's browser tests use."""
 
 LOOK_CLOSE = (480, 320)
-"""With ``--close``, each frame is cut to this much around Reksio (CSS px, at
-the default size): he, the bird on his head and what he holds or eyes fill
+"""With ``--close``, each frame is cut to this much around the hero (CSS px, at
+the default size): Reksio, the bird on his head and what he holds or eyes fill
 it, as a zoomed-in still would; 640x400 left him small on the sheet."""

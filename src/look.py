@@ -1,9 +1,10 @@
 """Look at a gag: play it in Chrome and photograph it as it runs.
 
 For checking a gag by eye while making it (CLAUDE.md, "Adding a gag"). It opens
-a seeded, still play (``LOOK_FLAGS``, with any flags given on top), awaits the
-setup steps, then starts the step to watch and takes a screenshot every so
-often until it ends. It saves the frames, a contact sheet, and ``look.json``:
+a seeded, still play (the game's ``LOOK_GAMES`` flags, with any flags given on
+top), wakes the hero if the game needs it, awaits the setup steps, then starts
+the step to watch and takes a screenshot every so often until it ends and the
+hero is free. It saves the frames, a contact sheet, and ``look.json``:
 each frame's game time, the game's trace and events, its state at the end, and
 any errors.
 """
@@ -21,7 +22,7 @@ from config import (
     GAME_PAGE,
     GAMES_DIR,
     LOOK_CLOSE,
-    LOOK_FLAGS,
+    LOOK_GAMES,
     WORLDS_DIR,
 )
 from replay import contact_sheet
@@ -45,16 +46,26 @@ class Look:
     errors: list[str] = field(default_factory=list)
 
 
+def look_game(game: str) -> dict:
+    """What a look needs to know of `game` (``LOOK_GAMES``)."""
+    if game not in LOOK_GAMES:
+        raise LookError(
+            f"`main.py look` doesn't know the game {game!r} yet. "
+            f"Add it to LOOK_GAMES in src/config.py (known: {', '.join(LOOK_GAMES)})."
+        )
+    return LOOK_GAMES[game]
+
+
 def look_url(world: str, game: str, flags: str = "") -> str:
-    """The game page with LOOK_FLAGS, and `flags` (a page address query) on
-    top: a flag given here replaces the default, never sits beside it (the
+    """The game page with its look flags, and `flags` (a page address query)
+    on top: a flag given here replaces the default, never sits beside it (the
     game reads the first of two)."""
     page = WORLDS_DIR / world / GAMES_DIR / game / GAME_PAGE
     if not page.is_file():
         raise LookError(
             f"No game page at {page}. Check the world and game names (`main.py list`)."
         )
-    query = dict(LOOK_FLAGS)
+    query = dict(look_game(game)["flags"])
     query.update(parse_qsl(flags.lstrip("?"), keep_blank_values=True))
     return f"{page.resolve().as_uri()}?{urlencode(query)}"
 
@@ -73,7 +84,7 @@ def parse_size(text: str) -> tuple[int, int]:
 
 
 def close_clip(box: dict, size: tuple[int, int]) -> dict:
-    """LOOK_CLOSE around Reksio's box (screen pixels), a little above his
+    """LOOK_CLOSE around the hero's box (screen pixels), a little above his
     middle (what lands on his head shows), kept inside the page."""
     w, h = min(LOOK_CLOSE[0], size[0]), min(LOOK_CLOSE[1], size[1])
     cx = box["x"] + box["width"] / 2
@@ -87,6 +98,7 @@ def look(
     url: str,
     out: Path,
     *,
+    game: dict,
     before: list[str],
     watch: str | None,
     seconds: float,
@@ -94,9 +106,10 @@ def look(
     size: tuple[int, int],
     close: bool,
 ) -> Look:
-    """Open `url`, await each of `before` (JavaScript, in the page), then
-    photograph `watch` as it runs, every `every_ms`, until it ends or
-    `seconds` pass (with no `watch`: for `seconds`). Saves to `out`."""
+    """Open `url`, wake the hero (`game`'s ready) and await each of `before`
+    (JavaScript, in the page) until he is free, then photograph `watch` as it
+    runs, every `every_ms`, until it ends with him free, or `seconds` pass
+    (with no `watch`: for `seconds`). Saves to `out`."""
     try:
         from playwright.sync_api import Error as PlaywrightError
         from playwright.sync_api import sync_playwright
@@ -127,13 +140,15 @@ def look(
             "pageerror", lambda e: result.errors.append(f"uncaught: {e}\n{e.stack}")
         )
         page.goto(url)
-        page.wait_for_function("window.yardGame")
+        api, free = game["api"], game["free"]
+        page.wait_for_function(f"typeof {api} !== 'undefined'")
         try:
-            for step in before:
+            for step in [game["ready"], *before] if game["ready"] else before:
                 page.evaluate(
                     "(js) => Debug.ignoreCut(Promise.resolve(eval(js)), 'look: before')",
                     step,
                 )
+                page.wait_for_function(free, timeout=seconds * 1000)
             if watch:
                 page.evaluate(
                     """(js) => {
@@ -151,12 +166,18 @@ def look(
         start = page.evaluate("Clock.now()")
         while True:
             now = page.evaluate("Clock.now()")
-            state = page.evaluate("window.__look") if watch else None
+            state = (
+                page.evaluate(
+                    f"window.__look === 'done' && !({free}) ? null : window.__look"
+                )
+                if watch
+                else None
+            )  # done once he is free too; a failure at once
             if state or now - start > seconds * 1000:
                 break
             frame = frames_dir / f"{len(result.frames):03d}.jpg"
             clip = (
-                close_clip(page.locator("#rk-bob").bounding_box(), size)
+                close_clip(page.locator(game["hero"]).first.bounding_box(), size)
                 if close
                 else None
             )
@@ -169,8 +190,8 @@ def look(
         record = {
             "url": url, "before": before, "watch": watch, "ended": result.ended, "failed": result.failed,
             "frames": [{"file": f.name, "t": t} for f, t in zip(result.frames, result.times, strict=True)],
-            "errors": result.errors, "state": page.evaluate("yardGame.state()"),
-            "events": page.evaluate("yardGame.events()"), "trace": page.evaluate("yardGame.trace()"),
+            "errors": result.errors, "state": page.evaluate(f"{api}.state()"),
+            "events": page.evaluate(f"{api}.events ? {api}.events() : []"), "trace": page.evaluate(f"{api}.trace()"),
         }  # fmt: skip
         browser.close()
     result.sheet = contact_sheet(result.frames, out / "sheet.jpg")

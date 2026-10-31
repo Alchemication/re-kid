@@ -70,6 +70,11 @@ Examples:
         looks/latest/. --for 20 without --watch photographs the play as it
         goes; --size 844x390 is a phone on its side.
 
+    uv run python main.py look krtek meadow --flags props=egg --close \
+            --watch "meadowGame.perform('paddle')"
+        The same for Krtek's meadow: it wakes him first, and a step ends
+        once he is free again (the meadow's taps are intents).
+
     uv run python main.py samples reksio yard
         Downloads the samples listed in games/yard/samples.yaml (CC0
         libraries), measures their pitch and packs them into samples.js.
@@ -270,7 +275,7 @@ def main() -> int:
         help="Page size WIDTHxHEIGHT in CSS px (default: %(default)s)",
     )
     p_look.add_argument(
-        "--close", action="store_true", help="Cut each frame close around Reksio"
+        "--close", action="store_true", help="Cut each frame close around the hero"
     )
     p_look.add_argument("--out", help="Folder for the frames (default: looks/latest)")
 
