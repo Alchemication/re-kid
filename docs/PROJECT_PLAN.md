@@ -132,6 +132,11 @@ decided and why.
       in an eclipse, glow and fade, and settle back into the grass at
       bedtime. `?critters=now`, `?critters=fireflies&day=60`. Judge: is
       the dusk calmer and lovelier, are the fireflies too few or faint.
+   6d. **Underground** (Adam's idea, 2026-10-31): he goes down and digs
+      about under the meadow, and meets other animals there. A second
+      layer of the scene, not a gag: a view down into the earth, its
+      painting, animals drawn after the films, and a way in and out a
+      toddler gets at once. Sketch designs for Adam after the fox.
    7. **Adam plays the meadow with Eliot** before any LLM work (Adam,
       2026-10-26).
    8. If the meadow feels more alive: the LLM director behind the player's

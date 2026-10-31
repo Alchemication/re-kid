@@ -148,11 +148,22 @@ scenes:
     origin: inspired
     refs: [world:humour]
   result:
-    text: He peers into the red tin and falls in head first, and comes out all red. A grinning fox comes sneaking in past the spring, and he claps his hands to his cheeks. Along come the hare and the mouse with brushes; they paint each other, tiger stripes and spots, and dab spots on him too. Then the three of them climb onto each other's shoulders - a big striped spotted monster with its arms up - and the fox yelps and runs. His friends wave and go, he jumps in the spring to wash the paint off, and the hare and the mouse come back for the tins and carry them off. In the film he paints the whole forest and the fox runs from it; the stacked scary creature is there (Krtek malířem, 3:20), the wash in the spring is ours. Someone helps him.
+    text: He peers into the red tin and falls in head first, and comes out all red. Then the fox comes sneaking in for the bullfinch's nest on the spring's rocks - up on his hind legs, twice the mole's height, tiptoeing, rubbing his paws, snickering and licking his lips - while the chicks huddle in the nest, trembling and peeping the alarm. The mole gasps, points at him (tam!) and leans back in fright (Adam, 2026-10-31. The fox's bad intentions must read; the small fox on all fours read as a new friend). Along come the hare and the mouse with brushes; they paint each other, tiger stripes and spots, and dab spots on him too. Then the three of them climb onto each other's shoulders - a big striped spotted monster with its arms up - and the fox yelps and runs. His friends wave and go, he jumps in the spring to wash the paint off, and the hare and the mouse come back for the tins and carry them off. In the film he paints the whole forest and the fox runs from it; the stacked scary creature is there (Krtek malířem, 3:20), the wash in the spring is ours. Someone helps him.
     origin: inspired
     refs: [world:humour, 'world:characters[myska].description', 'world:characters[zajic].description', 'world:themes_and_values[0]']
   sound:
-    text: Tins set down, a splash and his squeak of fright, his "ooh", brushes swished, a giggle, a low cartoon "boo", the fox's yelp, the spring's splash.
+    text: Tins set down, a splash and his squeak of fright, his "ooh", the fox's sly snicker, the chicks' alarm peeps, his gasp and "tam!", brushes swished, a giggle, a low cartoon "boo", the fox's yelp, the spring's splash.
+    origin: invented
+- id: nest
+  action:
+    text: Nothing. The bullfinch's nest sits on the spring's top boulder all day.
+    origin: invented
+  result:
+    text: Three chicks bob up and peep now and then by day, quietly, never in an eclipse. When the fox comes for them (the paint) they huddle up, trembling and peeping the alarm, and settle once he has run. In Krtek malířem the fox raids a birds' nest in a tree; the nest on the spring's rocks, with the spring's bullfinch as its mother, is ours.
+    origin: invented
+    refs: ['world:themes_and_values[0]']
+  sound:
+    text: The chicks' soft peeps, made in the browser.
     origin: invented
 - id: car
   action:

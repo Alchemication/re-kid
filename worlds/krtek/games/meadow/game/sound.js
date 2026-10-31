@@ -207,6 +207,12 @@ const Sound = (() => {
     }
   }
 
+  /** The fox's sly snicker as he sneaks (heh-heh-heh): his recorded takes, or a soft stand-in. */
+  function snicker() {
+    if (!ready() || recorded('snicker')) return
+    for (let i = 0; i < 3; i++) note(330 - i * 30, i * 0.14, 0.09, 0.05, 'triangle', 0.8)
+  }
+
   /** The frog: a low ribbit, twice. */
   function croak() {
     if (!ready()) return
@@ -362,5 +368,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, dig, pop, water, bell, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom, wind }
+    say, dig, pop, water, bell, snicker, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom, wind }
 })()

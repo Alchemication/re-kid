@@ -1,12 +1,18 @@
 // The paint and the fox (someone helps him), after Krtek malířem: the hare
 // and the mouse carry three paint tins in and set them down in the open grass
 // between his flowers and the spring, and go off. He peers into the red one and falls in
-// head first, and comes out all red. Then a grinning fox comes sneaking in
-// from the edge of the meadow, and he claps his hands to his cheeks. Along
+// head first, and comes out all red. Then the fox comes sneaking in from
+// the edge of the meadow for the bullfinch's nest on the spring's rocks
+// (nest.js; in the film he raids a nest): up on his hind legs, twice the
+// mole's height, tiptoeing, rubbing his paws, snickering and licking his
+// lips, while the chicks huddle up trembling and peeping the alarm. The mole gasps, points at him
+// (tam!) and leans back in fright (Adam, 2026-10-31: the fox's bad
+// intentions must read). Along
 // come the hare and the mouse with brushes: they paint each other (tiger
 // stripes, spots) and dab spots on him, and the three of them climb onto each
 // other's shoulders, a big striped spotted monster with its arms up, and
-// the fox yelps and runs (the surprise, as the stacked monster in the film).
+// the fox yelps and runs (the surprise, as the stacked monster in the film),
+// and the chicks settle.
 // His friends wave and go, he jumps in the spring to wash the paint off, and
 // the hare and the mouse come back for the tins and carry them off (nothing
 // falls from the sky or vanishes: Adam, 2026-10-23). If bedtime comes first,
@@ -17,7 +23,7 @@
 // on from the step it stopped at (the fox comes back first, quicker); he
 // stays red until he washes.
 
-/* global Debug, Friends, Layout, Mole, Motion, Sound, Things */
+/* global Debug, Friends, Layout, Mole, Motion, Nest, Sound, Things */
 ;(() => {
   const Y = Layout.GROUND
   const S = Layout.SPRING
@@ -25,7 +31,9 @@
   const RED = 2 // the tin he falls into: the one nearest the spring
   const PEER_X = S - 75 // where he stands to peer into it, right of the tins
   const FOX_FROM = PEER_X + 950 // the fox sneaks in from off to the right...
-  const FOX_AT = S + 190 // ...past the spring
+  const FOX_AT = Nest.AT.x + 110 // ...to the spring's rocks, the nest beside his head: under it, his head hid it
+  const SNEAK_MS = 3600 // tiptoeing in, slowly…
+  const TIPTOE = 12 // …each step up high
   const STACK_X = S + 40 // where the monster stands, between the tins and the fox
   const FRIENDS_FROM = STACK_X - 950 // the friends come from off to the left, from his molehill's side
   const QUICK = 0.45 // coming back after a cut, everyone hurries
@@ -139,16 +147,24 @@
     await Mole.cheer()
   }
 
-  /** The fox sneaks in, grinning; he claps his hands to his cheeks. */
+  /** The fox sneaks in for the nest: tiptoeing up to it as the chicks peep the alarm, rubbing his paws,
+   * snickering, licking his lips. The mole gasps, points at him, and leans back in fright. */
   async function foxComes(alive) {
+    Nest.fear(true) // the chicks see him coming
     if (!fox) {
       fox = cast.call('fox', Friends.offscreen(1, FOX_FROM), -1)
-      await fox.go(FOX_AT, pace(2600))
+      await fox.go(FOX_AT, pace(SNEAK_MS), TIPTOE) // slow, high steps: tiptoeing
       if (!alive()) return
     }
-    await fox.bob(2)
+    if (again) return // picked up after a cut: he is back, and the friends come on at once
+    Sound.snicker()
+    await fox.rub(3)
     if (!alive()) return
-    Sound.say('fright')
+    await fox.lick()
+    if (!alive()) return
+    Sound.say(['gasp', 'fright'])
+    await Mole.point(fox.x)
+    if (!alive()) return
     await Mole.lean(20, 900)
   }
 
@@ -202,6 +218,7 @@
       if (!alive()) return
       cast.dismiss(fox)
       fox = null
+      Nest.fear(false) // he has run: the chicks settle
     }
     Sound.say('giggle')
     await Promise.all([mouse.lift(0, 500), Mole.perch(0, 500)])
@@ -251,6 +268,7 @@
   function restore() {
     cast.dismissAll() // home on their own feet (friends.js leave)
     fox = null
+    Nest.fear(false)
     friends = { hare: null, mouse: null }
     again = true
   }

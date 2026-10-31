@@ -130,13 +130,7 @@ const Things = (() => {
     for (const p of plan) {
       const e = all[p.name]
       if (!e.out && !waitingNow && hour >= p.at) {
-        e.out = true
-        e.arrived = Clock.now()
-        Debug.trace('arrives', { thing: e.name })
-        e.appear()
-        api.music?.('curious')
-        if (e.urgent && !Debug.still && api.canBreakOff()) use(e.name, false)
-        else api.notice?.(e.name)
+        arrive(e)
         break
       }
     }
@@ -145,6 +139,18 @@ const Things = (() => {
     const waiting = plan.map((p) => all[p.name]).find((e) => e.out && !e.done)
     const waited = waiting && Math.min(api.alone(), Clock.now() - Math.max(waiting.arrived, waiting.tried || 0))
     if (waiting && hour < Day.SUNSET && !Debug.still && api.free() && waited > (waiting.engageMs ?? ENGAGE_MS)) use(waiting.name, false)
+  }
+
+  /** It arrives: drawn with its entrance, the music curious; weather (urgent) has him see to it at
+   * once, anything else he notices. */
+  function arrive(e) {
+    e.out = true
+    e.arrived = Clock.now()
+    Debug.trace('arrives', { thing: e.name })
+    e.appear()
+    api.music?.('curious')
+    if (e.urgent && !Debug.still && api.canBreakOff()) use(e.name, false)
+    else api.notice?.(e.name)
   }
 
   /** Its steps, from where they stopped; true once they are all done. */

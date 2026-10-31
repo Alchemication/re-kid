@@ -766,6 +766,44 @@ class TestMeadowEclipse:
         m.assert_settled()
 
 
+class TestMeadowFox:
+    """The fox up to no good (Adam, 2026-10-31): upright and tall, after the
+    bullfinch's nest, its chicks peeping the alarm until the monster sends
+    him running, or the encounter is cut short."""
+
+    HEIGHTS = """() => [document.querySelector('.friend.fox'), document.querySelector('.mole-body')]
+        .map((e) => e.getBoundingClientRect().height)"""
+
+    def fox_at_the_nest(self, meadow: callable) -> Meadow:
+        m = meadow(f"{STILL}&soon&props=paint")
+        m.wake()
+        arrived(m, "paint")
+        m.do("use paint")
+        m.wait("document.querySelector('.friend.fox') && Nest.alarmed", 40_000)
+        return m
+
+    def test_tall_and_after_the_nest_until_the_monster_sends_him_off(
+        self, meadow: callable
+    ) -> None:
+        m = self.fox_at_the_nest(meadow)
+        fox, mole = m.page.evaluate(self.HEIGHTS)
+        # about 1.6 times his drawn box (his hairs and arms in it): twice his body
+        assert fox > 1.5 * mole, (
+            f"the fox ({fox:.0f}) should stand well over the mole ({mole:.0f})"
+        )
+        m.wait("meadowGame.state().things.paint === 'done'", 90_000)
+        assert not m.page.evaluate("Nest.alarmed"), "the chicks still peep the alarm"
+        m.wait_free()
+        m.assert_settled()
+
+    def test_cut_short_the_chicks_settle(self, meadow: callable) -> None:
+        m = self.fox_at_the_nest(meadow)
+        m.do("go to 600")
+        m.wait_free()
+        m.wait("!Nest.alarmed", 5000)
+        m.assert_settled()
+
+
 class TestMeadowStorm:
     """The storm and the umbrella (umbrella.js, storm.js): the child picks
     whom he waves in; the last in squeezes him out into the rain, and he pops

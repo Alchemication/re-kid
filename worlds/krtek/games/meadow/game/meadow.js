@@ -16,7 +16,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
+/* global Again, Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -285,6 +285,7 @@ const meadowGame = (() => {
   function checkRules() {
     const m = Mole.state
     Debug.check('the mole is in the meadow', m.x >= DIG.from - 1 && m.x <= DIG.to + 1, { x: m.x })
+    Debug.check('the chicks peep the alarm only while the fox is about', !Nest.alarmed || !!document.querySelector('.friend.fox'), {})
     if (game.awake && !game.ended && !game.gesture) {
       Debug.check('a free mole stands', m.pose !== 'down', { pose: m.pose })
       Debug.check('a free mole holds nothing up, unless an encounter waits on it', !m.holdsUp || Things.holding(), {})
@@ -760,6 +761,7 @@ const meadowGame = (() => {
   })
   Friends.setup(document.getElementById('friends'))
   Spring.setup(document.getElementById('spring'), () => game.hour)
+  Nest.setup(document.getElementById('spring'), () => game.hour)
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
   Church.setup(document.getElementById('distant'), () => {
     if (!(game.awake && !game.ended && !game.gesture)) return

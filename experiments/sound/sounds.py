@@ -24,6 +24,19 @@ SOUNDS: dict[str, dict] = {
             "a light friendly ding of a small bell heard faintly across a sunny meadow, soft and short",
         ],
     },
+    # Krtek's meadow (2026-10-31): the fox sneaking up on a nest (paint.js).
+    # A comic baddie, never scary: calm first.
+    "krtek-snicker": {
+        "world": "krtek",
+        "id": "snicker",
+        "for": "The fox tiptoeing towards the birds' nest, rubbing his paws: a sly snicker, once or twice as he sneaks.",
+        "seconds": 1.5,
+        "prompts": [
+            "a sly cartoon fox snickering to himself, a soft sneaky heh-heh-heh through his teeth, mischievous, dry studio recording",
+            "a sneaky little villain chuckle from a 1970s Eastern European children's cartoon, a fox rubbing his paws, quiet and comic",
+            "a mischievous low snigger, hehehe, a crafty animal pleased with his plan, short and playful, not scary",
+        ],
+    },
     # winter (2026-10-27): the snowman's encounters and the ice
     "pat": {
         "for": "Snow patted in mittened hands: the boy packing a snowball, or a snowman's head (snowplay.js, snowman.js). Called every 0.2-0.26 s, four or five times running.",
