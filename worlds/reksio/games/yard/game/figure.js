@@ -21,6 +21,15 @@ const Figure = (() => {
   const LINE = 2.5
   const PELVIS_R = 27 // the bean's rear end…
   const CHEST_R = 20 // …and its front end
+  // Stretched like a dachshund, the bean thins into a long even tube, about
+  // as thick as his legs, his head and legs their own size (the intro,
+  // 25–27 s): a body longer than LONG_FROM is thinner, and from LONG_TO on
+  // it is all tube. A fat sausage read as a different dog.
+  const TUBE_R = 9
+  const LONG_FROM = 85 // longer than any pose of his own (a gallop's stretch is 68)
+  const LONG_TO = 260
+  const RIPPLE_WAVES = 1.5 // crests along his body as it ripples (the intro, 27 s)
+  const RIPPLE_POINTS = 18 // a rippling body is drawn through this many points along it
   // tubes: [outline width, white width]; the outline shows LINE each side
   const tubeOf = (white) => [white + 2 * LINE, white]
   const LEG = tubeOf(15) // short and thick, as the films draw them
@@ -75,6 +84,7 @@ const Figure = (() => {
   const mul = (a, k) => [a[0] * k, a[1] * k]
   const len = (a) => Math.hypot(a[0], a[1])
   const unit = (a) => (len(a) > 1e-6 ? mul(a, 1 / len(a)) : [0, -1])
+  const perp = (a) => [-a[1], a[0]] // a quarter turn: from along a line to across it
   const fmt = (n) => Math.round(n * 10) / 10
   const pt = (p) => `${fmt(p[0])} ${fmt(p[1])}`
   const clamp01 = (v) => Math.max(0, Math.min(1, v))
@@ -100,6 +110,29 @@ const Figure = (() => {
     const b2 = on(p2, r2, theta - phi)
     const b1 = on(p1, r1, theta - phi)
     return `M${pt(a1)} L${pt(a2)} A${fmt(r2)} ${fmt(r2)} 0 0 0 ${pt(b2)} L${pt(b1)} A${fmt(r1)} ${fmt(r1)} 0 1 0 ${pt(a1)} Z`
+  }
+
+  /** His body as a tube along its frame (bodyFrame), rippled across by a
+   * wave `amp` high that has run `phase` along it towards his chest; its
+   * ends stay put. The outline goes round the way capsule()'s does. */
+  function rippled(p, { n, r1, r2 }, [amp, phase]) {
+    const d = sub(p.chest, p.pelvis)
+    const N = RIPPLE_POINTS
+    const centre = []
+    for (let i = 0; i <= N; i++) {
+      const t = i / N
+      centre.push(add(add(p.pelvis, mul(d, t)), mul(n, amp * Math.sin(Math.PI * t) * Math.sin(2 * Math.PI * RIPPLE_WAVES * t - phase))))
+    }
+    let left = ''
+    let right = ''
+    for (let i = 0; i <= N; i++) {
+      const across = perp(unit(sub(centre[Math.min(N, i + 1)], centre[Math.max(0, i - 1)])))
+      const r = lerp(r1, r2, i / N)
+      left += `${i ? ' L' : 'M'}${pt(add(centre[i], mul(across, r)))}`
+      if (i === N) left += ` A${fmt(r2)} ${fmt(r2)} 0 0 0 ${pt(add(centre[i], mul(across, -r)))}`
+      else right = ` L${pt(add(centre[i], mul(across, -r)))}${right}`
+    }
+    return `${left}${right} A${fmt(r1)} ${fmt(r1)} 0 0 0 ${pt(add(centre[0], mul(perp(unit(sub(centre[1], centre[0]))), r1)))} Z`
   }
 
   /** An ellipse drawn clockwise, like every outline here, so shapes that
@@ -336,18 +369,22 @@ const Figure = (() => {
   /** Where the limbs join the body: a frame along the body (u, towards the
    * chest) and across it (n, the belly side). */
   function bodyFrame(p) {
-    const u = unit(sub(p.chest, p.pelvis))
-    const n = [-u[1], u[0]]
-    return { u, n }
+    const along = sub(p.chest, p.pelvis)
+    const long = len(along)
+    const u = long > 1e-6 ? mul(along, 1 / long) : [0, -1]
+    const n = perp(u)
+    const thin = clamp01((long - LONG_FROM) / (LONG_TO - LONG_FROM)) // stretched long: 0 his own bean, 1 all tube
+    return { u, n, long, thin, r1: lerp(PELVIS_R, TUBE_R, thin), r2: lerp(CHEST_R, TUBE_R, thin) }
   }
 
-  function limbs(p, { u, n }) {
+  function limbs(p, frame) {
+    const { u, n } = frame
     const shoulderNear = add(p.chest, add(mul(n, 8), mul(u, -4)))
     const shoulderFar = add(p.chest, add(mul(n, -6), mul(u, -2)))
     const hipNear = add(p.pelvis, add(mul(n, 6), mul(u, -10)))
     const hipFar = add(p.pelvis, add(mul(n, -4), mul(u, -10)))
     const leg = (hip, [knee, foot]) => `${bend(hip, knee, foot)} L${pt(add(foot, [TOE, 0]))}`
-    const tailBase = add(p.pelvis, add(mul(n, -18), mul(u, -2)))
+    const tailBase = add(p.pelvis, add(mul(n, (-18 * frame.r1) / PELVIS_R), mul(u, -2))) // on his back, however thin he is stretched
     const tailMid = add(mul(add(tailBase, p.tail), 0.5), mul(n, -3))
     return {
       nearArm: bend(shoulderNear, ...p.nearArm),
@@ -615,13 +652,23 @@ const Figure = (() => {
     return `M${pt([x - w, y - 5])} Q${pt([x, y - 9])} ${pt([x + w, y - 5])} Q${pt([x + w, y + 4])} ${pt([x, y + 7])} Q${pt([x - w, y + 4])} ${pt([x - w, y - 5])} Z`
   }
 
+  /** The ochre patch on his back, drawn inside his body's outline: stretched,
+   * it stretches with him, a long streak along the back half (the intro,
+   * 26 s), and covers the ripple's swing so it stays on him. */
+  function patchOn(p, { u, n, long, thin }, angle) {
+    const longer = Math.max(0, long - LONG_FROM)
+    const rx = 15 + longer * 0.22 // along about a third of him, from his back end
+    const back = lerp(-13, -TUBE_R * 0.6, thin) // across his back, as thick as he is
+    return { c: add(p.pelvis, add(mul(n, back), mul(u, rx - 15))), rx, ry: 11 + Math.abs(p.wave?.[0] ?? 0), angle }
+  }
+
   /** Everything to draw for a pose: path data and places, all plain values. */
   function shape(p) {
     const frame = bodyFrame(p)
     const angle = (Math.atan2(frame.u[1], frame.u[0]) * 180) / Math.PI
     return {
-      body: capsule(p.pelvis, PELVIS_R, p.chest, CHEST_R),
-      bodyPatch: { c: add(p.pelvis, mul(frame.n, -13)), rx: 15, ry: 11, angle },
+      body: p.wave ? rippled(p, frame, p.wave) : capsule(p.pelvis, frame.r1, p.chest, frame.r2), // wave: a ripple across him as a stretch gathers up (how high, how far it has run), only then
+      bodyPatch: patchOn(p, frame, angle),
       ...limbs(p, frame),
       head: head(p.head, p.face, p.ears),
       neckless: p.neckless >= 0.5,

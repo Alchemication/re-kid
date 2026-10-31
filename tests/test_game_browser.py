@@ -159,6 +159,7 @@ ACTS = [
     "howl",
     "fly",
     "yawn",
+    "stretchOut",
     "bowl",
     "bramble",
     "cuckoo",
@@ -1420,6 +1421,52 @@ class TestMorning:
         y.page.mouse.click(1100, 600)  # off he goes, the yawn cut short
         s = y.settled()
         assert s["reksio"]["x"] > DOOR_X + 300, s["reksio"]
+
+
+class TestStretch:
+    """The dachshund stretch, after the intro: held, and by himself."""
+
+    def stretched(self, yard: callable, ms: int) -> tuple[Yard, int, int]:
+        """A press held `ms` on him; returns the yard, where he stood and which way he faced."""
+        y = yard()
+        y.page.evaluate("yardGame.perform('press')")
+        y.page.wait_for_timeout(400)  # past a bark: stretching, turned to the roomier side
+        x, facing = y.page.evaluate("[Reksio.x, Reksio.facing]")
+        y.page.wait_for_timeout(ms - 400)
+        return y, x, facing
+
+    def test_let_go_after_a_long_one_he_gathers_up_forward(self, yard: callable) -> None:
+        y, x, facing = self.stretched(yard, 2200)
+        reach = y.page.evaluate("(() => { const r = Reksio.reach; yardGame.perform('release'); return r })()")  # still growing: read as he lets go
+        assert reach * facing > 300, f"reached only {reach}"
+        s = y.settled()
+        assert abs(s["reksio"]["x"] - (x + reach)) < 5, "he ends where his nose was"
+
+    def test_let_go_after_a_little_one_he_springs_back(self, yard: callable) -> None:
+        y, x, _ = self.stretched(yard, 500)
+        y.page.evaluate("yardGame.perform('release')")
+        assert abs(y.settled()["reksio"]["x"] - x) < 2
+
+    def test_a_tap_as_he_gathers_up_waits_until_he_is_himself(self, yard: callable) -> None:
+        y, x, facing = self.stretched(yard, 2200)
+        y.page.evaluate("yardGame.perform('release')")
+        y.page.wait_for_timeout(300)
+        back = round(x - facing * 300)
+        y.page.evaluate(f"yardGame.perform('walk to {back}')")
+        y.page.wait_for_function("!Reksio.stretching", timeout=5000)
+        s = y.settled()
+        assert abs(s["reksio"]["x"] - back) < 2, "the tap was kept for after, then done"
+
+    def test_a_press_while_he_stretches_alone_lets_go_and_barks(self, yard: callable) -> None:
+        y = yard()
+        y.start("yardGame.act('stretchOut')")
+        y.page.wait_for_function("Math.abs(Reksio.reach) > 200", timeout=5000)
+        y.page.evaluate("yardGame.perform('press')")
+        y.page.wait_for_timeout(500)  # long enough for a stretch, were it one
+        y.page.evaluate("yardGame.perform('release')")
+        y.settled()
+        assert y.events("relax"), "the press cut his stretch short"
+        assert len(y.events("stretch")) == 1, "a press while he stretches alone is a tap, not a second stretch"
 
 
 class TestGettingUp:

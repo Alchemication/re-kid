@@ -297,3 +297,97 @@ describe('cut short mid-gesture', () => {
     assert.deepEqual(bad, [])
   })
 })
+
+describe('the dachshund stretch', () => {
+  /** Stretch for `seconds`, then let go; resolves to whether he was himself
+   * again within a few seconds. `meanwhile(r)` runs as he lets go. */
+  async function stretchFor(r, seconds, meanwhile = () => {}) {
+    r.R.beginStretch()
+    r.step(seconds)
+    let done = false
+    r.R.endStretch().then(() => (done = true))
+    meanwhile(r)
+    for (let i = 0; i < 400 && !(done && !r.R.walking); i++) {
+      r.R.tick(DT)
+      await r.page.advance(50)
+    }
+    return done
+  }
+
+  it('let go after a long one, he gathers up forward: he ends where his nose was', async () => {
+    const r = reksio()
+    const x0 = r.R.x
+    r.R.face(1)
+    r.R.beginStretch()
+    r.step(2)
+    const reach = r.R.reach
+    assert.ok(reach > 300, `reached ${reach}`)
+    r.R.endStretch()
+    for (let i = 0; i < 80; i++) {
+      r.R.tick(DT)
+      await r.page.advance(50)
+    }
+    assert.equal(r.R.stretching, false)
+    assert.ok(Math.abs(r.R.x - (x0 + reach)) < 2, `at ${r.R.x}, his nose was at ${x0 + reach}`)
+    assert.equal(r.R.pose, 'stand')
+  })
+
+  it('let go after a little one, he springs back where he was', async () => {
+    const r = reksio()
+    const x0 = r.R.x
+    assert.equal(await stretchFor(r, 0.3), true)
+    assert.equal(r.R.x, x0)
+    assert.equal(r.R.stretching, false)
+  })
+
+  it('turns first to the side with room for a long one', async () => {
+    const r = reksio()
+    await r.walk(420) // by the house wall, facing it
+    assert.equal(r.R.facing, -1)
+    r.R.beginStretch()
+    assert.equal(r.R.facing, 1)
+    r.step(3)
+    assert.ok(r.R.reach > 500, `reached ${r.R.reach}`)
+    assert.equal(r.R.roomToStretch, 1)
+  })
+
+  it('never reaches past the end of the yard, so he gathers up inside it', async () => {
+    const r = reksio()
+    await r.walk(3300)
+    r.R.face(1)
+    r.R.keepBetween(3000, 3650) // no room behind him either
+    assert.equal(await stretchFor(r, 4), true)
+    assert.ok(r.R.x <= 3650)
+  })
+
+  it('asked to walk off as he gathers up (a tap), he finishes first, then turns and goes', async () => {
+    const r = reksio()
+    r.R.face(1)
+    let got = null
+    const done = await stretchFor(r, 2, ({ R }) => {
+      const nose = R.mouth().x
+      R.relax()
+      R.walkTo(R.x - 900).then((ok) => (got = ok)) // far: a run, once he sets off
+      R.tick(DT)
+      assert.equal(R.facing, 1, 'stretched out one way, he cannot turn yet')
+      assert.ok(Math.abs(R.mouth().x - nose) < 30, `his front stays put as he gathers up, not pulled into a gallop: ${nose} → ${R.mouth().x}`)
+    })
+    assert.equal(done, true)
+    assert.equal(got, true)
+    assert.equal(r.R.facing, -1)
+    assert.equal(r.R.stretching, false)
+  })
+
+  it('draws a thin long body while stretched, and its ripple as he gathers up', async () => {
+    const r = reksio()
+    const Figure = r.page.get('Figure')
+    const body = (pose) => Figure.shape(pose).body
+    const stand = Figure.POSES.onFours
+    const long = Figure.vary(stand, { chest: [stand.chest[0] + 400, stand.chest[1]] })
+    assert.ok(!body(long).includes('NaN'))
+    assert.match(body(long), / A9 9 /, 'all tube: as thick as his legs')
+    const rippling = body(Figure.vary(long, { wave: [22, 1] }))
+    assert.ok(!rippling.includes('NaN'))
+    assert.ok(rippling.split('L').length > 30, 'drawn through points along him')
+  })
+})

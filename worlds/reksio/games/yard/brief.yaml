@@ -125,11 +125,11 @@ scenes:
   moment: stretch
   action: {text: Press and hold on Reksio., origin: invented}
   result:
-    text: Reksio stretches longer and longer like a dachshund, his front half walking forward while his back stays put, for as long as the press lasts; let go and he snaps back with a springy wobble.
+    text: Reksio drops on all fours, turned to the side with more room, and stretches longer and longer like a dachshund, his front half walking forward while his back stays put, for as long as the press lasts. His body thins into a long even tube with his patch stretched along it, and he can reach across a good third of the screen. Let go after a long stretch and he gathers up as in the intro. His back legs let go, a ripple runs along his body, his back end catches up with his front, and he hops, pleased, where his nose was. Let go after a little one and he snaps back with a springy wobble. Left alone a good while, in some plays, he does the long stretch all by himself, once. A tap lets go of it.
     origin: inspired
     refs: [intro:stretch, mark:stretching-melody]
   sound:
-    text: A rising, rubbery stretching sound while held, and a cartoon boing on release.
+    text: A bassoon climbing a note at a time while he stretches, a falling run as he lets go, and a little hop as he lands.
     origin: inspired
     refs: [intro:stretch]
 - id: film

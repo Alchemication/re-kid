@@ -271,6 +271,7 @@ before a commit.
 | the boy (`boy.js`, `boyfigure.js`) or the snowman (`snowman.js`, `snowplay.js`) | `"TestSnowman or snowman or helpSnowman or greetBoy"` (and `boy.test.js`) |
 | a gesture or pose in `reksio.js`, `gestures.js`, `antics.js`, `figure.js`, `life.js` or `gait.js` | `"TestGestures or TestGettingUp"` (and `reksio.test.js`: walking, every gesture ends) |
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
+| the dachshund stretch (`stretch.js`, the stretch in `reksio.js`) | `"TestStretch or stretch"` |
 | `creatures.js` | `"TestCritters"` |
 | `weather.js` / `shower.js` / `wet.js` / `ice.js` | `"drops or shakeOff or puddle or snail or TestIce"` |
 | `day.js` / `sky.js` / `grownup.js` / the end | `"TestWholePlay or TestEvening"` |

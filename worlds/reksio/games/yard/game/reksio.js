@@ -34,8 +34,17 @@ const Reksio = (() => {
   const SNIFF_EVERY_MS = [380, 650] // on a sniffing trot, a sniff this often
   const ACCEL = 1500 // how quickly he speeds up and slows down (units/s²)
   const SKID = 900 // slipping, how quickly his skid slows (units/s²): a short slide on, not a glide
-  const MAX_STRETCH = 230 // longest dachshund stretch, in his own units
-  const STRETCH_RATE = 210 // how fast he stretches while held (units/s)
+  // The dachshund stretch, after the intro (22.5–28.5 s): there he reaches
+  // most of the way across the card, about eight of his widths.
+  const MAX_STRETCH = 520 // longest stretch, in his own units: about 600 of the scene's 1600
+  const STRETCH_RATE = 210 // how fast he stretches while held (units/s): the longest in about 2.5 s, as the intro's
+  const GATHER_FROM = 120 // let go stretched further than this, he gathers up forward as the intro's does; less, he springs back
+  const GATHER_MS = 1300 // his back end catching up with his front
+  const RIPPLE = 22 // how high the ripple along him swings as he gathers up
+  const RIPPLE_RUNS = 2.2 // how many times it runs along him meanwhile
+  const HOP = 14 // the little hop as he lands gathered up
+  const HOP_MS = 360
+  const FOURS_BY = 40 // stretched this far, he is all the way down on all fours, whatever his stance
   const RELAX_MS = 220 // how fast he springs up from a rest when asked to do something
   const STANCE_MS = 260 // dropping to all fours, or standing up
   const F = Figure.POSES
@@ -66,6 +75,11 @@ const Reksio = (() => {
   let v = 0 // current speed
   let stretch = 0 // how far his front half is pulled forward
   let stretching = false
+  let gathering = null // letting go of a stretch: resolves once he is himself again
+  const ripple = [0, 0] // a ripple along his body as he gathers up (Figure: wave)
+  let walkWaits = null // asked to walk while stretched: whether sniffing; he turns and sets off once gathered up
+  /** Stretched out, or letting go of it: he can't turn or set off yet. */
+  const stretchedOut = () => stretching || stretch !== 0 || gathering !== null
   let slipsHere = () => null // the game says (slipOn): walking at x, does he slip here? a gesture to play if so
   let slipping = false // a slip under way: his walk waits for it, skidding on a little
   let skid = 0 // the skid's speed
@@ -108,7 +122,7 @@ const Reksio = (() => {
   let rising = false // springing up from a rest: he stays put until he's up
   let last = null // the pose drawn last frame
 
-  const standing = () => Figure.mix(F.stand, F.onFours, stance.fours)
+  const standing = () => Figure.mix(F.stand, F.onFours, Math.max(stance.fours, Math.min(1, Math.abs(stretch) / FOURS_BY)))
   const restPose = (name) => (name === 'stand' ? standing() : REST[name])
   const springing = () => rising && rest.k < 1
 
@@ -117,21 +131,28 @@ const Reksio = (() => {
     return rest.k >= 1 || !rest.from ? to : Figure.mix(rest.from, to, rest.k)
   }
 
-  /** The pose to draw, from his state (without walking's stride). */
-  function compose() {
+  /** The pose to draw, from his state (without walking's stride); unstretched:
+   * as he would be without the stretch. */
+  function compose(unstretched = false) {
     let p = basePose()
     if (alive) p = lively(p, alive)
     if (act.w > 0) p = Figure.mix(p, Figure.mix(act.from, act.to, act.k), act.w)
     if (face.w > 0) p = { ...p, face: Figure.mix(p.face, Figure.mix(face.from, face.to, face.k), face.w) }
     if (alive) p = Figure.perked(p, alive.perk) // over a gesture's pose: an ear goes up whatever he is doing
     p = Figure.vary(p, { head: { tilt: p.head.tilt + add.tilt } })
-    if (stretch) p = stretched(p, stretch)
-    if (add.kick) p = Figure.vary(p, { nearLeg: [[p.nearLeg[0][0], p.nearLeg[0][1] - add.kick / 2], [p.nearLeg[1][0], p.nearLeg[1][1] - add.kick]] })
-    if (add.dig) p = digging(p, add.dig)
-    if (add.wag) p = Figure.vary(p, { tail: [p.tail[0] + add.wag * 6, p.tail[1] - Math.abs(add.wag) * 2] })
+    if (stretch && !unstretched) p = stretched(p, stretch)
+    p = moved(p)
     if (carrying) p = Figure.vary(p, { face: { open: Math.min(p.face.open, 0.1), tongue: 0, bone: 1 } }) // jaws shut on it, whatever his face says
     else if (holding) p = Figure.vary(p, { face: { bone: p.face.open < 0.15 && p.face.tongue < 0.1 ? 1 : 0 } })
     for (const change of worn.values()) p = change(p, toFigure)
+    return p
+  }
+
+  /** The add layer's small moves: a kick, paws digging, his tail wagging. */
+  function moved(p) {
+    if (add.kick) p = Figure.vary(p, { nearLeg: [[p.nearLeg[0][0], p.nearLeg[0][1] - add.kick / 2], [p.nearLeg[1][0], p.nearLeg[1][1] - add.kick]] })
+    if (add.dig) p = digging(p, add.dig)
+    if (add.wag) p = Figure.vary(p, { tail: [p.tail[0] + add.wag * 6, p.tail[1] - Math.abs(add.wag) * 2] })
     return p
   }
 
@@ -156,12 +177,14 @@ const Reksio = (() => {
     return Figure.vary(p, changes)
   }
 
-  /** The dachshund stretch: his front half pulled forward by s. */
+  /** The dachshund stretch: his front half pulled forward by s (his body
+   * thins as it lengthens: figure.js), rippling as he gathers up. */
   function stretched(p, s) {
     const fwd = ([a, b]) => [a + s, b]
     return Figure.vary(p, {
       chest: fwd(p.chest), head: { x: p.head.x + s },
       nearArm: p.nearArm.map(fwd), farArm: p.farArm.map(fwd),
+      ...(ripple[0] ? { wave: [...ripple] } : {}), // only while it ripples: no pose of his own has one
     })
   }
 
@@ -252,6 +275,14 @@ const Reksio = (() => {
   function walkTo(tx, { sniffing = false } = {}) {
     if (arrive) arrive(false)
     target = clamp(tx)
+    // stretched out one way, he can't turn or pick his pace yet: he does once gathered up (walkOn)
+    walkWaits = stretchedOut() ? sniffing : null
+    if (walkWaits === null) setOff(sniffing)
+    return new Promise((resolve) => (arrive = resolve))
+  }
+
+  /** Off on the walk: turned to where he goes, at the pace its length asks. */
+  function setOff(sniffing) {
     if (Math.abs(target - x) > 2) facing = target > x ? 1 : -1
     // keep running if already running; otherwise pick by distance
     if (!(gait === GAITS.run && v > GAITS.walk.speed)) {
@@ -262,7 +293,6 @@ const Reksio = (() => {
     }
     if (!act.moving) blend(stance, 'fours', gait.fours, STANCE_MS)
     flavour = Gait.swagger(gait, life.mood === 'proud', gaitRandom)
-    return new Promise((resolve) => (arrive = resolve))
   }
 
   function stopWalking() {
@@ -272,6 +302,7 @@ const Reksio = (() => {
   }
 
   function face_(dir) {
+    if (stretchedOut()) return // stretched out one way: he turns once gathered up
     facing = dir
     place()
   }
@@ -315,7 +346,7 @@ const Reksio = (() => {
   function stepLife(dt) {
     const before = last ?? compose()
     alive = life.step(dt, Clock.now(), {
-      free: doing === 0 && target === null && !stretching && current === 'stand' && act.w < 0.05 && face.w < 0.05,
+      free: doing === 0 && target === null && !stretchedOut() && current === 'stand' && act.w < 0.05 && face.w < 0.05,
       walking: target !== null,
       fours: stance.fours > 0.5,
       head: [(x * facing) / SCALE + before.head.x, before.head.y + add.dy],
@@ -328,16 +359,13 @@ const Reksio = (() => {
       // down on the ice: the walk waits, and he slides on a little
       x = clamp(x + facing * skid * dt)
       skid = Math.max(0, skid - SKID * dt)
-    } else if (target !== null && !stretching) {
-      // a walking dog is up on his feet: from a rest pose, up first, then off
-      if (current !== 'stand') relax()
-      if (!springing()) walking = stepAlong(dt)
-      if (walking) slip()
+    } else if (target !== null && !stretchedOut()) {
+      walking = walkOn(dt)
     } else if (stretching || stretch !== 0) {
       // front legs walk on the spot as his front half pulls forward
       phase += dt * 8
       walking = 0.4
-      if (stretching) setStretch(Math.min(maxStretch(), stretch + STRETCH_RATE * dt))
+      if (stretching) setStretch(Math.min(roomTo(facing), stretch + STRETCH_RATE * dt))
     } else {
       idleTime += dt
     }
@@ -346,6 +374,19 @@ const Reksio = (() => {
     if (!blends.moving((b) => b.key === 'wag')) add.wag = Math.sin(Clock.now() / (wagFast ? 80 : 260)) * (wagFast ? 1.2 : 0.8)
     place()
     draw(walking)
+  }
+
+  /** A step of a walk: a walking dog is up on his feet, so from a rest
+   * pose, up first, then off. Returns how much he is walking. */
+  function walkOn(dt) {
+    if (walkWaits !== null) {
+      setOff(walkWaits)
+      walkWaits = null
+    }
+    if (current !== 'stand') relax()
+    const walking = springing() ? 0 : stepAlong(dt)
+    if (walking) slip()
+    return walking
   }
 
   /** On ice, now and then (the game says, slipOn): his walk waits while the
@@ -369,40 +410,80 @@ const Reksio = (() => {
     stretch = s
   }
 
-  /** How far he can stretch before his nose reaches the end of the yard. */
-  function maxStretch() {
-    const room = facing > 0 ? maxX + 130 - x : x - (minX - 130)
-    return Math.max(0, Math.min(MAX_STRETCH, room / SCALE))
-  }
+  /** How far he can stretch that way (1 or -1) before his front reaches the
+   * end of the yard, so he gathers up inside it. */
+  const roomTo = (dir) => Math.max(0, Math.min(MAX_STRETCH, (dir > 0 ? maxX - x : x - minX) / SCALE))
 
+  /** Down on all fours and off, his front half walking away from his back:
+   * turned first to the side with more room, so he always gets a long one. */
   function beginStretch() {
     target = null
+    walkWaits = null
     if (arrive) arrive(false)
     arrive = null
     v = 0
+    gait = GAITS.walk // his front legs walk on the spot as he stretches
+    if (roomTo(facing) < MAX_STRETCH && roomTo(-facing) > roomTo(facing)) face_(-facing)
     stretching = true
     onFours()
   }
 
-  /** Let go: snap back with a springy wobble. */
+  /** Let go (once, however often asked): stretched far, he gathers up
+   * forward; a little, he springs back. Resolves once he is himself again. */
   function endStretch() {
     stretching = false
+    gathering ??= (stretch > GATHER_FROM ? gatherUp() : springBack()).finally(() => (gathering = null))
+    return gathering
+  }
+
+  /** Run step() each frame, on the Clock, until it says it is done. */
+  const eachFrame = (step) => new Promise((resolve) => {
+    const go = () => (step() ? resolve() : Clock.after(0, go))
+    Clock.after(0, go)
+  })
+
+  /** As the intro's: his back legs let go, a ripple runs along him, and his
+   * back end catches up with his front, so he ends up where his nose was;
+   * then a little hop, pleased. On the Clock but not a blend, so nothing a
+   * tap does leaves him stretched: a walk waits for it (tick). */
+  function gatherUp() {
+    const from = stretch
+    const x0 = x
+    const dir = facing
+    const start = Clock.now()
+    return eachFrame(() => {
+      const k = Math.min(1, (Clock.now() - start) / GATHER_MS)
+      setStretch(from * (1 - EASE(k)))
+      x = clamp(x0 + dir * SCALE * from * EASE(k))
+      ripple[0] = k < 1 ? RIPPLE * Math.sin(Math.PI * Math.min(1, k * 1.4)) : 0 // up as his back lets go, down before he is gathered
+      ripple[1] = 2 * Math.PI * RIPPLE_RUNS * k
+      return k >= 1
+    }).then(() => Debug.ignoreCut(landed(), 'hop, gathered up'))
+  }
+
+  /** Gathered up: a little hop, pleased with himself, unless he has
+   * somewhere to go. */
+  async function landed() {
+    if (target !== null) return
+    loose(upright(HOP_MS))
+    Sound.hop()
+    loose(faceTo({ eyes: 0, joy: 1, smile: 1, open: 0.5 }, 160))
+    await blend(add, 'dy', -HOP, HOP_MS / 2, EASE_OUT)
+    await blend(add, 'dy', 0, HOP_MS / 2, EASE_IN)
+    await faceOff(300)
+  }
+
+  /** Let go after a little stretch: snap back with a springy wobble. */
+  function springBack() {
     const from = stretch
     const start = Clock.now()
-    return new Promise((resolve) => {
-      function spring() {
-        const s = (Clock.now() - start) / 1000
-        const value = from * Math.exp(-5.5 * s) * Math.cos(15 * s)
-        if (s > 1 || Math.abs(value) < 0.5) {
-          setStretch(0)
-          upright()
-          resolve()
-          return
-        }
-        setStretch(Math.max(-14, value))
-        Clock.after(0, spring)
-      }
-      Clock.after(0, spring)
+    return eachFrame(() => {
+      const s = (Clock.now() - start) / 1000
+      const value = from * Math.exp(-5.5 * s) * Math.cos(15 * s)
+      const done = s > 1 || Math.abs(value) < 0.5
+      setStretch(done ? 0 : Math.max(-14, value))
+      if (done) upright()
+      return done
     })
   }
 
@@ -419,7 +500,7 @@ const Reksio = (() => {
    * where he was drawn. */
   function relax() {
     relaxes += 1
-    const was = last ?? compose()
+    const was = stretch ? compose(true) : last ?? compose() // the stretch is drawn on top of whatever he does: not part of where he blends from
     // drawn low (resting, or a gesture's sit or bow): up on his feet before he goes
     const fromRest = current !== 'stand' || root.getAttribute('data-up') === '0'
     blends.cut()
@@ -584,7 +665,12 @@ const Reksio = (() => {
     get pose() { return current },
     /** Lying down: resting, napping, curled up or sprawled out. */
     get lying() { return LYING.includes(current) },
-    get stretching() { return stretching || stretch !== 0 },
+    get stretching() { return stretchedOut() },
+    /** How far ahead of where he stands his front is stretched, in the scene
+     * (signed by which way he faces): the camera keeps it in view. */
+    get reach() { return facing * SCALE * stretch },
+    /** How much of a full stretch he has room for, on the roomier side (0 to 1). */
+    get roomToStretch() { return Math.max(roomTo(1), roomTo(-1)) / MAX_STRETCH },
     /** Moving along while not drawn walking: a gesture still posing him, or
      * his body still drawn resting. Read from what was drawn, not from the
      * state's names, so a drawing that has come apart from the state shows

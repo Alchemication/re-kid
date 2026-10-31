@@ -13,7 +13,7 @@
 // - Actions play along on samples: a xylophone flourish when a new thing is
 //   done, glockenspiel for a thought bubble, a flute trill for the bird, a
 //   rising bassoon as Reksio stretches and a falling run (the shape of the
-//   marked stretching melody) as he snaps back. They are in B-flat and each
+//   marked stretching melody) as he lets go. They are in B-flat and each
 //   take is in its own key, so they play only while no take does.
 // - The bed (the game turns it on: bed.start(score)): quiet music under all
 //   of it, so the yard is never silent; the game's score (beds.js) says what

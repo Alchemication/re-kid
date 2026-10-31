@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds, Tap */
+/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds, Tap, Stretch */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -125,29 +125,21 @@
   // ------------------------------------------------------------ the stretch
 
   // A press on Reksio: let go quickly and he barks; hold and he stretches,
-  // then snaps back when let go.
+  // then gathers up (or snaps back) when let go (stretch.js).
   let hold = null
 
   function holdStart() {
-    if (day.ended || busy || hold || Things.holding) return command(() => Reksio.bark(), 'bark') // held by a gag: no stretch, the gag answers
+    // held by a gag: no stretch, the gag answers; stretched out alone (or
+    // gathering up): a tap, which cuts it short
+    if (day.ended || busy || hold || Things.holding || Reksio.stretching) return command(() => Reksio.bark(), 'bark')
     lastTap = Clock.now()
-    hold = { stretching: false, stopSound: null }
+    hold = { letGo: null } // letGo: once he stretches
     const mine = hold
     mine.timer = Clock.after(HOLD_MS, () => {
       if (hold !== mine) return
-      mine.stretching = true
-      Debug.trace('stretch')
       busy = true
-      Reksio.beginStretch()
-      mine.stopSound = stretchMusic()
+      mine.letGo = Stretch.out()
     })
-  }
-
-  /** While he stretches, the bassoon climbs a note at a time. */
-  function stretchMusic() {
-    let n = 0
-    Music.react.stretchStep(n++)
-    return Clock.every(300, () => Music.react.stretchStep(n++))
   }
 
   async function holdEnd() {
@@ -155,11 +147,9 @@
     const h = hold
     hold = null
     Clock.cancel(h.timer)
-    if (!h.stretching) return command(() => Reksio.bark(), 'bark')
+    if (!h.letGo) return command(() => Reksio.bark(), 'bark')
     lastTap = Clock.now()
-    h.stopSound()
-    Music.react.snap()
-    await Reksio.endStretch()
+    await h.letGo()
     busy = false
     runPending()
   }
@@ -675,6 +665,8 @@
         if (f && random() < 0.6 && Math.abs(f.x - Reksio.x) < 380) await Reksio.pounce(f.x)
       },
     },
+    // once in some plays, a good while alone: the intro's dachshund stretch, by himself (stretch.js)
+    stretchOut: Stretch.act({ idleS: () => idleFor(), calm: () => !day.dusk && Weather.fog < FOG_SNIFF }),
     yawn: { get weight() { return day.sleepy(Clock.now()) ? 6 : 1 }, ok: () => day.count >= 2 || day.sleepy(Clock.now()), run: () => Reksio.yawn() }, // sleepy from 18:00
   }
 
@@ -858,7 +850,7 @@
     Clock.safely(() => Weather.tick(dt, camX))
     Clock.safely(() => Wet.frame(t))
     Clock.safely(() => Spots.frame())
-    const target = clampCam(Reksio.x - Painting.VIEW_W / 2)
+    const target = clampCam(Reksio.x + Reksio.reach / 2 - Painting.VIEW_W / 2) // stretched: the middle of him
     camX += (target - camX) * Math.min(1, dt * CAMERA_EASE)
     if (Math.abs(camX - shownCam) > 0.05) {
       shownCam = camX
