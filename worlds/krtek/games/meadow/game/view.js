@@ -1,7 +1,8 @@
 // The view onto the meadow: a screen's worth (1600 scene units) of the 4000
 // wide meadow, following the mole where he is drawn, easing after him, never
 // past either end. The sky stays put; the far trees scroll at half speed, for
-// depth; everything on the ground scrolls with the view (#cam).
+// depth; everything on the ground scrolls with the view (#cam, and the
+// fireflies over the night, #glow-view).
 //
 // The yard's painting.js does the same for Reksio, with its own painting.
 // Once both scenes have settled, what is the same in the two (the camera, the
@@ -18,11 +19,12 @@ const View = (() => {
 
   let camX = 0
   let target = () => 0 // where to keep in the middle (the mole, as drawn)
-  let cam, far, distant, onMove
+  let cam, glow, far, distant, onMove
 
   /** Start following `follow()` (a scene x); `moved(camX)` hears each move. */
   function setup(follow, moved) {
     cam = document.getElementById('cam')
+    glow = document.getElementById('glow-view')
     far = document.getElementById('far-view')
     distant = document.getElementById('distant-view')
     target = follow
@@ -44,6 +46,7 @@ const View = (() => {
 
   function draw() {
     cam.style.transform = `translateX(${-camX}px)`
+    glow.style.transform = cam.style.transform
     far.style.transform = `translateX(${-camX * FAR_SPEED}px)`
     distant.style.transform = `translateX(${-camX * DISTANT_SPEED}px)`
     if (onMove) onMove(camX)

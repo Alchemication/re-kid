@@ -627,6 +627,43 @@ class TestMeadowCritters:
         m.wait("document.querySelector('[data-critter]') === null", 15_000)
         assert not m.errors, m.errors
 
+    def test_a_curious_one_comes_to_look_at_him_and_he_watches_it(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(
+            "seed=2&props=&day=200"
+        )  # a play's own butterflies: one alone may spend its stay feeding
+        m.wake()
+        m.wait("meadowGame.trace().includes('watches butterfly')", 60_000)
+        assert not m.errors, m.errors
+
+
+class TestMeadowFireflies:
+    """The fireflies (critters.js): out only in the dim, rising about him;
+    a tap flashes one and has him look; home into the grass by bedtime."""
+
+    def test_a_tap_flashes_one_and_he_looks(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&critters=fireflies")
+        m.wake()
+        m.wait("Critters.fireflies.length >= 3", 6_000)
+        m.page.wait_for_timeout(2000)  # up out of the grass
+        m.page.locator("[data-critter^='firefly']").first.click(force=True)
+        m.wait("meadowGame.trace().includes('\"tapped\":true')", 3_000)
+        m.wait_free()
+        m.assert_settled()
+
+    def test_they_come_only_in_the_dim_and_go_home_by_bedtime(
+        self, meadow: callable
+    ) -> None:
+        m = meadow("seed=2&props=&day=30")
+        m.wake()
+        m.wait("Critters.fireflies.length > 0", 40_000)
+        assert m.page.evaluate("World.state.light") <= 0.45
+        assert m.page.evaluate("World.state.hour") >= 18.6
+        m.wait("meadowGame.state().ended", 30_000)
+        m.wait("Critters.fireflies.length === 0", 15_000)
+        assert not m.errors, m.errors
+
 
 class TestMeadowSnail:
     """The snail (critters.js): it comes up out of the grass where its shelter

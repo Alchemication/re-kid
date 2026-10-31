@@ -35,6 +35,8 @@ const meadowGame = (() => {
   const BED_STEER_MS = 200 // how often the music bed hears the moment and how busy the child is
   const TULIPS_LIGHT = [0.4, 0.8] // the tulips close as the light falls from this to this (at dusk, or in an eclipse)
   const CRICKET_LIGHT = 0.4 // the cricket comes out in a light this low, by day too (an eclipse)
+  const WATCHES_NEAR = 260 // a butterfly this near his head, he follows it with his eyes
+  const WATCH_FACE_MS = 2200 // and his face lights up this long as one first comes
   const ECLIPSE_LOOK_MS = 9000 // into an eclipse, this long (in a full-length day): he notices, and looks up
   const NIGHT_TINT = 0.6 // how dark the night's blue makes the meadow at its darkest (multiplied over it)
   const words = Debug.random('meadow-words')
@@ -59,7 +61,7 @@ const meadowGame = (() => {
   const cricket = document.getElementById('cricket')
   const den = layers.den
 
-  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3, eclipse: null, evening: false } // eclipse: when it began (Clock); evening: the cricket's dusk has come
+  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3, eclipse: null, evening: false, watching: null } // eclipse: when it began (Clock); evening: the cricket's dusk has come; watching: the butterfly he follows with his eyes
   let tulipHeads = []
 
   const el = (tag, attrs = {}, parent) => {
@@ -170,6 +172,7 @@ const meadowGame = (() => {
     if (eclipseAt !== null && game.eclipse === null && h >= eclipseAt) startEclipse()
     drawSky(h, eclipseCover())
     drawMeadow(h)
+    watchButterflies()
     if (!game.ended) evening(h)
     checkRules()
     Debug.show(stateNow())
@@ -235,6 +238,24 @@ const meadowGame = (() => {
       Debug.trace('cricket', { hour: Day.clock(h) })
       Music.evening()
     } else if (!game.evening) dimCricket(light < CRICKET_LIGHT)
+  }
+
+  /** Standing free, he is something on show: a curious butterfly now and then comes over to look at him
+   * (critters.js), and he follows the nearest with his eyes, his face lighting up as it first comes. */
+  function watchButterflies() {
+    const free = game.awake && !game.ended && !game.gesture && ['out', 'hill'].includes(Mole.state.pose) // up, out or in his molehill
+    const head = Mole.head()
+    World.offer('mole', 'sight', head.x, head.y, () => free)
+    const near = free ? Critters.out.filter((b) => !b.leaving && Math.hypot(b.x - head.x, b.y - head.y) < WATCHES_NEAR) : []
+    const b = near.sort((p, q) => Math.abs(p.x - head.x) - Math.abs(q.x - head.x))[0]
+    if (!b) return (game.watching = null)
+    if (game.watching !== b.id) {
+      Debug.trace('watches butterfly', { id: b.id })
+      Mole.perk(0.7)
+      Mole.feel('delighted', WATCH_FACE_MS)
+    }
+    game.watching = b.id
+    Mole.lookAt(b.x)
   }
 
   /** In an eclipse's dim, the cricket comes out and fiddles once, as at dusk; it goes in as the light comes back. */
@@ -568,6 +589,7 @@ const meadowGame = (() => {
     [/^stop$/, () => run('stop', async () => {})],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
     [/^tap butterfly (\d+)$/, (m) => tapButterfly(Number(m[1]))],
+    [/^tap firefly (\d+)$/, (m) => lookAfter(Critters.tapFirefly(Number(m[1])))],
     [/^tap frog$/, () => Spring.tapFrog()],
     [/^tap snail$/, () => tapSnail()],
     [/^tap sun$/, () => run('tap sun', callSun)],
@@ -607,7 +629,7 @@ const meadowGame = (() => {
   function waits(intent) {
     const busy = Things.stepping
     if (!busy || game.gesture !== busy) return false
-    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent === 'tap frog' || intent === 'tap snail') return false
+    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent.startsWith('tap firefly') || intent === 'tap frog' || intent === 'tap snail') return false
     game.queued = intent
     const to = intent.match(/^(?:go|dig) to (\d+)$/)
     if (to) Mole.lookAt(Number(to[1]))
@@ -651,6 +673,9 @@ const meadowGame = (() => {
   const CRITTER_TAPS = { frog: 'tap frog', snail: 'tap snail' } // the rest are butterflies, by number
   const CRITTER_MIDDLE = 0.3 // behind something (the snail among the wild flowers' stems), a creature wins the tap this near its middle, a share of its tap circle across: as in the yard
 
+  /** A tap on a little creature, by its data-critter: the frog, the snail, 'firefly <n>', or a butterfly's number. */
+  const critterIntent = (k) => CRITTER_TAPS[k] || (/^\d+$/.test(k) ? `tap butterfly ${k}` : `tap ${k}`)
+
   /** The little creature tapped: on top, or behind something but tapped near its middle. */
   function critterAt(e) {
     const on = e.target.closest('[data-critter]')
@@ -663,7 +688,7 @@ const meadowGame = (() => {
 
   /** What a tap at this point means (critter: the little creature tapped, if any). */
   function intentAt(target, p, critter) {
-    if (critter) return CRITTER_TAPS[critter.dataset.critter] || `tap butterfly ${critter.dataset.critter}`
+    if (critter) return critterIntent(critter.dataset.critter)
     const thing = target.closest('[data-thing]')
     const choice = target.closest('[data-choice]')
     if (thing) return choice ? `use ${thing.dataset.thing} ${choice.dataset.choice}` : `use ${thing.dataset.thing}`
@@ -729,7 +754,7 @@ const meadowGame = (() => {
       Mole.lookAt(World.state.view.x1)
     },
   })
-  Critters.setup(document.getElementById('critters'), document.getElementById('low-critters'), { now: Layout.flags.critters === 'now', snail: Layout.flags.critters === 'snail', still: Debug.still })
+  Critters.setup(document.getElementById('critters'), document.getElementById('low-critters'), document.getElementById('glows'), { now: Layout.flags.critters === 'now', snail: Layout.flags.critters === 'snail', fireflies: Layout.flags.critters === 'fireflies', still: Debug.still })
   const things = Things.setup({
     run,
     goTo,

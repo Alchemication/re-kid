@@ -178,6 +178,19 @@ test.describe('a creature', () => {
     }
   })
 
+  test('one of the night stays out in the dim, and goes home once the light comes back', () => {
+    const w = load()
+    const rnd = stream()
+    w.World.set({ light: 0.2 })
+    const c = w.Creature.make({ ...BUTTERFLY, hours: [0, 24], dark: 0, bright: 0.45, feeds: null }, 800, 500, 0, rnd)
+    w.Creature.think(c, w.World, w.clock.t, rnd)
+    assert.notEqual(c.goal.kind, 'home')
+    w.World.set({ light: 0.6 })
+    c.goal = null
+    w.Creature.think(c, w.World, w.clock.t, rnd)
+    assert.equal(c.goal.kind, 'home')
+  })
+
   test('one that freezes keeps still a while when scared, then goes on', () => {
     const w = load()
     const rnd = stream()

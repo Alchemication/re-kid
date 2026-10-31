@@ -20,7 +20,7 @@ and no clock, tested in node (`worlds/krtek/games/meadow/tests/creature.test.js`
   Clock: each thinks and moves, the game draws it, and takes it away once
   it is gone. Goals taken up go in the trace.
 
-Used in the meadow by the butterflies and the snail (`critters.js`), the
+Used in the meadow by the butterflies, the snail and the fireflies (`critters.js`), the
 bullfinch and the dragonflies (`spring.js`). The frog sits still, so it
 needs no steering: it reads the world's noises itself. The fish only makes
 noise.
@@ -68,7 +68,7 @@ shelter is wet; the wind gets up with it.
 Offer kinds in use: `nectar`, `drink`, `shelter` (a creature's home to
 come out of: the snail comes out where one is wet), `perch` (somewhere to
 land: the yard's roof, tap, bowl, flower), `sight` (something on show a
-curious creature comes to look at: Reksio's nose, the web's edge), `food`
+curious creature comes to look at: Reksio's nose, the web's edge, the mole standing free), `food`
 (the yard's bowl, in the cold: the sparrows come to it in winter, shy of
 his nose, so they keep off while he is at it). A new kind is a word
 both the thing and the creature use; add it to this list.
@@ -93,7 +93,7 @@ What it goes for, first that applies:
    fly's dodge, the bee's huff); or, with `freezeMs`, stock still at once,
    that long (a snail into her shell).
 2. **Home**: its stay is over, it is out of its `hours`, the `light` is below
-   its `dark`, rain coming or the wet if it minds it (`wet: 'avoid'`), or
+   its `dark` (or above its `bright`, for one of the night: the fireflies), rain coming or the wet if it minds it (`wet: 'avoid'`), or
    the dry if it likes the wet (`'likes'`). To its own `home` if made with
    one, else off out of sight (at `exitY`, or up and away).
 3. **Hunger**: once `hungerMs` has passed since it last fed, something on

@@ -14,7 +14,7 @@
 // nose too close if it is shy: off out of sight, quicker; or a startled dart
 // a short way off, after which it carries on; or, for one that freezes,
 // still a while), then going home (its stay is over, out of its hours, too
-// dark, rain coming or the wet if it minds it, the dry if it likes the
+// dark, or too light for one of the night, rain coming or the wet if it minds it, the dry if it likes the
 // wet), then hunger (to something on offer that it feeds on, a while there,
 // and full again), and otherwise it wanders, over the view or about its
 // haunt (closer in fog), now and then to something on show if it is curious, hovering a
@@ -40,7 +40,8 @@ const Creature = (() => {
    *   1: how much the wind pushes it, unless it is feeding: it holds on),
    *   errandSpeed (sent on an errand, this fast);
    * - stayMs [lo, hi], hours [from, to], dark (it goes home below this
-   *   light), wet ('avoid', 'likes' or null);
+   *   light), bright (one of the night: it goes home above this light),
+   *   wet ('avoid', 'likes' or null);
    * - feeds (an offer kind), hungerMs [lo, hi] (from fed to hungry),
    *   feedMs [lo, hi];
    * - startledBy (the kinds of noise that scare it, heard within their
@@ -118,13 +119,14 @@ const Creature = (() => {
     return null
   }
 
-  /** Must it go home: its stay over, out of its hours, too dark, rain coming or the wet it minds, or the dry if it likes the wet? */
+  /** Must it go home: its stay over, out of its hours, too dark (or too light, if of the night), rain coming or the wet it minds, or the dry if it likes the wet? */
   function homeward(c, world, t) {
     const { hour, light, overcast = 0 } = world.state
     const [from, to] = c.traits.hours
     const wet = world.isWet(c.x)
     const minds = c.traits.wet === 'avoid' && (wet || overcast >= RAIN_COMING)
-    return t > c.leaves || hour < from || hour >= to || light < c.traits.dark || minds || (c.traits.wet === 'likes' && !wet)
+    const lit = light < c.traits.dark || light > (c.traits.bright ?? Infinity)
+    return t > c.leaves || hour < from || hour >= to || lit || minds || (c.traits.wet === 'likes' && !wet)
   }
 
   /** Something it feeds on, on offer within its reach and a wander of it, and dry if it minds the wet. */

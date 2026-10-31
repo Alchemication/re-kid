@@ -1,5 +1,5 @@
-// The meadow's small life between the encounters: butterflies, and the snail
-// after the rain. Now and then
+// The meadow's small life between the encounters: butterflies, the snail
+// after the rain, and fireflies in the dim. Now and then
 // through the day one or two flutter in, wander over the meadow, settle on a
 // flower for its nectar a moment, and flutter off; never after sunset. A tap
 // on one sends it fluttering up and away, and the meadow has the mole look
@@ -18,10 +18,23 @@
 // tap, the car or a splash, and it pulls into its shell a moment; a tap on it
 // has the mole look and say "ooh" too.
 //
+// Curious, a butterfly now and then flutters over to him while he stands
+// free, to look at him (meadow.js offers him as a 'sight'), and he follows it
+// with his eyes. It never lands on him: nothing in the films says it may.
+//
+// The fireflies (invented, Adam's call that the games stay calm, 2026-10-31)
+// rise out of the grass once the light is low, at dusk as he lies listening to
+// the cricket, or in an eclipse's dim: a few, drifting slowly low over the
+// meadow, each glowing and fading in its own time. As the light comes back,
+// or at bedtime, each sinks back into the grass where it came from. A tap,
+// and it glows bright and drifts off a little way; a splash or the car, the
+// same.
+//
 // Their comings and goings draw from their own stream, and how they flutter
 // each frame from another, so neither shifts the rest of the play. Time is
 // the Clock's. A still play (?still) has none, unless ?critters=now asks for
-// one at once (layout.js), for trying them and for the tests. The world
+// one at once (layout.js), for trying them and for the tests; ?critters=fireflies
+// the fireflies, whatever the light. The world
 // model's runner (ambient.js) steps them each frame.
 
 /* global Ambient, Clock, Creature, Debug, World */
@@ -47,6 +60,7 @@ const Critters = (() => {
     startledBy: ['vroom', 'splash'], // not the bell, nor his words: he says "ooh" at them
     band: [420, 690], // how high it wanders (scene y): over the grass, among the flowers
     roam: 900,
+    curious: 0.3, // this share of its wanders take it to him, standing free, to look at him (meadow.js)
   }
   const SNAIL = {
     speed: 12, flee: 1, turn: 2, // a crawl
@@ -58,15 +72,36 @@ const Critters = (() => {
   const SNAIL_HAUNT = 260 // it keeps this near its shelter: out from among the stems, where it shows
   const SNAIL_LOOKS_MS = 2000 // how often it checks whether its shelter is wet
   const SNAIL_SIZE = 2.2 // big enough for a toddler to spot in the grass, and to tap
+  const FIREFLY = {
+    speed: 22, flee: 3, turn: 1.2, blown: 0.25, // a slow drift, easing into its turns; a gust carries it a little
+    stayMs: [150000, 150000], // as long as the dim lasts: the light, or bedtime, sends it home first
+    hours: [0, 20], // home into the grass at bedtime (day.js END), as the circle closes
+    dark: 0, bright: 0.45, // out only in the dim: from about 19:10, as the cricket starts, or an eclipse
+    wet: 'avoid',
+    startledBy: ['vroom', 'splash'], dart: 90, // a splash: off a little way, and on it drifts
+    band: [560, 690], roam: 280, // low over the grass, below his head and up to it
+    pauseMs: [800, 2400], // hanging still in the air a moment
+  }
+  const FIREFLIES = 5 // at most this many out at once: a few lights, not a swarm
+  const FIREFLY_EVERY_MS = 1800 // in the dim, another rises this often, up to FIREFLIES
+  const FIREFLY_GLOW_MS = [1600, 3200] // one glow and fade, each its own
+  const FIREFLY_SIZE = 1.7
+  const FIREFLY_ABOUT = 380 // they rise and drift within this of the middle of the view, where he is
+  const FLASH_MS = 900 // tapped, it glows bright this long
+  const FIREFLY_LIGHTS_MS = 1500 // it lights up over this long, rising out of the grass...
+  const FIREFLY_LANDS = 60 // ...and goes out over this last stretch home: never blinking out in view
   const INK = '#15140f'
   const COLOURS = [['#f6d23b', '#e08a20'], ['#fbf8ef', '#9aa4c8'], ['#e98a3a', '#7a3a14'], ['#9fc4f0', '#3d5fc4']] // wings, and their edges and spots
   const comings = Debug.random('meadow-critters')
   const flutter = Debug.random('meadow-flutter') // every frame: its own stream
   const crawl = Debug.random('meadow-snail') // the snail's own, so ?critters=snail shifts nothing else
+  const glows = Debug.random('meadow-fireflies') // the fireflies' own: they come only in the dim, so they shift nothing else
   const out = []
   let layer = null
   let low = null // behind the front grass
   let snail = null // { g, c }
+  let glowLayer = null // over the night's dusk, so they shine in it
+  const fireflies = [] // { id, g, light, c, t, glow, phase, flash }
   let ids = 0
 
   const el = (tag, attrs = {}, parent) => {
@@ -169,16 +204,70 @@ const Critters = (() => {
     })
   }
 
+  /** A firefly drawn at 0,0: a little dark body, and its light, which glows and fades. */
+  function drawFirefly(id) {
+    const g = el('g', { class: 'critter firefly', 'data-critter': `firefly ${id}` }, glowLayer)
+    const light = el('g', { opacity: 0 }, g)
+    el('circle', { r: 18, fill: '#f6f0a0', opacity: 0.3 }, light) // its glow on the dusk air: no blur, which costs every frame
+    el('circle', { r: 7, fill: '#fbf6b8', opacity: 0.55 }, light)
+    el('circle', { r: 3.4, fill: '#fffde8' }, light)
+    el('ellipse', { cx: 0, cy: -5, rx: 2.4, ry: 3.6, fill: '#2b2a1e' }, g)
+    el('circle', { r: 24, fill: 'transparent' }, g) // a bigger target than the light: small fingers
+    return { g, light }
+  }
+
+  /** A firefly rises out of the grass in the view; asked for, in daylight too. */
+  function fireflyComes(asked) {
+    const id = ++ids
+    const { x0, x1 } = World.state.view
+    const mid = (x0 + x1) / 2 // the view keeps him in the middle: they rise about him, inside the closing circle
+    const home = { x: mid + (glows() - 0.5) * 2 * FIREFLY_ABOUT, y: FIREFLY.band[1] + 20 }
+    const traits = { ...FIREFLY, haunt: [mid - FIREFLY_ABOUT * 1.3, mid + FIREFLY_ABOUT * 1.3], ...(asked ? { bright: Infinity } : {}) }
+    const c = Creature.make(traits, home.x, home.y, Clock.now(), glows, home)
+    const f = { id, ...drawFirefly(id), c, t: 0, glow: between(FIREFLY_GLOW_MS, glows()), phase: glows() * Math.PI * 2, flash: 0 }
+    fireflies.push(f)
+    Debug.trace('firefly', { id, comes: Math.round(home.x) })
+    Ambient.add(c, {
+      name: 'firefly', id, rnd: glows,
+      draw: (_, dt) => {
+        f.t += dt
+        f.flash = Math.max(0, f.flash - dt / FLASH_MS)
+        const on = (0.5 + 0.5 * Math.sin((f.t / f.glow) * Math.PI * 2 + f.phase)) ** 2 // a soft glow, and a fade
+        const homing = c.goal?.kind === 'home' ? Math.min(1, Math.hypot(c.x - c.home.x, c.y - c.home.y) / FIREFLY_LANDS) : 1
+        const up = Math.min(1, f.t / FIREFLY_LIGHTS_MS, homing) // lighting up as it rises; going out as it settles in the grass
+        f.light.setAttribute('opacity', (up * Math.min(1, 0.15 + 0.85 * on + f.flash)).toFixed(2))
+        f.g.style.transform = `translate(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px) scale(${FIREFLY_SIZE})`
+      },
+      gone: () => {
+        f.g.remove()
+        fireflies.splice(fireflies.indexOf(f), 1)
+      },
+    })
+  }
+
+  /** In the dim, and before bedtime, another firefly rises now and then, up to a few; asked for, all at once. */
+  function fireflyLooks(asked) {
+    if (asked) for (let i = 0; i < FIREFLIES; i++) Clock.after(i * 400, () => fireflyComes(true))
+    Clock.every(FIREFLY_EVERY_MS, () => {
+      const { light, hour } = World.state
+      if (asked || fireflies.length >= FIREFLIES || light > FIREFLY.bright || hour >= FIREFLY.hours[1]) return
+      fireflyComes(false)
+    })
+  }
+
   /**
    * Start: `into` the layer they fly in, `under` the one behind the front
-   * grass; now: a butterfly comes at once (whatever the hour, for trying
-   * them), snail: the snail (its shelter wet from the start); still: none
-   * come of themselves.
+   * grass, `glowing` the one over the night (the fireflies); now: a
+   * butterfly comes at once (whatever the hour, for trying them), snail: the
+   * snail (its shelter wet from the start), fireflies: the fireflies (in
+   * daylight too); still: none come of themselves.
    */
-  function setup(into, under, { now = false, snail: wantSnail = false, still = false } = {}) {
+  function setup(into, under, glowing, { now = false, snail: wantSnail = false, fireflies: wantFireflies = false, still = false } = {}) {
     layer = into
     low = under
+    glowLayer = glowing
     if (!still || wantSnail) snailLooks(wantSnail)
+    if (!still || wantFireflies) fireflyLooks(wantFireflies)
     const first = between(FIRST_MS, comings()) // drawn either way: a forced one doesn't shift the rest
     if (now) Clock.after(0, () => come(true))
     if (still) return
@@ -201,6 +290,16 @@ const Critters = (() => {
     return { x: b.c.x, y: b.c.y }
   }
 
+  /** A tap on firefly `id`: it glows bright and drifts off a little. Its place, for the mole to look at; null if gone. */
+  function tapFirefly(id) {
+    const f = fireflies.find((o) => o.id === id)
+    if (!f) return null
+    Debug.trace('firefly', { id, tapped: true })
+    f.c.tapped = true
+    f.flash = 1
+    return { x: f.c.x, y: f.c.y }
+  }
+
   /** A tap on the snail: into its shell it goes. Its place, for the mole to look at; null if it isn't out. */
   function tapSnail() {
     if (!snail) return null
@@ -210,5 +309,5 @@ const Critters = (() => {
   }
 
   const leaving = (b) => b.c.goal?.kind === 'home' || b.c.goal?.kind === 'flee'
-  return { setup, tap, tapSnail, get snail() { return snail ? { x: Math.round(snail.c.x), tucked: snail.c.goal?.kind === 'freeze' } : null }, get out() { return out.map((b) => ({ id: b.id, x: Math.round(b.c.x), y: Math.round(b.c.y), leaving: leaving(b) })) } }
+  return { setup, tap, tapSnail, tapFirefly, get fireflies() { return fireflies.map((f) => ({ id: f.id, x: Math.round(f.c.x), y: Math.round(f.c.y), home: f.c.goal?.kind === 'home' })) }, get snail() { return snail ? { x: Math.round(snail.c.x), tucked: snail.c.goal?.kind === 'freeze' } : null }, get out() { return out.map((b) => ({ id: b.id, x: Math.round(b.c.x), y: Math.round(b.c.y), leaving: leaving(b) })) } }
 })()

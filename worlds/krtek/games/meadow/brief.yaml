@@ -171,10 +171,20 @@ scenes:
     text: Nothing, or tap a butterfly.
     origin: invented
   result:
-    text: Now and then through the day, one or two butterflies flutter in, wander over the meadow, settle on a flower near them a moment and flutter on - the tulips only while they are open, the wild patch only while it isn't drooping. They keep out of the rain cloud's rain and leave when it drifts over them, fly off from the toy car going by and from a splash near them, and go at sunset. Tapped, one flutters up and away, and the mole looks up after it, hairs springing up - ooh.
+    text: Now and then through the day, one or two butterflies flutter in, wander over the meadow, settle on a flower near them a moment and flutter on - the tulips only while they are open, the wild patch only while it isn't drooping. They keep out of the rain cloud's rain and leave when it drifts over them, fly off from the toy car going by and from a splash near them, and go at sunset. Tapped, one flutters up and away, and the mole looks up after it, hairs springing up - ooh. Now and then one comes over to look at him while he stands free, flutters about his head, and he follows it with his eyes, his face lighting up; it never lands on him.
     origin: invented
   sound:
     text: His "ooh", now and then.
+    origin: invented
+- id: fireflies
+  action:
+    text: Nothing, or tap a firefly.
+    origin: invented
+  result:
+    text: As the light goes, at dusk while he lies listening to the cricket, or in an eclipse's dim, a few fireflies rise out of the grass about him and drift slowly low over the meadow, each glowing and fading in its own time. As the light comes back, or at bedtime as the circle closes, each settles back into the grass and goes out. Tapped, one glows bright and drifts off a little way, and he looks at it - ooh. Added to keep the end of the day the calmest part of it (Adam, 2026-10-31, that the games calm and soothe); not from the films.
+    origin: invented
+  sound:
+    text: None of their own.
     origin: invented
 - id: storm
   action:

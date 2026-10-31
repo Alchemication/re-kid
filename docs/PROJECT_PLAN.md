@@ -124,6 +124,14 @@ decided and why.
       spring answering a new way each tap (a dreamy sway with eyes shut,
       a sniff along the row; a splash in his face, the frog plopping in
       beside him). Judge: whether the new ways read and are fun to repeat.
+   6c. **Adam judges the meadow's new life** (built 2026-10-31, his ask
+      "more life to the creatures", nothing checked with him): a curious
+      butterfly now and then comes to look at him standing free, and he
+      follows it with his eyes (it never lands: nothing in the films says
+      it may); fireflies (invented) rise about him in the dim, at dusk and
+      in an eclipse, glow and fade, and settle back into the grass at
+      bedtime. `?critters=now`, `?critters=fireflies&day=60`. Judge: is
+      the dusk calmer and lovelier, are the fireflies too few or faint.
    7. **Adam plays the meadow with Eliot** before any LLM work (Adam,
       2026-10-26).
    8. If the meadow feels more alive: the LLM director behind the player's
