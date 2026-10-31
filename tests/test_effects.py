@@ -19,6 +19,7 @@ from worlds import load_model
 
 ROOT = Path(__file__).resolve().parents[1]
 YARD = ROOT / "worlds/reksio/games/yard"
+MEADOW = ROOT / "worlds/krtek/games/meadow"
 
 needs_ffmpeg = pytest.mark.skipif(
     shutil.which("ffmpeg") is None, reason="ffmpeg not installed"
@@ -68,45 +69,61 @@ class TestSchema:
             Effect.model_validate(_effect(gain=0))
 
 
-class TestYardEffects:
-    """The yard's picks: valid, every take there, every sound one sound.js has."""
+def sound_names(game: Path) -> set[str]:
+    """The sounds a game's sound.js plays: the yard's as methods (and his
+    voice's words), the meadow's in its return list (and the words he says)."""
+    text = (game / "game/sound.js").read_text()
+    names = set(
+        re.findall(r"^    (?:/\*\*.*\*/\s*)?([a-z][a-zA-Z]*)\(", text, re.MULTILINE)
+    )
+    voice = re.search(r"HIS_VOICE = \[([^\]]+)\]", text)
+    if voice:
+        names |= set(re.findall(r"'(\w+)'", voice.group(1)))
+    exported = re.findall(r"^    say, ([^}]+)}", text, re.MULTILINE)
+    if exported:
+        names |= {n.strip() for n in exported[0].split(",")}
+        said = "".join(p.read_text() for p in (game / "game").glob("*.js"))
+        names |= set(re.findall(r"Sound\.say\('(\w+)'", said))
+    return names
+
+
+@pytest.mark.parametrize("game", [YARD, MEADOW], ids=["yard", "meadow"])
+class TestGameEffects:
+    """Each game's picks: valid, every take there, every sound its sound.js has."""
 
     @pytest.fixture
-    def effects(self) -> EffectSet:
-        return load_model(YARD / "effects.yaml", EffectSet)
+    def effects(self, game: Path) -> EffectSet:
+        return load_model(game / "effects.yaml", EffectSet)
 
-    def test_every_take_is_there(self, effects: EffectSet) -> None:
+    def test_every_take_is_there(self, effects: EffectSet, game: Path) -> None:
         missing = [
             t.file
             for e in effects.effects
             for t in e.takes
-            if not (YARD / "effects" / t.file).is_file()
+            if not (game / "effects" / t.file).is_file()
         ]
         assert not missing
 
-    def test_no_take_left_unlisted(self, effects: EffectSet) -> None:
+    def test_no_take_left_unlisted(self, effects: EffectSet, game: Path) -> None:
         listed = {t.file for e in effects.effects for t in e.takes}
         on_disk = {
-            str(p.relative_to(YARD / "effects"))
-            for p in (YARD / "effects").rglob("*.mp3")
+            str(p.relative_to(game / "effects"))
+            for p in (game / "effects").rglob("*.mp3")
         }
         assert on_disk == listed, "a take on disk the game never plays, or listed twice"
 
-    def test_every_sound_is_one_sound_js_has(self, effects: EffectSet) -> None:
+    def test_every_sound_is_one_sound_js_has(
+        self, effects: EffectSet, game: Path
+    ) -> None:
         """A misspelt id would pack takes the game never plays."""
-        text = (YARD / "game/sound.js").read_text()
-        names = set(
-            re.findall(r"^    (?:/\*\*.*\*/\s*)?([a-z][a-zA-Z]*)\(", text, re.MULTILINE)
-        )
-        voice = re.search(r"HIS_VOICE = \[([^\]]+)\]", text).group(1)
-        names |= set(re.findall(r"'(\w+)'", voice))
+        names = sound_names(game)
         unknown = [e.id for e in effects.effects if e.id not in names]
         assert not unknown, f"not sounds in sound.js: {unknown}"
 
-    def test_packed_script_is_up_to_date(self, effects: EffectSet) -> None:
-        """effects.js holds exactly the listed sounds and takes: rebuild it with
-        `main.py effects` after changing effects.yaml."""
-        text = (YARD / "game/effects.js").read_text()
+    def test_packed_script_is_up_to_date(self, effects: EffectSet, game: Path) -> None:
+        """effects.js holds exactly the listed sounds and takes, and how each
+        plays: rebuild it with `main.py effects` after changing effects.yaml."""
+        text = (game / "game/effects.js").read_text()
         table = json.loads(text.split("const EFFECTS = ", 1)[1])
         assert {k: len(v["takes"]) for k, v in table.items()} == {
             e.id: len(e.takes) for e in effects.effects
@@ -114,6 +131,21 @@ class TestYardEffects:
         assert {k: v["gain"] for k, v in table.items()} == {
             e.id: e.gain for e in effects.effects
         }
+        assert {k for k, v in table.items() if v.get("inTurn")} == {
+            e.id for e in effects.effects if e.in_turn
+        }
+
+
+class TestMeadowBell:
+    def test_rings_ding_then_dong(self) -> None:
+        """Adam's order (2026-10-31): the brighter take first, in turn."""
+        bell = next(
+            e
+            for e in load_model(MEADOW / "effects.yaml", EffectSet).effects
+            if e.id == "bell"
+        )
+        assert bell.in_turn and bell.overlaps
+        assert [t.file for t in bell.takes] == ["bell/24.mp3", "bell/23.mp3"]
 
 
 class TestLevelling:

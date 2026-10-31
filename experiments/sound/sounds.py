@@ -12,12 +12,16 @@ SOUNDS: dict[str, dict] = {
     # over each other (`overlaps`). Soft and far: calm first.
     "krtek-bell": {
         "world": "krtek",
+        "id": "bell",  # Sound.bell in the meadow's sound.js
         "for": "One stroke of the village church bell far off on the hill (church.js): twice each hour, six times at sunset. Called every 1.1 s.",
-        "seconds": 3.5,
+        # takes 01-12 asked for a large, deep bronze bell's toll with a long
+        # hum: all serious, almost ominous (Adam, 2026-10-31). Light, small,
+        # short instead: a pleasant ding that is there and gently gone.
+        "seconds": 2,
         "prompts": [
-            "a single stroke of a large church bell heard from far across fields, soft and warm, a long ringing fade",
-            "a distant village church bell, one slow deep bong drifting over a quiet meadow, mellow, fading out",
-            "one toll of an old bronze church bell far away across a valley, soft, round and calm, with a long hum dying away",
+            "a small sweet chapel bell ringing once far away, light and bright, gently fading",
+            "one soft high ding of a little bell in a distant village tower, cheerful and gentle, quickly fading into the breeze",
+            "a light friendly ding of a small bell heard faintly across a sunny meadow, soft and short",
         ],
     },
     # winter (2026-10-27): the snowman's encounters and the ice

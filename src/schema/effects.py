@@ -51,6 +51,13 @@ class Effect(Model):
             "waiting for it to end."
         ),
     )
+    in_turn: bool = Field(
+        default=False,
+        description=(
+            "Its takes play in turn, in the order listed, each at its own pitch: "
+            "two takes that answer each other (the meadow's church bell, ding… dong)."
+        ),
+    )
     takes: list[Take] = Field(min_length=1)
 
     @model_validator(mode="after")

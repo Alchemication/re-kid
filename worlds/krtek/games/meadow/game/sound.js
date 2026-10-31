@@ -1,7 +1,9 @@
 // The meadow's sounds. The mole's voice is recorded takes picked by ear
 // (effects.yaml, packed into effects.js by `main.py effects`): one at random
-// each time, never the same twice running, a little higher or lower. The
-// rest is made in the browser, quiet and short: digging, popping up, water.
+// each time, never the same twice running, a little higher or lower. So is
+// the far church bell: its two takes in turn, ding… dong, each fading as the
+// next rings (the synthesised bell plays until they are decoded). The rest
+// is made in the browser, quiet and short: digging, popping up, water.
 // The music (the cricket's fiddle among it) is music.js's, on this audio
 // context (bus).
 //
@@ -15,10 +17,12 @@ const Sound = (() => {
   const VOICE_VOLUME = 0.9
   const VOICE_RATE = [0.95, 1.07] // each word a little lower or higher: never quite the same twice
   const CASUAL_GAP_S = 4 // an idle remark only if he hasn't spoken for this long
+  const EFFECT_VOLUME = 0.9 // recorded effects, as his voice (each one's own level is its gain in effects.yaml)
+  const FADE_S = 0.05 // a fade's floor: how quiet "gone" is, as a share of the level
   let ctx = null
   let master = null
   let noise = null
-  const takes = {} // decoded voice takes, by sound: {gain, buffers, last}
+  const takes = {} // decoded takes, by sound: {gain, overlaps, inTurn, buffers (in the order listed), last, until}
   let lastSaid = -100 // when he last spoke (audio time)
   let heard = () => {} // the game's hook: a word he says, as he says it (his face goes with it)
 
@@ -40,10 +44,10 @@ const Sound = (() => {
       const data = noise.getChannelData(0)
       for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
       for (const [name, e] of Object.entries(typeof EFFECTS !== 'undefined' ? EFFECTS : {})) {
-        const mine = (takes[name] = { gain: e.gain, buffers: [], last: -1 })
-        for (const b64 of e.takes) {
-          ctx.decodeAudioData(bytes(b64)).then((b) => mine.buffers.push(b), () => {}) // a take that won't decode is left out: the others play
-        }
+        const mine = (takes[name] = { gain: e.gain, overlaps: !!e.overlaps, inTurn: !!e.inTurn, buffers: [], last: -1, until: 0 })
+        e.takes.forEach((b64, i) => {
+          ctx.decodeAudioData(bytes(b64)).then((b) => (mine.buffers[i] = b), () => {}) // in its place in the list; a take that won't decode is left out: the others play
+        })
       }
     }
     if (ctx.state === 'suspended' && !Clock.held) ctx.resume()
@@ -61,18 +65,55 @@ const Sound = (() => {
     heard(name) // his face says it even where the sound can't play
     if (!ready()) return false
     const e = takes[name]
-    if (!e || !e.buffers.length) return false
+    const decoded = e ? e.buffers.filter(Boolean) : []
+    if (!decoded.length) return false
     lastSaid = ctx.currentTime // he spoke (only a word actually heard counts)
-    let i = Math.floor(Math.random() * e.buffers.length)
-    if (i === e.last && e.buffers.length > 1) i = (i + 1) % e.buffers.length
-    e.last = i
+    const i = another(e, decoded.length)
     const src = ctx.createBufferSource()
-    src.buffer = e.buffers[i]
+    src.buffer = decoded[i]
     src.playbackRate.value = VOICE_RATE[0] + Math.random() * (VOICE_RATE[1] - VOICE_RATE[0])
     const g = ctx.createGain()
     g.gain.value = VOICE_VOLUME * e.gain
     src.connect(g).connect(master)
     src.start()
+    return true
+  }
+
+  /** A random take of `n`, not the one played last (unless there is only one). */
+  function another(e, n) {
+    let i = Math.floor(Math.random() * n)
+    if (i === e.last && n > 1) i = (i + 1) % n
+    e.last = i
+    return i
+  }
+
+  /** One of a sound's recorded effects, if any are decoded: its takes in
+   * turn (inTurn: in the order listed, each at its own pitch) or one at
+   * random, a little higher or lower; over the last one if it `overlaps`,
+   * else not until that one ends. `fade`: [from, over] seconds, so it dies
+   * away however long the take rings. Played, or still playing: true. */
+  function recorded(name, fade = null) {
+    if (!ready()) return false
+    const e = takes[name]
+    const decoded = e ? e.buffers.filter(Boolean) : []
+    if (!decoded.length) return false
+    if (ctx.currentTime < e.until && !e.overlaps) return true
+    const i = e.inTurn ? (e.last = (e.last + 1) % decoded.length) : another(e, decoded.length)
+    const src = ctx.createBufferSource()
+    src.buffer = decoded[i]
+    src.playbackRate.value = e.inTurn ? 1 : VOICE_RATE[0] + Math.random() * (VOICE_RATE[1] - VOICE_RATE[0])
+    const g = ctx.createGain()
+    const level = EFFECT_VOLUME * e.gain
+    const t = ctx.currentTime
+    g.gain.setValueAtTime(level, t)
+    if (fade) {
+      g.gain.setValueAtTime(level, t + fade[0])
+      g.gain.exponentialRampToValueAtTime(level * FADE_S, t + fade[0] + fade[1])
+    }
+    src.connect(g).connect(master)
+    src.start()
+    if (fade) src.stop(t + fade[0] + fade[1])
+    e.until = t + src.buffer.duration / src.playbackRate.value
     return true
   }
 
@@ -137,10 +178,14 @@ const Sound = (() => {
   const BELL_HZ = 164.8 // E3
   const BELL_PARTIALS = [[0.5, 0.5, 4.5], [1, 0.9, 3.4], [1.2, 0.45, 2.6], [1.5, 0.3, 2.1], [2, 0.5, 2.4], [2.51, 0.18, 1.4], [3.01, 0.12, 1.1]] // [ratio, loudness, seconds]
   const BELL_VOLUME = 0.09
+  // The recorded bell rings this long, then fades away over this long: gone
+  // before the stroke after next, there and gently away (Adam, 2026-10-31).
+  const BELL_FADE = [0.6, 0.9]
 
-  /** One stroke of the far church bell. */
+  /** One stroke of the far church bell: its recorded takes, ding… dong, or
+   * the synthesised one until they are decoded. */
   function bell() {
-    if (!ready()) return
+    if (!ready() || recorded('bell', BELL_FADE)) return
     const far = ctx.createBiquadFilter() // far off: the top dulled
     far.type = 'lowpass'
     far.frequency.value = 2400

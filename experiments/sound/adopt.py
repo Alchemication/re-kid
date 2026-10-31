@@ -35,6 +35,27 @@ def world_of(sound: str) -> str:
     return {**SOUNDS, **VOICES}.get(sound, {}).get("world", "reksio")
 
 
+def game_id(sound: str) -> str:
+    """Its name in the game's sound.js (sounds.py `id`, else the board's name)."""
+    return {**SOUNDS, **VOICES}.get(sound, {}).get("id", sound)
+
+
+def in_old_order(takes: list[dict], old: str) -> list[dict]:
+    """A sound whose takes play in turn keeps the order it was given in
+    effects.yaml (by hand: the bell's ding before its dong); new takes last."""
+    if "in_turn: true" not in old:
+        return takes
+    listed = re.findall(r"- file: \S+/(\S+)", old)
+    return sorted(
+        takes,
+        key=lambda p: (
+            listed.index(Path(p["file"]).name)
+            if Path(p["file"]).name in listed
+            else len(listed)
+        ),
+    )
+
+
 def entry(sound: str, settings: str, takes: list[dict], game: Path) -> str:
     """A sound's entry in effects.yaml, its takes copied into effects/."""
     lines = [f"- id: {sound}"]
@@ -96,11 +117,14 @@ def main(args: list[str]) -> None:
         )
         if not takes:
             sys.exit(f"{sound}: no kept takes in {picks_file.name} — pick some first")
-        old = blocks.get(sound, "")
+        name = game_id(sound)
+        old = blocks.get(name, "")
         settings = re.search(r"\n((?:  (?!takes:)\w+: [^\n]*\n)*)  takes:", old)
-        shutil.rmtree(game / "effects" / sound, ignore_errors=True)
-        blocks[sound] = entry(sound, settings.group(1) if settings else "", takes, game)
-        print(f"{sound}: {len(takes)} takes")
+        shutil.rmtree(game / "effects" / name, ignore_errors=True)
+        blocks[name] = entry(
+            name, settings.group(1) if settings else "", in_old_order(takes, old), game
+        )
+        print(f"{sound}: {len(takes)} takes, as {name}")
     yaml_path.write_text(head + "\neffects:\n" + "".join(blocks.values()))
 
 
