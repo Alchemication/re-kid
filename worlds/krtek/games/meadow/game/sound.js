@@ -116,7 +116,8 @@ const Sound = (() => {
     src.connect(g).connect(master)
     src.start()
     if (fade) src.stop(t + fade[0] + fade[1])
-    e.until = t + src.buffer.duration / src.playbackRate.value
+    const length = src.buffer.duration / src.playbackRate.value
+    e.until = t + (fade ? Math.min(length, fade[0] + fade[1]) : length) // cut short and faded: over when it stops
     return true
   }
 
@@ -299,10 +300,19 @@ const Sound = (() => {
     hiss(0, 0.5, 1500, 0.8, 0.12)
   }
 
-  /** The bulldozer far off: a soft low rumble for a few seconds. */
+  const RUMBLE_FADE = 0.6 // a recorded rumble, played for less than its take: faded out over this long
+
+  /** The bulldozer, rolling: its engine for a few seconds, recorded, or a soft low rumble. */
   function rumble(seconds) {
-    if (!ready()) return
+    if (!ready() || recorded('rumble', [Math.max(0, seconds - RUMBLE_FADE), RUMBLE_FADE])) return
     for (let t = 0; t < seconds; t += 0.25) hiss(t, 0.3, 110 + Math.random() * 40, 1.2, 0.05)
+  }
+
+  /** The bulldozer tipping nose-first into the pit: a heavy clunk, recorded, or a low thud. */
+  function clunk() {
+    if (!ready() || recorded('clunk')) return
+    note(70, 0, 0.35, 0.2, 'sine', 0.6)
+    hiss(0, 0.25, 300, 1, 0.2)
   }
 
   /** A splash: into a tin of paint, or the spring. */
@@ -375,5 +385,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, dig, pop, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom, wind }
+    say, dig, pop, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind }
 })()

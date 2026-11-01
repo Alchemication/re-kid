@@ -55,3 +55,10 @@ test('one with a chance comes in that share of plays, instead of the one it repl
   const forced = [...Things.choose(withStorm, seq(0.9), { props: ['storm'] }).map((p) => p.name)]
   assert.deepEqual(forced, ['storm']) // ?props=storm brings it whatever the draw
 })
+
+test('a quiet spell after one is done, and none in the last hour before sunset', () => {
+  assert.equal(Things.quiet(9, null, 18.8), false) // none done yet: any time
+  assert.equal(Things.quiet(10.5, 10, 18.8), true) // just done: rest
+  assert.equal(Things.quiet(11.3, 10, 18.8), false) // rested
+  assert.equal(Things.quiet(18, null, 18.8), true) // too near sunset
+})

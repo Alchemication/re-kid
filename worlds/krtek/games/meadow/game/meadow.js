@@ -58,6 +58,7 @@ const meadowGame = (() => {
   const sun = document.getElementById('sun')
   const eclipseMoon = document.getElementById('eclipse-moon')
   let sunX = 800 // where the sun is across the sky (the sky's units: it stays put as the view moves)
+  let framed = null // a scene x an encounter wants kept in sight with him (the bulldozer), or null: the view follows him
   const moon = document.getElementById('moon')
   const stops = [...document.querySelectorAll('#sky-grad stop')]
   const cricket = document.getElementById('cricket')
@@ -755,7 +756,7 @@ const meadowGame = (() => {
     if (word === 'ahoj') helloAt = Clock.now()
     Mole.express(word) // each word he says comes with its face
   })
-  View.setup(() => Mole.drawnX(), (camX) => {
+  View.setup(() => (framed === null ? Mole.drawnX() : (Mole.drawnX() + framed) / 2), (camX) => {
     irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX)))
     World.set({ view: { x0: camX, x1: camX + Layout.VIEW_W } })
   })
@@ -790,6 +791,8 @@ const meadowGame = (() => {
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
     music: (part) => Music.cue(part),
+    /** Keep x in sight with him (the view between them), or null: follow him again. */
+    frame: (x) => { framed = x },
     notice: noticeArrival,
     stepped,
   })

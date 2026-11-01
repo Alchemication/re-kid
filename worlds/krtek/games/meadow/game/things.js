@@ -11,7 +11,9 @@
 // where he helps someone, one where someone helps him, and one to discover,
 // as in the yard (docs/DECISIONS.md, "Helping is the yard's theme"), then
 // the rest, as many as there are hours for (children wanted more to happen
-// in a day: the yard's lesson). None is needed for the day to end.
+// in a day: the yard's lesson), but with a quiet spell after each, so the
+// child gets a moment to relax (Adam, 2026-11-01). None is needed for the
+// day to end.
 //
 // An encounter registers itself (Things.add) with:
 //   name, offer ('help', 'helped' or 'discover'),
@@ -49,14 +51,17 @@
 //   detail(): its own state, for the overlay and the tests; `cast`, the
 //     visitors it has out now (none once the mole is free: checkRules).
 // It draws on the meadow's helpers (Things.meadow: goTo) for the mole's
-// trips, and tells the meadow the music's moments (Things.meadow.music).
+// trips, tells the meadow the music's moments (Things.meadow.music), and
+// asks it to keep something big in sight with him (Things.meadow.frame).
 
 /* global Clock, Day, Debug, Layout */
 /* exported Things */
 const Things = (() => {
   const HOURS = [9, 10.7, 12.4, 14.1, 15.8] // when the chosen ones arrive, in their (seeded) order: one every hour and three quarters or so, about 40 s of play apart
   const SOON_HOUR = 8 // ?soon: the first arrives as he wakes, for trying it
-  const ENGAGE_MS = 7000 // a thing out and the mole left alone this long: he goes to it himself
+  const ENGAGE_MS = 12000 // a thing out and the mole left alone this long: he goes to it himself (a while, so the child can look first)
+  const REST_HOURS = 1.2 // after one is done, a quiet spell before the next may arrive: about 30 s of a five-minute day, for the child to relax (Adam, 2026-11-01)
+  const LAST_HOURS = 1 // and none arrives in the last hour before sunset: too late to play it out
   const BETWEEN_MS = 1300 // a breath between steps, so each reads (a tap on the thing skips it)
   const STUCK_MS = 60000 // one out this long and not done (a busy child, never leaving him alone): the next may come too
 
@@ -64,6 +69,8 @@ const Things = (() => {
   let api = null // the meadow's: run, alone, free
   let plan = [] // [{ name, at }], the order they come
   let skip = null // resolves the breath between steps early
+  let lastDone = null // the hour the last one was done
+  let hourNow = 0
   let stepping = null // the encounter whose step (or try) is playing now: a tap elsewhere waits for it (meadow.js)
 
   /** Play one step (or try) of `e`, saying so while it plays, and telling the meadow once it is over. */
@@ -113,6 +120,10 @@ const Things = (() => {
     return names.slice(0, HOURS.length).map((name, i) => ({ name, at: soon && i === 0 ? SOON_HOUR : HOURS[i] }))
   }
 
+  /** Whether it is too soon for one to arrive at this hour: the quiet spell after the last one was
+   * done (lastDone, an hour, or null), or the last hour before sunset. */
+  const quiet = (hour, lastDone, sunset) => (lastDone !== null && hour < lastDone + REST_HOURS) || hour > sunset - LAST_HOURS
+
   /** Decide this play's encounters; `meadow` lends its run(), free(), alone(), music(), notice()
    * and stepped() (a step is over: a tap that waited for it may go). */
   function setup(meadow) {
@@ -124,12 +135,14 @@ const Things = (() => {
 
   /** The meadow's tick: things arrive on time; a waiting one draws the mole to it when he's left alone. */
   function tick(hour) {
-    // one at a time: the next arrives at its hour, or once the one before is done (or has waited
-    // STUCK_MS), whichever is later
+    // one at a time: the next arrives at its hour, or a quiet spell after the one before is done
+    // (or once it has waited STUCK_MS), whichever is later
+    hourNow = hour
     const waitingNow = plan.some((p) => all[p.name].out && !all[p.name].done && Clock.now() - all[p.name].arrived < STUCK_MS)
+    const resting = quiet(hour, lastDone, Day.SUNSET)
     for (const p of plan) {
       const e = all[p.name]
-      if (!e.out && !waitingNow && hour >= p.at) {
+      if (!e.out && !waitingNow && !resting && hour >= p.at) {
         arrive(e)
         break
       }
@@ -170,6 +183,7 @@ const Things = (() => {
 
   function finish(e) {
     e.done = true
+    lastDone = hourNow
     Debug.trace('done', { thing: e.name })
     if (!Object.values(e.music || {}).includes('happy')) api.music?.('happy')
   }
@@ -276,5 +290,5 @@ const Things = (() => {
   const stateOf = (e) => (e.done ? 'done' : !e.out ? null : e.ask && e.step >= e.steps.length ? 'choosing' : `step ${e.step}`)
   const state = () => Object.fromEntries(plan.map((p) => [p.name, stateOf(all[p.name]) || `at ${p.at}`]))
 
-  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, names: () => Object.keys(all), add, choose, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
+  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, names: () => Object.keys(all), add, choose, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
 })()

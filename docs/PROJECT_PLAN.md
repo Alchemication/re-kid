@@ -118,6 +118,13 @@ decided and why.
       ("krtek fox"): snicker, growl, yelp, his ghost "uuuu".
       Still to do: each character's height against the mole measured
       in frames, as observed claims in world.yaml.
+   5a. **Adam judges the bulldozer and the rests** (built 2026-11-01, his
+      pick A): the bulldozer comes big from off the right after the film's,
+      shoving earth and tearing a track, and nose-dives into the pit he
+      digs; a quiet spell (`REST_HOURS`, about 30 s) after each encounter,
+      and 12 s before he goes to a new one himself. Judge: does it read as
+      harm, is it too loud or big for calm, is the pit funny, do the rests
+      feel restful or empty, and are there still enough encounters a day.
    6. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
    6b. **Adam judges the meadow's night's work** (built 2026-10-30 while
@@ -372,7 +379,9 @@ scene:
   yet), `TestMeadowTapsWait::test_a_tap_on_the_meadow_mid_step_waits_then_goes`
   (the same), `TestMeadowEgg::test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it`,
   `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]` and `[car]`,
-  `test_a_tap_on_the_egg_while_waiting`, `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`;
+  `test_a_tap_on_the_egg_while_waiting`, `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`,
+  `TestMeadowStorm::test_a_storm_coming_breaks_off_his_play_and_he_goes_for_the_umbrella`
+  (2026-11-01, a 27-minute run; both passed 3 of 3 alone);
   the yard's `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`.
   `test_look.py::test_photographs_a_gesture_until_it_ends` failed once more
   after the fix below (2026-10-31, load 85+), and passed alone and 8 at once.

@@ -26,6 +26,7 @@ then cuts it short to be picked up at the next step later. Keep each step
 | His moves | `mole.js`: `goTo` (via `Things.meadow`), `walkTo`, `carry`/`wear`, `lean`, `knock`, `wobble`, `cheer`, `perch`, `glide`, `paint`/`dots`. New moves there, made with `Motion.endAt`, cut by `relax()` |
 | Drawing helpers | `Things.meadow.el` (the SVG helper), the layers in `index.html` (`#things` behind him, `#mole-out` him on the grass, `#friends` in front, `#far-things` up the hill) |
 | A tap on it | `data-thing="<name>"` on what can be tapped; remove it when the thing is done (unless it has `again`), so it stops taking taps meant for what is under it |
+| Something big the child must see (the bulldozer) | `Things.meadow.frame(x)` keeps x in sight with him (the view between them); `frame(null)` in its `restore`, and when it goes. Weather-like arrivals that won't wait for a tap: `urgent: true` |
 | What it does once done | an optional `again` (the car's ride; the paint retells its story, quicker, and may end it differently). Keep its things tappable (`data-thing`) while there is an `again` to play |
 | Variety | the play's own stream, `Debug.random('meadow-<name>')`, drawn in the encounter's file: a detail per play (how the fox sneaks in) or per retelling (how the story ends) |
 | A visitor who acts | its drawing, faces (`feel`) and own moves in a file of its own (`foxart.js`), plugged in through `friends.js` `DRAW`, `NECK` (the point its head turns about) and `MOVES` |

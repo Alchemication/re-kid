@@ -51,6 +51,30 @@ SOUNDS: dict[str, dict] = {
             "a crafty animal growling softly as it creeps closer, one short throaty grrr, theatrical, not too loud",
         ],
     },
+    # The bulldozer (2026-11-01, after Krtek a buldozer): big, rolling in
+    # at the meadow, then nose-diving into the mole's pit (poles.js).
+    "krtek-rumble": {
+        "world": "krtek",
+        "id": "rumble",
+        "for": "A big old bulldozer rolling in and lurching on, engine chugging: played 1-4 s, faded out early when called for less.",
+        "seconds": 4.5,
+        "prompts": [
+            "a big old diesel bulldozer rolling slowly closer, engine chugging and clanking tracks, steady, close up",
+            "a heavy cartoon bulldozer chugging along, puffing and rattling, from a 1970s Eastern European children's cartoon, comic not menacing",
+            "an old crawler tractor engine putt-putt-putting as it creeps forward, metal tracks squeaking, warm and low",
+        ],
+    },
+    "krtek-clunk": {
+        "world": "krtek",
+        "id": "clunk",
+        "for": "The bulldozer tips nose-first into the mole's pit and gets stuck: one big comic clunk and a thump of earth.",
+        "seconds": 1.5,
+        "prompts": [
+            "a heavy machine tipping nose-first into a hole, a big hollow metal clunk and a soft thump of earth",
+            "a cartoon bulldozer falling into a pit, one comic clonk and crunch, from a 1970s Eastern European children's cartoon",
+            "a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh",
+        ],
+    },
     "krtek-yelp": {
         "world": "krtek",
         "id": "yelp",

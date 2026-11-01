@@ -30,7 +30,7 @@ CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 5, "rain": 5, "storm": 2}
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 7, "rain": 5, "storm": 2}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
 SOLVE = {
@@ -168,16 +168,19 @@ class TestMeadowDay:
             m.assert_settled()
 
     def test_one_encounter_at_a_time(self, meadow: callable) -> None:
-        m = meadow(f"{STILL}&day=90&props=egg,poles")
+        # a long enough day that the quiet spell after the egg ends before the last hour
+        # (none arrives then)
+        m = meadow(f"{STILL}&day=180&props=egg,poles")
         m.wake()
-        m.wait("meadowGame.state().hour >= '13:00'", 40_000)
+        m.wait("meadowGame.state().hour >= '11:00'", 60_000)
         things = m.state()["things"]
         assert things["egg"].startswith("step"), things
         assert things["poles"].startswith("at"), (
             "the poles came while the egg still waited"
         )
         finish(m, "egg")
-        m.wait("meadowGame.state().things.poles.startsWith('step')", 5_000)
+        # a quiet spell first (REST_HOURS: about 18 s of a 180 s day)
+        m.wait("meadowGame.state().things.poles.startsWith('step')", 40_000)
         assert not m.errors, m.errors
 
     def test_the_day_ends_asleep_in_the_den(self, meadow: callable) -> None:
@@ -850,6 +853,73 @@ class TestMeadowFox:
         m.wait_free()
         m.wait("!Nest.alarmed", 5000)
         m.assert_settled()
+
+
+class TestMeadowBulldozer:
+    """The poles and the bulldozer (Adam, 2026-11-01): it comes big from off
+    the right, framed in view with him, shoots its line of poles, and
+    nose-dives into the pit he digs; and it won't wait for a tap."""
+
+    BOXES = """() => [document.querySelector('.dozer'), document.querySelector('.mole-body')]
+        .map((e) => { const r = e.getBoundingClientRect(); return [r.left, r.right, r.height] })"""
+
+    def test_it_comes_big_and_in_sight_with_him(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=poles")
+        m.wake()
+        arrived(m, "poles")
+        m.do("use poles")
+        m.wait("meadowGame.state().things.poles === 'step 1'", 30_000)
+        m.page.wait_for_timeout(1500)  # the view eases over
+        (d_left, _d_right, d_h), (m_left, m_right, m_h) = m.page.evaluate(self.BOXES)
+        assert d_h > 1.8 * m_h, (
+            f"the bulldozer ({d_h:.0f}) should tower over him ({m_h:.0f})"
+        )
+        width = m.page.evaluate("innerWidth")
+        assert 0 <= m_left and m_right <= width, "he is out of sight"
+        assert d_left < width * 0.75, "the bulldozer is hardly in sight"
+        assert (
+            m.page.evaluate(
+                "document.querySelectorAll('.pole[style*=\"visibility: hidden\"]').length"
+            )
+            == 0
+        ), "a pole was never shot"
+
+    def test_it_noses_into_the_pit_and_leaves_its_marks(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=poles")
+        m.wake()
+        arrived(m, "poles")
+        m.do("use poles")
+        m.wait("meadowGame.state().things.poles === 'done'", 90_000)
+        trace = m.page.evaluate("meadowGame.trace()")
+        assert trace.index("bulldozer stuck") < trace.rindex("pole far"), (
+            "the last pole went before it was stuck in the pit"
+        )
+        assert not m.page.evaluate("document.querySelector('.dozer')"), "it never left"
+        assert m.page.evaluate("document.querySelectorAll('.pit').length") == 1
+        m.wait_free()
+        m.assert_settled()
+
+    def test_it_breaks_off_his_play(self, meadow: callable) -> None:
+        m = meadow("seed=1&day=60&props=poles")
+        m.wake()
+        for _ in range(30):  # the child taps him on and on, until it comes
+            if "arrives" in m.page.evaluate("meadowGame.trace()"):
+                break
+            m.do("tap mole")
+            m.page.wait_for_timeout(500)
+        arrived(m, "poles")
+        trace = m.page.evaluate("meadowGame.trace()").split("\n")
+        came = next(
+            float(t.split("s")[0])
+            for t in trace
+            if '"thing":"poles"' in t and "arrives" in t
+        )
+        went = next(
+            float(t.split("s")[0])
+            for t in trace
+            if '"name":"poles"' in t and "gesture" in t
+        )
+        assert went - came < 0.5, f"he went to see {went - came:.1f} s after it came"
 
 
 class TestMeadowStorm:

@@ -132,15 +132,15 @@ scenes:
     origin: invented
 - id: poles
   action:
-    text: Far off on the hill a little bulldozer comes puffing, and bullfinches fly in one after another, each with a red-and-white pole in its feet, and drop it so it plants itself, in a line running straight at his flowers; then off they fly. Tap a pole, or leave him be.
+    text: A rumble from off the right - a big red bulldozer, twice his height, rolls in, puffing, its lilac blade shoving a heap of earth, a brown track torn in the grass behind it, and stops. From a rack on its back it shoots red-and-white poles, one by one, that arc over and stick in the ground in a line running straight at his flowers. It won't wait for a tap - he drops what he is doing and hurries over to see (Adam, 2026-11-01. The tiny bulldozer far off could not be spotted and did no harm, and birds carrying the poles in looked ridiculous).
     origin: inspired
     refs: [world:episode_formula, 'world:places[molehill].description']
   result:
-    text: He knocks on the pole by his flowers and sighs "ach jo". Then he tugs it out and throws it like a javelin - it sails off and plants itself far away up the hill, and the line bends away from his flowers. The next one too. The last is stuck - he tugs and tugs, it pops, he tumbles over backwards, and the pole flies off by itself and lands just where it should. The bulldozer follows the bent line away into the distance, and he cheers. The poles stay out for the rest of the day. In the film he digs a pit for the bulldozer and moves the poles by hand; the throwing and the stuck pole are ours. Something to discover - Eliot's favourite, the "cones".
+    text: He knocks on the pole by his flowers - hm? Then he looks up at the bulldozer, puffing at the end of the line, and claps his hands to his face. He tugs out the pole nearest the bulldozer and throws it like a javelin - it sails off and plants itself far away up the hill, and the line bends away from his flowers - and the bulldozer lurches on. The next one too. Then it rolls at the last pole, the one by his flowers - he dives into the ground in its path and digs a pit, and it nose-dives in, stuck, tracks shuddering and puffing hard. While it is stuck he tugs at the last pole - it is stuck too, it pops, he tumbles over backwards, and the pole flies off by itself and lands just where it should. The bulldozer backs out and follows the bent line away up the hill, smaller and smaller, and he cheers. Its track, the pit and its heap of earth green over in about a minute; the poles stay out for the rest of the day. As in the film - the bulldozer pushing earth, the pit it falls into, the poles moved to bend the road (Krtek a buldozer 4:03-4:37); the throwing and the stuck pole are ours. Something to discover - Eliot's favourite, the "cones".
     origin: inspired
     refs: [world:episode_formula, 'world:characters[krtek].moves[carries-overhead].claim', 'world:characters[krtek].moves[arms-up-cheer].claim']
   sound:
-    text: A far rumble, a wooden tok as each pole goes in, a knock knock, his sigh, a tug, a whoosh, his squeak and giggle.
+    text: A wooden tok as each pole goes in, a knock knock, his "hm", the bulldozer's rumble, his gasp and sigh, a tug, a whoosh, digging, a crack as it nose-dives, his giggle and squeak.
     origin: invented
 - id: paint
   action:
