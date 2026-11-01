@@ -95,3 +95,19 @@ effects:
     prompt: 'A little girl pretending to be a ghost, a wavering "woooo-ooo!" with her arms up, playful and funny, dry studio recording, no reverb.'
   - file: ghost/06.mp3
     prompt: 'A little girl pretending to be a ghost, a wavering "woooo-ooo!" with her arms up, playful and funny, dry studio recording, no reverb.'
+- id: rumble
+  takes:
+  - file: rumble/01.mp3
+    prompt: 'a big old diesel bulldozer rolling slowly closer, engine chugging and clanking tracks, steady, close up'
+  - file: rumble/03.mp3
+    prompt: 'a big old diesel bulldozer rolling slowly closer, engine chugging and clanking tracks, steady, close up'
+  - file: rumble/05.mp3
+    prompt: 'a heavy cartoon bulldozer chugging along, puffing and rattling, from a 1970s Eastern European children''s cartoon, comic not menacing'
+- id: clunk
+  takes:
+  - file: clunk/03.mp3
+    prompt: 'a heavy machine tipping nose-first into a hole, a big hollow metal clunk and a soft thump of earth'
+  - file: clunk/07.mp3
+    prompt: 'a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh'
+  - file: clunk/09.mp3
+    prompt: 'a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh'

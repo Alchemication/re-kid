@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-01T11:43:27.579Z",
+ "saved": "2026-11-01T14:30:20.977Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1701,6 +1701,72 @@
    "folder": "krtek fox",
    "made": "2026-10-31",
    "sound": "krtek-snicker",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-rumble/01.mp3",
+   "source": "eleven",
+   "prompt": "a big old diesel bulldozer rolling slowly closer, engine chugging and clanking tracks, steady, close up",
+   "wording": 1,
+   "seed": 3,
+   "folder": "krtek bulldozer",
+   "made": "2026-11-01",
+   "sound": "krtek-rumble",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-rumble/03.mp3",
+   "source": "eleven",
+   "prompt": "a big old diesel bulldozer rolling slowly closer, engine chugging and clanking tracks, steady, close up",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek bulldozer",
+   "made": "2026-11-01",
+   "sound": "krtek-rumble",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-rumble/05.mp3",
+   "source": "eleven",
+   "prompt": "a heavy cartoon bulldozer chugging along, puffing and rattling, from a 1970s Eastern European children's cartoon, comic not menacing",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek bulldozer",
+   "made": "2026-11-01",
+   "sound": "krtek-rumble",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-clunk/07.mp3",
+   "source": "eleven",
+   "prompt": "a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh",
+   "wording": 3,
+   "seed": 1,
+   "folder": "krtek bulldozer",
+   "made": "2026-11-01",
+   "sound": "krtek-clunk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-clunk/09.mp3",
+   "source": "eleven",
+   "prompt": "a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek bulldozer",
+   "made": "2026-11-01",
+   "sound": "krtek-clunk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-clunk/03.mp3",
+   "source": "eleven",
+   "prompt": "a heavy machine tipping nose-first into a hole, a big hollow metal clunk and a soft thump of earth",
+   "wording": 1,
+   "seed": 3,
+   "folder": "krtek bulldozer",
+   "made": "2026-11-01",
+   "sound": "krtek-clunk",
    "verdict": "keep"
   }
  ]
