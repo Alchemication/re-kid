@@ -12,7 +12,9 @@
 // the meadow's far edge and down its own winding road to us, growing, sand
 // heaped along its edges (each play draws the road), until it stands half as
 // tall again as him, puffing, its blade shoving a heap of earth (Krtek a
-// buldozer 4:03-4:37), and turns to face his flowers. From a rack on its back
+// buldozer 4:03-4:37), felling the young trees that stood on its road, birds
+// bursting out of them (the film's bursts through a forest, 3:31), and turns
+// to face his flowers. From a rack on its back
 // it shoots red-and-white poles, thwip... ka-chunk, in a line marching
 // straight at his flowers. He knocks on the one by his flowers: hm? He looks
 // up at it and claps his hands to his face. It rolls to its first pole and
@@ -37,7 +39,7 @@
 // (things.js): a pole in his hands is stood up where he is, the bulldozer
 // stands where it was going, and the next tap carries on with it.
 
-/* global Clock, Debug, Layout, Mole, Motion, Sound, Things, View, World */
+/* global Clock, Debug, Layout, Mole, Motion, Painting, Sound, Things, View, World */
 ;(() => {
   const Y = Layout.GROUND
   // the line as the bulldozer shoots it, from just ahead of it to by his flowers...
@@ -53,6 +55,11 @@
   const KNOCKED = 'rotate(-74deg)' // a tulip a clod knocked over
   const CLOD_MS = 1500 // a clod rolling off its heap, across the meadow, into his tulips (each a little later)
   const HIT = 2 // the clods knock over this many of his tulips, at the bed's end nearest it
+  // young trees standing on the road it will make (planted as the play starts), felled as it comes: this
+  // many, at these points of its way (WIND_POINTS + 1 of them, far to near), drawn each play; birds in them
+  const SAPLINGS = { n: [1, 3], at: [5, 7, 9], birds: [1, 2], tall: 1.2 } // on the meadow's slope, not its edge (there, the edge hid its trunk); tall: against the bulldozer there
+  const FELL_MS = 550 // a young tree going over, crack
+  const BIRD = 0.6 // a bird in it, against the tree
   const SHOOT_EVERY_MS = 700 // the bulldozer shoots a pole this often…
   const SHOOT_MS = 750 // …each flying this long
   const RACK = { x: 22, y: -96 } // where they fly from: the rack on its back (its units)
@@ -105,7 +112,7 @@
   let dozer = null
   let far = null // the tiny bulldozer far off on the church's hill, coming down
   const random = Debug.random('meadow-dozer') // its own stream: the road's winding and its sand
-  const state = { x: 0, stuck: false, pit: false, path: null, hill: false, tumble: false, flat: [], knocked: [], recovering: false } // the bulldozer's place, whether it is in the pit, what it harmed
+  const state = { x: 0, stuck: false, pit: false, path: null, hill: false, tumble: false, flat: [], knocked: [], recovering: false, trees: [] } // the bulldozer's place, whether it is in the pit, what it harmed
   let scrape = null // the ground it tears up pushing on along the ground
   const scars = [] // its track, the pit and the heap, left behind on the meadow
   const m = () => Things.meadow
@@ -192,7 +199,7 @@
     dozer = drawDozer()
     syncRack() // poles a cut planted already are off its rack
     const [below, crest] = way()
-    state.path = winding(way())
+    state.path ||= winding(way()) // planted on as the play started
     dozer.style.transform = dozerAt(...below, -1) // coming down, it faces the way it goes: right
     state.x = DOZER.stop // where it is going: a cut leaves it there
     Debug.trace('bulldozer')
@@ -200,6 +207,7 @@
     scrapeIn(ground)
     Sound.rumble(COME_MS / 1000, RUMBLE.edge, RUMBLE.here) // over the edge and down to us: louder and louder
     const step = (COME_MS - ROAD.legs[0]) / (state.path.length - 1)
+    for (const t of state.trees) Clock.after(ROAD.legs[0] + t.i * step, () => fell(t)) // as it reaches each
     const near = (y) => y > Y - 30 // down on the meadow, in front
     return travel([
       [...crest, 'beyond', ROAD.legs[0], -1], // up over the meadow's far edge
@@ -409,6 +417,65 @@
       { transform: `translate(${x}px, ${Y + 4}px) scale(1) rotate(0deg)` },
     ], { duration: SHOOT_MS, easing: 'ease-in' })
     Sound.plink()
+  }
+
+  /** As the play starts: its road worked out already, and young trees standing on it, some with a bird or
+   * two in them (they were always there: then it comes, and fells them). */
+  function plant() {
+    state.path = winding(way())
+    const spots = [...SAPLINGS.at]
+    const n = SAPLINGS.n[0] + Math.floor(random() * (SAPLINGS.n[1] - SAPLINGS.n[0] + 1))
+    for (let k = 0; k < n; k++) {
+      const i = spots.splice(Math.floor(random() * spots.length), 1)[0]
+      const [x, y, size] = state.path[i]
+      const layer = document.getElementById(y < Y - 30 ? 'far-things' : 'things')
+      const g = el('g', { class: 'sapling', transform: `translate(${x} ${y}) scale(${size * SAPLINGS.tall})` })
+      layer.insertBefore(g, layer.firstChild) // behind what comes on the road
+      const body = drawSapling(g, size * SAPLINGS.tall)
+      const birds = Array.from({ length: SAPLINGS.birds[0] + Math.floor(random() * (SAPLINGS.birds[1] - SAPLINGS.birds[0] + 1)) }, (_, b) => drawBird(g, b ? 30 : -24, b ? -150 : -186))
+      state.trees.push({ g, body, birds, i, x, size, side: random() < 0.5 ? -1 : 1, felled: false })
+    }
+  }
+
+  /** A young tree, its foot at 0, 0, painted as the meadow's trees are (Painting.tree), shown `big` times over. */
+  function drawSapling(g, big) {
+    const body = el('g', { class: 'sapling-body' }, g)
+    Painting.tree(body, [120, 120], 110, random, big)
+    return body
+  }
+
+  /** A little bird (a bullfinch, as at the spring) sitting at x, y in the tree. */
+  function drawBird(g, x, y) {
+    const b = el('g', { class: 'sapling-bird', transform: `translate(${x} ${y}) scale(${BIRD})` }, g)
+    el('ellipse', { cx: 0, cy: 0, rx: 13, ry: 10, fill: '#5f6a72', stroke: '#15140f', 'stroke-width': 2 }, b)
+    el('path', { d: 'M-9 2 Q0 12 9 2 Q4 -2 -9 2 Z', fill: '#e0453a' }, b)
+    el('circle', { cx: 9, cy: -8, r: 7, fill: '#15140f' }, b)
+    el('path', { d: 'M15 -8 l6 2 l-6 2 z', fill: '#2b2b2b' }, b)
+    el('path', { d: 'M-12 -2 l-10 -4 l2 6 z', fill: '#15140f' }, b)
+    return b
+  }
+
+  /** It reaches young tree t: crack, over it goes, sideways, and its birds burst out and away off the side. */
+  function fell(t, now = false) {
+    if (t.felled) return
+    t.felled = true
+    t.body.style.transformOrigin = '0px 0px'
+    const over = `rotate(${t.side * 84}deg)`
+    if (now) t.body.style.transform = over
+    else {
+      Sound.crack()
+      Debug.trace('felled', { x: Math.round(t.x) })
+      if (!state.trees.some((o) => o !== t && o.felled)) Sound.say('gasp') // the first: he sees what it does
+      Debug.ignoreCut(Motion.endAt(t.body, [{ transform: 'rotate(0deg)' }, { transform: over }], { duration: FELL_MS, easing: 'ease-in' }), 'a young tree felled')
+    }
+    for (const [k, b] of t.birds.entries()) {
+      const away = (k % 2 ? 1 : -1) * t.side // off to the sides, out of sight: they leave the way birds do
+      const from = b.getAttribute('transform').match(/-?[\d.]+/g).map(Number)
+      b.removeAttribute('transform')
+      Motion.endAt(b, [{ transform: `translate(${from[0]}px, ${from[1]}px) scale(${BIRD})` }, { transform: `translate(${from[0] + away * 900}px, ${from[1] - 500}px) scale(${BIRD * 0.6})` }], { duration: now ? 1 : 1400, easing: 'ease-in' })
+        .then(() => b.remove(), () => b.remove())
+    }
+    t.birds = []
   }
 
   /** It arrives: a rumble from off the right. The poles wait, unseen, to be shot; it won't wait for a
@@ -719,6 +786,7 @@
     state.recovering = true
     for (const g of state.flat) Debug.ignoreCut(Motion.endAt(g, [{ transform: FLAT }, { transform: UP }], { duration: SCAR_MS, easing: 'ease-in' }), 'a wild flower coming up')
     for (const t of state.knocked) if (!t.up) Debug.ignoreCut(Motion.endAt(t.bend, [{ transform: KNOCKED }, { transform: 'rotate(0deg)' }], { duration: SCAR_MS, easing: 'ease-in' }), 'a tulip coming up')
+    for (const t of state.trees) if (t.felled) Debug.ignoreCut(Motion.endAt(t.body, [{ transform: `rotate(${t.side * 84}deg)` }, { transform: 'rotate(0deg)' }], { duration: SCAR_MS, easing: 'ease-in' }), 'a young tree standing up')
   }
 
   /** He goes to his knocked-over tulips and stands each up again, gently: it springs up. Then, glad. */
@@ -783,6 +851,7 @@
     restoreFlowers()
     if (dozer) {
       for (const e of [dozer, ...dozer.querySelectorAll('.heap, .hull')]) e.getAnimations().forEach((a) => a.cancel())
+      for (const t of state.trees) fell(t, true) // it passed them all, on its way to where it stands
       document.getElementById('things').appendChild(dozer) // back on the meadow, where it was going
       dozer.style.transform = dozerAt(state.x)
       dozer.querySelector('.hull').style.transform = state.stuck ? `rotate(${DIVE.deg}deg) translateY(${DIVE.dy}px)` : ''
@@ -812,6 +881,10 @@
       e.getAnimations().forEach((a) => a.cancel())
       e.style.transform = '' // and every flower up
     }
+    for (const t of state.trees) {
+      t.body.getAnimations().forEach((a) => a.cancel())
+      t.body.style.transform = '' // bent, not broken: up again
+    }
     state.flat = []
     state.knocked = []
     state.recovering = false
@@ -825,6 +898,7 @@
     trouble: [0, 8], // from its rumble till it is gone: the bed uneasy, and no glad theme…
     music: { 8: 'happy' }, // …until he stands his tulips up again
     appear,
+    plant,
     steps: [farOff, comesIn, shootsLine, notice, crush, throwOne, pit, away, mend],
     restore,
     night,

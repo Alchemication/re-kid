@@ -18,7 +18,8 @@ const Painting = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const RES = [0.75, 1.5] // canvas pixels per scene unit: as sharp as the screen shows the scene, within this (memory: the back is 4000 units wide)
   const OPEN = { from: 1400, to: 2080 } // the poles' hill: open grass, nothing tall where they land far off (poles.js FAR)
-  const random = Debug.random('meadow-painting') // its own stream: so many draws must not shift the others
+  let random = Debug.random('meadow-painting') // its own stream: so many draws must not shift the others (tree() lends another)
+  const GREENS = [['#244529', '#335c34', '#4a7843', '#6d9a58', '#a2c47e'], ['#33491b', '#476a27', '#62893a', '#86a94f', '#bccd77'], ['#22443a', '#345f4d', '#4f8068', '#76a48a', '#a9cbb2']] // the leaves' tones, dark to light
   const r = (a = 1, b) => (b == null ? random() * a : a + random() * (b - a))
   const pick = (list) => list[Math.floor(random() * list.length)]
   let res = 1
@@ -367,7 +368,7 @@ const Painting = (() => {
   function back(ctx) {
     const W = Layout.WORLD_W
     const edge = 628 // where the meadow meets the bushes
-    const greens = [['#244529', '#335c34', '#4a7843', '#6d9a58', '#a2c47e'], ['#33491b', '#476a27', '#62893a', '#86a94f', '#bccd77'], ['#22443a', '#345f4d', '#4f8068', '#76a48a', '#a9cbb2']]
+    const greens = GREENS
     // the forest's edge at the left, a few trees and bushes along the rest, none on the poles' hill
     for (let x = -60; x < W + 60; x += r(70, 150)) {
       if (open(x)) continue
@@ -489,5 +490,22 @@ const Painting = (() => {
     if (cloudImg) cloudImg.style.opacity = String(Math.max(0, Math.min(1, light)))
   }
 
-  return { paint, cloudsAt }
+  /** A young tree painted as the meadow's are (leaf stars on a thin trunk), its foot at 0, 0, as an image in
+   * `parent`: for a tree that must move (the bulldozer fells them: poles.js). Crown [w, h] over a trunk
+   * this tall; painted `sharp` times finer (it is shown that much bigger), drawn from `stream` so it shifts
+   * nothing else. */
+  function tree(parent, [w, h], trunk, stream, sharp = 1) {
+    const [was, wasRes] = [random, res]
+    random = stream
+    res *= sharp
+    try {
+      const tones = pick(GREENS)
+      return place(parent, layer(-w / 2 - 20, -(trunk + h) - 20, w + 40, trunk + h + 40, (ctx) => leafy(ctx, 0, 0, [w, h], tones, trunk)))
+    } finally {
+      random = was
+      res = wasRes
+    }
+  }
+
+  return { paint, cloudsAt, tree }
 })()

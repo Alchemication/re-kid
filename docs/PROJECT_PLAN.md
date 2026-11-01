@@ -127,9 +127,11 @@ decided and why.
       up its road, it backs out and trundles off after it. Its harm, after
       the film's (3:25-4:10): its blade flattens the wild flowers in its
       way, clods off its heap knock over two of his tulips, its rumble
-      scares the creatures off; once it has gone he stands his tulips up,
+      scares the creatures off, and it fells the young trees standing on
+      its road (painted as the meadow's; one to three a play, birds
+      bursting out of them); once it has gone he stands his tulips up,
       and the wild flowers come up slowly by themselves, or at once if the
-      rain cloud comes. An uneasy bed
+      rain cloud comes; the trees stand up again slowly. An uneasy bed
       holds while it is here, the glad theme only once it is gone (the
       fox the same, till the monster). About 50 s: judge whether it is
       too long, whether the rule reads, and the uneasy bed by ear. A quiet spell (`REST_HOURS`, about 30 s) after each encounter,
@@ -392,7 +394,10 @@ scene:
   `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]` and `[car]`,
   `test_a_tap_on_the_egg_while_waiting`, `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`,
   `TestMeadowStorm::test_a_storm_coming_breaks_off_his_play_and_he_goes_for_the_umbrella`
-  (2026-11-01, a 27-minute run; both passed 3 of 3 alone);
+  (2026-11-01, a 27-minute run; both passed 3 of 3 alone), and the same
+  for the bulldozer, `TestMeadowBulldozer::test_it_breaks_off_his_play`
+  (2026-11-01: he went 3.1 s after it came, the still-waking delay;
+  passed 3 of 3 alone);
   the yard's `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`.
   `test_look.py::test_photographs_a_gesture_until_it_ends` failed once more
   after the fix below (2026-10-31, load 85+), and passed alone and 8 at once.

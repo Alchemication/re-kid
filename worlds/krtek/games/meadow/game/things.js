@@ -18,6 +18,9 @@
 // An encounter registers itself (Things.add) with:
 //   name, offer ('help', 'helped' or 'discover'),
 //   appear(): it arrives (drawn, with its entrance),
+//   plant (optional): () => …, what stands there all day before it comes,
+//     drawn as the play starts if it comes this play (the bulldozer's young
+//     trees on the road it will make: nothing from nowhere),
 //   steps: async functions (alive) => …, each one beat of the chain; they
 //     return early once alive() is false (cut short),
 //   restore(): after a cut, put everything it moved back in a state the
@@ -135,6 +138,7 @@ const Things = (() => {
   function setup(meadow) {
     api = meadow
     plan = choose(Object.values(all), Debug.random('things'), Layout.flags)
+    for (const p of plan) all[p.name].plant?.()
     Debug.trace('things', { plan: plan.map((p) => `${p.name}@${p.at}`).join(' ') })
     return plan.map((p) => p.name)
   }
