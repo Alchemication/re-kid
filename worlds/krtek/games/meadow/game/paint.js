@@ -452,7 +452,7 @@
   Things.add({
     name: 'paint',
     offer: 'helped',
-    music: { 1: 'hush', 5: 'happy' }, // the fox: a fright, the effects lead; the monster sends it off
+    music: { 1: 'menace', 5: 'happy' }, // the fox: a short uneasy turn, then the effects lead; the monster sends it off
     appear,
     steps: [curious, foxComes, tumble, ghost, friendsPaint, monster, wash],
     again: retold,

@@ -35,7 +35,7 @@ class TuneTake(Model):
 class Tune(Model):
     """One part of the day's music, and the takes it plays from."""
 
-    id: Literal["morning", "phrase", "curious", "sad", "happy", "lullaby"] = Field(
+    id: Literal["morning", "phrase", "curious", "sad", "happy", "menace", "lullaby"] = Field(
         description=(
             "The part in the game's music.js (its PARTS): 'morning' as he "
             "wakes; 'phrase' now and then through the day (the yard); the "

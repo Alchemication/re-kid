@@ -38,7 +38,7 @@
 //   urgent (optional): weather that won't wait for a tap (the storm): as
 //     it arrives he drops whatever he is doing and sees to it at once,
 //     unless he is still waking, or in a ?still play (Adam, 2026-10-31),
-//   music (optional): { [step]: 'sad' | 'happy' | 'hush' }, the music's
+//   music (optional): { [step]: 'sad' | 'happy' | 'menace' | 'hush' }, the music's
 //     moment as that step starts (music.js: the theme sad at its trouble,
 //     happy as it comes right, stepping back at a fright). The theme comes
 //     curious as any encounter arrives, and happy as it is done unless a

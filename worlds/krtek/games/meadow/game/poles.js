@@ -61,6 +61,7 @@
   const WIND_POINTS = 14 // its winding way down: this many turns of the wheel
   const SWERVE = 34 // how far it swerves from the straight way, at its size 1 (each play draws a bit more or less)
   const SAND = '#b98a4e' // the sand it heaps up along the road
+  const RUMBLE = { far: 0.18, edge: 0.4, here: 1 } // how loud its engine, far off on the hill, at the meadow's edge, here
   const FINER = 4 // its road is torn up in this many pieces to each leg it drives: close behind it
   const SAND_R = 22 // a heap of sand's half width, at its size 1 (each draws its own, mostly small)
   // the church's hill far off (church.js; the distant layer's units): out from behind the church its
@@ -178,7 +179,7 @@
     Debug.trace('bulldozer')
     const ground = road(finer(state.path), { into: document.getElementById('far-things'), start: ROAD.legs[0], step: (COME_MS - ROAD.legs[0]) / (state.path.length - 1) / FINER })
     scrapeIn(ground)
-    Sound.rumble(COME_MS / 1000)
+    Sound.rumble(COME_MS / 1000, RUMBLE.edge, RUMBLE.here) // over the edge and down to us: louder and louder
     const step = (COME_MS - ROAD.legs[0]) / (state.path.length - 1)
     const near = (y) => y > Y - 30 // down on the meadow, in front
     return travel([
@@ -331,7 +332,7 @@
     far = drawDozer(into)
     into.insertBefore(far, church) // it comes out from behind the church
     far.style.transform = dozerAt(...points[0], -1)
-    Sound.rumble(1.5)
+    Sound.rumble(HILL.ms / 1000, RUMBLE.far, RUMBLE.edge) // far off: faint, a little louder as it comes down
     try {
       for (let n = 1; n < points.length; n++) {
         const [x, y, size] = points[n]
@@ -388,7 +389,7 @@
       stand(p, x, Y + 4, 1, 'things') // where it ends, so a cut (restore) leaves it planted…
       wrap.style.visibility = 'hidden' // …until it is shot
     })
-    Sound.rumble(1.2) // short: over before it rolls in, so it doesn't swallow that rumble
+    Sound.rumble(1.2, RUMBLE.far) // something far off: faint, and over before it comes
   }
 
   /** The rack on its back shows the poles still to be shot (a cut plants them all at once). */
@@ -405,6 +406,7 @@
     await m().goTo(WATCH_X)
     if (!alive()) return
     m().frame(DOZER.stop) // the view between him and where it will stand, so the child sees it come
+    if (!state.hill) m().music('menace') // trouble coming: a short uneasy turn, then the rumble leads
     await overTheHill()
   }
 
@@ -571,7 +573,7 @@
       if (!alive()) return
     }
     leaveScars()
-    Sound.rumble(4)
+    Sound.rumble(4, RUMBLE.here, RUMBLE.far) // going away: fainter and fainter
     const cheering = (async () => {
       await Mole.cheer()
       if (alive()) await Mole.cheer()

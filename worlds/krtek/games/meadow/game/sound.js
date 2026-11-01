@@ -94,29 +94,44 @@ const Sound = (() => {
    * turn (inTurn: in the order listed, each at its own pitch) or one at
    * random, a little higher or lower; over the last one if it `overlaps`,
    * else not until that one ends. `fade`: [from, over] seconds, so it dies
-   * away however long the take rings. Played, or still playing: true. */
-  function recorded(name, fade = null) {
+   * away however long the take rings. `swell`: [from, to], its loudness
+   * (times its own) growing or dying from the one to the other until it
+   * fades; `loop`: played over and over until the fade, for a sound called
+   * for longer than its takes. Played, or still playing: true. */
+  /** The next take of a sound, to play: in turn at its own pitch, or one at random, a little higher or lower. */
+  function source(e, decoded) {
+    const i = e.inTurn ? (e.last = (e.last + 1) % decoded.length) : another(e, decoded.length)
+    const src = ctx.createBufferSource()
+    src.buffer = decoded[i]
+    src.playbackRate.value = e.inTurn ? 1 : VOICE_RATE[0] + Math.random() * (VOICE_RATE[1] - VOICE_RATE[0])
+    return src
+  }
+
+  /** How loud a take plays from t: `level`, swelling from swell[0] to swell[1] (times it) until it fades. */
+  function envelope(gain, level, t, fade, swell) {
+    const [from, to] = swell || [1, 1]
+    gain.setValueAtTime(level * from, t)
+    if (!fade) return
+    gain.linearRampToValueAtTime(level * to, t + fade[0])
+    gain.exponentialRampToValueAtTime(level * to * FADE_S, t + fade[0] + fade[1])
+  }
+
+  function recorded(name, fade = null, { swell = null, loop = false } = {}) {
     if (!ready()) return false
     const e = takes[name]
     const decoded = e ? e.buffers.filter(Boolean) : []
     if (!decoded.length) return false
     if (ctx.currentTime < e.until && !e.overlaps) return true
-    const i = e.inTurn ? (e.last = (e.last + 1) % decoded.length) : another(e, decoded.length)
-    const src = ctx.createBufferSource()
-    src.buffer = decoded[i]
-    src.playbackRate.value = e.inTurn ? 1 : VOICE_RATE[0] + Math.random() * (VOICE_RATE[1] - VOICE_RATE[0])
+    const src = source(e, decoded)
     const g = ctx.createGain()
     const level = EFFECT_VOLUME * e.gain
     const t = ctx.currentTime
-    g.gain.setValueAtTime(level, t)
-    if (fade) {
-      g.gain.setValueAtTime(level, t + fade[0])
-      g.gain.exponentialRampToValueAtTime(level * FADE_S, t + fade[0] + fade[1])
-    }
+    envelope(g.gain, level, t, fade, swell)
+    src.loop = loop && !!fade // only with an end to it
     src.connect(g).connect(master)
     src.start()
     if (fade) src.stop(t + fade[0] + fade[1])
-    const length = src.buffer.duration / src.playbackRate.value
+    const length = src.loop ? Infinity : src.buffer.duration / src.playbackRate.value
     e.until = t + (fade ? Math.min(length, fade[0] + fade[1]) : length) // cut short and faded: over when it stops
     return true
   }
@@ -302,10 +317,12 @@ const Sound = (() => {
 
   const RUMBLE_FADE = 0.6 // a recorded rumble, played for less than its take: faded out over this long
 
-  /** The bulldozer, rolling: its engine for a few seconds, recorded, or a soft low rumble. */
-  function rumble(seconds) {
-    if (!ready() || recorded('rumble', [Math.max(0, seconds - RUMBLE_FADE), RUMBLE_FADE])) return
-    for (let t = 0; t < seconds; t += 0.25) hiss(t, 0.3, 110 + Math.random() * 40, 1.2, 0.05)
+  /** The bulldozer, rolling: its engine for `seconds` (its takes over and over, if it rolls longer),
+   * recorded, or a soft low rumble; `from`, `to`: how loud as it starts and ends (far off, faint;
+   * coming closer, louder). */
+  function rumble(seconds, from = 1, to = from) {
+    if (!ready() || recorded('rumble', [Math.max(0, seconds - RUMBLE_FADE), RUMBLE_FADE], { swell: [from, to], loop: true })) return
+    for (let t = 0; t < seconds; t += 0.25) hiss(t, 0.3, 110 + Math.random() * 40, 1.2, 0.05 * (from + ((to - from) * t) / seconds))
   }
 
   /** The bulldozer tipping nose-first into the pit: a heavy clunk, recorded, or a low thud. */

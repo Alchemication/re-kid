@@ -576,7 +576,8 @@ class TestMeadowMusic:
         m.do("use paint")
         m.wait("meadowGame.state().things.paint === 'step 1'")
         m.page.wait_for_timeout(1500)  # the fade
-        assert m.page.evaluate("meadowGame.music()") is None, "music over the fox"
+        # the theme stops; at most the short uneasy turn (menace), once it has takes
+        assert m.page.evaluate("meadowGame.music()") in (None, "menace"), "music over the fox"
         finish(m, "paint")
         assert m.page.evaluate(MUSIC)[-1] == "happy"
         assert not m.errors, m.errors

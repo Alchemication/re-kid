@@ -288,4 +288,26 @@ PIECES: dict[str, dict] = {
             "the same gentle meadow theme, now joyful and triumphant: fuller and brighter, strings and flute together, as everything turns out well in the end",
         ],
     },
+    # 2026-11-01: trouble comes (the bulldozer over the hill, the fox): a
+    # short uneasy turn of the theme as it first appears, then the music
+    # steps back and its sounds lead (Adam's pick, against the films' plain
+    # quiet). A little ominous for small children, never frightening; no
+    # tiptoe pizzicato or bassoon jokes (Reksio's).
+    "meadow-menace": {
+        "world": "krtek",
+        "for": "Trouble coming (the bulldozer winding down the hill, the fox): a few seconds of the meadow's music gone uneasy, then quiet. Listen for: a little ominous, still the meadow's (flute, strings, calm), never frightening for a toddler.",
+        "parts": ["menace", "menace", "menace"],  # by wording
+        "seconds": 8,
+        # not grown from meadow-theme/01: its song id is not found under the
+        # account the current key belongs to (404, 2026-11-01)
+        "models": ["music_v1", "music_v2_5"],
+        "takes": 2,
+        "style": False,
+        "prompts": [
+            "A short uneasy instrumental moment for a calm, nature-filled children's animated film: slow and low, in a minor key, a dark clarinet over soft low strings, as something big comes over the hill. Mysterious but never frightening.",
+            "A few seconds of gentle suspense in a children's cartoon about a sunny meadow: slow low strings and a hushed flute, a held breath, a shadow passing over the grass. Soft enough for small children.",
+            "A brief, slightly menacing musical hint for a small animal's meadow in a children's film: deep slow strings and a low muted horn, a big machine rumbling closer, suspenseful but not scary, then fading.",
+        ],
+    },
+
 }

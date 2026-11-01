@@ -56,7 +56,8 @@ by ear.
   | An encounter starts | more curious |
   | Someone needs help | sad, gently, never frightening |
   | Help works | back fuller and happier: the moment the music swells |
-  | Trouble (the fox, a fright) | the music steps back, effects lead |
+  | Trouble coming (the bulldozer, the fox) | a short uneasy turn (menace), then the music steps back and its sounds lead |
+  | A fright | the music steps back, effects lead |
   | Dusk to sleep | the cricket's fiddle, not the theme |
   | Next morning (the start) | the theme fades back in |
 
@@ -109,3 +110,10 @@ by ear.
     0.58), on its pulse and in its major keys, even the sad ones. Adam
     kept them anyway; our reading is that this closeness is what the
     films do with their theme.
+- **2026-11-01, trouble.** Adam asked for "a little bit scary motif" as
+  the bulldozer arrives, reusable across gags. Told that the films go
+  quiet when trouble comes, he chose a short motif, then quiet (over
+  just the rumble, or a motif under the whole arrival). Its takes could
+  not be grown from `meadow-theme/01`: its song id is not found under
+  the current key (404), so they are worded from the meadow's style
+  (`pieces.py` `meadow-menace`, board folder "krtek menace").

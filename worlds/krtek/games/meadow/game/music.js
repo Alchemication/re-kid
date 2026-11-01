@@ -4,12 +4,13 @@
 // - the morning: the meadow's theme as he comes up;
 // - an encounter: the theme curious as it arrives, sad at its trouble,
 //   happy as it comes right (things.js; each encounter says at which of its
-//   steps). At a fright (the fox) the music steps back and the effects
-//   lead, as the films go quiet when trouble comes;
+//   steps). When trouble comes (the bulldozer over the hill, the fox), a
+//   short uneasy turn (menace, Adam 2026-11-01), then the music steps back
+//   and the effects lead, as the films go quiet when trouble comes;
 // - from dusk, the cricket's fiddle, one take after another until the
 //   circle closes.
-// A mood plays over quiet, or cuts short a weaker one (happy over sad over
-// curious over the morning), never the same or a stronger one.
+// A mood plays over quiet, or cuts short a weaker one (menace over happy
+// over sad over curious over the morning), never the same or a stronger one.
 // Between takes, a quiet bed (beds.js: harp, flute, birds, violins, in the
 // takes' key and pulse; ensemble.js plays it) steps back under each take
 // and comes back after; the game says the moment and how busy the child is
@@ -22,8 +23,8 @@ const Music = (() => {
   const TAKE_VOLUME = 0.8 // each take (levelled when packed)
   const LEAD_S = 0.15 // a take starts this long after it is asked for
   const CRICKET_GAP_S = 0.6 // between one of the cricket's takes and the next
-  const RANK = { morning: 0, curious: 1, sad: 2, happy: 3 } // a mood cuts short only a weaker one
-  const PARTS = ['morning', 'curious', 'sad', 'happy', 'lullaby'] // the parts it plays (tunes.yaml)
+  const RANK = { morning: 0, curious: 1, sad: 2, happy: 3, menace: 4 } // a mood cuts short only a weaker one
+  const PARTS = ['morning', 'curious', 'sad', 'happy', 'menace', 'lullaby'] // the parts it plays (tunes.yaml)
 
   let takes = null // the takes' player (takes.js)
   let band = null // the samples and the bed (ensemble.js)
@@ -65,9 +66,10 @@ const Music = (() => {
   }
 
   /**
-   * An encounter's moment: 'curious', 'sad' or 'happy' (a take of that
-   * mood, if it wins over what plays), or 'hush' (a fright: what plays
-   * fades and the effects lead).
+   * An encounter's moment: 'curious', 'sad', 'happy' or 'menace' (a take
+   * of that mood, if it wins over what plays; trouble coming: a short uneasy
+   * turn, then quiet), or 'hush' (a fright: what plays fades and the
+   * effects lead). A mood with no takes yet fades what plays, as a hush.
    */
   function cue(part) {
     if (!loading || night) return // no tap yet: no sound
