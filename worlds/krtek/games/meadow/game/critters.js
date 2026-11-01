@@ -57,7 +57,7 @@ const Critters = (() => {
     feeds: 'nectar',
     hungerMs: [3000, 9000], // from one flower to wanting the next
     feedMs: [1500, 3500], // settled on a flower, this long
-    startledBy: ['vroom', 'splash'], // not the bell, nor his words: he says "ooh" at them
+    startledBy: ['vroom', 'splash', 'rumble'], // not the bell, nor his words: he says "ooh" at them; the bulldozer, yes
     band: [420, 690], // how high it wanders (scene y): over the grass, among the flowers
     roam: 900,
     curious: 0.3, // this share of its wanders take it to him, standing free, to look at him (meadow.js)
@@ -66,7 +66,7 @@ const Critters = (() => {
     speed: 12, flee: 1, turn: 2, // a crawl
     stayMs: [90000, 90000], // as long as the grass stays wet: the wet sends it home first
     hours: [8.3, 19], dark: 0.3, wet: 'likes',
-    startledBy: ['vroom', 'splash'], freezeMs: [3000, 5000], // into its shell
+    startledBy: ['vroom', 'splash', 'rumble'], freezeMs: [3000, 5000], // into its shell
     band: [700, 706], roam: 220, // along the top of the grass, shell and all showing
   }
   const SNAIL_HAUNT = 260 // it keeps this near its shelter: out from among the stems, where it shows
@@ -78,7 +78,7 @@ const Critters = (() => {
     hours: [0, 20], // home into the grass at bedtime (day.js END), as the circle closes
     dark: 0, bright: 0.45, // out only in the dim: from about 19:10, as the cricket starts, or an eclipse
     wet: 'avoid',
-    startledBy: ['vroom', 'splash'], dart: 90, // a splash: off a little way, and on it drifts
+    startledBy: ['vroom', 'splash', 'rumble'], dart: 90, // a splash: off a little way, and on it drifts
     band: [560, 690], roam: 280, // low over the grass, below his head and up to it
     pauseMs: [800, 2400], // hanging still in the air a moment
   }

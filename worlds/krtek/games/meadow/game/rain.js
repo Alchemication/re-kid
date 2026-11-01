@@ -51,7 +51,7 @@
     for (let i = 0; i < FLOWERS; i++) {
       const x = PATCH.x - PATCH.w / 2 + (i * PATCH.w) / (FLOWERS - 1)
       const top = Y - 78 - (i % 3) * 18
-      const g = el('g', { class: 'wild-flower', 'data-thing': 'rain' }, layer)
+      const g = el('g', { class: 'wild-flower', 'data-thing': 'rain', 'data-x': x }, layer) // data-x: for what flattens it (poles.js)
       const sway = el('g', { class: 'sway' }, g) // leans in the wind (weather.js); g droops
       sway.style.transformOrigin = `${x}px ${Y + 6}px`
       el('path', { d: `M${x} ${Y + 6} Q${x + 5} ${(Y + top) / 2} ${x} ${top}`, stroke: '#3f7d22', 'stroke-width': 5, fill: 'none' }, sway)
@@ -70,7 +70,11 @@
   }
 
   /** The flowers droop (k = 1) or stand up (0): each bends over from its foot. */
-  const droop = (f, k, ms) => Motion.endAt(f.g, [{ transform: `rotate(${k * 38}deg) scaleY(${1 - k * 0.12})` }], { duration: ms, easing: 'ease-out' })
+  function droop(f, k, ms) {
+    const from = getComputedStyle(f.g).transform // from as it is (Motion.endAt sets the end first, so a start must be given)
+    f.g.getAnimations().forEach((a) => a.cancel()) // flattened by the bulldozer and coming up slowly (poles.js): the rain takes over
+    return Motion.endAt(f.g, [{ transform: from === 'none' ? 'rotate(0deg) scaleY(1)' : from }, { transform: `rotate(${k * 38}deg) scaleY(${1 - k * 0.12})` }], { duration: ms, easing: 'ease-out' })
+  }
 
   function drawCloud() {
     const g = el('g', { class: 'rain-cloud', 'data-thing': 'rain' }, document.getElementById('things'))

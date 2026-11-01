@@ -47,7 +47,7 @@ const Spring = (() => {
     stayMs: [3000, 5000], // over by the time it has drunk: down, a drink, and off (a drink under way is always finished)
     hours: [8.4, NIGHT_FROM], dark: 0.5, wet: 'avoid',
     feeds: 'drink', hungerMs: [0, 0], feedMs: [2200, 3000], // comes thirsty; two dips
-    startledBy: ['bell', 'splash', 'vroom'],
+    startledBy: ['bell', 'splash', 'vroom', 'rumble'],
     band: [POOL.y - 320, POOL.y - 160], roam: 1400, // sees the pool from out of sight
     haunt: [POOL.x - 700, POOL.x + 700],
   }
@@ -55,7 +55,7 @@ const Spring = (() => {
     speed: 260, flee: 2, turn: 7, blown: 0.3, // a dart, quick to turn; a gust nudges it
     stayMs: [6000, 11000],
     hours: [8.4, NIGHT_FROM], dark: 0.5, wet: 'avoid',
-    startledBy: ['splash'],
+    startledBy: ['splash', 'rumble'],
     band: [POOL.y - 110, POOL.y - 40], roam: 300, // low over the water
     haunt: [POOL.x - POOL.rx * 0.8, POOL.x + POOL.rx * 0.8],
     pauseMs: [500, 1300], // hovering

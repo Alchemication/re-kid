@@ -16,7 +16,10 @@
 // it shoots red-and-white poles, thwip... ka-chunk, in a line marching
 // straight at his flowers. He knocks on the one by his flowers: hm? He looks
 // up at it and claps his hands to his face. It rolls to its first pole and
-// flattens it under its tracks: he winces. He pulls out the next and throws
+// flattens it under its tracks, and the wild flowers in its way; clods roll
+// off its heap across the meadow and knock over two of his tulips (the
+// film's clods bowl over the cricket, 3:58-4:04): ach jo. The harm is why
+// the child wants it gone (Adam, 2026-11-01). He pulls out the next and throws
 // it far up the hill: the bulldozer stops dead, puzzled, then turns on the
 // last, by his flowers, and comes on. He dives into the ground in its path
 // and digs a pit, and it nose-dives in, stuck, tracks spinning (the film's
@@ -24,15 +27,17 @@
 // he tumbles over, and it flies off by itself) and throws it far up the
 // bulldozer's own road; and the bulldozer, true to its rule, backs out and
 // trundles off after it, up its road, smaller and smaller, and over the far
-// edge, and he cheers. Its roads, the pit and the heap green over in about a
-// minute. All the while it is here the bed is uneasy (things.js `trouble`);
-// the glad theme comes only once it is gone.
+// edge, and he cheers. Then he stands his tulips up again, one by one, and the
+// glad theme comes. The wild flowers come up slowly by themselves, with its
+// roads, the pit and the heap greening over, in about a minute; sooner, if
+// the rain cloud comes and rains on them (rain.js). All the while it is here
+// the bed is uneasy (things.js `trouble`).
 //
 // A tap on a pole or on him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
 // (things.js): a pole in his hands is stood up where he is, the bulldozer
 // stands where it was going, and the next tap carries on with it.
 
-/* global Clock, Debug, Layout, Mole, Motion, Sound, Things, View */
+/* global Clock, Debug, Layout, Mole, Motion, Sound, Things, View, World */
 ;(() => {
   const Y = Layout.GROUND
   // the line as the bulldozer shoots it, from just ahead of it to by his flowers...
@@ -43,6 +48,11 @@
   const UP_ROAD = 0.35
   const FLAT_MS = 450 // the pole toppling under it
   const TUMBLE = 0.5 // in this share of plays the last pole is stuck, pops, and he tumbles over
+  const UP = 'rotate(0deg) scaleY(1)' // a flower standing
+  const FLAT = 'rotate(-82deg) scaleY(0.8)' // a wild flower its blade went over: pushed flat, away from it
+  const KNOCKED = 'rotate(-74deg)' // a tulip a clod knocked over
+  const CLOD_MS = 1500 // a clod rolling off its heap, across the meadow, into his tulips (each a little later)
+  const HIT = 2 // the clods knock over this many of his tulips, at the bed's end nearest it
   const SHOOT_EVERY_MS = 700 // the bulldozer shoots a pole this often…
   const SHOOT_MS = 750 // …each flying this long
   const RACK = { x: 22, y: -96 } // where they fly from: the rack on its back (its units)
@@ -66,7 +76,7 @@
   const WIND_POINTS = 14 // its winding way down: this many turns of the wheel
   const SWERVE = 34 // how far it swerves from the straight way, at its size 1 (each play draws a bit more or less)
   const SAND = '#b98a4e' // the sand it heaps up along the road
-  const RUMBLE = { far: 0.18, edge: 0.4, here: 1 } // how loud its engine, far off on the hill, at the meadow's edge, here
+  const RUMBLE = { far: 0.18, edge: 0.4, here: 1, reach: 900 } // how loud its engine, far off on the hill, at the meadow's edge, here; how far off on the meadow creatures hear it
   const FINER = 4 // its road is torn up in this many pieces to each leg it drives: close behind it
   const SAND_R = 22 // a heap of sand's half width, at its size 1 (each draws its own, mostly small)
   // the church's hill far off (church.js; the distant layer's units): out from behind the church its
@@ -82,7 +92,7 @@
     size: [0.1, 0.17], // the bulldozer up there, top and bottom
     depth: 3, // its road there drawn this much deeper than its size gives: up there, a hair's breadth was lost
     rise: 900, // up over the crest…
-    ms: 6000, // …and all the way down
+    ms: 4000, // …and all the way down (quick: the meadow's part is the show, Adam 2026-11-01)
   }
   const PIT_X = 1540 // where he digs the pit, in its path: between the bulldozer (its blade, CRUSH_AT, just clear of it) and the last pole, by his flowers
   const DIVE = { deg: -9, dy: 8 } // nose down into the pit (at its size, a few degrees take the blade well down)
@@ -95,7 +105,7 @@
   let dozer = null
   let far = null // the tiny bulldozer far off on the church's hill, coming down
   const random = Debug.random('meadow-dozer') // its own stream: the road's winding and its sand
-  const state = { x: 0, stuck: false, pit: false, path: null, hill: false, tumble: false } // the bulldozer's place and whether it is in the pit
+  const state = { x: 0, stuck: false, pit: false, path: null, hill: false, tumble: false, flat: [], knocked: [], recovering: false } // the bulldozer's place, whether it is in the pit, what it harmed
   let scrape = null // the ground it tears up pushing on along the ground
   const scars = [] // its track, the pit and the heap, left behind on the meadow
   const m = () => Things.meadow
@@ -157,6 +167,8 @@
     state.x = x
     m().frame(x) // kept in sight with him
     scrapeTo(x, ms)
+    flattenUnder(from - NOSE, x - NOSE, ms)
+    World.noise('rumble', x, RUMBLE.reach) // the meadow's creatures flee it (critters.js, spring.js)
     Sound.rumble(ms / 1000)
     const grow = Math.min(HEAP[1], HEAP[0] + (DOZER.stop - x) / 1000) // more earth the further it pushes
     await Promise.all([
@@ -249,6 +261,7 @@
   async function travel(legs) {
     for (const [x, y, size, layer, ms, face = 1] of legs) {
       if (layer) document.getElementById(layer).appendChild(dozer)
+      if (y > Y - 30) World.noise('rumble', x, RUMBLE.reach) // down on the meadow: heard, and fled
       await Motion.endAt(dozer, [{ transform: dozer.style.transform }, { transform: dozerAt(x, y, size, face) }], { duration: ms })
     }
   }
@@ -456,7 +469,7 @@
   async function notice(alive) {
     const p = poles[poles.length - 1]
     if (dozer) m().frame(state.x)
-    await m().goTo(p.x - 60)
+    await m().goTo(p.x + 70) // beside his bed, not in front of it: the child sees his tulips
     if (!alive()) return
     Sound.knock()
     await Mole.knock()
@@ -486,7 +499,43 @@
     Mole.feel('squeezed', 900) // a wince
     await Motion.endAt(p.wrap, [{ transform: `translate(${p.x}px, ${Y + 4}px) rotate(0deg)` }, { transform: lying(p) }], { duration: FLAT_MS, easing: 'ease-in' })
     if (!alive()) return
-    await Mole.handsToFace(700)
+    await spill(alive)
+  }
+
+  /** The wild flowers (rain.js) its blade goes over, moving from a to b, go flat as it reaches each. */
+  function flattenUnder(a, b, ms) {
+    for (const g of document.querySelectorAll('.wild-flower')) {
+      const x = Number(g.dataset.x)
+      if (x > a || x <= b || state.flat.includes(g)) continue
+      state.flat.push(g)
+      g.getAnimations().forEach((an) => an.cancel())
+      Debug.ignoreCut(Motion.endAt(g, [{ transform: UP }, { transform: FLAT }], { duration: 260, delay: (ms * (a - x)) / (a - b), easing: 'ease-in' }), 'a wild flower flattened')
+    }
+  }
+
+  /** Clods roll off its heap across the meadow and knock over his tulips at the bed's end: he turns, ach jo. */
+  async function spill(alive) {
+    if (state.knocked.length) return // spilled already (a cut, then this again)
+    const bed = document.getElementById('bed')
+    const blade = state.x - NOSE
+    state.knocked = m().tulips().slice(-HIT).reverse() // nearest first
+    const rolls = state.knocked.map((t, i) => {
+      const ms = CLOD_MS + i * 250
+      const clod = el('circle', { r: 13 + i * 3, fill: '#4a2f14', stroke: '#15140f', 'stroke-width': 2 }, bed)
+      scars.push(clod)
+      Clock.after(ms, () => { if (alive()) Sound.knock() })
+      Debug.ignoreCut(Motion.endAt(t.bend, [{ transform: 'rotate(0deg)' }, { transform: KNOCKED }], { duration: 380, delay: ms, easing: 'ease-in' }), 'a tulip knocked over')
+      return Motion.endAt(clod, [
+        { transform: `translate(${blade - 30}px, ${Y - 14}px) rotate(0deg)` },
+        { transform: `translate(${t.x + 16}px, ${t.base - 12}px) rotate(-${540 + i * 180}deg)` },
+      ], { duration: ms, easing: 'ease-out' })
+    })
+    Sound.rumble(0.8)
+    await Debug.ignoreCut(Promise.all(rolls), 'clods rolling')
+    if (!alive()) return
+    Mole.lookAt(state.knocked[0].x)
+    Sound.say('achJo')
+    await Mole.lean(-8, 1400) // a slump: his flowers
   }
 
   /** Pole p flat on the ground under it, out of the story: it greens over with the road. */
@@ -658,10 +707,39 @@
     dozer = null
     m().frame(null)
     for (const p of poles) p.wrap.removeAttribute('data-thing') // done: they're the meadow's now
+    recover()
     if (!alive()) return
     Sound.say('giggle') // gone: now he cheers
     await Mole.cheer()
-    if (alive()) await Mole.cheer()
+  }
+
+  /** It has gone: what it flattened comes up again, slowly, by itself (his tulips sooner, by his hands). */
+  function recover() {
+    if (state.recovering) return
+    state.recovering = true
+    for (const g of state.flat) Debug.ignoreCut(Motion.endAt(g, [{ transform: FLAT }, { transform: UP }], { duration: SCAR_MS, easing: 'ease-in' }), 'a wild flower coming up')
+    for (const t of state.knocked) if (!t.up) Debug.ignoreCut(Motion.endAt(t.bend, [{ transform: KNOCKED }, { transform: 'rotate(0deg)' }], { duration: SCAR_MS, easing: 'ease-in' }), 'a tulip coming up')
+  }
+
+  /** He goes to his knocked-over tulips and stands each up again, gently: it springs up. Then, glad. */
+  async function mend(alive) {
+    recover() // gone already (a cut, then this again): coming up by themselves meanwhile
+    for (const t of state.knocked) {
+      if (t.up) continue
+      await m().goTo(t.x + 60)
+      if (!alive()) return
+      Mole.lookAt(t.x)
+      await Mole.lean(14, 600) // he bends to it
+      if (!alive()) return
+      t.up = true
+      const from = getComputedStyle(t.bend).transform
+      t.bend.getAnimations().forEach((a) => a.cancel())
+      Sound.plink()
+      await Motion.endAt(t.bend, [{ transform: from === 'none' ? KNOCKED : from }, { transform: 'rotate(7deg)', offset: 0.7 }, { transform: 'rotate(0deg)' }], { duration: 650, easing: 'ease-out' })
+      if (!alive()) return
+    }
+    Sound.say('tam')
+    await Mole.cheer()
   }
 
   /** What it tore up stays where it was, on the meadow, and greens over. */
@@ -702,6 +780,7 @@
       p.where = 'line'
       stand(p, freeSpot(Mole.state.x + 40), Y + 4, 1, 'things')
     }
+    restoreFlowers()
     if (dozer) {
       for (const e of [dozer, ...dozer.querySelectorAll('.heap, .hull')]) e.getAnimations().forEach((a) => a.cancel())
       document.getElementById('things').appendChild(dozer) // back on the meadow, where it was going
@@ -712,11 +791,30 @@
     }
   }
 
+  /** Cut short: what it harmed shows as it ends up (flat, knocked over); a tulip he stood up stands; once
+   * it has gone, they keep coming up. */
+  function restoreFlowers() {
+    for (const t of state.knocked) {
+      if (t.up) { // stood up by him: up, even if cut as it sprang
+        t.bend.getAnimations().forEach((a) => a.cancel())
+        t.bend.style.transform = 'rotate(0deg)'
+      } else if (!state.recovering) t.bend.getAnimations().forEach((a) => a.cancel()) // knocked over (its end), not yet coming up
+    }
+    if (!state.recovering) for (const g of state.flat) g.getAnimations().forEach((a) => a.cancel()) // flat
+  }
+
   function night() {
     restore()
     if (dozer) dozer.remove()
     dozer = null
     for (const sc of scars.splice(0)) sc.remove() // a new day: the meadow green again
+    for (const e of [...state.flat, ...state.knocked.map((t) => t.bend)]) {
+      e.getAnimations().forEach((a) => a.cancel())
+      e.style.transform = '' // and every flower up
+    }
+    state.flat = []
+    state.knocked = []
+    state.recovering = false
   }
 
   Things.add({
@@ -724,11 +822,12 @@
     offer: 'discover',
     urgent: true, // a bulldozer won't wait for a tap: he goes to see at once (things.js)
     engageMs: 3000, // when it can't break off his play (still waking), he goes to see soon: nothing shows till he does
-    trouble: [0], // from its rumble till it is gone: the bed uneasy, and no glad theme (happy as it is done)
+    trouble: [0, 8], // from its rumble till it is gone: the bed uneasy, and no glad theme…
+    music: { 8: 'happy' }, // …until he stands his tulips up again
     appear,
-    steps: [farOff, comesIn, shootsLine, notice, crush, throwOne, pit, away],
+    steps: [farOff, comesIn, shootsLine, notice, crush, throwOne, pit, away, mend],
     restore,
     night,
-    detail: () => ({ poles: poles.map((p) => p.where), dozer: !!dozer, stuck: state.stuck, pit: state.pit, cast: [] }),
+    detail: () => ({ poles: poles.map((p) => p.where), dozer: !!dozer, stuck: state.stuck, pit: state.pit, flat: state.flat.length, knocked: state.knocked.filter((t) => !t.up).length, cast: [] }),
   })
 })()

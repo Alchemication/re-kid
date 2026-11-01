@@ -25,12 +25,14 @@ playwright = pytest.importorskip("playwright.sync_api")
 ROOT = Path(__file__).resolve().parent.parent
 MEADOW = ROOT / "worlds/krtek/games/meadow/game/index.html"
 STILL = "seed=1&still"
-DONE_MS = 60_000  # the longest encounter runs well under this
+DONE_MS = (
+    90_000  # the longest encounter (the bulldozer, about a minute) runs well under this
+)
 CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 8, "rain": 5, "storm": 2}
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 9, "rain": 5, "storm": 2}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
 SOLVE = {
@@ -921,6 +923,11 @@ class TestMeadowBulldozer:
             "far",
             "far",
         ], "the first was not flattened, or the others not thrown"
+        flowers = m.page.evaluate("meadowGame.detail('poles')")
+        assert flowers["flat"] == 7, (
+            "its blade did not flatten the wild flowers in its way"
+        )
+        assert flowers["knocked"] == 0, "he did not stand his tulips up again"
         m.wait_free()
         m.assert_settled()
 
@@ -938,7 +945,7 @@ class TestMeadowBulldozer:
             state, mood, part = m.page.evaluate(
                 "[meadowGame.state().things.poles, Music.bed.mood, Music.part]"
             )
-            if state == "done":
+            if state in ("step 8", "done"):  # gone: he mends his tulips, glad again
                 break
             moods.add(mood)
             parts.add(part)
@@ -948,6 +955,26 @@ class TestMeadowBulldozer:
             f"the theme came back while it was here: {parts}"
         )
         m.wait("Music.bed.mood !== 'trouble'", 2000)  # gone: the day's bed again
+
+    def test_taps_on_him_get_worried_answers_while_it_is_here(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&soon&props=poles")
+        m.wake()
+        arrived(m, "poles")
+        m.do("use poles")
+        m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)
+        for intent in ["tap mole", "sniff", "tap mole"]:
+            m.do(intent)
+            m.wait_free()
+        says = [
+            line
+            for line in m.page.evaluate("meadowGame.trace()").split("\n")
+            if " says " in line
+        ]
+        hows = {line.split('"how":"')[1].split('"')[0] for line in says}
+        assert hows, "he never answered"
+        assert hows <= {"dismay", "fright", "worry"}, f"he played: {hows}"
 
     def test_it_breaks_off_his_play(self, meadow: callable) -> None:
         m = meadow("seed=1&day=60&props=poles")

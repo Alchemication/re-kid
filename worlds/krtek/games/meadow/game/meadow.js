@@ -131,7 +131,9 @@ const meadowGame = (() => {
       const x = BED.from + 20 + (i * (BED.to - BED.from - 40)) / (TULIPS - 1) + (paint() - 0.5) * 14
       const base = 700 + (i % 2) * 10 // behind him, at the meadow's back: nothing hides behind it
       const height = 66 + paint() * 26
-      const stem = el('g', { class: 'tulip sway' }, bed) // leans in the wind (weather.js)
+      const bend = el('g', { class: 'tulip-bend' }, bed) // knocked over, and stood up again (poles.js), round its foot
+      bend.style.transformOrigin = `${x}px ${base}px`
+      const stem = el('g', { class: 'tulip sway' }, bend) // leans in the wind (weather.js)
       stem.style.transformOrigin = `${x}px ${base}px`
       el('path', { d: `M${x} ${base} V${base - height}`, stroke: '#3f7d22', 'stroke-width': 5 }, stem)
       el('path', { d: `M${x} ${base - 20} c-28 -10 -36 -36 -30 -58 c16 12 28 30 30 50`, fill: '#4d6d1f' }, stem)
@@ -142,7 +144,7 @@ const meadowGame = (() => {
       const right = el('path', { d: `M${x} ${base - height} c20 -4 26 -26 18 -44 l-10 10 z`, fill: c, stroke: '#7a1f17', 'stroke-width': 2 }, head)
       el('path', { d: `M${x - 9} ${base - height - 2} c0 -20 4 -38 9 -44 c5 6 9 24 9 44 z`, fill: c, stroke: '#7a1f17', 'stroke-width': 2 }, head)
       for (const p of [left, right]) p.style.transformOrigin = `${x}px ${base - height}px`
-      tulipHeads.push({ left, right, stem })
+      tulipHeads.push({ left, right, stem, bend, x, base })
     }
     el('rect', { class: 'tap-bed', x: BED.from - 20, y: 590, width: BED.to - BED.from + 40, height: 125, fill: 'transparent' }, bed)
   }
@@ -412,6 +414,26 @@ const meadowGame = (() => {
 
   let helloAt = -Infinity // when he last said "ahoj!"
 
+  // While trouble is about (the bulldozer, the fox: things.js `trouble`), a tap on him, his flowers or the
+  // spring gets a worried answer instead: no laughing next to a bulldozer (Adam, 2026-11-01)
+  const WORRIED = {
+    dismay: ['achJo', () => Mole.lean(-8, 1100)], // a slump
+    fright: ['gasp', () => Mole.handsToFace(700)],
+    worry: ['hm', async () => { Mole.feel('worried', 1200); await Mole.lean(6, 900) }],
+  }
+  const nextWorry = rounds(Object.keys(WORRIED), Debug.random('meadow-worry'))
+
+  async function worried() {
+    const how = nextWorry()
+    const [said, act] = WORRIED[how]
+    Sound.say(said, true)
+    Debug.trace('says', { said, how })
+    await act()
+  }
+
+  /** The answer to a tap on him (or his flowers, or the spring: `play`), worried while trouble is about. */
+  const answer = (name, play) => run(name, Things.troubled() ? worried : play)
+
   async function tapMole() {
     let how = nextAnswer()
     if (ANSWERS[how][0] === 'ahoj' && Clock.now() - helloAt < HELLO_AGAIN_MS) how = nextAnswer() // he has just said hello: another answer, the wave in a later round
@@ -588,10 +610,10 @@ const meadowGame = (() => {
 
   const INTENTS = [
     [/^wake$/, () => wake()],
-    [/^tap mole$/, () => run('tap mole', tapMole)],
-    [/^sniff$/, () => run('sniff', sniff)],
-    [/^paddle$/, () => run('paddle', paddle)],
-    [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || run('tap mole', tapMole)],
+    [/^tap mole$/, () => answer('tap mole', tapMole)],
+    [/^sniff$/, () => answer('sniff', sniff)],
+    [/^paddle$/, () => answer('paddle', paddle)],
+    [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => run('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
@@ -608,7 +630,7 @@ const meadowGame = (() => {
   /** A tap on the sun in an eclipse: he looks up and calls to it, waving ("ahoj!"); it comes back in its own
    * time, the same for every child. Out of an eclipse, a tap on the sun is a tap on the sky: he answers. */
   async function callSun() {
-    if (!eclipseCover()) return tapMole()
+    if (!eclipseCover()) return Things.troubled() ? worried() : tapMole()
     Mole.perk(1.2)
     Mole.lookAt(View.x + sunX) // the sky stays put as the view moves
     Sound.say('ahoj')
@@ -791,6 +813,8 @@ const meadowGame = (() => {
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
     music: (part) => Music.cue(part),
+    /** His tulips, left to right: { x, base, bend } (bend: turned about its foot, to knock one over). */
+    tulips: () => tulipHeads.map(({ x, base, bend }) => ({ x, base, bend })),
     /** Keep x in sight with him (the view between them), or null: follow him again. */
     frame: (x) => { framed = x },
     notice: noticeArrival,

@@ -53,7 +53,7 @@ everything else the bee would do.
 | `view` | `{x0, x1}`: what the child sees | `meadow.js`, from the view |
 | `offer(id, kind, x, y, open)` | a thing offers something while `open()`; in the yard, each puddle a `drink` while it holds water (`weather.js`) | `meadow.js` (nectar: the tulips while open, the bluebells, the yellow spike), `rain.js` (nectar: the wild patch, not while drooping; shelter under its leaves), `spring.js` (a drink at either edge of the pool) |
 | `wet(x0, x1, ms)` | rain, or wet underfoot, there and for so long | `rain.js`, under the cloud and for 45 s after; `storm.js`, the whole meadow while it rains and 45 s after |
-| `noise(kind, x, reach)` | a sound, heard within `reach`. Noises are numbered: a listener keeps `World.heardUpTo` and hears each once | `car.js` (`vroom`, along its way), `spring.js` and the paddle (`splash`), `church.js` (`bell`, everywhere), `storm.js` (`thunder`, everywhere); the yard: Reksio's `bark` and `snap` |
+| `noise(kind, x, reach)` | a sound, heard within `reach`. Noises are numbered: a listener keeps `World.heardUpTo` and hears each once | `car.js` (`vroom`, along its way), `poles.js` (`rumble`, the bulldozer on the meadow), `spring.js` and the paddle (`splash`), `church.js` (`bell`, everywhere), `storm.js` (`thunder`, everywhere); the yard: Reksio's `bark` and `snap` |
 
 A field joins only when something reads it. Hour and light are apart on
 purpose: the day is the same length for every child, so an eclipse or a

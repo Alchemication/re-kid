@@ -124,7 +124,12 @@ decided and why.
       where its poles are: it flattens the first; he throws the next away
       and it stops, puzzled, then comes on for the last, by his flowers;
       it nose-dives into the pit he digs, and once he throws its last pole
-      up its road, it backs out and trundles off after it. An uneasy bed
+      up its road, it backs out and trundles off after it. Its harm, after
+      the film's (3:25-4:10): its blade flattens the wild flowers in its
+      way, clods off its heap knock over two of his tulips, its rumble
+      scares the creatures off; once it has gone he stands his tulips up,
+      and the wild flowers come up slowly by themselves, or at once if the
+      rain cloud comes. An uneasy bed
       holds while it is here, the glad theme only once it is gone (the
       fox the same, till the monster). About 50 s: judge whether it is
       too long, whether the rule reads, and the uneasy bed by ear. A quiet spell (`REST_HOURS`, about 30 s) after each encounter,

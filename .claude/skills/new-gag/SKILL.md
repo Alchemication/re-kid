@@ -80,7 +80,10 @@ beat many):
   visibly change what happens next; a beat with no effect is filler: cut
   it or give it one (the meadow's bulldozer lurched on whether or not he
   threw its poles away, Adam 2026-11-01). And his feelings follow the
-  story: no cheering while the trouble is still there.
+  story: no cheering while the trouble is still there, and none in his
+  answer to a tap between its beats either (a tap on him made him laugh
+  next to the bulldozer; the meadow's taps now answer worried while an
+  encounter's `trouble` holds).
 - **New to the place.** It adds what the game doesn't have yet. First list
   the gags of the same kind already in the game (who helps or is helped, how,
   what the comic moment is, how it ends) and make this one differ in the
