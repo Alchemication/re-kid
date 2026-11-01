@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-28T09:03:26.824Z",
+ "saved": "2026-11-01T16:21:55.943Z",
  "picks": [
   {
    "file": "theme/10.mp3",
@@ -557,6 +557,66 @@
    "level": "level/lullaby-winter/05.mp3",
    "retro": "retro/lullaby-winter/05.mp3",
    "piece": "lullaby-winter",
+   "verdict": "keep"
+  },
+  {
+   "file": "meadow-menace/08.mp3",
+   "source": "eleven",
+   "model": "music_v1",
+   "song": "kb3k8y24IdfkePXZ3Qjh",
+   "prompt": "A few seconds of gentle suspense in a children's cartoon about a sunny meadow: slow low strings and a hushed flute, a held breath, a shadow passing over the grass. Soft enough for small children.",
+   "wording": 2,
+   "seed": 1,
+   "folder": "krtek menace",
+   "made": "2026-11-01",
+   "level": "level/meadow-menace/08.mp3",
+   "retro": "retro/meadow-menace/08.mp3",
+   "piece": "meadow-menace",
+   "verdict": "keep"
+  },
+  {
+   "file": "meadow-menace/01.mp3",
+   "source": "eleven",
+   "model": "music_v1",
+   "song": "qwRF57oDp3UCUfd4oOSQ",
+   "prompt": "A short uneasy instrumental moment for a calm, nature-filled children's animated film: slow and low, in a minor key, a dark clarinet over soft low strings, as something big comes over the hill. Mysterious but never frightening.",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek menace",
+   "made": "2026-11-01",
+   "level": "level/meadow-menace/01.mp3",
+   "retro": "retro/meadow-menace/01.mp3",
+   "piece": "meadow-menace",
+   "verdict": "keep"
+  },
+  {
+   "file": "meadow-menace/10.mp3",
+   "source": "eleven",
+   "model": "music_v1",
+   "song": "akuLgXMkY1162ZBLka8l",
+   "prompt": "A brief, slightly menacing musical hint for a small animal's meadow in a children's film: deep slow strings and a low muted horn, a big machine rumbling closer, suspenseful but not scary, then fading.",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek menace",
+   "made": "2026-11-01",
+   "level": "level/meadow-menace/10.mp3",
+   "retro": "retro/meadow-menace/10.mp3",
+   "piece": "meadow-menace",
+   "verdict": "keep"
+  },
+  {
+   "file": "meadow-menace/12.mp3",
+   "source": "eleven",
+   "model": "music_v2_5",
+   "song": "w4nBczQp2YK3jKfAUuuh",
+   "prompt": "A brief, slightly menacing musical hint for a small animal's meadow in a children's film: deep slow strings and a low muted horn, a big machine rumbling closer, suspenseful but not scary, then fading.",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek menace",
+   "made": "2026-11-01",
+   "level": "level/meadow-menace/12.mp3",
+   "retro": "retro/meadow-menace/12.mp3",
+   "piece": "meadow-menace",
    "verdict": "keep"
   }
  ]

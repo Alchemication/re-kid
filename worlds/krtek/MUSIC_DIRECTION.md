@@ -56,8 +56,8 @@ by ear.
   | An encounter starts | more curious |
   | Someone needs help | sad, gently, never frightening |
   | Help works | back fuller and happier: the moment the music swells |
-  | Trouble coming (the bulldozer, the fox) | a short uneasy turn (menace), then the music steps back and its sounds lead |
-  | A fright | the music steps back, effects lead |
+  | The bulldozer coming | a short uneasy turn (menace), then the music steps back and its rumble leads |
+  | Trouble, a fright (the fox) | the music steps back, effects lead |
   | Dusk to sleep | the cricket's fiddle, not the theme |
   | Next morning (the start) | the theme fades back in |
 
@@ -117,3 +117,6 @@ by ear.
   not be grown from `meadow-theme/01`: its song id is not found under
   the current key (404), so they are worded from the meadow's style
   (`pieces.py` `meadow-menace`, board folder "krtek menace").
+  Picked 2026-11-01: keeps 01, 08, 10, 12 (menace/01-04). Adam: "it can
+  work for a bulldozer, but may not work for each scary-ish encounter",
+  so the fox keeps the plain quiet; another trouble gets its own.

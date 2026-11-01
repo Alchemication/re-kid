@@ -42,6 +42,24 @@ tunes:
     prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (low): the same gentle meadow theme, now joyful and triumphant: fuller and brighter, strings and flute together, as everything turns out well in the end'
     model: music_v2_5
     song: AS4GA6D4lu39AOZPGuqn
+- id: menace
+  takes:
+  - file: menace/01.mp3
+    prompt: 'A few seconds of gentle suspense in a children''s cartoon about a sunny meadow: slow low strings and a hushed flute, a held breath, a shadow passing over the grass. Soft enough for small children.'
+    model: music_v1
+    song: kb3k8y24IdfkePXZ3Qjh
+  - file: menace/02.mp3
+    prompt: 'A short uneasy instrumental moment for a calm, nature-filled children''s animated film: slow and low, in a minor key, a dark clarinet over soft low strings, as something big comes over the hill. Mysterious but never frightening.'
+    model: music_v1
+    song: qwRF57oDp3UCUfd4oOSQ
+  - file: menace/03.mp3
+    prompt: 'A brief, slightly menacing musical hint for a small animal''s meadow in a children''s film: deep slow strings and a low muted horn, a big machine rumbling closer, suspenseful but not scary, then fading.'
+    model: music_v1
+    song: akuLgXMkY1162ZBLka8l
+  - file: menace/04.mp3
+    prompt: 'A brief, slightly menacing musical hint for a small animal''s meadow in a children''s film: deep slow strings and a low muted horn, a big machine rumbling closer, suspenseful but not scary, then fading.'
+    model: music_v2_5
+    song: w4nBczQp2YK3jKfAUuuh
 - id: lullaby
   takes:
   - file: lullaby/01.mp3

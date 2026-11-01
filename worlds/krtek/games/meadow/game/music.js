@@ -4,9 +4,10 @@
 // - the morning: the meadow's theme as he comes up;
 // - an encounter: the theme curious as it arrives, sad at its trouble,
 //   happy as it comes right (things.js; each encounter says at which of its
-//   steps). When trouble comes (the bulldozer over the hill, the fox), a
-//   short uneasy turn (menace, Adam 2026-11-01), then the music steps back
-//   and the effects lead, as the films go quiet when trouble comes;
+//   steps). When the bulldozer comes over the hill, a short uneasy turn
+//   (menace, Adam 2026-11-01), then the music steps back and its rumble
+//   leads; at a fright (the fox) the music just steps back, as the films
+//   go quiet when trouble comes;
 // - from dusk, the cricket's fiddle, one take after another until the
 //   circle closes.
 // A mood plays over quiet, or cuts short a weaker one (menace over happy

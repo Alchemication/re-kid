@@ -48,7 +48,7 @@ HEADERS = {
 # picks on the music board (worlds/krtek/MUSIC_DIRECTION.md).
 """,
 }
-ORDER = ["morning", "phrase", "curious", "sad", "happy", "lullaby"]
+ORDER = ["morning", "phrase", "curious", "sad", "happy", "menace", "lullaby"]
 
 
 def quoted(text: str) -> str:
