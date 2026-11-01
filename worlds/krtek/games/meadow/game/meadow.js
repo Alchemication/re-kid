@@ -414,25 +414,13 @@ const meadowGame = (() => {
 
   let helloAt = -Infinity // when he last said "ahoj!"
 
-  // While trouble is about (the bulldozer, the fox: things.js `trouble`), a tap on him, his flowers or the
-  // spring gets a worried answer instead: no laughing next to a bulldozer (Adam, 2026-11-01)
-  const WORRIED = {
-    dismay: ['achJo', () => Mole.lean(-8, 1100)], // a slump
-    fright: ['gasp', () => Mole.handsToFace(700)],
-    worry: ['hm', async () => { Mole.feel('worried', 1200); await Mole.lean(6, 900) }],
+  /** The answer to a tap on him (or his flowers, or the spring: `play`). While trouble is about (the
+   * bulldozer, the fox: things.js `trouble`), any tap carries its story on instead: it would cut it short,
+   * and a child tapping on and on held the bulldozer at the meadow's edge (Adam, 2026-11-01). */
+  function answer(name, play) {
+    const trouble = Things.troubledName()
+    return trouble ? Things.use(trouble) : run(name, play)
   }
-  const nextWorry = rounds(Object.keys(WORRIED), Debug.random('meadow-worry'))
-
-  async function worried() {
-    const how = nextWorry()
-    const [said, act] = WORRIED[how]
-    Sound.say(said, true)
-    Debug.trace('says', { said, how })
-    await act()
-  }
-
-  /** The answer to a tap on him (or his flowers, or the spring: `play`), worried while trouble is about. */
-  const answer = (name, play) => run(name, Things.troubled() ? worried : play)
 
   async function tapMole() {
     let how = nextAnswer()
@@ -614,7 +602,7 @@ const meadowGame = (() => {
     [/^sniff$/, () => answer('sniff', sniff)],
     [/^paddle$/, () => answer('paddle', paddle)],
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
-    [/^go to (\d+)$/, (m) => run('go', () => goTo(Number(m[1])))],
+    [/^go to (\d+)$/, (m) => answer('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
     [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
     [/^tap butterfly (\d+)$/, (m) => tapButterfly(Number(m[1]))],
@@ -630,7 +618,7 @@ const meadowGame = (() => {
   /** A tap on the sun in an eclipse: he looks up and calls to it, waving ("ahoj!"); it comes back in its own
    * time, the same for every child. Out of an eclipse, a tap on the sun is a tap on the sky: he answers. */
   async function callSun() {
-    if (!eclipseCover()) return Things.troubled() ? worried() : tapMole()
+    if (!eclipseCover()) return tapMole()
     Mole.perk(1.2)
     Mole.lookAt(View.x + sunX) // the sky stays put as the view moves
     Sound.say('ahoj')

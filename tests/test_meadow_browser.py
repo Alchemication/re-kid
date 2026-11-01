@@ -956,25 +956,20 @@ class TestMeadowBulldozer:
         )
         m.wait("Music.bed.mood !== 'trouble'", 2000)  # gone: the day's bed again
 
-    def test_taps_on_him_get_worried_answers_while_it_is_here(
-        self, meadow: callable
-    ) -> None:
+    def test_taps_carry_it_on_rather_than_cut_it(self, meadow: callable) -> None:
+        """A child tapping on and on held it at the meadow's edge: each tap
+        cut the story short (Adam, 2026-11-01). Now every tap carries it on."""
         m = meadow(f"{STILL}&soon&props=poles")
         m.wake()
         arrived(m, "poles")
         m.do("use poles")
-        m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)
-        for intent in ["tap mole", "sniff", "tap mole"]:
+        m.wait("meadowGame.state().things.poles === 'step 0'")
+        for intent in ["go to 400", "tap mole", "sniff", "paddle", "tap mole"]:
             m.do(intent)
-            m.wait_free()
-        says = [
-            line
-            for line in m.page.evaluate("meadowGame.trace()").split("\n")
-            if " says " in line
-        ]
-        hows = {line.split('"how":"')[1].split('"')[0] for line in says}
-        assert hows, "he never answered"
-        assert hows <= {"dismay", "fright", "worry"}, f"he played: {hows}"
+            m.page.wait_for_timeout(700)
+            assert m.state()["busy"] == "poles", f"{intent} cut it short"
+        m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)
+        assert m.state()["busy"] == "poles"
 
     def test_it_breaks_off_his_play(self, meadow: callable) -> None:
         m = meadow("seed=1&day=60&props=poles")
@@ -1157,19 +1152,23 @@ class TestMeadowTapsWait:
     def test_a_tap_on_the_meadow_mid_step_waits_then_goes(
         self, meadow: callable
     ) -> None:
-        m = meadow(f"{STILL}&soon&props=poles")
+        m = meadow(
+            f"{STILL}&soon&props=rain"
+        )  # not the bulldozer: a threat won't be cut short
         m.wake()
-        arrived(m, "poles")
-        m.do("use poles")
-        m.wait("meadowGame.state().things.poles === 'step 0'")
+        arrived(m, "rain")
+        m.do("use rain")
+        m.wait(
+            "Things.stepping === 'rain'"
+        )  # its first step playing (it arrives as 'step 0' already)
         m.page.wait_for_timeout(CUT_MS)
         m.do("go to 400")
         m.page.wait_for_timeout(200)
-        assert m.state()["busy"] == "poles", "the tap cut the step short"
+        assert m.state()["busy"] == "rain", "the tap cut the step short"
         m.wait("meadowGame.state().busy === 'go'", 15_000)  # the step over, off he goes
         m.wait_free()
         assert m.state()["x"] == 400
-        assert m.state()["things"]["poles"] == "step 1", "the step was not kept"
+        assert m.state()["things"]["rain"] == "step 1", "the step was not kept"
         m.assert_settled()
 
 
