@@ -53,6 +53,14 @@ beat many):
   it. No aiming or dragging. Left alone, he tries them himself, in a
   sensible order. Depth before breadth: one encounter like this, well acted,
   beats several that only play on.
+- **A story, not a list of beats.** Each beat causes the next: someone
+  wants something, something gets in the way, and what happens next comes
+  out of that. Read the beats as "and so…": where one only follows another
+  ("and then…"), reorder or cut. The paint passed every other check here
+  and still read as nonsense (Adam, 2026-11-01): the mole was red before
+  the fox came, so his scaring the fox had no reason. In the film the fox
+  frightens him first and the paint is an accident. A repeat should move
+  the story on, not only vary it (the fox, told again, may end a friend).
 - **Fun to repeat.** The core stays the same each time (small children love
   exact repetition); something small is added on top now and then.
 - **A story over uses, where the thing allows it.** If it holds an amount
