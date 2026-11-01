@@ -101,7 +101,8 @@
     rise: 900, // up over the crest…
     ms: 4000, // …and all the way down (quick: the meadow's part is the show, Adam 2026-11-01)
   }
-  const PIT_X = 1540 // where he digs the pit, in its path: between the bulldozer (its blade, CRUSH_AT, just clear of it) and the last pole, by his flowers
+  const PIT_X = 1440 // where he digs the pit, in its path, just before the last pole: clear of the earth its blade shoves (at 1540, under it, the pit never showed)
+  const PIT = { rx: 95, ry: 20, ms: 1800, every: 110 } // the pit: how wide and deep it opens; how long he digs, a clod flying out this often
   const DIVE = { deg: -9, dy: 8 } // nose down into the pit (at its size, a few degrees take the blade well down)
   const HEAP = [0.45, 0.75] // the earth it shoves grows from this to this as it comes (bigger, it buried him)
   const SCAR_MS = 60000 // its track, the pit and the heap green over in about a minute
@@ -639,9 +640,9 @@
       Sound.dig()
       await Mole.goDown()
       if (!alive()) return
-      dig()
-      Sound.dig()
-      await Mole.tunnelTo(PIT_X - 320) // out of its way, by the last pole
+      await dig(alive) // under there, digging: earth flying out, the hole widening
+      if (!alive()) return
+      await Mole.tunnelTo(PIT_X - PIT.rx - 60) // out of its way, beyond the pit, by the last pole
       if (!alive()) return
       Sound.pop()
       await Mole.comeUp('out')
@@ -653,6 +654,8 @@
     state.stuck = true
     Debug.trace('bulldozer stuck')
     Sound.clunk()
+    const heap = dozer.querySelector('.heap')
+    Debug.ignoreCut(Motion.endAt(heap, [{ transform: getComputedStyle(heap).transform }, { transform: `scale(${HEAP[0] * 0.5}) translateY(10px)` }], { duration: 380, easing: 'ease-in' }), 'its earth tumbling into the pit') // its earth goes in first
     await Motion.endAt(dozer.querySelector('.hull'), [{ transform: `rotate(${DIVE.deg}deg) translateY(${DIVE.dy}px)` }], { duration: 380, easing: 'ease-in' })
     if (!alive()) return
     dozer.classList.add('stuck') // tracks spinning, puffing hard (game.css)
@@ -662,22 +665,36 @@
     await Mole.lean(10, 900)
   }
 
-  /** The pit, dug where he went down: earth flies, and a dark hole opens in the grass. */
-  function dig() {
+  /** The pit, dug where he went down: a hole widening in the grass, a rim of loose earth piling up behind
+   * it, and earth flying out of it in arcs, this way and that, while he digs down there. */
+  async function dig(alive) {
     state.pit = true
     const layer = document.getElementById('things')
-    const hole = el('ellipse', { class: 'pit', cx: PIT_X, cy: Y + 6, rx: 120, ry: 16, fill: '#2b1b0b', stroke: '#15140f', 'stroke-width': 3 }, layer)
-    layer.insertBefore(hole, layer.firstChild) // in the grass, under the pole and the bulldozer
-    scars.push(hole)
-    Debug.ignoreCut(Motion.endAt(hole, [{ transform: 'scaleX(0.1)' }, { transform: 'scaleX(1)' }], { duration: 400, easing: 'ease-out' }), 'the pit opens')
-    hole.style.transformBox = 'fill-box'
-    hole.style.transformOrigin = 'center'
-    const drops = document.getElementById('drops')
-    for (let i = 0; i < 8; i++) {
-      const d = el('circle', { r: 6 + (i % 3) * 3, fill: '#6e4a24' }, drops)
-      const a = Math.PI * (0.15 + (0.7 * i) / 7)
-      Motion.endAt(d, [{ transform: `translate(${PIT_X}px, ${Y}px)` }, { transform: `translate(${PIT_X + Math.cos(a) * 130}px, ${Y - Math.sin(a) * 120}px)`, opacity: 0 }], { duration: 700, easing: 'ease-out' }).then(() => d.remove(), () => d.remove())
+    const rim = el('path', { class: 'pit-rim', d: `M${PIT_X - PIT.rx - 30} ${Y + 10} Q${PIT_X} ${Y - 100} ${PIT_X + PIT.rx + 30} ${Y + 10} Z`, fill: '#6e4a24', stroke: '#15140f', 'stroke-width': 3 }, layer)
+    const hole = el('ellipse', { class: 'pit', cx: PIT_X, cy: Y + 8, rx: PIT.rx, ry: PIT.ry, fill: '#2b1b0b', stroke: '#15140f', 'stroke-width': 3 }, layer)
+    for (const e of [hole, rim]) {
+      layer.insertBefore(e, layer.firstChild) // in the grass, under the pole and the bulldozer; the rim behind the hole
+      e.style.transformBox = 'fill-box'
+      e.style.transformOrigin = 'center bottom'
+      scars.push(e)
+      Debug.ignoreCut(Motion.endAt(e, [{ transform: 'scale(0.15)' }, { transform: 'scale(1)' }], { duration: PIT.ms, easing: 'ease-out' }), 'the pit opens')
     }
+    const drops = document.getElementById('drops')
+    for (let t = 0; t < PIT.ms; t += PIT.every) {
+      Clock.after(t, () => {
+        if (!alive()) return
+        if (t % (PIT.every * 4) === 0) Sound.dig()
+        const side = random() < 0.5 ? -1 : 1
+        const [dx, up] = [side * (60 + random() * 150), 70 + random() * 110]
+        const d = el('circle', { r: 7 + random() * 9, fill: random() < 0.5 ? '#6e4a24' : '#4a2f14', stroke: '#15140f', 'stroke-width': 1.5 }, drops)
+        Motion.endAt(d, [
+          { transform: `translate(${PIT_X + side * 20}px, ${Y}px)`, opacity: 1 }, // opacity given: Motion.endAt sets the end (faint) first
+          { transform: `translate(${PIT_X + dx * 0.6}px, ${Y - up}px)`, opacity: 1, offset: 0.45 },
+          { transform: `translate(${PIT_X + dx}px, ${Y + 4}px)`, opacity: 0.2 },
+        ], { duration: 650, easing: 'ease-out' }).then(() => d.remove(), () => d.remove())
+      })
+    }
+    await Clock.wait(PIT.ms)
   }
 
   /** Over to pole k (1, the middle one: away up the hill; 2, by his flowers: up the bulldozer's road),
