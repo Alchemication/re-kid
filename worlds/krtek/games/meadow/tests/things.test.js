@@ -62,3 +62,18 @@ test('a quiet spell after one is done, and none in the last hour before sunset',
   assert.equal(Things.quiet(11.3, 10, 18.8), false) // rested
   assert.equal(Things.quiet(18, null, 18.8), true) // too near sunset
 })
+
+test('trouble holds from its first step to its last, and lifts once it is done', () => {
+  const steps = [0, 1, 2, 3, 4, 5, 6].map(() => async () => {})
+  const fox = (step, more = {}) => ({ out: true, done: false, step, steps, trouble: [1, 5], ...more })
+  assert.equal(Things.inTrouble(fox(0)), false) // the tins, before the fox
+  assert.equal(Things.inTrouble(fox(1)), true)
+  assert.equal(Things.inTrouble(fox(4)), true)
+  assert.equal(Things.inTrouble(fox(5)), false) // the monster sends it off
+  const dozer = (step, more = {}) => ({ out: true, done: false, step, steps, trouble: [0], ...more })
+  assert.equal(Things.inTrouble(dozer(0)), true) // from its rumble…
+  assert.equal(Things.inTrouble(dozer(6)), true) // …to its last step…
+  assert.equal(Things.inTrouble(dozer(7, { done: true })), false) // …and lifted once it is gone
+  assert.equal(Things.inTrouble(dozer(3, { out: false })), false)
+  assert.equal(Things.inTrouble({ out: true, done: false, step: 2, steps }), false) // no trouble at all
+})

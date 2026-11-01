@@ -803,7 +803,7 @@ const meadowGame = (() => {
   Clock.every(TICK_MS, tick)
   Clock.every(BED_STEER_MS, () => { // the bed: the moment of the day, and how busy the child is, calming as time passes
     game.busy = Bed.calmer(game.busy, BED_STEER_MS / 1000)
-    Music.setBed({ mood: MeadowBeds.moodAt({ hour: game.hour }), energy: game.busy })
+    Music.setBed({ mood: Things.troubled() ? 'trouble' : MeadowBeds.moodAt({ hour: game.hour }), energy: game.busy }) // a threat about: uneasy till it's gone
   })
   Clock.after(WAKE_ANYWAY_MS, () => { if (!game.awake) perform('wake') })
 

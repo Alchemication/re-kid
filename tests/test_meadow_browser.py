@@ -30,7 +30,7 @@ CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 9, "rain": 5, "storm": 2}
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 8, "rain": 5, "storm": 2}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
 SOLVE = {
@@ -559,12 +559,26 @@ class TestMeadowMusic:
     def test_an_encounter_turns_the_theme_curious_sad_then_happy(
         self, meadow: callable
     ) -> None:
+        m = meadow(f"{STILL}&soon&props=rain")
+        m.wake()
+        arrived(m, "rain")
+        finish(m, "rain")
+        parts = m.page.evaluate(MUSIC)
+        assert in_order(parts, ["curious", "sad", "happy"]), parts
+        assert not m.errors, m.errors
+
+    def test_a_threat_has_its_menace_and_nothing_glad_till_it_is_gone(
+        self, meadow: callable
+    ) -> None:
         m = meadow(f"{STILL}&soon&props=poles")
         m.wake()
         arrived(m, "poles")
         finish(m, "poles")
         parts = m.page.evaluate(MUSIC)
-        assert in_order(parts, ["curious", "sad", "happy"]), parts
+        assert in_order(parts, ["menace", "happy"]), parts
+        after = parts[parts.index("menace") :]
+        assert not {"curious", "sad"} & set(after), parts
+        assert after.index("happy") == len(after) - 1, parts  # glad only at the end
         assert not m.errors, m.errors
 
     def test_the_music_steps_back_for_the_fox_and_comes_back_happy(
@@ -577,7 +591,9 @@ class TestMeadowMusic:
         m.wait("meadowGame.state().things.paint === 'step 1'")
         m.page.wait_for_timeout(1500)  # the fade
         # the theme stops; at most the short uneasy turn (menace), once it has takes
-        assert m.page.evaluate("meadowGame.music()") in (None, "menace"), "music over the fox"
+        assert m.page.evaluate("meadowGame.music()") in (None, "menace"), (
+            "music over the fox"
+        )
         finish(m, "paint")
         assert m.page.evaluate(MUSIC)[-1] == "happy"
         assert not m.errors, m.errors
@@ -858,8 +874,9 @@ class TestMeadowFox:
 
 class TestMeadowBulldozer:
     """The poles and the bulldozer (Adam, 2026-11-01): it comes over the
-    meadow's far edge and down to him, big, framed in view with him, shoots its line of poles, and
-    nose-dives into the pit he digs; and it won't wait for a tap."""
+    meadow's far edge and down to him, big, framed in view with him, shoots its line of poles, flattens
+    the first, nose-dives into the pit he digs, and goes off after its last pole; the bed is uneasy
+    all the while it is here; and it won't wait for a tap."""
 
     BOXES = """() => [document.querySelector('.dozer'), document.querySelector('.mole-body')]
         .map((e) => { const r = e.getBoundingClientRect(); return [r.left, r.right, r.height] })"""
@@ -869,7 +886,9 @@ class TestMeadowBulldozer:
         m.wake()
         arrived(m, "poles")
         m.do("use poles")
-        m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)  # it came, and shot its poles
+        m.wait(
+            "meadowGame.state().things.poles === 'step 3'", 40_000
+        )  # it came, and shot its poles
         m.page.wait_for_timeout(1500)  # the view eases over
         (d_left, _d_right, d_h), (m_left, m_right, m_h) = m.page.evaluate(self.BOXES)
         assert d_h > 1.3 * m_h, (
@@ -897,8 +916,38 @@ class TestMeadowBulldozer:
         )
         assert not m.page.evaluate("document.querySelector('.dozer')"), "it never left"
         assert m.page.evaluate("document.querySelectorAll('.pit').length") == 1
+        assert m.page.evaluate("[...meadowGame.detail('poles').poles]") == [
+            "flat",
+            "far",
+            "far",
+        ], "the first was not flattened, or the others not thrown"
         m.wait_free()
         m.assert_settled()
+
+    def test_the_bed_is_uneasy_till_it_is_gone(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=poles")
+        m.wake()
+        arrived(m, "poles")
+        m.do("use poles")
+        m.wait("meadowGame.state().things.poles === 'step 2'", 40_000)
+        m.wait("Music.bed && Music.bed.mood === 'trouble'", 2000)
+        moods, parts = set(), set()
+        while (
+            True
+        ):  # one look at a time, so "done" and its happy theme can't slip in between
+            state, mood, part = m.page.evaluate(
+                "[meadowGame.state().things.poles, Music.bed.mood, Music.part]"
+            )
+            if state == "done":
+                break
+            moods.add(mood)
+            parts.add(part)
+            m.page.wait_for_timeout(250)
+        assert moods == {"trouble"}, f"the bed lifted while it was here: {moods}"
+        assert not parts & {"curious", "sad", "happy", "morning"}, (
+            f"the theme came back while it was here: {parts}"
+        )
+        m.wait("Music.bed.mood !== 'trouble'", 2000)  # gone: the day's bed again
 
     def test_it_breaks_off_his_play(self, meadow: callable) -> None:
         m = meadow("seed=1&day=60&props=poles")

@@ -119,9 +119,15 @@ decided and why.
       Still to do: each character's height against the mole measured
       in frames, as observed claims in world.yaml.
    5a. **Adam judges the bulldozer and the rests** (built 2026-11-01, his
-      pick A): the bulldozer comes big from off the right after the film's,
-      shoving earth and tearing a track, and nose-dives into the pit he
-      digs; a quiet spell (`REST_HOURS`, about 30 s) after each encounter,
+      pick A; its story reworked the same day): it comes over the church's
+      hill (beside the church now) and down its own road, big, and goes
+      where its poles are: it flattens the first; he throws the next away
+      and it stops, puzzled, then comes on for the last, by his flowers;
+      it nose-dives into the pit he digs, and once he throws its last pole
+      up its road, it backs out and trundles off after it. An uneasy bed
+      holds while it is here, the glad theme only once it is gone (the
+      fox the same, till the monster). About 50 s: judge whether it is
+      too long, whether the rule reads, and the uneasy bed by ear. A quiet spell (`REST_HOURS`, about 30 s) after each encounter,
       and 12 s before he goes to a new one himself. Judge: does it read as
       harm, is it too loud or big for calm, is the pit funny, do the rests
       feel restful or empty, and are there still enough encounters a day.

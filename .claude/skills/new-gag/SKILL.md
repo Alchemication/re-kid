@@ -122,7 +122,13 @@ chosen one, write down briefly:
   `new-sound`, a synth stand-in in `sound.js` first so the gag plays
   before Adam has picked takes. Music only where a moment needs a mood the
   game has no music for (`new-music`); otherwise the bed and phrases cover
-  it. The report lists what waits on the boards for his ear.
+  it. Write the music as a timeline over the whole gag, from start to
+  end, what plays *between* the cues too (the bed): a threat holds an
+  uneasy bed until it has gone, and nothing glad comes back before (the
+  meadow's bulldozer had the cheerful bed and the flute theme back while
+  it was still coming, Adam 2026-11-01). Check it by tracing a whole run
+  (each step, the bed's mood, the take playing), not only that the cues
+  fire. The report lists what waits on the boards for his ear.
 - **What it offers:** `discover`, `help` (the hero helps someone) or
   `helped` (someone helps him); each play should offer one of each. The
   game's map says where that is recorded.

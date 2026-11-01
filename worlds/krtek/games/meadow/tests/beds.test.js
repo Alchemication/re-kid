@@ -42,8 +42,22 @@ test('only the meadow\'s instruments, inside the bar, soft', () => {
 test('the takes\' pulse, and a bed for each moment', () => {
   for (const s of Object.values(Beds.STYLES)) assert.equal(s.bpm, 103)
   assert.equal(Beds.style('morning', 0).style, 'birdsong')
+  assert.equal(Beds.style('trouble', 1).style, 'unease') // trouble about: uneasy, however busy the child
   assert.equal(Beds.style('day', 0).style, 'meadow')
   assert.equal(Beds.style('day', 1).style, 'stroll')
   assert.equal(Beds.style('afternoon', 0).style, 'haze')
   assert.deepEqual([9, 12, 16].map((hour) => Beds.moodAt({ hour })), ['morning', 'day', 'afternoon'])
+})
+
+test('trouble\'s bed: no flute and no birds, and quieter than the day\'s', () => {
+  const random = seq(5)
+  const loud = (style, mood) => {
+    let sum = 0
+    for (let n = 0; n < 16; n++) for (const note of Beds.bar(style, mood, 0, n, random).notes) sum += note.vol
+    return sum
+  }
+  for (let n = 0; n < 16; n++) {
+    for (const note of Beds.bar('unease', 'trouble', 1, n, random).notes) assert.ok(!['flute', 'birdflute'].includes(note.inst), note.inst)
+  }
+  assert.ok(loud('unease', 'trouble') < loud('meadow', 'day'))
 })

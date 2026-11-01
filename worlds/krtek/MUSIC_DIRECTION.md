@@ -9,7 +9,9 @@ play at their moments (`game/music.js`, 2026-10-22). Between them a quiet
 bed (`game/beds.js`, 2026-10-25) in the takes' key and pulse (E major,
 103): a harp with birdsong in the morning, the harp with a flute turn
 while the child watches, the harp strolling while the child plays, soft
-held violins in the afternoon. It stops at dusk for the cricket. Built,
+held violins in the afternoon, and an uneasy bed while a threat is about
+(low strings on a bare fifth, a slow harp heartbeat a half step apart,
+a low clarinet sigh; no flute, no birds). It stops at dusk for the cricket. Built,
 not yet picked by ear.
 
 ## From the films
@@ -56,8 +58,8 @@ by ear.
   | An encounter starts | more curious |
   | Someone needs help | sad, gently, never frightening |
   | Help works | back fuller and happier: the moment the music swells |
-  | The bulldozer coming | a short uneasy turn (menace), then the music steps back and its rumble leads |
-  | The fox | a sly motif written note by note on the meadow's samples (clarinet, harp), then the music steps back |
+  | The bulldozer coming | a short uneasy turn (menace), then the uneasy bed under its rumble until it has gone |
+  | The fox | a sly motif written note by note on the meadow's samples (clarinet, harp), then the uneasy bed until the monster sends him off |
   | A fright | the music steps back, effects lead |
   | Dusk to sleep | the cricket's fiddle, not the theme |
   | Next morning (the start) | the theme fades back in |
@@ -124,4 +126,9 @@ by ear.
   synth could be better" for these: motifs written note by note on the
   meadow's samples (`music.js` `MOTIFS`, no takes to load) now play for
   the fox, and for the bulldozer with `?menace=notes`, to compare with its
-  recorded takes. Not yet heard.
+  recorded takes. Not yet heard. Adam then heard the flute theme come
+  back while the bulldozer was still coming ("we should only get back to
+  the positive sound once the bulldozer is gone"): the bed knew only the
+  hour, and arrival and the poles' trouble cued the flute theme. Now a
+  threat holds an uneasy bed from its coming till it is gone
+  (`things.js` `trouble`, `beds.js` `unease`). Not yet heard.

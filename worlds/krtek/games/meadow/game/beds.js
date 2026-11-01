@@ -8,7 +8,11 @@
 // A bed for each moment of the day: in the morning a harp and birdsong; while
 // the child watches, the harp with a little flute turn now and then; while the
 // child plays, the harp strolling on every beat; in the afternoon, soft held
-// violins under a slower harp. From dusk the cricket's fiddle takes over
+// violins under a slower harp. While trouble is about (the bulldozer, the fox
+// looming: things.js `trouble`), an uneasy bed instead: low held strings, a
+// slow harp heartbeat a half step apart, now and then a low clarinet sigh; no
+// flute, no birds (Adam, 2026-11-01: the cheerful bed came back while the
+// bulldozer was still coming). From dusk the cricket's fiddle takes over
 // (music.js), and the bed stops.
 
 /* global Bed */
@@ -24,6 +28,7 @@ const MeadowBeds = (() => {
     morning: { chords: [0, 3, 4, 0], lift: 12, dens: [2, 4] },
     day: { chords: [0, 5, 3, 4], lift: 12, dens: [2, 5] },
     afternoon: { chords: [0, 3, 0, 4], lift: 0, dens: [1, 3] },
+    trouble: { chords: [0], lift: 0, dens: [0, 1] }, // unease (below): it writes its own low notes
   }
 
   /** A bird's trill: two or three quick high notes, to and fro between two of the chord's (in key). */
@@ -79,9 +84,22 @@ const MeadowBeds = (() => {
         return out
       },
     },
+    // trouble about: low strings held, the harp's slow heartbeat a half step apart (the bulldozer's
+    // creep, slowed), a low clarinet sigh now and then; quiet, never a tune
+    unease: {
+      bpm: BPM,
+      bar(m, e, n, random) {
+        const low = TONIC - 12
+        const out = [{ inst: 'harp', midi: low, at: 0, vol: 0.26 }, { inst: 'harp', midi: low - 1, at: 2, vol: 0.2 }]
+        if (n % 2 === 0) out.push({ inst: 'strings', midi: TONIC, at: 0, vol: 0.09 }, { inst: 'strings', midi: TONIC - 5, at: 0, vol: 0.06 }) // a bare fifth: no third, neither glad nor sad
+        if (n % 4 === 3 && random() < 0.5) out.push({ inst: 'clarinet', midi: TONIC, at: 1, vol: 0.09 }, { inst: 'clarinet', midi: TONIC - 1, at: 2.5, vol: 0.08 })
+        if (random() < e * 0.5) out.push({ inst: 'harp', midi: low + 7, at: 3, vol: 0.12 }) // a busy child: a little more
+        return out
+      },
+    },
   }
 
-  const BY_MOOD = { morning: 'birdsong', day: 'meadow', afternoon: 'haze' }
+  const BY_MOOD = { morning: 'birdsong', day: 'meadow', afternoon: 'haze', trouble: 'unease' }
 
   return Bed.score({
     tonic: TONIC,

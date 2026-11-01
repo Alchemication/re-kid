@@ -41,8 +41,14 @@
 //   music (optional): { [step]: 'sad' | 'happy' | 'menace' | 'hush' }, the music's
 //     moment as that step starts (music.js: the theme sad at its trouble,
 //     happy as it comes right, stepping back at a fright). The theme comes
-//     curious as any encounter arrives, and happy as it is done unless a
-//     step has had it already.
+//     curious as any encounter arrives (unless its trouble starts as it
+//     does), and happy as it is done unless a step has had it already.
+//   trouble (optional): [from, until], the steps a threat is about (the
+//     bulldozer, the fox looming; until left out: to the end). From the
+//     start of step `from` to the start of step `until` the bed is uneasy
+//     (beds.js), between cues too: no glad music while it is still here
+//     (Adam, 2026-11-01). A tap or a cut doesn't lift it; only the story
+//     moving on does.
 //   engageMs (optional): left alone this long, he goes to it, or tries its
 //     next choice, himself (default ENGAGE_MS; the storm's friends stand in
 //     the rain, so he doesn't keep them waiting);
@@ -161,7 +167,7 @@ const Things = (() => {
     e.arrived = Clock.now()
     Debug.trace('arrives', { thing: e.name })
     e.appear()
-    api.music?.('curious')
+    api.music?.(e.trouble?.[0] === 0 ? 'hush' : 'curious') // a threat: the music steps back, and it opens with its own (the bulldozer's menace)
     if (e.urgent && !Debug.still && api.canBreakOff()) use(e.name, false)
     else api.notice?.(e.name)
   }
@@ -284,11 +290,15 @@ const Things = (() => {
     for (const e of Object.values(all)) if (e.out) e.night()
   }
 
+  /** Whether an encounter out now is in its trouble (`trouble`: the steps a threat is about). */
+  const inTrouble = (e) => e.out && !e.done && !!e.trouble && e.step >= e.trouble[0] && e.step < (e.trouble[1] ?? e.steps.length)
+  const troubled = () => Object.values(all).some(inTrouble)
+
   /** Every visitor out now, from every encounter. */
   const cast = () => Object.values(all).filter((e) => e.out).flatMap((e) => e.detail().cast)
 
   const stateOf = (e) => (e.done ? 'done' : !e.out ? null : e.ask && e.step >= e.steps.length ? 'choosing' : `step ${e.step}`)
   const state = () => Object.fromEntries(plan.map((p) => [p.name, stateOf(all[p.name]) || `at ${p.at}`]))
 
-  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, names: () => Object.keys(all), add, choose, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
+  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, names: () => Object.keys(all), add, choose, troubled, inTrouble, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
 })()

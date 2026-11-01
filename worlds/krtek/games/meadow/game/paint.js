@@ -452,6 +452,7 @@
   Things.add({
     name: 'paint',
     offer: 'helped',
+    trouble: [1, 5], // from the fox's coming till the monster sends it off: the bed uneasy (things.js)
     music: { 1: 'fox', 5: 'happy' }, // the fox: his sly motif (Music MOTIFS), then the effects lead; the monster sends it off
     appear,
     steps: [curious, foxComes, tumble, ghost, friendsPaint, monster, wash],

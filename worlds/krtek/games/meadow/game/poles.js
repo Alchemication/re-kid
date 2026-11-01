@@ -1,31 +1,32 @@
 // The poles and the bulldozer (to discover), after Krtek a buldozer, and
-// Eliot's "cones", told as the film tells it (Adam, 2026-11-01: the tiny
-// bulldozer far off was impossible to spot and did no harm, and birds
-// carrying the poles in looked ridiculous). A rumble: it won't wait for a
-// tap, so he drops what he is doing and hurries over to his flowers, the
-// view taking it in with him. Far off, a tiny bulldozer comes out from
-// behind the church on its hill and winds down the slope, tearing a road
-// in switchbacks (as the film's winds through the land, 5:06), into the
-// far trees. Then, small, it comes up over the meadow's far edge and down
-// its own winding road to us, growing, the road torn up behind it with
-// sand heaped along its edges, until it stands half as tall again as him,
-// puffing, its blade shoving a heap of earth (Krtek a buldozer 4:03-4:37),
-// and turns round to face his flowers (Adam, 2026-11-01: make the road as
-// it comes, winding and different each time; each play draws the road). From a rack on
-// its back it shoots red-and-white survey poles, thwip... ka-chunk, one by
-// one, in a line marching straight at his flowers: where it means to go.
-// He knocks on the one by his flowers: hm? Then he looks up at the
-// bulldozer and claps his hands to his face. He tugs out the
-// pole nearest it and throws it like a javelin: it sails off and plants
-// itself far up the hill, and the line bends away from his flowers. The
-// next one too, and each time the bulldozer lurches on. Then it rolls at
-// the last pole, the one by his flowers: he dives into the ground in its path and digs a pit, and
-// it nose-dives in, stuck, tracks spinning (the film's pit, 4:32). While
-// it is stuck he tugs at the last pole: it is stuck too, it pops, he
-// tumbles over, and the pole flies off on its own and lands just where it
-// should (the surprise). The bulldozer backs out and goes back up its
-// road, smaller and smaller, and over the far edge, and he cheers. Its
-// roads, the pit and the heap green over in about a minute; the poles stay out.
+// Eliot's "cones" (Adam, 2026-11-01: the tiny bulldozer far off was
+// impossible to spot and did no harm, birds carrying the poles in looked
+// ridiculous, and his throwing the poles changed nothing). One rule the
+// child can see: the bulldozer goes where its poles are, flattening them.
+//
+// A rumble: it won't wait for a tap, so he drops what he is doing and
+// hurries over to his flowers, the view taking it in with him. Far off, a
+// tiny bulldozer comes up over the church's hill, beside the church, and
+// winds down the slope, tearing a road in switchbacks (as the film's winds
+// through the land, 5:06), into the far trees. Then, small, it comes up over
+// the meadow's far edge and down its own winding road to us, growing, sand
+// heaped along its edges (each play draws the road), until it stands half as
+// tall again as him, puffing, its blade shoving a heap of earth (Krtek a
+// buldozer 4:03-4:37), and turns to face his flowers. From a rack on its back
+// it shoots red-and-white poles, thwip... ka-chunk, in a line marching
+// straight at his flowers. He knocks on the one by his flowers: hm? He looks
+// up at it and claps his hands to his face. It rolls to its first pole and
+// flattens it under its tracks: he winces. He pulls out the next and throws
+// it far up the hill: the bulldozer stops dead, puzzled, then turns on the
+// last, by his flowers, and comes on. He dives into the ground in its path
+// and digs a pit, and it nose-dives in, stuck, tracks spinning (the film's
+// pit, 4:32). Then he pulls its last pole (some plays it is stuck: it pops,
+// he tumbles over, and it flies off by itself) and throws it far up the
+// bulldozer's own road; and the bulldozer, true to its rule, backs out and
+// trundles off after it, up its road, smaller and smaller, and over the far
+// edge, and he cheers. Its roads, the pit and the heap green over in about a
+// minute. All the while it is here the bed is uneasy (things.js `trouble`);
+// the glad theme comes only once it is gone.
 //
 // A tap on a pole or on him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
 // (things.js): a pole in his hands is stood up where he is, the bulldozer
@@ -36,19 +37,23 @@
   const Y = Layout.GROUND
   // the line as the bulldozer shoots it, from just ahead of it to by his flowers...
   const LINE = [1760, 1520, 1330]
-  // ...and where they land when thrown: away up the hill, smaller with distance
-  // (left of the spring's rock, or right of it, never behind it)
-  const FAR = [{ x: 1500, y: 596, s: 0.38 }, { x: 1640, y: 606, s: 0.46 }, { x: 1975, y: 640, s: 0.62 }]
+  // ...the middle one, thrown, lands away up the hill, smaller with distance (left of the spring's rock,
+  // never behind it); the last lands up the bulldozer's own road, this far along it from the far edge
+  const THROWN = { x: 1640, y: 606, s: 0.46 }
+  const UP_ROAD = 0.35
+  const FLAT_MS = 450 // the pole toppling under it
+  const TUMBLE = 0.5 // in this share of plays the last pole is stuck, pops, and he tumbles over
   const SHOOT_EVERY_MS = 700 // the bulldozer shoots a pole this often…
   const SHOOT_MS = 750 // …each flying this long
   const RACK = { x: 22, y: -96 } // where they fly from: the rack on its back (its units)
   const THROW_MS = 900
-  // the bulldozer: big in front, coming over the far edge and down to the line's far end, lurching on as
-  // each pole goes, then at the last pole into the pit; away up the hill it goes small, over the edge
+  // the bulldozer: big in front, coming over the far edge and down to the line's far end, flattening its
+  // first pole, then at the last pole into the pit; away up the hill it goes small, over the edge
   // (about half as tall again as him: at 5.2, twice his height, it filled the screen, Adam 2026-11-01)
-  const DOZER = { s: 4, blade: 1850, lurch: 70 }
+  const DOZER = { s: 4, blade: 1850, lurch: 40 }
   const NOSE = 94 * DOZER.s // from the bulldozer's middle to its blade's edge, drawn at its size
   DOZER.stop = DOZER.blade + NOSE // where it stops, its blade just short of the line
+  const CRUSH_AT = LINE[0] + NOSE - 40 // where it stops on its first pole, its blade just past it
   const FAR_S = 0.22 // its size far off, at the meadow's far edge
   // its road: over the meadow's far edge here it comes down to us, and goes back up it (in the
   // painting's open stretch, painting.js OPEN, clear of the spring's stones and trees that hid it).
@@ -68,16 +73,18 @@
   // road winds down the slope in switchbacks, into the far trees, inside the hill's outline (each
   // play draws how many turns, how wide, how ragged)
   const HILL = {
-    top: [600, 386], // behind the church
+    over: [715, 452], // behind the hill, right of the church, clear of it (out from behind the church, it looked
+    top: [715, 429], // launched from it, Adam 2026-11-01)… up over the hill's shoulder (church.js: its outline)
     foot: [900, 600], // into the far trees
     middle: 560, // the hill's middle line…
     half: (y) => 88 + (y - 397) * 1.39, // …and its half width at y (church.js: its outline, near enough)
     turns: [3, 6], // this many switchbacks, from…to
     size: [0.1, 0.17], // the bulldozer up there, top and bottom
     depth: 3, // its road there drawn this much deeper than its size gives: up there, a hair's breadth was lost
-    ms: 7000, // all the way down
+    rise: 900, // up over the crest…
+    ms: 6000, // …and all the way down
   }
-  const PIT_X = 1600 // where he digs the pit, in its path: between the bulldozer and the last pole, by his flowers
+  const PIT_X = 1540 // where he digs the pit, in its path: between the bulldozer (its blade, CRUSH_AT, just clear of it) and the last pole, by his flowers
   const DIVE = { deg: -9, dy: 8 } // nose down into the pit (at its size, a few degrees take the blade well down)
   const HEAP = [0.45, 0.75] // the earth it shoves grows from this to this as it comes (bigger, it buried him)
   const SCAR_MS = 60000 // its track, the pit and the heap green over in about a minute
@@ -88,7 +95,7 @@
   let dozer = null
   let far = null // the tiny bulldozer far off on the church's hill, coming down
   const random = Debug.random('meadow-dozer') // its own stream: the road's winding and its sand
-  const state = { x: 0, stuck: false, pit: false, path: null, hill: false } // the bulldozer's place and whether it is in the pit
+  const state = { x: 0, stuck: false, pit: false, path: null, hill: false, tumble: false } // the bulldozer's place and whether it is in the pit
   let scrape = null // the ground it tears up pushing on along the ground
   const scars = [] // its track, the pit and the heap, left behind on the meadow
   const m = () => Things.meadow
@@ -318,8 +325,8 @@
     return points
   }
 
-  /** Far off first: a tiny bulldozer comes out from behind the church on its hill and winds down it,
-   * tearing its road in switchbacks, until the far trees hide it. He watches. */
+  /** Far off first: a tiny bulldozer comes up over the church's hill, beside the church, and winds down
+   * it, tearing its road in switchbacks, until the far trees hide it. He watches. */
   async function overTheHill() {
     if (state.hill) return // a cut, then this again: it is down already
     state.hill = true
@@ -328,12 +335,15 @@
     const path = switchbacks()
     const points = path.map(([x, y], n) => [x, y, HILL.size[0] + ((HILL.size[1] - HILL.size[0]) * n) / (path.length - 1)])
     const step = HILL.ms / (points.length - 1)
-    road(finer(points), { into, before: church, start: 0, step: step / FINER, depth: HILL.depth })
+    road(finer(points), { into, before: church, start: HILL.rise, step: step / FINER, depth: HILL.depth })
     far = drawDozer(into)
-    into.insertBefore(far, church) // it comes out from behind the church
-    far.style.transform = dozerAt(...points[0], -1)
-    Sound.rumble(HILL.ms / 1000, RUMBLE.far, RUMBLE.edge) // far off: faint, a little louder as it comes down
+    into.insertBefore(far, into.querySelector('.hill')) // behind the hill (church.js), below its crest…
+    far.style.transform = dozerAt(...HILL.over, HILL.size[0], -1)
+    Sound.rumble((HILL.rise + HILL.ms) / 1000, RUMBLE.far, RUMBLE.edge) // far off: faint, a little louder as it comes down
     try {
+      Mole.lookAt(View.fromDistant(HILL.over[0]))
+      await Motion.endAt(far, [{ transform: far.style.transform }, { transform: dozerAt(...points[0], -1) }], { duration: HILL.rise })
+      into.insertBefore(far, church) // …up over it, and on the slope, in front of the hill
       for (let n = 1; n < points.length; n++) {
         const [x, y, size] = points[n]
         const face = x > points[n - 1][0] ? -1 : 1 // it faces the way it goes
@@ -389,6 +399,7 @@
       stand(p, x, Y + 4, 1, 'things') // where it ends, so a cut (restore) leaves it planted…
       wrap.style.visibility = 'hidden' // …until it is shot
     })
+    state.tumble = random() < TUMBLE // this play's last pole: stuck, or not
     Sound.rumble(1.2, RUMBLE.far) // something far off: faint, and over before it comes
   }
 
@@ -451,10 +462,44 @@
     Sound.say('achJo')
   }
 
-  /** As a pole goes, the bulldozer lurches on along the line. */
-  async function lurch(alive, n) {
-    if (!alive() || state.stuck) return
-    await roll(Math.min(state.x, DOZER.stop - n * DOZER.lurch), 900)
+  /** It rolls to its first pole and flattens it under its tracks: he winces. The rule, seen: it goes
+   * where its poles are. */
+  async function crush(alive) {
+    const p = poles[0]
+    if (p.where !== 'line') return // flat already (a cut, then this again)
+    Mole.lookAt(state.x)
+    await roll(CRUSH_AT, 1500)
+    if (!alive()) return
+    flatten(p)
+    Sound.knock()
+    Sound.say(['gasp', 'fright'])
+    Mole.feel('squeezed', 900) // a wince
+    await Motion.endAt(p.wrap, [{ transform: `translate(${p.x}px, ${Y + 4}px) rotate(0deg)` }, { transform: lying(p) }], { duration: FLAT_MS, easing: 'ease-in' })
+    if (!alive()) return
+    await Mole.handsToFace(700)
+  }
+
+  /** Pole p flat on the ground under it, out of the story: it greens over with the road. */
+  function flatten(p) {
+    p.where = 'flat'
+    p.wrap.removeAttribute('data-thing')
+    const layer = document.getElementById('things')
+    layer.insertBefore(p.wrap, dozer) // under its tracks
+    p.wrap.style.transform = lying(p)
+    scars.push(p.wrap)
+  }
+  const lying = (p) => `translate(${p.x}px, ${Y + 4}px) rotate(90deg) scale(1, 0.7)` // toppled back under it, pressed flat
+
+  /** He pulls the next pole out and throws it far up the hill: the bulldozer stops dead, puzzled (where
+   * did it go?), then turns on the last, by his flowers, and comes on. */
+  async function throwOne(alive) {
+    await sendAway(alive, 1)
+    if (!alive() || state.x < CRUSH_AT) return // it came on already (a cut, then this again)
+    Sound.rumble(0.6)
+    const hull = dozer.querySelector('.hull')
+    await Motion.endAt(hull, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(4deg)', offset: 0.3 }, { transform: 'rotate(-2deg)', offset: 0.65 }, { transform: 'rotate(0deg)' }], { duration: 1100 }) // a puzzled rock, back and forth
+    if (!alive()) return
+    await roll(CRUSH_AT - DOZER.lurch, 900)
   }
 
   /** It rolls at the last pole: he dives into the ground in its path and digs a pit, and it nose-dives in. */
@@ -477,7 +522,7 @@
       if (!alive()) return
     }
     Mole.lookAt(PIT_X)
-    await roll(PIT_X + NOSE, 2200)
+    await roll(PIT_X + NOSE, 1400)
     if (!alive()) return
     state.stuck = true
     Debug.trace('bulldozer stuck')
@@ -508,11 +553,12 @@
     }
   }
 
-  /** Over to pole k (from the bulldozer's end: the last, k 2, is the one by his flowers), a tug or two,
-   * up over his head, and away it sails. Gone already (its step cut short after, and played again): nothing. */
+  /** Over to pole k (1, the middle one: away up the hill; 2, by his flowers: up the bulldozer's road),
+   * a tug or two, up over his head, and away it sails. Gone already (its step cut short after, and played
+   * again): nothing. */
   async function sendAway(alive, k, stuck = false) {
     const p = poles[k]
-    const far = FAR[k]
+    const far = k === 2 ? upItsRoad() : THROWN
     if (p.where === 'far') return
     if (p.where === 'line') {
       await m().goTo(p.x - 50)
@@ -561,14 +607,26 @@
     Debug.trace('pole far', { x: far.x })
   }
 
-  /** It backs out of the pit and follows the bent line away up the hill, smaller and smaller; it leaves
-   * its track, the pit and its heap, which green over. */
+  /** Where its last pole lands, thrown: up its own road, a way from the far edge (small, far off). */
+  function upItsRoad() {
+    const path = state.path || winding(way())
+    const [x, y, size] = path[Math.round((path.length - 1) * UP_ROAD)]
+    return { x, y, s: size / DOZER.s }
+  }
+
+  /** He pulls its last pole (stuck, some plays: it pops, he tumbles, it flies by itself) and throws it up
+   * the bulldozer's road; it backs out of the pit and trundles off after it, as its rule says, up its
+   * road, smaller and smaller, and over the far edge, and he cheers. It leaves its track, the pit and its
+   * heap, which green over. */
   async function away(alive) {
     if (!dozer) return
+    await sendAway(alive, 2, state.tumble)
+    if (!alive()) return
     if (state.stuck) {
+      Mole.lookAt(state.x)
       dozer.classList.remove('stuck')
       Sound.rumble(1)
-      await Motion.endAt(dozer.querySelector('.hull'), [{ transform: 'rotate(0deg) translateY(0px)' }], { duration: 600, easing: 'ease-out' })
+      await Motion.endAt(dozer.querySelector('.hull'), [{ transform: `rotate(${DIVE.deg}deg) translateY(${DIVE.dy}px)` }, { transform: 'rotate(0deg) translateY(0px)' }], { duration: 600, easing: 'ease-out' })
       state.stuck = false
       if (!alive()) return
     }
@@ -579,7 +637,7 @@
       if (alive()) await Mole.cheer()
     })()
     const [below] = way()
-    const back = [...(state.path || way().slice(1))].reverse().slice(1) // back up its winding road, the way it came
+    const back = [...(state.path || way().slice(1))].reverse().slice(1) // back up its winding road, the way it came, after its pole
     const step = (COME_MS - ROAD.legs[0]) / back.length
     let behind = false
     await travel([
@@ -629,6 +687,7 @@
     for (const p of poles) {
       if (p.where === 'line') stand(p, p.x, p.y, p.s, 'things') // planted, not in mid-air where its flight was cut short
       if (p.where === 'far') stand(p, p.x, p.y, p.s, 'far-things')
+      if (p.where === 'flat') p.wrap.style.transform = lying(p)
       if (p.where !== 'carried') continue
       Mole.carry(null)
       p.node.style.transform = ''
@@ -657,19 +716,9 @@
     offer: 'discover',
     urgent: true, // a bulldozer won't wait for a tap: he goes to see at once (things.js)
     engageMs: 3000, // when it can't break off his play (still waking), he goes to see soon: nothing shows till he does
-    music: { 3: 'sad' }, // the bulldozer's poles at his flowers, and he sighs (happy as it goes)
+    trouble: [0], // from its rumble till it is gone: the bed uneasy, and no glad theme (happy as it is done)
     appear,
-    steps: [
-      farOff,
-      comesIn,
-      shootsLine,
-      notice,
-      async (alive) => { await sendAway(alive, 0); await lurch(alive, 1) },
-      async (alive) => { await sendAway(alive, 1); await lurch(alive, 2) },
-      pit,
-      (alive) => sendAway(alive, 2, true),
-      away,
-    ],
+    steps: [farOff, comesIn, shootsLine, notice, crush, throwOne, pit, away],
     restore,
     night,
     detail: () => ({ poles: poles.map((p) => p.where), dozer: !!dozer, stuck: state.stuck, pit: state.pit, cast: [] }),

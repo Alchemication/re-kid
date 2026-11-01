@@ -44,7 +44,7 @@ const Church = (() => {
 
   /** The hill and the church on it. */
   function draw() {
-    el('path', { d: `M${X - 420} 660 C${X - 260} 520 ${X - 140} 384 ${X} 380 C${X + 150} 384 ${X + 280} 520 ${X + 440} 660 Z`, fill: '#a7c4ad', opacity: 0.9 }, layer)
+    el('path', { class: 'hill', d: `M${X - 420} 660 C${X - 260} 520 ${X - 140} 384 ${X} 380 C${X + 150} 384 ${X + 280} 520 ${X + 440} 660 Z`, fill: '#a7c4ad', opacity: 0.9 }, layer)
     const g = el('g', { class: 'church', opacity: 0.92 }, layer) // a touch of the haze between
     // the nave, its roof, a round window, a door
     el('rect', { x: X - 4, y: 330, width: 120, height: 52, fill: '#f4efe2', ...line }, g)

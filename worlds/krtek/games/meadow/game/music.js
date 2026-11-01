@@ -6,8 +6,9 @@
 //   happy as it comes right (things.js; each encounter says at which of its
 //   steps). When the bulldozer comes over the hill, a short uneasy turn
 //   (menace, Adam 2026-11-01), then the music steps back and its rumble
-//   leads; for the fox, a sly motif written note by note (MOTIFS); then
-//   quiet, as the films go quiet when trouble comes;
+//   leads; for the fox, a sly motif written note by note (MOTIFS); then,
+//   until the trouble is over, only the uneasy bed (beds.js `unease`,
+//   things.js `trouble`): no glad theme while the threat is still here;
 // - from dusk, the cricket's fiddle, one take after another until the
 //   circle closes.
 // A mood plays over quiet, or cuts short a weaker one (menace over happy
