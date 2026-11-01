@@ -348,10 +348,19 @@
         const [x, y, size] = points[n]
         const face = x > points[n - 1][0] ? -1 : 1 // it faces the way it goes
         Mole.lookAt(View.fromDistant(x))
-        await Motion.endAt(far, [{ transform: far.style.transform.replace(/scale\(-?[\d.]+, /, `scale(${size * face}, `) }, { transform: dozerAt(x, y, size, face) }], { duration: step })
+        const leg = Motion.endAt(far, [{ transform: far.style.transform.replace(/scale\(-?[\d.]+, /, `scale(${size * face}, `) }, { transform: dozerAt(x, y, size, face) }], { duration: step })
+        if (n < points.length - 1) {
+          await leg
+          continue
+        }
+        // the last, into the far trees, plays on while it comes up over the meadow's edge: the child never
+        // loses it between (Adam, 2026-11-01: it was out of sight for long)
+        const going = far
+        far = null
+        Debug.ignoreCut(leg.finally(() => going.remove()), 'into the far trees')
       }
     } finally {
-      far.remove() // down behind the far trees
+      if (far) far.remove() // cut short: down behind the far trees
       far = null
     }
   }
@@ -421,7 +430,8 @@
     await overTheHill()
   }
 
-  /** Over the meadow's far edge it comes, down its winding road to us, and turns to face his flowers. */
+  /** Over the meadow's far edge it comes (as the far one goes into the trees), down its winding road to
+   * us, and turns to face his flowers. */
   async function comesIn(alive) {
     m().frame(DOZER.stop)
     Mole.lookAt(DOZER.stop)
@@ -531,8 +541,9 @@
     if (!alive()) return
     dozer.classList.add('stuck') // tracks spinning, puffing hard (game.css)
     Sound.rumble(1.6)
-    Sound.say('giggle')
-    await Mole.cheer()
+    // stuck, but still here, puffing: he peeks at it, wary (no cheer till it has gone, Adam 2026-11-01)
+    Mole.feel('worried', 1400)
+    await Mole.lean(10, 900)
   }
 
   /** The pit, dug where he went down: earth flies, and a dark hole opens in the grass. */
@@ -574,8 +585,6 @@
         Sound.pop()
         Sound.say(['gasp', 'fright'])
         await Promise.all([fly(p, far, { x: p.x, y: Y - 80 }, 720), Mole.lean(-55, 1100)])
-        if (!alive()) return
-        Sound.say('giggle')
         return
       }
       p.where = 'carried'
@@ -632,10 +641,7 @@
     }
     leaveScars()
     Sound.rumble(4, RUMBLE.here, RUMBLE.far) // going away: fainter and fainter
-    const cheering = (async () => {
-      await Mole.cheer()
-      if (alive()) await Mole.cheer()
-    })()
+    Mole.lookAt(ROAD.x) // he watches it go
     const [below] = way()
     const back = [...(state.path || way().slice(1))].reverse().slice(1) // back up its winding road, the way it came, after its pole
     const step = (COME_MS - ROAD.legs[0]) / back.length
@@ -648,12 +654,14 @@
       }),
       [...below, 'beyond', ROAD.legs[0]], // over the edge, out of sight
     ])
-    await cheering
-    if (!alive()) return
     dozer.remove()
     dozer = null
     m().frame(null)
     for (const p of poles) p.wrap.removeAttribute('data-thing') // done: they're the meadow's now
+    if (!alive()) return
+    Sound.say('giggle') // gone: now he cheers
+    await Mole.cheer()
+    if (alive()) await Mole.cheer()
   }
 
   /** What it tore up stays where it was, on the meadow, and greens over. */
