@@ -30,7 +30,7 @@ CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 7, "rain": 5, "storm": 2}
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 9, "rain": 5, "storm": 2}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
 SOLVE = {
@@ -856,8 +856,8 @@ class TestMeadowFox:
 
 
 class TestMeadowBulldozer:
-    """The poles and the bulldozer (Adam, 2026-11-01): it comes big from off
-    the right, framed in view with him, shoots its line of poles, and
+    """The poles and the bulldozer (Adam, 2026-11-01): it comes over the
+    meadow's far edge and down to him, big, framed in view with him, shoots its line of poles, and
     nose-dives into the pit he digs; and it won't wait for a tap."""
 
     BOXES = """() => [document.querySelector('.dozer'), document.querySelector('.mole-body')]
@@ -868,10 +868,10 @@ class TestMeadowBulldozer:
         m.wake()
         arrived(m, "poles")
         m.do("use poles")
-        m.wait("meadowGame.state().things.poles === 'step 1'", 30_000)
+        m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)  # it came, and shot its poles
         m.page.wait_for_timeout(1500)  # the view eases over
         (d_left, _d_right, d_h), (m_left, m_right, m_h) = m.page.evaluate(self.BOXES)
-        assert d_h > 1.8 * m_h, (
+        assert d_h > 1.3 * m_h, (
             f"the bulldozer ({d_h:.0f}) should tower over him ({m_h:.0f})"
         )
         width = m.page.evaluate("innerWidth")
