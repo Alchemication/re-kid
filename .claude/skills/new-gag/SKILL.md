@@ -232,7 +232,13 @@ for, and update every caller, no shims.
 How, for each game: its file (section 4). Whichever the game, check that
 each beat reads without words, at phone size too. Check size and placement
 here, before writing tests: the first clock was too small to read and had
-to move. A visitor's faces: draw them all on a scratch page, beside the
+to move. Judge both from a screenshot of the scene, never from the
+numbers: a thing's size against the hero as drawn (a bulldozer meant to
+tower over him came out his height twice, at two scales that "should"
+have been enough), and whether the view shows each beat at all (it
+followed the hero while the bulldozer arrived off-screen). Anything the
+child must see happen where the hero isn't needs the view to take it in
+(the game's map says how). A visitor's faces: draw them all on a scratch page, beside the
 film frames they come from, before putting them in the scene. Check that
 each photo shows what the trace says happened: a look that photographed
 the wrong moment once passed for a working gag. Stills can't judge timing
