@@ -406,7 +406,7 @@
     await m().goTo(WATCH_X)
     if (!alive()) return
     m().frame(DOZER.stop) // the view between him and where it will stand, so the child sees it come
-    if (!state.hill) m().music('menace') // trouble coming: a short uneasy turn, then the rumble leads
+    if (!state.hill) m().music(Layout.flags.menace === 'notes' ? 'bulldozer' : 'menace') // trouble coming: a short uneasy turn (recorded; or written, to compare), then the rumble leads
     await overTheHill()
   }
 

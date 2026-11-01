@@ -57,7 +57,8 @@ by ear.
   | Someone needs help | sad, gently, never frightening |
   | Help works | back fuller and happier: the moment the music swells |
   | The bulldozer coming | a short uneasy turn (menace), then the music steps back and its rumble leads |
-  | Trouble, a fright (the fox) | the music steps back, effects lead |
+  | The fox | a sly motif written note by note on the meadow's samples (clarinet, harp), then the music steps back |
+  | A fright | the music steps back, effects lead |
   | Dusk to sleep | the cricket's fiddle, not the theme |
   | Next morning (the start) | the theme fades back in |
 
@@ -119,4 +120,8 @@ by ear.
   (`pieces.py` `meadow-menace`, board folder "krtek menace").
   Picked 2026-11-01: keeps 01, 08, 10, 12 (menace/01-04). Adam: "it can
   work for a bulldozer, but may not work for each scary-ish encounter",
-  so the fox keeps the plain quiet; another trouble gets its own.
+  so another trouble gets its own. Adam then wondered whether "even
+  synth could be better" for these: motifs written note by note on the
+  meadow's samples (`music.js` `MOTIFS`, no takes to load) now play for
+  the fox, and for the bulldozer with `?menace=notes`, to compare with its
+  recorded takes. Not yet heard.

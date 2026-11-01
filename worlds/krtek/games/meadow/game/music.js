@@ -6,8 +6,8 @@
 //   happy as it comes right (things.js; each encounter says at which of its
 //   steps). When the bulldozer comes over the hill, a short uneasy turn
 //   (menace, Adam 2026-11-01), then the music steps back and its rumble
-//   leads; at a fright (the fox) the music just steps back, as the films
-//   go quiet when trouble comes;
+//   leads; for the fox, a sly motif written note by note (MOTIFS); then
+//   quiet, as the films go quiet when trouble comes;
 // - from dusk, the cricket's fiddle, one take after another until the
 //   circle closes.
 // A mood plays over quiet, or cuts short a weaker one (menace over happy
@@ -17,7 +17,7 @@
 // and comes back after; the game says the moment and how busy the child is
 // (bed.set). It stops at dusk, for the cricket.
 
-/* global Debug, Ensemble, MeadowBeds, SAMPLES, Sound, Takes, TUNES */
+/* global Clock, Debug, Ensemble, MeadowBeds, SAMPLES, Sound, Takes, TUNES */
 /* exported Music */
 const Music = (() => {
   const VOLUME = 0.45 // the music under his voice and the effects
@@ -26,6 +26,25 @@ const Music = (() => {
   const CRICKET_GAP_S = 0.6 // between one of the cricket's takes and the next
   const RANK = { morning: 0, curious: 1, sad: 2, happy: 3, menace: 4 } // a mood cuts short only a weaker one
   const PARTS = ['morning', 'curious', 'sad', 'happy', 'menace', 'lullaby'] // the parts it plays (tunes.yaml)
+  // Motifs written note by note on the meadow's own samples (no takes to load: Adam, 2026-11-01, "even
+  // synth could be better"): a few seconds as trouble comes, then quiet. [instrument, midi note, at s, loudness]
+  const MOTIFS = {
+    // the bulldozer: a low clarinet creeping between two neighbouring notes, slow, then quicker and
+    // quicker as it comes, over soft low strings; a low held chord as it arrives
+    bulldozer: [
+      ['strings', 52, 0, 0.35], ['clarinet', 52, 0, 0.7], ['clarinet', 53, 0.9, 0.7], ['clarinet', 52, 1.7, 0.7],
+      ['clarinet', 53, 2.4, 0.75], ['strings', 52, 2.4, 0.35], ['clarinet', 52, 3.0, 0.75], ['clarinet', 53, 3.5, 0.8],
+      ['clarinet', 52, 3.9, 0.8], ['clarinet', 53, 4.25, 0.85], ['clarinet', 52, 4.55, 0.85], ['clarinet', 53, 4.8, 0.9],
+      ['strings', 52, 5.1, 0.5], ['strings', 55, 5.1, 0.45], ['clarinet', 52, 5.1, 0.8],
+    ],
+    // the fox: a sly little turn, slinking down and back on the clarinet over a few dark harp notes
+    fox: [
+      ['harp', 40, 0, 0.6], ['clarinet', 59, 0, 0.6], ['clarinet', 58, 0.45, 0.6], ['clarinet', 59, 0.9, 0.6],
+      ['harp', 47, 0.9, 0.5], ['clarinet', 55, 1.4, 0.65], ['harp', 40, 1.9, 0.6], ['clarinet', 54, 1.9, 0.7], ['harp', 39, 2.6, 0.6],
+    ],
+  }
+  const MOTIF_VOLUME = 0.9 // a motif against the takes (both under the effects)
+  const MOTIF_TAIL_S = 2 // after its last note, the bed comes back over about this long
 
   let takes = null // the takes' player (takes.js)
   let band = null // the samples and the bed (ensemble.js)
@@ -70,11 +89,13 @@ const Music = (() => {
    * An encounter's moment: 'curious', 'sad', 'happy' or 'menace' (a take
    * of that mood, if it wins over what plays; trouble coming: a short uneasy
    * turn, then quiet), or 'hush' (a fright: what plays fades and the
-   * effects lead). A mood with no takes yet fades what plays, as a hush.
+   * effects lead), or a motif's name (MOTIFS: a few written notes as
+   * trouble comes). A mood with no takes yet fades what plays, as a hush.
    */
   function cue(part) {
     if (!loading || night) return // no tap yet: no sound
     if (!ready) return void loading.then(() => cue(part)) // still loading (an encounter arriving as he wakes)
+    if (MOTIFS[part]) return motif(part)
     if (part === 'hush') {
       if (takes.playing) Debug.trace('music', { part })
       takes.fade()
@@ -85,6 +106,21 @@ const Music = (() => {
     const wait = now ? takes.FADE_S + 0.2 : LEAD_S // once the weaker one has faded
     takes.fade()
     play(part, wait)
+  }
+
+  /** A motif (MOTIFS) as trouble comes: what plays fades, the bed steps back, its notes play, and after
+   * them the bed comes back. */
+  function motif(name) {
+    const t = ctx.currentTime + (takes.playing ? takes.FADE_S : LEAD_S)
+    takes.fade()
+    bed.away(t)
+    let last = 0
+    for (const [inst, midi, at, vol] of MOTIFS[name]) {
+      band.play(inst, midi, t + at, vol * MOTIF_VOLUME)
+      last = Math.max(last, at)
+    }
+    Debug.trace('music', { motif: name })
+    Clock.after((t - ctx.currentTime + last + MOTIF_TAIL_S) * 1000, () => { if (!night && !takes.playing) bed.back() })
   }
 
   /** Dusk: the cricket fiddles, take after take, until quiet(). */

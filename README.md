@@ -219,7 +219,8 @@ once, even in a `?still` play (which otherwise has none), and `?critters=snail` 
 under the wild flowers wet from the start, `?critters=fireflies` the dusk's fireflies, at once and in daylight too; `?wind=gust` brings a strong gust that carries leaves or
 seeds three seconds after he wakes; `?eclipse=11` an eclipse at 11:00 (with `?day=60`, 15 s in), `?eclipse=now` one as he
 wakes (the sun is still behind the trees then); `?props=storm&soon` brings the storm and the
-umbrella as he wakes. In the console, `meadowGame.state()`,
+umbrella as he wakes; `?menace=notes` plays the bulldozer's motif written note by note on the
+meadow's samples, instead of its recorded takes, to compare. In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 
 In the yard's console: `yardGame.state()`, `yardGame.trace()`, `yardGame.act('nap')`,
