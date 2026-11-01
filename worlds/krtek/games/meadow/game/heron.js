@@ -16,7 +16,7 @@
 //
 // ?critters=heron asks for it at once; a still play has none unless asked.
 
-/* global Ambient, Clock, Creature, Debug, Motion, WildArt, World */
+/* global Ambient, Clock, Creature, Debug, Motion, Sound, WildArt, World */
 /* exported Heron */
 const Heron = (() => {
   const POND = { x: 640, y: 650, rx: 110, ry: 12 } // at the meadow's far edge behind his home end, where the child looks most; clear of the poles' hill and the spring
@@ -127,10 +127,11 @@ const Heron = (() => {
     if (now) look(true)
   }
 
-  /** A tap on it: it lifts its head, and flies off. */
+  /** A tap on it: it lifts its head, and flies off, croaking. */
   function tap() {
     if (!heron) return null
     heron.c.tapped = true
+    Sound.heron()
     return { x: heron.c.x }
   }
 

@@ -332,6 +332,17 @@ const Sound = (() => {
     hiss(0, 0.25, 300, 1, 0.2)
   }
 
+  // The far wildlife's voices (wildlife.js, flock.js, heron.js): recorded takes, soft and far off, or
+  // nothing at all: far away, silence is better than a synth standing in
+  /** A finch in the far trees: a soft chirp. */
+  const chirp = () => { if (ready()) recorded('chirp') }
+  /** The heron taking off: one hoarse croak. */
+  const heron = () => { if (ready()) recorded('heron') }
+  /** A wild boar rooting, or tapped: a short grunt. */
+  const grunt = () => { if (ready()) recorded('grunt') }
+  /** The żubr, tapped: one slow, deep snort. */
+  const snort = () => { if (ready()) recorded('snort') }
+
   /** A splash: into a tin of paint, or the spring. */
   function splash() {
     if (!ready()) return
@@ -402,5 +413,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, dig, pop, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind }
+    say, dig, pop, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort }
 })()

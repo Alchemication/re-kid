@@ -86,6 +86,52 @@ SOUNDS: dict[str, dict] = {
             "a scared little yip-yip of a fox jumping with fright, funny, not painful",
         ],
     },
+    # The far wildlife (2026-11-01, wildlife.js, flock.js, heron.js): all far
+    # off, so every sound soft and distant, never in the foreground.
+    "krtek-chirp": {
+        "world": "krtek",
+        "id": "chirp",
+        "for": "A finch in the far trees, now and then: one short soft chirp or two, far off across a meadow.",
+        "seconds": 1.0,
+        "prompts": [
+            "a small finch chirping once or twice, distant, soft, across a quiet summer meadow, no other birds",
+            "a bullfinch's soft piping call, far away in the trees, gentle, a single short phrase",
+            "one little songbird's quiet tweet from a far tree line, calm countryside, very soft",
+        ],
+    },
+    "krtek-heron": {
+        "world": "krtek",
+        "id": "heron",
+        "for": "The grey heron at the far pond, taking off: one hoarse croak, far away.",
+        "seconds": 1.2,
+        "prompts": [
+            "a grey heron's single hoarse croak as it takes off, distant, across a meadow",
+            "a heron calling once, a harsh low frank, far away over a pond, calm",
+            "a large wading bird's rough croak in the distance, one call, soft",
+        ],
+    },
+    "krtek-grunt": {
+        "world": "krtek",
+        "id": "grunt",
+        "for": "The wild boar far off, rooting, or tapped: a short soft grunt; the piglets a tiny squeak.",
+        "seconds": 1.0,
+        "prompts": [
+            "a wild boar's short low grunt while rooting, distant, soft, in a meadow",
+            "a mother wild boar grunting gently and her piglets squeaking, far away, short",
+            "a pig-like snuffle and grunt from far across a field, calm, one short sound",
+        ],
+    },
+    "krtek-snort": {
+        "world": "krtek",
+        "id": "snort",
+        "for": "The żubr far off, tapped: he looks back and blows one slow, deep snort, unbothered.",
+        "seconds": 1.4,
+        "prompts": [
+            "a bison's slow deep snort, distant, calm, one breath out through the nose",
+            "a large cow-like animal blowing a long low snort far away in a meadow, unbothered",
+            "a European bison's soft low grunt and snort in the distance, single, peaceful",
+        ],
+    },
     # winter (2026-10-27): the snowman's encounters and the ice
     "pat": {
         "for": "Snow patted in mittened hands: the boy packing a snowball, or a snowman's head (snowplay.js, snowman.js). Called every 0.2-0.26 s, four or five times running.",

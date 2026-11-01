@@ -27,7 +27,7 @@
 // play's own; a still play (?still) has none unless asked. The draws are made
 // either way, so asking shifts nothing else.
 
-/* global Ambient, Clock, Creature, Debug, WildArt, World */
+/* global Ambient, Clock, Creature, Debug, Sound, WildArt, World */
 /* exported Wildlife */
 const Wildlife = (() => {
   const FAR = { y: 642, k: 0.3 } // along the meadow's far edge, at this size (the bushes start at 628: painting.js)…
@@ -218,6 +218,8 @@ const Wildlife = (() => {
     const h = herd
     h.lookAll = Clock.now() + TAP_LOOK_MS + (KINDS[h.kind].tapFlees ? 0 : 1600)
     Debug.trace('wild tapped', { kind: h.kind })
+    if (h.kind === 'boar') Sound.grunt()
+    if (h.kind === 'bison') Sound.snort()
     if (KINDS[h.kind].tapFlees) Clock.after(TAP_LOOK_MS, () => { if (herd === h) h.c.tapped = true })
     return { x: h.c.x }
   }

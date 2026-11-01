@@ -15,7 +15,7 @@
 // They are there as the day starts, sitting in the trees. A still play
 // (?still) has none, unless ?critters=flock asks for them.
 
-/* global Ambient, Clock, Creature, Debug, Painting, WildArt, World */
+/* global Ambient, Clock, Creature, Debug, Painting, Sound, WildArt, World */
 /* exported Flock */
 const Flock = (() => {
   const BIRDS = [3, 5] // how many live in the far trees (each play draws)
@@ -24,6 +24,7 @@ const Flock = (() => {
   const BACK_MS = [4000, 9000] // …then one comes back about this often
   const LOOK_MS = 2000 // how often the flock looks whether one may come back
   const SCARY = ['rumble', 'thunder', 'vroom'] // what sends them off, and keeps them away a while
+  const CHIRPS = 0.3 // this share of landings come with a chirp: now and then, never a chorus
   const BIRD = {
     speed: 170, flee: 2.4, turn: 4, blown: 0.2, // a quick flit; scared, off fast; a gust nudges them
     stayMs: [600000, 900000], // they live here: they go only when scared, or at dusk
@@ -58,6 +59,7 @@ const Flock = (() => {
     out.set(id, { c, g })
     Ambient.add(c, {
       name: 'flock', id, rnd: flits,
+      arrived: (b, kind) => { if (kind === 'feed' && flits() < CHIRPS) Sound.chirp() }, // landed in a crown: now and then a chirp
       draw: (b) => {
         const perched = b.goal?.kind === 'feed' && Math.hypot(b.vx, b.vy) < 8
         if (g.flying !== !perched) g.classList.toggle('flying', (g.flying = !perched))
