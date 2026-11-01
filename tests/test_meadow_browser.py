@@ -30,7 +30,7 @@ CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 5, "poles": 5, "rain": 5, "storm": 2}
+ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 5, "rain": 5, "storm": 2}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
 SOLVE = {
@@ -793,7 +793,55 @@ class TestMeadowFox:
         )
         m.wait("meadowGame.state().things.paint === 'done'", 90_000)
         assert not m.page.evaluate("Nest.alarmed"), "the chicks still peep the alarm"
+        trace = m.page.evaluate("meadowGame.trace()")
+        assert trace.index('"alarmed":true') < trace.index(" red"), (
+            "he fell in the paint before the fox came to frighten him"
+        )
+        assert m.page.evaluate("meadowGame.detail('paint').ending") == "ran", (
+            "the first time, the fox runs, as in the film"
+        )
         m.wait_free()
+        m.assert_settled()
+
+    def test_told_again_the_fox_may_end_a_friend_and_the_tins_go(
+        self, meadow: callable
+    ) -> None:
+        """The tins tapped again tell the story again; as chance has it the
+        fox runs, or is sorry and goes off with the friends, and then the
+        hare and the mouse carry the tins off (seed 1: ran, then friends)."""
+        m = self.fox_at_the_nest(meadow)
+        m.wait("meadowGame.state().things.paint === 'done'", 90_000)
+        m.wait_free()
+        for _ in range(4):
+            m.do("use paint")
+            m.wait("meadowGame.state().busy", 5000)
+            m.wait_free(90_000)
+            if m.page.evaluate("meadowGame.detail('paint').ending") == "friends":
+                break
+        detail = m.page.evaluate("meadowGame.detail('paint')")
+        assert detail["ending"] == "friends", detail
+        assert "fox befriended" in m.page.evaluate("meadowGame.trace()")
+        assert not m.page.evaluate("Nest.alarmed")
+        m.wait("document.querySelectorAll('.tin').length === 0", 20_000)
+        m.assert_settled()
+
+    def test_told_again_cut_short_then_tapped_it_carries_on(
+        self, meadow: callable
+    ) -> None:
+        m = self.fox_at_the_nest(meadow)
+        m.wait("meadowGame.state().things.paint === 'done'", 90_000)
+        m.wait_free()
+        m.do("use paint")
+        m.wait("document.querySelector('.friend.fox') && Nest.alarmed", 10_000)
+        m.do("go to 600")
+        m.wait_free()
+        m.wait("!Nest.alarmed && !document.querySelector('.friend.fox')", 10_000)
+        m.do("use paint")
+        m.wait("meadowGame.state().busy", 5000)
+        m.wait_free(90_000)
+        detail = m.page.evaluate("meadowGame.detail('paint')")
+        assert detail["told"] == 2 and not detail["red"], detail
+        assert not m.page.evaluate("Nest.alarmed")
         m.assert_settled()
 
     def test_cut_short_the_chicks_settle(self, meadow: callable) -> None:

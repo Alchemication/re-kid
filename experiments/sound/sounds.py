@@ -37,6 +37,31 @@ SOUNDS: dict[str, dict] = {
             "a mischievous low snigger, hehehe, a crafty animal pleased with his plan, short and playful, not scary",
         ],
     },
+    # The fox looming over the nest, then sent running (2026-11-01: Adam
+    # wants him a bit scary at first, then small and scared): a little
+    # spooky is fine, but comic.
+    "krtek-growl": {
+        "world": "krtek",
+        "id": "growl",
+        "for": "The fox rears up over the birds' nest, teeth bared: one low menacing growl, a cartoon baddie's.",
+        "seconds": 1.5,
+        "prompts": [
+            "a cartoon fox growling low through bared teeth, a short menacing grrr, comic villain, dry studio recording",
+            "a sly fox's low rumbling growl, a little spooky but playful, from a 1970s Eastern European children's cartoon",
+            "a crafty animal growling softly as it creeps closer, one short throaty grrr, theatrical, not too loud",
+        ],
+    },
+    "krtek-yelp": {
+        "world": "krtek",
+        "id": "yelp",
+        "for": "The fox, frightened by the painted monster: a startled yelp as he jumps, then runs off.",
+        "seconds": 1.2,
+        "prompts": [
+            "a startled cartoon fox yelping in fright, a high squeaky yip, comic",
+            "a frightened fox's short yelp and whimper as it turns to run, from a 1970s Eastern European children's cartoon",
+            "a scared little yip-yip of a fox jumping with fright, funny, not painful",
+        ],
+    },
     # winter (2026-10-27): the snowman's encounters and the ice
     "pat": {
         "for": "Snow patted in mittened hands: the boy packing a snowball, or a snowman's head (snowplay.js, snowman.js). Called every 0.2-0.26 s, four or five times running.",
@@ -321,25 +346,33 @@ VOICES: dict[str, dict] = {
         'the word "ahoj!", a cheerful hello',
         "ahoj",
     ),
-    "krtek-hele": _voice("look, he has found something", "hele!", 'the word "hele!"', "hele"),
+    "krtek-hele": _voice(
+        "look, he has found something", "hele!", 'the word "hele!"', "hele"
+    ),
     "krtek-je": _voice("delight", "jé!", 'the word "jé!", delighted', "je"),
-    "krtek-ooh": _voice("discovery", "óóó!", 'an excited little "ooh!" of discovery', "ooh"),
+    "krtek-ooh": _voice(
+        "discovery", "óóó!", 'an excited little "ooh!" of discovery', "ooh"
+    ),
     "krtek-giggle": {
         **_voice("a happy giggle", "hihihi!", "a short happy giggle", "giggle"),
         # many kinds of giggle (Adam, 2026-10-31): each its own wording
         "prompts": [
             *_voice("", "hihihi!", "a short happy giggle")["prompts"],
             _MOLE + "The sound is a tiny shy giggle through closed lips.",
-            _MOLE + "The sound is a bubbly delighted little laugh, two or three high hee-hees.",
+            _MOLE
+            + "The sound is a bubbly delighted little laugh, two or three high hee-hees.",
             _MOLE + "The sound is a ticklish squealing giggle, quick and bright.",
-            _MOLE + "The sound is a soft chuckle at something funny, short and breathy.",
+            _MOLE
+            + "The sound is a soft chuckle at something funny, short and breathy.",
         ],
     },
     "krtek-fright": _voice("a fright", "jéje!", "a tiny squeak of fright", "fright"),
     # Adam, 2026-10-31: "tam!" as he points at something; gasps; little
     # questioning sounds
     "krtek-tam": {
-        **_voice("pointing: there!", "tam!", 'the word "tam!", pointing eagerly: there!'),
+        **_voice(
+            "pointing: there!", "tam!", 'the word "tam!", pointing eagerly: there!'
+        ),
         "id": "tam",
     },
     "krtek-gasp": {
@@ -347,8 +380,10 @@ VOICES: dict[str, dict] = {
         "id": "gasp",
         "seconds": 0.8,
         "prompts": [
-            _MOLE + "The sound is a tiny sharp gasp of surprise, a quick intake of breath.",
-            _MOLE + "The sound is a soft delighted gasp of wonder, a breathy little \"ah!\".",
+            _MOLE
+            + "The sound is a tiny sharp gasp of surprise, a quick intake of breath.",
+            _MOLE
+            + 'The sound is a soft delighted gasp of wonder, a breathy little "ah!".',
             "A little girl gasps once, a short surprised intake of breath, as a cartoon animal would: breathy, dry studio recording, no reverb.",
         ],
     },
@@ -356,9 +391,23 @@ VOICES: dict[str, dict] = {
         **_voice("a little question", "hm?", "a curious questioning hm"),
         "id": "hm",
         "prompts": [
-            _MOLE + "The sound is a short curious questioning \"hm?\", rising at the end.",
+            _MOLE
+            + 'The sound is a short curious questioning "hm?", rising at the end.',
             _ADAM + 'The word is "co?", asked, curious and puzzled.',
             'A little girl asks a puzzled "hmm?" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.',
+        ],
+    },
+    # 2026-11-01: all red from the paint, he plays a ghost at the fox
+    # (paint.js): a child's pretend-spooky "uuuu", more funny than frightening.
+    "krtek-ghost": {
+        **_voice("playing a ghost", "uuuu!", "a pretend-spooky ghost wail"),
+        "id": "ghost",
+        "seconds": 1.8,
+        "prompts": [
+            _MOLE
+            + 'The sound is a long wobbly pretend-ghost "uuuuu!", a child playing at being spooky.',
+            'A little girl pretending to be a ghost, a wavering "woooo-ooo!" with her arms up, playful and funny, dry studio recording, no reverb.',
+            'A small cartoon creature trying to sound scary, a squeaky wobbling "boooo!", more cute than frightening, short, dry studio recording.',
         ],
     },
 }

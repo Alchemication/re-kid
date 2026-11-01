@@ -34,6 +34,7 @@ const Mole = (() => {
   const IDLE_MS = [2600, 5200] // left standing, now and then he looks about: another view, the other way
   const POINT_MS = 700 // pointing at something, held this long
   const POINT_REACH = 1.45 // …his arm stretched out this much longer, a cartoon reach: his own short arm read as a wave
+  const GHOST_ARMS = 95 // playing a ghost, his arms flung out wide: any higher, his short arms read as hands to his face
   const PERK_MS = 650 // his hairs springing up when he notices something, and settling
   // His faces, after Krtek a autíčko's close-ups (moleart.js face): the mouth's numbers (open 0-1, curve
   // -1 corners down to +1 up, width, round, chin) and the brows' (lift, tilt > 0 worried), in plain numbers so
@@ -573,6 +574,24 @@ const Mole = (() => {
     await Motion.endAt(near, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${sign * -80}deg)`, offset: 0.15 }, { transform: `rotate(${sign * -45}deg)`, offset: 0.35 }, { transform: `rotate(${sign * -80}deg)`, offset: 0.55 }, { transform: `rotate(${sign * -45}deg)`, offset: 0.75 }, { transform: 'rotate(0deg)' }], { duration: 900 })
   }
 
+  /** Playing a ghost, all red (Krtek malířem 1:58-2:04, the red blob that frightens the fox): turned to us,
+   * arms up, mouth round, swaying side to side (hop: bobbing up and down on the spot instead). */
+  async function ghost(ms = 1600, hop = false) {
+    if (state.holdsUp) return
+    show('front')
+    const v = cur()
+    feel('ooh', ms + 400)
+    const frames = hop
+      ? [0, -22, 0, -22, 0, -22, 0].map((y) => ({ transform: `translateY(${y}px)` }))
+      : [0, -12, 12, -12, 12, 0].map((d) => ({ transform: `rotate(${d}deg)` }))
+    try {
+      await arms(GHOST_ARMS, -GHOST_ARMS, 300, v)
+      await Motion.endAt(tilt, frames, { duration: ms, easing: 'ease-in-out' })
+    } finally {
+      await arms(state.pose === 'out' ? 0 : ARMS.rim, state.pose === 'out' ? 0 : -ARMS.rim, 220, v)
+    }
+  }
+
   /** Shake what he holds overhead: it wobbles in his hands. */
   async function wobble(ms = 900) {
     const at = carrySlot.style.transform || 'translate(0px, -200px)'
@@ -612,5 +631,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, listen }
+  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
 })()

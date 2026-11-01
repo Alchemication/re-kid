@@ -7,7 +7,7 @@
 // nearer edge of the screen (the mouse ducks into her hole) and only then is
 // gone (leave()); gone() at once is for bedtime, under the closing circle.
 
-/* global Debug, DOMMatrixReadOnly, Layout, Motion, View */
+/* global Debug, DOMMatrixReadOnly, FoxArt, Layout, Motion, View */
 /* exported Friends */
 const Friends = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -90,49 +90,7 @@ const Friends = (() => {
       el('path', { d: 'M-56 -88 q4 10 10 2', fill: '#d8322b' }, head)
       return head
     },
-    fox(g) {
-      // Standing up like a person, about twice the mole's height, as the films draw him (Krtek malířem
-      // 1:00-1:30, three times there): a big bushy tail with a white tip, a white chest and a jagged
-      // white ruff round a sly face, legs in dark socks, his paws together in front to rub. Up to no good
-      // at a glance: a half-shut eye, a toothy grin, a tongue to lick his lips (Adam, 2026-10-31: the
-      // small fox on all fours read as a new friend).
-      const orange = { fill: '#c8642a', ...line }
-      const sock = { fill: '#3a2414', ...line, 'stroke-width': 2 }
-      el('path', { d: fluffy(84, -196, 30, 74, 10, 0.12), ...orange, transform: 'rotate(32 84 -196)' }, g) // the tail
-      el('path', { d: fluffy(124, -258, 18, 20, 8, 0.2), fill: '#fbf8ef', ...line, 'stroke-width': 2 }, g)
-      for (const x of [-12, 18]) {
-        el('ellipse', { cx: x, cy: -104, rx: 20, ry: 40, ...orange }, g) // a thigh
-        el('path', { d: `M${x - 9} -74 L${x - 7} -12 L${x + 7} -12 L${x + 9} -74 Z`, ...sock }, g)
-        el('ellipse', { cx: x - 14, cy: -7, rx: 20, ry: 8, ...sock }, g) // a foot, to the front
-      }
-      const body = el('g', { transform: 'rotate(-12 0 -120)' }, g) // hunched forward: sneaking
-      el('ellipse', { cx: 0, cy: -190, rx: 46, ry: 84, ...orange }, body)
-      el('ellipse', { cx: -18, cy: -196, rx: 24, ry: 58, fill: '#fbf8ef' }, body)
-      const paws = el('g', { class: 'paws' }, g)
-      paws.style.transformOrigin = '-24px -244px'
-      for (const [sx, px, py] of [[-6, -54, -204], [-34, -46, -196]]) {
-        el('path', { d: `M${sx} -248 Q${sx - 30} -238 ${px} ${py}`, fill: 'none', stroke: INK, 'stroke-width': 17, 'stroke-linecap': 'round' }, paws)
-        el('path', { d: `M${sx} -248 Q${sx - 30} -238 ${px} ${py}`, fill: 'none', stroke: '#c8642a', 'stroke-width': 12, 'stroke-linecap': 'round' }, paws)
-        el('circle', { cx: px, cy: py, r: 8, ...sock }, paws)
-      }
-      const head = el('g', { class: 'head' }, g)
-      const face = el('g', { transform: 'translate(-10 -262) scale(1.35) translate(10 262)' }, head) // a big head, as the films': about the neck
-      for (const x of [-24, 6]) {
-        el('path', { d: `M${x} -315 l-6 -36 l22 24 z`, ...orange }, face)
-        el('path', { d: `M${x - 4} -335 l-2 -14 l9 9 z`, fill: '#3a2414' }, face)
-      }
-      el('path', { d: fluffy(-14, -285, 40, 30, 13, 0.24), fill: '#fbf8ef', ...line, 'stroke-width': 2 }, face)
-      el('path', { d: 'M8 -307 C16 -285 0 -271 -24 -269 L-64 -281 C-52 -295 -34 -313 8 -307 Z', ...orange }, face)
-      el('circle', { cx: -66, cy: -281, r: 5.5, fill: INK }, face)
-      el('ellipse', { cx: -20, cy: -295, rx: 7, ry: 5, fill: '#fff', ...line, 'stroke-width': 1.5 }, face)
-      el('circle', { cx: -23, cy: -294, r: 3, fill: INK }, face)
-      el('path', { d: 'M-27 -295 A7 5 0 0 1 -13 -295 Z', ...orange, 'stroke-width': 1.5 }, face) // a half-shut lid: sly
-      el('path', { d: 'M-32 -303 l16 -2', stroke: INK, 'stroke-width': 2.5, 'stroke-linecap': 'round' }, face)
-      el('path', { class: 'tongue', d: 'M-52 -270 q5 9 12 1', fill: '#e8788a', stroke: INK, 'stroke-width': 1.5, style: 'display: none' }, face)
-      el('path', { d: 'M-62 -275 q20 12 40 -2 q-20 4 -40 2 Z', fill: '#fff', ...line, 'stroke-width': 2 }, face) // the grin
-      el('path', { d: 'M-56 -273 l3 4 l3 -4 l3 4 l3 -4 l3 4 l3 -4 l3 4 l3 -4 l3 4', fill: 'none', stroke: INK, 'stroke-width': 1.2 }, face) // teeth
-      return head
-    },
+    fox: (g) => FoxArt.draw(g, { el, fluffy }), // foxart.js
     bullfinch(g) {
       // the films' bird (Krtek a buldozer's opening): grey back, red-orange breast and cheeks, a black cap,
       // black wings with a white bar and a black tail. Drawn round its body, facing left; its wings beat in flight (game.css)
@@ -194,36 +152,10 @@ const Friends = (() => {
   /** Off the screen to the left (-1) or right (1) of the view now, and at least as far as x. */
   const offscreen = (dir, x = dir < 0 ? Infinity : -Infinity) => (dir < 0 ? Math.min(x, View.x - OFF) : Math.max(x, View.x + Layout.VIEW_W + OFF))
 
-  /** The fox's own moves: licking his lips, rubbing his paws (paint.js). */
-  function foxMoves(inner) {
-    return {
-      /** The fox: licks his lips, his tongue out round his grin and back in. */
-      async lick() {
-        const tongue = inner.querySelector('.tongue')
-        if (!tongue) return
-        tongue.style.display = ''
-        try {
-          await Motion.endAt(tongue, [{ transform: 'translateX(0px)' }, { transform: 'translateX(-12px)', offset: 0.5 }, { transform: 'translateX(0px)' }], { duration: 700 })
-        } finally {
-          tongue.style.display = 'none'
-        }
-      },
-      /** The fox: rubbing his paws together, pleased with his plan. */
-      async rub(times = 3) {
-        const paws = inner.querySelector('.paws')
-        if (!paws) return
-        const frames = [{ transform: 'rotate(0deg)' }]
-        for (let i = 0; i < times; i++) frames.push({ transform: 'rotate(-7deg)' }, { transform: 'rotate(5deg)' })
-        frames.push({ transform: 'rotate(0deg)' })
-        await Motion.endAt(paws, frames, { duration: 260 * times })
-      },
-    }
-  }
-
   // what turns a kind's head (a bob nods it, a shake shakes it), where it isn't the usual: the tall
   // fox's neck, so a bob nods his head, not his whole body; and a kind's own moves
-  const NECK = { fox: '-10px -262px' }
-  const MOVES = { fox: foxMoves }
+  const NECK = { fox: '-2px -266px' } // where foxart.js's head meets his body
+  const MOVES = { fox: FoxArt.moves }
 
   /** Call one in: drawn at x, facing left (face: 1 turns it right). Nobody appears in view out of
    * nowhere: it must be out of sight, unless it lives in a hole there (hole: the mouse, who

@@ -108,13 +108,16 @@ decided and why.
       Still off against the films: shut eyes are white lids, where the
       films draw curved light lines (11:44.5); our eyes are bigger and
       rounder, and our outline heavier.
-   5. **The cast's sizes, and the fox** (Adam: in the films the fox is
-      much bigger than him, and stands like a person, he remembers;
-      check in frames, Krtek malířem 1:44–3:28): each character's height
-      against the mole measured in frames, as observed claims in
-      world.yaml, and friends.js drawn from them; the fox redrawn if the
-      frames say so. A bigger fox is scarier: follow the films, judge it
-      with Eliot.
+   5. **Adam judges the fox's story** (built 2026-11-01, his pick A):
+      the paint told in the film's order (the fox first, a fright, the
+      red paint by accident, the mole's ghost), told again on a tap with
+      the fox sometimes made a friend; the fox redrawn with a face that
+      acts (foxart.js), big then small, his shadow first. Judge: is he a
+      bit scary but not too much, do the faces read, is the ghost funny,
+      does the second telling feel new. Sounds waiting on the board
+      ("krtek fox"): snicker, growl, yelp, his ghost "uuuu".
+      Still to do: each character's height against the mole measured
+      in frames, as observed claims in world.yaml.
    6. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
    6b. **Adam judges the meadow's night's work** (built 2026-10-30 while

@@ -59,7 +59,7 @@ const Sound = (() => {
   const ready = () => ctx && ctx.state !== 'closed'
 
   /** One of the mole's words or noises ('giggle', 'ahoj', 'achJo', 'ooh', 'fright', 'gasp', 'hm',
-   * 'tam'), if it has takes; given several (['gasp', 'fright']), one of them at random.
+   * 'tam', 'ghost'), if it has takes; given several (['gasp', 'fright']), one of them at random.
    * `casual`: an idle remark (a tap on him, a look at a thing), skipped if he spoke only just now,
    * so his voice is kept for real moments (docs/DESIGN_PRINCIPLES.md). */
   function say(words, casual = false) {
@@ -213,6 +213,13 @@ const Sound = (() => {
     for (let i = 0; i < 3; i++) note(330 - i * 30, i * 0.14, 0.09, 0.05, 'triangle', 0.8)
   }
 
+  /** The fox looming over the nest: a low growl, his recorded takes, or a rumbling stand-in. */
+  function growl() {
+    if (!ready() || recorded('growl')) return
+    note(90, 0, 0.9, 0.1, 'sawtooth', 0.85)
+    hiss(0, 0.9, 260, 3, 0.05)
+  }
+
   /** The frog: a low ribbit, twice. */
   function croak() {
     if (!ready()) return
@@ -317,9 +324,9 @@ const Sound = (() => {
     for (const f of [150, 190, 230]) note(f, 0, 0.7, 0.12, 'sawtooth', 0.7)
   }
 
-  /** The fox, frightened: a quick yelp. */
+  /** The fox, frightened: a quick yelp, his recorded takes, or a squeak. */
   function yelp() {
-    if (!ready()) return
+    if (!ready() || recorded('yelp')) return
     note(900, 0, 0.18, 0.15, 'square', 1.6)
   }
 
@@ -368,5 +375,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, dig, pop, water, bell, snicker, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom, wind }
+    say, dig, pop, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, boo, yelp, crank, vroom, wind }
 })()

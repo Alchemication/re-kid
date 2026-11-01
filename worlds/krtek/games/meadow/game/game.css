@@ -83,6 +83,9 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
   #world [data-critter] { cursor: pointer; }
 }
 
+/* the fox, frightened (foxart.js bristle): his ruff on end, trembling */
+.friend .bristle .ruff { transform-box: fill-box; transform-origin: center; animation: bristle 0.14s steps(2) infinite alternate; }
+@keyframes bristle { from { transform: scale(1.06) rotate(-2deg); } to { transform: scale(1.14) rotate(2deg); } }
 /* a bird in flight (poles.js): its wing beats about the shoulder */
 .friend.bullfinch .wing { transform-box: fill-box; transform-origin: 10% 80%; }
 .friend.bullfinch.flying .wing { animation: beat 0.16s ease-in-out infinite alternate; }
