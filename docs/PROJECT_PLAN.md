@@ -148,10 +148,13 @@ decided and why.
       bulldozer, the car and thunder; the birds come back once it is
       quiet. Try `?wild=deer` (`boar`, `bison`), `?critters=flock`,
       `?critters=heron`. Judge: are they far enough (or too small to
-      notice), do they look like themselves, is it too busy. Still to
-      do: their sounds (a heron's croak, a boar's grunt, birdsong, soft;
-      `new-sound`), and whether the hare, hedgehog and mouse, the films'
-      own, should also live in the meadow between encounters.
+      notice), do they look like themselves, is it too busy. Their voices
+      wait on the sound board for his ear (folder "krtek wildlife": a far
+      finch's chirp, the heron's croak, a boar's grunt, the żubr's snort;
+      9 takes each, worded soft and distant); the game is silent there
+      until takes are picked. Still open: whether the hare, hedgehog and
+      mouse, the films' own, should also live in the meadow between
+      encounters.
    6. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
    6b. **Adam judges the meadow's night's work** (built 2026-10-30 while
