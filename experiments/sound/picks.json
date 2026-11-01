@@ -1,5 +1,5 @@
 {
- "saved": "2026-10-31T21:47:51.809Z",
+ "saved": "2026-11-01T11:43:27.579Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1558,6 +1558,149 @@
    "folder": "krtek voice, more",
    "made": "2026-10-31",
    "sound": "krtek-hm",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-ghost/01.mp3",
+   "source": "eleven",
+   "prompt": "A little girl pretending to be a ghost, a wavering \"woooo-ooo!\" with her arms up, playful and funny, dry studio recording, no reverb.",
+   "wording": 2,
+   "seed": 1,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-ghost",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-ghost/05.mp3",
+   "source": "eleven",
+   "prompt": "A little girl pretending to be a ghost, a wavering \"woooo-ooo!\" with her arms up, playful and funny, dry studio recording, no reverb.",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-ghost",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-ghost/06.mp3",
+   "source": "eleven",
+   "prompt": "A little girl pretending to be a ghost, a wavering \"woooo-ooo!\" with her arms up, playful and funny, dry studio recording, no reverb.",
+   "wording": 2,
+   "seed": 3,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-ghost",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-yelp/06.mp3",
+   "source": "eleven",
+   "prompt": "a scared little yip-yip of a fox jumping with fright, funny, not painful",
+   "wording": 3,
+   "seed": 1,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-yelp/08.mp3",
+   "source": "eleven",
+   "prompt": "a scared little yip-yip of a fox jumping with fright, funny, not painful",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-yelp/09.mp3",
+   "source": "eleven",
+   "prompt": "a scared little yip-yip of a fox jumping with fright, funny, not painful",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-yelp/07.mp3",
+   "source": "eleven",
+   "prompt": "a frightened fox's short yelp and whimper as it turns to run, from a 1970s Eastern European children's cartoon",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-yelp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-growl/01.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon fox growling low through bared teeth, a short menacing grrr, comic villain, dry studio recording",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-growl",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-growl/02.mp3",
+   "source": "eleven",
+   "prompt": "a cartoon fox growling low through bared teeth, a short menacing grrr, comic villain, dry studio recording",
+   "wording": 1,
+   "seed": 2,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-growl",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-growl/03.mp3",
+   "source": "eleven",
+   "prompt": "a sly fox's low rumbling growl, a little spooky but playful, from a 1970s Eastern European children's cartoon",
+   "wording": 2,
+   "seed": 1,
+   "folder": "krtek fox",
+   "made": "2026-11-01",
+   "sound": "krtek-growl",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snicker/04.mp3",
+   "source": "eleven",
+   "prompt": "a sly cartoon fox snickering to himself, a soft sneaky heh-heh-heh through his teeth, mischievous, dry studio recording",
+   "wording": 1,
+   "seed": 4,
+   "folder": "krtek fox",
+   "made": "2026-10-31",
+   "sound": "krtek-snicker",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snicker/05.mp3",
+   "source": "eleven",
+   "prompt": "a sneaky little villain chuckle from a 1970s Eastern European children's cartoon, a fox rubbing his paws, quiet and comic",
+   "wording": 2,
+   "seed": 1,
+   "folder": "krtek fox",
+   "made": "2026-10-31",
+   "sound": "krtek-snicker",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snicker/11.mp3",
+   "source": "eleven",
+   "prompt": "a mischievous low snigger, hehehe, a crafty animal pleased with his plan, short and playful, not scary",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek fox",
+   "made": "2026-10-31",
+   "sound": "krtek-snicker",
    "verdict": "keep"
   }
  ]

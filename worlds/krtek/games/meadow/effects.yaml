@@ -61,3 +61,37 @@ effects:
     prompt: 'A little girl asks a puzzled "hmm?" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.'
   - file: hm/09.mp3
     prompt: 'A little girl asks a puzzled "hmm?" as a cartoon animal would: short, rising, breathy, dry studio recording, no reverb.'
+- id: snicker
+  takes:
+  - file: snicker/04.mp3
+    prompt: 'a sly cartoon fox snickering to himself, a soft sneaky heh-heh-heh through his teeth, mischievous, dry studio recording'
+  - file: snicker/05.mp3
+    prompt: 'a sneaky little villain chuckle from a 1970s Eastern European children''s cartoon, a fox rubbing his paws, quiet and comic'
+  - file: snicker/11.mp3
+    prompt: 'a mischievous low snigger, hehehe, a crafty animal pleased with his plan, short and playful, not scary'
+- id: growl
+  takes:
+  - file: growl/01.mp3
+    prompt: 'a cartoon fox growling low through bared teeth, a short menacing grrr, comic villain, dry studio recording'
+  - file: growl/02.mp3
+    prompt: 'a cartoon fox growling low through bared teeth, a short menacing grrr, comic villain, dry studio recording'
+  - file: growl/03.mp3
+    prompt: 'a sly fox''s low rumbling growl, a little spooky but playful, from a 1970s Eastern European children''s cartoon'
+- id: yelp
+  takes:
+  - file: yelp/06.mp3
+    prompt: 'a scared little yip-yip of a fox jumping with fright, funny, not painful'
+  - file: yelp/07.mp3
+    prompt: 'a frightened fox''s short yelp and whimper as it turns to run, from a 1970s Eastern European children''s cartoon'
+  - file: yelp/08.mp3
+    prompt: 'a scared little yip-yip of a fox jumping with fright, funny, not painful'
+  - file: yelp/09.mp3
+    prompt: 'a scared little yip-yip of a fox jumping with fright, funny, not painful'
+- id: ghost
+  takes:
+  - file: ghost/01.mp3
+    prompt: 'A little girl pretending to be a ghost, a wavering "woooo-ooo!" with her arms up, playful and funny, dry studio recording, no reverb.'
+  - file: ghost/05.mp3
+    prompt: 'A little girl pretending to be a ghost, a wavering "woooo-ooo!" with her arms up, playful and funny, dry studio recording, no reverb.'
+  - file: ghost/06.mp3
+    prompt: 'A little girl pretending to be a ghost, a wavering "woooo-ooo!" with her arms up, playful and funny, dry studio recording, no reverb.'
