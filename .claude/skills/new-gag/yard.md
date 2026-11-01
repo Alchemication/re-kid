@@ -4,6 +4,9 @@
 the yard has hit, how to look at a gag, and its test tables. The procedure
 is `SKILL.md`.
 
+The worked example is the bowl stuck on his head (`bowl.js`
+`stuckInBowl`, `bird.js` `rescue`, `antics.js`, `TestBowl`).
+
 ## Where each piece goes
 
 | Piece | Where |
@@ -17,6 +20,11 @@ is `SKILL.md`.
 | A left-alone trigger | `yard.js` `ACTS`; a fix someone helps him out of: a `helped` field on its thing (`{ act, can, alone, times }`, as `bowl.js`), and yard.js makes the once-a-play move. A move an event starts (he looks up at the cuckoo on the hour) is an `ACTS` entry with `weight: 0, ok: () => false`, so it never picks itself, started with `startAct` from the event's hook (`glanceAtCuckoo`) |
 | Something a shared part (Reksio, `debug.js`, sound) must know about the game | a hook the game sets (`Reksio.listen`, `Debug.pin`), never the game's name in the shared file (`CLAUDE.md`, "Shared parts") |
 | Its seasons | a thing or creature that belongs only to some seasons lists them in `layout.js` `IN_SEASON` (one not listed belongs to all); the layout puts out only what is in season. What it does in the cold reads `Weather.frozen` (the world's `cold`), not the season: ice, snow. Its look per season goes in the season's table (`painting.js` palettes, `sky.js` `SUNS`, game.css `.season-winter`, `.frozen`) |
+| What it offers | a prop's `OFFERS` in `layout.js` gains the kind it makes real (`discover`, `help`, `helped`); the layout tests follow |
+| How the child gets to see it | a tap on a thing, its variations, or a left-alone move in `yard.js` `ACTS` (`due: true` makes a once-a-play move happen the first time it can) |
+| Variations | a thing's pool in `things.js` `VARIATIONS`, drawn by `variation()` (`Idle.pool`); a thing in its own file gets it as `run({ v })` through `varied(name, thing)`. A pool that depends on the play: `Tree.VARIATIONS`. A rule like "the first variation is always his tail caught" keeps the one it stands in for (the bramble's `owed`) |
+| A tap answered inside the gag | `Things.stuckTap`, or, outside things.js, the `hold` the gag is handed (the bowl, the bramble) |
+| Room for it | a prop's footprint in the row (`layout.js` `FOOTPRINTS`) wide enough for all it moves (the ladder, a second mouse hole); the row must still fit with the widest props out (the layout tests). Something that appears mid-play takes free ground from `Layout.gaps`, less their puddles (`TestMushrooms` over a dozen seeds) |
 | Tunables | named constants at the top of the module, each with why |
 | What must always hold | a `Debug.check` in `yard.js` `checkRules` |
 | Words | the scene in `brief.yaml`, marked `original`, `inspired` or `invented` with refs to what it is based on; status in `docs/PROJECT_PLAN.md` |
@@ -69,6 +77,7 @@ look at the full view first; phone size is `--size 844x390`.
 - **Browser** (`tests/test_game_browser.py`): add new gestures to `GESTURES`
   (or `NOT_GESTURES`), moves to `ACTS`, things to `THINGS`; the coverage tests
   fail until you do. Give the gag a class (`TestBowl`): it runs to the end;
-  taps mid-gag; each interleaving that can be forced (rain:
+  taps mid-gag (tap a point the thing owns: `y.on_screen(x, y)` gives a
+  scene point's place on the screen); each interleaving that can be forced (rain:
   `rain=1&rain-at=N`, never on top of `STILL`, which already says `rain=0`
   and the game reads the first); what changes after.

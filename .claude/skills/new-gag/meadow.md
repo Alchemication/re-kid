@@ -5,6 +5,10 @@ piece goes, how to look at one, and its test tables. The procedure is
 `SKILL.md`; ambient life (the butterflies, the spring's life, the snail) is
 `ambient.md`.
 
+The worked example is the paint and the fox (`paint.js`, `foxart.js`,
+`nest.js`, `TestMeadowFox`): a story in steps, told again on a tap
+(`again`), the play's seed drawing how it goes.
+
 ## How encounters run, and where each piece goes
 
 The meadow is one screen, so its encounters arrive one at a time at their
@@ -18,11 +22,13 @@ then cuts it short to be picked up at the next step later. Keep each step
 |---|---|
 | An encounter | its own file (`egg.js`, `poles.js`, `paint.js`, `car.js`, `umbrella.js`; one with `instead` and `chance` comes in that share of plays in place of another, as the storm for the rain cloud) that registers with `Things.add({ name, offer, appear, steps, restore, night, detail, again? })`; `offer` is `help`, `helped` or `discover` (one of each comes a play). Each step is `async (alive) => …` and returns as soon as `alive()` is false after an await. Steps must be safe to run again from the start after a cut: guard what is already done (`if (egg.chick) return`) and bring back whoever it needs (the paint's fox comes back first) |
 | What a cut leaves | `restore()`, called at once when the chain is cut (the meadow's `run` onCut, before he is settled): visitors home, a thing in his hands put down by him, everything it was animating cancelled and left where it ends. Store a thing's end position before animating to it, so a cut leaves it there |
-| Visitors (mouse, hare, hen, fox, bullfinch…) | drawn in `friends.js`; an encounter keeps its own `Friends.troupe()` and calls them with `cast.call(kind, x, face)` from out of sight (`Friends.offscreen(dir, x)`; `{ hole }` for one that lives in a hole, `{ born }` for the chick), sends them home with `cast.dismiss(f)` (they walk off), all in `restore` with `cast.dismissAll()`, and at bedtime `dismissAll(true)` (at once). Those who only bring or fetch its things (the tins' porters, the poles' birds) are a troupe of their own, not its `detail().cast` (a rule checks none of that is left once he is free) |
+| Visitors (mouse, hare, hen, fox, bullfinch…) | drawn in `friends.js`; an encounter keeps its own `Friends.troupe()` and calls them with `cast.call(kind, x, face)` from out of sight (`Friends.offscreen(dir, x)`; `{ hole }` for one that lives in a hole, `{ born }` for the chick), sends them home with `cast.dismiss(f)` (they walk off; never `gone()` in view: a rule checks both ways), all in `restore` with `cast.dismissAll()`, and at bedtime `dismissAll(true)` (at once). Those who only bring or fetch its things (the tins' porters, the poles' birds) are a troupe of their own, not its `detail().cast` (a rule checks none of that is left once he is free) |
 | His moves | `mole.js`: `goTo` (via `Things.meadow`), `walkTo`, `carry`/`wear`, `lean`, `knock`, `wobble`, `cheer`, `perch`, `glide`, `paint`/`dots`. New moves there, made with `Motion.endAt`, cut by `relax()` |
 | Drawing helpers | `Things.meadow.el` (the SVG helper), the layers in `index.html` (`#things` behind him, `#mole-out` him on the grass, `#friends` in front, `#far-things` up the hill) |
 | A tap on it | `data-thing="<name>"` on what can be tapped; remove it when the thing is done (unless it has `again`), so it stops taking taps meant for what is under it |
-| What it does once done | an optional `again` step (the car's ride) |
+| What it does once done | an optional `again` (the car's ride; the paint retells its story, quicker, and may end it differently). Keep its things tappable (`data-thing`) while there is an `again` to play |
+| Variety | the play's own stream, `Debug.random('meadow-<name>')`, drawn in the encounter's file: a detail per play (how the fox sneaks in) or per retelling (how the story ends) |
+| A visitor who acts | its drawing, faces (`feel`) and own moves in a file of its own (`foxart.js`), plugged in through `friends.js` `DRAW`, `NECK` (the point its head turns about) and `MOVES` |
 | What ambient life should answer | its offers, wet places and noises, from its own file (`ambient.md`) |
 | Sounds | `sound.js` (the meadow's); reuse first |
 | What must always hold | a `Debug.check` in `meadow.js` `checkRules` |
@@ -59,6 +65,12 @@ the answers a thing varies through, repeat `--before` with the same intent:
 each is played to the end first. `look.json` has the trace (`sniffs`,
 `paddles`: which answer came). A creature's own doing doesn't make him busy:
 photograph it with `--for SECONDS`.
+
+`look` with a `--before` that starts an encounter once photographed a still
+meadow while its trace said the whole story had played (2026-11-01, not yet
+understood). If the frames don't show what the trace says, drive the page
+with Playwright yourself (`channel="chrome"`: wake, wait for the arrival,
+`perform('use <name>')`, a screenshot every half second) and say so.
 
 ## Tests
 
