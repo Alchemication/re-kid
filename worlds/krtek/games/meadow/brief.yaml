@@ -197,6 +197,36 @@ scenes:
   sound:
     text: None of their own.
     origin: invented
+- id: wildlife
+  action:
+    text: Nothing, or tap the animals far off.
+    origin: invented
+  result:
+    text: Far off along the meadow's far edge, small, so they never take the eye from what happens in front (Adam, 2026-11-01), one kind of animal a play comes out now and then at its own hours, walks along, stops to graze and goes - roe deer in the morning and evening (a doe with a fawn or two, or a few with a buck; the fawns hop about their mother; they stop to drink at the far pond), wild boar from the afternoon (a sow with a line of striped piglets that pair off to wrestle, or a male alone), the żubr about midday (a bull alone, or a cow with her calf). Now and then they wander a little nearer. Heads go down to graze and up to look about; the church bell has them all look up. Tapped, deer and boar look up, then make off; the żubr only turns and looks, chewing. The bulldozer's rumble, the car and thunder send them off (the żubr only for the big ones). Adam asked for them to make the world truly alive; none of them is from the films.
+    origin: invented
+  sound:
+    text: None of their own yet.
+    origin: invented
+- id: far-birds
+  action:
+    text: Nothing, or tap a bird.
+    origin: invented
+  result:
+    text: A few small red-breasted finches live in the trees along the meadow's far edge all day, sitting a while in one crown, then flitting to another. The bulldozer's rumble, the car and thunder send them all up and away; once it has been quiet a while they come back by ones and twos, so the child sees the meadow is all right again. Tapped, one flies off, and comes back later with the others.
+    origin: invented
+  sound:
+    text: None of their own yet.
+    origin: invented
+- id: heron
+  action:
+    text: Nothing, or tap the heron.
+    origin: invented
+  result:
+    text: A little pond with reeds lies at the meadow's far edge behind his home. Now and then a grey heron flies in on slow wingbeats and stands at its edge, still as a post; every so often it leans and stabs at the water, sometimes coming up with a little silver fish, gone in a gulp. It flies off after a while, or at a tap, the bulldozer, the car or thunder. Adam's idea (2026-11-01, "a distant bird might be a heron").
+    origin: invented
+  sound:
+    text: None of its own yet.
+    origin: invented
 - id: storm
   action:
     text: Nothing; then tap a friend, or the umbrella, or leave him be.

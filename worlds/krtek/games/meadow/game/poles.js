@@ -83,7 +83,7 @@
   const WIND_POINTS = 14 // its winding way down: this many turns of the wheel
   const SWERVE = 34 // how far it swerves from the straight way, at its size 1 (each play draws a bit more or less)
   const SAND = '#b98a4e' // the sand it heaps up along the road
-  const RUMBLE = { far: 0.18, edge: 0.4, here: 1, reach: 900 } // how loud its engine, far off on the hill, at the meadow's edge, here; how far off on the meadow creatures hear it
+  const RUMBLE = { far: 0.18, edge: 0.4, here: 1, reach: 1600 } // how loud its engine, far off on the hill, at the meadow's edge, here; how far off on the meadow creatures hear it (all the view: the far animals too)
   const FINER = 4 // its road is torn up in this many pieces to each leg it drives: close behind it
   const SAND_R = 22 // a heap of sand's half width, at its size 1 (each draws its own, mostly small)
   // the church's hill far off (church.js; the distant layer's units): out from behind the church its

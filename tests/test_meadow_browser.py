@@ -688,6 +688,74 @@ class TestMeadowFireflies:
         assert not m.errors, m.errors
 
 
+class TestMeadowWildlife:
+    """The far life (wildlife.js, flock.js, heron.js; Adam, 2026-11-01: make
+    the world truly alive, far off so it doesn't distract): one kind of
+    herd a play, the birds of the far trees, the heron at the far pond.
+    Each comes, lives, answers a tap and the bulldozer's rumble, and goes."""
+
+    OUT = "Wildlife.out"
+
+    @pytest.mark.parametrize("kind", ["deer", "boar", "bison"])
+    def test_a_herd_comes_grazes_and_answers_a_tap(
+        self, meadow: callable, kind: str
+    ) -> None:
+        m = meadow(f"{STILL}&props=&wild={kind}")
+        m.wake()
+        m.wait(f"{self.OUT} && {self.OUT}.kind === '{kind}'", 10_000)
+        m.wait(f"{self.OUT} && {self.OUT}.goal === 'pause'", 30_000)  # it grazes
+        far = m.page.evaluate(
+            "[...document.querySelectorAll('.wild-one')].every((g) => (g.transform.baseVal.consolidate()?.matrix.d ?? 0) <= 0.501)"
+        )
+        assert far, "an animal came near the front: they keep far off"
+        m.do("tap wild")
+        if kind == "bison":  # he only looks back, chewing
+            m.page.wait_for_timeout(3000)
+            assert m.page.evaluate(f"{self.OUT} && {self.OUT}.goal") != "flee"
+        else:
+            m.wait(f"!{self.OUT} || {self.OUT}.goal === 'flee'", 5000)
+            m.wait(f"!{self.OUT}", 30_000)  # off out of sight
+        assert not m.errors, m.errors
+        m.wait_free()
+        m.assert_settled()
+
+    def test_the_bulldozer_sends_them_all_off(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=poles&wild=deer&critters=flock")
+        m.wake()
+        m.wait(f"{self.OUT} && {self.OUT}.goal === 'pause'", 30_000)
+        assert m.page.evaluate("Flock.count") > 0, "no birds in the far trees"
+        m.do("use poles")
+        m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)
+        m.wait(f"!{self.OUT} || {self.OUT}.goal === 'flee'", 10_000)
+        m.wait("Flock.count === 0", 30_000)  # all flown off
+        assert not m.errors, m.errors
+
+    def test_the_birds_sit_in_the_trees_and_fly_from_thunder(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&props=&critters=flock")
+        m.wake()
+        assert m.page.evaluate("Flock.count") > 0
+        m.wait(
+            "meadowGame.trace().includes('\"feed\":true')", 20_000
+        )  # one sat in a tree
+        m.page.evaluate("World.noise('thunder', 1000, Infinity)")
+        m.wait("Flock.count === 0", 30_000)
+        assert not m.errors, m.errors
+
+    def test_the_heron_comes_to_the_pond_and_a_tap_sends_it_off(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{STILL}&props=&critters=heron")
+        m.wake()
+        m.wait("Heron.out && Heron.out.goal === 'feed'", 30_000)  # standing at the pond
+        m.do("tap heron")
+        m.wait("!Heron.out", 30_000)
+        assert not m.errors, m.errors
+        m.wait_free()
+        m.assert_settled()
+
+
 class TestMeadowSnail:
     """The snail (critters.js): it comes up out of the grass where its shelter
     is wet, a tap tucks it into its shell and has him look at it; and in a

@@ -138,6 +138,20 @@ decided and why.
       and 12 s before he goes to a new one himself. Judge: does it read as
       harm, is it too loud or big for calm, is the pit funny, do the rests
       feel restful or empty, and are there still enough encounters a day.
+   5b. **Adam judges the far wildlife** (built 2026-11-01 overnight, at
+      his ask, "make the world truly alive"; the designs agreed in chat,
+      the rest not checked with him): one kind of herd a play, far off at
+      the meadow's far edge (`wildlife.js`, `wildart.js`): sarny morning
+      and evening, boars from the afternoon (piglets wrestling), the żubr
+      at midday; the birds of the far trees all day (`flock.js`); the
+      heron at a new far pond behind his home (`heron.js`). All flee the
+      bulldozer, the car and thunder; the birds come back once it is
+      quiet. Try `?wild=deer` (`boar`, `bison`), `?critters=flock`,
+      `?critters=heron`. Judge: are they far enough (or too small to
+      notice), do they look like themselves, is it too busy. Still to
+      do: their sounds (a heron's croak, a boar's grunt, birdsong, soft;
+      `new-sound`), and whether the hare, hedgehog and mouse, the films'
+      own, should also live in the meadow between encounters.
    6. A local director picking the ambient moments, keeping "the same
       again, and a bit more".
    6b. **Adam judges the meadow's night's work** (built 2026-10-30 while

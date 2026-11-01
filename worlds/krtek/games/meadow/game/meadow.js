@@ -16,7 +16,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Church, Clock, Critters, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
+/* global Again, Bed, Church, Clock, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -609,6 +609,9 @@ const meadowGame = (() => {
     [/^tap firefly (\d+)$/, (m) => lookAfter(Critters.tapFirefly(Number(m[1])))],
     [/^tap frog$/, () => Spring.tapFrog()],
     [/^tap snail$/, () => tapSnail()],
+    [/^tap wild$/, () => lookAfter(Wildlife.tap())],
+    [/^tap flock (\d+)$/, (m) => lookAfter(Flock.tap(Number(m[1])))],
+    [/^tap heron$/, () => lookAfter(Heron.tap())],
     [/^tap sun$/, () => run('tap sun', callSun)],
   ]
 
@@ -661,7 +664,7 @@ const meadowGame = (() => {
   function waits(intent) {
     const busy = Things.stepping
     if (!busy || game.gesture !== busy) return false
-    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent.startsWith('tap firefly') || intent === 'tap frog' || intent === 'tap snail') return false
+    if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent.startsWith('tap firefly') || intent === 'tap frog' || intent === 'tap snail' || /^tap (wild|flock|heron)/.test(intent)) return false
     game.queued = intent
     const to = intent.match(/^(?:go|dig) to (\d+)$/)
     if (to) Mole.lookAt(Number(to[1]))
@@ -790,6 +793,10 @@ const meadowGame = (() => {
       Mole.lookAt(World.state.view.x1)
     },
   })
+  const farThings = document.getElementById('far-things')
+  Heron.setup(farThings, { still: Debug.still, now: Layout.flags.critters === 'heron' }) // the far pond first: on the ground, under the rest
+  Flock.setup(farThings, { still: Debug.still, now: Layout.flags.critters === 'flock' })
+  Wildlife.setup(farThings, { wild: Layout.flags.wild, still: Debug.still })
   Critters.setup(document.getElementById('critters'), document.getElementById('low-critters'), document.getElementById('glows'), { now: Layout.flags.critters === 'now', snail: Layout.flags.critters === 'snail', fireflies: Layout.flags.critters === 'fireflies', still: Debug.still })
   const things = Things.setup({
     run,

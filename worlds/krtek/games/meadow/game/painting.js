@@ -23,6 +23,7 @@ const Painting = (() => {
   const r = (a = 1, b) => (b == null ? random() * a : a + random() * (b - a))
   const pick = (list) => list[Math.floor(random() * list.length)]
   let res = 1
+  const perches = [] // where the far trees' crowns are, for the birds (flock.js)
 
   /** A canvas covering scene units x, y, w, h; draw() paints in scene units. */
   function layer(x, y, w, h, draw) {
@@ -375,8 +376,11 @@ const Painting = (() => {
       const forest = x < 520 || x > W - 300
       const kind = r()
       const tones = pick(greens)
-      if (forest || kind < 0.3) leafy(ctx, x, edge + r(4, 16), [r(150, 280), r(150, 280)], tones, r(50, 150))
-      else if (kind < 0.42) pine(ctx, x, edge + r(6, 14), r(180, 300), '#2f5640', '#46705a')
+      if (forest || kind < 0.3) {
+        const [base, size, trunk] = [edge + r(4, 16), [r(150, 280), r(150, 280)], r(50, 150)] // drawn in the order leafy's arguments were
+        leafy(ctx, x, base, size, tones, trunk)
+        perches.push({ x, y: base - trunk - size[1] * 0.85 }) // near its crown's top: the far trees' birds sit there (flock.js)
+      } else if (kind < 0.42) pine(ctx, x, edge + r(6, 14), r(180, 300), '#2f5640', '#46705a')
       else if (kind < 0.75) leafy(ctx, x, edge + r(6, 18), [r(90, 160), r(60, 110)], tones)
       else fan(ctx, x, edge + r(8, 18), r(50, 80), pick(['#4b7a3a', '#5d8a44', '#3e6b45']), '#2a4a25')
       if (!forest && r() < 0.5) leafy(ctx, x + r(-60, 60), edge + r(14, 22), [r(70, 120), r(40, 70)], pick(greens)) // undergrowth at their feet
@@ -507,5 +511,5 @@ const Painting = (() => {
     }
   }
 
-  return { paint, cloudsAt, tree }
+  return { paint, cloudsAt, tree, /** The far trees' crowns, as painted: [{ x, y }]. */ get perches() { return perches } }
 })()

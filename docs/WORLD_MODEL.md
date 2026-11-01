@@ -21,7 +21,9 @@ and no clock, tested in node (`worlds/krtek/games/meadow/tests/creature.test.js`
   it is gone. Goals taken up go in the trace.
 
 Used in the meadow by the butterflies, the snail and the fireflies (`critters.js`), the
-bullfinch and the dragonflies (`spring.js`). The frog sits still, so it
+bullfinch and the dragonflies (`spring.js`), the far herds (`wildlife.js`: the leader is the
+creature; the others follow it, each with its own life while they graze), the birds of the far
+trees (`flock.js`) and the heron at the far pond (`heron.js`). The frog sits still, so it
 needs no steering: it reads the world's noises itself. The fish only makes
 noise.
 
@@ -70,7 +72,10 @@ come out of: the snail comes out where one is wet), `perch` (somewhere to
 land: the yard's roof, tap, bowl, flower), `sight` (something on show a
 curious creature comes to look at: Reksio's nose, the web's edge, the mole standing free), `food`
 (the yard's bowl, in the cold: the sparrows come to it in winter, shy of
-his nose, so they keep off while he is at it). A new kind is a word
+his nose, so they keep off while he is at it), `fish` (the far pond, where
+the heron stands to fish). In the meadow, `perch` is also the far trees'
+crowns (`painting.js` says where it painted them) and `drink` the far pond's
+ends, where the deer drink. A new kind is a word
 both the thing and the creature use; add it to this list.
 
 ## A creature

@@ -63,6 +63,8 @@ SCENARIOS = {
         "props=",
         "setInterval(() => meadowGame.perform(meadowGame.state().x < 2000 ? 'go to 3400' : 'go to 600'), 5000); meadowGame.perform('go to 3400')",
     ),
+    # the far life all out at once: a sow and her piglets, the heron, the far trees' birds (wildlife.js)
+    "meadow-wildlife": (MEADOW, "props=&wild=boar&critters=heron", None),
     # the storm's rain over the whole view (storm.js, a canvas), measured once it rains
     "meadow-storm": (
         MEADOW,
