@@ -11,12 +11,13 @@ takes, 11 keeps; 2026-10-21: the bed); `experiments/music/README.md`
 ("Findings") has the evidence behind each rule. That evidence is Reksio's:
 what worked there is a starting point for another world, not a rule.
 
-The music has three layers (see `worlds/reksio/MUSIC_DIRECTION.md`): the
+The music has three layers (each world's `MUSIC_DIRECTION.md`): the
 **bed**, quiet notes always underneath (`bed.js`, from the instrument
 samples); the **touches**, a few notes for what the character does
 (`Music.react`); and the **takes**, recorded moments the bed swells into
-(morning, phrase, lullaby). This skill covers all three; generation is
-only for the takes.
+(the parts a game's `music.js` plays: the yard's morning, phrase and
+lullaby; the meadow's one theme in its moods, and the cricket). This skill
+covers all three; generation is only for the takes.
 
 The pieces:
 
@@ -32,7 +33,7 @@ The pieces:
 | Pick a bed by ear, in a pretend day | `experiments/music/bed.html` (Reksio's; `bed.js` plays the game's own) |
 | Bring the keeps into the game | `experiments/music/adopt.py` → `games/<game>/tunes/`, `tunes.yaml` |
 | The retro recipe, pack | `main.py tunes <world> [game]` → `game/tunes.js` (`config.TUNE_*`, the effects' `EFFECT_*` filters) |
-| How the game plays them | `takes.js` (shared) plays a take of a part; each game's `music.js` says when. The meadow: the theme as he wakes, its moods at an encounter's steps (`music` in `Things.add`), the cricket from dusk. The yard's `music.js`: a random take of a part, never the same twice running; the morning as he wakes, a `phrase()` when the game asks (yard.js after something new, `Idle.phraseOk`: not over music, not in the rain, at most every `PHRASE_GAP_MS`), the lullaby at evening. Sample touches (`react`) only between takes |
+| How the game plays them | `takes.js` (shared) plays a take of a part; each game's `music.js` says when. For example, the meadow: the theme as he wakes, its moods at an encounter's steps (`music` in `Things.add`), the cricket from dusk. The yard's `music.js`: a random take of a part, never the same twice running; the morning as he wakes, a `phrase()` when the game asks (yard.js after something new, `Idle.phraseOk`: not over music, not in the rain, at most every `PHRASE_GAP_MS`), the lullaby at evening. Sample touches (`react`) only between takes |
 
 Music needs a person's ears (`CLAUDE.md`): Claude writes wordings, runs the
 tools and measures what the files hold, but every keep is Adam's.
@@ -72,9 +73,9 @@ run flat.
 
 ## 1. Which part, and what for
 
-- The parts are music.js's: `morning` (about 12 s), `phrase` (15–20 s),
-  `lullaby` (about 15 s). A new part needs music.js to play it and
-  `schema.tunes.Tune.id` to allow it.
+- The parts are the ones `schema.tunes.Tune.id` allows and the game's
+  `music.js` plays (`morning` about 12 s, `phrase` 15–20 s, `lullaby` about
+  15 s; the moods `curious`, `sad`, `happy`). A new part needs both.
 - Count what a part has: one take of a part repeats every play (the yard's
   morning had two after the first run). Aim for 3+ mornings and lullabies,
   5+ phrases: phrases are what a child hears most.
@@ -101,15 +102,15 @@ Reksio, use `adam()` (each wording with and without his closing sentence).
 - **Name the feel, not the notes.** What worked is Adam's form: "A catchy,
   playful instrumental theme reminiscent of 1970s Eastern European
   children's cartoons, featuring lighthearted melodies and whimsical motifs
-  suitable for [what happens in the yard], capturing the nostalgic and
+  suitable for [what happens in the scene], capturing the nostalgic and
   charming vibe of vintage animated shows from that era." Change only the
-  middle for a part ("a short, slow, sleepy goodnight tune… a small dog
-  curling up in his doghouse").
+  middle for a part (the yard's lullaby: "a short, slow, sleepy goodnight
+  tune… a small dog curling up in his doghouse").
 - **What failed:** detailed musical wordings (instruments, shape, "ending
   on a glockenspiel note") plus a style line (`STYLE`, era, "no drums")
   came out "too modern… too complex and too serious" (round 1: 2 keeps of
   27). A cheeky, tiptoeing "sneaking up on a fly" phrase got 0 of 8.
-- His closing sentence ("Keep extremely simple, elegant, and humorous…")
+- Adam's closing sentence ("Keep extremely simple, elegant, and humorous…")
   made no clear difference; keep both versions until it does.
 
 ## 3. Generate
@@ -163,15 +164,16 @@ he kept, what he rejected and why.
 
 ```sh
 cd experiments/music
-python3 adopt.py --world krtek [--also FILE ...] [--skip FILE ...]   # keeps (and maybes named) → the world's game's tunes/, tunes.yaml (rewritten)
-cd ../.. && uv run python main.py tunes krtek meadow   # retro recipe, levelled, faded out → tunes.js
+python3 adopt.py --world <world> [--also FILE ...] [--skip FILE ...]   # keeps (and maybes named) → the world's game's tunes/, tunes.yaml (rewritten)
+cd ../.. && uv run python main.py tunes <world> <game>   # retro recipe, levelled, faded out → tunes.js
 ```
 
 - Takes as made are committed in `tunes/` (generated, ours): the recipe can
   change without making them again.
 - The level of the music against the effects is `VOLUME` and
-  `TAKE_VOLUME` in music.js; how often phrases come is `PHRASE_GAP_MS` in
-  idle.js. Adam sets them by ear in play.
+  `TAKE_VOLUME` in the game's music.js; how often its takes come is the
+  game's own constant (the yard's phrases: `PHRASE_GAP_MS` in idle.js).
+  Adam sets them by ear in play.
 
 ## 6. Test, then report
 
@@ -179,11 +181,13 @@ cd ../.. && uv run python main.py tunes krtek meadow   # retro recipe, levelled,
   list against `tunes/` and music.js, `tunes.js` up to date), `npx --yes
   eslint@10.12.0 worlds`, `main.py validate`.
 - In Chrome: a probe that counts long buffers started
-  (`AudioBufferSourceNode.prototype.start`, `buffer.duration > 5`): a tap
-  wakes him to a morning take, something new after it ends brings a phrase,
-  `perform('evening now')` brings a lullaby; no console error. Browser slice
-  `"TestWholePlay or TestEvening"`; the whole suite and `-m perf` once
-  before the commit when music.js changed or many takes were added.
+  (`AudioBufferSourceNode.prototype.start`, `buffer.duration > 5`), and each
+  of the game's music moments starts its take (the yard: waking brings a
+  morning, something new a phrase, `perform('evening now')` a lullaby; the
+  meadow: waking the theme, an encounter's steps its moods, dusk the
+  cricket); no console error. The game's browser slice (`CLAUDE.md`
+  table); the whole suite and `-m perf` once before the commit when
+  music.js changed or many takes were added.
 - Report what changed, what to judge by ear (levels, how often, variety),
   what wasn't checked. Commit when asked.
 

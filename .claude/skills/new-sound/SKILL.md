@@ -7,7 +7,8 @@ description: Make or replace a game's sound effects — word each sound, generat
 
 The procedure for one or more of a game's sound effects, from "this needs a
 sound" to takes playing in the game. Written from the first run (2026-10-12:
-13 sounds, 50 takes, his voice brought back); `experiments/sound/README.md`
+13 sounds, 50 takes, the hero's voice brought back), and used since for a
+second world's game; `experiments/sound/README.md`
 ("Findings") has the findings behind each rule. The pieces:
 
 | Piece | Where |
@@ -17,7 +18,7 @@ sound" to takes playing in the game. Written from the first run (2026-10-12:
 | Pick by ear | `experiments/sound/board.html` (Adam); his verdicts end in `picks.json` |
 | Bring the keeps into the game | `experiments/sound/adopt.py <sound> ...` → `games/<game>/effects/`, `effects.yaml` (only the sounds named, only the game's world's) |
 | The retro recipe, pack | `main.py effects <world> [game]` → `game/effects.js` (`config.EFFECT_*`) |
-| How the game plays them | `sound.js` `recorded()`: a random take, never twice running, 0.94–1.06 speed, one take of a sound at a time; a sound marked `steady: true` in `effects.yaml` (a thing that always sounds the same: the cuckoo clock) has one take, always played at its own speed; one marked `overlaps: true` (called quicker than its takes last: the boy's pats) plays every call, over the last |
+| How the game plays them | the game's `sound.js` `recorded()`: a random take, never twice running, 0.94–1.06 speed, one take of a sound at a time. In `effects.yaml`, `steady: true` (a thing that always sounds the same: a cuckoo clock) is one take at its own speed; `overlaps: true` (called quicker than its takes last) plays every call over the last; `in_turn: true` plays the takes in the order listed, at their own pitch (a bell's ding… dong) |
 
 Sound needs a person's ears (`CLAUDE.md`): Claude writes wordings, runs
 the tools and reads what the files measure, but every keep is Adam's.
@@ -30,10 +31,11 @@ the tools and reads what the files measure, but every keep is Adam's.
   Make our own version of each, inspired, never copied; a mark's note ("a
   short dry creak, high") goes into the wording. The mark page is research
   on the original; this skill makes the game's sounds.
-- The tools are set up for Reksio's yard (`adopt.py --game`, one
-  `sounds.py`, the board playing the yard's `sound.js`). The first run for
-  another game makes them take a game, and its retro updates this skill.
-- Each sound is a name in
+- The tools take any world and game: a sound in `sounds.py` names its
+  `world` and its `id` (its name in the game's `sound.js`, when the board's
+  name differs); `adopt.py --game worlds/<world>/games/<game>` brings it in;
+  a run's takes go in a board folder of their own (`--folder NAME`).
+- Each sound is a name in the game's
   `sound.js` (`Sound.<name>`). A new name needs a function there first (a
   synth version, or `() => {}` silent until it has takes): `test_effects`
   fails on an id `sound.js` lacks.
@@ -47,7 +49,14 @@ the tools and reads what the files measure, but every keep is Adam's.
   length and where their notes start (`librosa` onsets, a lead) and fit
   that code to them. Takes come padded to the length asked for, and only
   their start is trimmed, so a 0.8 s take blocks the next call for 0.8 s.
-- A sound belongs to one world (`sounds.py` `world`, Reksio's if unset)
+- A character's voice (a word, a giggle, a pretend-ghost "uuuu") is not an
+  effect: where the game has words (`Sound.say(word)`), it goes through
+  them, so it gets its face, its volume and its place among his remarks,
+  and stays silent until it has takes rather than playing a synth stand-in.
+  Everything else gets a synth stand-in first, so the gag plays before
+  Adam has picked.
+- A sound belongs to one world (`sounds.py` `world`; unset means the first
+  world's, Reksio's)
   and is never shared with another (`docs/DECISIONS.md`); `adopt.py`
   refuses another world's sound.
 - Original audio is never used or committed (the barks are the one
@@ -62,9 +71,13 @@ Add the sound to `sounds.py` with three wordings. What worked (Adam's picks):
   "cartoon" alone got no keeps on any sound.
 - **For cartoon sounds** (boing, bonk), add the era or the name as its own
   wording: `--style 1970s` ("1970s Eastern European hand-drawn cartoon…,
-  orchestral instruments, warm vintage tape sound") or `--style Reksio`.
-  Bonk: 3 of 3 kept with the era. It spoils natural sounds (splash: 0 of 2).
-- His voice: "a small dog …", "a puppy …"; one action, one sound.
+  orchestral instruments, warm vintage tape sound"), or the series' name
+  (`STYLES` in `generate_eleven.py`; a new world adds its own). Bonk: 3 of
+  3 kept with the era. It spoils natural sounds (splash: 0 of 2).
+- A character: what he is, plainly, and the feeling ("a small dog …", "a
+  sly cartoon fox snickering …, comic, not scary"); one action, one sound.
+  A hero who speaks (Krtek's few words) gets a helper with the world's
+  voice in every wording (`_voice()` in `sounds.py`).
 
 ## 3. Generate
 
@@ -100,8 +113,9 @@ take repeats audibly.
 
 ```sh
 cp "<Downloads>/picks (N).json" experiments/sound/picks.json
-python3 experiments/sound/adopt.py pat whoosh   # the sounds just picked: keeps → effects/, effects.yaml (settings kept, other sounds untouched)
-uv run python main.py effects reksio         # trims, levels, retro recipe → effects.js
+cd experiments/sound
+python3 adopt.py <sound> ... --game ../../worlds/<world>/games/<game>   # the sounds just picked: keeps → effects/, effects.yaml (settings kept, other sounds untouched)
+cd ../.. && uv run python main.py effects <world> <game>               # trims, levels, retro recipe → effects.js
 ```
 
 - `main.py effects` prints each take's levelling. A take raised more than
@@ -110,20 +124,21 @@ uv run python main.py effects reksio         # trims, levels, retro recipe → e
 - The retro recipe is Adam's choice over a clean one, for every sound. To
   change it, make both versions of a few keeps, levelled the same (louder
   sounds better to the ear), and let him pick (`process.py` did this).
-- His level for a sound, against the others, is `gain` in `effects.yaml`;
-  `EFFECT_VOLUME` in `sound.js` sets them all against the synth.
+- Adam's level for a sound, against the others, is `gain` in
+  `effects.yaml`; `EFFECT_VOLUME` in the game's `sound.js` sets them all
+  against the synth.
 
 ## 6. Test, then report
 
-- `uv run ruff check . && uv run pytest` (effects schema, the yard's list
-  against its files, `effects.js` up to date, `sound.test.js`), `npx --yes
+- `uv run ruff check . && uv run pytest` (effects schema, each game's list
+  against its files and its `sound.js`, `effects.js` up to date, `sound.test.js`), `npx --yes
   eslint@10.12.0 worlds`, `main.py validate`.
 - In the browser: a play with no console error, and a probe that a sound
   with takes starts an audio source (`AudioContext.prototype.createBufferSource`
-  counted). Browser suite slice `"TestWholePlay"`; the whole suite and
-  `-m perf` once before the commit when many takes are added (they decode at
-  the first tap). Walking's perf budget sits at the edge on this Mac (23–30%
-  busy before any of this): compare with the old code before blaming a change.
+  counted). The game's browser slice for where the sound plays (`CLAUDE.md`
+  table); the whole suite and `-m perf` once before the commit when many
+  takes are added (they decode at the first tap). The perf budget sits at
+  the edge on this Mac: compare with the old code before blaming a change.
 - Report what changed, what to judge by ear (levels, long takes), what
   wasn't checked. Commit when asked.
 
