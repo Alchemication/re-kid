@@ -22,6 +22,8 @@ const Mole = (() => {
   const SINK = { down: 240, hill: 16, out: 0, listen: 26 } // how far below his feet-line he sits, scene units
   const PEEK = 104 // coming up, how far down he is while only his hands show above the molehill
   const DIG_MS = 380 // diving down, or coming up
+  const DIG_IN = { depths: [55, 110, 160], strokes: 3, strokeMs: 95, jerkMs: 170 } // digging himself in out on the grass: sunk this far at each jerk (his waist, his shoulders, just his hairs), his hands paddling this many strokes before each
+  const SCRATCH = { rubs: 3, rubMs: 150 } // scratching his head: rubs to and fro, each this long
   const SNAP_MS = 90 // pose to pose: how quickly he moves from one held pose to the next
   const TUNNEL_MS_PER_UNIT = 0.9 // the bump of earth running under the grass
   // His gaits, in scene units and ms: a walk with short quick steps, a bob and an arm swinging, and
@@ -328,6 +330,48 @@ const Mole = (() => {
     show('front')
     arms(ARMS.up, -ARMS.up, 120)
     await sink('down')
+  }
+
+  /**
+   * Digging himself in where he stands, out on the grass where there is no molehill (Adam, 2026-11-02: so a
+   * child sees him dig down, step by step): turned to us, both hands paddling fast at the ground, he sinks in
+   * jerks behind the grass, to his waist, his shoulders, just his hairs; then down. `onJerk(i)` as each
+   * starts: the game's hole widening round him, the earth flying.
+   */
+  async function digIn(onJerk = () => {}) {
+    show('front')
+    const v = cur()
+    for (const f of v.feet) f.style.visibility = 'hidden'
+    inLayer.appendChild(root) // behind the grass's edge: it hides what has gone below
+    let at = SINK.out
+    for (const [i, depth] of DIG_IN.depths.entries()) {
+      onJerk(i)
+      Debug.trace('dig in', { depth })
+      for (let k = 0; k < DIG_IN.strokes; k++) await arms(k % 2 ? 20 : 70, k % 2 ? -70 : -20, DIG_IN.strokeMs, v) // scooping low at the ground, hand over hand
+      await Motion.endAt(body, [{ transform: `translateY(${at}px)` }, { transform: `translateY(${depth}px)` }], { duration: DIG_IN.jerkMs, easing: 'cubic-bezier(.3,1.4,.5,1)' })
+      at = depth
+    }
+    arms(ARMS.up, -ARMS.up, 120, v)
+    await sink('down', 200)
+  }
+
+  /** Scratching his head, puzzled: in three-quarter view, the near hand up on top of his head, rubbing. */
+  async function scratchHead() {
+    if (state.holdsUp) return
+    show('three')
+    const v = cur()
+    const hand = v.arms[1]
+    const behind = hand.nextSibling
+    v.view.appendChild(hand)
+    feel('puzzled', SCRATCH.rubs * SCRATCH.rubMs * 2 + 300)
+    try {
+      await Motion.endAt(hand, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-150deg)' }], { duration: SNAP_MS * 2, easing: 'ease-out' })
+      for (let k = 0; k < SCRATCH.rubs * 2; k++) await Motion.endAt(hand, [{ transform: `rotate(${k % 2 ? -138 : -150}deg)` }, { transform: `rotate(${k % 2 ? -150 : -138}deg)` }], { duration: SCRATCH.rubMs })
+      await Motion.endAt(hand, [{ transform: 'rotate(-150deg)' }, { transform: 'rotate(0deg)' }], { duration: 160 })
+    } finally {
+      hand.style.transform = ''
+      v.view.insertBefore(hand, behind)
+    }
   }
 
   /** Bumps of earth running under the grass from where he is to x, as he tunnels. */
@@ -653,5 +697,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, calm, settle, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
+  return { SCALE, state, drawnX, face, mood, calm, settle, feel, digIn, scratchHead, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
 })()

@@ -1,15 +1,19 @@
 // The far pond and its heron (invented, Adam 2026-11-01: "a distant bird might
 // be a heron, obviously would need a small pond"). A little pond lies at the
-// meadow's far edge, reeds at its ends, there all day. Now and then a grey
-// heron comes flying in from out of sight on slow wingbeats, lands in the
-// shallows at one end and fishes as herons do, facing out over the water
+// meadow's far edge, reeds at its ends, there all day; where, and how big,
+// each play draws (Adam, 2026-11-02). Now and then a grey heron comes flying
+// in from out of sight on slow wingbeats, lands in the shallows at one end,
+// somewhere new each visit, and fishes as herons do, facing out over the water
 // (Adam, 2026-11-02: like it would in real life): hunched, still as a post;
 // now and then its neck slowly out over the water, head low, watching; a
 // freeze; then a strike quicker than the eye, tipping right over, legs bent,
 // its bill in the water with a splash. Mostly nothing, and it eases back to
 // wait; sometimes it comes up with a little silver fish, head up, bill to the
-// sky, and down it goes. Then it flies off the way herons do, legs trailing. Far off and small, as all the wildlife (Adam: far in the
-// distance, so it doesn't distract).
+// sky, and down it goes. Then it flies off the way herons do, legs
+// trailing. Each visit its own heron: its own size, and now and then a young
+// one, greyer, its black crest not grown yet (Adam: make it look real). Far
+// off and small, as all the wildlife (Adam: far in the distance, so it
+// doesn't distract).
 //
 // What it does comes from the world model (creature.js on world.js): the pond
 // offers a `fish` where it stands, and a `drink` at either end (the deer come
@@ -22,8 +26,13 @@
 /* global Ambient, Clock, Creature, Debug, Motion, Sound, WildArt, World */
 /* exported Heron */
 const Heron = (() => {
-  const POND = { x: 640, y: 650, rx: 110, ry: 12 } // at the meadow's far edge behind his home end, where the child looks most; clear of the poles' hill and the spring
-  const SIZE = 0.42 // far off
+  const POND = { x: 640, y: 650, rx: 110, ry: 12 } // where it lies this play (setup draws x and rx)
+  const SPOTS = [[420, 700], [2850, 3650]] // its middle in one of these stretches of the far edge: clear of his molehill and flower bed, the poles' hill and the spring's ferns…
+  const NEAR_HOME = 0.6 // …in this share of plays the first, near his home, where the child is most
+  const SIZE_RX = [85, 130] // how wide (half its width)
+  const WADE = [0.5, 0.85] // the heron stands this far out from the middle towards an end (of its half width): in the shallows
+  const SIZE = [0.36, 0.48] // far off; each heron its own size…
+  const YOUNG = { share: 0.25, size: [0.3, 0.36] } // …and in this share of visits a young one, smaller, its crest not grown
   const VISITS = 2 // at most this many a day
   const LOOK_MS = 5000
   const FIRST = [9, 13] // the first may come between these hours…
@@ -51,7 +60,7 @@ const Heron = (() => {
     stayMs: [45000, 80000], hours: [8.5, 18.3], dark: 0.5, wet: 'avoid',
     feeds: 'fish', hungerMs: [0, 0], feedMs: [35000, 60000], // it comes to fish: it stands there a long while
     startledBy: ['rumble', 'thunder', 'vroom'],
-    band: [430, POND.y], roam: 1600, haunt: [POND.x - 900, POND.x + 900], exitY: 360, // roam: it sees the pond from far off
+    band: [430, POND.y], roam: 1600, exitY: 360, // roam: it sees the pond from far off (its haunt: about the pond, come)
   }
 
   const comings = Debug.random('meadow-heron')
@@ -67,13 +76,12 @@ const Heron = (() => {
     layer.insertBefore(g, layer.firstChild) // on the ground, under whatever comes to it
     WildArt.el('ellipse', { cx: POND.x, cy: POND.y, rx: POND.rx + 6, ry: POND.ry + 3, fill: '#7a8f5a' }, g)
     WildArt.el('ellipse', { cx: POND.x, cy: POND.y, rx: POND.rx, ry: POND.ry, fill: '#5d86a8', stroke: '#3d5f7a', 'stroke-width': 2 }, g)
-    WildArt.el('path', { d: `M${POND.x - 70} ${POND.y - 3} h50 M${POND.x + 10} ${POND.y + 2} h40`, stroke: '#a9c6dc', 'stroke-width': 2, 'stroke-linecap': 'round' }, g)
-    for (const [dx, h] of [[-118, 34], [-108, 26], [-98, 38], [104, 30], [114, 40], [124, 24]]) {
+    const k = POND.rx / 110 // its glints and reeds drawn for a pond this much the first one's size
+    WildArt.el('path', { d: `M${POND.x - 70 * k} ${POND.y - 3} h${50 * k} M${POND.x + 10 * k} ${POND.y + 2} h${40 * k}`, stroke: '#a9c6dc', 'stroke-width': 2, 'stroke-linecap': 'round' }, g)
+    for (const [dx, h] of [[-8, 34], [2, 26], [12, 38], [-6, 30], [4, 40], [14, 24]].map(([d, h], i) => [i < 3 ? -POND.rx + d : POND.rx + d, h * (0.8 + comings() * 0.4)])) {
       WildArt.el('path', { d: `M${POND.x + dx} ${POND.y + 2} q2 ${-h / 2} -2 ${-h}`, stroke: '#4f6b2e', 'stroke-width': 2.5, fill: 'none' }, g)
       if (h > 32) WildArt.el('ellipse', { cx: POND.x + dx - 1, cy: POND.y - h + 2, rx: 2.6, ry: 6, fill: '#6b4a2b' }, g) // a bulrush head
     }
-    World.offer('far-pond', 'fish', POND.x - POND.rx + 30, POND.y - 2, () => true) // the shallows at either end
-    World.offer('far-pond-east', 'fish', POND.x + POND.rx - 30, POND.y - 2, () => true)
     World.offer('far-pond-left', 'drink', POND.x - POND.rx - 20, POND.y + 4, () => true)
     World.offer('far-pond-right', 'drink', POND.x + POND.rx + 20, POND.y + 4, () => true)
   }
@@ -82,10 +90,15 @@ const Heron = (() => {
   function come(opened = false) {
     const { x0, x1 } = World.state.view
     const x = comings() < 0.5 ? Math.min(x0, POND.x - 900) - 200 : Math.max(x1, POND.x + 900) + 200
-    const c = Creature.make(opened ? { ...HERON, hours: [0, 24] } : HERON, x, 420, Clock.now(), comings) // asked for: its hours opened
+    const end = comings() < 0.5 ? -1 : 1 // where it fishes this visit: the shallows at one end, somewhere new
+    World.offer('far-pond', 'fish', POND.x + end * POND.rx * (WADE[0] + comings() * (WADE[1] - WADE[0])), POND.y - 2 + comings() * 4, () => true)
+    const traits = { ...HERON, haunt: [POND.x - 900, POND.x + 900], ...(opened ? { hours: [0, 24] } : {}) } // asked for: its hours opened
+    const c = Creature.make(traits, x, 420, Clock.now(), comings)
     const g = WildArt.el('g', { class: 'far-heron flying', 'data-critter': 'heron' }, layer)
-    const art = WildArt.heron(g)
-    heron = { c, g, art, lean: art.querySelector('.lean'), neck: art.querySelector('.neck'), pose: 'wait', fishing: false, hunting: false }
+    const young = comings() < YOUNG.share
+    const [lo, hi] = young ? YOUNG.size : SIZE
+    const art = WildArt.heron(g, { young })
+    heron = { c, g, art, size: lo + comings() * (hi - lo), young, lean: art.querySelector('.lean'), neck: art.querySelector('.neck'), pose: 'wait', fishing: false, hunting: false }
     visits++
     Debug.trace('heron', { comes: true })
     Ambient.add(c, { name: 'heron', id: visits, rnd: comings, draw, gone })
@@ -103,7 +116,7 @@ const Heron = (() => {
     }
     if (fishing) h.face = c.x < POND.x ? -1 : 1 // out over the water (drawn facing left: -1 mirrors it)
     else if (Math.abs(c.vx) > 3) h.face = c.vx > 0 ? -1 : 1 // flying: the way it goes
-    h.g.setAttribute('transform', `translate(${c.x} ${c.y}) scale(${SIZE * (h.face ?? 1)} ${SIZE})`)
+    h.g.setAttribute('transform', `translate(${c.x} ${c.y}) scale(${h.size * (h.face ?? 1)} ${h.size})`)
   }
 
   const between = ([a, b]) => a + life() * (b - a)
@@ -183,6 +196,9 @@ const Heron = (() => {
   /** The pond, drawn now (there all day); the heron's first visit drawn now. `now`: ?critters=heron. */
   function setup(into, { still = false, now = false } = {}) {
     layer = into
+    const [lo, hi] = SPOTS[comings() < NEAR_HOME ? 0 : 1]
+    POND.x = Math.round(lo + comings() * (hi - lo))
+    POND.rx = Math.round(SIZE_RX[0] + comings() * (SIZE_RX[1] - SIZE_RX[0]))
     drawPond()
     nextAt = FIRST[0] + comings() * (FIRST[1] - FIRST[0])
     if (still && !now) return

@@ -438,6 +438,15 @@ scene:
   rolling into the mouse hole, pushed back by the mouse; wasps at fallen
   fruit; a gust shaking fruit down; a butterfly that lands on his nose; a
   fox's eyes under the gate at dusk; ants carrying crumbs; leaves to chase.
+- **A stream in the meadow, as an encounter** (Adam, 2026-11-02: a river
+  would be nice; see what the films have with water, fish, sea creatures).
+  First break down the leads with `new-episode`: Krtek zahradníkem (1969:
+  a leaking hose, a frog blocking it, the wilting flowers saved by an
+  irrigation ditch he digs with the mouse; the closest fit, a mole digging
+  his own little stream to his flower bed), Jak krtek ke kalhotkám přišel
+  (1957: a crayfish cuts his cloth), Krtek a raketa (1965: the sea, a
+  crab, fish, turtles). The catalogue has no synopses for the later films
+  yet: check them too (the robot film's trip to the sea).
 - **An episode as a dream:** Reksio falls asleep in the doghouse and
   dreams an episode (Kosmonauta's rocket, say), inside the yard: new
   content for a world without leaving its scene.

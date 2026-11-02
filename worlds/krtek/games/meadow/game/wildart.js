@@ -147,8 +147,9 @@ const WildArt = (() => {
    * face with a black stripe back from the eye, a long dagger bill. `.lean` (all but its legs) tips forward at
    * the hip and `.neck` stretches out from the body (heron.js: it stalks, strikes, swallows); `.ripples` ring
    * its legs where it stands in the shallows; `.wings` show only in flight, the legs then trailing behind
-   * (game.css, `.flying`). */
-  function heron(g) {
+   * (game.css, `.flying`). A young one (`young`) has a greyer neck and no black crest yet. */
+  function heron(g, { young = false } = {}) {
+    const neckColour = young ? '#c4c9cb' : '#e8ebe8'
     const a = el('g', {}, g)
     const stand = el('g', { class: 'standing' }, a)
     el('path', { d: 'M-4 -96 L-8 0 M8 -96 L10 0 M-8 0 l-12 0 M10 0 l-10 0', stroke: '#c9a23a', 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' }, stand)
@@ -157,9 +158,9 @@ const WildArt = (() => {
     el('path', { d: 'M-24 -128 Q-28 -100 -4 -92 L30 -88 Q56 -86 66 -70 Q50 -98 28 -120 Q4 -140 -24 -128 Z', fill: '#9aa3a8', ...line }, lean) // the body, its tail down behind
     el('path', { d: 'M0 -124 Q24 -118 46 -96', stroke: '#5f6a72', 'stroke-width': 5, fill: 'none' }, lean) // the dark wing edge
     const neck = part(lean, 'neck', -20, -124)
-    el('path', { d: 'M-20 -124 Q-36 -150 -18 -168 Q-4 -182 -22 -200 L-32 -194 Q-20 -180 -30 -168 Q-48 -148 -30 -120 Z', fill: '#e8ebe8', ...line, 'stroke-width': 2.5 }, neck)
-    el('ellipse', { cx: -26, cy: -206, rx: 13, ry: 10, fill: '#e8ebe8', ...line, 'stroke-width': 2.5 }, neck)
-    el('path', { d: 'M-24 -210 L6 -216', stroke: INK, 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, neck) // its black crest
+    el('path', { d: 'M-20 -124 Q-36 -150 -18 -168 Q-4 -182 -22 -200 L-32 -194 Q-20 -180 -30 -168 Q-48 -148 -30 -120 Z', fill: neckColour, ...line, 'stroke-width': 2.5 }, neck)
+    el('ellipse', { cx: -26, cy: -206, rx: 13, ry: 10, fill: neckColour, ...line, 'stroke-width': 2.5 }, neck)
+    if (!young) el('path', { d: 'M-24 -210 L6 -216', stroke: INK, 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' }, neck) // its black crest
     el('path', { d: 'M-36 -208 L-78 -202 L-36 -200 Z', fill: '#d9b23a', ...line, 'stroke-width': 2 }, neck) // the bill
     eye(neck, -30, -207, 3.5)
     const wings = el('g', { class: 'wings' }, a)

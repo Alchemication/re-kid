@@ -19,7 +19,7 @@
 /* exported Flock */
 const Flock = (() => {
   const BIRDS = [3, 5] // how many live in the far trees (each play draws)
-  const SIZE = 0.6 // against their own drawing: small, far off
+  const SIZE = [0.5, 0.68] // against their own drawing: small, far off, each bird its own size
   const QUIET_MS = 25000 // after a fright, this long quiet before they start to come back…
   const BACK_MS = [4000, 9000] // …then one comes back about this often
   const LOOK_MS = 2000 // how often the flock looks whether one may come back
@@ -54,6 +54,7 @@ const Flock = (() => {
     const id = nextId++
     const c = Creature.make(BIRD, x, y, Clock.now(), comings)
     if (sitting) c.hungry = Clock.now() + 2000 + comings() * 10000 // sat a while already
+    const size = SIZE[0] + comings() * (SIZE[1] - SIZE[0])
     const g = WildArt.el('g', { class: 'far-bird', 'data-critter': `flock ${id}` }, layer)
     WildArt.bird(g)
     out.set(id, { c, g })
@@ -65,7 +66,7 @@ const Flock = (() => {
         if (g.flying !== !perched) g.classList.toggle('flying', (g.flying = !perched))
         const face = b.vx > 2 ? -1 : b.vx < -2 ? 1 : (g.face ?? 1) // drawn facing left; sitting, as it came
         g.face = face
-        const at = `translate(${b.x.toFixed(1)} ${b.y.toFixed(1)}) scale(${SIZE * face} ${SIZE})`
+        const at = `translate(${b.x.toFixed(1)} ${b.y.toFixed(1)}) scale(${(size * face).toFixed(3)} ${size.toFixed(3)})`
         if (at !== g.at) g.setAttribute('transform', (g.at = at)) // a sitting bird: no write
       },
       gone: () => {

@@ -35,6 +35,12 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
   the hero looks at it if he is free.
 - **How often, how many.** Quiet by default (`docs/DESIGN_PRINCIPLES.md`:
   never busy).
+- **As in nature** (Adam, 2026-11-02: make it look real). Read how the
+  animal really goes about it before animating (a heron stands still,
+  stalks with its neck out, freezes, strikes, and swallows bill up), and
+  have it face what it deals with (the water, not the bank). No two are
+  alike: each its own size, a young one now and then looking younger; the
+  scenery it needs (the pond) lies somewhere else each play, its own size.
 
 ## 2. Where each piece goes (the meadow)
 
@@ -47,9 +53,22 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
 | A new trait or rule | `shared/creature.js` (generic, never a creature's name), then `main.py shared`; its test in `tests/creature.test.js` |
 | A tap | an `INTENTS` entry and `CRITTER_TAPS` in `meadow.js`, `data-critter="<name>"` on its drawing with a transparent target circle, and its intent in `waits` (a tap on it never waits for an encounter) |
 | Trying it | `?critters=<name>` (layout.js, README): it comes at once, its hours opened (an asked-for one may come before them), whatever it needs set up (the snail's wet grass) |
+| Animals far off (the meadow) | drawn in `wildart.js` (each with `.head`, `.leg`s at their hips and its leg length, `.tail`), living in `wildlife.js` (the herds), `flock.js` (the far trees' birds), `heron.js` (the pond) |
 | Words | its part in `brief.yaml`, `docs/WORLD_MODEL.md` (who uses it), the plan |
 
 ## 3. Traps already hit
+
+- **Never in view.** The herds came in from out of sight and wandered near
+  where they came in, so the slow żubr never got on screen. One that is
+  there to be seen keeps `inside` the view (`creature.js`).
+- **Walking backwards, sliding.** The herds faced away from where they
+  walked (a mirror sign), and their legs swung on a CSS loop at any
+  speed, so their feet skated: legs move with the ground covered
+  (`wildlife.js` `stride`), and a browser test checks each faces the way
+  it goes. Watch frames of it walking, close up, before showing Adam.
+- **A state that flickers.** The heron's fishing (slow at its food) went
+  on, off and on again as it settled, which stopped its hunt before it
+  began. Once in a state like that, give it slack before leaving it.
 
 - **A beeline across the scene.** Hungry, a butterfly flew 16 s in a straight
   line to the only open flower: food is looked for within half its `roam`.

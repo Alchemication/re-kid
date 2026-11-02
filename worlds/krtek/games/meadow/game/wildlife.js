@@ -59,6 +59,7 @@ const Wildlife = (() => {
     airborne: 1.7, // a bound carries this much further than the legs reach
     leap: 0.16, // the body lifts this much (of its leg's length) with each bound
   }
+  const BUILD = { grown: [0.82, 1], young: [0.75, 1] } // each one its own size, as in nature (Adam, 2026-11-02): this share of the size where it stands, never bigger
   const YOUNG_SWING = 1.4 // a piglet's, a fawn's, a calf's legs swing this much wider
   const STEPPING = 10 // going at least this fast (its own units a second), its legs step; slower, they settle
   const SETTLE_MS = 250 // legs come to stand, or start out, over about this long
@@ -155,6 +156,8 @@ const Wildlife = (() => {
       m.legs = [...m.g.querySelectorAll('.leg')]
       m.tail = m.g.querySelector('.tail')
       m.young = !!(opts.piglet || opts.fawn || opts.calf)
+      const [lo, hi] = m.young ? BUILD.young : BUILD.grown
+      m.build = lo + comings() * (hi - lo)
       Object.assign(m, { drawnX: m.x, phase: life(), amp: 0, angles: [], headA: 0, nodA: 0, face: left ? -1 : 1, shuffle: 0, nextShuffle: 0, swishFrom: 0, nextSwish: Clock.now() + between(SWISH.every, life()) })
       m.lookUntil = 0
       m.nextLook = Clock.now() + between([1500, 6000], life())
@@ -195,7 +198,7 @@ const Wildlife = (() => {
       m.g.style.display = shown ? '' : 'none' // out of view: not drawn at all
     }
     if (!shown) return
-    const s = sizeAt(m.y)
+    const s = sizeAt(m.y) * m.build
     const lift = stride(h, m, (m.x + dx - m.drawnX) / s, dt, played?.[2])
     m.drawnX = m.x + dx
     const at = `translate(${m.drawnX.toFixed(1)} ${(m.y + dy - lift * s).toFixed(1)}) scale(${(s * m.face).toFixed(3)} ${s.toFixed(3)})`

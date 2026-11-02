@@ -50,7 +50,9 @@
 //     bulldozer, the fox looming; until left out: to the end). From the
 //     start of step `from` to the start of step `until` the bed is uneasy
 //     (beds.js), between cues too: no glad music while it is still here
-//     (Adam, 2026-11-01). A tap doesn't cut it short, as it would another
+//     (Adam, 2026-11-01); the moment it lifts, the theme comes happy
+//     (Adam, 2026-11-02: once it's gone, the glad music back), so its
+//     `music` needn't cue it. A tap doesn't cut it short, as it would another
 //     encounter: any tap carries the story on (meadow.js), so a busy child
 //     never holds a bulldozer at the meadow's edge. While it is about he
 //     rests on an uneasy face, not his smile (mole.js `calm`),
@@ -153,6 +155,7 @@ const Things = (() => {
     // one at a time: the next arrives at its hour, or a quiet spell after the one before is done
     // (or once it has waited STUCK_MS), whichever is later
     hourNow = hour
+    for (const e of Object.values(all)) relief(e)
     const waitingNow = plan.some((p) => all[p.name].out && !all[p.name].done && Clock.now() - all[p.name].arrived < STUCK_MS)
     const resting = quiet(hour, lastDone, Day.SUNSET)
     for (const p of plan) {
@@ -200,7 +203,18 @@ const Things = (() => {
     e.done = true
     lastDone = hourNow
     Debug.trace('done', { thing: e.name })
-    if (!Object.values(e.music || {}).includes('happy')) api.music?.('happy')
+    if (!e.relieved && !Object.values(e.music || {}).includes('happy')) api.music?.('happy')
+  }
+
+  /** The moment an encounter's trouble lifts (the threat gone), the theme comes happy: once. */
+  function relief(e) {
+    const now = inTrouble(e)
+    if (e.troubling && !now && !e.done && !e.relieved) {
+      e.relieved = true
+      Debug.trace('relieved', { thing: e.name })
+      api.music?.('happy')
+    }
+    e.troubling = now
   }
 
   /**

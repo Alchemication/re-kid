@@ -80,7 +80,11 @@ beat many):
   visibly change what happens next; a beat with no effect is filler: cut
   it or give it one (the meadow's bulldozer lurched on whether or not he
   threw its poles away, Adam 2026-11-01). And his feelings follow the
-  story: no cheering while the trouble is still there. A threat isn't
+  story: no cheering while the trouble is still there, and no smile at
+  rest either: the hero's resting face turns uneasy while it holds. A
+  gesture shared by two feelings takes the face as a parameter: the
+  mole's hands-to-face was a laugh, and used for the bulldozer's fright it
+  showed a grin (Adam, 2026-11-02). A threat isn't
   cut short by a tap as a gentle encounter is: a tap made him laugh next
   to the bulldozer, and a child tapping on and on held it at the meadow's
   edge. While an encounter's `trouble` holds, every tap carries it on.
@@ -99,7 +103,11 @@ beat many):
   comes on its own feet, or was always there, and it leaves the same way,
   even when a tap cuts it short (docs/DESIGN_PRINCIPLES.md). Visitors come
   in from out of sight and go home out of sight; the game's map says how,
-  and a rule should check it.
+  and a rule should check it. Nothing vanishes in one go, either: going
+  into the ground, digging, building show their steps, quick but each
+  seen (the mole sank out of sight at once and the pit was simply there;
+  now he scratches his head, has the idea, and digs himself down in three
+  jerks as the hole widens round him, Adam 2026-11-02).
 - **Built from what exists.** Reuse the hero's moves, the creatures and the
   sounds before inventing new ones. Reuse parts, not the story: borrowing
   another gag's face for relief is fine; borrowing its plot is not.
@@ -134,7 +142,8 @@ chosen one, write down briefly:
   end, what plays *between* the cues too (the bed): a threat holds an
   uneasy bed until it has gone, and nothing glad comes back before (the
   meadow's bulldozer had the cheerful bed and the flute theme back while
-  it was still coming, Adam 2026-11-01). Check it by tracing a whole run
+  it was still coming, Adam 2026-11-01); the moment it has gone, the glad
+  music comes back, not a step later (Adam, 2026-11-02). Check it by tracing a whole run
   (each step, the bed's mood, the take playing), not only that the cues
   fire. The report lists what waits on the boards for his ear.
 - **What it offers:** `discover`, `help` (the hero helps someone) or
@@ -243,6 +252,10 @@ for, and update every caller, no shims.
 
 ## 6. Look at it
 
+Probe scripts write where the shell stands, and it goes back to the project
+between calls: give their outputs absolute paths in the scratchpad (a
+sheet of screenshots once landed in the project's root).
+
 How, for each game: its file (section 4). Whichever the game, check that
 each beat reads without words, at phone size too. Check size and placement
 here, before writing tests: the first clock was too small to read and had
@@ -286,7 +299,10 @@ The game's tables and fakes: its file (section 4). For every game:
 3. Then once: `uv run ruff check . && uv run pytest`, `npx --yes
    eslint@10.12.0 worlds`, `uv run pytest -m browser -n 8`, `uv run pytest
    -m perf` if something drawn every frame changed, `main.py validate`.
-   Not after each step: the full browser suite takes about 15–20 minutes.
+   Not after each step: the full browser suite takes about 25 minutes,
+   and its eight browsers slow the whole machine. Tell Adam before
+   starting it (a play meanwhile is choppy and its timing misleads), and
+   say when it is done.
 
 ## 9. Report and retro
 

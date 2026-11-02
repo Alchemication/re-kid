@@ -766,7 +766,9 @@ class TestMeadowWildlife:
     def test_the_heron_comes_to_the_pond_and_a_tap_sends_it_off(
         self, meadow: callable
     ) -> None:
-        m = meadow("seed=2&still&props=&critters=heron")  # it fishes at the west end
+        m = meadow(
+            f"{STILL}&props=&critters=heron"
+        )  # it fishes west of the pond's middle: faces east
         m.wake()
         m.wait("Heron.out && Heron.out.goal === 'feed'", 30_000)  # standing at the pond
         m.wait(
@@ -1026,6 +1028,32 @@ class TestMeadowBulldozer:
         m.wait_free()
         m.assert_settled()
 
+    def test_he_thinks_then_digs_himself_down_step_by_step(
+        self, meadow: callable
+    ) -> None:
+        """Adam, 2026-11-02: he just vanished, then the pit was there. Now he
+        scratches his head, has the idea, and sinks in jerks as he digs."""
+        m = meadow(f"{STILL}&soon&props=poles")
+        m.wake()
+        arrived(m, "poles")
+        m.do("use poles")
+        m.wait("meadowGame.state().things.poles === 'step 6'", 60_000)
+        faces = set()
+        while m.page.evaluate("!document.querySelector('.pit')"):
+            faces.add(m.page.evaluate("Mole.state.face"))
+            m.page.wait_for_timeout(40)
+        assert "puzzled" in faces, f"he didn't stop to think: {faces}"
+        depths = m.page.evaluate(
+            "meadowGame.trace().split('\\n').filter((l) => l.includes(' dig in '))"
+            ".map((l) => JSON.parse(l.slice(l.indexOf('{'))).depth)"
+        )
+        assert depths == [55, 110, 160], f"he didn't sink step by step: {depths}"
+        m.wait("meadowGame.state().things.poles === 'step 7'", 20_000)
+        assert not m.page.evaluate("document.querySelector('#low-critters ellipse')"), (
+            "the hole he dug himself into was left behind"
+        )
+        assert not m.errors, m.errors
+
     def test_the_bed_and_he_are_uneasy_till_it_is_gone(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&soon&props=poles")
         m.wake()
@@ -1054,6 +1082,11 @@ class TestMeadowBulldozer:
             f"he smiled while it was here: {faces}"
         )
         m.wait("Music.bed.mood !== 'trouble'", 2000)  # gone: the day's bed again
+        m.wait(  # and the glad theme, at once, not only once he has mended his tulips
+            'meadowGame.trace().includes(\'"part":"happy"\')'
+            " || Music.part === 'happy'",
+            4000,
+        )
         m.wait(  # and his smile back
             "['content', 'delighted'].includes(Mole.state.face)", 5000
         )

@@ -103,6 +103,7 @@
   }
   const PIT_X = 1440 // where he digs the pit, in its path, just before the last pole: clear of the earth its blade shoves (at 1540, under it, the pit never showed)
   const PIT = { rx: 95, ry: 20, ms: 1800, every: 110 } // the pit: how wide and deep it opens; how long he digs, a clod flying out this often
+  const DIG_IN = { rx: [36, 50, 64], clods: 4, idea: 450 } // digging himself in: the hole round him at each jerk; clods flung each jerk; the idea dawning this long
   const DIVE = { deg: -9, dy: 8 } // nose down into the pit (at its size, a few degrees take the blade well down)
   const HEAP = [0.45, 0.75] // the earth it shoves grows from this to this as it comes (bigger, it buried him)
   const SCAR_MS = 60000 // its track, the pit and the heap green over in about a minute
@@ -636,11 +637,21 @@
     if (!state.pit) {
       await m().goTo(PIT_X)
       if (!alive()) return
-      Sound.say('hm') // an idea
-      Sound.dig()
-      await Mole.goDown()
+      Mole.lookAt(state.x) // at it, and what can he do?
+      Sound.say('hm')
+      await Mole.scratchHead()
       if (!alive()) return
-      await dig(alive) // under there, digging: earth flying out, the hole widening
+      Sound.say('tam') // an idea! (his hairs up, his mouth round: no grin while it's here)
+      await Clock.wait(DIG_IN.idea)
+      if (!alive()) return
+      const start = digStart()
+      try {
+        await Mole.digIn((i) => start.jerk(i)) // down he digs, step by step, the hole widening round him
+      } finally {
+        start.done() // dug in, or cut short: the pit (dig) takes over, or it is dug again
+      }
+      if (!alive()) return
+      await dig(alive, DIG_IN.rx.at(-1) / PIT.rx) // under there, digging: earth flying out, the hole widening on
       if (!alive()) return
       await Mole.tunnelTo(PIT_X - PIT.rx - 60) // out of its way, beyond the pit, by the last pole
       if (!alive()) return
@@ -665,9 +676,43 @@
     await Mole.lean(10, 900)
   }
 
-  /** The pit, dug where he went down: a hole widening in the grass, a rim of loose earth piling up behind
-   * it, and earth flying out of it in arcs, this way and that, while he digs down there. */
-  async function dig(alive) {
+  /** The hole he digs himself into: its dark far side behind him, the near lip of loose earth in front,
+   * wider at each jerk, earth flung up as he goes; done() clears it for the pit (dig) to take over. */
+  function digStart() {
+    const back = el('ellipse', { cx: PIT_X, cy: Y - 2, rx: 0, ry: PIT.ry * 0.7, fill: '#2b1b0b', stroke: '#15140f', 'stroke-width': 3 }, document.getElementById('low-critters'))
+    const lip = el('path', { fill: '#6e4a24', stroke: '#15140f', 'stroke-width': 2.5 }, document.getElementById('things'))
+    const lipAt = (rx) => `M${PIT_X - rx - 10} ${Y + 2} Q${PIT_X} ${Y + 34} ${PIT_X + rx + 10} ${Y + 2} Q${PIT_X} ${Y + 8} ${PIT_X - rx - 10} ${Y + 2} Z` // a crescent of loose earth
+    return {
+      jerk(i) {
+        const rx = DIG_IN.rx[i]
+        back.setAttribute('rx', rx)
+        lip.setAttribute('d', lipAt(rx))
+        Sound.dig()
+        for (let k = 0; k < DIG_IN.clods; k++) Clock.after(k * 90, () => fling(PIT_X, 0.6))
+      },
+      done() {
+        back.remove()
+        lip.remove()
+      },
+    }
+  }
+
+  /** A clod of earth flung up out of a hole at x, this way or that, landing in the grass (`k`: how far). */
+  function fling(x, k = 1) {
+    const side = random() < 0.5 ? -1 : 1
+    const [dx, up] = [side * (60 + random() * 150) * k, (70 + random() * 110) * k]
+    const d = el('circle', { r: 7 + random() * 9, fill: random() < 0.5 ? '#6e4a24' : '#4a2f14', stroke: '#15140f', 'stroke-width': 1.5 }, document.getElementById('drops'))
+    Motion.endAt(d, [
+      { transform: `translate(${x + side * 20}px, ${Y}px)`, opacity: 1 }, // opacity given: Motion.endAt sets the end (faint) first
+      { transform: `translate(${x + dx * 0.6}px, ${Y - up}px)`, opacity: 1, offset: 0.45 },
+      { transform: `translate(${x + dx}px, ${Y + 4}px)`, opacity: 0.2 },
+    ], { duration: 650, easing: 'ease-out' }).then(() => d.remove(), () => d.remove())
+  }
+
+  /** The pit, dug where he went down: a hole widening in the grass (from `from` of its size: the hole he
+   * dug himself into), a rim of loose earth piling up behind it, and earth flying out of it in arcs, this
+   * way and that, while he digs down there. */
+  async function dig(alive, from = 0.15) {
     state.pit = true
     const layer = document.getElementById('things')
     const rim = el('path', { class: 'pit-rim', d: `M${PIT_X - PIT.rx - 30} ${Y + 10} Q${PIT_X} ${Y - 100} ${PIT_X + PIT.rx + 30} ${Y + 10} Z`, fill: '#6e4a24', stroke: '#15140f', 'stroke-width': 3 }, layer)
@@ -677,21 +722,13 @@
       e.style.transformBox = 'fill-box'
       e.style.transformOrigin = 'center bottom'
       scars.push(e)
-      Debug.ignoreCut(Motion.endAt(e, [{ transform: 'scale(0.15)' }, { transform: 'scale(1)' }], { duration: PIT.ms, easing: 'ease-out' }), 'the pit opens')
+      Debug.ignoreCut(Motion.endAt(e, [{ transform: `scale(${e === hole ? from : Math.max(0.15, from * 0.6)})` }, { transform: 'scale(1)' }], { duration: PIT.ms, easing: 'ease-out' }), 'the pit opens')
     }
-    const drops = document.getElementById('drops')
     for (let t = 0; t < PIT.ms; t += PIT.every) {
       Clock.after(t, () => {
         if (!alive()) return
         if (t % (PIT.every * 4) === 0) Sound.dig()
-        const side = random() < 0.5 ? -1 : 1
-        const [dx, up] = [side * (60 + random() * 150), 70 + random() * 110]
-        const d = el('circle', { r: 7 + random() * 9, fill: random() < 0.5 ? '#6e4a24' : '#4a2f14', stroke: '#15140f', 'stroke-width': 1.5 }, drops)
-        Motion.endAt(d, [
-          { transform: `translate(${PIT_X + side * 20}px, ${Y}px)`, opacity: 1 }, // opacity given: Motion.endAt sets the end (faint) first
-          { transform: `translate(${PIT_X + dx * 0.6}px, ${Y - up}px)`, opacity: 1, offset: 0.45 },
-          { transform: `translate(${PIT_X + dx}px, ${Y + 4}px)`, opacity: 0.2 },
-        ], { duration: 650, easing: 'ease-out' }).then(() => d.remove(), () => d.remove())
+        fling(PIT_X)
       })
     }
     await Clock.wait(PIT.ms)
@@ -912,8 +949,7 @@
     offer: 'discover',
     urgent: true, // a bulldozer won't wait for a tap: he goes to see at once (things.js)
     engageMs: 3000, // when it can't break off his play (still waking), he goes to see soon: nothing shows till he does
-    trouble: [0, 8], // from its rumble till it is gone: the bed uneasy, and no glad theme…
-    music: { 8: 'happy' }, // …until he stands his tulips up again
+    trouble: [0, 8], // from its rumble till it is gone: the bed uneasy, no glad theme till then (things.js: happy the moment it lifts)
     gone: () => state.recovering, // out of sight (recover): the trouble over, he may cheer
     appear,
     plant,
