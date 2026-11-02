@@ -105,18 +105,6 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 .again.holding .again-ring { stroke-dashoffset: 0; transition: stroke-dashoffset var(--hold, 2s) linear; }
 .splash-drop { fill: #cfe6f2; stroke: #15140f; stroke-width: 1.5; pointer-events: none; } /* off his face at the spring (meadow.js) */
 
-/* The wild animals far off (wildlife.js, wildart.js): legs swing while they walk, quicker as they run;
-   heads go down to graze and up to look, gently. */
-.wild.walking .wild-one:not(.small) .leg-a { animation: wild-step 0.9s ease-in-out infinite; }
-.wild.walking .wild-one:not(.small) .leg-b { animation: wild-step 0.9s ease-in-out infinite reverse; }
-.wild.running .wild-one:not(.small) .leg-a { animation: wild-step 0.38s ease-in-out infinite; }
-.wild.running .wild-one:not(.small) .leg-b { animation: wild-step 0.38s ease-in-out infinite reverse; }
-@keyframes wild-step {
-  0%, 100% { transform: rotate(-14deg); }
-  50% { transform: rotate(14deg); }
-}
-.wild .head { transition: transform 0.7s ease-in-out; }
-
 /* The far trees' birds (flock.js) and the far pond's heron (heron.js): wings only in flight, flapping. */
 .far-bird .wings, .far-heron .wings { display: none; }
 .far-bird.flying .wings { display: inline; animation: flap 0.22s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center bottom; }

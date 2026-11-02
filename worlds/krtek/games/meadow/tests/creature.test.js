@@ -219,6 +219,18 @@ test.describe('a creature', () => {
     assert.ok(paused > 0, 'it hovered')
   })
 
+  test('one kept inside the view walks into it from out of sight, and stays in it', () => {
+    const w = load()
+    const rnd = stream()
+    const c = w.Creature.make({ ...BUTTERFLY, feeds: null, speed: 40, roam: 500, inside: 200, pauseMs: [500, 500] }, 1900, 500, 0, rnd)
+    let inView = false
+    run(w, c, 60000, rnd, (b) => {
+      if (b.x < 1400) inView = true
+      if (inView) assert.ok(b.x > 150 && b.x < 1450, `x ${b.x}`)
+    })
+    assert.ok(inView, 'it came into view')
+  })
+
   test('one with a home goes back to it, not off out of sight', () => {
     const w = load()
     const rnd = stream()

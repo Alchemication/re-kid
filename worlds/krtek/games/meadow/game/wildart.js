@@ -6,8 +6,10 @@
 //
 // Each faces left, its feet on the ground at 0, 0 (a bird: its middle), in
 // its own units; the caller scales and mirrors it. Its moving parts are
-// groups the caller turns: `.head` (down to graze, up to look), `.legs`
-// (each leg a `.leg`, swung by game.css while it walks), `.tail`.
+// groups the caller turns: `.head` (down to graze, up to look), `.leg`s
+// (fore far, fore near, hind far, hind near, each turning at its hip),
+// `.tail`. Each returns its drawing with `leg`, its legs' length in the
+// caller's units, so the caller can match their stride to the ground.
 
 /* exported WildArt */
 const WildArt = (() => {
@@ -29,11 +31,11 @@ const WildArt = (() => {
     return p
   }
 
-  /** Legs, each a thin tapered shape from the body down to a hoof at the ground, swinging about its top. */
+  /** Legs, each a thin tapered shape from the body down to a hoof at the ground, turning about its top. */
   function legs(g, xs, top, w, colour, hoof) {
     const all = el('g', { class: 'legs' }, g)
     xs.forEach((x, i) => {
-      const leg = part(all, `leg leg-${i % 2 ? 'b' : 'a'}`, x, top)
+      const leg = part(all, 'leg', x, top)
       el('path', { d: `M${x - w / 2} ${top} L${x - w * 0.3} -6 L${x + w * 0.3} -6 L${x + w / 2} ${top} Z`, fill: colour, ...line, 'stroke-width': 2.5 }, leg)
       el('path', { d: `M${x - w * 0.34} -7 L${x + w * 0.34} -7 L${x + w * 0.3} 0 L${x - w * 0.3} 0 Z`, fill: hoof, ...line, 'stroke-width': 2 }, leg)
     })
@@ -57,6 +59,7 @@ const WildArt = (() => {
     const tail = part(a, 'tail', 70, -112)
     el('path', { d: 'M62 -118 Q84 -116 80 -96 Q70 -92 62 -100 Z', fill: '#fbf8ef', ...line, 'stroke-width': 2.5 }, tail) // the white rump
     legs(a, [-38, -24, 44, 58], -86, 13, coat, '#3a2a1c')
+    a.leg = 86 * s
     el('path', { d: 'M-52 -96 Q-58 -136 -20 -140 L46 -138 Q78 -134 74 -104 Q70 -84 40 -84 L-30 -84 Q-50 -84 -52 -96 Z', fill: coat, ...line }, a)
     el('path', { d: 'M-40 -92 Q0 -82 40 -90', stroke: '#e9c9a1', 'stroke-width': 5, fill: 'none' }, a) // the pale belly
     if (fawn) for (const [x, y] of [[-24, -126], [-4, -130], [16, -128], [34, -124], [-12, -116], [8, -118], [26, -114]]) el('circle', { cx: x, cy: y, r: 3.4, fill: '#fbf1dc' }, a)
@@ -84,6 +87,7 @@ const WildArt = (() => {
     el('path', { d: 'M66 -76 Q80 -66 74 -48', stroke: INK, 'stroke-width': 3, fill: 'none' }, tail)
     el('path', { d: 'M74 -50 l-4 10 l8 -2 z', fill: INK }, tail)
     legs(a, [-34, -20, 40, 54], -40, 14, coat, '#2b2b2b')
+    a.leg = 40 * s
     el('path', { d: 'M-56 -60 Q-60 -116 -16 -122 Q30 -122 60 -98 Q76 -80 66 -56 Q60 -38 30 -38 L-40 -38 Q-56 -40 -56 -60 Z', fill: coat, ...line }, a)
     if (piglet) for (const y of [-110, -96, -82, -68]) el('path', { d: `M-44 ${y} Q8 ${y - 8} 60 ${y + 6}`, stroke: '#ead7ae', 'stroke-width': 6, fill: 'none' }, a)
     else for (const [x, y] of [[-30, -118], [-14, -124], [4, -124], [20, -120]]) el('path', { d: `M${x} ${y} l3 -10 l3 9`, stroke: INK, 'stroke-width': 2, fill: 'none' }, a) // bristles on its back
@@ -109,6 +113,7 @@ const WildArt = (() => {
     el('path', { d: 'M92 -120 Q100 -96 96 -70', stroke: INK, 'stroke-width': 3, fill: 'none' }, tail)
     el('path', { d: 'M96 -72 l-5 14 l10 -2 z', fill: INK }, tail)
     legs(a, [-50, -32, 66, 82], -64, 20, coat, '#2b2b2b')
+    a.leg = 64 * s
     el('path', { d: 'M-70 -90 Q-82 -190 -24 -200 Q20 -196 40 -150 Q90 -150 98 -112 Q100 -64 70 -62 L-50 -62 Q-72 -64 -70 -90 Z', fill: coat, ...line }, a)
     if (!calf) el('path', { d: 'M-66 -120 Q-70 -186 -24 -194 Q6 -190 22 -160 Q-10 -150 -20 -120 Q-40 -96 -66 -100 Z', fill: wool, stroke: 'none' }, a) // the woolly hump and mane
     const head = part(a, 'head', -66, -110)

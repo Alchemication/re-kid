@@ -703,7 +703,20 @@ class TestMeadowWildlife:
         m = meadow(f"{STILL}&props=&wild={kind}")
         m.wake()
         m.wait(f"{self.OUT} && {self.OUT}.kind === '{kind}'", 10_000)
-        m.wait(f"{self.OUT} && {self.OUT}.goal === 'pause'", 30_000)  # it grazes
+        m.wait(  # walking in, it faces where it goes (drawn facing left: unmirrored)
+            f"{self.OUT} && Math.abs({self.OUT}.vx) > 8 && document.querySelector('.wild-one')?.getAttribute('transform')",
+            15_000,
+        )
+        faces = m.page.evaluate(
+            f"[{self.OUT}.vx, document.querySelector('.wild-one').transform.baseVal.consolidate().matrix.a]"
+        )
+        assert (faces[0] < 0) == (faces[1] > 0), f"it walks backwards: {faces}"
+        m.wait(
+            f"{self.OUT} && {self.OUT}.goal === 'pause'", 30_000
+        )  # it grazes, in view
+        assert m.page.evaluate(
+            f"{self.OUT}.x > World.state.view.x0 && {self.OUT}.x < World.state.view.x1"
+        ), "it grazes out of sight"
         far = m.page.evaluate(
             "[...document.querySelectorAll('.wild-one')].every((g) => (g.transform.baseVal.consolidate()?.matrix.d ?? 0) <= 0.501)"
         )
@@ -722,12 +735,19 @@ class TestMeadowWildlife:
     def test_the_bulldozer_sends_them_all_off(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&soon&props=poles&wild=deer&critters=flock")
         m.wake()
-        m.wait(f"{self.OUT} && {self.OUT}.goal === 'pause'", 30_000)
+        m.wait(  # grazing, or drinking at the pond
+            f"{self.OUT} && ['pause', 'feed'].includes({self.OUT}.goal)", 30_000
+        )
         assert m.page.evaluate("Flock.count") > 0, "no birds in the far trees"
         m.do("use poles")
         m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)
         m.wait(f"!{self.OUT} || {self.OUT}.goal === 'flee'", 10_000)
-        m.wait("Flock.count === 0", 30_000)  # all flown off
+        m.wait(  # all in sight flown off (one sitting beyond the rumble's reach may stay)
+            "[...document.querySelectorAll('.far-bird')].every((g) => {"
+            " const x = g.transform.baseVal.consolidate().matrix.e;"
+            " return x < World.state.view.x0 || x > World.state.view.x1 })",
+            30_000,
+        )
         assert not m.errors, m.errors
 
     def test_the_birds_sit_in_the_trees_and_fly_from_thunder(
@@ -1255,6 +1275,19 @@ class TestMeadowChurch:
         )
         assert [b["hour"] for b in bells] == list(range(9, 20)), bells
         assert bells[-1]["strokes"] > bells[0]["strokes"], "no evening bell"
+        assert not m.errors, m.errors
+
+    def test_the_old_clock_tells_the_play_s_hour(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&props=&day=40")
+        m.wake()
+        for _ in range(3):  # the hands follow the day, a step behind at most
+            m.page.wait_for_timeout(2500)
+            shows, hour = m.page.evaluate("[Church.shows, World.state.hour]")
+            assert 0 <= hour - shows < 0.2, (shows, hour)
+        hand = m.page.evaluate(
+            "document.querySelector('.clock-hour').getAttribute('transform')"
+        )
+        assert hand and hand.startswith("rotate("), hand
         assert not m.errors, m.errors
 
 

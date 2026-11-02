@@ -105,7 +105,9 @@ What it goes for, first that applies:
    offer that it `feeds` on, within its reach and half its `roam`, and dry
    if it minds the wet. It sits there `feedMs`. Whatever it is doing, a feed
    under way is finished: going home waits for it, fear doesn't.
-4. **Wander**: somewhere within its reach (its `haunt`, or the view),
+4. **Wander**: somewhere within its reach (its `haunt`, or the view: a
+   little past its edges, or, with `inside`, that far in from them, for one
+   there to be seen, as the far herds; out of sight, it walks in),
    `band` (scene y) and `roam`; with `pauseMs`, it hovers where it gets to;
    if `curious`, that share of its wanders go to something on show.
 

@@ -52,6 +52,8 @@ const Creature = (() => {
    *   freezeMs [lo, hi] (scared, it keeps still this long instead);
    * - band [top, bottom] (where it wanders, scene y), roam (how far it
    *   wanders at a time), haunt [x0, x1] (it keeps to this stretch),
+   *   inside (else it keeps to the view, this far in from its edges: one
+   *   there to be seen; without it, a little past them),
    *   pauseMs [lo, hi] (it hovers this long where it wandered to), curious
    *   (this share of its wanders go to something on show: 'sight' offers),
    *   exitY (it leaves the view at this height; else up and away).
@@ -78,10 +80,11 @@ const Creature = (() => {
     return { kind, x: c.x + dir * 1400, y: c.traits.exitY ?? -200 }
   }
 
-  /** Where it may be along the scene: its haunt, or the view and a little past it. */
+  /** Where it may be along the scene: its haunt, or the view (`inside` it, or a little past it). */
   function reach(c, world) {
     const { x0, x1 } = world.state.view
-    return c.traits.haunt || [x0 - 100, x1 + 100]
+    const inside = c.traits.inside ?? -100
+    return c.traits.haunt || [x0 + inside, x1 - inside]
   }
 
   const clampY = (c, y) => Math.max(c.traits.band[0], Math.min(c.traits.band[1], y))

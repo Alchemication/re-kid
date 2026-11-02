@@ -408,7 +408,7 @@ scene:
   (fails about 1 run in 4 under load, 2026-10-31: the sway hasn't grown
   yet), `TestMeadowTapsWait::test_a_tap_on_the_meadow_mid_step_waits_then_goes`
   (the same), `TestMeadowEgg::test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it`,
-  `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]` and `[car]`,
+  `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]`, `[car]` and `[rain]` (2026-11-02, a 90 s timeout under -n 8; passed alone),
   `test_a_tap_on_the_egg_while_waiting`, `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`,
   `TestMeadowStorm::test_a_storm_coming_breaks_off_his_play_and_he_goes_for_the_umbrella`
   (2026-11-01, a 27-minute run; both passed 3 of 3 alone), and the same
