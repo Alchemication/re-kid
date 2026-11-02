@@ -765,6 +765,7 @@ const meadowGame = (() => {
   Storm.setup({ sky: layers.sky, picture: svg, rain: document.getElementById('rain'), over: night.parentNode })
   Again.watch(document.getElementById('again'), HOLD_NEW_DAY_MS)
   Mole.setFree(() => game.awake && !game.ended && !game.gesture)
+  Mole.calm(() => (Things.troubled() ? 'uneasy' : 'content')) // a threat about: no smile till it's gone (Adam, 2026-11-02)
   Sound.listen((word) => {
     if (word === 'ahoj') helloAt = Clock.now()
     Mole.express(word) // each word he says comes with its face
@@ -822,7 +823,9 @@ const meadowGame = (() => {
   Clock.every(TICK_MS, tick)
   Clock.every(BED_STEER_MS, () => { // the bed: the moment of the day, and how busy the child is, calming as time passes
     game.busy = Bed.calmer(game.busy, BED_STEER_MS / 1000)
-    Music.setBed({ mood: Things.troubled() ? 'trouble' : MeadowBeds.moodAt({ hour: game.hour }), energy: game.busy }) // a threat about: uneasy till it's gone
+    const troubled = Things.troubled()
+    Music.setBed({ mood: troubled ? 'trouble' : MeadowBeds.moodAt({ hour: game.hour }), energy: game.busy }) // a threat about: uneasy till it's gone
+    Mole.settle() // and so is he (calm, below)
   })
   Clock.after(WAKE_ANYWAY_MS, () => { if (!game.awake) perform('wake') })
 

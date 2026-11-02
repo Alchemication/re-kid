@@ -1,11 +1,14 @@
 // The far pond and its heron (invented, Adam 2026-11-01: "a distant bird might
 // be a heron, obviously would need a small pond"). A little pond lies at the
 // meadow's far edge, reeds at its ends, there all day. Now and then a grey
-// heron comes flying in from out of sight on slow wingbeats, lands at the
-// water's edge and stands there, still as a post; every so often it leans,
-// stretches its neck, and stabs at the water, sometimes coming up with a
-// little silver fish, gone in a gulp. Then it flies off the way herons do,
-// legs trailing. Far off and small, as all the wildlife (Adam: far in the
+// heron comes flying in from out of sight on slow wingbeats, lands in the
+// shallows at one end and fishes as herons do, facing out over the water
+// (Adam, 2026-11-02: like it would in real life): hunched, still as a post;
+// now and then its neck slowly out over the water, head low, watching; a
+// freeze; then a strike quicker than the eye, tipping right over, legs bent,
+// its bill in the water with a splash. Mostly nothing, and it eases back to
+// wait; sometimes it comes up with a little silver fish, head up, bill to the
+// sky, and down it goes. Then it flies off the way herons do, legs trailing. Far off and small, as all the wildlife (Adam: far in the
 // distance, so it doesn't distract).
 //
 // What it does comes from the world model (creature.js on world.js): the pond
@@ -25,8 +28,24 @@ const Heron = (() => {
   const LOOK_MS = 5000
   const FIRST = [9, 13] // the first may come between these hours…
   const GAP_HOURS = 2.5 // …the next at least this long after it left
-  const STAB_MS = [4000, 9000] // standing this long between stabs
-  const CATCH = 0.4 // this share of stabs come up with a fish
+  // Its poses, [lean, neck, crouch]: its body tipped at the hip (deg, < 0 forward), its neck from the body,
+  // its body sunk this much (its own units) as its legs bend
+  const POSE = {
+    wait: [0, 8, 0], // hunched, neck drawn in
+    stalk: [-15, -25, 0], // neck out over the water, head low, watching
+    strike: [-55, -50, 22], // tipped right over, legs bent, bill in the water
+    gulp: [6, 24, 0], // head up, bill to the sky: down it goes
+  }
+  const WAIT_MS = [3000, 8000] // still as a post this long…
+  const STALK_MS = 1800 // …then its neck slowly out…
+  const FREEZE_MS = [600, 2200] // …a freeze…
+  const STRIKES = 0.6 // …and this share of them end in a strike; the rest, it eases back and waits
+  const STRIKE_MS = 170 // quicker than the eye
+  const DOWN_MS = 300 // its bill in the water this long
+  const CATCH = 0.4 // this share of strikes come up with a fish
+  const UP_MS = 500
+  const GULP_MS = 700 // the fish in its bill, bill to the sky, this long before it's gone
+  const SPLASH = { x: -100, ms: 900 } // where its bill goes in (its own units, ahead of its feet), the rings spreading this long
   const HERON = {
     speed: 120, flee: 1.6, turn: 1.4, blown: 0.1, // slow, heavy wingbeats
     stayMs: [45000, 80000], hours: [8.5, 18.3], dark: 0.5, wet: 'avoid',
@@ -53,7 +72,8 @@ const Heron = (() => {
       WildArt.el('path', { d: `M${POND.x + dx} ${POND.y + 2} q2 ${-h / 2} -2 ${-h}`, stroke: '#4f6b2e', 'stroke-width': 2.5, fill: 'none' }, g)
       if (h > 32) WildArt.el('ellipse', { cx: POND.x + dx - 1, cy: POND.y - h + 2, rx: 2.6, ry: 6, fill: '#6b4a2b' }, g) // a bulrush head
     }
-    World.offer('far-pond', 'fish', POND.x - POND.rx + 30, POND.y - 2, () => true)
+    World.offer('far-pond', 'fish', POND.x - POND.rx + 30, POND.y - 2, () => true) // the shallows at either end
+    World.offer('far-pond-east', 'fish', POND.x + POND.rx - 30, POND.y - 2, () => true)
     World.offer('far-pond-left', 'drink', POND.x - POND.rx - 20, POND.y + 4, () => true)
     World.offer('far-pond-right', 'drink', POND.x + POND.rx + 20, POND.y + 4, () => true)
   }
@@ -65,7 +85,7 @@ const Heron = (() => {
     const c = Creature.make(opened ? { ...HERON, hours: [0, 24] } : HERON, x, 420, Clock.now(), comings) // asked for: its hours opened
     const g = WildArt.el('g', { class: 'far-heron flying', 'data-critter': 'heron' }, layer)
     const art = WildArt.heron(g)
-    heron = { c, g, art, neck: art.querySelector('.neck'), nextStab: 0 }
+    heron = { c, g, art, lean: art.querySelector('.lean'), neck: art.querySelector('.neck'), pose: 'wait', fishing: false, hunting: false }
     visits++
     Debug.trace('heron', { comes: true })
     Ambient.add(c, { name: 'heron', id: visits, rnd: comings, draw, gone })
@@ -73,34 +93,77 @@ const Heron = (() => {
 
   function draw(c) {
     const h = heron
-    const fishing = c.goal?.kind === 'feed' && Math.hypot(c.vx, c.vy) < 10
-    h.g.classList.toggle('flying', !fishing)
-    const face = c.vx > 3 ? -1 : 1 // drawn facing left
-    if (fishing || Math.abs(c.vx) > 3) h.face = face
+    const fishing = c.goal?.kind === 'feed' && Math.hypot(c.vx, c.vy) < (h.fishing ? 40 : 10) // once down, settling doesn't lift it
+    if (fishing !== h.fishing) {
+      h.fishing = fishing
+      Debug.trace('heron', { fishing })
+      h.g.classList.toggle('flying', !fishing)
+      if (fishing && !h.hunting) hunt(h)
+      if (!fishing && h.pose !== 'wait') Debug.ignoreCut(pose(h, 'wait', 250), 'the heron straightens to fly') // off: straight up out of whatever it was at
+    }
+    if (fishing) h.face = c.x < POND.x ? -1 : 1 // out over the water (drawn facing left: -1 mirrors it)
+    else if (Math.abs(c.vx) > 3) h.face = c.vx > 0 ? -1 : 1 // flying: the way it goes
     h.g.setAttribute('transform', `translate(${c.x} ${c.y}) scale(${SIZE * (h.face ?? 1)} ${SIZE})`)
-    if (fishing && Clock.now() > h.nextStab) stab(h)
-    if (!fishing) h.nextStab = Clock.now() + 2000 + life() * 3000 // landed: it stands a moment before the first
   }
 
-  /** It leans and stabs at the water; sometimes a little silver fish, gone in a gulp. */
-  function stab(h) {
-    h.nextStab = Clock.now() + STAB_MS[0] + life() * (STAB_MS[1] - STAB_MS[0])
-    Debug.ignoreCut(Motion.endAt(h.neck, [
-      { transform: 'rotate(0deg) translate(0px, 0px)' },
-      { transform: 'rotate(-14deg) translate(-6px, 0px)', offset: 0.45 }, // leaning, stretching out
-      { transform: 'rotate(-58deg) translate(-12px, 26px)', offset: 0.55 }, // stab!
-      { transform: 'rotate(-30deg) translate(-6px, 10px)', offset: 0.75 },
-      { transform: 'rotate(0deg) translate(0px, 0px)' },
-    ], { duration: 1600, easing: 'ease-in-out' }), 'the heron stabs')
-    if (life() < CATCH) Clock.after(1150, () => fish(h))
+  const between = ([a, b]) => a + life() * (b - a)
+  const leanAt = ([lean, , crouch]) => `translate(0px, ${crouch}px) rotate(${lean}deg)`
+  const neckAt = ([, neck]) => `rotate(${neck}deg)`
+
+  /** From the pose it is in to another (POSE), over ms. */
+  function pose(h, name, ms, easing = 'ease-in-out') {
+    const from = POSE[h.pose]
+    const to = POSE[name]
+    h.pose = name
+    return Promise.all([
+      Motion.endAt(h.lean, [{ transform: leanAt(from) }, { transform: leanAt(to) }], { duration: ms, easing }),
+      Motion.endAt(h.neck, [{ transform: neckAt(from) }, { transform: neckAt(to) }], { duration: ms, easing }),
+    ])
   }
 
-  /** A little silver fish in its bill, flicking, gone in a gulp. */
+  /** Its fishing, as herons do, for as long as it stands in the shallows: wait, stalk, freeze, and now and then strike. */
+  async function hunt(h) {
+    h.hunting = true
+    const on = () => heron === h && h.fishing
+    const move = (name, ms, easing) => Debug.ignoreCut(pose(h, name, ms, easing), 'the heron fishes')
+    while (on()) {
+      await Clock.wait(between(WAIT_MS))
+      if (!on()) break
+      await move('stalk', STALK_MS)
+      await Clock.wait(between(FREEZE_MS))
+      if (!on()) break
+      if (life() >= STRIKES) {
+        await move('wait', 1200) // nothing worth it: back to waiting
+        continue
+      }
+      await move('strike', STRIKE_MS, 'ease-in')
+      splash(h)
+      Debug.trace('heron', { strike: true })
+      await Clock.wait(DOWN_MS)
+      if (!on()) break
+      const f = life() < CATCH ? fish(h) : null
+      await move(f ? 'gulp' : 'wait', UP_MS)
+      if (!f) continue
+      await Clock.wait(GULP_MS)
+      f.remove() // down it goes
+      if (on()) await move('wait', 600)
+    }
+    h.hunting = false
+  }
+
+  /** Rings spreading on the water where its bill went in. */
+  function splash(h) {
+    const r = WildArt.el('ellipse', { cx: SPLASH.x, cy: 2, rx: 8, ry: 2.5, fill: 'none', stroke: '#e3eef5', 'stroke-width': 3 }, h.art)
+    r.style.transformBox = 'fill-box'
+    r.style.transformOrigin = 'center'
+    Motion.endAt(r, [{ transform: 'scale(1)', opacity: 1 }, { transform: 'scale(4)', opacity: 0 }], { duration: SPLASH.ms, easing: 'ease-out' })
+      .then(() => r.remove(), () => r.remove())
+  }
+
+  /** A little silver fish in its bill: it comes up with it. */
   function fish(h) {
-    if (heron !== h) return
-    const f = WildArt.el('path', { d: 'M-84 -202 q8 -6 16 0 q-8 6 -16 0 z M-68 -202 l6 -4 l0 8 z', fill: '#c9d3da', stroke: '#15140f', 'stroke-width': 1.5 }, h.neck)
-    Motion.endAt(f, [{ opacity: 1 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }], { duration: 700 }).then(() => f.remove(), () => f.remove())
     Debug.trace('heron', { fish: true })
+    return WildArt.el('path', { d: 'M-84 -202 q8 -6 16 0 q-8 6 -16 0 z M-68 -202 l6 -4 l0 8 z', fill: '#c9d3da', stroke: '#15140f', 'stroke-width': 1.5 }, h.neck)
   }
 
   function gone() {
@@ -135,5 +198,5 @@ const Heron = (() => {
     return { x: heron.c.x }
   }
 
-  return { setup, tap, POND, get out() { return heron ? { x: Math.round(heron.c.x), goal: heron.c.goal?.kind ?? null } : null } }
+  return { setup, tap, POND, get out() { return heron ? { x: Math.round(heron.c.x), goal: heron.c.goal?.kind ?? null, face: heron.face ?? 1, pose: heron.pose } : null } }
 })()

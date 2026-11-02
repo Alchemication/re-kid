@@ -52,7 +52,11 @@
 //     (beds.js), between cues too: no glad music while it is still here
 //     (Adam, 2026-11-01). A tap doesn't cut it short, as it would another
 //     encounter: any tap carries the story on (meadow.js), so a busy child
-//     never holds a bulldozer at the meadow's edge.
+//     never holds a bulldozer at the meadow's edge. While it is about he
+//     rests on an uneasy face, not his smile (mole.js `calm`),
+//   gone (optional): () => true once the threat has left, before its
+//     trouble's last step is over (the bulldozer out of sight, his cheer
+//     at it): the trouble ends there,
 //   engageMs (optional): left alone this long, he goes to it, or tries its
 //     next choice, himself (default ENGAGE_MS; the storm's friends stand in
 //     the rain, so he doesn't keep them waiting);
@@ -296,7 +300,7 @@ const Things = (() => {
   }
 
   /** Whether an encounter out now is in its trouble (`trouble`: the steps a threat is about). */
-  const inTrouble = (e) => e.out && !e.done && !!e.trouble && e.step >= e.trouble[0] && e.step < (e.trouble[1] ?? e.steps.length)
+  const inTrouble = (e) => e.out && !e.done && !!e.trouble && e.step >= e.trouble[0] && e.step < (e.trouble[1] ?? e.steps.length) && !e.gone?.()
   /** The encounter in its trouble now, if any (its name). */
   const troubledName = () => Object.values(all).find(inTrouble)?.name ?? null
   const troubled = () => !!troubledName()

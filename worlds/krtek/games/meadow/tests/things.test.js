@@ -75,5 +75,7 @@ test('trouble holds from its first step to its last, and lifts once it is done',
   assert.equal(Things.inTrouble(dozer(6)), true) // …to its last step…
   assert.equal(Things.inTrouble(dozer(7, { done: true })), false) // …and lifted once it is gone
   assert.equal(Things.inTrouble(dozer(3, { out: false })), false)
+  assert.equal(Things.inTrouble(dozer(6, { gone: () => true })), false) // its threat gone mid-step: over there
+  assert.equal(Things.inTrouble(dozer(6, { gone: () => false })), true)
   assert.equal(Things.inTrouble({ out: true, done: false, step: 2, steps }), false) // no trouble at all
 })

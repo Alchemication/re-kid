@@ -548,7 +548,7 @@
     Mole.lookAt(state.x)
     Sound.rumble(1.2)
     Sound.say(['gasp', 'fright'])
-    await Mole.handsToFace(700)
+    await Mole.handsToFace(700, 'fright')
     if (!alive()) return
     Sound.say('achJo')
   }
@@ -914,6 +914,7 @@
     engageMs: 3000, // when it can't break off his play (still waking), he goes to see soon: nothing shows till he does
     trouble: [0, 8], // from its rumble till it is gone: the bed uneasy, and no glad theme…
     music: { 8: 'happy' }, // …until he stands his tulips up again
+    gone: () => state.recovering, // out of sight (recover): the trouble over, he may cheer
     appear,
     plant,
     steps: [farOff, comesIn, shootsLine, notice, crush, throwOne, pit, away, mend],

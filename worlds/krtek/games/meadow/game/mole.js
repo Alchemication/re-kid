@@ -48,6 +48,7 @@ const Mole = (() => {
     squeezed: { open: 0, curve: -1, width: 0.42, brows: { tilt: -1, lift: -2 } }, // 11:44.5: eyes shut tight, an effort
     fright: { open: 0.95, curve: -0.2, width: 0.6, round: 0.6, brows: { tilt: 1, lift: 7 } },
     puzzled: { open: 0.15, curve: -0.1, width: 0.45, round: 1, brows: { tilt: 0.5, lift: 3 } }, // hm? a small pursed mouth, one worry in his brows
+    uneasy: { open: 0, curve: -0.45, width: 0.55, brows: { tilt: 1, lift: 2 } }, // a threat about: no smile, mouth shut and down, brows worried (Adam, 2026-11-02)
   }
   // the face each of his words comes with, held this long; how far the lids come down (0 open, 1 shut), how hard his hairs perk
   const WORDS = {
@@ -210,6 +211,26 @@ const Mole = (() => {
   }
 
   let laughing = false // a gesture's laugh: a word's face waits for it
+  let rest = 'content' // the face he settles back to after a word or a moment's feeling: uneasy while a threat is about
+  let restOf = () => 'content' // the meadow says which (calm)
+
+  /** The face he rests on now (FACES), as the meadow says; if he was resting on another, he shows this one. */
+  function settle() {
+    const name = restOf()
+    if (name === rest) return rest
+    const resting = state.face === rest
+    rest = name
+    if (resting && !laughing) mood(name)
+    return rest
+  }
+
+  /** The meadow says which face he rests on (`content`, or `uneasy` while a threat is about: no smile then). */
+  function calm(fn) {
+    restOf = fn
+  }
+
+  /** A face he would show, as it may be now: while a threat is about, no grin; his mouth opens round instead. */
+  const glad = (name) => (name === 'delighted' && settle() !== 'content' ? 'ooh' : name)
 
   /** Show one of his FACES in every view. */
   function mood(name) {
@@ -217,10 +238,10 @@ const Mole = (() => {
     for (const v of all()) v.face(FACES[name])
   }
 
-  /** Open his mouth in a laugh (or close it again, back to content). */
-  function laugh(on) {
+  /** Open his mouth in a laugh, or `face` (a fright), or close it again, back to his resting face. */
+  function laugh(on, face = 'delighted') {
     laughing = on
-    mood(on ? 'delighted' : 'content')
+    mood(on ? glad(face) : settle())
   }
 
   /** His hairs spring up and settle: he has noticed something (k: how hard). */
@@ -237,31 +258,31 @@ const Mole = (() => {
 
   let faceToken = null
 
-  /** The face that goes with a word he says (WORDS), held a moment, then content again. */
+  /** The face that goes with a word he says (WORDS), held a moment, then his resting face again. */
   function express(word) {
     const f = WORDS[word]
     if (!f || state.pose === 'down') return
     if (f.perk) perk(f.perk)
     if (!f.face && !f.lids) return
     const mine = (faceToken = Symbol(word))
-    if (f.face && !laughing) mood(f.face)
+    if (f.face && !laughing) mood(glad(f.face))
     if (f.lids) for (const v of all()) v.lids.style.transform = `scaleY(${f.lids})`
     Clock.after(f.ms, () => {
       if (faceToken !== mine) return
-      if (state.face === f.face && !laughing) mood('content')
+      if (state.face === glad(f.face) && !laughing) mood(settle())
       // the lids back only where they are still as the word left them (a stretch or peekaboo since has its own)
       if (f.lids) for (const v of all()) if (v.lids.style.transform === `scaleY(${f.lids})`) v.lids.style.transform = state.pose === 'listen' ? 'scaleY(0.55)' : 'scaleY(0)'
     })
   }
 
-  /** A face (FACES) held ms, then content again: a moment's feeling with no word (an effort, a worry). A word
+  /** A face (FACES) held ms, then his resting face again: a moment's feeling with no word (an effort, a worry). A word
    * or a newer feeling takes over; a cut (relax) ends it. */
   function feel(name, ms) {
     if (state.pose === 'down' || laughing) return
     const mine = (faceToken = Symbol(name))
-    mood(name)
+    mood(glad(name))
     Clock.after(ms, () => {
-      if (faceToken === mine && state.face === name) mood('content')
+      if (faceToken === mine && state.face === glad(name)) mood(settle())
     })
   }
 
@@ -419,12 +440,13 @@ const Mole = (() => {
     }
   }
 
-  /** Both hands up, palms out, then clapped over his face, eyes shut: a fright, or laughing too much (Krtek a autíčko 11:38). */
-  async function handsToFace(ms = 900) {
+  /** Both hands up, palms out, then clapped over his face, eyes shut: laughing too much (Krtek a autíčko 11:38), or,
+   * with `face` 'fright', a fright. */
+  async function handsToFace(ms = 900, face = 'delighted') {
     if (state.holdsUp) return
     show('front')
     const v = cur()
-    laugh(true)
+    laugh(true, face)
     try {
       await arms(ARMS.wide, -ARMS.wide, SNAP_MS, v)
       await hold(220)
@@ -547,7 +569,7 @@ const Mole = (() => {
     show('front')
     const v = cur()
     v.lids.style.transform = 'scaleY(1)'
-    mood('content')
+    mood(settle())
     try {
       await Motion.endAt(tilt, [0, 14, -10, 11, -6, 0].map((d) => ({ transform: `rotate(${d}deg)` })), { duration: ms, easing: 'ease-in-out' })
     } finally {
@@ -631,5 +653,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
+  return { SCALE, state, drawnX, face, mood, calm, settle, feel, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
 })()

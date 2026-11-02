@@ -195,7 +195,7 @@
     if (!state.scared) {
       state.scared = true // once a storm: picked up after a cut, he just goes on
       Sound.say(['gasp', 'fright'])
-      await Mole.handsToFace(SCARED_MS)
+      await Mole.handsToFace(SCARED_MS, 'fright')
       if (!alive()) return
     }
     Mole.perk(1.3)

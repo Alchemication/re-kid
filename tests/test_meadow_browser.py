@@ -766,9 +766,16 @@ class TestMeadowWildlife:
     def test_the_heron_comes_to_the_pond_and_a_tap_sends_it_off(
         self, meadow: callable
     ) -> None:
-        m = meadow(f"{STILL}&props=&critters=heron")
+        m = meadow("seed=2&still&props=&critters=heron")  # it fishes at the west end
         m.wake()
         m.wait("Heron.out && Heron.out.goal === 'feed'", 30_000)  # standing at the pond
+        m.wait(
+            "Heron.out.pose !== undefined && meadowGame.trace().includes('\"fishing\":true')",
+            15_000,
+        )
+        assert m.page.evaluate(  # out over the water, not away from it
+            "Heron.out.face === (Heron.out.x < Heron.POND.x ? -1 : 1)"
+        ), m.page.evaluate("JSON.stringify(Heron.out)")
         m.do("tap heron")
         m.wait("!Heron.out", 30_000)
         assert not m.errors, m.errors
@@ -1019,30 +1026,37 @@ class TestMeadowBulldozer:
         m.wait_free()
         m.assert_settled()
 
-    def test_the_bed_is_uneasy_till_it_is_gone(self, meadow: callable) -> None:
+    def test_the_bed_and_he_are_uneasy_till_it_is_gone(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&soon&props=poles")
         m.wake()
         arrived(m, "poles")
         m.do("use poles")
         m.wait("meadowGame.state().things.poles === 'step 2'", 40_000)
         m.wait("Music.bed && Music.bed.mood === 'trouble'", 2000)
-        moods, parts = set(), set()
+        moods, parts, faces = set(), set(), set()
         while (
             True
         ):  # one look at a time, so "done" and its happy theme can't slip in between
-            state, mood, part = m.page.evaluate(
-                "[meadowGame.state().things.poles, Music.bed.mood, Music.part]"
+            here, mood, part, face = m.page.evaluate(
+                "[Things.troubled(), Music.bed.mood, Music.part, Mole.state.face]"
             )
-            if state in ("step 8", "done"):  # gone: he mends his tulips, glad again
+            if not here:  # gone: he cheers, and mends his tulips, glad again
                 break
             moods.add(mood)
             parts.add(part)
+            faces.add(face)
             m.page.wait_for_timeout(250)
         assert moods == {"trouble"}, f"the bed lifted while it was here: {moods}"
         assert not parts & {"curious", "sad", "happy", "morning"}, (
             f"the theme came back while it was here: {parts}"
         )
+        assert not faces & {"content", "delighted"}, (
+            f"he smiled while it was here: {faces}"
+        )
         m.wait("Music.bed.mood !== 'trouble'", 2000)  # gone: the day's bed again
+        m.wait(  # and his smile back
+            "['content', 'delighted'].includes(Mole.state.face)", 5000
+        )
 
     def test_taps_carry_it_on_rather_than_cut_it(self, meadow: callable) -> None:
         """A child tapping on and on held it at the meadow's edge: each tap

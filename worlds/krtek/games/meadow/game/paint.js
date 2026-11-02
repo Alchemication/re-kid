@@ -238,7 +238,7 @@
     await Promise.all([fox.grow(LOOM, 500), fox.paws(PAWS_UP, 400)])
     if (!alive()) return
     Sound.say('fright')
-    await Mole.handsToFace(600)
+    await Mole.handsToFace(600, 'fright')
     if (!alive()) return
     await Promise.all([fox.grow(BIG, 600), fox.paws(0, 500)])
     fox.feel('sly')
