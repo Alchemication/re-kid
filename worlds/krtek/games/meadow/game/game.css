@@ -114,3 +114,23 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
   from { transform: scaleY(1); }
   to { transform: scaleY(-0.6); }
 }
+
+/* ---- a phone held upright: turn it on its side (turn.js) ---- */
+.turn { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: #000; }
+.turn[hidden] { display: none; }
+.turn svg { width: min(70vw, 50vh); }
+.turn-body { fill: none; stroke: #c9dcf2; stroke-width: 5; }
+.turn-sky { fill: #c9dcf2; }
+.turn-ground { fill: #86bb60; }
+.turn-hill { fill: #7a5232; }
+.turn-mole { fill: #1f1f1f; }
+.turn-eye { fill: #fff; }
+.turn-nose { fill: #d9443a; }
+.turn-arrow { fill: none; stroke: #f2c230; stroke-width: 6; stroke-linecap: round; }
+.turn-arrow-head { fill: #f2c230; }
+.turn-phone { transform-origin: 100px 104px; animation: turn-phone 3s ease-in-out infinite; }
+@keyframes turn-phone {
+  0%, 25% { transform: rotate(0); }
+  50%, 85% { transform: rotate(-90deg); }
+  100% { transform: rotate(0); }
+}

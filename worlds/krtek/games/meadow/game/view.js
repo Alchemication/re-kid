@@ -4,6 +4,13 @@
 // depth; everything on the ground scrolls with the view (#cam, and the
 // fireflies over the night, #glow-view).
 //
+// It fits the screen (fit(), on load and on resize): a 16:9 screen shows the
+// 1600 by 900 of it; a wider one (a phone on its side) shows a little more
+// at each side (`pad`), cutting at most a little of the sky, so the church's
+// cross stays in sight (Adam, 2026-11-03: on the phone it was cut off); a
+// narrower one, less at the sides. The game's 1600 stays the middle of the
+// view: `left` and `right` are its edges as the child sees them.
+//
 // The yard's painting.js does the same for Reksio, with its own painting.
 // Once both scenes have settled, what is the same in the two (the camera, the
 // fit to the screen) is the part to move into shared/ (CLAUDE.md, "Shared
@@ -16,8 +23,12 @@ const View = (() => {
   const FAR_SPEED = 0.5 // the far trees scroll this much slower than the ground
   const DISTANT_SPEED = 0.1 // the church's hill, far off, barely moves: in sight wherever he is
   const MAX = Layout.WORLD_W - Layout.VIEW_W
+  const H = 900 // the scene's height
+  const TOP_CUT = 140 // a wide screen cuts at most this much of the sky: the church's cross stands at 156 (church.js)
+  const MAX_W = 2000 // and shows at most this wide: the sky, the night and the iris reach 200 past each side (index.html); wider still, more sky is cut
 
   let camX = 0
+  let pad = 0 // what a wide screen shows past the 1600 at each side
   let target = () => 0 // where to keep in the middle (the mole, as drawn)
   let cam, glow, far, distant, onMove
 
@@ -42,12 +53,33 @@ const View = (() => {
     Clock.after(0, frame)
   }
 
-  const clamp = (x) => Math.max(0, Math.min(MAX, x))
+  const clamp = (x) => Math.max(pad, Math.min(MAX - pad, x))
+
+  /** The view for a screen of w × h: how much sky it cuts (top), its size in scene units, and its pad. */
+  function viewFor(w, h) {
+    const shape = w / (h || 1)
+    if (shape <= Layout.VIEW_W / H) return { top: 0, w: Layout.VIEW_W, h: H, pad: 0 } // as wide or narrower: the svg's slice cuts the sides
+    const top = Math.min(TOP_CUT, H - Layout.VIEW_W / shape)
+    const vw = Math.min(MAX_W, (H - top) * shape)
+    return { top, w: vw, h: H - top, pad: (vw - Layout.VIEW_W) / 2 }
+  }
+
+  /** Fit the view to the svg's size on screen. */
+  function fit(svg) {
+    const { width, height } = svg.getBoundingClientRect()
+    const v = viewFor(width, height)
+    pad = v.pad
+    svg.setAttribute('viewBox', `${-v.pad} ${v.top} ${v.w} ${v.h}`)
+    if (cam) {
+      camX = clamp(camX)
+      draw()
+    }
+  }
 
   function draw() {
     cam.style.transform = `translateX(${-camX}px)`
     glow.style.transform = cam.style.transform
-    far.style.transform = `translateX(${-camX * FAR_SPEED}px)`
+    far.style.transform = `translateX(${-((camX - pad) * FAR_SPEED + pad)}px)` // its painting starts at the view's left edge, wherever the view
     distant.style.transform = `translateX(${-camX * DISTANT_SPEED}px)`
     if (onMove) onMove(camX)
   }
@@ -58,5 +90,15 @@ const View = (() => {
   /** Where something at x in the distant layer shows, as a meadow x (for the mole to look at it). */
   const fromDistant = (x) => camX + x - camX * DISTANT_SPEED
 
-  return { setup, toWorld, fromDistant, get x() { return camX } }
+  return {
+    setup,
+    fit,
+    viewFor,
+    toWorld,
+    fromDistant,
+    get x() { return camX },
+    /** The view's edges, as the child sees them (wider than the 1600 on a wide screen). */
+    get left() { return camX - pad },
+    get right() { return camX + Layout.VIEW_W + pad },
+  }
 })()

@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds, Tap, Stretch */
+/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds, Tap, Stretch, Turn */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -862,19 +862,7 @@
   const paint = () => {
     Painting.setup($('paint'))
     Painting.render(camX)
-    turnMe(Painting.tooSmall)
-  }
-
-  /** A phone held upright: ask for it on its side, and wait meanwhile (the
-   * game holds before the picture shows, so the picture's own turning isn't
-   * paused with the game). */
-  function turnMe(on) {
-    const picture = $('turn')
-    if (picture.hidden !== on) return
-    Debug.trace('turn me', { on })
-    if (on) Clock.hold('turned', true)
-    picture.hidden = !on
-    if (!on) Clock.hold('turned', false)
+    Turn.ask(Painting.tooSmall) // a phone held upright: a picture asks for it on its side, and the game waits
   }
   new ResizeObserver(paint).observe($('paint'))
   paint()

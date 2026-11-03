@@ -106,6 +106,29 @@
   </svg>
   <canvas id="rain" aria-hidden="true"></canvas><!-- a storm's rain, over the picture (storm.js) -->
 
+  <!-- A phone held upright shows the meadow too small to play: instead, a
+       picture asks (without words) to turn it on its side, and the game
+       waits (turn.js). The little meadow in the phone is upright once the
+       phone is turned. -->
+  <div id="turn" class="turn" hidden>
+    <svg viewBox="30 20 140 150" role="img" aria-label="Turn the phone on its side">
+      <path class="turn-arrow" d="M150 58 A62 62 0 0 0 58 46" />
+      <path class="turn-arrow-head" d="M66 34 L54 47 L71 54 Z" />
+      <g class="turn-phone">
+        <rect class="turn-body" x="68" y="48" width="64" height="112" rx="10" />
+        <g transform="rotate(90 100 104)">
+          <rect class="turn-sky" x="54" y="80" width="92" height="34" />
+          <rect class="turn-ground" x="54" y="114" width="92" height="14" />
+          <path class="turn-hill" d="M88 118 Q100 104 112 118 Z" />
+          <circle class="turn-mole" cx="100" cy="104" r="7" />
+          <circle class="turn-eye" cx="97.5" cy="102" r="2" />
+          <circle class="turn-eye" cx="102.5" cy="102" r="2" />
+          <circle class="turn-nose" cx="100" cy="106.5" r="1.6" />
+        </g>
+      </g>
+    </svg>
+  </div>
+
   <!-- after the end, for the grown-up: held, a new day (again.js); a tap does nothing -->
   <button id="again" class="again" type="button" hidden title="A new day: hold (for the grown-up)" aria-label="A new day: hold">
     <svg viewBox="0 0 48 48" aria-hidden="true">
@@ -116,6 +139,7 @@
   </button>
 
   <script src="debug.js"></script>
+  <script src="turn.js"></script>
   <script src="filmlook.js"></script>
   <script src="effects.js"></script>
   <script src="layout.js"></script>

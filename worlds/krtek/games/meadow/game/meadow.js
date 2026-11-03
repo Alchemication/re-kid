@@ -16,7 +16,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Church, Clock, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, View, Weather, World */
+/* global Again, Bed, Church, Clock, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -761,6 +761,7 @@ const meadowGame = (() => {
   // ------------------------------------------------------------ start
 
   World.setup(Clock.now)
+  View.fit(svg) // the screen's shape first: the painting's detail follows its scale
   makeScene()
   Storm.setup({ sky: layers.sky, picture: svg, rain: document.getElementById('rain'), over: night.parentNode })
   Again.watch(document.getElementById('again'), HOLD_NEW_DAY_MS)
@@ -772,8 +773,12 @@ const meadowGame = (() => {
   })
   View.setup(() => (framed === null ? Mole.drawnX() : (Mole.drawnX() + framed) / 2), (camX) => {
     irisCircle.setAttribute('cx', String(Math.round(Mole.drawnX() - camX)))
-    World.set({ view: { x0: camX, x1: camX + Layout.VIEW_W } })
+    World.set({ view: { x0: View.left, x1: View.right } })
   })
+  new ResizeObserver(() => {
+    View.fit(svg)
+    Turn.ask(Turn.upright())
+  }).observe(svg)
   Friends.setup(document.getElementById('friends'))
   Spring.setup(document.getElementById('spring'), () => game.hour)
   Nest.setup(document.getElementById('spring'), () => game.hour)

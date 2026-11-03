@@ -133,11 +133,11 @@ const Friends = (() => {
       if (hole) await f.rise(false)
       else {
         const x = f.drawnX()
-        const leftwards = dir ? dir < 0 : x - View.x < View.x + Layout.VIEW_W - x
+        const leftwards = dir ? dir < 0 : x - View.left < View.right - x
         // on past the edge, and on again if the view has followed the mole that way meanwhile
         for (let n = 0; n < 6 && (n === 0 || inSight(f.drawnX())); n++) {
           const at = f.drawnX()
-          const to = leftwards ? Math.min(View.x - OFF, at - OFF) : Math.max(View.x + Layout.VIEW_W + OFF, at + OFF)
+          const to = leftwards ? Math.min(View.left - OFF, at - OFF) : Math.max(View.right + OFF, at + OFF)
           f.turn(leftwards ? -1 : 1)
           await f.go(to, LEAVE_MS, f.kind === 'hare' ? 30 : 0)
         }
@@ -147,10 +147,10 @@ const Friends = (() => {
   }
 
   /** Whether something at scene x shows on the screen now (with a body's width either side). */
-  const inSight = (x) => x > View.x - 60 && x < View.x + Layout.VIEW_W + 60
+  const inSight = (x) => x > View.left - 60 && x < View.right + 60
 
   /** Off the screen to the left (-1) or right (1) of the view now, and at least as far as x. */
-  const offscreen = (dir, x = dir < 0 ? Infinity : -Infinity) => (dir < 0 ? Math.min(x, View.x - OFF) : Math.max(x, View.x + Layout.VIEW_W + OFF))
+  const offscreen = (dir, x = dir < 0 ? Infinity : -Infinity) => (dir < 0 ? Math.min(x, View.left - OFF) : Math.max(x, View.right + OFF))
 
   // what turns a kind's head (a bob nods it, a shake shakes it), where it isn't the usual: the tall
   // fox's neck, so a bob nods his head, not his whole body; and a kind's own moves

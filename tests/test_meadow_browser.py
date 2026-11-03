@@ -354,6 +354,64 @@ class TestMeadowView:
         m.assert_settled()
 
 
+PHONE = {"width": 844, "height": 340}  # a phone on its side in Safari, its bars showing
+
+
+class TestMeadowScreens:
+    """The view fits the screen (view.js): a phone on its side sees more of
+    the meadow at the sides and only a little less sky, so the church's
+    cross stays in sight; upright, a picture asks for it on its side."""
+
+    def test_on_a_phone_the_church_cross_shows(self, meadow: callable) -> None:
+        m = meadow()
+        m.page.set_viewport_size(PHONE)
+        m.page.wait_for_timeout(300)
+        top = m.page.evaluate(
+            "document.querySelector('#distant path[d^=\"M538 176 V156\"]').getBoundingClientRect().top"
+        )
+        assert top >= 0, f"the cross is cut off: its top at {top}"
+        assert not m.errors, m.errors
+
+    def test_on_a_phone_taps_land_and_the_view_keeps_to_the_meadow(
+        self, meadow: callable
+    ) -> None:
+        m = meadow()
+        m.page.set_viewport_size(PHONE)
+        m.wake()
+        for to in (3900, 100):
+            m.do(f"go to {to}")
+            m.wait_free()
+            m.page.wait_for_timeout(1500)  # the view eases after him
+            edges = m.page.evaluate("[View.left, View.right]")
+            assert edges[0] >= 0 and edges[1] <= 4000, f"past the meadow: {edges}"
+        m.do("go to 2000")
+        m.wait_free()
+        m.page.wait_for_timeout(1500)
+        left, right = m.page.evaluate("[View.left, View.right]")
+        assert right - left > 1600, "a wide screen sees more of the meadow"
+        m.page.mouse.click(
+            844 * 0.25, 340 * 0.9
+        )  # a quarter of the way across, low on the grass
+        m.wait_free()
+        assert abs(m.state()["x"] - (left + (right - left) * 0.25)) < 30, m.state()
+        m.assert_settled()
+
+    def test_a_phone_held_upright_asks_to_be_turned_and_waits(
+        self, meadow: callable
+    ) -> None:
+        m = meadow()
+        m.page.set_viewport_size({"width": 390, "height": 844})
+        turn = "!document.getElementById('turn').hidden"
+        m.wait(turn, 2000)
+        t0 = m.page.evaluate("Clock.now()")
+        m.page.wait_for_timeout(1000)
+        assert m.page.evaluate("Clock.now()") == t0  # the game waits
+        m.page.set_viewport_size({"width": 844, "height": 390})
+        m.wait(f"!({turn})", 2000)
+        m.wait(f"Clock.now() > {t0} + 500", 3000)
+        assert not m.errors, m.errors
+
+
 class TestMeadowWalking:
     def test_quick_taps_never_make_him_jump(self, meadow: callable) -> None:
         m = meadow()
