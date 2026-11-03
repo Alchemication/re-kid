@@ -43,7 +43,8 @@ const Wildlife = (() => {
   const LOOK_MS = 4000 // how often the meadow looks whether they may come
   const GAP_HOURS = 1.6 // after a visit, at least this long before the next
   const VISITS = 2 // at most this many a day
-  const FOLLOW_MS = 450 // the others catch up with the leader over about this long
+  const FOLLOW_MS = 450 // the others catch up with the leader over about this long…
+  const CATCH_UP = 1.8 // …but never faster than this many times its pace: when the leader turns, the place behind it jumps to its other side, and they walk round to it (a calf slid across, Adam, 2026-11-03)
   const BELL_LOOK_MS = 2200 // the bell: heads up this long
   const TAP_LOOK_MS = 900 // a tap: heads up this long, then (deer, boar) off
   const INSIDE = 260 // the leader keeps this far inside the view's edges, the others trailing behind it still in view
@@ -189,7 +190,9 @@ const Wildlife = (() => {
     const back = m.behind * h.facing * -1 // behind it: the other way from where it faces
     const k = Math.min(1, dt / FOLLOW_MS)
     if (grazing) shuffle(m, t)
-    m.x += (c.x - back * sizeAt(c.y) * 2 + m.shuffle * sizeAt(m.y) - m.x) * k
+    const { speed, flee } = KINDS[h.kind].traits
+    const most = speed * (h.running ? flee : 1) * CATCH_UP * (dt / 1000)
+    m.x += Math.max(-most, Math.min(most, (c.x - back * sizeAt(c.y) * 2 + m.shuffle * sizeAt(m.y) - m.x) * k))
     m.y += (c.y + (m.i ? m.side * 0.4 : 0) - m.y) * k
     const played = h.play?.who.includes(m) ? playing(h.play, m, t) : null
     const [dx, dy] = played ?? [0, 0]

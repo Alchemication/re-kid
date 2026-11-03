@@ -732,6 +732,30 @@ class TestMeadowWildlife:
         m.wait_free()
         m.assert_settled()
 
+    def test_the_calf_walks_round_when_the_bull_turns(self, meadow: callable) -> None:
+        """When the leader turns, the place behind it jumps to its other
+        side: the others walk round to it at an animal's pace, never slide
+        across (the calf did, Adam, 2026-11-03)."""
+        m = meadow("seed=1&still&props=&wild=bison&day=600")
+        m.wake()
+        m.wait(f"{self.OUT} && {self.OUT}.n === 2", 10_000)
+        m.page.evaluate(
+            """() => { window.paces = []; let last = null
+            const look = () => {
+              const xs = [...document.querySelectorAll('.wild-one')].map((g) => g.transform.baseVal.consolidate()?.matrix.e ?? null)
+              const t = Clock.now()
+              if (last && t > last.t) xs.forEach((x, i) => { if (x !== null && last.xs[i] !== null) window.paces.push(Math.abs(x - last.xs[i]) / (t - last.t) * 1000) })
+              last = { t, xs }; requestAnimationFrame(look) }
+            look() }"""
+        )
+        m.wait(f"Math.abs({self.OUT}.vx) > 3", 15_000)  # walking in, then
+        came = 1 if m.page.evaluate(f"{self.OUT}.vx") > 0 else -1
+        m.wait(f"{self.OUT}.vx * {came} < -3", 90_000)  # it turns
+        m.page.wait_for_timeout(3000)
+        fastest = m.page.evaluate("Math.max(...window.paces)")
+        assert fastest < 20 * 1.8 * 1.1, f"one slid along at {fastest:.0f} a second"
+        assert not m.errors, m.errors
+
     def test_the_bulldozer_sends_them_all_off(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&soon&props=poles&wild=deer&critters=flock")
         m.wake()
