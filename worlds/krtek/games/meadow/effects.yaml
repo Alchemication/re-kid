@@ -111,3 +111,41 @@ effects:
     prompt: 'a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh'
   - file: clunk/09.mp3
     prompt: 'a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh'
+- id: chirp
+  takes:
+  - file: chirp/01.mp3
+    prompt: 'a small finch chirping once or twice, distant, soft, across a quiet summer meadow, no other birds'
+  - file: chirp/02.mp3
+    prompt: 'a small finch chirping once or twice, distant, soft, across a quiet summer meadow, no other birds'
+  - file: chirp/04.mp3
+    prompt: 'a bullfinch''s soft piping call, far away in the trees, gentle, a single short phrase'
+  - file: chirp/06.mp3
+    prompt: 'a bullfinch''s soft piping call, far away in the trees, gentle, a single short phrase'
+  - file: chirp/08.mp3
+    prompt: 'one little songbird''s quiet tweet from a far tree line, calm countryside, very soft'
+  - file: chirp/09.mp3
+    prompt: 'one little songbird''s quiet tweet from a far tree line, calm countryside, very soft'
+- id: heron
+  takes:
+  - file: heron/01.mp3
+    prompt: 'a grey heron''s single hoarse croak as it takes off, distant, across a meadow'
+  - file: heron/06.mp3
+    prompt: 'a heron calling once, a harsh low frank, far away over a pond, calm'
+- id: grunt
+  takes:
+  - file: grunt/04.mp3
+    prompt: 'a mother wild boar grunting gently and her piglets squeaking, far away, short'
+  - file: grunt/09.mp3
+    prompt: 'a pig-like snuffle and grunt from far across a field, calm, one short sound'
+- id: snort
+  takes:
+  - file: snort/02.mp3
+    prompt: 'a bison''s slow deep snort, distant, calm, one breath out through the nose'
+  - file: snort/03.mp3
+    prompt: 'a bison''s slow deep snort, distant, calm, one breath out through the nose'
+  - file: snort/05.mp3
+    prompt: 'a large cow-like animal blowing a long low snort far away in a meadow, unbothered'
+  - file: snort/08.mp3
+    prompt: 'a European bison''s soft low grunt and snort in the distance, single, peaceful'
+  - file: snort/09.mp3
+    prompt: 'a European bison''s soft low grunt and snort in the distance, single, peaceful'

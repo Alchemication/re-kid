@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-01T14:30:20.977Z",
+ "saved": "2026-11-03T21:47:19.909Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1767,6 +1767,171 @@
    "folder": "krtek bulldozer",
    "made": "2026-11-01",
    "sound": "krtek-clunk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-chirp/01.mp3",
+   "source": "eleven",
+   "prompt": "a small finch chirping once or twice, distant, soft, across a quiet summer meadow, no other birds",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-chirp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-chirp/02.mp3",
+   "source": "eleven",
+   "prompt": "a small finch chirping once or twice, distant, soft, across a quiet summer meadow, no other birds",
+   "wording": 1,
+   "seed": 2,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-chirp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-chirp/04.mp3",
+   "source": "eleven",
+   "prompt": "a bullfinch's soft piping call, far away in the trees, gentle, a single short phrase",
+   "wording": 2,
+   "seed": 1,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-chirp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-chirp/06.mp3",
+   "source": "eleven",
+   "prompt": "a bullfinch's soft piping call, far away in the trees, gentle, a single short phrase",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-chirp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-chirp/09.mp3",
+   "source": "eleven",
+   "prompt": "one little songbird's quiet tweet from a far tree line, calm countryside, very soft",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-chirp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-chirp/08.mp3",
+   "source": "eleven",
+   "prompt": "one little songbird's quiet tweet from a far tree line, calm countryside, very soft",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-chirp",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-heron/06.mp3",
+   "source": "eleven",
+   "prompt": "a heron calling once, a harsh low frank, far away over a pond, calm",
+   "wording": 2,
+   "seed": 3,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-heron",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-heron/01.mp3",
+   "source": "eleven",
+   "prompt": "a grey heron's single hoarse croak as it takes off, distant, across a meadow",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-heron",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-grunt/04.mp3",
+   "source": "eleven",
+   "prompt": "a mother wild boar grunting gently and her piglets squeaking, far away, short",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-grunt",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-grunt/09.mp3",
+   "source": "eleven",
+   "prompt": "a pig-like snuffle and grunt from far across a field, calm, one short sound",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-grunt",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snort/05.mp3",
+   "source": "eleven",
+   "prompt": "a large cow-like animal blowing a long low snort far away in a meadow, unbothered",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-snort",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snort/09.mp3",
+   "source": "eleven",
+   "prompt": "a European bison's soft low grunt and snort in the distance, single, peaceful",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-snort",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snort/08.mp3",
+   "source": "eleven",
+   "prompt": "a European bison's soft low grunt and snort in the distance, single, peaceful",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-snort",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snort/02.mp3",
+   "source": "eleven",
+   "prompt": "a bison's slow deep snort, distant, calm, one breath out through the nose",
+   "wording": 1,
+   "seed": 3,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-snort",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snort/03.mp3",
+   "source": "eleven",
+   "prompt": "a bison's slow deep snort, distant, calm, one breath out through the nose",
+   "wording": 1,
+   "seed": 2,
+   "folder": "krtek wildlife",
+   "made": "2026-11-01",
+   "sound": "krtek-snort",
    "verdict": "keep"
   }
  ]

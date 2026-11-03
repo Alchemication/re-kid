@@ -149,10 +149,9 @@ decided and why.
       quiet. Try `?wild=deer` (`boar`, `bison`), `?critters=flock`,
       `?critters=heron`. Judge: are they far enough (or too small to
       notice), do they look like themselves, is it too busy. Their voices
-      wait on the sound board for his ear (folder "krtek wildlife": a far
-      finch's chirp, the heron's croak, a boar's grunt, the żubr's snort;
-      9 takes each, worded soft and distant); the game is silent there
-      until takes are picked. Still open: whether the hare, hedgehog and
+      are in (Adam's picks, 2026-11-03: 6 chirps, 2 croaks, 2 grunts, 5
+      snorts); judge their level in play: four of the snorts were very
+      quiet as made and are raised 20-26 dB, so listen for hiss. Still open: whether the hare, hedgehog and
       mouse, the films' own, should also live in the meadow between
       encounters.
    6. A local director picking the ambient moments, keeping "the same
