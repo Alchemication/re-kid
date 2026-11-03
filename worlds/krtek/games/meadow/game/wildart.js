@@ -102,12 +102,14 @@ const WildArt = (() => {
 
   // ------------------------------------------------------------ żubr
 
+  const BISON = 1.5 // drawn this much bigger than the rest: a żubr stands about twice a roe deer's height at the shoulder, and at 1 he read small beside the deer (Adam, 2026-11-03)
+
   /** A żubr (European bison): huge, dark brown, a high shaggy hump, a beard and mane paler and woolly,
    * short horns curving up; small hindquarters; a calf is reddish, with no hump to speak of. */
   function bison(g, { calf = false } = {}) {
     const coat = calf ? '#9a5a2e' : '#4f3424'
     const wool = calf ? '#b4703e' : '#7a5235'
-    const s = calf ? 0.55 : 1
+    const s = (calf ? 0.55 : 1) * BISON
     const a = el('g', { transform: `scale(${s})` }, g)
     const tail = part(a, 'tail', 92, -120)
     el('path', { d: 'M92 -120 Q100 -96 96 -70', stroke: INK, 'stroke-width': 3, fill: 'none' }, tail)

@@ -113,10 +113,11 @@ const Wildlife = (() => {
         roam: 500, pauseMs: [8000, 15000],
       },
       graze: -24,
+      nearer: 0, // he keeps to the far edge: near Krtek he read small for a żubr; far off and big, he reads huge (Adam, 2026-11-03)
       tapFlees: false, // a tap: he turns his head and looks, chewing
       herds: [
         [['bison', {}, 0]],
-        [['bison', {}, 0], ['bison', { calf: true }, 130]],
+        [['bison', {}, 0], ['bison', { calf: true }, 190]],
       ],
     },
   }
@@ -140,7 +141,7 @@ const Wildlife = (() => {
   /** They come out of sight at the nearer side of the view and walk in. */
   function come(opened = false) {
     const K = KINDS[kind]
-    const near = comings() < NEARER
+    const near = comings() < (K.nearer ?? NEARER)
     const make = pick(K.herds, comings)
     const { x0, x1 } = World.state.view
     const left = comings() < 0.5
