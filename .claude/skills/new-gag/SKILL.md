@@ -113,6 +113,12 @@ beat many):
   another gag's face for relief is fine; borrowing its plot is not.
 - **Inspired, not copied.** New drawings, sounds and music; original audio
   only as an occasional easter egg (`CLAUDE.md`).
+- **A character from the films is drawn from its frames**, however small:
+  find where it appears, pull frames, and draw after them, side by side, as
+  `new-character` does for a hero. The meadow's cricket, first drawn
+  without looking (a green blob in the grass), was hard to spot and looked
+  bad (Adam, 2026-11-04); the films' is a black fellow with a fiddle and a
+  music stand.
 
 ## 3. Design on paper, then check with Adam
 
