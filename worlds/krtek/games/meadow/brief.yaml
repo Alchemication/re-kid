@@ -283,7 +283,7 @@ scenes:
     text: Nothing; the sun goes down at 19:00.
     origin: invented
   result:
-    text: The sky warms to orange, the tulips close, and the cricket comes out by the molehill with his fiddle and plays. Left alone a moment, the mole goes home and settles in his molehill to listen, eyes half shut (in the film he lies on his belly, chin on his hands; a later drawing). Taps still answer.
+    text: The sky warms to orange, the tulips close, and the cricket climbs out of his little burrow by the bluebells, carrying his fiddle and music stand, walks over by the molehill, sets the stand down facing the mole and plays, rocking to his tune and keeping time with his foot (drawn after the film's - upright and black, a big eye, a wide smile, an orange fiddle and a white stand). Left alone a moment, the mole goes home and settles in his molehill to listen, eyes half shut (in the film he lies on his belly, chin on his hands; a later drawing). Taps still answer.
     origin: inspired
     refs: ['world:characters[krtek].moves[lies-listening].claim']
   sound:
@@ -298,7 +298,7 @@ scenes:
     origin: inspired
     refs: [world:episode_formula, 'world:design_notes[0]']
   sound:
-    text: The end of the cricket's tune, a little yawn.
+    text: The cricket's last tune plays on to its own end over him asleep, then quiet; a little yawn.
     origin: invented
 
 ending:

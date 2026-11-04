@@ -16,7 +16,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Church, Clock, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
+/* global Again, Bed, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -61,10 +61,9 @@ const meadowGame = (() => {
   let framed = null // a scene x an encounter wants kept in sight with him (the bulldozer), or null: the view follows him
   const moon = document.getElementById('moon')
   const stops = [...document.querySelectorAll('#sky-grad stop')]
-  const cricket = document.getElementById('cricket')
   const den = layers.den
 
-  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3, eclipse: null, evening: false, watching: null } // eclipse: when it began (Clock); evening: the cricket's dusk has come; watching: the butterfly he follows with his eyes
+  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3, eclipse: null, evening: false, dim: false, watching: null } // eclipse: when it began (Clock); evening: the cricket's dusk has come; watching: the butterfly he follows with his eyes
   let tulipHeads = []
 
   const el = (tag, attrs = {}, parent) => {
@@ -239,9 +238,8 @@ const meadowGame = (() => {
     Church.tick(h)
     if (Day.cricket(h) && !game.evening) {
       game.evening = true
-      cricket.classList.add('out')
       Debug.trace('cricket', { hour: Day.clock(h) })
-      Music.evening()
+      Cricket.out().then(() => Music.evening()) // his tune once he is at his spot, stand set down (or at once, if he was out already)
     } else if (!game.evening) dimCricket(light < CRICKET_LIGHT)
   }
 
@@ -265,10 +263,11 @@ const meadowGame = (() => {
 
   /** In an eclipse's dim, the cricket comes out and fiddles once, as at dusk; it goes in as the light comes back. */
   function dimCricket(dim) {
-    if (dim === cricket.classList.contains('out')) return
-    cricket.classList.toggle('out', dim)
+    if (dim === game.dim) return
+    game.dim = dim
     Debug.trace('cricket', { dim })
-    if (dim) Music.fiddle()
+    if (dim) Cricket.out().then((plays) => plays && Music.fiddle())
+    else Cricket.home()
   }
 
   /** The circle closing through the last hour; at dusk, left alone, he goes home to listen; then bedtime. */
@@ -783,6 +782,7 @@ const meadowGame = (() => {
   Spring.setup(document.getElementById('spring'), () => game.hour)
   Nest.setup(document.getElementById('spring'), () => game.hour)
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
+  Cricket.setup(document.getElementById('crickets'))
   Church.setup(document.getElementById('distant'), () => {
     if (!(game.awake && !game.ended && !game.gesture)) return
     Mole.perk(1.2)

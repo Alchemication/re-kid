@@ -10,7 +10,7 @@
 //   until the trouble is over, only the uneasy bed (beds.js `unease`,
 //   things.js `trouble`): no glad theme while the threat is still here;
 // - from dusk, the cricket's fiddle, one take after another until the
-//   circle closes.
+//   circle closes; the last plays to its end over him asleep.
 // A mood plays over quiet, or cuts short a weaker one (menace over happy
 // over sad over curious over the morning), never the same or a stronger one.
 // Between takes, a quiet bed (beds.js: harp, flute, birds, violins, in the
@@ -55,6 +55,7 @@ const Music = (() => {
   let ready = false
   let night = false // from dusk: only the cricket
   let ended = false // the circle has closed: nothing more
+  let startsAt = 0 // when the take asked for last starts (audio time)
   let random = null
 
   /** Load the takes (once), on the audio context Sound made at the first tap. */
@@ -76,7 +77,9 @@ const Music = (() => {
 
   /** A take of `part` after `wait` seconds; then(): once it has played to its end. */
   function play(part, wait = LEAD_S, then = null) {
-    if (takes.play(part, random, ctx.currentTime + wait, then)) Debug.trace('music', { part })
+    if (!takes.play(part, random, ctx.currentTime + wait, then)) return
+    startsAt = ctx.currentTime + wait
+    Debug.trace('music', { part })
   }
 
   /** The morning: the theme, as he comes up (if nothing plays yet). */
@@ -145,11 +148,14 @@ const Music = (() => {
     play('lullaby', wait)
   }
 
-  /** The circle has closed: the music fades and stays away. */
+  /** The circle has closed: the tune playing ends as it ends, over him asleep (cut, it sounded
+   * unfinished: Adam, 2026-11-04), and nothing comes after; one not started yet never starts. */
   function quiet() {
     ended = true
-    takes?.fade()
     bed?.stop()
+    const waiting = takes && ctx.currentTime < startsAt
+    if (waiting) takes.fade()
+    Debug.trace('last tune', { playsOn: !!takes?.playing })
   }
 
   return {

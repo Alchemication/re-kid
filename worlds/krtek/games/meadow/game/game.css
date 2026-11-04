@@ -12,11 +12,25 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 @keyframes buzz { from { transform: scaleY(1); } to { transform: scaleY(0.3); } }
 @keyframes flow { to { stroke-dashoffset: -36; } }
 
-/* the cricket is out only at dusk, fiddling */
-#cricket { visibility: hidden; }
-#cricket.out { visibility: visible; }
-#cricket.out .bow { transform-origin: 17px -67px; animation: bow 0.84s ease-in-out infinite alternate; }
-@keyframes bow { from { transform: rotate(-8deg) translateX(-8px); } to { transform: rotate(6deg) translateX(10px); } }
+/* the cricket (cricket.js): walking, his legs step; playing, the bow saws along itself, he rocks to
+   his tune, nods, keeps time with his front foot; his antennae sway and he blinks now and then */
+.cricket.walking .leg-back { transform-origin: -5px -36px; animation: cricket-step 0.36s ease-in-out infinite alternate; }
+.cricket.walking .leg-front { transform-origin: 5px -36px; animation: cricket-step 0.36s ease-in-out infinite alternate-reverse; }
+@keyframes cricket-step { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
+.cricket.walking .cricket-upper { animation: cricket-bob 0.36s ease-in-out infinite alternate; }
+@keyframes cricket-bob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+.cricket.playing .cricket-bow { animation: cricket-saw 0.46s ease-in-out infinite alternate; }
+@keyframes cricket-saw { from { transform: translate(7px, -12px); } to { transform: translate(-7px, 12px); } }
+.cricket.playing .cricket-upper { transform-origin: 0 -36px; animation: cricket-rock 1.84s ease-in-out infinite alternate; }
+@keyframes cricket-rock { from { transform: rotate(-5deg); } to { transform: rotate(4deg); } }
+.cricket.playing .cricket-head { transform-origin: 4px -74px; animation: cricket-nod 0.92s ease-in-out infinite alternate; }
+@keyframes cricket-nod { from { transform: rotate(-4deg); } to { transform: rotate(5deg); } }
+.cricket.playing .leg-front .cricket-foot { transform-box: fill-box; transform-origin: 20% 80%; animation: cricket-tap 0.92s ease-in-out infinite; }
+@keyframes cricket-tap { 0%, 50%, 100% { transform: rotate(0); } 25% { transform: rotate(-18deg); } }
+.cricket-antennae { transform-origin: 2px -110px; animation: cricket-feel 2.6s ease-in-out infinite alternate; }
+@keyframes cricket-feel { from { transform: rotate(-4deg); } to { transform: rotate(5deg); } }
+.cricket-eye { transform-box: fill-box; transform-origin: center; animation: cricket-blink 4.6s step-end infinite; }
+@keyframes cricket-blink { 0%, 96% { transform: scaleY(1); } 97%, 99% { transform: scaleY(0.12); } }
 
 /* the hen pecks about while she waits */
 .friend.pecking .head { animation: peck 1.8s ease-in-out infinite; }

@@ -666,8 +666,14 @@ class TestMeadowMusic:
         m.wait(f"{MUSIC}.includes('lullaby')", 40_000)
         assert m.page.evaluate("meadowGame.music()") == "lullaby"
         m.wait("meadowGame.state().ended && !meadowGame.state().busy", 40_000)
-        m.page.wait_for_timeout(1500)  # the fade
-        assert m.page.evaluate("meadowGame.music()") is None
+        heard = m.page.evaluate(f"{MUSIC}.length")
+        if '"playsOn":true' in m.page.evaluate("meadowGame.trace()"):
+            m.page.wait_for_timeout(1500)  # a cut take would have faded by now
+            assert m.page.evaluate("meadowGame.music()") == "lullaby", (
+                "the last tune plays on to its end over him asleep, not cut"
+            )
+        m.wait("meadowGame.music() === null", 20_000)  # a take is about 15 s
+        assert m.page.evaluate(f"{MUSIC}.length") == heard, "a tune began after the end"
         parts = m.page.evaluate(MUSIC)
         assert parts[parts.index("lullaby") :] == ["lullaby"] * len(
             parts[parts.index("lullaby") :]
@@ -934,20 +940,35 @@ class TestMeadowEclipse:
         m.wake()
         m.wait("meadowGame.state().eclipse === 1", 25_000)
         m.wait("World.state.light < 0.35", 3_000)
-        assert m.page.evaluate(
-            "document.getElementById('cricket').classList.contains('out')"
-        )
+        assert m.page.evaluate("Cricket.state") in ("coming", "playing")
         assert abs(m.page.evaluate(self.TULIP_OPEN)) < 0.05, "the tulips closed"
         assert m.page.evaluate("Critters.out.every((b) => b.leaving)")
         m.do("tap sun")
         m.wait("meadowGame.trace().includes('calls the sun')", 3_000)
         m.wait("meadowGame.state().eclipse === 0 && World.state.light > 0.9", 15_000)
-        assert not m.page.evaluate(
-            "document.getElementById('cricket').classList.contains('out')"
-        )
+        assert m.page.evaluate("Cricket.state") in ("going", "home")
+        m.wait("Cricket.state === 'home'", 10_000)  # back down his burrow
         assert abs(m.page.evaluate(self.TULIP_OPEN)) > 0.3, "the tulips opened again"
         m.wait_free()
         m.assert_settled()
+
+    def test_the_cricket_climbs_out_walks_over_and_plays(
+        self, meadow: callable
+    ) -> None:
+        """In the dim he comes out of his burrow (nothing from nowhere), walks
+        to his spot by the molehill, sets his stand down and plays."""
+        m = meadow(f"{STILL}&props=&eclipse=now")
+        assert m.page.evaluate(
+            "Cricket.state === 'home' && getComputedStyle(document.getElementById('cricket')).display === 'none'"
+        ), "he waits down his burrow"
+        m.wake()
+        m.wait("Cricket.state === 'coming'", 20_000)
+        start = m.page.evaluate("Cricket.x")
+        m.wait("Cricket.state === 'playing'", 10_000)
+        assert m.page.evaluate("Cricket.x") == m.page.evaluate("Cricket.SPOT") != start
+        trace = m.page.evaluate("meadowGame.trace()")
+        assert trace.index('"out":true') < trace.index('"plays":true')
+        assert not m.errors, m.errors
 
     def test_now_starts_one_as_he_wakes(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&props=&eclipse=now")
