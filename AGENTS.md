@@ -246,15 +246,26 @@ the edge cases that would let bad data pass silently.
   in milliseconds. Logic that can be pure should be, and tested here.
 - *Conventions* (`tests/test_game.py`, in `uv run pytest`): the debuggability
   rules above that a grep can check.
-- *Browser* (`tests/test_game_browser.py`, `uv run pytest -m browser -n 8`,
-  about 2 minutes, real time): every gesture, left-alone move, thing (plain
-  and variation) and creature chase run alone in a `?seed=1&still` play, then
-  cut short by a tap; plus a whole day to bed, Reksio left alone, and a
-  report-and-replay round trip. Each must end with Reksio free and standing,
-  no console error, no broken rule. The tables at the top list everything;
-  the coverage tests fail until a new gesture, move, thing or creature is
-  added there. Eight workers load the machine, which flushes out timing bugs:
-  a test that fails only then is a real bug, not noise.
+- *Browser* (`tests/test_game_browser.py`, `tests/test_meadow_browser.py`,
+  `uv run pytest -m browser -n 8`): every gesture, left-alone move, thing
+  (plain and variation) and creature chase run alone in a `?seed=1&still`
+  play, then cut short by a tap; plus a whole day to bed, Reksio left alone,
+  and a report-and-replay round trip. Each must end with Reksio free and
+  standing, no console error, no broken rule. The tables at the top list
+  everything; the coverage tests fail until a new gesture, move, thing or
+  creature is added there. Pages run on game time, `?step` (debug.js) at
+  `STEP_MS` (conftest.py), four times real time, in lock-step with the
+  test (`tests/game_page.py`): the play runs only while the test waits and
+  is held in the frame a wait ends, so a test sees the same play however
+  busy the machine is. So a test waits through its page (`wait(js)`,
+  `play_for(ms)`, `run(js)`), never on `page.wait_for_*` or with
+  `wait_for_timeout`, except to check that game time stands still. "Free"
+  can hold for one frame before a queued tap goes: wait for what the tap
+  does, not only for him to be free. A test on sound's own clock (music),
+  one where the game holds itself, or one in the stress set (a whole day,
+  the replay round trip), is marked `realtime` and runs on real frames;
+  eight workers load the machine, which flushes out timing bugs there: a
+  test that fails only then is a real bug, not noise.
 
 - *Performance* (`tests/test_game_perf.py`, `uv run pytest -m perf`, about
   35 s, alone on an idle machine): a phone-sized 3x screen with Chrome's CPU
@@ -265,8 +276,11 @@ the edge cases that would let bad data pass silently.
   measure on the iPhone.
 
 **Which tests while working.** Unit and convention tests always (seconds).
-Browser tests: only the slice for what changed, then the whole suite once
-before a commit.
+Browser tests, in three widths: while iterating, only the test being worked
+on, alone (`-m browser -x --lf -k <test>`, no `-n`); when the change is
+done, its slice below; the whole suite (`-n 8`) once, before a commit. Never
+the whole of a game's file on every iteration: it runs in real time and
+heats the laptop for minutes.
 
 | Changed | Browser slice (`-m browser -n 8 -k …`) |
 |---|---|
@@ -282,7 +296,13 @@ before a commit.
 | `input.js`, taps and keys | `"TestRealInput"` |
 | screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
-| Krtek's meadow (`worlds/krtek/games/meadow`, `tests/test_meadow_browser.py`) | `"Meadow"` |
+| the meadow's encounters (`things.js`, `car.js`, `egg.js`, `paint.js`, `poles.js`, `rain.js`, `umbrella.js`, `storm.js`, `afterrain.js`) | `"TestMeadowEncounters and <name>"`, plus its own class where it has one (`"TestMeadowCar"`, `"TestMeadowEgg"`, `"TestMeadowFox"` for the paint, `"TestMeadowBulldozer"` for the poles, `"TestMeadowStorm"`) |
+| the mole (`mole.js`, `moleart.js`), taps on him or the meadow (`meadow.js`) | `"TestMeadowDay or TestMeadowWalking or TestMeadowTapHim or TestMeadowTapsWait"` |
+| the meadow's view or screen (`view.js`, `painting.js`, `game.css`) | `"TestMeadowView or TestMeadowScreens"` |
+| the meadow's small life and wildlife (`critters.js`, `flock.js`, `wildlife.js`, `wildart.js`, `heron.js`, `nest.js`, `friends.js`, `foxart.js`) | `"TestMeadowCritters or TestMeadowFireflies or TestMeadowSnail or TestMeadowWildlife"` |
+| the meadow's music, the cricket (`music.js`, `beds.js`, `cricket.js`) | `"TestMeadowMusic"` |
+| the meadow's wind, eclipse, church, spring (`weather.js`, `eclipse.js`, `church.js`, `spring.js`) | `"TestMeadowWind"`, `"TestMeadowEclipse"`, `"TestMeadowChurch"`, `"TestMeadowSpring"` |
+| the meadow's `day.js`, `layout.js`, or anything shared | the whole meadow file, `"Meadow"` |
 
 **Adding a gag:** run the `new-gag` skill; it has the steps and where each
 piece goes. Every gag gets its rows in the `test_game_browser.py` tables, a

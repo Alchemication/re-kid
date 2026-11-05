@@ -133,3 +133,17 @@ def browser() -> Iterator[object]:
         b = p.chromium.launch(channel="chrome")
         yield b
         b.close()
+
+
+STEP_MS = 64
+"""Game time each frame counts for in a browser test (`?step`, debug.js): four
+times real time at 60 frames a second, and the same play however busy the
+machine is. Small enough that a gesture's shortest moments (150 ms and up)
+still get a frame or two."""
+
+
+@pytest.fixture
+def game_time(request: pytest.FixtureRequest) -> str:
+    """The page-address flag that puts a browser test on game time, or "" for
+    a test marked `realtime` (sound's clock, the stress set)."""
+    return "" if request.node.get_closest_marker("realtime") else f"&step={STEP_MS}"

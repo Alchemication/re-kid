@@ -19,6 +19,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.game_page import GamePage
+
 pytestmark = pytest.mark.browser
 playwright = pytest.importorskip("playwright.sync_api")
 
@@ -41,28 +43,23 @@ SOLVE = {
 }
 
 
-class Meadow:
+class Meadow(GamePage):
     """One open play of the meadow, collecting what went wrong."""
 
     def __init__(self, browser: object, query: str) -> None:
-        self.errors: list[str] = []
-        self.page = browser.new_page(viewport={"width": 1280, "height": 720})
-        self.page.on(
-            "console",
-            lambda m: self.errors.append(m.text[:3000]) if m.type == "error" else None,
+        super().__init__(
+            browser,
+            MEADOW,
+            query,
+            "meadowGame",
+            viewport={"width": 1280, "height": 720},
         )
-        self.page.on("pageerror", lambda e: self.errors.append(f"uncaught: {e}"))
-        self.page.goto(f"{MEADOW.as_uri()}?{query}")
-        self.page.wait_for_function("typeof meadowGame !== 'undefined'")
 
     def do(self, intent: str) -> None:
         self.page.evaluate("(i) => meadowGame.perform(i)", intent)
 
     def state(self) -> dict:
         return self.page.evaluate("meadowGame.state()")
-
-    def wait(self, js: str, ms: int = DONE_MS) -> None:
-        self.page.wait_for_function(js, timeout=ms)
 
     def wake(self) -> None:
         self.do("wake")
@@ -80,11 +77,11 @@ class Meadow:
 
 
 @pytest.fixture
-def meadow(browser: object) -> Iterator[callable]:
+def meadow(browser: object, game_time: str) -> Iterator[callable]:
     opened: list[Meadow] = []
 
     def open_(query: str = STILL) -> Meadow:
-        opened.append(Meadow(browser, query))
+        opened.append(Meadow(browser, query + game_time))
         return opened[-1]
 
     yield open_
@@ -154,7 +151,7 @@ class TestMeadowDay:
         m.wake()
         for _ in range(3):
             m.do(intent)
-            m.page.wait_for_timeout(2600)  # there, and part way through
+            m.play_for(2600)  # there, and part way through
             m.do("go to 400")
             m.wait_free()
             m.assert_settled()
@@ -164,7 +161,7 @@ class TestMeadowDay:
         m.wake()
         for first in ("go to 2300", "sniff", "paddle", "tap mole", "dig to 1800"):
             m.do(first)
-            m.page.wait_for_timeout(CUT_MS)
+            m.play_for(CUT_MS)
             m.do("go to 400")
             m.wait_free()
             m.assert_settled()
@@ -201,14 +198,14 @@ class TestMeadowDay:
     ) -> None:
         m = meadow(f"{STILL}&day=12&props=")
         m.wake()
-        m.page.wait_for_selector("#again:not([hidden])", timeout=60_000)
+        m.wait("document.querySelector('#again:not([hidden])')", 60_000)
         m.page.evaluate("window.__sameplay = true")
         m.page.mouse.move(640, 400)
         m.page.mouse.down()  # held, on the picture: nothing
-        m.page.wait_for_timeout(3000)
+        m.play_for(3000)
         m.page.mouse.up()
         m.page.keyboard.press("Space")
-        m.page.wait_for_timeout(500)
+        m.play_for(500)
         assert m.page.evaluate("window.__sameplay === true"), (
             "a press started a new day"
         )
@@ -218,7 +215,7 @@ class TestMeadowDay:
         m.page.mouse.down()
         # the reload begun is the new play; its page loading may be slow on a busy machine
         with m.page.expect_navigation(wait_until="commit", timeout=5000):
-            m.page.wait_for_timeout(2400)
+            m.play_on()  # held long enough, the sun reloads the page
         m.page.mouse.up()
 
 
@@ -243,7 +240,7 @@ class TestMeadowEncounters:
         arrived(m, name)
         m.do(f"use {name}")
         m.wait(f"meadowGame.state().things.{name} === 'step {step}'")
-        m.page.wait_for_timeout(CUT_MS)
+        m.play_for(CUT_MS)
         m.do("go to 1400")
         m.wait_free()
         m.assert_settled()
@@ -262,7 +259,7 @@ class TestMeadowEncounters:
         ]  # a choice encounter: its answer, tapped again and again
         for _ in range(150):  # long enough for the storm's clouds to come in first
             m.do(last)
-            m.page.wait_for_timeout(300)
+            m.play_for(300)
             if m.state()["things"][name] == "done":
                 break
         m.wait(f"meadowGame.state().things.{name} === 'done'")
@@ -279,11 +276,11 @@ class TestMeadowEncounters:
         arrived(m, name)
         m.do(f"use {name}")
         m.wait(f"meadowGame.state().things.{name} === 'step 1'")
-        m.page.wait_for_timeout(1500)
+        m.play_for(1500)
         m.page.locator(
             "#mole-out .mole .mole-body, #mole .mole .mole-body"
         ).first.click(force=True)
-        m.page.wait_for_timeout(200)
+        m.play_for(200)
         assert m.state()["busy"] == name, "a tap on him cut the encounter short"
         m.wait(f"meadowGame.state().things.{name} === 'done'")
         m.wait_free()
@@ -325,7 +322,7 @@ class TestMeadowCar:
         m.wait_free()
         m.do("use car")
         m.wait("meadowGame.detail('car').riding", 10_000)
-        m.page.wait_for_timeout(900)  # zooming towards the spring
+        m.play_for(900)  # zooming towards the spring
         m.do("tap mole")
         m.wait_free()
         m.assert_settled()
@@ -344,7 +341,7 @@ class TestMeadowView:
         m.wake()
         m.do("go to 3500")
         m.wait_free()
-        m.page.wait_for_timeout(1500)  # the view eases after him
+        m.play_for(1500)  # the view eases after him
         view = m.state()["view"]
         assert view >= 2300, f"the view stayed behind at {view}"
         # a real tap a quarter of the way across the screen, low on the grass
@@ -365,7 +362,7 @@ class TestMeadowScreens:
     def test_on_a_phone_the_church_cross_shows(self, meadow: callable) -> None:
         m = meadow()
         m.page.set_viewport_size(PHONE)
-        m.page.wait_for_timeout(300)
+        m.play_for(300)
         top = m.page.evaluate(
             "document.querySelector('#distant path[d^=\"M538 176 V156\"]').getBoundingClientRect().top"
         )
@@ -381,12 +378,12 @@ class TestMeadowScreens:
         for to in (3900, 100):
             m.do(f"go to {to}")
             m.wait_free()
-            m.page.wait_for_timeout(1500)  # the view eases after him
+            m.play_for(1500)  # the view eases after him
             edges = m.page.evaluate("[View.left, View.right]")
             assert edges[0] >= 0 and edges[1] <= 4000, f"past the meadow: {edges}"
         m.do("go to 2000")
         m.wait_free()
-        m.page.wait_for_timeout(1500)
+        m.play_for(1500)
         left, right = m.page.evaluate("[View.left, View.right]")
         assert right - left > 1600, "a wide screen sees more of the meadow"
         m.page.mouse.click(
@@ -396,6 +393,7 @@ class TestMeadowScreens:
         assert abs(m.state()["x"] - (left + (right - left) * 0.25)) < 30, m.state()
         m.assert_settled()
 
+    @pytest.mark.realtime  # the game holds itself here: a test's hold would hide it
     def test_a_phone_held_upright_asks_to_be_turned_and_waits(
         self, meadow: callable
     ) -> None:
@@ -404,7 +402,7 @@ class TestMeadowScreens:
         turn = "!document.getElementById('turn').hidden"
         m.wait(turn, 2000)
         t0 = m.page.evaluate("Clock.now()")
-        m.page.wait_for_timeout(1000)
+        m.page.wait_for_timeout(1000)  # real time: game time stands still
         assert m.page.evaluate("Clock.now()") == t0  # the game waits
         m.page.set_viewport_size({"width": 844, "height": 390})
         m.wait(f"!({turn})", 2000)
@@ -418,13 +416,13 @@ class TestMeadowWalking:
         m.wake()
         m.do("go to 1000")  # out of his molehill and walking
         m.wait_free()
-        # where he is drawn, every animation frame, timed in the page (load can't stretch it)
+        # where he is drawn, every animation frame, in game time (load can't stretch it)
         m.page.evaluate(
-            """() => { window.__xs = []; const f = (t) => { window.__xs.push([t, Mole.drawnX()]); if (window.__xs.length < 100000) requestAnimationFrame(f) }; requestAnimationFrame(f) }"""
+            """() => { window.__xs = []; const f = () => { window.__xs.push([Clock.now(), Mole.drawnX()]); if (window.__xs.length < 100000) requestAnimationFrame(f) }; requestAnimationFrame(f) }"""
         )
         for i in range(8):  # each tap cuts a walk under way
             m.page.mouse.click(1250 if i % 2 else 30, 650)
-            m.page.wait_for_timeout(400)
+            m.play_for(400)
         xs = m.page.evaluate("window.__xs")
         speed = max(abs(b[1] - a[1]) / max(1, b[0] - a[0]) for a, b in pairwise(xs))
         # a run is about 0.43 units/ms; the bug teleported him thousands of units in one frame
@@ -437,12 +435,12 @@ class TestMeadowWalking:
         m.wake()
         x0 = m.state()["x"]
         m.page.keyboard.down("ArrowRight")
-        m.page.wait_for_timeout(1200)
+        m.play_for(1200)
         m.page.keyboard.up("ArrowRight")
         m.wait_free(3_000)
         x1 = m.state()["x"]
         assert 150 < x1 - x0 < 1500, (x0, x1)
-        m.page.wait_for_timeout(600)
+        m.play_for(600)
         assert m.state()["x"] == x1, "he walked on after the key was let go"
         m.assert_settled()
 
@@ -481,7 +479,7 @@ class TestMeadowEgg:
     ) -> None:
         m = self.open(meadow)
         m.do("use egg mouse")
-        m.page.wait_for_timeout(1200)  # the mouse is out
+        m.play_for(1200)  # the mouse is out
         m.do("use egg hare")
         m.wait(
             'meadowGame.trace().includes(\'try {"thing":"egg","who":"hare"}\')', 5_000
@@ -497,7 +495,7 @@ class TestMeadowEgg:
         m.page.locator(".mole-carry .egg-shape").click(
             force=True
         )  # a real tap on the egg he holds up
-        m.page.wait_for_timeout(100)
+        m.play_for(100)
         assert m.state()["busy"] == "egg"
         m.wait_free()
         assert m.page.evaluate("meadowGame.detail('egg').tried") == ["mouse"]
@@ -518,11 +516,11 @@ class TestMeadowEgg:
     ) -> None:
         m = self.open(meadow)
         m.do("use egg hare")
-        m.page.wait_for_timeout(600)
+        m.play_for(600)
         m.page.locator(
             "#mole-out .mole .mole-body, #mole .mole .mole-body"
         ).first.click(force=True)
-        m.page.wait_for_timeout(200)
+        m.play_for(200)
         assert m.state()["busy"] == "egg", "a tap on him cut the choice short"
         m.wait_free()
         m.assert_settled()
@@ -530,8 +528,9 @@ class TestMeadowEgg:
     def test_wandering_off_mid_choice_and_coming_back(self, meadow: callable) -> None:
         m = self.open(meadow)
         m.do("use egg mouse")
-        m.page.wait_for_timeout(1300)
-        m.do("go to 2000")
+        m.play_for(1300)
+        m.do("go to 2000")  # waits for the mouse's try, then goes (a frame later)
+        m.wait("meadowGame.state().x === 2000")
         m.wait_free()
         m.assert_settled()
         assert m.page.evaluate("meadowGame.detail('egg').cast") == []
@@ -565,10 +564,10 @@ class TestMeadowEgg:
         m.wake()
         arrived(m, "egg")
         m.do("use egg")
-        m.page.wait_for_timeout(400)
+        m.play_for(400)
         for _ in range(6):  # a toddler tapping the hen over and over
             m.do("use egg hen")
-            m.page.wait_for_timeout(200)
+            m.play_for(200)
         m.wait("meadowGame.state().things.egg === 'done'")
         steps = m.page.evaluate(
             "meadowGame.trace().split('\\n').filter((l) => l.includes(' step ')).length"
@@ -605,6 +604,7 @@ def in_order(parts: list[str], wanted: list[str]) -> bool:
     return all(w in it for w in wanted)
 
 
+@pytest.mark.realtime  # the takes follow sound's own clock
 class TestMeadowMusic:
     """The meadow's music (music.js): the theme as he wakes, its moods in an
     encounter, the cricket from dusk. Read from the trace: whether a take is
@@ -649,7 +649,7 @@ class TestMeadowMusic:
         arrived(m, "paint")
         m.do("use paint")
         m.wait("meadowGame.state().things.paint === 'step 1'")
-        m.page.wait_for_timeout(1500)  # the fade
+        m.play_for(1500)  # the fade
         # the theme stops; at most the short uneasy turn (menace), once it has takes
         assert m.page.evaluate("meadowGame.music()") in (None, "menace"), (
             "music over the fox"
@@ -668,7 +668,7 @@ class TestMeadowMusic:
         m.wait("meadowGame.state().ended && !meadowGame.state().busy", 40_000)
         heard = m.page.evaluate(f"{MUSIC}.length")
         if '"playsOn":true' in m.page.evaluate("meadowGame.trace()"):
-            m.page.wait_for_timeout(1500)  # a cut take would have faded by now
+            m.play_for(1500)  # a cut take would have faded by now
             assert m.page.evaluate("meadowGame.music()") == "lullaby", (
                 "the last tune plays on to its end over him asleep, not cut"
             )
@@ -701,7 +701,7 @@ class TestMeadowCritters:
     def test_none_in_a_still_play_unless_asked(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&props=")
         m.wake()
-        m.page.wait_for_timeout(4000)
+        m.play_for(4000)
         assert (
             m.page.evaluate("document.querySelectorAll('[data-critter]').length") == 0
         )
@@ -733,7 +733,7 @@ class TestMeadowFireflies:
         m = meadow(f"{STILL}&props=&critters=fireflies")
         m.wake()
         m.wait("Critters.fireflies.length >= 3", 6_000)
-        m.page.wait_for_timeout(2000)  # up out of the grass
+        m.play_for(2000)  # up out of the grass
         m.page.locator("[data-critter^='firefly']").first.click(force=True)
         m.wait("meadowGame.trace().includes('\"tapped\":true')", 3_000)
         m.wait_free()
@@ -787,7 +787,7 @@ class TestMeadowWildlife:
         assert far, "an animal came near the front: they keep far off"
         m.do("tap wild")
         if kind == "bison":  # he only looks back, chewing
-            m.page.wait_for_timeout(3000)
+            m.play_for(3000)
             assert m.page.evaluate(f"{self.OUT} && {self.OUT}.goal") != "flee"
         else:
             m.wait(f"!{self.OUT} || {self.OUT}.goal === 'flee'", 5000)
@@ -815,7 +815,7 @@ class TestMeadowWildlife:
         m.wait(f"Math.abs({self.OUT}.vx) > 3", 15_000)  # walking in, then
         came = 1 if m.page.evaluate(f"{self.OUT}.vx") > 0 else -1
         m.wait(f"{self.OUT}.vx * {came} < -3", 90_000)  # it turns
-        m.page.wait_for_timeout(3000)
+        m.play_for(3000)
         fastest = m.page.evaluate("Math.max(...window.paces)")
         assert fastest < 20 * 1.8 * 1.1, f"one slid along at {fastest:.0f} a second"
         assert not m.errors, m.errors
@@ -883,7 +883,7 @@ class TestMeadowSnail:
         m.wake()
         m.do("go to 1450")
         m.wait("Critters.snail !== null", 6_000)
-        m.page.wait_for_timeout(5000)  # up out of the grass
+        m.play_for(5000)  # up out of the grass
         m.page.locator("[data-critter=snail]").click(force=True)
         m.wait("Critters.snail && Critters.snail.tucked", 3_000)
         m.wait("Critters.snail && !Critters.snail.tucked", 8_000)  # and out again
@@ -1091,7 +1091,7 @@ class TestMeadowBulldozer:
         m.wait(
             "meadowGame.state().things.poles === 'step 3'", 40_000
         )  # it came, and shot its poles
-        m.page.wait_for_timeout(1500)  # the view eases over
+        m.play_for(1500)  # the view eases over
         (d_left, _d_right, d_h), (m_left, m_right, m_h) = m.page.evaluate(self.BOXES)
         assert d_h > 1.3 * m_h, (
             f"the bulldozer ({d_h:.0f}) should tower over him ({m_h:.0f})"
@@ -1144,7 +1144,7 @@ class TestMeadowBulldozer:
         faces = set()
         while m.page.evaluate("!document.querySelector('.pit')"):
             faces.add(m.page.evaluate("Mole.state.face"))
-            m.page.wait_for_timeout(40)
+            m.play_for(40)
         assert "puzzled" in faces, f"he didn't stop to think: {faces}"
         depths = m.page.evaluate(
             "meadowGame.trace().split('\\n').filter((l) => l.includes(' dig in '))"
@@ -1176,7 +1176,7 @@ class TestMeadowBulldozer:
             moods.add(mood)
             parts.add(part)
             faces.add(face)
-            m.page.wait_for_timeout(250)
+            m.play_for(250)
         assert moods == {"trouble"}, f"the bed lifted while it was here: {moods}"
         assert not parts & {"curious", "sad", "happy", "morning"}, (
             f"the theme came back while it was here: {parts}"
@@ -1204,7 +1204,7 @@ class TestMeadowBulldozer:
         m.wait("meadowGame.state().things.poles === 'step 0'")
         for intent in ["go to 400", "tap mole", "sniff", "paddle", "tap mole"]:
             m.do(intent)
-            m.page.wait_for_timeout(700)
+            m.play_for(700)
             assert m.state()["busy"] == "poles", f"{intent} cut it short"
         m.wait("meadowGame.state().things.poles === 'step 3'", 40_000)
         assert m.state()["busy"] == "poles"
@@ -1216,7 +1216,7 @@ class TestMeadowBulldozer:
             if "arrives" in m.page.evaluate("meadowGame.trace()"):
                 break
             m.do("tap mole")
-            m.page.wait_for_timeout(500)
+            m.play_for(500)
         arrived(m, "poles")
         trace = m.page.evaluate("meadowGame.trace()").split("\n")
         came = next(
@@ -1273,7 +1273,7 @@ class TestMeadowStorm:
             if "arrives" in m.page.evaluate("meadowGame.trace()"):
                 break
             m.do("tap mole")
-            m.page.wait_for_timeout(1000)
+            m.play_for(1000)
         arrived(m, "storm")
         trace = m.page.evaluate("meadowGame.trace()").split("\n")
         came = next(
@@ -1305,7 +1305,7 @@ class TestMeadowStorm:
         m.wait("meadowGame.detail('storm').under.includes('mouse')", 10_000)
         m.wait("!meadowGame.state().busy", 5_000)
         m.do("use storm hare")
-        m.page.wait_for_timeout(400)  # the hare's wave under way
+        m.play_for(400)  # the hare's wave under way
         m.do("use storm hen")
         m.wait("meadowGame.detail('storm').under.length >= 2", 10_000)
         assert "mouse" in m.page.evaluate("meadowGame.detail('storm').under")
@@ -1321,7 +1321,7 @@ class TestMeadowStorm:
         arrived(m, "storm")
         m.do("use storm")
         m.wait("meadowGame.state().carrying", 20_000)
-        m.page.wait_for_timeout(CUT_MS)
+        m.play_for(CUT_MS)
         m.do(
             "stop"
         )  # a tap would wait for the step to end; an arrow let go (or bedtime) cuts at once
@@ -1376,7 +1376,7 @@ class TestMeadowTapHim:
         m.wake()
         for _ in range(5):
             m.do("tap mole")
-            m.page.wait_for_timeout(CUT_MS)
+            m.play_for(CUT_MS)
             m.do("go to 600")
             m.wait_free()
             m.assert_settled()
@@ -1399,9 +1399,9 @@ class TestMeadowTapsWait:
         m.wait(
             "Things.stepping === 'rain'"
         )  # its first step playing (it arrives as 'step 0' already)
-        m.page.wait_for_timeout(CUT_MS)
+        m.play_for(CUT_MS)
         m.do("go to 400")
-        m.page.wait_for_timeout(200)
+        m.play_for(200)
         assert m.state()["busy"] == "rain", "the tap cut the step short"
         m.wait("meadowGame.state().busy === 'go'", 15_000)  # the step over, off he goes
         m.wait_free()
@@ -1431,7 +1431,7 @@ class TestMeadowChurch:
         m = meadow(f"{STILL}&props=&day=40")
         m.wake()
         for _ in range(3):  # the hands follow the day, a step behind at most
-            m.page.wait_for_timeout(2500)
+            m.play_for(2500)
             shows, hour = m.page.evaluate("[Church.shows, World.state.hour]")
             assert 0 <= hour - shows < 0.2, (shows, hour)
         hand = m.page.evaluate(

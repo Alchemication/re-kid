@@ -141,7 +141,7 @@ uv run python main.py schema world|sources|episodes|intro|brief
 
 Development: `uv run ruff check . && uv run ruff format . && uv run pytest`,
 `npx --yes eslint@10.12.0 worlds` for the game scripts, and
-`uv run pytest -m browser -n 8` (about 2 minutes) after changing a game.
+`uv run pytest -m browser -n 8` (about 10 minutes) after changing a game.
 
 ## The site
 
@@ -198,6 +198,7 @@ Flags in the page address (`main.py play` takes the first three):
 | `?debug` | State overlay, every event in the console, a "report a bug" button. |
 | `?still` | Reksio moves only when asked: try one gesture or gag alone. He starts up, not asleep in his doghouse. |
 | `?held` | The game starts paused until a tool lets it go (`Clock.hold('held', false)`): `main.py replay` uses it, so a slow-loading page still plays a report from its start. |
+| `?step=N` | Every frame counts as exactly N ms of game time, and the page's animations step with it: faster above 16, and frame by frame the same on a busy machine as on an idle one. The browser tests run on `?step=64` (four times real time), held between their steps (`tests/game_page.py`); sound keeps its own clock. Works in the meadow too. |
 | `?morning=1` / `0` | Start asleep in the doghouse at dawn (he wakes by himself after 6–9 s, or at the first tap), or start the day with him up. On unless `?still`. |
 | `?props=trap,bowl` | Which props are out (of bowl, dig, film, trap, tree, berries). |
 | `?sky=clear\|fair\|cloudy\|golden` | The kind of day: no clouds, a few drifting, more with a haze and a softer sun, or warmer light all day. |

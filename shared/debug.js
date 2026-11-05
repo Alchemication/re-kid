@@ -8,6 +8,10 @@
 //   pauses rather than running on unseen; its animations and sound pause too.
 //   Clock.hold pauses it the same way for other reasons (a phone held
 //   upright, in the yard).
+// - `?step=N`: every frame counts as exactly N ms of game time, however long
+//   it took, and the page's animations are moved on with it (paused, then
+//   stepped), so a test sees the same play on a busy machine as on an idle
+//   one, and N above 16 runs it faster. Sound keeps its own clock.
 //   Everything that plays out over time uses it, never setTimeout or
 //   performance.now (sound's own audio clock aside).
 // - Motion.endAt: animate something to where it ends up, setting the end on
@@ -53,10 +57,11 @@ const Clock = (() => {
   const listeners = []
   const paused = new Set() // animations the clock paused while it was held
   const holds = new Set() // why the game is paused now: 'hidden' (the page), or a reason given to hold()
+  let fixed = null // ms of game time each frame counts for (?step), or null: as long as it took
 
   function frame(t) {
     requestAnimationFrame(frame) // first: whatever a timer does, the game goes on
-    if (last !== null && !holds.size) now += Math.max(0, Math.min(MAX_STEP_MS, t - last))
+    if (!fixed && last !== null && !holds.size) now += Math.max(0, Math.min(MAX_STEP_MS, t - last))
     last = t
     const before = seq // timers set during this frame wait for the next one
     while (due.length && due[0].at <= now && due[0].seq < before) safely(due.shift().fn)
@@ -79,7 +84,39 @@ const Clock = (() => {
       else console.error(e)
     }
   }
-  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(frame)
+  /** Under ?step: game time moves on, and the page's animations with it, in
+   * a frame callback of its own that runs before frame(), so what awaits an
+   * animation's end goes on before the game's timers run, as when the
+   * browser moves animations at a frame's start. Held, both stand still. */
+  function stepFrame() {
+    requestAnimationFrame(stepFrame)
+    if (!fixed) return
+    const step = holds.size ? 0 : fixed
+    now += step
+    stepAnimations(step)
+  }
+  if (typeof requestAnimationFrame === 'function') {
+    requestAnimationFrame(stepFrame) // before frame(), every frame: registered first
+    requestAnimationFrame(frame)
+  }
+
+  /** Every animation runs on game time, not the page's. One running has
+   * started since the last step: it is paused and set back to its start (it
+   * starts in game time from here, however long the page took meanwhile).
+   * Each moves on by the step, and one that reaches its end is finished. */
+  function stepAnimations(step) {
+    for (const a of document.getAnimations()) {
+      if (a.playState === 'running') {
+        a.pause()
+        a.currentTime = 0
+      }
+      if (a.playState !== 'paused') continue
+      const end = a.effect.getComputedTiming().endTime
+      const at = (a.currentTime ?? 0) + step * a.playbackRate
+      if (at >= end) a.finish()
+      else a.currentTime = Math.max(0, at)
+    }
+  }
 
   function cancel(timer) {
     const i = due.indexOf(timer)
@@ -103,7 +140,9 @@ const Clock = (() => {
     else holds.delete(why)
     const held = holds.size > 0
     if (held === was) return
-    if (held) {
+    if (fixed) {
+      // ?step: the animations stand still with game time already (stepFrame)
+    } else if (held) {
       for (const a of document.getAnimations()) {
         if (a.playState === 'running') {
           a.pause()
@@ -155,6 +194,10 @@ const Clock = (() => {
     /** fn(held) whenever the game pauses or plays on. */
     onHold(fn) {
       listeners.push(fn)
+    },
+    /** Count every frame as ms of game time from now on (?step). */
+    stepBy(ms) {
+      fixed = ms
     },
   }
 })()
@@ -245,6 +288,7 @@ const Debug = (() => {
   const on = params.has('debug')
   const still = params.has('still')
   if (params.has('held')) Clock.hold('held', true)
+  if (Number(params.get('step')) > 0) Clock.stepBy(Number(params.get('step')))
   const seeded = params.has('seed')
   const seed = (seeded ? Number(params.get('seed')) : Math.floor(Math.random() * 2 ** 32)) >>> 0
 

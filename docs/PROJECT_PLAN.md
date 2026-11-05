@@ -401,22 +401,17 @@ scene:
 - **Code:** the perf budget's slack is thin: walking measures 24–25% busy
   of 25% (2026-10-22, the bed about one point of it). Before adding more
   drawn every frame, win some back (the sky and painting are the biggest).
-  Under `-n 8`, these fail now and then and pass alone: timing bugs to
-  look into. `TestScreens::test_turning_the_phone_refits_it` (2026-10-22,
-  10-27); the meadow's `TestMeadowWind::test_a_gust_carries_something_across_and_the_plants_lean`
-  (fails about 1 run in 4 under load, 2026-10-31: the sway hasn't grown
-  yet), `TestMeadowTapsWait::test_a_tap_on_the_meadow_mid_step_waits_then_goes`
-  (the same), `TestMeadowEgg::test_a_tap_on_him_mid_choice_hurries_it_rather_than_cuts_it`,
-  `test_a_tap_on_him_hurries_it_rather_than_cuts_it[poles]`, `[car]` and `[rain]` (2026-11-02, a 90 s timeout under -n 8; passed alone),
-  `test_a_tap_on_the_egg_while_waiting`, `TestMeadowCritters::test_a_tap_sends_it_off_and_he_looks_up`,
-  `TestMeadowStorm::test_a_storm_coming_breaks_off_his_play_and_he_goes_for_the_umbrella`
-  (2026-11-01, a 27-minute run; both passed 3 of 3 alone), and the same
-  for the bulldozer, `TestMeadowBulldozer::test_it_breaks_off_his_play`
-  (2026-11-01: he went 3.1 s after it came, the still-waking delay;
-  passed 3 of 3 alone);
-  the yard's `TestBramble::test_taps_while_caught_are_tries_and_nothing_waits_for_after`.
-  `test_look.py::test_photographs_a_gesture_until_it_ends` failed once more
-  after the fix below (2026-10-31, load 85+), and passed alone and 8 at once.
+  The browser tests that failed now and then under `-n 8` (the wind's
+  gust, taps mid-step, the hurried encounters, the egg, the critters, the
+  storm, the herd, the phone turned) were the tests seeing a different
+  moment of the play on a loaded machine. Since 2026-11-05 they run on
+  game time in lock-step with the test (`?step`, `tests/game_page.py`):
+  the whole suite green at load 100+, and those 8 runs of 8. Still open:
+  `test_look.py::test_photographs_a_gesture_until_it_ends` (`main.py look`
+  is not on game time) failed again under load (2026-11-05) and passes
+  alone. The meadow: "free" holds for a frame before a tap that waited
+  for a step goes (`stepped()`, `Clock.after(0)`); harmless for a child,
+  a trap for a test (CLAUDE.md says to wait for what the tap does).
   Fixed 2026-10-31 (the tools and tests, not the games): look and replay
   photograph in held game time, a replay starts `?held`, the key tap and
   the corner sun tests.

@@ -158,3 +158,21 @@ class TestConventions:
             )
         ]
         assert not bad, f"use Clock.after / Clock.wait / Clock.now: {bad}"
+
+    @pytest.mark.parametrize(
+        "path", sorted(ROOT.glob("tests/test_*_browser.py")), ids=lambda p: p.name
+    )
+    def test_browser_tests_wait_in_game_time(self, path: Path) -> None:
+        """On ?step a play goes in lock-step with its test (game_page.py):
+        held between the test's waits, so a real-time wait sees a different
+        moment on a loaded machine, and a wait straight on the page never
+        lets the play run on. Only a check that game time stands still waits
+        in real time, and says so."""
+        straight = re.compile(r"\.page\.(wait_for_function|wait_for_selector)\(")
+        bad = [
+            f"{path.name}:{i}"
+            for i, line in enumerate(path.read_text().splitlines(), 1)
+            if ("wait_for_timeout(" in line and "# real time" not in line)
+            or straight.search(line)
+        ]
+        assert not bad, f"wait through the page helper, wait(js) / play_for(ms): {bad}"

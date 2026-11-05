@@ -22,6 +22,8 @@ from pathlib import Path
 
 import pytest
 
+from tests.game_page import GamePage
+
 pytestmark = pytest.mark.browser
 playwright = pytest.importorskip("playwright.sync_api")
 
@@ -106,7 +108,7 @@ GESTURES = {
     "wagFinger": "Reksio.wagFinger()",
     "wary": "Reksio.wary()",
     "lookAtTongue": "Reksio.lookAtTongue()",
-    "stretch": "(async () => { Reksio.beginStretch(); await new Promise((r) => setTimeout(r, 600)); await Reksio.endStretch() })()",
+    "stretch": "(async () => { Reksio.beginStretch(); await Clock.wait(600); await Reksio.endStretch() })()",
 }
 # Reksio's other functions: state, not gestures, or tested through a thing.
 NOT_GESTURES = {
@@ -205,7 +207,7 @@ CRITTER_NEEDS = {
 }
 
 
-class Yard:
+class Yard(GamePage):
     """One open play of the yard, collecting what went wrong."""
 
     def __init__(
@@ -215,33 +217,19 @@ class Yard:
         size: tuple[int, int] = (1280, 720),
         touch: bool = True,
     ) -> None:
-        self.errors: list[str] = []
-        self.page = browser.new_page(
-            viewport={"width": size[0], "height": size[1]}, has_touch=touch
+        super().__init__(
+            browser,
+            YARD,
+            query,
+            "yardGame",
+            viewport={"width": size[0], "height": size[1]},
+            has_touch=touch,
         )
-        self.page.on("console", self._console)
-        self.page.on("pageerror", lambda e: self.errors.append(f"uncaught: {e}"))
-        self.page.goto(f"{YARD.as_uri()}?{query}")
-        self.page.wait_for_function("window.yardGame")
 
     def _console(self, msg: object) -> None:
         # barks.js is local-only (never committed); its absence is expected
-        if (
-            msg.type == "error"
-            and "barks.js" not in msg.text
-            and "ERR_FILE_NOT_FOUND" not in msg.text
-        ):
-            self.errors.append(msg.text[:3000])
-
-    def run(self, js: str, ms: int = DONE_MS) -> None:
-        """Await `js` (a promise) in the page; fail if it doesn't end in time."""
-        self.page.evaluate(
-            """([js, ms]) => Promise.race([
-                Debug.ignoreCut(eval(js), 'test'),
-                new Promise((_, no) => setTimeout(() => no(new Error(`still going after ${ms} ms`)), ms)),
-            ])""",
-            [js, ms],
-        )
+        if "barks.js" not in msg.text and "ERR_FILE_NOT_FOUND" not in msg.text:
+            super()._console(msg)
 
     def start(self, js: str) -> None:
         """Start `js` without waiting for it."""
@@ -259,12 +247,12 @@ class Yard:
     def settled(self) -> dict:
         """Wait until he's free, then check he's standing and nothing went wrong."""
         try:
-            self.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+            self.wait("yardGame.free()")
         except playwright.TimeoutError:
             pytest.fail(
                 f"never free again: {self.state()}\n{self.page.evaluate('yardGame.trace()')}"
             )
-        self.page.wait_for_timeout(300)  # a rules check or two (every 200 ms)
+        self.play_for(300)  # a rules check or two (every 200 ms)
         s = self.state()
         assert s["reksio"]["pose"] == "stand", self.page.evaluate("yardGame.trace()")
         assert not self.errors, "\n---\n".join(self.errors)
@@ -272,13 +260,13 @@ class Yard:
 
 
 @pytest.fixture
-def yard(browser: object) -> Iterator[callable]:
+def yard(browser: object, game_time: str) -> Iterator[callable]:
     opened: list[Yard] = []
 
     def open_(
         query: str = STILL, size: tuple[int, int] = (1280, 720), touch: bool = True
     ) -> Yard:
-        opened.append(Yard(browser, query, size, touch))
+        opened.append(Yard(browser, query + game_time, size, touch))
         return opened[-1]
 
     yield open_
@@ -337,7 +325,7 @@ class TestActs:
     def test_a_tap_cuts_it_short(self, yard: callable, name: str) -> None:
         y = open_for_act(yard, name)
         y.start(f"yardGame.act('{name}')")
-        y.page.wait_for_timeout(CUT_AFTER_MS)
+        y.play_for(CUT_AFTER_MS)
         y.page.evaluate("yardGame.walk(Reksio.x + 300)")
         y.settled()
 
@@ -349,7 +337,7 @@ def open_for_thing(yard: callable, name: str) -> Yard:
         f"{STILL}&flowers=1&mouse-at=0&visitor-at=0&hen-at=0&mushrooms=0{props}{query}"
     )
     try:
-        y.page.wait_for_function(f"Things.ready('{name}')", timeout=20_000)
+        y.wait(f"Things.ready('{name}')", timeout=20_000)
     except playwright.TimeoutError:
         pytest.fail(f"{name} never ready: {y.state()}")
     return y
@@ -367,8 +355,8 @@ class TestThings:
     def test_a_tap_while_busy_waits_its_turn(self, yard: callable, name: str) -> None:
         y = open_for_thing(yard, name)
         y.page.evaluate(f"yardGame.tap('{name}')")
-        y.page.wait_for_function("yardGame.state().busy", timeout=DONE_MS)
-        y.page.wait_for_timeout(CUT_AFTER_MS)
+        y.wait("yardGame.state().busy", timeout=DONE_MS)
+        y.play_for(CUT_AFTER_MS)
         y.page.evaluate("yardGame.walk(Layout.MIN_X + 100)")
         s = y.settled()
         assert s["uses"].get(name) == 1
@@ -404,7 +392,7 @@ class TestVariations:
         y = open_for_thing(yard, name)
         for _ in range(uses):
             # ready again first (a picked porcino takes a while to grow back)
-            y.page.wait_for_function(f"Things.ready('{name}')", timeout=60_000)
+            y.wait(f"Things.ready('{name}')", timeout=60_000)
             y.run(f"yardGame.use('{name}')")
             y.settled()
         seen = re.findall(
@@ -438,12 +426,13 @@ class TestVariations:
         y.run(f"yardGame.use('{name}')")
         y.settled()
         y.page.evaluate(f"yardGame.tap('{name}')")
-        y.page.wait_for_function("yardGame.state().busy", timeout=DONE_MS)
-        y.page.wait_for_timeout(1500)
+        y.wait("yardGame.state().busy", timeout=DONE_MS)
+        y.play_for(1500)
         y.page.evaluate("yardGame.walk(Layout.MIN_X + 100)")
         y.settled()
 
 
+@pytest.mark.realtime  # the bed follows sound's own clock
 class TestMusicBed:
     """The music bed: quiet music under the yard (bed.js), steered by the
     moment and how busy the child is; ?music=takes, the music as it was."""
@@ -453,8 +442,8 @@ class TestMusicBed:
     ) -> None:
         y = yard(STILL)
         y.page.mouse.click(640, 650)  # a tap: sound may play now
-        y.page.wait_for_function("Music.bed.on && Music.ready", timeout=20_000)
-        y.page.wait_for_timeout(500)
+        y.wait("Music.bed.on && Music.ready", timeout=20_000)
+        y.play_for(500)
         assert y.page.evaluate("Music.bed.style") in ("musicbox", "tiptoe")
         assert y.page.evaluate("Music.bed.mood") == "morning", "the play starts at 8"
         assert not y.errors, y.errors
@@ -462,9 +451,9 @@ class TestMusicBed:
     def test_in_the_rain_it_plays_the_drips(self, yard: callable) -> None:
         y = yard("seed=1&creatures=&rain=1&rain-at=1")
         y.page.mouse.click(640, 650)
-        y.page.wait_for_function("Weather.raining && Music.bed.on", timeout=30_000)
+        y.wait("Weather.raining && Music.bed.on", timeout=30_000)
         # after the morning take (the bed waits under it)
-        y.page.wait_for_function("Music.bed.style === 'drips'", timeout=25_000)
+        y.wait("Music.bed.style === 'drips'", timeout=25_000)
         assert not y.errors, y.errors
 
     def test_it_stops_at_the_lullaby_and_a_replay_keeps_it(
@@ -472,12 +461,12 @@ class TestMusicBed:
     ) -> None:
         y = yard(STILL)
         y.page.mouse.click(640, 650)
-        y.page.wait_for_function("Music.bed.on && Music.ready", timeout=20_000)
+        y.wait("Music.bed.on && Music.ready", timeout=20_000)
         assert "music=" not in y.page.evaluate("yardGame.replayUrl()")
         y.page.evaluate("Music.evening(Debug.random('test-evening'))")
         assert y.page.evaluate("Music.bed.on") is False, "still on after the lullaby"
         y.page.mouse.click(640, 650)  # a tap after it: the day is over, no bed again
-        y.page.wait_for_timeout(500)
+        y.play_for(500)
         assert y.page.evaluate("Music.bed.on") is False
         assert not y.errors, y.errors
 
@@ -487,7 +476,7 @@ class TestMusicBed:
         y = yard(f"{STILL}&music=takes")
         assert "music=takes" in y.page.evaluate("yardGame.replayUrl()")
         y.page.mouse.click(640, 650)
-        y.page.wait_for_timeout(1500)
+        y.play_for(1500)
         assert y.page.evaluate("Music.bed.on") is False
 
 
@@ -500,7 +489,7 @@ class TestMushrooms:
         """Never on a thing's ground, nor in a puddle (Adam, 2026-10-21: they
         came up on the hen's nest, under her ladder)."""
         y = yard(f"seed={seed}&still&creatures=&rain=0&mushrooms=0")
-        y.page.wait_for_function("Things.ready('porcino')", timeout=20_000)
+        y.wait("Things.ready('porcino')", timeout=20_000)
         clash = y.page.evaluate("""() => {
             const taken = Object.entries(Layout.FOOTPRINTS)
               .filter(([n]) => !Layout.hidden.includes(n))
@@ -518,11 +507,9 @@ class TestMushrooms:
 
     def test_after_a_full_basket_he_shares_with_the_snail(self, yard: callable) -> None:
         y = yard("seed=1&still&creatures=&rain=1&rain-at=0&mushrooms=0")
-        y.page.wait_for_function(
-            "Creatures.snail && Things.ready('porcino')", timeout=90_000
-        )
+        y.wait("Creatures.snail && Things.ready('porcino')", timeout=90_000)
         for _ in range(4):
-            y.page.wait_for_function("Things.ready('porcino')", timeout=60_000)
+            y.wait("Things.ready('porcino')", timeout=60_000)
             y.run("yardGame.use('porcino')")
             y.settled()
         assert y.page.evaluate("Mushrooms.inBasket") == 3
@@ -611,11 +598,11 @@ class TestTap:
             y.run("yardGame.use('tap')")
             y.settled()
         y.start("yardGame.use('tap')")
-        y.page.wait_for_function(
+        y.wait(
             "yardGame.events().some((e) => e.kind === 'tap' && e.stage === 'dry')",
             timeout=DONE_MS,
         )
-        y.page.wait_for_timeout(2500)  # under it, knocking or huffing
+        y.play_for(2500)  # under it, knocking or huffing
         y.page.evaluate("yardGame.perform('walk to 600')")
         s = y.settled()
         assert s["uses"]["tap"] == 3
@@ -666,12 +653,10 @@ class TestTree:
             y.run("yardGame.use('tree')")
             y.settled()
         y.start("yardGame.use('tree')")
-        y.page.wait_for_function(
-            "yardGame.trace().includes('bird to the fruit')", timeout=DONE_MS
-        )
+        y.wait("yardGame.trace().includes('bird to the fruit')", timeout=DONE_MS)
         y.page.evaluate("yardGame.perform('walk to 600')")
         y.settled()
-        y.page.wait_for_function("!Bird.flying", timeout=DONE_MS)
+        y.wait("!Bird.flying", timeout=DONE_MS)
         assert y.page.evaluate("Tree.hanging") == 0
 
     def test_in_winter_it_snows_down_and_he_shakes_it_off(self, yard: callable) -> None:
@@ -713,11 +698,11 @@ class TestBowl:
     ) -> None:
         y = self.stuck(yard)
         y.start("yardGame.use('bowl', true)")
-        y.page.wait_for_function("Reksio.wearing('bowl')", timeout=10_000)
+        y.wait("Reksio.wearing('bowl')", timeout=10_000)
         x = y.page.evaluate("Reksio.x")
         for intent in ["press", "release", "walk to 3000", "go to gate"]:
             y.page.evaluate(f"yardGame.perform('{intent}')")
-            y.page.wait_for_timeout(200)
+            y.play_for(200)
         s = y.settled()
         assert len(y.events("stuck tap")) == 3  # the release isn't a tap
         assert abs(s["reksio"]["x"] - x) < 200, "a tap while stuck was kept for after"
@@ -728,11 +713,11 @@ class TestBowl:
     ) -> None:
         y = self.stuck(yard)
         y.start("yardGame.use('bowl', true)")
-        y.page.wait_for_function("Reksio.wearing('bowl')", timeout=10_000)
+        y.wait("Reksio.wearing('bowl')", timeout=10_000)
         while y.page.evaluate("Reksio.wearing('bowl')"):  # a child tapping away
             y.page.evaluate("yardGame.perform('press')")
             y.page.evaluate("yardGame.perform('release')")
-            y.page.wait_for_timeout(300)
+            y.play_for(300)
         y.settled()
         on = y.events("bird on the bowl")[0]["t"]
         off = y.events("bowl off")[0]["t"]
@@ -743,13 +728,11 @@ class TestBowl:
     def test_the_bird_beside_him_can_be_tapped(self, yard: callable) -> None:
         y = self.stuck(yard)
         y.start("yardGame.use('bowl', true)")
-        y.page.wait_for_function(
-            "yardGame.events().some((e) => e.kind === 'bowl off')", timeout=30_000
-        )
-        y.page.wait_for_timeout(900)  # landed beside him
+        y.wait("yardGame.events().some((e) => e.kind === 'bowl off')", timeout=30_000)
+        y.play_for(900)  # landed beside him
         y.page.tap("#bird .bird >> nth=0")
         y.settled()  # the gag, then the tap's turn
-        y.page.wait_for_function(
+        y.wait(
             "yardGame.events().some((e) => e.kind === 'bird visits')", timeout=DONE_MS
         )
         y.settled()
@@ -759,7 +742,7 @@ class TestBowl:
     ) -> None:
         y = yard(f"{STILL}&props=bowl")  # a full bowl: he eats it first
         y.start("yardGame.act('bowl')")
-        y.page.wait_for_function("Reksio.wearing('bowl')", timeout=20_000)
+        y.wait("Reksio.wearing('bowl')", timeout=20_000)
         x = y.page.evaluate("Reksio.x")
         y.page.evaluate("yardGame.perform('walk to 3000')")  # doesn't cut it short now
         s = y.settled()
@@ -815,11 +798,11 @@ class TestBramble:
     ) -> None:
         y = yard(f"{STILL}&props=berries")
         y.start("yardGame.use('berries', true)")
-        y.page.wait_for_function("Reksio.wearing('tail')", timeout=20_000)
+        y.wait("Reksio.wearing('tail')", timeout=20_000)
         x = y.page.evaluate("Reksio.x")
         while y.page.evaluate("Reksio.wearing('tail')"):  # a child tapping away
             y.page.evaluate("yardGame.perform('walk to 3000')")
-            y.page.wait_for_timeout(400)
+            y.play_for(400)
         s = self.freed(y)
         taps = y.events("tail tap")
         assert any(t.get("stage") == "stuck" for t in taps), taps
@@ -830,7 +813,7 @@ class TestBramble:
     ) -> None:
         y = yard(f"{STILL}&props=berries")
         y.start("yardGame.act('bramble')")
-        y.page.wait_for_function("Reksio.wearing('tail')", timeout=30_000)
+        y.wait("Reksio.wearing('tail')", timeout=30_000)
         y.page.evaluate("yardGame.perform('walk to 3000')")  # doesn't cut it short now
         self.freed(y)
         assert y.events("stuck tap")
@@ -841,9 +824,9 @@ class TestBramble:
     ) -> None:
         y = yard(f"{STILL}&props=berries")
         y.start("yardGame.act('bramble')")
-        y.page.wait_for_function("Reksio.wearing('tail')", timeout=30_000)
+        y.wait("Reksio.wearing('tail')", timeout=30_000)
         y.page.evaluate("yardGame.perform('press')")
-        y.page.wait_for_timeout(600)  # longer than a press takes to become a stretch
+        y.play_for(600)  # longer than a press takes to become a stretch
         assert not y.page.evaluate("Reksio.stretching")
         y.page.evaluate("yardGame.perform('release')")
         self.freed(y)
@@ -876,7 +859,7 @@ class TestCritters:
         if name in CRITTER_NEEDS:
             pytest.skip(f"needs {CRITTER_NEEDS[name]}")
         y = yard(f"seed=1&still&rain=0&creatures={CRITTERS[name]}")
-        y.page.wait_for_timeout(1500)  # let it fly in
+        y.play_for(1500)  # let it fly in
         y.run(f"yardGame.chase('{name}')")
         y.settled()
 
@@ -884,7 +867,7 @@ class TestCritters:
 class TestDebugOverlay:
     def test_shows_the_seed_and_state(self, yard: callable) -> None:
         y = yard("seed=5&debug&still")
-        y.page.wait_for_selector("#debug")
+        y.wait("document.querySelector('#debug')")
         text = y.page.inner_text("#debug")
         assert "seed 5" in text
         assert "busy: false" in text
@@ -895,6 +878,7 @@ DAY_PLAY = f"{STILL}&props=bowl,dig,film&flowers=1"
 SUN_X = "Number(document.querySelector('#sun .sun').getAttribute('cx'))"
 
 
+@pytest.mark.realtime  # the stress set: a whole day on real frames, under load
 class TestWholePlay:
     """The day is on a clock (day.js): things done never bring the evening; the
     hour does (?hour starts it late, ?day makes it short)."""
@@ -913,27 +897,25 @@ class TestWholePlay:
         self, yard: callable
     ) -> None:
         y = yard(f"{DAY_PLAY}&hour=18.9&day=600")  # dusk in 5 s, bedtime in 55
-        y.page.wait_for_function("yardGame.state().dusk", timeout=15_000)
+        y.wait("yardGame.state().dusk", timeout=15_000)
         y.page.evaluate("yardGame.tap('bowl')")  # the yard is still open
         y.settled()
         assert y.state()["uses"]["bowl"] == 1 and not y.state()["ended"]
         y.page.evaluate("yardGame.tap('doghouse')")
-        y.page.wait_for_function("yardGame.state().ended", timeout=DONE_MS)
-        y.page.wait_for_timeout(7000)  # night falls, he walks home, the picture closes
+        y.wait("yardGame.state().ended", timeout=DONE_MS)
+        y.play_for(7000)  # night falls, he walks home, the picture closes
         assert not y.errors, "\n---\n".join(y.errors)
 
     def test_at_bedtime_supper_then_bed_by_himself(self, yard: callable) -> None:
         y = yard(
             f"{DAY_PLAY}&hour=19.9&day=60"
         )  # 5 s an hour: bedtime in half a second
-        y.page.wait_for_function(
-            "yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000
-        )
-        y.page.wait_for_function("yardGame.state().ended", timeout=40_000)
+        y.wait("yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000)
+        y.wait("yardGame.state().ended", timeout=40_000)
         assert y.state()["moonUp"] == 1 and y.state()["hour"] == 20
         asks = [e["what"] for e in y.events("ask")]
         assert asks == ["supper", "bedtime"], "nobody sent him: the hour did"
-        y.page.wait_for_timeout(5000)
+        y.play_for(5000)
         assert not y.errors, "\n---\n".join(y.errors)
 
 
@@ -945,10 +927,8 @@ class TestEvening:
     def fed(yard: callable) -> Yard:
         """A play at bedtime, past supper, the doghouse waiting for him."""
         y = yard(f"{DAY_PLAY}&hour=19.95&day=60")
-        y.page.wait_for_function(
-            "yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000
-        )
-        y.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+        y.wait("yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000)
+        y.wait("yardGame.free()", timeout=DONE_MS)
         return y
 
     def test_after_supper_a_tap_on_the_doghouse_sends_him_in(
@@ -956,7 +936,7 @@ class TestEvening:
     ) -> None:
         y = self.fed(yard)
         y.page.evaluate("yardGame.tap('doghouse')")
-        y.page.wait_for_function("yardGame.state().ended", timeout=15_000)
+        y.wait("yardGame.state().ended", timeout=15_000)
         assert "bedtime" not in [e["what"] for e in y.events("ask")]
         assert not y.errors, "\n---\n".join(y.errors)
 
@@ -964,11 +944,11 @@ class TestEvening:
         """One bowl, not two: supper steams in his own bowl, and he eats it there
         (Adam saw a red dish appear by the doghouse beside the bowl)."""
         y = yard(f"{DAY_PLAY}&hour=19.95&day=60")  # DAY_PLAY has the bowl out
-        y.page.wait_for_function(
+        y.wait(
             "document.getElementById('bowl').classList.contains('supper')",
             timeout=10_000,
         )
-        y.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+        y.wait("yardGame.free()", timeout=DONE_MS)
         assert not y.page.evaluate(
             "document.getElementById('supper').classList.contains('served')"
         ), "a second dish by the doghouse"
@@ -982,10 +962,8 @@ class TestEvening:
 
     def test_without_his_bowl_supper_comes_in_a_dish(self, yard: callable) -> None:
         y = yard(f"{STILL}&props=dig,film&flowers=1&hour=19.95&day=60")
-        y.page.wait_for_function(
-            "yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000
-        )
-        y.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+        y.wait("yardGame.events().some((e) => e.kind === 'supper')", timeout=10_000)
+        y.wait("yardGame.free()", timeout=DONE_MS)
         assert y.page.evaluate(
             "document.getElementById('supper').classList.contains('served')"
         )
@@ -1002,13 +980,11 @@ class TestEvening:
         y.page.evaluate(
             "yardGame.tap('doghouse')"
         )  # a long way back: bedtime comes on his way
-        y.page.wait_for_function(
-            "yardGame.state().bedtime || yardGame.state().ended", timeout=30_000
-        )
+        y.wait("yardGame.state().bedtime || yardGame.state().ended", timeout=30_000)
         assert y.state()["reksio"]["walking"], (
             "bedtime came before or after his walk: no race"
         )
-        y.page.wait_for_function("yardGame.state().ended", timeout=30_000)
+        y.wait("yardGame.state().ended", timeout=30_000)
         assert not y.events("supper"), "sent to bed: no supper on the way"
         assert not y.errors, "\n---\n".join(y.errors)
 
@@ -1016,11 +992,11 @@ class TestEvening:
         self, yard: callable
     ) -> None:
         y = self.fed(yard)
-        y.page.wait_for_timeout(10_500)  # just before he'd go by himself
+        y.play_for(10_500)  # just before he'd go by himself
         y.page.evaluate("yardGame.tap('bowl')")
-        y.page.wait_for_function("yardGame.state().busy", timeout=DONE_MS)
+        y.wait("yardGame.state().busy", timeout=DONE_MS)
         y.page.evaluate("yardGame.tap('dig')")  # waits its turn, after the bowl
-        y.page.wait_for_function("yardGame.state().ended", timeout=60_000)
+        y.wait("yardGame.state().ended", timeout=60_000)
         assert not y.errors, "\n---\n".join(y.errors)
 
     def test_holding_the_house_brings_the_evening_and_a_tap_does_not(
@@ -1030,10 +1006,10 @@ class TestEvening:
         box = y.page.locator("#things [data-thing='house'] .plaster").bounding_box()
         y.page.mouse.move(box["x"] + box["width"] * 0.7, box["y"] + box["height"] * 0.7)
         y.page.mouse.down()
-        y.page.wait_for_timeout(2400)
+        y.play_for(2400)
         y.page.mouse.up()
         assert y.events("evening now")
-        y.page.wait_for_function("yardGame.state().dusk", timeout=8000)
+        y.wait("yardGame.state().dusk", timeout=8000)
         assert not y.state()["uses"].get("house"), "a hold is not a tap"
         assert 19 <= y.state()["hour"] < 19.5, "then the last hour as ever"
         assert not y.errors, "\n---\n".join(y.errors)
@@ -1043,22 +1019,22 @@ class TestEvening:
     ) -> None:
         y = self.fed(yard)
         y.page.evaluate("yardGame.tap('doghouse')")
-        y.page.wait_for_selector("#again:not([hidden])", timeout=20_000)
+        y.wait("document.querySelector('#again:not([hidden])')", 20_000)
         y.page.evaluate("window.__sameplay = true")
         y.page.mouse.click(640, 300)
-        y.page.wait_for_timeout(3500)
+        y.play_for(3500)
         assert y.page.evaluate("window.__sameplay === true"), "a tap started a new play"
         box = y.page.locator("#again").bounding_box()
         y.page.mouse.move(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
         y.page.mouse.down()
-        y.page.wait_for_timeout(600)
+        y.play_for(600)
         y.page.mouse.up()  # let go too soon: nothing
-        y.page.wait_for_timeout(2500)
+        y.play_for(2500)
         assert y.page.evaluate("window.__sameplay === true")
         y.page.mouse.down()
         # the reload begun is the new play; its page loading may be slow on a busy machine
         with y.page.expect_navigation(wait_until="commit", timeout=5000):
-            y.page.wait_for_timeout(2400)
+            y.play_on()  # held long enough, the sun reloads the page
         y.page.mouse.up()
 
 
@@ -1073,15 +1049,15 @@ class TestSky:
     def test_a_clear_day_has_no_clouds_in_the_sky(self, yard: callable) -> None:
         y = yard(f"{STILL}&sky=clear")
         for _ in range(6):  # none sweeps across as the play starts, either
-            y.page.wait_for_timeout(500)
+            y.play_for(500)
             assert y.page.evaluate(CLOUDS_IN_VIEW) == []
         assert not y.errors, "\n---\n".join(y.errors)
 
     def test_a_fair_day_has_clouds_drifting_across(self, yard: callable) -> None:
         y = yard(f"{STILL}&sky=fair")
-        y.page.wait_for_timeout(1000)
+        y.play_for(1000)
         before = y.page.evaluate(CLOUDS_IN_VIEW)
-        y.page.wait_for_timeout(2000)
+        y.play_for(2000)
         after = y.page.evaluate(CLOUDS_IN_VIEW)
         assert before and after, "clouds in the sky"
         assert sum(after) > sum(before), "drifting to the right"
@@ -1094,14 +1070,14 @@ class TestClock:
 
     def test_the_hands_show_the_hour(self, yard: callable) -> None:
         y = yard(f"{STILL}&hour=10.25&day=100000")
-        y.page.wait_for_timeout(500)
+        y.play_for(500)
         got = y.page.evaluate("""() => ['hour', 'minute'].map((h) => parseFloat(
             document.getElementById(`clock-${h}`).style.transform.slice(7)))""")
         assert got == pytest.approx([307.5, 90], abs=1)  # drawn to whole degrees
 
     def test_it_calls_the_hour_and_he_looks_up_near_it(self, yard: callable) -> None:
         y = yard("seed=1&rain=0&creatures=&morning=0&hour=8.95&day=120")  # 10 s an hour
-        y.page.wait_for_function(
+        y.wait(
             "yardGame.events().filter((e) => e.kind === 'cuckoo').length >= 2",
             timeout=30_000,
         )
@@ -1113,11 +1089,9 @@ class TestClock:
         y = yard(
             f"{DAY_PLAY}&hour=19.9&day=60"
         )  # 5 s an hour: bedtime in half a second
-        y.page.wait_for_function(
-            "yardGame.events().some((e) => e.kind === 'cuckoo')", timeout=10_000
-        )
+        y.wait("yardGame.events().some((e) => e.kind === 'cuckoo')", timeout=10_000)
         assert [e["calls"] for e in y.events("cuckoo")] == [8]
-        y.page.wait_for_timeout(10_000)  # it calls on through supper
+        y.play_for(10_000)  # it calls on through supper
         assert not y.errors, "\n---\n".join(y.errors)
 
 
@@ -1126,7 +1100,7 @@ class TestLeftAlone:
         y = yard(
             "seed=2&rain=0&creatures=&morning=0"
         )  # left alone, not the morning (TestMorning)
-        y.page.wait_for_timeout(20_000)
+        y.play_for(20_000)
         acts = [
             e["name"]
             for e in y.page.evaluate("yardGame.events()")
@@ -1162,7 +1136,7 @@ class TestRealInput:
         y.page.mouse.move(
             (left + box["x"] + box["width"]) / 2, box["y"] + box["height"] / 2
         )
-        y.page.wait_for_timeout(300)
+        y.play_for(300)
         assert y.page.evaluate(
             "getComputedStyle(document.querySelector('#house')).filter.includes('drop-shadow')"
         ), "no glow"
@@ -1171,7 +1145,7 @@ class TestRealInput:
         ]
         assert y.page.evaluate("Reksio.facing") == -1, "he didn't turn to it"
         y.page.mouse.move(5, 5)
-        y.page.wait_for_timeout(300)
+        y.play_for(300)
         assert not y.page.evaluate(
             "getComputedStyle(document.querySelector('#house')).filter.includes('drop-shadow')"
         ), "still glowing"
@@ -1179,7 +1153,7 @@ class TestRealInput:
     def test_a_tap_on_a_thing_uses_it(self, yard: callable) -> None:
         y = yard(STILL)
         y.page.click("#things [data-thing='house']")  # in view from the start
-        y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
+        y.wait("yardGame.state().uses.house === 1", timeout=DONE_MS)
         assert self.intents(y) == ["go to house"]
         y.settled()
 
@@ -1190,7 +1164,7 @@ class TestRealInput:
         y = yard(f"{STILL}&fog=1")
         assert y.page.evaluate("Weather.fog") > 0.5
         y.page.click("#things [data-thing='house']")
-        y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
+        y.wait("yardGame.state().uses.house === 1", timeout=DONE_MS)
         y.settled()
 
     def test_a_tap_on_open_sky_walks_there(self, yard: callable) -> None:
@@ -1204,7 +1178,7 @@ class TestRealInput:
         y = yard(STILL)
         x0 = y.state()["reksio"]["x"]
         y.page.keyboard.down("ArrowRight")
-        y.page.wait_for_timeout(800)
+        y.play_for(800)
         y.page.keyboard.up("ArrowRight")
         y.settled()
         assert self.intents(y) == ["walk to 3650", "stop"]
@@ -1264,11 +1238,11 @@ class TestScreens:
     def test_he_can_go_anywhere_on_a_phone(self, yard: callable) -> None:
         y = yard(STILL, size=(844, 390))
         y.page.tap("#things [data-thing='house']")
-        y.page.wait_for_function("yardGame.state().uses.house === 1", timeout=DONE_MS)
+        y.wait("yardGame.state().uses.house === 1", timeout=DONE_MS)
         y.settled()
         y.page.evaluate("yardGame.walk(3650)")  # the far end of the yard
         y.settled()
-        y.page.wait_for_timeout(1500)  # the camera catches up
+        y.play_for(1500)  # the camera catches up
         assert y.state()["camX"] == 4000 - self.fit(y)["view"]
 
     def test_a_16_9_screen_shows_the_view_as_it_was(self, yard: callable) -> None:
@@ -1286,6 +1260,7 @@ class TestScreens:
             f["view"] == 2100 and f["h"] == 600 and round(f["w"]) == round(600 * 21 / 9)
         )
 
+    @pytest.mark.realtime  # the game holds itself here: a test's hold would hide it
     def test_a_phone_held_upright_asks_to_be_turned_and_waits(
         self, yard: callable
     ) -> None:
@@ -1293,11 +1268,11 @@ class TestScreens:
         turn = "!document.getElementById('turn').hidden"
         assert y.page.evaluate(turn)
         t0 = y.page.evaluate("Clock.now()")
-        y.page.wait_for_timeout(1000)
+        y.page.wait_for_timeout(1000)  # real time: game time stands still
         assert y.page.evaluate("Clock.now()") == t0  # the game waits
         y.page.set_viewport_size({"width": 660, "height": 393})
-        y.page.wait_for_function(f"!({turn})", timeout=2000)
-        y.page.wait_for_function(f"Clock.now() > {t0} + 500", timeout=3000)
+        y.wait(f"!({turn})", timeout=2000)
+        y.wait(f"Clock.now() > {t0} + 500", timeout=3000)
         assert not y.errors, "\n---\n".join(y.errors)
 
     def test_an_upright_tablet_plays_without_asking(self, yard: callable) -> None:
@@ -1309,18 +1284,19 @@ class TestScreens:
         # upright: a 16:9 stage, bars above and below, the sky cut
         assert self.fit(y)["view"] == round(740 * 16 / 9)
         y.page.set_viewport_size({"width": 844, "height": 390})
-        y.page.wait_for_timeout(300)
+        y.play_for(300)
         assert self.fit(y)["view"] == round(740 * 844 / 390)
         assert not y.errors, "\n---\n".join(y.errors)
 
 
+@pytest.mark.realtime  # the browser's own animations, paused and played on by the page
 class TestHidden:
     def test_hiding_the_page_pauses_what_moves_and_showing_it_plays_on(
         self, yard: callable
     ) -> None:
         y = yard(STILL)
         y.start("Reksio.nap(4000)")
-        y.page.wait_for_timeout(300)  # settling down: animations running
+        y.play_for(300)  # settling down: animations running
         states = """() => document.getAnimations().map((a) => a.playState)"""
         assert "running" in y.page.evaluate(states)
         set_hidden = """(hidden) => {
@@ -1335,6 +1311,7 @@ class TestHidden:
         y.settled()
 
 
+@pytest.mark.realtime  # a report made and replayed as a player's would be
 class TestRecorder:
     """Save a bug report from the game, then replay it."""
 
@@ -1344,8 +1321,8 @@ class TestRecorder:
         y = yard("seed=4&debug&rain=0&creatures=")
         for intent in ["walk to 1400", "press", "release", "go to tap"]:
             y.page.evaluate(f"yardGame.perform('{intent}')")
-            y.page.wait_for_timeout(700)
-        y.page.wait_for_function("yardGame.free()", timeout=DONE_MS)
+            y.play_for(700)
+        y.wait("yardGame.free()", timeout=DONE_MS)
         y.page.once("dialog", lambda d: d.accept("he looked odd at the tap"))
         with y.page.expect_download() as download:
             y.page.keyboard.press("Control+Shift+B")
@@ -1411,7 +1388,7 @@ class TestMorning:
 
     def test_a_tap_wakes_him_and_does_nothing_else(self, yard: callable) -> None:
         y = yard(MORNING)
-        y.page.wait_for_timeout(500)
+        y.play_for(500)
         y.page.mouse.click(1100, 600)  # far off: awake, he would go there
         s = y.settled()
         trace = self.trace(y)
@@ -1420,9 +1397,9 @@ class TestMorning:
 
     def test_a_tap_while_he_yawns_sends_him_off(self, yard: callable) -> None:
         y = yard(MORNING)
-        y.page.wait_for_timeout(500)
+        y.play_for(500)
         y.page.mouse.click(1100, 600)  # wakes him
-        y.page.wait_for_timeout(1200)  # out, and yawning
+        y.play_for(1200)  # out, and yawning
         y.page.mouse.click(1100, 600)  # off he goes, the yawn cut short
         s = y.settled()
         assert s["reksio"]["x"] > DOOR_X + 300, s["reksio"]
@@ -1435,11 +1412,9 @@ class TestStretch:
         """A press held `ms` on him; returns the yard, where he stood and which way he faced."""
         y = yard()
         y.page.evaluate("yardGame.perform('press')")
-        y.page.wait_for_timeout(
-            400
-        )  # past a bark: stretching, turned to the roomier side
+        y.play_for(400)  # past a bark: stretching, turned to the roomier side
         x, facing = y.page.evaluate("[Reksio.x, Reksio.facing]")
-        y.page.wait_for_timeout(ms - 400)
+        y.play_for(ms - 400)
         return y, x, facing
 
     def test_let_go_after_a_long_one_he_gathers_up_forward(
@@ -1467,10 +1442,10 @@ class TestStretch:
     ) -> None:
         y, x, facing = self.stretched(yard, 2200)
         y.page.evaluate("yardGame.perform('release')")
-        y.page.wait_for_timeout(300)
+        y.play_for(300)
         back = round(x - facing * 300)
         y.page.evaluate(f"yardGame.perform('walk to {back}')")
-        y.page.wait_for_function("!Reksio.stretching", timeout=5000)
+        y.wait("!Reksio.stretching", timeout=5000)
         s = y.settled()
         assert abs(s["reksio"]["x"] - back) < 2, "the tap was kept for after, then done"
 
@@ -1479,9 +1454,9 @@ class TestStretch:
     ) -> None:
         y = yard()
         y.start("yardGame.act('stretchOut')")
-        y.page.wait_for_function("Math.abs(Reksio.reach) > 200", timeout=5000)
+        y.wait("Math.abs(Reksio.reach) > 200", timeout=5000)
         y.page.evaluate("yardGame.perform('press')")
-        y.page.wait_for_timeout(500)  # long enough for a stretch, were it one
+        y.play_for(500)  # long enough for a stretch, were it one
         y.page.evaluate("yardGame.perform('release')")
         y.settled()
         assert y.events("relax"), "the press cut his stretch short"
@@ -1501,7 +1476,7 @@ class TestGettingUp:
     ) -> None:
         y = yard()
         y.start(f"yardGame.act('{act}')")
-        y.page.wait_for_timeout(after_ms)
+        y.play_for(after_ms)
         y.page.evaluate("yardGame.walk(Reksio.x + 900)")
         assert_moves_standing(y)
         y.settled()
@@ -1549,7 +1524,7 @@ def assert_moves_standing(y: Yard) -> None:
         ):
             wrong.append((round(d["x"]), d["bob"], d["anims"]))
         last_x = d["x"]
-        y.page.wait_for_timeout(40)
+        y.play_for(40)
     assert not wrong, f"moved while drawn resting or posed: {wrong}"
 
 
@@ -1571,8 +1546,8 @@ class TestWinter:
             "document.getElementById('stage').classList.contains('season-winter')"
         )
         y.page.mouse.click(640, 650)
-        y.page.wait_for_function("Weather.raining", timeout=30_000)
-        y.page.wait_for_timeout(4000)
+        y.wait("Weather.raining", timeout=30_000)
+        y.play_for(4000)
         assert y.page.evaluate("Wet.soak") == 0, "snow soaked him"
         assert y.page.evaluate("Weather.puddles.length") == 0, "a puddle to jump in"
         assert y.page.evaluate("Weather.puddleAt(Reksio.x)") is None
@@ -1583,10 +1558,8 @@ class TestWinter:
     ) -> None:
         y = yard(self.QUERY)
         y.page.mouse.click(640, 650)
-        y.page.wait_for_function("Weather.phase === 'after'", timeout=90_000)
-        y.page.wait_for_timeout(
-            8000
-        )  # past when the mushrooms and the snail would come
+        y.wait("Weather.phase === 'after'", timeout=90_000)
+        y.play_for(8000)  # past when the mushrooms and the snail would come
         assert (
             y.page.evaluate("document.getElementById('mushrooms').children.length") == 0
         )
@@ -1608,11 +1581,9 @@ class TestSparrows:
     def test_he_guards_his_bowl_and_gives_in(self, yard: callable) -> None:
         y = yard(self.QUERY)
         y.page.mouse.click(640, 650)
-        y.page.wait_for_function(self.PECKING, timeout=60_000)
+        y.wait(self.PECKING, timeout=60_000)
         y.run("yardGame.act('guardBowl')")
-        y.page.wait_for_function(
-            "yardGame.trace().includes('shares the bowl')", timeout=40_000
-        )
+        y.wait("yardGame.trace().includes('shares the bowl')", timeout=40_000)
         y.settled()
 
     def test_a_tap_mid_guard_ends_it(self, yard: callable) -> None:
@@ -1620,23 +1591,23 @@ class TestSparrows:
         not stop the guard, which ran on beside the chase."""
         y = yard(self.QUERY)
         y.page.mouse.click(640, 650)
-        y.page.wait_for_function(self.PECKING, timeout=60_000)
+        y.wait(self.PECKING, timeout=60_000)
         y.page.evaluate("() => { yardGame.act('guardBowl') }")
-        y.page.wait_for_timeout(300)  # on his way to the bowl
+        y.play_for(300)  # on his way to the bowl
         y.page.evaluate("yardGame.perform('chase sparrow')")
         y.settled()
-        y.page.wait_for_timeout(6000)
+        y.play_for(6000)
         assert "shares the bowl" not in y.page.evaluate("yardGame.trace()")
         assert not y.errors, y.errors
 
     def test_a_tap_sends_them_all_up(self, yard: callable) -> None:
         y = yard(self.QUERY)
         y.page.mouse.click(640, 650)
-        y.page.wait_for_function(self.PECKING, timeout=60_000)
+        y.wait(self.PECKING, timeout=60_000)
         y.page.evaluate(
             "() => { yardGame.chase('sparrow') }"
         )  # not awaited: once up, they come back
-        y.page.wait_for_function(f"!({self.PECKING})", timeout=1_500)
+        y.wait(f"!({self.PECKING})", timeout=1_500)
         y.settled()
 
 
@@ -1659,7 +1630,7 @@ class TestIce:
         y = yard(self.QUERY)
         y.page.evaluate(self.FORCE)
         to = y.page.evaluate(self.ACROSS)
-        assert y.page.evaluate(f"Reksio.walkTo({to})") is True
+        assert y.run(f"Reksio.walkTo({to})") is True
         assert round(y.page.evaluate("Reksio.x")) == round(to)
         y.settled()
 
@@ -1668,10 +1639,10 @@ class TestIce:
         y.page.evaluate(self.FORCE)
         to = y.page.evaluate(self.ACROSS)
         y.start(f"Reksio.walkTo({to})")
-        y.page.wait_for_function("Reksio.slipping", timeout=10_000)
-        y.page.wait_for_timeout(400)  # down on his bottom
+        y.wait("Reksio.slipping", timeout=10_000)
+        y.play_for(400)  # down on his bottom
         y.page.evaluate("yardGame.perform('walk to 1500')")
-        y.page.wait_for_function("!Reksio.slipping", timeout=10_000)
+        y.wait("!Reksio.slipping", timeout=10_000)
         y.settled()
 
 
@@ -1687,9 +1658,12 @@ class TestHelpedUp:
         " ? (done = true, () => Ice.reksioSlips()) : null)) })()"
     )
 
-    def slips_by_the_boy(self, yard: callable, busy: bool = False) -> Yard:
+    def slips_by_the_boy(
+        self, yard: callable, busy: bool = False, later_ms: int = 0
+    ) -> Yard:
         y = yard(self.QUERY)
-        y.page.wait_for_function(self.FREE, timeout=20_000)
+        y.wait(self.FREE, timeout=20_000)
+        y.play_for(later_ms)
         y.run("Reksio.walkTo(Boy.x + 300)")
         if busy:
             y.page.evaluate(
@@ -1697,30 +1671,31 @@ class TestHelpedUp:
             )
         y.page.evaluate(self.FORCE)
         y.start("Reksio.walkTo(Boy.x + 520)")
-        y.page.wait_for_function("Reksio.slipping", timeout=10_000)
+        y.wait("Reksio.slipping", timeout=10_000)
         return y
 
     def test_the_boy_pulls_him_up_and_they_laugh(self, yard: callable) -> None:
         # the boy may start something of his own (snowman.js wonder) just as
-        # Reksio goes down, and then rightly doesn't come: slip again
-        for _ in range(3):
-            y = self.slips_by_the_boy(yard)
+        # Reksio goes down, and then rightly doesn't come: slip again, later
+        # (game time is the same each play, so the same moment would repeat)
+        for attempt in range(3):
+            y = self.slips_by_the_boy(yard, later_ms=attempt * 700)
             y.settled()
             if "boy helps him up" in y.page.evaluate("yardGame.trace()"):
                 break
         else:
             pytest.fail("the boy never came to help him up")
-        y.page.wait_for_function(f"{self.FREE} && !Boy.walking", timeout=DONE_MS)
+        y.wait(f"{self.FREE} && !Boy.walking", timeout=DONE_MS)
 
     def test_a_tap_mid_help_gets_him_up_and_the_boy_stands(
         self, yard: callable
     ) -> None:
         y = self.slips_by_the_boy(yard)
-        y.page.wait_for_function("Boy.busy || Boy.walking", timeout=10_000)
-        y.page.wait_for_timeout(800)
+        y.wait("Boy.busy || Boy.walking", timeout=10_000)
+        y.play_for(800)
         y.page.evaluate("yardGame.perform('walk to 1500')")
         y.settled()
-        y.page.wait_for_function(self.FREE, timeout=DONE_MS)
+        y.wait(self.FREE, timeout=DONE_MS)
 
     def test_a_busy_boy_does_not_come(self, yard: callable) -> None:
         y = self.slips_by_the_boy(yard, busy=True)
@@ -1743,11 +1718,11 @@ class TestSnowman:
     def finish(y: object) -> None:
         """Tap it until it's done, each tap once the last is over."""
         for _ in range(3):
-            y.page.wait_for_function(
+            y.wait(
                 "Things.ready('snowman') && !Boy.busy && !Boy.walking", timeout=30_000
             )
             y.run("yardGame.use('snowman')")
-        y.page.wait_for_function("Snowman.stage === 'done'", timeout=60_000)
+        y.wait("Snowman.stage === 'done'", timeout=60_000)
 
     def test_the_whole_story(self, yard: callable) -> None:
         y = yard(self.BUILT)
@@ -1760,12 +1735,12 @@ class TestSnowman:
             "carrot": True,
             "hat": True,
         }
-        y.page.wait_for_function("!Boy.busy", timeout=20_000)
+        y.wait("!Boy.busy", timeout=20_000)
         y.run("yardGame.use('snowman')")  # snowballs, and its head knocked off
         trace = y.page.evaluate("yardGame.trace()")
         assert "snowballs" in trace
         assert "snowman head broken" in trace
-        y.page.wait_for_function("Snowman.stage === 'done'", timeout=40_000)
+        y.wait("Snowman.stage === 'done'", timeout=40_000)
         assert "snowman mended" in y.page.evaluate("yardGame.trace()")
         assert y.page.evaluate("Snowman.has") == has
         assert y.page.evaluate("Boy.out")
@@ -1775,20 +1750,20 @@ class TestSnowman:
     def play(y: object, what: str) -> None:
         """Tap the finished snowman until `what` happens (the pool gives each in two taps)."""
         for _ in range(2):
-            y.page.wait_for_function(
+            y.wait(
                 "Snowman.stage === 'done' && Things.ready('snowman') && !Boy.busy"
                 " && !Boy.walking && !yardGame.state().busy",
                 timeout=60_000,
             )
             plays = y.page.evaluate("yardGame.trace().split('snow play').length")
             y.start("yardGame.use('snowman')")
-            y.page.wait_for_function(
+            y.wait(
                 f"yardGame.trace().split('snow play').length > {plays}",
                 timeout=20_000,
             )
             if what in y.page.evaluate("yardGame.trace()"):
                 return
-            y.page.wait_for_function("!yardGame.state().busy", timeout=60_000)
+            y.wait("!yardGame.state().busy", timeout=60_000)
         raise AssertionError(f"{what} never came")
 
     def test_the_sparrow_takes_the_carrot(self, yard: callable) -> None:
@@ -1796,11 +1771,9 @@ class TestSnowman:
         y = yard(self.BUILT)
         self.finish(y)
         self.play(y, 'snow play {"what":"carrot"}')
-        y.page.wait_for_function(
-            "yardGame.trace().includes('carrot in the snow')", timeout=30_000
-        )
+        y.wait("yardGame.trace().includes('carrot in the snow')", timeout=30_000)
         assert not y.page.evaluate("Snowman.has.carrot")
-        y.page.wait_for_function("Snowman.has.carrot", timeout=40_000)
+        y.wait("Snowman.has.carrot", timeout=40_000)
         y.settled()
         assert y.page.evaluate("document.querySelectorAll('#fx .sparrow').length") == 0
 
@@ -1811,11 +1784,9 @@ class TestSnowman:
         y = yard(self.BUILT)
         self.finish(y)
         self.play(y, 'snow play {"what":"carrot"}')
-        y.page.wait_for_function(
-            "yardGame.trace().includes('carrot in the snow')", timeout=30_000
-        )
+        y.wait("yardGame.trace().includes('carrot in the snow')", timeout=30_000)
         y.page.evaluate("yardGame.perform('evening now')")
-        y.page.wait_for_function("!Boy.out", timeout=40_000)
+        y.wait("!Boy.out", timeout=40_000)
         y.settled()
         # back on the snowman (if he was quick) or lying in the snow: one carrot, never gone or stuck
         assert y.page.evaluate("document.querySelectorAll('#fx .carrot').length") == 0
@@ -1826,28 +1797,24 @@ class TestSnowman:
 
     def test_the_boy_builds_it(self, yard: callable) -> None:
         y = yard("seed=3&still&creatures=&rain=0&season=winter&snowman=0")
-        y.page.wait_for_function("Boy.out", timeout=5_000)
-        y.page.wait_for_function(
-            "yardGame.trace().includes('snowman built')", timeout=60_000
-        )
+        y.wait("Boy.out", timeout=5_000)
+        y.wait("yardGame.trace().includes('snowman built')", timeout=60_000)
         assert y.page.evaluate("Things.ready('snowman')")
         y.settled()
 
     def test_left_alone_he_fetches_the_next_piece(self, yard: callable) -> None:
         y = yard(self.BUILT)
-        y.page.wait_for_function("Things.ready('snowman')", timeout=20_000)
+        y.wait("Things.ready('snowman')", timeout=20_000)
         y.run("yardGame.act('helpSnowman')")
-        y.page.wait_for_function("Snowman.has.eyes || Snowman.has.arms", timeout=20_000)
+        y.wait("Snowman.has.eyes || Snowman.has.arms", timeout=20_000)
         y.settled()
 
     def test_cut_short_the_piece_goes_back(self, yard: callable) -> None:
         y = yard(self.BUILT)
-        y.page.wait_for_function("Things.ready('snowman')", timeout=20_000)
+        y.wait("Things.ready('snowman')", timeout=20_000)
         y.start("yardGame.act('helpSnowman')")  # left alone: a tap cuts it short
-        y.page.wait_for_function(
-            "yardGame.trace().includes('fetches for the snowman')", timeout=20_000
-        )
-        y.page.wait_for_timeout(1500)  # picking it up
+        y.wait("yardGame.trace().includes('fetches for the snowman')", timeout=20_000)
+        y.play_for(1500)  # picking it up
         y.page.evaluate("yardGame.walk(Layout.MIN_X + 100)")
         y.settled()
         assert y.page.evaluate("!Snowman.has.eyes && !Snowman.has.arms")
@@ -1858,15 +1825,13 @@ class TestSnowman:
         or in the air, nor its head stuck in the air."""
         y = yard(self.BUILT)
         self.finish(y)
-        y.page.wait_for_function("!Boy.busy", timeout=20_000)
+        y.wait("!Boy.busy", timeout=20_000)
         y.start("yardGame.use('snowman')")
-        y.page.wait_for_function(
-            "yardGame.trace().includes('snowballs')", timeout=20_000
-        )
-        y.page.wait_for_timeout(2500)  # packing, or a ball in the air
+        y.wait("yardGame.trace().includes('snowballs')", timeout=20_000)
+        y.play_for(2500)  # packing, or a ball in the air
         y.page.evaluate("yardGame.perform('evening now')")
-        y.page.wait_for_function("!Boy.out", timeout=40_000)
-        y.page.wait_for_timeout(1000)
+        y.wait("!Boy.out", timeout=40_000)
+        y.play_for(1000)
         assert (
             y.page.evaluate(
                 "document.querySelectorAll('#fx .snow-ball, #fx .snowball').length"
@@ -1879,13 +1844,11 @@ class TestSnowman:
         """Dusk as the last ball hits: its head lands and stays broken; the boy goes in."""
         y = yard(self.BUILT)
         self.finish(y)
-        y.page.wait_for_function("!Boy.busy", timeout=20_000)
+        y.wait("!Boy.busy", timeout=20_000)
         y.start("yardGame.use('snowman')")
-        y.page.wait_for_function(
-            "yardGame.trace().includes('snowman head knocked off')", timeout=40_000
-        )
+        y.wait("yardGame.trace().includes('snowman head knocked off')", timeout=40_000)
         y.page.evaluate("yardGame.perform('evening now')")
-        y.page.wait_for_function("!Boy.out", timeout=40_000)
+        y.wait("!Boy.out", timeout=40_000)
         trace = y.page.evaluate("yardGame.trace()")
         assert "snowman head broken" in trace
         assert "snowman mended" not in trace
@@ -1894,9 +1857,9 @@ class TestSnowman:
 
     def test_at_dusk_the_boy_goes_in(self, yard: callable) -> None:
         y = yard(self.BUILT)
-        y.page.wait_for_function("Boy.out", timeout=5_000)
+        y.wait("Boy.out", timeout=5_000)
         y.page.evaluate("yardGame.perform('evening now')")
-        y.page.wait_for_function("!Boy.out", timeout=40_000)
+        y.wait("!Boy.out", timeout=40_000)
         assert not y.errors, y.errors
 
     def test_dusk_mid_build_sends_him_in(self, yard: callable) -> None:
@@ -1904,10 +1867,10 @@ class TestSnowman:
         doesn't throw), a ball could stay stuck to his hands, and a walk on
         a hidden boy never ended, hanging his queue."""
         y = yard("seed=3&still&creatures=&rain=0&season=winter&snowman=0")
-        y.page.wait_for_function("Boy.out && Boy.x > 600", timeout=20_000)
+        y.wait("Boy.out && Boy.x > 600", timeout=20_000)
         y.page.evaluate("yardGame.perform('evening now')")
-        y.page.wait_for_function("!Boy.out", timeout=40_000)
-        y.page.wait_for_timeout(3000)
+        y.wait("!Boy.out", timeout=40_000)
+        y.play_for(3000)
         assert "snowman built" not in y.page.evaluate("yardGame.trace()")
         assert (
             y.page.evaluate(
@@ -1919,6 +1882,6 @@ class TestSnowman:
 
     def test_only_in_winter(self, yard: callable) -> None:
         y = yard("seed=3&still&creatures=&rain=0&season=summer&snowman=0")
-        y.page.wait_for_timeout(1500)
+        y.play_for(1500)
         assert not y.page.evaluate("Boy.out")
         assert not y.page.evaluate("Things.ready('snowman')")
