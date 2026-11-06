@@ -3,7 +3,8 @@
 // meadow sends him waddling there (the view follows him, view.js), a tap on
 // him gets a word and a hop, a tap on the flower bed (behind his molehill)
 // has him sniff a flower, a tap on the spring has him paddle in its pool,
-// each a different way every time (rounds);
+// a tap on the old oak at the meadow's left end has him peek into its
+// hollow (oak.js), each a different way every time (rounds);
 // watering comes with the rain cloud (rain.js), now and then. The day
 // runs on its own (day.js); at dusk the tulips close and the cricket
 // fiddles, through the last hour the picture closes in a circle round his
@@ -16,11 +17,11 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
+/* global Again, Bed, Oak, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
-  const { GROUND, HOME, BED, SPRING, DIG } = Layout
+  const { GROUND, HOME, BED, SPRING, DIG, clampX } = Layout
   const IRIS_FULL = 1700 // the circle's radius when it shows the whole view, wherever he stands in it
   const IRIS_OPEN = 10000 // until the last hour it is out of the way altogether
   const IRIS_Y = GROUND - 90 // it closes round him (and at bedtime he is home, in his molehill)
@@ -114,6 +115,7 @@ const meadowGame = (() => {
       front: frontGround,
       bed: document.getElementById('bed'),
       rocks: document.getElementById('rocks'),
+      oak: document.getElementById('oak'),
     }, (ctm ? ctm.a : 1) * (window.devicePixelRatio || 1))
     hill(HOME, true, false)
     makeBed()
@@ -293,6 +295,7 @@ const meadowGame = (() => {
       Debug.check('a free mole holds nothing up, unless an encounter waits on it', !m.holdsUp || Things.holding(), {})
       Debug.check('a free mole stands on the ground', m.lift === 0, { lift: m.lift })
       Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
+      Debug.check('the oak\'s hollow is open once he is free', !Oak.dark, {})
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
     }
   }
@@ -356,7 +359,6 @@ const meadowGame = (() => {
     Mole.put(m.x, m.pose === 'listen' ? 'listen' : 'hill')
   }
 
-  const clampX = (x) => Math.max(DIG.from, Math.min(DIG.to, x))
 
   async function digTo(x) {
     x = clampX(x)
@@ -372,16 +374,19 @@ const meadowGame = (() => {
     await Mole.comeUp('hill')
   }
 
-  /** Whatever is on his head falls off as he dives: it lies on the grass a moment and fades. */
-  function dropHat() {
+  /** Whatever is on his head falls off (as he dives): it lies on the grass a moment and fades. `fall(x, y, s)`: its
+   * keyframes from his head (x, y), drawn at his size (s), over `ms`, in `layer` (behind him, or in front). */
+  function dropHat(fall = slideOff, ms = 2400, layer = document.getElementById('things')) {
     const hat = Mole.wear(null)
     if (!hat) return
     const { x, y } = Mole.head()
-    const g = el('g', {}, document.getElementById('things'))
+    const g = el('g', {}, layer)
     g.appendChild(hat)
-    const s = `scale(${Mole.SCALE})` // drawn at his size, as it was on his head
-    Motion.endAt(g, [{ transform: `translate(${x}px, ${y}px) ${s}` }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, offset: 0.4 }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, opacity: 0 }], { duration: 2400 }).then(() => g.remove(), () => g.remove())
+    Motion.endAt(g, fall(x, y, `scale(${Mole.SCALE})`), { duration: ms }).then(() => g.remove(), () => g.remove())
   }
+
+  /** Off his head, down to the grass beside him, where it lies a moment and fades. */
+  const slideOff = (x, y, s) => [{ transform: `translate(${x}px, ${y}px) ${s}` }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, offset: 0.4 }, { transform: `translate(${x - 40}px, ${GROUND - 8}px) rotate(-30deg) ${s}`, opacity: 0 }]
 
   /** A pool of answers drawn from `random`: all of them in turn before any comes again, in a new
    * order each round, never the same twice running (the yard's lesson: repeats need variety). */
@@ -416,9 +421,9 @@ const meadowGame = (() => {
   /** The answer to a tap on him (or his flowers, or the spring: `play`). While trouble is about (the
    * bulldozer, the fox: things.js `trouble`), any tap carries its story on instead: it would cut it short,
    * and a child tapping on and on held the bulldozer at the meadow's edge (Adam, 2026-11-01). */
-  function answer(name, play) {
+  function answer(name, play, onCut = null) {
     const trouble = Things.troubledName()
-    return trouble ? Things.use(trouble) : run(name, play)
+    return trouble ? Things.use(trouble) : run(name, play, onCut)
   }
 
   async function tapMole() {
@@ -600,6 +605,7 @@ const meadowGame = (() => {
     [/^tap mole$/, () => answer('tap mole', tapMole)],
     [/^sniff$/, () => answer('sniff', sniff)],
     [/^paddle$/, () => answer('paddle', paddle)],
+    [/^peek$/, () => answer('peek', Oak.peek, Oak.restore)],
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => answer('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
@@ -733,6 +739,7 @@ const meadowGame = (() => {
     if (target.closest('#bed')) return 'sniff'
     if (target.closest('#sun') && eclipseCover()) return 'tap sun'
     if (target.closest('#spring')) return 'paddle'
+    if (target.closest('.oak-hit')) return 'peek'
     if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`
     return 'tap mole' // the sky: he answers anyway
   }
@@ -742,6 +749,13 @@ const meadowGame = (() => {
     if (game.ended) return // asleep: only the grown-up's corner sun starts a new day (again.js)
     perform(intentAt(e.target, scenePoint(e), critterAt(e)))
   })
+  // The places that answer the space bar, when he is near: [near(x), intent]
+  const PLACES = [
+    [(x) => Math.abs(x - SPRING) < 300, 'paddle'],
+    [(x) => x > BED.from - 120 && x < BED.to + 120, 'sniff'],
+    [(x) => x < Layout.OAK.x + Layout.OAK.reach, 'peek'],
+  ]
+
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey || e.metaKey || e.altKey || ['Shift', 'Meta', 'Control', 'Alt', 'Tab', 'CapsLock', 'Escape'].includes(e.key)) return
     Sound.ensure()
@@ -750,7 +764,7 @@ const meadowGame = (() => {
     if (e.repeat) return // a key held down repeats: he is already going
     // an arrow held: he walks that way until it is let go (keyup)
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') perform(`go to ${e.key === 'ArrowLeft' ? DIG.from : DIG.to}`)
-    else if (e.key === ' ') perform(Math.abs(x - SPRING) < 300 ? 'paddle' : x > BED.from - 120 && x < BED.to + 120 ? 'sniff' : 'tap mole')
+    else if (e.key === ' ') perform(PLACES.find(([near]) => near(x))?.[1] || 'tap mole') // by a place: its answer; else a word from him
     else perform('tap mole')
   })
   document.addEventListener('keyup', (e) => {
@@ -781,6 +795,7 @@ const meadowGame = (() => {
   Friends.setup(document.getElementById('friends'))
   Spring.setup(document.getElementById('spring'), () => game.hour)
   Nest.setup(document.getElementById('spring'), () => game.hour)
+  Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), { goTo, rounds, dropHat })
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
   Cricket.setup(document.getElementById('crickets'))
   Church.setup(document.getElementById('distant'), () => {

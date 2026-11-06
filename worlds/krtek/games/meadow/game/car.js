@@ -239,7 +239,7 @@
     place(car.x, 1) // turned round to face the spring, ready for the next ride
     if (car.riding) {
       car.riding = false
-      Mole.put(Math.min(Layout.DIG.to, Math.max(Layout.DIG.from, car.x + 150)), 'out')
+      Mole.put(Layout.clampX(car.x + 150), 'out')
     }
     for (const [i, w] of car.loose.entries()) {
       if (!w || car.wheels > i) continue
@@ -247,7 +247,7 @@
       if (w.held) {
         Mole.carry(null)
         w.held = false
-        w.x = Math.max(Layout.DIG.from, Math.min(Layout.DIG.to, Mole.state.x - 40))
+        w.x = Layout.clampX(Mole.state.x - 40)
       }
       w.g.style.transform = `translate(${w.x}px, ${Y - 16}px)`
       if (!w.g.parentNode) document.getElementById('things').appendChild(w.g)

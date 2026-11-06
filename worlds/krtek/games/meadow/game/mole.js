@@ -617,6 +617,9 @@ const Mole = (() => {
     return had
   }
 
+  /** What is on his head (an eggshell cap, a leaf), or null. */
+  const wearing = () => hatSlot.firstChild
+
   /** Put `node` on his head (null: take it off). Returns what was there. */
   function wear(node) {
     const had = hatSlot.firstChild
@@ -714,5 +717,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, calm, settle, feel, digIn, scratchHead, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
+  return { SCALE, state, drawnX, face, mood, calm, settle, feel, digIn, scratchHead, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, wearing, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
 })()

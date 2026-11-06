@@ -89,6 +89,13 @@ def meadow(browser: object, game_time: str) -> Iterator[callable]:
         m.page.close()
 
 
+def traced(m: Meadow, kind: str) -> list[str]:
+    """Which way each traced `kind` went (its `how`), in order."""
+    return m.page.evaluate(
+        f"meadowGame.trace().split('\\n').filter((l) => l.includes(' {kind} ')).map((l) => JSON.parse(l.slice(l.indexOf('{{'))).how)"
+    )
+
+
 def finish(m: Meadow, name: str) -> None:
     """Taps it to its end: on and on, or, a choice encounter, its choices in turn."""
     for intent in SOLVE.get(name, [f"use {name}"]):
@@ -119,11 +126,6 @@ class TestMeadowDay:
             m.assert_settled()
         assert m.state()["x"] == 300
 
-    def traced(self, m: object, kind: str) -> list[str]:
-        return m.page.evaluate(
-            f"meadowGame.trace().split('\\n').filter((l) => l.includes(' {kind} ')).map((l) => JSON.parse(l.slice(l.indexOf('{{'))).how)"
-        )
-
     def test_the_flower_bed_and_the_spring_answer_a_new_way_each_time(
         self, meadow: callable
     ) -> None:
@@ -135,10 +137,10 @@ class TestMeadowDay:
             m.do(intent)
             m.wait_free()
             m.assert_settled()
-        sniffs = self.traced(m, "sniffs")
+        sniffs = traced(m, "sniffs")
         assert sorted(sniffs[:3]) == ["along", "dreamy", "giggle"], sniffs
         assert all(a != b for a, b in pairwise(sniffs)), sniffs
-        paddles = self.traced(m, "paddles")
+        paddles = traced(m, "paddles")
         assert paddles[0] == "frog", "the frog on its pad joins the first paddle"
         assert {"splash", "face"} <= set(paddles), paddles
         assert all(a != b for a, b in pairwise(paddles)), paddles
@@ -326,7 +328,8 @@ class TestMeadowCar:
         m.do("tap mole")
         m.wait_free()
         m.assert_settled()
-        assert 140 <= m.state()["x"] <= 3860
+        dig = m.page.evaluate("Layout.DIG")
+        assert dig["from"] <= m.state()["x"] <= dig["to"]
         m.do("use car")  # it sets off facing the spring again
         m.wait("meadowGame.detail('car').riding", 10_000)
         m.wait_free()
@@ -1439,6 +1442,101 @@ class TestMeadowChurch:
         )
         assert hand and hand.startswith("rotate("), hand
         assert not m.errors, m.errors
+
+
+class TestMeadowOak:
+    """The old oak at the meadow's left end (oak.js): he stops at its arch, and a
+    tap on it has him peek into its hollow, a different way each time."""
+
+    GONE = "document.getElementById('oak-front').childElementCount === 1 && !document.querySelector('.oak-leaf')"  # the dark alone: nothing falling
+
+    PEEKS = ("acorns", "dark", "echo")
+
+    def leaves_nothing(self, m: Meadow) -> None:
+        """No dark over him, no eyes in it, no leaf on his head, nothing in his hands or falling."""
+        left = m.page.evaluate(
+            """({ dark: Oak.dark, eyes: document.querySelectorAll('.oak-eyes').length,
+                 hat: document.querySelector('.mole-hat').childElementCount,
+                 holds: Mole.state.holdsUp, falling: document.getElementById('oak-front').childElementCount - 1 })"""
+        )
+        assert left == {
+            "dark": False,
+            "eyes": 0,
+            "hat": 0,
+            "holds": False,
+            "falling": 0,
+        }, left
+
+    def test_he_stops_at_its_arch(self, meadow: callable) -> None:
+        m = meadow()
+        m.wake()
+        m.do("go to 0")
+        m.wait_free()
+        assert m.state()["x"] == m.page.evaluate("Layout.OAK.x")
+        m.assert_settled()
+
+    def test_a_tap_on_it_peeks_a_new_way_each_time(self, meadow: callable) -> None:
+        m = meadow()
+        m.wake()
+        for _ in range(4):
+            m.do("peek")
+            m.wait_free()
+            m.assert_settled()
+        peeks = traced(m, "peeks")
+        assert tuple(sorted(peeks[:3])) == self.PEEKS, peeks
+        assert all(a != b for a, b in pairwise(peeks)), peeks
+        assert m.page.evaluate("Oak.kept") == peeks.count("acorns")
+        m.wait(self.GONE)  # what fell or flew off has landed and gone
+        self.leaves_nothing(m)
+
+    @pytest.mark.parametrize("cut_ms", [1800, 3200, 4600, 6000])
+    def test_each_peek_cut_short_leaves_nothing_behind(
+        self, meadow: callable, cut_ms: int
+    ) -> None:
+        m = meadow()
+        m.wake()
+        m.do("go to 300")  # beside it: each peek starts at once
+        m.wait_free()
+        for _ in range(3):
+            m.do("peek")
+            m.play_for(cut_ms)
+            m.do("go to 400")
+            m.wait_free()
+            m.assert_settled()
+            m.wait(self.GONE)
+            self.leaves_nothing(m)
+        assert tuple(sorted(traced(m, "peeks"))) == self.PEEKS
+
+    def test_a_real_tap_on_its_trunk_and_he_peeks(self, meadow: callable) -> None:
+        m = meadow()
+        m.wake()
+        m.do("go to 400")
+        m.wait_free()
+        m.wait(
+            "meadowGame.state().view === 0"
+        )  # the view eases to the meadow's left end
+        # the screen shows 0.8 px a unit
+        m.page.mouse.click(240, 544)  # its foot, at the meadow's edge: he walks there
+        m.wait_free()
+        assert abs(m.state()["x"] - 300) < 5, m.state()
+        m.page.mouse.click(200, 300)  # the trunk, above the arch
+        m.wait("meadowGame.trace().includes(' peeks ')", 5_000)
+        m.wait_free()
+        m.assert_settled()
+
+    def test_his_eggshell_cap_stays_on(self, meadow: callable) -> None:
+        """In the dark he would come out with a leaf on his head: in his cap, he keeps it."""
+        m = meadow()
+        m.wake()
+        m.page.evaluate(
+            "() => { const cap = document.createElementNS('http://www.w3.org/2000/svg', 'g'); cap.id = 'cap'; Mole.wear(cap) }"
+        )
+        for _ in range(3):
+            m.do("peek")
+            m.wait_free()
+            m.assert_settled()
+        assert "dark" in traced(m, "peeks")
+        assert m.page.evaluate("Mole.wearing()?.id") == "cap"
 
 
 class TestMeadowSpring:

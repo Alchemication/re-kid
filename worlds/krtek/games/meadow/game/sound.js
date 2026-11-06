@@ -18,11 +18,15 @@ const Sound = (() => {
   const VOICE_RATE = [0.95, 1.07] // each word a little lower or higher: never quite the same twice
   const CASUAL_GAP_S = 4 // an idle remark only if he hasn't spoken for this long
   const EFFECT_VOLUME = 0.9 // recorded effects, as his voice (each one's own level is its gain in effects.yaml)
+  const ECHO_GAP_S = 0.42 // a word given back by the oak's hollow: this long after, each time
+  const ECHO_FALL = 0.4 // ...each this much as loud as the last
+  const ECHO_DULL_HZ = 2400 // ...and duller: the first cut above this, the next above half of it
   const FADE_S = 0.05 // a fade's floor: how quiet "gone" is, as a share of the level
   let ctx = null
   let master = null
   let noise = null
   const takes = {} // decoded takes, by sound: {gain, overlaps, inTurn, buffers (in the order listed), last, until}
+  const echoing = new Set() // echoes started ahead on the audio clock, not yet heard out
   let lastSaid = -100 // when he last spoke (audio time)
   let heard = () => {} // the game's hook: a word he says, as he says it (his face goes with it)
   const whichWord = Debug.random('meadow-words') // which of several words he says: it shows on his face, so seeded
@@ -61,8 +65,9 @@ const Sound = (() => {
   /** One of the mole's words or noises ('giggle', 'ahoj', 'achJo', 'ooh', 'fright', 'gasp', 'hm',
    * 'tam', 'ghost'), if it has takes; given several (['gasp', 'fright']), one of them at random.
    * `casual`: an idle remark (a tap on him, a look at a thing), skipped if he spoke only just now,
-   * so his voice is kept for real moments (docs/DESIGN_PRINCIPLES.md). */
-  function say(words, casual = false) {
+   * so his voice is kept for real moments (docs/DESIGN_PRINCIPLES.md). `echoes`: that many times
+   * more, each later, quieter and duller, as a hollow gives it back (the oak). */
+  function say(words, casual = false, echoes = 0) {
     const name = Array.isArray(words) ? words[Math.floor(whichWord() * words.length)] : words
     if (casual && ready() && ctx.currentTime - lastSaid < CASUAL_GAP_S) return false
     heard(name) // his face says it even where the sound can't play
@@ -79,7 +84,30 @@ const Sound = (() => {
     g.gain.value = VOICE_VOLUME * e.gain
     src.connect(g).connect(master)
     src.start()
+    for (let k = 1; k <= echoes; k++) echoing.add(echo(src, g.gain.value, k))
     return true
+  }
+
+  /** The `k`th echo of a word said at `level`: the same take at the same pitch, ECHO_GAP_S later each, quieter and duller. */
+  function echo(said, level, k) {
+    const src = ctx.createBufferSource()
+    src.buffer = said.buffer
+    src.playbackRate.value = said.playbackRate.value
+    const f = ctx.createBiquadFilter()
+    f.type = 'lowpass'
+    f.frequency.value = ECHO_DULL_HZ / k
+    const g = ctx.createGain()
+    g.gain.value = level * ECHO_FALL ** k
+    src.connect(f).connect(g).connect(master)
+    src.start(ctx.currentTime + k * ECHO_GAP_S)
+    src.onended = () => echoing.delete(src)
+    return src
+  }
+
+  /** Echoes still to come, silenced: he has left the hollow (a tap cut the peek short). */
+  function hushEchoes() {
+    for (const src of echoing) src.stop()
+    echoing.clear()
   }
 
   /** A random take of `n`, not the one played last (unless there is only one). */
@@ -260,6 +288,14 @@ const Sound = (() => {
     }
   }
 
+  /** An acorn on his head: a small hollow wooden tok (a stand-in until takes are picked: new-sound). */
+  function bonk() {
+    if (!ready() || recorded('bonk')) return
+    note(950, 0, 0.09, 0.3, 'triangle', 0.55)
+    note(420, 0.01, 0.12, 0.12, 'sine', 0.8)
+    hiss(0, 0.04, 2500, 2, 0.12)
+  }
+
   /** The mouse: two little squeaks. */
   function squeak() {
     if (!ready()) return
@@ -413,5 +449,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, dig, pop, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort }
 })()

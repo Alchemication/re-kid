@@ -36,8 +36,20 @@ decided and why.
    - **Adam judges the church bell** (2026-10-25): the village church on a
      far hill, its bell ringing twice each hour and longer at sunset, the
      mole looking up. Its sound is made in the browser: if it falls flat,
-     takes through `new-sound`. Then the meadow's edges (perhaps a loop
-     back to the start).
+     takes through `new-sound`.
+   - **Adam judges the oak at the meadow's left end** (built 2026-11-06,
+     his yes to the design): the old oak after Krtek a hodinářem, its
+     arch where he stops (no more invisible wall), the mouse's hole moved
+     under its root and the egg's rest beside it; a tap on it, three
+     peeks in turn (an echo of his own voice, his eyes in the dark and an
+     oak leaf on his head, an acorn's bonk and one caught and kept in the
+     hollow). Judge: the oak's look against the film's (its bark, its
+     size), whether each peek reads, the echo by ear (`ECHO_*` in
+     sound.js). The bonk is a synth stand-in: takes through `new-sound`.
+     Next, each with `new-gag`: the owl in the oak (invented, some plays,
+     asleep in the hollow by day, out on a branch from about 18:00,
+     hooting only between the cricket's tunes), then the right end, a low
+     fence with a gap and a road towards the church hill.
    - **Adam judges the rain cloud, the bed and the spring** (2026-10-25,
      not yet seen by him): watering is now the rain cloud encounter (five
      encounters a day, a little closer together); the flower bed stands

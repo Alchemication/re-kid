@@ -3,8 +3,9 @@
 // a misty band of pines and sponged round trees; nearer, bushes made of
 // little stars of leaves, fans of long leaves, big fern fronds by the spring,
 // tall bluebells and a yellow flower spike behind his molehill; grass
-// painted in fine strokes, daisies and small flowers along the front; and
-// the flower bed a dense mass of daisies and cornflowers round the tulips.
+// painted in fine strokes, daisies and small flowers along the front; the
+// flower bed a dense mass of daisies and cornflowers round the tulips; and
+// at the left end the old oak with its arch (after Krtek a hodinářem).
 //
 // Each layer is painted once, with brush strokes made in code from a fixed
 // seed (the same meadow every play), onto a canvas, and shown as one image
@@ -12,7 +13,7 @@
 // thousands of shapes. Nothing here moves or changes after it is painted,
 // except the clouds' wash fading at night (cloudsAt).
 
-/* global Debug, Layout */
+/* global Debug, Layout, Path2D */
 /* exported Painting */
 const Painting = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -446,6 +447,99 @@ const Painting = (() => {
     for (const x of [S - 170, S + 610]) fan(ctx, x, 716, 60, '#4b7a3a', '#2a4a25')
   }
 
+  /** One of the oak's leaves: rounded lobes fanned from its stalk (the films' oak leaves are pale, lobed, like a hand). */
+  function oakLeaf(ctx, x, y, size, colour, turn) {
+    ctx.fillStyle = colour
+    ctx.beginPath() // one path, one fill: thousands of leaves
+    for (let k = -2; k <= 2; k++) {
+      const a = turn + k * 0.5
+      const [cx, cy] = [x + Math.cos(a) * size * 0.5, y + Math.sin(a) * size * 0.5]
+      const rad = size * (k ? 0.3 : 0.36)
+      ctx.moveTo(cx + rad, cy)
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2)
+    }
+    ctx.fill()
+  }
+
+  /** The old oak at the meadow's left end, after Krtek a hodinářem (1:00-1:24): a huge grey-brown trunk
+   * with scalloped bark, an arch between its root legs, limbs up into clusters of pale lobed leaves,
+   * ferns at its foot; and at the picture's edge the wood running on, darker. Layout.OAK says its shape. */
+  function oak(ctx) {
+    const { x: archX, trunk, arch, crown } = Layout.OAK
+    const body = new Path2D(trunk)
+    ctx.save()
+    ctx.clip(body)
+    const g = ctx.createLinearGradient(-20, 0, 440, 0) // lit from the top left, as the meadow
+    g.addColorStop(0, '#9a9083')
+    g.addColorStop(0.45, '#7d7368')
+    g.addColorStop(1, '#5a5149')
+    ctx.fillStyle = g
+    ctx.fillRect(-60, 0, 520, 720)
+    for (let i = 0; i < 260; i++) dab(ctx, r(-30, 440), r(20, 716), r(10, 30), pick(['#8a7f72', '#6b6259', '#a39889', '#776b5e', '#8d8494', '#9a90a0']), r(0.15, 0.35)) // grey-brown, a little lavender in places, as the film's
+    // the bark: rows of scallops, a dark curve with a light one over it (the film's swirling bark)
+    ctx.lineWidth = 2.6
+    for (let row = 0, y = 24; y < 720; row++, y += r(15, 20)) {
+      for (let x = -40 + (row % 2) * 14 + r(-4, 4); x < 450; x += r(24, 32)) {
+        const w = r(9, 14)
+        ctx.globalAlpha = r(0.35, 0.55)
+        ctx.strokeStyle = '#3e362f'
+        ctx.beginPath()
+        ctx.arc(x, y, w, Math.PI * 0.12, Math.PI * 0.88)
+        ctx.stroke()
+        ctx.globalAlpha = r(0.15, 0.3)
+        ctx.strokeStyle = '#c4baa9'
+        ctx.beginPath()
+        ctx.arc(x, y - 3, w, Math.PI * 0.2, Math.PI * 0.8)
+        ctx.stroke()
+      }
+    }
+    ctx.globalAlpha = 1
+    // shadow round the arch and down the trunk's right
+    const shade = ctx.createRadialGradient(archX, 600, 40, archX, 600, 200)
+    shade.addColorStop(0, 'rgba(40, 32, 26, 0.55)')
+    shade.addColorStop(1, 'rgba(40, 32, 26, 0)')
+    ctx.fillStyle = shade
+    ctx.fillRect(-60, 380, 520, 340)
+    ctx.restore()
+    ctx.strokeStyle = '#2f2a22'
+    ctx.lineWidth = 3
+    ctx.stroke(body)
+    // the arch: dark inside, deepest at its back
+    const hollow = new Path2D(arch)
+    const dark = ctx.createLinearGradient(0, 444, 0, 716)
+    dark.addColorStop(0, '#1e1813')
+    dark.addColorStop(1, '#3a2f25')
+    ctx.fillStyle = dark
+    ctx.fill(hollow)
+    ctx.stroke(hollow)
+    // a knot-hole up on the right limb
+    ctx.fillStyle = '#231c16'
+    ctx.beginPath()
+    ctx.ellipse(276, 300, 13, 20, -0.3, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+    // the crown: clumps of pale lobed leaves, darker underneath
+    const tones = ['#2f5548', '#4a7a66', '#6c9c84', '#9dc3a7', '#c3dcc2']
+    for (const [x, y, rad] of crown) {
+      dab(ctx, x, y + rad * 0.1, rad * 0.9, tones[0], 1)
+      for (let i = 0, n = Math.round(rad * rad / 30); i < n; i++) {
+        const a = r(Math.PI * 2)
+        const d = Math.sqrt(random()) * rad
+        const [lx, ly] = [x + Math.cos(a) * d, y + Math.sin(a) * d]
+        const lit = (x - lx + (y - ly) * 1.3) / rad
+        oakLeaf(ctx, lx, ly, r(13, 19), tones[Math.max(0, Math.min(tones.length - 1, Math.round(1.6 + lit * 1.3 + r(-0.6, 0.6))))], r(Math.PI * 2))
+      }
+    }
+    // ferns at its feet, either side of the arch
+    for (const [x, len, lean] of [[-6, 170, -0.5], [44, 140, -0.25], [296, 130, 0.3], [350, 170, 0.6], [400, 120, 0.8]]) fern(ctx, x, 718, len, lean, pick(['#2f5a3a', '#3d6c46', '#28503a']))
+    // the wood running on past the picture's edge: darker towards it
+    const deep = ctx.createLinearGradient(-60, 0, 70, 0)
+    deep.addColorStop(0, 'rgba(24, 34, 26, 0.55)')
+    deep.addColorStop(1, 'rgba(24, 34, 26, 0)')
+    ctx.fillStyle = deep
+    ctx.fillRect(-60, -80, 130, 800)
+  }
+
   /** In front: grass strokes, denser and darker towards the bottom, and low clumps of flowers along the edge. */
   function front(ctx) {
     const W = Layout.WORLD_W
@@ -472,8 +566,8 @@ const Painting = (() => {
 
   /**
    * Paint the meadow into its layers: the clouds into the sky, the far
-   * trees, the back and the front, and the flower bed's mass.
-   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element, rocks: Element}} into
+   * trees, the back and the front, the flower bed's mass, and the oak.
+   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element, rocks: Element, oak: Element}} into
    * @param {number} pxPerUnit how many screen pixels a scene unit is
    */
   function paint(into, pxPerUnit) {
@@ -483,6 +577,7 @@ const Painting = (() => {
     place(into.far, layer(-60, 380, farW + 120, 290, (ctx) => far(ctx, farW)))
     place(into.back, layer(-60, 140, Layout.WORLD_W + 120, 590, back))
     if (into.rocks) place(into.rocks, layer(Layout.SPRING - 240, 360, 900, 370, rocks))
+    withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(-60, -80, 560, 800, oak), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else
     place(into.front, layer(-60, 690, Layout.WORLD_W + 120, 210, front))
     const { from, to } = Layout.BED
     place(into.bed, layer(from - 30, 610, to - from + 60, 110, (ctx) => bed(ctx, from - 10, to + 10)))
@@ -499,12 +594,19 @@ const Painting = (() => {
    * this tall; painted `sharp` times finer (it is shown that much bigger), drawn from `stream` so it shifts
    * nothing else. */
   function tree(parent, [w, h], trunk, stream, sharp = 1) {
+    return withStream(stream, sharp, () => {
+      const tones = pick(GREENS)
+      return place(parent, layer(-w / 2 - 20, -(trunk + h) - 20, w + 40, trunk + h + 40, (ctx) => leafy(ctx, 0, 0, [w, h], tones, trunk)))
+    })
+  }
+
+  /** Paint with `stream` lent for the painting's draws, `sharp` times finer, so it shifts nothing else. */
+  function withStream(stream, sharp, paintIt) {
     const [was, wasRes] = [random, res]
     random = stream
     res *= sharp
     try {
-      const tones = pick(GREENS)
-      return place(parent, layer(-w / 2 - 20, -(trunk + h) - 20, w + 40, trunk + h + 40, (ctx) => leafy(ctx, 0, 0, [w, h], tones, trunk)))
+      return paintIt()
     } finally {
       random = was
       res = wasRes

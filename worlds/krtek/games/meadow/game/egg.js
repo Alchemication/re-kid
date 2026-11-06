@@ -22,8 +22,8 @@
 ;(() => {
   const Y = Layout.GROUND
   const ROLL_FROM = -60 // it rolls in from the left edge...
-  const REST_X = 330 // ...and stops here, in the grass left of his molehill
-  const HOLE_X = 190 // the mouse's hole
+  const HOLE_X = Layout.OAK.x + 160 // the mouse's hole, under the old oak's root (oak.js)
+  const REST_X = HOLE_X + 120 // ...and the egg stops here, in the grass left of his molehill
   const HARE_AT = 650 // where the hare sits, between the egg and his molehill
   const HEN_AT = 1460 // where the hen pecks about, past his flowers…
   const HEN_NEAR = 1000 // …and where she comes once he holds the egg up, so she shows by him (a child must see whom to ask)
@@ -270,7 +270,7 @@
     cast.dismissAll()
     if (egg.where === 'carried') {
       Mole.carry(null)
-      onGround(Math.max(150, Mole.state.x - 60))
+      onGround(Layout.clampX(Mole.state.x - 60))
     }
     if (egg.where === 'home' && hare) {
       hare.leave() // given back, and cut as the hare hopped off: on he hops, home
@@ -286,7 +286,7 @@
     if (hen && !egg.chick) hen.g.classList.add('pecking')
     if (egg.chick) {
       egg.chick.g.getAnimations().forEach((a) => a.cancel())
-      egg.chick.place(Math.max(150, Math.min(Layout.DIG.to, egg.chick.x)))
+      egg.chick.place(Layout.clampX(egg.chick.x))
     }
   }
 

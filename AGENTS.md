@@ -300,6 +300,7 @@ heats the laptop for minutes.
 | screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
 | the meadow's encounters (`things.js`, `car.js`, `egg.js`, `paint.js`, `poles.js`, `rain.js`, `umbrella.js`, `storm.js`, `afterrain.js`) | `"TestMeadowEncounters and <name>"`, plus its own class where it has one (`"TestMeadowCar"`, `"TestMeadowEgg"`, `"TestMeadowFox"` for the paint, `"TestMeadowBulldozer"` for the poles, `"TestMeadowStorm"`) |
+| the meadow's oak (`oak.js`), its peeks | `"TestMeadowOak"` |
 | the mole (`mole.js`, `moleart.js`), taps on him or the meadow (`meadow.js`) | `"TestMeadowDay or TestMeadowWalking or TestMeadowTapHim or TestMeadowTapsWait"` |
 | the meadow's view or screen (`view.js`, `painting.js`, `game.css`) | `"TestMeadowView or TestMeadowScreens"` |
 | the meadow's small life and wildlife (`critters.js`, `flock.js`, `wildlife.js`, `wildart.js`, `heron.js`, `nest.js`, `friends.js`, `foxart.js`) | `"TestMeadowCritters or TestMeadowFireflies or TestMeadowSnail or TestMeadowWildlife"` |
