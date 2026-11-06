@@ -6,8 +6,10 @@ key comes from ELEVENLABS_API_KEY, in the environment or the project's .env.
 Standard library only: run it with any Python 3.
 
 Calls run PARALLEL at a time; only the main thread writes files and the
-manifest, so the board's list has one writer. --style NAME adds a style to
-each sound's first wording (STYLES), as its own labelled wording.
+manifest, so the board's list has one writer. --style NAME also makes each
+sound's first wording with a style added (STYLES), as its own labelled
+wording beside the plain ones. Takes already made are skipped, so a run
+with --style after a plain one makes only the styled wording.
 
 Sounds in VOICES (Krtek's voice) are made only when named.
 
@@ -158,11 +160,9 @@ def main(args: list[str]) -> None:
             for c in entry["candidates"]
             if c["source"] == "eleven"
         }
-        wordings = (
-            [(style, sound["prompts"][0] + STYLES[style])]
-            if style
-            else list(enumerate(sound["prompts"], 1))
-        )
+        wordings = list(enumerate(sound["prompts"], 1))
+        if style:
+            wordings.append((style, sound["prompts"][0] + STYLES[style]))
         jobs += [
             (name, w, prompt, take)
             for w, prompt in wordings

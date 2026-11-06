@@ -68,12 +68,17 @@ Add the sound to `sounds.py` with three wordings. What worked (Adam's picks):
 
 - **Plain and physical** for real-world sounds: "a gentle splash in shallow
   water, close up", "a small dog yawning, a long squeaky yawn". The word
-  "cartoon" alone got no keeps on any sound.
-- **For cartoon sounds** (boing, bonk), add the era or the name as its own
-  wording: `--style 1970s` ("1970s Eastern European hand-drawn cartoon…,
-  orchestral instruments, warm vintage tape sound"), or the series' name
-  (`STYLES` in `generate_eleven.py`; a new world adds its own). Bonk: 3 of
-  3 kept with the era. It spoils natural sounds (splash: 0 of 2).
+  "cartoon" alone got no keeps on any sound. This holds for a small real
+  thing hitting something too, even in a comic moment: the meadow's acorn
+  on the mole's head got all 3 keeps from "an acorn falling onto a wooden
+  table" and "a knuckle on a small hollow box", none from the era wording.
+- **For cartoon sounds** (a boing, a big comic bonk), add the era or the
+  name as a wording of its own: `--style 1970s` ("1970s Eastern European
+  hand-drawn cartoon…, orchestral instruments, warm vintage tape sound"),
+  or the series' name (`STYLES` in `generate_eleven.py`; a new world adds
+  its own). It is made beside the plain wordings, so one run tries both.
+  Reksio's apple bonk: 3 of 3 kept with the era. It spoils natural sounds
+  (splash: 0 of 2).
 - A character: what he is, plainly, and the feeling ("a small dog …", "a
   sly cartoon fox snickering …, comic, not scary"); one action, one sound.
   A hero who speaks (Krtek's few words) gets a helper with the world's
@@ -84,7 +89,7 @@ Add the sound to `sounds.py` with three wordings. What worked (Adam's picks):
 ```sh
 cd experiments/sound
 python3 generate_eleven.py <sound> ...                 # 3 wordings × 3 takes
-python3 generate_eleven.py --style 1970s <sound> ...   # cartoon sounds
+python3 generate_eleven.py --style 1970s <sound> ...   # and the era as a 4th wording
 TAKES=6 python3 generate_eleven.py <sound> ...         # more of a sound
 ```
 
