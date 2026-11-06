@@ -45,7 +45,8 @@ decided and why.
      oak leaf on his head, an acorn's bonk and one caught and kept in the
      hollow). Judge: the oak's look against the film's (its bark, its
      size), whether each peek reads, the echo by ear (`ECHO_*` in
-     sound.js). The bonk is a synth stand-in: takes through `new-sound`.
+     sound.js), the bonk's level (his three takes, one raised 14 dB: listen
+     for hiss), whether the plink fits the catch and the tuck-in.
      Next, each with `new-gag`: the owl in the oak (invented, some plays,
      asleep in the hollow by day, out on a branch from about 18:00,
      hooting only between the cricket's tunes), then the right end, a low
