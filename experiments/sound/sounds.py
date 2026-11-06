@@ -75,6 +75,17 @@ SOUNDS: dict[str, dict] = {
             "a big tractor dropping its front into a ditch, a dull bonk of metal and a puff of dirt, funny, not harsh",
         ],
     },
+    "krtek-bonk": {
+        "world": "krtek",
+        "id": "bonk",
+        "for": "An acorn drops out of the old oak onto the little mole's head: one small light bonk, funny, never painful.",
+        "seconds": 0.6,
+        "prompts": [
+            "a small acorn dropping onto a head, one light hollow wooden tok, comic and soft",
+            "an acorn falling onto a wooden table, a single small knock, close up",
+            "a knuckle tapping once on a small hollow wooden box, light and bright",
+        ],
+    },
     "krtek-yelp": {
         "world": "krtek",
         "id": "yelp",
