@@ -24,6 +24,7 @@ from config import (
     GAMES_DIR,
     LOOK_CLOSE,
     LOOK_GAMES,
+    LOOK_MAX_S,
     WORLDS_DIR,
 )
 from replay import contact_sheet, run_to
@@ -108,7 +109,8 @@ def look(
     close: bool,
 ) -> Look:
     """Open `url`, wake the hero (`game`'s ready) and await each of `before`
-    (JavaScript, in the page) until he is free, then photograph `watch` as it
+    (JavaScript, in the page) until he is free (each up to LOOK_MAX_S, however
+    short the look), then photograph `watch` as it
     runs, every `every_ms`, until it ends with him free, or `seconds` pass
     (with no `watch`: for `seconds`). Saves to `out`."""
     try:
@@ -149,7 +151,7 @@ def look(
                     "(js) => Debug.ignoreCut(Promise.resolve(eval(js)), 'look: before')",
                     step,
                 )
-                page.wait_for_function(free, timeout=seconds * 1000)
+                page.wait_for_function(free, timeout=LOOK_MAX_S * 1000)
             if watch:
                 page.evaluate(
                     """(js) => {

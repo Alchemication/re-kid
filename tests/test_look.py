@@ -134,6 +134,16 @@ class TestLookInChrome:
         assert run.returncode == 1
         assert "browser console" in run.stderr
 
+    def test_a_short_look_waits_out_a_long_setup_step(self, tmp_path: Path) -> None:
+        """--for is how long to photograph, not how long a set-up step may take."""
+        run = run_look(
+            tmp_path, "--before", "meadowGame.perform('go to 2000')", "--for", "0.5",
+            game=("krtek", "meadow"),
+        )  # fmt: skip
+        assert run.returncode == 0, run.stdout + run.stderr
+        record = json.loads((tmp_path / "look.json").read_text())
+        assert abs(record["state"]["x"] - 2000) < 5, record["state"]
+
     def test_wakes_the_mole_and_waits_until_he_is_free(self, tmp_path: Path) -> None:
         run = run_look(
             tmp_path, "--close", "--watch", "meadowGame.perform('sniff')",

@@ -195,7 +195,11 @@ encounter's spot, mushrooms came up on a hen's nest. Room for everything
 it moves, and anything that appears mid-play (after rain, on a timer)
 takes free ground, never "beside" something, with a browser test over a
 dozen seeds that it never lands on a thing. Keep what the child must see
-on screen when it happens. How a game lays things out: its map.
+on screen when it happens. How a game lays things out: its map. Where
+something else must move to make room, or a bound moves (where the hero
+can go), write the moved spots relative to what they now stand by, and
+grep for the old numbers: moving the meadow's left end to the oak's arch
+left two hard-coded limits behind in the egg, which a review caught.
 
 ## 4. Where each piece goes
 
@@ -255,6 +259,15 @@ for, and update every caller, no shims.
 - A part drawn round a point other than its own (a head nodding about its
   neck, a group scaled from the feet) needs that point updated whenever the
   drawing changes: a redrawn head kept the old neck and spun.
+- What a cut puts back is for cuts only. A gag that ends by itself has
+  already put everything back as it went, so running the cut's restore at
+  the end too cancels what is still landing: the leaf shaken off the
+  meadow's mole vanished mid-air. And a cut lets what is falling fall on
+  to the ground, rather than vanish where it was.
+- A sound booked ahead on the audio clock (an echo, a second knock) plays
+  on after a cut unless the cut stops it: keep the booked sources and stop
+  them in the restore (the oak's echoes answered a mole who had walked
+  away).
 
 ## 6. Look at it
 

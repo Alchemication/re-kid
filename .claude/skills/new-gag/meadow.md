@@ -25,6 +25,7 @@ then cuts it short to be picked up at the next step later. Keep each step
 | Visitors (mouse, hare, hen, fox, bullfinch…) | drawn in `friends.js`; an encounter keeps its own `Friends.troupe()` and calls them with `cast.call(kind, x, face)` from out of sight (`Friends.offscreen(dir, x)`; `{ hole }` for one that lives in a hole, `{ born }` for the chick), sends them home with `cast.dismiss(f)` (they walk off; never `gone()` in view: a rule checks both ways), all in `restore` with `cast.dismissAll()`, and at bedtime `dismissAll(true)` (at once). Those who only bring or fetch its things (the tins' porters, the poles' birds) are a troupe of their own, not its `detail().cast` (a rule checks none of that is left once he is free) |
 | His moves | `mole.js`: `goTo` (via `Things.meadow`), `walkTo`, `carry`/`wear`, `lean`, `knock`, `wobble`, `cheer`, `perch`, `glide`, `paint`/`dots`. New moves there, made with `Motion.endAt`, cut by `relax()` |
 | Drawing helpers | `Things.meadow.el` (the SVG helper), the layers in `index.html` (`#things` behind him, `#mole-out` him on the grass, `#friends` in front, `#far-things` up the hill) |
+| A place that answers taps (the flower bed, the spring, the oak) | not an encounter: there all play, a tap has him go and do something there, a different way each time (meadow.js `rounds`, its own random stream). In meadow.js: an `INTENTS` entry run through `answer(name, play, onCut)`, its `intentAt` test, and its row in `PLACES` (the space bar near it); its drawing and ways in a file of its own once they outgrow meadow.js (`oak.js`), given `goTo` and `rounds` at setup. Its `onCut` puts back at once what a way left (on him, in the air, booked on the audio clock); a `Debug.check` that nothing of it is left once he is free |
 | A tap on it | `data-thing="<name>"` on what can be tapped; remove it when the thing is done (unless it has `again`), so it stops taking taps meant for what is under it |
 | A threat (the bulldozer, the fox) | `trouble: [from, until]` in `Things.add`, and `gone()` once it has left before its last step ends. While it holds, the bed is uneasy, every tap carries it on, and he rests on an uneasy face (`Mole.calm`, set by the meadow); the moment it lifts, the theme comes happy (`things.js` `relief`), so its `music` needn't cue it. A fright is `handsToFace(ms, 'fright')`, not the laughing default |
 | Something big the child must see (the bulldozer) | `Things.meadow.frame(x)` keeps x in sight with him (the view between them); `frame(null)` in its `restore`, and when it goes. Weather-like arrivals that won't wait for a tap: `urgent: true` |
@@ -66,7 +67,10 @@ around him. A tap is an intent: `--watch "meadowGame.perform('use egg')"`
 the answers a thing varies through, repeat `--before` with the same intent:
 each is played to the end first. `look.json` has the trace (`sniffs`,
 `paddles`: which answer came). A creature's own doing doesn't make him busy:
-photograph it with `--for SECONDS`.
+photograph it with `--for SECONDS`. `--for` is only how long to
+photograph: each `--before` is played out first, however long it takes
+(a short `--for` once made a walk in `--before` fail, and a piped `tail`
+hid the error: read look's whole output).
 
 `look` with a `--before` that starts an encounter once photographed a still
 meadow while its trace said the whole story had played (2026-11-01, not yet
