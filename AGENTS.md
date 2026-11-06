@@ -55,7 +55,10 @@ world and scene, and the engine under it. So, at any time, not only in a
 retro: when work shows that a skill is wrong, missing a step, slow, or
 shaped around one cartoon, propose the edit to Adam, with the reason, as
 soon as you notice it; the same for a step done by hand twice that could
-become a skill. Make the edit once he agrees, never silently.
+become a skill. Make the edit once he agrees, never silently. Write each
+addition as a rule for any cartoon, with the case that taught it as a
+short example; a cartoon's own details go in its dossier or game, not
+the skill, unless only that case can use them (then say so).
 
 Provenance rules (enforced by `schema.common.Claim` and `worlds.validate_world`):
 

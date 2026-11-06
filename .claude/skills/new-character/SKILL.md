@@ -6,10 +6,11 @@ description: Draw (or redraw) a cartoon's hero in code after the films — gathe
 # New character
 
 The procedure for drawing a cartoon's hero in code so he reads as himself,
-not as a generic sticker of his species. Written from two runs: Krtek in
-three views (`dc2a0ff`) and Reksio's redraw (2026-10-18 to 10-20: Adam's
+not as a generic sticker of his species. Written from three runs: Krtek in
+three views (`dc2a0ff`), Reksio's redraw (2026-10-18 to 10-20: Adam's
 wife asked why he looked so weird; side by side with the films, ours read
-as a rabbit-dog). Reksio's figure is the worked example: `figure.js` (pose
+as a rabbit-dog) and Krtek's face and turned views (2026-11-06, the same
+question about his eyes; `38f5c9c`, `3a602bb`). Reksio's figure is the worked example: `figure.js` (pose
 → drawing), `life.js` (what keeps him alive), `gait.js` (his walk),
 `antics.js` (expressions in the gags).
 
@@ -30,8 +31,21 @@ as a rabbit-dog). Reksio's figure is the worked example: `figure.js` (pose
 
 Render ours at the same size (a 3x screenshot of him in the scene, and his
 poses on a scratch page, step 5) and put the frames above. Then list what
-makes ours look off, worst first, each with a frame and a time. The usual
-ones, all found on Reksio:
+makes ours look off, worst first, each with a frame and a time.
+
+Measure, don't eyeball or go by words. For each feature, its size and
+place as a share of the head: eye height, the space above the eyes, the
+nose's height against the eyes, the mouth's width against the muzzle.
+Read it on three or four neighbouring frames, not one: a single frame
+may be mid-turn (Krtek's pupils, read off one, were drawn wrong twice).
+The dossier's words and memory are leads, not measurements (his nose,
+placed from words, sat too low).
+
+Compare every view, not only the one asked about, and first the views
+he is seen in most. A front fixed alone leaves the turned views in the
+old design (on Krtek the gap was bigger there).
+
+The usual faults:
 
 - **Silhouette and species.** Ears that read as another animal's (long
   curved tubes made him a rabbit); a muzzle too long and thin, or one that
@@ -50,6 +64,14 @@ ones, all found on Reksio:
   thin and one weight all over.
 - **Hands and colour.** Tubes where the films have mittens with a thumb;
   a patch too big or too orange.
+- **The profile line.** The snout's (muzzle's, beak's) shape carries
+  the species, and so does what is under it. Trace the films' profile
+  from forehead to throat instead of drawing a generic snout: Krtek's
+  first read as a shrew's cone, then a lump, until it followed the
+  film's dip under the eye, thin straight tube and receding chin.
+- **Where the arms come out.** On a body with a front patch, arms grow
+  out of the body's colour at the sides; a patch as wide as the body
+  leaves them coming out of the face.
 
 Tell Adam plainly which version is cuter, livelier and more fun to look
 at, and why. Record what the frames show in `world.yaml` (observed, with
@@ -80,20 +102,38 @@ Things that bit:
   rest, snapping up on a spring when he notices something (`kit.perk`,
   `life.js`). The films did this; it made him feel alive more than any
   redraw.
+- **Moving one feature hides another.** After any change to the face,
+  look at every face in every view, not only the one being fixed
+  (raising Krtek's mouth hid his shut mouths in his dark snout).
+- **The heaviest line takes the eye.** Once the face is right, a thick
+  outline on hands, feet or hairs reads as a sticker next to it. Check
+  line weights across the whole figure after a face redraw.
 
 ## 4. The face: parts that act, then expressions
 
 First find, from the films' close-ups, which feature carries his feeling:
-for Reksio the brows, for Krtek the mouth (Krtek a autíčko 11:41-11:46:
-the mouth on the teal muzzle does most of it; his brows show only while
-they act). Build that feature first and best. On a black character, lines
+for Reksio the brows, for Krtek the mouth (Krtek a autíčko 7:12-7:13,
+11:41-11:46; the dossier's `face-acts` says how it is drawn). Build
+that feature first and best. On a black character, lines
 on the face (brows, the squeeze by shut eyes) are drawn light, as the
 films draw them: ink vanishes there. Each character gets its own face
 parameters, from his own frames, not another hero's.
 
 Krtek's (`moleart.js` `mouth`, `eyes`; his faces in `mole.js` `FACES`, a
 quiet moment's face with `Mole.feel`): the mouth's open, curve, width,
-round and chin; brows' lift and tilt. Reksio's follow.
+round, lean (lopsided) and chin; brows' lift and tilt. Reksio's follow.
+
+Two things that hold for any face:
+
+- **A face is not one drawing.** In hand-drawn films it shifts with
+  every turn and glance. Tie a small shift to where he looks, never a
+  random flicker (Krtek's smile leans after his pupils, `mole.js`
+  `looking`).
+- **Creases are tapered.** A crease by the mouth or eyes is a filled
+  stroke, wide where it starts, thinning to a point, and driven by the
+  same numbers as the feature it belongs to (Krtek's grow on the side
+  his lopsided smile pulls up). A line of one width read as a mustache,
+  then as a stray hook.
 
 Give the face parameters, not drawings (`figure.js` `FACE`): eyes (with an
 upper lid that comes down and slopes with the brows), joy (shut eyes
@@ -130,8 +170,19 @@ second). Draw straight from the figure:
   points of one stride (`Gait.stride`). To move him with his engine
   (gestures, blends), load `debug.js` first: the engine runs on its
   Clock and random streams;
+  A character drawn as fixed views instead of a pose model: draw it,
+  keep one view, and set its face and arms directly (Krtek:
+  `MoleArt.draw`, `view.face({...})`, an arm's `style.transform`);
 - screenshot it with Playwright (`channel="chrome"`), at 1.5–3x;
-- tile it under the film frames with Pillow (`uv run --with pillow`).
+- tile it beside the film frames, cut to the same head size, with ffmpeg
+  (`crop`, `scale`, `hstack`/`vstack`) or Pillow (`uv run --with pillow`).
+  Keep one comparison image per view and redo it after every change;
+  a change judged without the film beside it drifts.
+
+After moving a head or its features, draw every arm pose on the old and
+the new figure, one above the other (the old file from
+`git show HEAD:<path>`): hands to the face must still reach the eyes,
+what he wears still sit on his head, what he holds still clear it.
 
 Then in the scene: a 3x screenshot of him, and at phone size (`--size
 844x390`), with the film grain on: what reads big may be lost small (two
