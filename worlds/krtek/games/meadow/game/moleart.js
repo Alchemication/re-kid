@@ -22,7 +22,8 @@ const MoleArt = (() => {
   const INK = '#15140f'
   const BODY = '#15140f'
   const BIB = '#4a6a64' // teal in the films; blue-grey in some transfers
-  const PINK = '#f2a0a6'
+  const PINK = '#eda88f' // his hands and feet: a warm peach-pink (Autíčko 11:34-11:37)
+  const SKIN_LINE = '#8c4f3c' // their outline: thin and brown, not ink, so they don't read as stickers
   const NOSE = '#e0442c'
   const WHITE = '#eef1ef' // his eyes' white: a little grey, as on the cels
   const MOUTH = '#6e3430' // the tongue in his open mouth: a muted red-brown (Krtek a autíčko 11:41.5)
@@ -42,7 +43,7 @@ const MoleArt = (() => {
   function hand(parent, cx, cy, dir = 0) {
     const g = el('g', { class: 'mole-hand' }, parent)
     g.setAttribute('transform', `rotate(${dir} ${cx} ${cy}) translate(${cx} ${cy}) scale(${dir < 0 ? -HAND : HAND} ${HAND})`) // the thumb always towards his body
-    const skin = { fill: PINK, stroke: INK, 'stroke-width': 1.8 }
+    const skin = { fill: PINK, stroke: SKIN_LINE, 'stroke-width': 1.1 }
     el('ellipse', { cx: -10.5, cy: 2, rx: 3.6, ry: 8, ...skin, transform: 'rotate(-38 -10.5 2)' }, g) // the thumb
     el('rect', { x: -9.5, y: -3, width: 19, height: 15, rx: 6, ...skin }, g) // the palm
     for (const [x, len] of [[-6.6, 11], [-2.2, 14], [2.2, 13.5], [6.6, 10]]) el('rect', { x: x - 2.2, y: -3 - len, width: 4.4, height: len + 5, rx: 2.2, ...skin }, g)
@@ -61,7 +62,7 @@ const MoleArt = (() => {
   }
 
   function foot(parent, cx) {
-    const f = el('ellipse', { cx, cy: -5, rx: 18, ry: 8.5, fill: PINK, stroke: INK, 'stroke-width': 2.5 }, parent)
+    const f = el('ellipse', { cx, cy: -5, rx: 18, ry: 8.5, fill: PINK, stroke: SKIN_LINE, 'stroke-width': 1.5 }, parent)
     f.style.transformOrigin = `${cx}px -5px`
     return f
   }
@@ -117,7 +118,8 @@ const MoleArt = (() => {
   /**
    * His mouth on the muzzle at x, y, turned `slant` degrees (the three-quarter
    * and side views), `w` wide and opening `h` deep at most; shut, its line
-   * `drop` lower (out of the black snout facing us). Returns set(f),
+   * `drop` lower (out of the black snout); its creases on `sides` (-1 the
+   * left, 1 the right: turned, only the near one shows). Returns set(f),
    * which draws it from numbers: open (0 a line, 1 wide), curve (+1 corners
    * up, -1 down), width (a share of w), round (an arched top; 1 or more, an
    * ooh's oval), lean (-1..1: the open mouth
@@ -146,7 +148,7 @@ const MoleArt = (() => {
     return `M${pt(half - 1 - t, -c + 1)} C${pt(x1 - t, y1 - t)} ${pt(x2, y2 - t)} ${end} C${pt(x2, y2 + t * 0.4)} ${pt(x1 + t, y1 + t * 0.6)} ${pt(half - 1 + t, -c + 1)} Z`
   }
 
-  function mouth(parent, x, y, slant, w, h, drop = 0) {
+  function mouth(parent, x, y, slant, w, h, drop = 0, sides = [-1, 1]) {
     const g = el('g', { class: 'mole-mouth', transform: `translate(${x} ${y}) rotate(${slant})` }, parent)
     const shape = el('path', {}, el('clipPath', { id: `mole-mouth-${++clips}` }, g))
     const open = el('path', { fill: INK }, g)
@@ -171,7 +173,7 @@ const MoleArt = (() => {
       } else shut.setAttribute('d', `M${-half} ${drop - c} Q0 ${(drop + c * 1.5).toFixed(1)} ${half} ${drop - c}`)
       const smiling = isOpen && f.curve > 0 && !(f.round >= 1)
       creases.style.display = smiling ? '' : 'none' // from the corners up and out along his cheeks' tops (Autíčko 7:12)
-      if (smiling) creases.setAttribute('d', [-1, 1].map((s) => crease(s, half, c, w * (1 - s * (f.lean || 0) * 0.5))).join(' '))
+      if (smiling) creases.setAttribute('d', sides.map((s) => crease(s, half, c, w * (1 - s * (f.lean || 0) * 0.5))).join(' '))
       chin.style.display = f.chin ? '' : 'none'
       const under = (isOpen ? depth : drop + Math.max(0, c * 0.25)) + 6
       if (f.chin) chin.setAttribute('d', `M${-half * 0.45} ${under.toFixed(1)} Q0 ${(under + 4).toFixed(1)} ${half * 0.45} ${under.toFixed(1)}`)
@@ -184,10 +186,10 @@ const MoleArt = (() => {
     brows(f.brows || null)
   }
 
-  /** His three hairs, in a group that can perk up from where they grow (mole.js perk). */
+  /** His three hairs, fine lines as the films draw them, in a group that can perk up from where they grow (mole.js perk). */
   function hairs(parent, list, root) {
     const g = el('g', { class: 'mole-hair' }, parent)
-    for (const d of list) line(d, g).style.transformOrigin = `${root[0]}px ${root[1]}px` // each flutters in the wind (game.css)
+    for (const d of list) line(d, g, 1.8).style.transformOrigin = `${root[0]}px ${root[1]}px` // each flutters in the wind (game.css)
     g.style.transformOrigin = `${root[0]}px ${root[1]}px`
     return g
   }
@@ -216,37 +218,35 @@ const MoleArt = (() => {
     return { view: v, feet, arms, hair, ...eye, face: faceOf(m, eye.brows), dots }
   }
 
-  /** Three-quarter view, facing right (mirrored for left), as he is mostly drawn: the snout up and to the side, the near eye big, the far one half behind it. */
+  /** Three-quarter view, facing right (mirrored for left), as he is mostly drawn: a round head with a blunt snout, both eyes big, the nose low at the front edge, the teal wrapping round his mouth (Autíčko 7:10-7:12). */
   function three(parent, skin) {
     const v = el('g', { class: 'mole-three' }, parent)
     const far = arm(v, skin, [32, -94], [58, -70], 45) // behind his body
     const feet = [foot(v, -16), foot(v, 24)]
-    skin.push(el('path', { d: 'M-36 -4 C-44 -26 -32 -62 -32 -84 C-32 -102 -42 -118 -37 -136 C-32 -152 -14 -156 4 -154 C28 -152 44 -132 44 -110 C44 -98 38 -92 38 -80 C38 -60 46 -24 36 -4 Q0 6 -36 -4 Z', fill: BODY }, v))
-    skin.push(el('path', { d: 'M34 -126 C44 -130 54 -134 62 -138 C70 -128 64 -116 52 -110 C46 -107 40 -107 34 -108 Z', fill: BODY }, v))
-    el('path', { d: 'M64 -130 C68 -118 58 -106 46 -100 C40 -92 41 -70 38 -44 C36 -26 28 -18 18 -20 C10 -38 10 -76 22 -98 C30 -112 46 -124 64 -130 Z', fill: BIB }, v) // up along under the snout (Autíčko 11:43)
+    skin.push(el('path', { d: 'M-36 -4 C-44 -26 -32 -62 -32 -84 C-32 -104 -42 -122 -36 -140 C-30 -158 -8 -166 12 -165 C36 -164 52 -146 53 -128 C54 -122 58 -120 63 -118 C69 -116 70 -108 65 -105 C61 -100 55 -96 51 -92 C46 -86 44 -76 44 -66 C44 -46 46 -24 36 -4 Q0 6 -36 -4 Z', fill: BODY }, v))
+    el('path', { d: 'M-4 -96 C-4 -106 10 -110 22 -106 C30 -103 34 -102 38 -103 C46 -105 56 -105 63 -104 C60 -99 54 -96 50 -92 C45 -86 44 -76 43 -66 C42 -48 42 -32 36 -22 C28 -14 8 -16 2 -26 C-6 -46 -8 -80 -4 -98 Z', fill: BIB }, v) // a wide band, its near cheek up under the eye, round his mouth under the snout to his chin (Autíčko 7:11)
     const dots = spots(v, [[-24, -44], [22, -34], [-6, -22], [30, -70], [-28, -82], [8, -56]])
-    const hair = hairs(v, ['M-2 -148 C-8 -174 -26 -180 -36 -164', 'M6 -151 C6 -184 -10 -198 -24 -188', 'M14 -150 C20 -182 6 -200 -8 -196'], [6, -150])
-    const eye = eyes(v, [{ x: 36, y: -133, rx: 4.5, ry: 12, tilt: -5, px: 37, py: -135 }, { x: 20, y: -134, rx: 7.5, ry: 14, tilt: -5, px: 22, py: -136 }], 33)
-    el('ellipse', { cx: 66, cy: -136, rx: 8, ry: 6, fill: NOSE, transform: 'rotate(-15 66 -136)' }, v) // flat, no outline, as facing us
-    line('M56 -130 l14 -4 M56 -126 l14 4', v, 1.5)
-    const m = mouth(v, 44, -108, -20, 20, 12)
+    const hair = hairs(v, ['M4 -162 C-2 -188 -20 -194 -30 -178', 'M12 -164 C12 -197 -4 -211 -18 -201', 'M20 -163 C26 -195 12 -213 -2 -209'], [12, -163])
+    const eye = eyes(v, [{ x: 39, y: -128, rx: 6.5, ry: 14, tilt: -5, px: 40, py: -130 }, { x: 19, y: -128, rx: 8, ry: 15, tilt: -5, px: 21, py: -130 }], 30)
+    el('ellipse', { cx: 66, cy: -112, rx: 5.5, ry: 4.5, fill: NOSE, transform: 'rotate(-10 66 -112)' }, v) // on the short snout's tip, level with the bottom of his eyes
+    line('M66 -109 l20 -9 M67 -108 l22 -2 M66 -106 l19 6', v, 1)
+    const m = mouth(v, 47, -101, -15, 20, 17, 9, [-1]) // under the nose: one black from snout to tongue, as facing us
     const near = arm(v, skin, [-22, -92], [-50, -68], -45)
     return { view: v, feet, arms: [near, far], hair, ...eye, face: faceOf(m, eye.brows), dots }
   }
 
-  /** In profile, facing right (mirrored for left): walking. The snout straight ahead, one big eye, the hairs arching back, one arm, two feet. */
+  /** In profile, facing right (mirrored for left): walking. A round head, its front dipping under the eye into a thin straight snout with the nose a cap on its tip, one big eye near the front, the hairs arching back, one arm, two feet (Autíčko 11:34). */
   function side(parent, skin) {
     const v = el('g', { class: 'mole-side' }, parent)
     const feet = [foot(v, -14), foot(v, 16)]
-    skin.push(el('path', { d: 'M-36 -4 C-44 -26 -32 -62 -32 -84 C-32 -102 -42 -118 -37 -136 C-32 -150 -14 -152 4 -150 C34 -152 50 -128 50 -108 C50 -96 40 -92 40 -80 C40 -60 46 -24 36 -4 Q0 6 -36 -4 Z', fill: BODY }, v))
-    skin.push(el('path', { d: 'M44 -134 C62 -138 78 -132 86 -122 C82 -104 64 -98 48 -100 Z', fill: BODY }, v))
-    el('path', { d: 'M86 -118 C80 -106 64 -100 50 -98 C42 -90 44 -60 36 -34 C32 -22 20 -22 16 -32 C14 -58 18 -86 30 -96 C46 -106 66 -110 86 -118 Z', fill: BIB }, v) // under the snout to its tip
+    skin.push(el('path', { d: 'M-36 -4 C-44 -26 -32 -62 -32 -84 C-32 -104 -42 -122 -36 -140 C-30 -158 -6 -167 14 -166 C38 -165 52 -148 51 -130 C51 -122 52 -117 57 -116 C61 -115 66 -116 70 -117 C75 -117 75 -105 70 -105 C64 -105 57 -104 53 -100 C49 -97 46 -93 42 -89 C38 -66 46 -26 36 -4 Q0 6 -36 -4 Z', fill: BODY }, v))
+    el('path', { d: 'M53 -100 C49 -95 46 -86 44 -74 C42 -50 40 -30 34 -22 C26 -16 16 -20 14 -30 C12 -56 16 -80 26 -90 C34 -96 44 -98 53 -100 Z', fill: BIB }, v) // from under his chin down his front
     const dots = spots(v, [[-18, -40], [20, -30], [-4, -20], [28, -64], [-22, -80]])
-    const hair = hairs(v, ['M-2 -148 C-8 -174 -26 -180 -36 -164', 'M6 -151 C6 -184 -10 -198 -24 -188', 'M14 -150 C20 -182 6 -200 -8 -196'], [6, -150])
-    const eye = eyes(v, [{ x: 38, y: -132, rx: 7.5, ry: 14, tilt: -6, px: 41, py: -134 }], 80)
-    el('ellipse', { cx: 88, cy: -124, rx: 8, ry: 6, fill: NOSE, transform: 'rotate(-10 88 -124)' }, v)
-    line('M76 -118 l16 -5 M76 -114 l16 4', v, 1.5)
-    const m = mouth(v, 58, -103, -10, 16, 10)
+    const hair = hairs(v, ['M4 -162 C-2 -188 -20 -194 -30 -178', 'M12 -164 C12 -197 -4 -211 -18 -201', 'M20 -163 C26 -195 12 -213 -2 -209'], [12, -163])
+    const eye = eyes(v, [{ x: 40, y: -131, rx: 6, ry: 14, tilt: -6, px: 42.5, py: -133 }], 60)
+    el('ellipse', { cx: 72.5, cy: -111, rx: 5, ry: 7, fill: NOSE, transform: 'rotate(-12 72.5 -111)' }, v) // a cap on the snout's tip
+    line('M70 -107 l22 -7 M70 -106 l24 1 M69 -105 l20 8', v, 1)
+    const m = mouth(v, 48, -95, -20, 14, 10, 4, [-1])
     const a = arm(v, skin, [10, -94], [40, -74], 60)
     return { view: v, feet, arms: [a, a], hair, ...eye, face: faceOf(m, eye.brows), dots }
   }

@@ -52,6 +52,7 @@ const Mole = (() => {
     puzzled: { open: 0.15, curve: -0.1, width: 0.45, round: 1, brows: { tilt: 0.5, lift: 3 } }, // hm? a small pursed mouth, one worry in his brows
     uneasy: { open: 0, curve: -0.45, width: 0.55, brows: { tilt: 1, lift: 2 } }, // a threat about: no smile, mouth shut and down, brows worried (Adam, 2026-11-02)
   }
+  const GAZE_LEAN = 0.6 // how far a smile leans after his pupils (-1..1 across the white): it follows his look, as in Autíčko 7:12-7:15
   // the face each of his words comes with, held this long; how far the lids come down (0 open, 1 shut), how hard his hairs perk
   const WORDS = {
     ooh: { face: 'ooh', perk: 1, ms: 1000 },
@@ -135,6 +136,7 @@ const Mole = (() => {
     const dx = Math.max(-4, Math.min(4, (x - state.x) / 40)) // to the white's edge, not past it * (state.view === 'front' ? 1 : state.facing)
     cur().pupils.getAnimations().forEach((a) => a.cancel())
     cur().pupils.style.transform = `translate(${Math.round(dx)}px, -2px)`
+    follow(dx / 4)
   }
 
   /** Stand him at x in `pose`, as the end of whatever brought him there. */
@@ -175,6 +177,7 @@ const Mole = (() => {
       const dx = Math.round((life() - 0.5) * 6)
       const dy = Math.round((life() - 0.6) * 5)
       Debug.ignoreCut(Motion.endAt(cur().pupils, [{ transform: `translate(${dx}px, ${dy}px)` }], { duration: 120, easing: 'ease-out' }), 'glance')
+      follow(dx / 4)
       glance()
     })
   }
@@ -234,10 +237,24 @@ const Mole = (() => {
   /** A face he would show, as it may be now: while a threat is about, no grin; his mouth opens round instead. */
   const glad = (name) => (name === 'delighted' && settle() !== 'content' ? 'ooh' : name)
 
+  let gaze = 0 // where his pupils are across the white, -1..1
+
+  /** A face as he looks now: an open smile leans after his pupils. */
+  function looking(f) {
+    if (!(f.open > 0 && f.curve > 0) || f.round >= 1) return f
+    return { ...f, lean: Math.max(-1, Math.min(1, (f.lean || 0) + gaze * GAZE_LEAN)) }
+  }
+
   /** Show one of his FACES in every view. */
   function mood(name) {
     state.face = name
-    for (const v of all()) v.face(FACES[name])
+    for (const v of all()) v.face(looking(FACES[name]))
+  }
+
+  /** His pupils have moved to `to` (-1..1): his smile follows them. */
+  function follow(to) {
+    gaze = to
+    mood(state.face)
   }
 
   /** Open his mouth in a laugh, or `face` (a fright), or close it again, back to his resting face. */
