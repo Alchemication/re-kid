@@ -290,7 +290,7 @@ The game's tables and fakes: its file (section 4). For every game:
 - Tapping a thing by its selector clicks the middle of its box, which may be
   something drawn on top (a clock over a house). Tap a point the thing
   owns (the game's map has the helper).
-- A browser test that fails now and then under `-n 8`: run the same slice a
+- A browser test that fails now and then under `-n 4`: run the same slice a
   few times on the committed code (`git worktree add <scratch> HEAD`) to
   tell an old timing bug from a new one; either way it's a real bug, noted
   in `docs/PROJECT_PLAN.md` if not fixed then.
@@ -303,7 +303,7 @@ The game's tables and fakes: its file (section 4). For every game:
    at a time, never once at the end for several: each review of four
    encounters found four to ten real bugs. Fix them all, with tests (7).
 3. Then once: `uv run ruff check . && uv run pytest`, `npx --yes
-   eslint@10.12.0 worlds`, `uv run pytest -m browser -n 8`, `uv run pytest
+   eslint@10.12.0 worlds`, `uv run pytest -m browser -n 4`, `uv run pytest
    -m perf` if something drawn every frame changed, `main.py validate`.
    Not after each step: the full browser suite takes about 25 minutes,
    and its eight browsers slow the whole machine. Tell Adam before

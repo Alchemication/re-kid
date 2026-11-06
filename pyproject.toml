@@ -25,7 +25,7 @@ pythonpath = ["src", "."]
 # The browser tests play the game in real time (minutes); run them with -m browser.
 addopts = "-m 'not browser and not perf'"
 markers = [
-  "browser: drives a game in the installed Chrome (slow: uv run pytest -m browser -n 8)",
+  "browser: drives a game in the installed Chrome (slow: uv run pytest -m browser -n 4)",
   "realtime: a browser test kept on the real clock, not ?step game time (sound, the stress set)",
   "perf: performance budgets, one at a time on an idle machine (uv run pytest -m perf)",
 ]

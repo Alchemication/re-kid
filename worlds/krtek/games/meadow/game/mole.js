@@ -39,10 +39,10 @@ const Mole = (() => {
   const GHOST_ARMS = 95 // playing a ghost, his arms flung out wide: any higher, his short arms read as hands to his face
   const PERK_MS = 650 // his hairs springing up when he notices something, and settling
   // His faces, after Krtek a autíčko's close-ups (moleart.js face): the mouth's numbers (open 0-1, curve
-  // -1 corners down to +1 up, width, round, chin) and the brows' (lift, tilt > 0 worried), in plain numbers so
+  // -1 corners down to +1 up, width, round, lean, chin) and the brows' (lift, tilt > 0 worried), in plain numbers so
   // a word or a moment names one. The mouth carries most of it, as in the films (Adam, 2026-10-26).
   const FACES = {
-    content: { open: 0, curve: 0.7, width: 0.75 }, // at rest: a small closed smile
+    content: { open: 0.8, curve: 0.3, width: 0.95, lean: -0.4, chin: 1 }, // at rest: open under his snout, a little lopsided (Autíčko 7:12)
     delighted: { open: 0.75, curve: 0.9, width: 1, chin: 1, brows: { lift: 4 } }, // 7:13, 11:41.5
     ooh: { open: 0.8, curve: 0, width: 0.5, round: 1.3, brows: { lift: 6 } }, // wonder: a round little mouth
     worried: { open: 0.55, curve: -0.35, width: 0.75, chin: 1, brows: { tilt: 1 } }, // 11:43
@@ -132,7 +132,7 @@ const Mole = (() => {
   function lookAt(x) {
     const dir = x >= state.x ? 1 : -1
     if (state.pose === 'out' && Math.abs(x - state.x) > 30) show('three', dir)
-    const dx = Math.max(-6, Math.min(6, (x - state.x) / 40)) * (state.view === 'front' ? 1 : state.facing)
+    const dx = Math.max(-4, Math.min(4, (x - state.x) / 40)) // to the white's edge, not past it * (state.view === 'front' ? 1 : state.facing)
     cur().pupils.getAnimations().forEach((a) => a.cancel())
     cur().pupils.style.transform = `translate(${Math.round(dx)}px, -2px)`
   }
@@ -172,7 +172,7 @@ const Mole = (() => {
 
   function glance() {
     Clock.after(1500 + life() * 3000, () => {
-      const dx = Math.round((life() - 0.5) * 8)
+      const dx = Math.round((life() - 0.5) * 6)
       const dy = Math.round((life() - 0.6) * 5)
       Debug.ignoreCut(Motion.endAt(cur().pupils, [{ transform: `translate(${dx}px, ${dy}px)` }], { duration: 120, easing: 'ease-out' }), 'glance')
       glance()

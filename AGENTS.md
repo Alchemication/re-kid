@@ -247,7 +247,7 @@ the edge cases that would let bad data pass silently.
 - *Conventions* (`tests/test_game.py`, in `uv run pytest`): the debuggability
   rules above that a grep can check.
 - *Browser* (`tests/test_game_browser.py`, `tests/test_meadow_browser.py`,
-  `uv run pytest -m browser -n 8`): every gesture, left-alone move, thing
+  `uv run pytest -m browser -n 4`): every gesture, left-alone move, thing
   (plain and variation) and creature chase run alone in a `?seed=1&still`
   play, then cut short by a tap; plus a whole day to bed, Reksio left alone,
   and a report-and-replay round trip. Each must end with Reksio free and
@@ -264,7 +264,7 @@ the edge cases that would let bad data pass silently.
   does, not only for him to be free. A test on sound's own clock (music),
   one where the game holds itself, or one in the stress set (a whole day,
   the replay round trip), is marked `realtime` and runs on real frames;
-  eight workers load the machine, which flushes out timing bugs there: a
+  four workers load the machine, which flushes out timing bugs there: a
   test that fails only then is a real bug, not noise.
 
 - *Performance* (`tests/test_game_perf.py`, `uv run pytest -m perf`, about
@@ -278,11 +278,11 @@ the edge cases that would let bad data pass silently.
 **Which tests while working.** Unit and convention tests always (seconds).
 Browser tests, in three widths: while iterating, only the test being worked
 on, alone (`-m browser -x --lf -k <test>`, no `-n`); when the change is
-done, its slice below; the whole suite (`-n 8`) once, before a commit. Never
+done, its slice below; the whole suite (`-n 4`) once, before a commit. Never
 the whole of a game's file on every iteration: it runs in real time and
 heats the laptop for minutes.
 
-| Changed | Browser slice (`-m browser -n 8 -k …`) |
+| Changed | Browser slice (`-m browser -n 4 -k …`) |
 |---|---|
 | a thing in `things.js` / `bowl.js` / `tree.js` / `bramble.js` / `bird.js` / `cuckoo.js` / `nap.js` / `hen.js` / `mushrooms.js` / `spots.js` / `mouse.js` / `mound.js` / `film.js` / `tap.js` | `"TestThings and <name>"`, the bowl `"TestBowl"`, the tap `"TestTap"`, the tree `"TestTree"`, the bramble `"TestBramble"`, the clock `"TestClock"`, the doghouse nap `"TestNap"`, the variations and the hen `"TestVariations"`, the mushrooms `"TestMushrooms"` (and its rules in `things.test.js` / `tree.test.js` / `cuckoo.test.js` / `nap.test.js`) |
 | the boy (`boy.js`, `boyfigure.js`) or the snowman (`snowman.js`, `snowplay.js`) | `"TestSnowman or snowman or helpSnowman or greetBoy"` (and `boy.test.js`) |

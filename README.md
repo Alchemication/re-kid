@@ -141,7 +141,7 @@ uv run python main.py schema world|sources|episodes|intro|brief
 
 Development: `uv run ruff check . && uv run ruff format . && uv run pytest`,
 `npx --yes eslint@10.12.0 worlds` for the game scripts, and
-`uv run pytest -m browser -n 8` (about 10 minutes) after changing a game.
+`uv run pytest -m browser -n 4` (about 13 minutes) after changing a game.
 
 ## The site
 
