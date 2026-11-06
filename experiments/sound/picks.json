@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-03T21:47:19.909Z",
+ "saved": "2026-11-06T22:33:18.333Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -1932,6 +1932,39 @@
    "folder": "krtek wildlife",
    "made": "2026-11-01",
    "sound": "krtek-snort",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-bonk/05.mp3",
+   "source": "eleven",
+   "prompt": "an acorn falling onto a wooden table, a single small knock, close up",
+   "wording": 2,
+   "seed": 1,
+   "folder": "6 Nov: the oak's acorn",
+   "made": "2026-11-06",
+   "sound": "krtek-bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-bonk/08.mp3",
+   "source": "eleven",
+   "prompt": "an acorn falling onto a wooden table, a single small knock, close up",
+   "wording": 2,
+   "seed": 3,
+   "folder": "6 Nov: the oak's acorn",
+   "made": "2026-11-06",
+   "sound": "krtek-bonk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-bonk/09.mp3",
+   "source": "eleven",
+   "prompt": "a knuckle tapping once on a small hollow wooden box, light and bright",
+   "wording": 3,
+   "seed": 2,
+   "folder": "6 Nov: the oak's acorn",
+   "made": "2026-11-06",
+   "sound": "krtek-bonk",
    "verdict": "keep"
   }
  ]

@@ -149,3 +149,11 @@ effects:
     prompt: 'a European bison''s soft low grunt and snort in the distance, single, peaceful'
   - file: snort/09.mp3
     prompt: 'a European bison''s soft low grunt and snort in the distance, single, peaceful'
+- id: bonk
+  takes:
+  - file: bonk/05.mp3
+    prompt: 'an acorn falling onto a wooden table, a single small knock, close up'
+  - file: bonk/08.mp3
+    prompt: 'an acorn falling onto a wooden table, a single small knock, close up'
+  - file: bonk/09.mp3
+    prompt: 'a knuckle tapping once on a small hollow wooden box, light and bright'
