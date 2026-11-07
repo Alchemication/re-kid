@@ -21,7 +21,7 @@
 // Nothing comes from nowhere: the flowers were always there, the cloud and
 // the hare come in from out of sight and go off again, the rainbow fades.
 
-/* global AfterRain, Clock, Debug, DOMMatrixReadOnly, Friends, Layout, Mole, Motion, Sound, Things, World */
+/* global AfterRain, Clock, Debug, Friends, Layout, Mole, Motion, Sound, Things, World */
 ;(() => {
   const Y = Layout.GROUND
   const PATCH = { x: 1640, w: 190 } // the wild flowers, in the middle of the meadow

@@ -21,7 +21,7 @@
 // tap on the meadow cuts it short: the mouse ducks home, the egg goes down
 // in the grass by him, and the next tap carries on.
 
-/* global CSSAnimation, Debug, Friends, Layout, Mole, Motion, Sound, Things */
+/* global Debug, Friends, Layout, Mole, Motion, Sound, Things */
 ;(() => {
   const Y = Layout.GROUND
   const ROLL_FROM = -60 // it rolls in from the left edge...

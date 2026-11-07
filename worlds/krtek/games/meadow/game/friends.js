@@ -7,7 +7,7 @@
 // nearer edge of the screen (the mouse ducks into her hole) and only then is
 // gone (leave()); gone() at once is for bedtime, under the closing circle.
 
-/* global Debug, DOMMatrixReadOnly, FoxArt, Layout, Motion, View */
+/* global Debug, FoxArt, Layout, Motion, View */
 /* exported Friends */
 const Friends = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -203,8 +203,7 @@ const Friends = (() => {
       },
       /** Where it is drawn now, mid-walk (f.x is where it is going). */
       drawnX() {
-        const t = getComputedStyle(g).transform
-        return t && t !== 'none' ? new DOMMatrixReadOnly(t).e : f.x
+        return Motion.drawnX(g, f.x)
       },
       /** Walk (small steps) or hop (high bounces) to x, from where it is drawn now. */
       async go(nx, ms, hop = 0) {

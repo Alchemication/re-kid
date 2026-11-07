@@ -21,7 +21,7 @@
 // the Clock (Motion.endAt), and restore() puts everything back at once when
 // a tap cuts a peek short (what is falling falls on to the grass).
 
-/* global Clock, Debug, DOMMatrixReadOnly, Layout, Mole, Motion, Owl, Sound */
+/* global Clock, Debug, Layout, Mole, Motion, Owl, Sound */
 /* exported Oak */
 const Oak = (() => {
   const SVG = 'http://www.w3.org/2000/svg'

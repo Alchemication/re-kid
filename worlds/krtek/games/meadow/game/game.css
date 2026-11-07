@@ -99,6 +99,8 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
   50% { transform: rotate(var(--flutter, 1deg)); }
 }
 .sway { animation: sway 3.4s ease-in-out infinite; }
+/* out of sight, nothing animates (view.js offstage): no style, layer or paint for what no one sees */
+.offstage, .offstage * { animation: none !important; }
 .sway:nth-of-type(2n) { animation-duration: 4.1s; animation-delay: -1.3s; }
 .sway:nth-of-type(3n) { animation-duration: 3.7s; animation-delay: -2.2s; }
 .mole-hair path { animation: flutter 0.9s ease-in-out infinite; }

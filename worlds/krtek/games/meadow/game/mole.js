@@ -13,7 +13,7 @@
 // hands, eyes half shut: the cricket is playing). Which way: `view` ('front',
 // 'three' or 'side') and `facing` (1 right, -1 left).
 
-/* global Clock, Debug, DOMMatrixReadOnly, Layout, MoleArt, Motion */
+/* global Clock, Debug, Layout, MoleArt, Motion */
 /* exported Mole */
 const Mole = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -603,10 +603,7 @@ const Mole = (() => {
   }
 
   /** Where he is drawn now, mid-move (state.x is where he is going): for the view to follow. */
-  function drawnX() {
-    const t = getComputedStyle(root).transform
-    return t && t !== 'none' ? new DOMMatrixReadOnly(t).e : state.x
-  }
+  const drawnX = () => Motion.drawnX(root, state.x)
 
   /** The middle of his head, in scene units: where something lands on it. */
   const head = () => ({ x: state.x, y: Y - lift + SINK[state.pose] - 150 * SCALE })

@@ -820,6 +820,7 @@ const meadowGame = (() => {
   Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), document.getElementById('oak-ground'), { goTo, rounds, dropHat })
   Owl.setup(document.getElementById('oak'), { goTo, rounds })
   Fence.setup(document.getElementById('fence'), document.getElementById('fence-near'), document.getElementById('garden-life'), { goTo, rounds, el })
+  View.offstage(document.querySelectorAll('#cam .sway, #cam .fall, #cam .foam')) // what sways and pours stops while out of sight
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
   Cricket.setup(document.getElementById('crickets'))
   Church.setup(document.getElementById('distant'), () => {

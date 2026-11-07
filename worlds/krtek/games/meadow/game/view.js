@@ -31,6 +31,8 @@ const View = (() => {
   let pad = 0 // what a wide screen shows past the 1600 at each side
   let target = () => 0 // where to keep in the middle (the mole, as drawn)
   let cam, glow, far, distant, onMove
+  const OFFSTAGE_MARGIN = 200 // a thing this far past the view's edge still animates: it is in sight before it gets there
+  const culled = [] // {el, x0, x1, off}: animated things (OFFSTAGE) that stop while out of sight
 
   /** Start following `follow()` (a scene x); `moved(camX)` hears each move. */
   function setup(follow, moved) {
@@ -77,11 +79,38 @@ const View = (() => {
   }
 
   function draw() {
+    cull()
     cam.style.transform = `translateX(${-camX}px)`
     glow.style.transform = cam.style.transform
     far.style.transform = `translateX(${-((camX - pad) * FAR_SPEED + pad)}px)` // its painting starts at the view's left edge, wherever the view
     distant.style.transform = `translateX(${-camX * DISTANT_SPEED}px)`
     if (onMove) onMove(camX)
+  }
+
+  /**
+   * Things that animate on their own (plants swaying, the spring's falls) stop while out of sight: each
+   * one animating costs a phone a style update, a layer and a repaint every frame, seen or not, and most of
+   * the 4000-wide meadow is out of sight (about 6% of a phone's main thread, idle). `els` must scroll with
+   * the ground (inside #cam); where each spans is measured once, here.
+   */
+  function offstage(els) {
+    const inCam = cam.getCTM().inverse()
+    for (const el of els) {
+      const box = el.getBBox()
+      const m = inCam.multiply(el.getCTM())
+      const xs = [box.x, box.x + box.width].flatMap((x) => [box.y, box.y + box.height].map((y) => new DOMPoint(x, y).matrixTransform(m).x))
+      culled.push({ el, x0: Math.min(...xs), x1: Math.max(...xs), off: false })
+    }
+    cull()
+  }
+
+  function cull() {
+    const from = camX - pad - OFFSTAGE_MARGIN
+    const to = camX + Layout.VIEW_W + pad + OFFSTAGE_MARGIN
+    for (const c of culled) {
+      const off = c.x1 < from || c.x0 > to
+      if (off !== c.off) c.el.classList.toggle('offstage', (c.off = off))
+    }
   }
 
   /** A point on the screen's scene (as svg coordinates give it) in the meadow's own: add the view's offset. */
@@ -93,6 +122,7 @@ const View = (() => {
   return {
     setup,
     fit,
+    offstage,
     viewFor,
     toWorld,
     fromDistant,

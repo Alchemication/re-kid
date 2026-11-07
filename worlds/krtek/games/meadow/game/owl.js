@@ -21,7 +21,7 @@
 // game.css .owl), and restore() puts it back as it sits at once when a tap
 // cuts a visit short.
 
-/* global Clock, CSSAnimation, Debug, Layout, Mole, Motion, Music, Sound, View */
+/* global Clock, Debug, Layout, Mole, Motion, Music, Sound, View */
 /* exported Owl */
 const Owl = (() => {
   const SVG = 'http://www.w3.org/2000/svg'

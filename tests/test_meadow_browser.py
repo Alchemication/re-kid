@@ -383,6 +383,27 @@ class TestMeadowCar:
 
 
 class TestMeadowView:
+    SWAYING = """(() => { const all = [...document.querySelectorAll('#cam .sway')]
+        const x = (e) => { const b = e.getBBox(); return b.x + b.width / 2 }
+        const far = all.filter((e) => x(e) > 3300), near = all.filter((e) => x(e) < 1200)
+        const on = (list) => list.filter((e) => e.getAnimations().length > 0).length
+        return { far: on(far), farAll: far.length, near: on(near), nearAll: near.length } })()"""
+
+    def test_what_sways_out_of_sight_stops_and_starts_again_in_sight(
+        self, meadow: callable
+    ) -> None:
+        m = meadow()
+        m.wake()
+        at_home = m.page.evaluate(self.SWAYING)
+        assert at_home["farAll"] > 0 and at_home["far"] == 0, at_home
+        assert at_home["near"] == at_home["nearAll"] > 0, at_home
+        m.do("go to 3500")
+        m.wait_free()
+        m.wait("View.x > 2000")
+        far_end = m.page.evaluate(self.SWAYING)
+        assert far_end["far"] == far_end["farAll"], far_end
+        assert far_end["near"] == 0, far_end
+
     def test_the_view_follows_him_and_a_tap_lands_where_aimed(
         self, meadow: callable
     ) -> None:

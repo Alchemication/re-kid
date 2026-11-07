@@ -18,6 +18,8 @@
 // - Motion.endAt: animate something to where it ends up, setting the end on
 //   the element first, so the drawing never depends on an animation frozen on
 //   its last frame (fill: 'forwards'), which a cut-short gag can leave behind.
+// - Motion.drawnX: where something endAt moves is drawn across now, read
+//   from its move rather than the page's styles (cheap every frame).
 // - Motion.blends: a character's numbers moved to a target over game time,
 //   all cut short at once when he is asked to do something else (Reksio's
 //   and the boy's engines both move only through one).
@@ -223,9 +225,36 @@ const Motion = (() => {
     }
     for (const [k, v] of end) el.style[k] = v
     const anim = el.animate(keyframes, { ...opts, fill: opts.delay ? 'backwards' : 'none' })
+    if (end.some(([k]) => k === 'transform')) moves.set(el, { anim, xs: null })
     const done = anim.finished
     done.catch(() => 'cut short: the element already shows its end') // whoever awaits it hears; nobody else need
     return done
+  }
+
+  const moves = new WeakMap() // each element's latest move by endAt, for drawnX
+
+  /**
+   * Where `el` is drawn across now (its transform's x), mid-move, worked out from its latest endAt move's
+   * keyframes and progress: no style is read, so asking every frame costs nothing (getComputedStyle there
+   * made the browser recalculate styles mid-frame, about 7% of a phone's main thread in the meadow).
+   * `fallback`: where it stands when no move is under way (its end is set on it already).
+   */
+  function drawnX(el, fallback) {
+    const move = moves.get(el)
+    const a = move?.anim
+    if (!a || !['running', 'paused'].includes(a.playState)) return fallback
+    const p = a.effect.getComputedTiming().progress
+    if (p === null) return fallback
+    try {
+      move.xs ??= a.effect.getKeyframes().map((k) => [k.computedOffset, new DOMMatrixReadOnly(k.transform).e])
+    } catch {
+      return new DOMMatrixReadOnly(getComputedStyle(el).transform).e // a transform DOMMatrix can't read alone (a relative length): ask the page
+    }
+    const xs = move.xs
+    let i = 0
+    while (i < xs.length - 2 && p > xs[i + 1][0]) i++
+    const [[o0, x0], [o1, x1]] = [xs[i], xs[i + 1]]
+    return o1 > o0 ? x0 + ((x1 - x0) * (p - o0)) / (o1 - o0) : x1
   }
 
   const EASE = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2)
@@ -279,7 +308,7 @@ const Motion = (() => {
     }
   }
 
-  return { endAt, blends, loose, EASE }
+  return { endAt, drawnX, blends, loose, EASE }
 })()
 
 const Debug = (() => {

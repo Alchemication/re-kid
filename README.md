@@ -180,8 +180,11 @@ same way: asleep in his den, and only the corner sun, held, starts a new day.
 
 ## Performance
 
-`uv run pytest -m perf` checks the yard against a budget on a phone-sized
-screen with the CPU slowed 4x (run it alone: it times things). It prints
+`uv run pytest -m perf` checks the yard and the meadow against a budget on a
+phone-sized screen with the CPU slowed 4x (run it alone: it times things).
+Things that animate on their own stop while out of sight (the meadow's
+`View.offstage`), and nothing reads styles every frame (`Motion.drawnX`
+for where something moving is drawn): both were most of the meadow's cost. It prints
 what it measured, for example `idle: main thread 14% busy, 60 fps, frames
 p50 16.7 ms, p95 16.7 ms`.
 

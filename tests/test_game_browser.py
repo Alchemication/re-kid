@@ -894,6 +894,34 @@ class TestMotion:
         )
         assert 10 < x < 90, f"half way it should be on its way, not already there: {x}"
 
+    @pytest.mark.parametrize(
+        "easing", ["linear", "ease-in-out", "cubic-bezier(.3,1.4,.5,1)"]
+    )
+    def test_drawn_x_is_where_the_page_draws_it(
+        self, yard: callable, easing: str
+    ) -> None:
+        y = yard(STILL)
+        y.page.evaluate(
+            """(easing) => {
+              const el = document.body.appendChild(document.createElement('div'))
+              el.id = 'mover'
+              el.style.transform = 'translate(0px, 0px)'
+              const frames = [0, 120, 40, 300].map((x, i) => ({ transform: `translate(${x}px, ${i * 5}px)` }))
+              Debug.ignoreCut(Motion.endAt(el, frames, { duration: 1200, easing }), 'test')
+            }""",
+            easing,
+        )
+        for _ in range(5):
+            y.play_for(200)
+            drawn, page = y.page.evaluate(
+                "[Motion.drawnX(mover, 300), new DOMMatrixReadOnly(getComputedStyle(mover).transform).e]"
+            )
+            assert abs(drawn - page) < 1, (drawn, page)
+        y.play_for(400)
+        assert y.page.evaluate("Motion.drawnX(mover, 300)") == 300, (
+            "done: where it ends"
+        )
+
 
 DAY = ["house", "tap", "bowl", "dig", "gate", "flowers"]  # six new things
 DAY_PLAY = f"{STILL}&props=bowl,dig,film&flowers=1"
