@@ -15,7 +15,9 @@ The meadow is one screen, so its encounters arrive one at a time at their
 own hours and wait (`things.js`): each is a chain of steps that plays on
 when he's left alone, a tap on it hurries it to its next step, and a tap
 elsewhere waits for the step to end (as in the yard; meadow.js `waits`),
-then cuts it short to be picked up at the next step later. Keep each step
+then cuts it short to be picked up at the next step later. Except a step
+he went to by himself, left alone (`Things.byHimself`): a tap then is the
+child taking over, and goes at once. Keep each step
 4–8 s, so no tap waits long.
 
 | Piece | Where |
@@ -57,6 +59,9 @@ then cuts it short to be picked up at the next step later. Keep each step
   holds, not on its turn in a rotation (`rounds`): by its turn, other taps
   have usually changed the state, and it almost never shows. Check it in
   the first few taps of a seeded play.
+- Turning him toward a tap (`Mole.lookAt`) while he walks elsewhere makes
+  him slide along backwards: walking, he only glances (his eyes). A tap
+  that must wait never turns him mid-walk.
 - One story on screen at a time (`things.js` `open`): a world event that
   takes the stage (the eclipse) asks `Things.open(hour)` before it
   starts and tells things.js it is on (`elsewhere`), so no encounter

@@ -665,11 +665,12 @@ const meadowGame = (() => {
    * and goes once the step is over (Things calls stepped). A toddler taps all the time, and cut
    * short at every tap a step started again and again, and nothing ever ended (a filmed day,
    * 2026-10-23). A tap on the encounter itself still hurries it; between steps, and while it waits
-   * for a choice, taps are free. Only the latest waiting tap counts.
+   * for a choice, taps are free. Only the latest waiting tap counts. A step he went to by himself, left
+   * alone, doesn't wait: a tap then is the child taking over (Adam, 2026-11-07: he walked on, unstoppable).
    */
   function waits(intent) {
     const busy = Things.stepping
-    if (!busy || game.gesture !== busy) return false
+    if (!busy || game.gesture !== busy || Things.byHimself === busy) return false
     if (intent.startsWith(`use ${busy}`) || intent === 'stop' || intent.startsWith('tap butterfly') || intent.startsWith('tap firefly') || intent === 'tap frog' || intent === 'tap snail' || /^tap (wild|flock|heron)/.test(intent)) return false
     game.queued = intent
     const to = intent.match(/^(?:go|dig) to (\d+)$/)

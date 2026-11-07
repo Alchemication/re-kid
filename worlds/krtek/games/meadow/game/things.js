@@ -90,6 +90,7 @@ const Things = (() => {
   let lastDone = null // the hour the last one was done
   let hourNow = 0
   let stepping = null // the encounter whose step (or try) is playing now: a tap elsewhere waits for it (meadow.js)
+  let byHimself = null // the encounter he went to by himself, left alone, until the child taps it: a tap elsewhere is the child taking over, and goes at once
 
   /** Play one step (or try) of `e`, saying so while it plays, and telling the meadow once it is over. */
   async function oneStep(e, play) {
@@ -226,6 +227,7 @@ const Things = (() => {
   function use(name, tapped = true, who = null) {
     const e = all[name]
     if (!e || !e.out) return false
+    byHimself = tapped || e.urgent ? null : name // weather and threats (urgent) won't wait for the child, so they keep the wait
     if (e.done) return again(e)
     if (api.busyWith() === name && whileBusy(e, tapped, who)) return true
     if (e.ask) tryChoice(e, who || (tapped || e.step < e.steps.length ? null : e.next()))
@@ -326,5 +328,5 @@ const Things = (() => {
   const stateOf = (e) => (e.done ? 'done' : !e.out ? null : e.ask && e.step >= e.steps.length ? 'choosing' : `step ${e.step}`)
   const state = () => Object.fromEntries(plan.map((p) => [p.name, stateOf(all[p.name]) || `at ${p.at}`]))
 
-  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, names: () => Object.keys(all), add, choose, open, troubled, troubledName, inTrouble, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
+  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, /** The one he went to by himself, if no tap on it since. */ get byHimself() { return byHimself }, names: () => Object.keys(all), add, choose, open, troubled, troubledName, inTrouble, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
 })()

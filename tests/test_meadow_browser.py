@@ -467,6 +467,50 @@ class TestMeadowWalking:
         assert m.state()["x"] == x1, "he walked on after the key was let go"
         m.assert_settled()
 
+    def facing_wrong_way(self, m: Meadow, ms: int) -> int:
+        """Frames over `ms` in which he moves one way while turned the other (sliding)."""
+        m.page.evaluate(
+            """() => { window.__s = []; const f = () => { window.__s.push([Clock.now(), Mole.drawnX(), Mole.state.facing, Mole.state.view]); if (window.__s.length < 100000) requestAnimationFrame(f) }; requestAnimationFrame(f) }"""
+        )
+        m.play_for(ms)
+        s = m.page.evaluate("window.__s")
+        wrong = 0
+        for (t0, x0, _, _), (t1, x1, facing, view) in pairwise(s):
+            v = (x1 - x0) / max(1, t1 - t0)
+            if abs(v) > 0.05 and view != "front" and (v > 0) != (facing > 0):
+                wrong += 1
+        return wrong
+
+    def test_a_tap_that_waits_never_turns_him_to_slide(self, meadow: callable) -> None:
+        """A tap away from an encounter's step waits for it; walking, he must not turn
+        to it and slide along backwards (Adam, 2026-11-07)."""
+        m = meadow(f"{STILL}&soon&props=car")
+        m.wake()
+        arrived(m, "car")
+        m.do("use car")  # off he walks to it, far to the right
+        m.play_for(500)
+        m.do("go to 300")
+        assert self.facing_wrong_way(m, 3000) <= 1  # the one frame he turns to go
+        m.wait_free()
+        m.assert_settled()
+
+    def test_gone_to_it_by_himself_a_tap_takes_over(self, meadow: callable) -> None:
+        """Left alone, he goes to a waiting thing himself; the child's tap elsewhere then
+        goes at once, not after the step (he walked on, unstoppable)."""
+        m = meadow(f"{STILL}&soon&props=car")
+        m.wake()
+        arrived(m, "car")
+        m.page.evaluate("Things.use('car', false)")  # what the left-alone tick does
+        m.play_for(500)
+        assert m.state()["busy"] == "car"
+        m.do("go to 300")
+        m.play_for(200)
+        assert m.state()["busy"] == "go", m.state()
+        m.wait_free()
+        assert abs(m.state()["x"] - 300) < 5, m.state()
+        m.assert_settled()
+        finish(m, "car")  # and it is still there to play
+
 
 class TestMeadowRain:
     def test_some_plays_the_hen_comes_by_under_the_cloud(

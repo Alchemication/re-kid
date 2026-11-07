@@ -132,7 +132,8 @@ const Mole = (() => {
   /** Look towards scene x: the first answer to a tap, before he goes. Standing, he turns to it. */
   function lookAt(x) {
     const dir = x >= state.x ? 1 : -1
-    if (state.pose === 'out' && Math.abs(x - state.x) > 30) show('three', dir)
+    // walking, he only glances: turned to it, he slid along backwards (Adam, 2026-11-07)
+    if (state.pose === 'out' && Math.abs(x - state.x) > 30 && !moving()) show('three', dir)
     const dx = Math.max(-4, Math.min(4, (x - state.x) / 40)) // to the white's edge, not past it * (state.view === 'front' ? 1 : state.facing)
     cur().pupils.getAnimations().forEach((a) => a.cancel())
     cur().pupils.style.transform = `translate(${Math.round(dx)}px, -2px)`
@@ -194,15 +195,18 @@ const Mole = (() => {
     })
   }
 
+  /** Is he on his way somewhere (walking, gliding): his place animating? */
+  const moving = () => root.getAnimations().length > 0
+
   /** Cut every gesture short. He stays where he is drawn now, mid-step (a cut walk must not jump him
    * to where it was going), and stands as he is. */
   function relax() {
-    const moving = root.getAnimations().length > 0
-    const x = moving ? drawnX() : state.x
+    const was = moving()
+    const x = was ? drawnX() : state.x
     const parts = [root, body, tilt, carrySlot]
     for (const v of all()) parts.push(...v.arms, ...v.feet, v.lids, v.hair)
     for (const e of parts) e.getAnimations().forEach((a) => a.cancel())
-    if (moving) {
+    if (was) {
       state.x = x
       root.style.transform = rootAt(x, lift)
     }
