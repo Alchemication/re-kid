@@ -25,7 +25,11 @@ the tools and reads what the files measure, but every keep is Adam's.
 
 ## 1. Which sounds, and what for
 
-- From a gag, the audit, or Adam's complaint. For an episode game, start
+- From a gag, the audit, or Adam's complaint. For a game's sounds made in
+  code (stand-ins), start from Adam's verdicts on
+  `experiments/sound/made_in_code.html` (Save gives `made_in_code.json`:
+  "needs takes" and his notes are the run's list and its wording hints;
+  the meadow's 2026-11-07 run came from it). For an episode game, start
   from Adam's marks on the episode (`main.py mark`, saved as `observed`
   sound claims in its breakdown): they say which sounds the original has.
   Make our own version of each, inspired, never copied; a mark's note ("a
@@ -36,14 +40,21 @@ the tools and reads what the files measure, but every keep is Adam's.
   name differs); `adopt.py --game worlds/<world>/games/<game>` brings it in;
   a run's takes go in a board folder of their own (`--folder NAME`).
 - Each sound is a name in the game's
-  `sound.js` (`Sound.<name>`). A new name needs a function there first (a
-  synth version, or `() => {}` silent until it has takes): `test_effects`
-  fails on an id `sound.js` lacks.
+  `sound.js` (`Sound.<name>`), in camelCase (`effects.yaml` refuses a
+  dash: the owl's sleepy hoot became `hootSleepy`). A variant of a sound
+  that needs its own takes is its own name and function, not a flag on
+  another (`hoot(true)` had to become `hootSleepy()`). A new name needs a
+  function there first (a synth version, or `() => {}` silent until it
+  has takes): `test_effects` fails on an id `sound.js` lacks.
 - Write what it is for in the game, in a line ("an apple falls on his
   head"), and how long it must be. Check how often the game calls it: one
   take of a sound plays at a time, so a take longer than its call gap
   swallows calls (the snore: 2.5 s takes, called every 1.7 s). Keep takes
-  shorter than the gap, or say so to Adam.
+  shorter than the gap, or say so to Adam. Where the game means the calls
+  to overlap (a loop asked for again before the last has faded, a note
+  per fence paling), mark the sound `overlaps: true` in `effects.yaml`:
+  the meadow's storm asked for 3.4 s of rain every 3 s, and its takes
+  would have fallen silent 2.6 s in every 3.
 - Where the game paces itself around a sound (the cuckoo's beak opens on
   each note, its calls are spaced), measure the keeps once picked: their
   length and where their notes start (`librosa` onsets, a lead) and fit
