@@ -259,7 +259,7 @@ const Owl = (() => {
 
   /** Woken in its hole: a sleepy "hoo?", its eyes open at him, a blink, shut again. True if still his. */
   async function wake(alive) {
-    Sound.hoot(true)
+    Sound.hootSleepy()
     Debug.trace('owl', { woken: true })
     await Clock.wait(400)
     if (!alive()) return false

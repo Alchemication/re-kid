@@ -157,3 +157,109 @@ effects:
     prompt: 'an acorn falling onto a wooden table, a single small knock, close up'
   - file: bonk/09.mp3
     prompt: 'a knuckle tapping once on a small hollow wooden box, light and bright'
+- id: boo
+  takes:
+  - file: boo/02.mp3
+    prompt: 'three small animals together shouting a deep pretend-scary ''booo!'', playful children''s game, comic, not frightening'
+  - file: boo/06.mp3
+    prompt: 'small voices trying to sound big and scary, a low wobbly ''booo'', giggly underneath, from a 1970s Eastern European children''s cartoon'
+  - file: boo/07.mp3
+    prompt: 'a group of little cartoon animals making a big silly monster ''boooo'' together, warm and funny'
+  - file: boo/12.mp3
+    prompt: 'three small animals together shouting a deep pretend-scary ''booo!'', playful children''s game, comic, not frightening, 1970s Eastern European hand-drawn cartoon sound effect, played on orchestral instruments, warm vintage tape sound'
+- id: hoot
+  takes:
+  - file: hoot/04.mp3
+    prompt: 'one owl calling gently from an old tree at nightfall, two soft hoots, peaceful'
+  - file: hoot/09.mp3
+    prompt: 'a soft round owl hoot in a quiet meadow at dusk, distant, warm'
+- id: hootSleepy
+  takes:
+  - file: hootSleepy/01.mp3
+    prompt: 'a sleepy owl woken up, one short low drowsy hoo, rising like a question, close and soft'
+  - file: hootSleepy/06.mp3
+    prompt: 'a drowsy little owl''s single puzzled hoot, quiet, yawning'
+- id: cluck
+  takes:
+  - file: cluck/03.mp3
+    prompt: 'a hen clucking softly, bok bok bok, close up, calm farmyard'
+  - file: cluck/04.mp3
+    prompt: 'a single hen''s gentle contented clucks, three short ones, quiet'
+  - file: cluck/05.mp3
+    prompt: 'a single hen''s gentle contented clucks, three short ones, quiet'
+- id: croak
+  takes:
+  - file: croak/01.mp3
+    prompt: 'a frog croaking twice by a small pond, a low ribbit ribbit, close up, quiet summer day'
+  - file: croak/02.mp3
+    prompt: 'a frog croaking twice by a small pond, a low ribbit ribbit, close up, quiet summer day'
+  - file: croak/07.mp3
+    prompt: 'a small pond frog calling twice, deep and round, close up'
+- id: sneeze
+  takes:
+  - file: sneeze/03.mp3
+    prompt: 'a tiny mouse sneezing, a small squeaky atchoo'
+  - file: sneeze/05.mp3
+    prompt: 'a very small animal''s quick little sneeze, high and cute'
+- id: splash
+  takes:
+  - file: splash/03.mp3
+    prompt: 'a small splash of a hand slapping shallow water in a pond, close up'
+  - file: splash/05.mp3
+    prompt: 'a little paddle in a clear pool, one soft splash'
+  - file: splash/08.mp3
+    prompt: 'small feet stepping into shallow water, a light splash, close'
+- id: whoosh
+  takes:
+  - file: whoosh/04.mp3
+    prompt: 'a quick light swoosh of something tossed away, close'
+  - file: whoosh/05.mp3
+    prompt: 'a quick light swoosh of something tossed away, close'
+  - file: whoosh/06.mp3
+    prompt: 'a quick light swoosh of something tossed away, close'
+- id: swish
+  takes:
+  - file: swish/04.mp3
+    prompt: 'one quick stroke of a wet paintbrush on canvas'
+  - file: swish/05.mp3
+    prompt: 'one quick stroke of a wet paintbrush on canvas'
+  - file: swish/09.mp3
+    prompt: 'a soft brush sweep, short and bristly'
+- id: tug
+  takes:
+  - file: tug/02.mp3
+    prompt: 'a wooden post creaking as someone tugs at it stuck in the earth, a short strained creak'
+  - file: tug/09.mp3
+    prompt: 'a stake being wiggled loose in soil, creak and scrape, close'
+- id: water
+  overlaps: true # the storm asks for more before the last has faded (storm.js): each over the last, a crossfade
+  takes:
+  - file: water/02.mp3
+    prompt: 'light gentle rain pattering on leaves and flowers in a garden, steady, close'
+  - file: water/04.mp3
+    prompt: 'light gentle rain pattering on leaves and flowers in a garden, steady, close'
+  - file: water/06.mp3
+    prompt: 'a soft summer shower falling on a meadow, even patter, no thunder'
+- id: knock
+  takes:
+  - file: knock/02.mp3
+    prompt: 'two light knocks with a knuckle on a small hollow wooden box, knock knock, close up'
+  - file: knock/08.mp3
+    prompt: 'knock knock on an eggshell, two light hollow taps'
+  - file: knock/09.mp3
+    prompt: 'knock knock on an eggshell, two light hollow taps'
+- id: tock
+  overlaps: true # a paling comes quicker than a take lasts: each over the last
+  takes:
+  - file: tock/02.mp3
+    prompt: 'a stick hitting one wooden picket of a fence, a single short dry wooden tok, close up'
+  - file: tock/04.mp3
+    prompt: 'one tap of a twig on a wooden slat, short and hollow'
+- id: plink
+  takes:
+  - file: plink/03.mp3
+    prompt: 'a small wooden object set down on a wooden shelf, a light hollow tok'
+  - file: plink/06.mp3
+    prompt: 'an acorn dropped into a small wooden bowl, one light knock'
+  - file: plink/08.mp3
+    prompt: 'a little tin can set down on soft ground, a small dull clunk'

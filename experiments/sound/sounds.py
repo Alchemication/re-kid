@@ -379,6 +379,161 @@ SOUNDS: dict[str, dict] = {
             "a small dog's soft mournful howl",
         ],
     },
+    # The meadow's stand-ins Adam judged bad on made_in_code.html (2026-11-07).
+    "krtek-boo": {
+        "world": "krtek",
+        "id": "boo",
+        "for": "Three little meadow friends stacked into a pretend monster shout one deep playful 'booo!' at a fox: funny, not scary.",
+        "seconds": 1.2,
+        "prompts": [
+            "three small animals together shouting a deep pretend-scary 'booo!', playful children's game, comic, not frightening",
+            "a group of little cartoon animals making a big silly monster 'boooo' together, warm and funny",
+            "small voices trying to sound big and scary, a low wobbly 'booo', giggly underneath, from a 1970s Eastern European children's cartoon",
+        ],
+    },
+    "krtek-hoot": {
+        "world": "krtek",
+        "id": "hoot",
+        "for": "An owl in an old oak at dusk, now and then between the cricket's tunes: its soft call, calm and far-carrying.",
+        "seconds": 2.5,
+        "prompts": [
+            "a tawny owl hooting softly at dusk, hooo... hu-hoooo, calm summer evening in the woods",
+            "one owl calling gently from an old tree at nightfall, two soft hoots, peaceful",
+            "a soft round owl hoot in a quiet meadow at dusk, distant, warm",
+        ],
+    },
+    "krtek-hoot-sleepy": {
+        "world": "krtek",
+        "id": "hootSleepy",
+        "for": "The owl asleep in its hole in the oak, woken by the little mole's call: one drowsy, puzzled 'hoo?', rising.",
+        "seconds": 1.0,
+        "prompts": [
+            "a sleepy owl woken up, one short low drowsy hoo, rising like a question, close and soft",
+            "a drowsy little owl's single puzzled hoot, quiet, yawning",
+            "one soft sleepy questioning owl hoo, close up, gentle",
+        ],
+    },
+    "krtek-cluck": {
+        "world": "krtek",
+        "id": "cluck",
+        "for": "The hen: a few soft contented clucks (looking through the fence, over the egg, in the rain).",
+        "seconds": 1.2,
+        "prompts": [
+            "a hen clucking softly, bok bok bok, close up, calm farmyard",
+            "a single hen's gentle contented clucks, three short ones, quiet",
+            "a curious hen clucking quietly as she looks around, close",
+        ],
+    },
+    "krtek-croak": {
+        "world": "krtek",
+        "id": "croak",
+        "for": "A frog on a lily pad in a little pool: a low ribbit, twice, just before it plops into the water.",
+        "seconds": 1.0,
+        "prompts": [
+            "a frog croaking twice by a small pond, a low ribbit ribbit, close up, quiet summer day",
+            "one green frog's two short throaty croaks, close, calm",
+            "a small pond frog calling twice, deep and round, close up",
+        ],
+    },
+    "krtek-sneeze": {
+        "world": "krtek",
+        "id": "sneeze",
+        "for": "A little mouse sniffs a big egg and sneezes: a tiny 'atchoo!', funny.",
+        "seconds": 0.8,
+        "prompts": [
+            "a tiny mouse sneezing, a small squeaky atchoo",
+            "a very small animal's quick little sneeze, high and cute",
+            "a little mouse sniffing then sneezing once, tiny and funny",
+        ],
+    },
+    "krtek-splash": {
+        "world": "krtek",
+        "id": "splash",
+        "for": "The little mole paddles in the spring's pool, or water splashes up in his face: a small splash.",
+        "seconds": 0.7,
+        "prompts": [
+            "a small splash of a hand slapping shallow water in a pond, close up",
+            "a little paddle in a clear pool, one soft splash",
+            "small feet stepping into shallow water, a light splash, close",
+        ],
+    },
+    "krtek-whoosh": {
+        "world": "krtek",
+        "id": "whoosh",
+        "for": "Something light thrown or blown through the air (a pole tossed away, a cloud pushed along): a soft whoosh.",
+        "seconds": 0.6,
+        "prompts": [
+            "a thin wooden stick thrown through the air, a short soft whoosh",
+            "a quick light swoosh of something tossed away, close",
+            "a soft airy whoosh passing by, short",
+        ],
+    },
+    "krtek-swish": {
+        "world": "krtek",
+        "id": "swish",
+        "for": "A wide paintbrush swished once across fur or wood: a soft bristly swish (three in a row as friends paint each other).",
+        "seconds": 0.5,
+        "prompts": [
+            "a wide paintbrush swished once across a wooden board, a soft bristly swish, close up",
+            "one quick stroke of a wet paintbrush on canvas",
+            "a soft brush sweep, short and bristly",
+        ],
+    },
+    "krtek-tug": {
+        "world": "krtek",
+        "id": "tug",
+        "for": "A wooden pole stuck in the ground, tugged at: wood creaking and straining, short.",
+        "seconds": 0.8,
+        "prompts": [
+            "a wooden post creaking as someone tugs at it stuck in the earth, a short strained creak",
+            "wood straining and creaking under a pull, one short creak",
+            "a stake being wiggled loose in soil, creak and scrape, close",
+        ],
+    },
+    "krtek-water": {
+        "world": "krtek",
+        "id": "water",
+        "for": "A little rain cloud raining on the flowers, or rain over the whole meadow in a storm (played quieter): light rain patter, looped as long as it rains.",
+        "seconds": 3.0,
+        "prompts": [
+            "light gentle rain pattering on leaves and flowers in a garden, steady, close",
+            "a soft summer shower falling on a meadow, even patter, no thunder",
+            "water sprinkling from a watering can onto flower beds, steady",
+        ],
+    },
+    "krtek-knock": {
+        "world": "krtek",
+        "id": "knock",
+        "for": "The little mole knocks twice on something to see what it is (an egg, a toy car, a wooden pole): knock knock.",
+        "seconds": 0.6,
+        "prompts": [
+            "two light knocks with a knuckle on a small hollow wooden box, knock knock, close up",
+            "a small fist knocking twice on a hollow toy, curious",
+            "knock knock on an eggshell, two light hollow taps",
+        ],
+    },
+    "krtek-tock": {
+        "world": "krtek",
+        "id": "tock",
+        "for": "A twig drawn along a wooden paling fence: one paling's single short wooden tok (the game plays it up a scale, one per paling).",
+        "seconds": 0.3,
+        "prompts": [
+            "a stick hitting one wooden picket of a fence, a single short dry wooden tok, close up",
+            "one tap of a twig on a wooden slat, short and hollow",
+            "a single wooden tok, like a woodblock, short and soft",
+        ],
+    },
+    "krtek-plink": {
+        "world": "krtek",
+        "id": "plink",
+        "for": "Something small set down or caught (a paint tin set on the grass, an acorn caught and tucked in a hollow, a pole planted): a light, soft wooden tok.",
+        "seconds": 0.4,
+        "prompts": [
+            "a small wooden object set down on a wooden shelf, a light hollow tok",
+            "an acorn dropped into a small wooden bowl, one light knock",
+            "a little tin can set down on soft ground, a small dull clunk",
+        ],
+    },
 }
 
 # Krtek's voice (worlds/krtek), to judge against the films by ear before

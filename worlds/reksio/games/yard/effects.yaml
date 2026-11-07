@@ -197,3 +197,31 @@ effects:
     prompt: 'a child plopping onto a snowy ground, a muffled bump'
   - file: bump/07.mp3
     prompt: 'a small body landing on packed snow, a dull soft thump'
+- id: burp
+  takes:
+  - file: burp/05.mp3
+    prompt: 'air sputtering out of a water tap, a short wet splutter'
+- id: clonk
+  takes:
+  - file: clonk/01.mp3
+    prompt: 'a single knock on a hollow iron pipe on a wall, a dull metallic bong'
+  - file: clonk/06.mp3
+    prompt: 'a paw thumping a garden tap''s metal pipe, a short hollow clank'
+- id: gurgle
+  takes:
+  - file: gurgle/07.mp3
+    prompt: 'a gurgle running down a drainpipe, glug glug, short'
+  - file: gurgle/08.mp3
+    prompt: 'a gurgle running down a drainpipe, glug glug, short'
+  - file: gurgle/09.mp3
+    prompt: 'a gurgle running down a drainpipe, glug glug, short'
+- id: huff
+  takes:
+  - file: huff/01.mp3
+    prompt: 'a small dog breathing out a long warm huff, close up'
+  - file: huff/02.mp3
+    prompt: 'a small dog breathing out a long warm huff, close up'
+  - file: huff/03.mp3
+    prompt: 'a small dog breathing out a long warm huff, close up'
+  - file: huff/07.mp3
+    prompt: 'a long breathy exhale, warming cold hands, soft and close'

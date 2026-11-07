@@ -18,6 +18,14 @@ board, keep the picks. Outputs (`out/`) and model caches are not committed.
   at a time, across every board open; a world filter, one wording's prompt
   above its takes, keys (←/→ move, space play, 1/2/3 keep, maybe, no, N
   note, U next unmarked, Esc stop).
+- `made_in_code.html` — the sounds each game makes in code today (no
+  recorded takes yet), played through the game's own `Sound` exactly as it
+  plays them; mark each **fine as it is** or **needs takes** (keys 1 and 2),
+  and Save downloads `made_in_code.json`, the list for `new-sound`'s next
+  run. One world at a time (`?world=krtek` or `reksio`). Its descriptions
+  come from the comment above each sound in `sound.js`:
+  `python3 made_in_code.py` writes them to `out/` (rerun after a `sound.js`
+  changes; the page works without them).
 - `adopt.py` — copies the kept takes of the sounds named from `picks.json`
   into the game (`effects/`, `effects.yaml`), only its own world's sounds;
   then `main.py effects reksio` packs them.

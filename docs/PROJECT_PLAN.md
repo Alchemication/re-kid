@@ -62,10 +62,9 @@ decided and why.
      out, three plays in turn (tilt and his totter, its head turned
      right round, a wink). Judge: does it read at phone size, the
      moves' timing (`POP_MS`, `FLY_MS`, `TILT`, owl.js), and whether
-     the closing circle hides it too soon. Its hoots are stand-ins made
-     in the browser (`Sound.hoot`): takes through `new-sound` (a soft
-     tawny call, a sleepy "hoo?") once he has heard them. It hoots once
-     or twice a play, after the cricket's tunes.
+     the closing circle hides it too soon. It hoots once or twice a play,
+     after the cricket's tunes (its call and its sleepy "hoo?" are takes
+     he picked, 2026-11-07).
    - **Adam judges one story at a time, the fox first, and the variations**
      (built 2026-11-06 overnight, after his two plays where the bulldozer
      came on top of the fox and of the egg, in an eclipse). Encounters and

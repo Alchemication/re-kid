@@ -22,6 +22,8 @@ const Sound = (() => {
   const ECHO_FALL = 0.4 // ...each this much as loud as the last
   const ECHO_DULL_HZ = 2400 // ...and duller: the first cut above this, the next above half of it
   const FADE_S = 0.05 // a fade's floor: how quiet "gone" is, as a share of the level
+  const WATER_FADE_S = 0.3 // rain (its takes looped): faded out over this long as it stops
+  const SOFT_RAIN = 0.35 // the storm's rain over the whole meadow, under everything: this much of the cloud's rain on the flowers
   let ctx = null
   let master = null
   let noise = null
@@ -144,13 +146,14 @@ const Sound = (() => {
     gain.exponentialRampToValueAtTime(level * to * FADE_S, t + fade[0] + fade[1])
   }
 
-  function recorded(name, fade = null, { swell = null, loop = false } = {}) {
+  function recorded(name, fade = null, { swell = null, loop = false, rate = null } = {}) {
     if (!ready()) return false
     const e = takes[name]
     const decoded = e ? e.buffers.filter(Boolean) : []
     if (!decoded.length) return false
     if (ctx.currentTime < e.until && !e.overlaps) return true
     const src = source(e, decoded)
+    if (rate) src.playbackRate.value = rate // pitched (the twig's scale): its own speed, not the usual small wobble
     const g = ctx.createGain()
     const level = EFFECT_VOLUME * e.gain
     const t = ctx.currentTime
@@ -213,7 +216,7 @@ const Sound = (() => {
 
   /** Water: filling the can at the spring, or sprinkling it on the flowers. */
   function water(seconds = 0.8, { soft = false } = {}) {
-    if (!ready()) return
+    if (!ready() || recorded('water', [Math.max(0.2, seconds - WATER_FADE_S), WATER_FADE_S], { loop: true, swell: soft ? [SOFT_RAIN, SOFT_RAIN] : null })) return
     // soft: rain on the whole meadow, a high patter under everything (storm.js plays it again and again)
     const [step, length, low, spread, q, peak] = soft ? [0.12, 0.2, 3000, 2500, 1.5, 0.02] : [0.07, 0.1, 2600, 1800, 3, 0.08]
     for (let t = 0; t < seconds; t += step) hiss(t, length, low + Math.random() * spread, q, peak)
@@ -266,7 +269,7 @@ const Sound = (() => {
 
   /** The frog: a low ribbit, twice. */
   function croak() {
-    if (!ready()) return
+    if (!ready() || recorded('croak')) return
     for (const at of [0, 0.32]) {
       note(150, at, 0.16, 0.12, 'square', 0.8)
       hiss(at, 0.12, 700, 4, 0.05)
@@ -281,14 +284,14 @@ const Sound = (() => {
 
   /** Knock knock, on an eggshell. */
   function knock() {
-    if (!ready()) return
+    if (!ready() || recorded('knock')) return
     for (const at of [0.18, 0.5]) {
       note(1400, at, 0.05, 0.22, 'triangle', 0.6)
       hiss(at, 0.03, 3000, 2, 0.12)
     }
   }
 
-  /** An acorn on his head: a small hollow wooden tok (a stand-in until takes are picked: new-sound). */
+  /** An acorn on his head: a small hollow wooden tok. */
   function bonk() {
     if (!ready() || recorded('bonk')) return
     note(950, 0, 0.09, 0.3, 'triangle', 0.55)
@@ -305,20 +308,24 @@ const Sound = (() => {
 
   /** A small animal's sneeze: a breath in, then "tchoo". */
   function sneeze() {
-    if (!ready()) return
+    if (!ready() || recorded('sneeze')) return
     hiss(0, 0.25, 1400, 1, 0.05)
     hiss(0.3, 0.12, 3200, 1.5, 0.25)
     note(900, 0.3, 0.1, 0.06, 'triangle', 0.6)
   }
 
-  /** The owl: its call, "hooo… hu-hoooo" (a tawny owl's, soft), or, woken (sleepy), one low "hoo?" rising.
-   * Its recorded takes, or a stand-in. */
-  function hoot(sleepy = false) {
-    if (!ready() || recorded(sleepy ? 'hoot-sleepy' : 'hoot')) return
-    if (sleepy) return void note(300, 0, 0.45, 0.05, 'sine', 1.25)
+  /** The owl: its call, soft and calm, "hooo… hu-hoooo". */
+  function hoot() {
+    if (!ready() || recorded('hoot')) return
     note(410, 0, 0.6, 0.06, 'sine', 0.94)
     note(380, 1.0, 0.14, 0.04, 'sine', 0.97)
     note(395, 1.2, 0.75, 0.06, 'sine', 0.9)
+  }
+
+  /** The owl woken in its hole: one drowsy "hoo?", rising. */
+  function hootSleepy() {
+    if (!ready() || recorded('hootSleepy')) return
+    note(300, 0, 0.45, 0.05, 'sine', 1.25)
   }
 
   /** The chick: a few high peeps. */
@@ -335,7 +342,7 @@ const Sound = (() => {
 
   /** The hen: a soft "bok bok bok". */
   function cluck() {
-    if (!ready()) return
+    if (!ready() || recorded('cluck')) return
     for (let i = 0; i < 3; i++) {
       note(420 - i * 20, i * 0.2, 0.11, 0.12, 'square', 0.7)
       hiss(i * 0.2, 0.06, 1200, 3, 0.05)
@@ -344,17 +351,18 @@ const Sound = (() => {
 
   /** A pole planted in the ground: a wooden tok. */
   function plink() {
-    if (!ready()) return
+    if (!ready() || recorded('plink')) return
     note(520, 0, 0.12, 0.2, 'triangle', 0.7)
     hiss(0, 0.05, 900, 2, 0.1)
   }
 
-  /** A twig along the fence: one paling's soft wooden tok, `step` notes up a pentatonic scale from G
-   * (a stand-in until takes are picked: new-sound). */
+  /** A twig along the fence: one paling's soft wooden tok, `step` notes up a pentatonic scale from G:
+   * its take, pitched, or a stand-in. */
   function tock(step) {
     if (!ready()) return
     const PENTA = [0, 2, 4, 7, 9]
     const semis = 12 * Math.floor(step / PENTA.length) + PENTA[((step % PENTA.length) + PENTA.length) % PENTA.length]
+    if (recorded('tock', null, { rate: 2 ** (semis / 12) })) return // its take, pitched up the scale
     const f = 392 * 2 ** (semis / 12)
     note(f, 0, 0.14, 0.12, 'triangle', 0.98)
     note(f * 2, 0, 0.05, 0.03, 'sine')
@@ -363,13 +371,13 @@ const Sound = (() => {
 
   /** A tug at something stuck: a low strain. */
   function tug() {
-    if (!ready()) return
+    if (!ready() || recorded('tug')) return
     hiss(0, 0.35, 260, 1.5, 0.18)
   }
 
   /** Something thrown: a whoosh. */
   function whoosh() {
-    if (!ready()) return
+    if (!ready() || recorded('whoosh')) return
     hiss(0, 0.5, 1500, 0.8, 0.12)
   }
 
@@ -403,20 +411,20 @@ const Sound = (() => {
 
   /** A splash: into a tin of paint, or the spring. */
   function splash() {
-    if (!ready()) return
+    if (!ready() || recorded('splash')) return
     hiss(0, 0.35, 900, 0.7, 0.3)
     hiss(0.05, 0.25, 2400, 1.5, 0.15)
   }
 
   /** A brush, swished. */
   function swish() {
-    if (!ready()) return
+    if (!ready() || recorded('swish')) return
     for (const at of [0, 0.22]) hiss(at, 0.16, 3200, 1.2, 0.1)
   }
 
   /** The monster's "boo": three voices low and loud, for a cartoon fright. */
   function boo() {
-    if (!ready()) return
+    if (!ready() || recorded('boo')) return
     for (const f of [150, 190, 230]) note(f, 0, 0.7, 0.12, 'sawtooth', 0.7)
   }
 
@@ -471,5 +479,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy }
 })()

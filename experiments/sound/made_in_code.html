@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sounds made in code</title>
+<link rel="stylesheet" href="../board/board.css">
+<style>
+  /* this board's own parts, on the shared boards' look (board.css) */
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); padding: 20px 24px 60px; }
+  .card { background: var(--card); border: 2px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 8px; outline: none; }
+  .card.hidden { display: none; }
+  .card.focus { border-color: var(--ink); }
+  .card.playing { border-color: var(--ink); box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--sun); }
+  .card.fine { border-color: var(--keep); background: #f3faea; }
+  .card.takes { border-color: var(--maybe); background: #fff7e6; }
+  .card h2 { margin: 0; font: 700 22px/1.2 var(--hand); }
+  .card .what { color: var(--soft); margin: 0; font-size: 14px; min-height: 2.6em; }
+  .card .plays { display: flex; gap: 8px; flex-wrap: wrap; }
+  .card .listen { display: inline-flex; gap: 8px; align-items: center; border: 0; border-radius: 999px; background: var(--mole); color: #fff; padding: 7px 14px; font: 700 14px var(--round); cursor: pointer; }
+  .card .listen.soft { background: #fff; color: var(--mole); border: 2px solid var(--line); }
+  .card .listen svg { width: 14px; height: 14px; }
+  .card .verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .card .verdict button { border: 2px solid var(--line); background: #fff; border-radius: 10px; padding: 6px 0; font: 700 13px var(--round); cursor: pointer; color: var(--ink); }
+  .card .verdict button.on.fine { background: #dff2cc; border-color: var(--keep); }
+  .card .verdict button.on.takes { background: #ffe9bd; border-color: var(--maybe); }
+  .card textarea { width: 100%; box-sizing: border-box; font-size: 13px; border: 2px solid var(--line); border-radius: 8px; padding: 4px 6px; min-height: 40px; resize: vertical; }
+  .empty { padding: 40px 24px; color: var(--soft); }
+  @media (max-width: 760px) { .grid { padding: 16px; } }
+</style>
+</head>
+<body>
+<script src="../board/board.js"></script>
+<script src="out/made_in_code.js"></script>
+<script>
+  // The sounds a game makes in code today (tones and noise in its sound.js, no recorded takes), each
+  // playing exactly as the game plays it, through the game's own Sound. Adam marks each fine as it is
+  // or needing takes; Save downloads made_in_code.json, the list for new-sound's next run.
+  // One world at a time (?world=krtek or reksio): each game's sound.js is its own `Sound`.
+  const GAMES = {
+    krtek: { name: 'Krtek', dir: '../../worlds/krtek/games/meadow/game/', scripts: ['debug.js', 'effects.js', 'sound.js'] },
+    reksio: { name: 'Reksio', dir: '../../worlds/reksio/games/yard/game/', scripts: ['debug.js', 'effects.js', 'barks.js', 'sound.js'] },
+  }
+  const NOT_SOUNDS = new Set(['ensure', 'bus', 'listen', 'say', 'hushEchoes', 'from', 'scaled', 'bark', 'bowlBark', 'farBark', 'original']) // helpers, his voice (Sound.say) and the original barks
+  // Sounds that need something to play: what to pass (several: one card each)
+  const CALLS = {
+    roll: [[1.4]], vroom: [[1.6]], water: [[1.2]], buzz: [[0.8]], whine: [[0.8]], stamp: [[0]], clang: [[0, 1]],
+  }
+  const CALL_NAMES = {} // what to call each of a sound's cards, where it has several
+  const RUNS = { tock: () => { for (let i = 0; i < 8; i++) later(i * 280, () => Sound.tock(i)) } } // a twig along the palings: the scale up
+  const LOOPS_MS = 3500 // a background loop (the wind, the rain) plays this long, rising to a gust, then falls back
+  const KEY = 'made-in-code-picks'
+  const world = GAMES[new URLSearchParams(location.search).get('world')] ? new URLSearchParams(location.search).get('world') : 'krtek'
+  const game = GAMES[world]
+
+  const timers = [] // a page of its own: plain timers are fine here
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms))
+  const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } }
+  const keep = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch { /* no storage: this visit only */ } }
+
+  const ART = ['../../worlds/reksio/games/yard/game/figure.js', '../../worlds/krtek/games/meadow/game/moleart.js'] // the header's two heroes (board.js)
+  function loadGame(done) {
+    const all = [...game.scripts.map((f) => game.dir + f), ...ART]
+    const next = (i) => {
+      if (i >= all.length) return done()
+      const s = document.createElement('script')
+      s.src = all[i]
+      s.onload = () => next(i + 1)
+      s.onerror = () => next(i + 1) // barks.js may not be there: the yard falls back
+      document.head.append(s)
+    }
+    next(0)
+  }
+
+  loadGame(() => {
+    const docs = (window.MADE_IN_CODE_DOCS || {})[world] || {}
+    const recorded = new Set(Object.keys(typeof EFFECTS !== 'undefined' ? EFFECTS : {}))
+    const names = Object.keys(Sound).filter((n) => typeof Sound[n] === 'function' && !NOT_SOUNDS.has(n) && !recorded.has(n)).sort()
+    const items = names.flatMap((n) => (CALLS[n] || [[]]).map((args, i) => ({
+      id: `${world}:${n}${i ? `:${i}` : ''}`, sound: n, args, label: CALL_NAMES[n]?.[i] || n,
+    })))
+    const picks = load(KEY, {})
+    const saved = load(`${KEY}-saved`, { changed: 0, saved: 0 })
+    const view = { unmarked: false, ...load(`${KEY}-view`, {}) }
+
+    const { bar, folders, main } = Board.frame({
+      title: 'Sounds made in code',
+      lead: `Every sound ${game.name}'s game makes in code today (no recorded takes yet), played exactly as the game plays it. Listen, then mark it <b>fine as it is</b> or <b>needs takes</b>, with a note if you like. <b>Save</b> downloads the list for Claude: the "needs takes" ones go to the next <code>new-sound</code> run.`,
+    })
+    folders.remove()
+    bar.innerHTML = `
+      <div class="worlds" role="group" aria-label="World">${Object.entries(GAMES).map(([w, g]) => `<button class="chip" data-world="${w}" aria-pressed="${w === world}">${g.name}</button>`).join('')}</div>
+      <label><input id="unmarked" type="checkbox"> Only unmarked</label>
+      <label>Volume <input id="vol" type="range" min="0" max="2" step="0.05" value="${load(`${KEY}-vol`, 1)}"></label>
+      <button class="btn" id="stop" title="Stop (Esc)">■ Stop</button>
+      <button class="btn" id="next" title="Play the next unmarked (U)">▶ Next unmarked</button>
+      <span class="spacer"></span>
+      <span class="progress"><span class="meter"><i class="k"></i><i class="m"></i></span><span id="count"></span></span>
+      <button class="btn primary" id="save" title="Download the verdicts for Claude">Save</button>
+      <span class="keys"><kbd>←</kbd><kbd>→</kbd> move · <kbd>space</kbd> play · <kbd>1</kbd> fine · <kbd>2</kbd> needs takes · <kbd>N</kbd> note · <kbd>U</kbd> next unmarked</span>`
+    for (const b of bar.querySelectorAll('[data-world]')) b.onclick = () => { location.search = `?world=${b.dataset.world}` }
+    const grid = document.createElement('div')
+    grid.className = 'grid'
+    main.append(grid)
+    if (!items.length) grid.outerHTML = '<p class="empty">Every sound in this game has recorded takes.</p>'
+
+    // ---------------------------------------------------------------- playing
+
+    let base = null // the game's own master level, scaled by the slider
+    let loop = null // a background loop's level setter, while it plays
+    let playingCard = null
+    const vol = document.getElementById('vol')
+    function level() {
+      const { master } = Sound.bus()
+      base ??= master.gain.value
+      master.gain.value = base * Number(vol.value)
+    }
+    vol.oninput = () => { keep(`${KEY}-vol`, Number(vol.value)); if (base !== null) level() }
+    function stop() {
+      timers.splice(0).forEach(clearTimeout)
+      loop?.(0)
+      loop = null
+      playingCard?.classList.remove('playing')
+      playingCard = null
+      Board.release(stop)
+    }
+    function play(item, card, times = 1) {
+      Board.claim(stop) // whatever played stops, here or on another board
+      timers.splice(0).forEach(clearTimeout)
+      Sound.ensure()
+      level()
+      playingCard?.classList.remove('playing')
+      playingCard = card
+      card.classList.add('playing')
+      for (let k = 0; k < times; k++) later(k * 1100, () => {
+        if (RUNS[item.sound]) return RUNS[item.sound]()
+        const set = Sound[item.sound](...item.args)
+        if (typeof set === 'function') { // a loop: up to a gust and back
+          loop = set
+          set(0.2)
+          later(LOOPS_MS * 0.3, () => set(1))
+          later(LOOPS_MS, () => set(0))
+        }
+      })
+      later(times * 1100 + (RUNS[item.sound] ? 2400 : 900) + (loopy(item) ? LOOPS_MS : 0), stop)
+      focus(card)
+    }
+    const loopy = (item) => ['wind', 'rain'].includes(item.sound)
+
+    // ---------------------------------------------------------------- the cards
+
+    const cards = items.map((item) => {
+      const card = document.createElement('section')
+      card.className = 'card'
+      card.tabIndex = 0
+      card.innerHTML = `<h2>${Board.escape(item.label)}</h2>
+        <p class="what">${Board.escape(docs[item.sound] || '')}</p>
+        <div class="plays">
+          <button class="listen" title="Play (space)"><svg viewBox="0 0 20 20"><path d="M6 3.5v13l11-6.5z" fill="currentColor"/></svg>Play</button>
+          <button class="listen soft" title="Three times, as a game repeats it">×3</button>
+        </div>
+        <div class="verdict"><button class="fine">Fine as it is</button><button class="takes">Needs takes</button></div>
+        <textarea placeholder="A note (what's wrong, what it should be)"></textarea>`
+      const [once, thrice] = card.querySelectorAll('.listen')
+      once.onclick = () => play(item, card)
+      thrice.onclick = () => play(item, card, 3)
+      card.querySelector('.verdict .fine').onclick = () => mark(item, 'fine')
+      card.querySelector('.verdict .takes').onclick = () => mark(item, 'takes')
+      const note = card.querySelector('textarea')
+      note.value = picks[item.id]?.note || ''
+      note.oninput = () => record(item, { ...picks[item.id], note: note.value })
+      card.onfocus = () => focus(card)
+      grid.append(card)
+      return { item, card }
+    })
+
+    function record(item, p) {
+      picks[item.id] = { world, sound: item.sound, args: item.args, verdict: p.verdict, note: p.note }
+      keep(KEY, picks)
+      saved.changed = Date.now()
+      keep(`${KEY}-saved`, saved)
+      show()
+    }
+    function mark(item, v) {
+      const mine = picks[item.id] || {}
+      record(item, { ...mine, verdict: mine.verdict === v ? undefined : v })
+    }
+    let focused = null
+    function focus(card, scroll) {
+      focused?.classList.remove('focus')
+      focused = card
+      card.classList.add('focus')
+      if (scroll) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    }
+
+    function show() {
+      let fine = 0
+      let takes = 0
+      for (const { item, card } of cards) {
+        const v = picks[item.id]?.verdict
+        card.classList.toggle('fine', v === 'fine')
+        card.classList.toggle('takes', v === 'takes')
+        card.querySelector('.verdict .fine').classList.toggle('on', v === 'fine')
+        card.querySelector('.verdict .takes').classList.toggle('on', v === 'takes')
+        card.classList.toggle('hidden', view.unmarked && !!v)
+        fine += v === 'fine'
+        takes += v === 'takes'
+      }
+      const n = cards.length || 1
+      document.querySelector('.meter .k').style.width = `${(100 * fine) / n}%`
+      document.querySelector('.meter .m').style.width = `${(100 * takes) / n}%`
+      document.getElementById('count').textContent = `${fine} fine · ${takes} need takes · ${cards.length - fine - takes} to hear`
+      document.getElementById('save').classList.toggle('unsaved', saved.changed > saved.saved)
+    }
+
+    const unmarked = document.getElementById('unmarked')
+    unmarked.checked = view.unmarked
+    unmarked.onchange = () => { view.unmarked = unmarked.checked; keep(`${KEY}-view`, view); show() }
+    document.getElementById('stop').onclick = stop
+    const nextUnmarked = () => {
+      const from = cards.findIndex((c) => c.card === focused) + 1
+      const c = [...cards.slice(from), ...cards.slice(0, from)].find((x) => !picks[x.item.id]?.verdict && !x.card.classList.contains('hidden'))
+      if (c) { focus(c.card, true); play(c.item, c.card) }
+    }
+    document.getElementById('next').onclick = nextUnmarked
+    document.getElementById('save').onclick = () => {
+      const out = { saved: new Date().toISOString(), picks: Object.values(picks).filter((p) => p.verdict || p.note) }
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }))
+      a.download = 'made_in_code.json'
+      a.click()
+      saved.saved = Date.now()
+      keep(`${KEY}-saved`, saved)
+      show()
+    }
+    addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'TEXTAREA') { if (e.key === 'Escape') e.target.blur(); return }
+      const at = cards.findIndex((c) => c.card === focused)
+      const go = (d) => { const c = cards[(at + d + cards.length) % cards.length]; if (c) focus(c.card, true) }
+      const cur = cards[at]
+      if (e.key === 'ArrowRight') go(1)
+      else if (e.key === 'ArrowLeft') go(-1)
+      else if (e.key === ' ' && cur) play(cur.item, cur.card)
+      else if (e.key === '1' && cur) mark(cur.item, 'fine')
+      else if (e.key === '2' && cur) mark(cur.item, 'takes')
+      else if (e.key.toLowerCase() === 'n' && cur) cur.card.querySelector('textarea').focus()
+      else if (e.key.toLowerCase() === 'u') nextUnmarked()
+      else if (e.key === 'Escape') stop()
+      else return
+      e.preventDefault()
+    })
+    if (cards.length) focus(cards[0].card)
+    show()
+  })
+</script>
+</body>
+</html>
