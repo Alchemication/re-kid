@@ -13,6 +13,7 @@
      chosen at random. index.html asks him to cheer (postMessage 'cheer')
      when he is tapped. -->
 <style>
+  html { visibility: hidden; } /* until painted (reveal) */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #94b8ea; }
   svg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
 </style>
@@ -39,7 +40,17 @@
   const DOWN = 240 // down in his molehill, this far below his place up to his middle
   const between = ([a, b]) => a + Math.random() * (b - a)
   const ease = (t) => 1 - (1 - t) ** 3
-  const load = (src) => new Promise((resolve, reject) => document.head.appendChild(Object.assign(document.createElement('script'), { src: GAME + src, onload: resolve, onerror: reject })))
+  // fetched side by side, run in the order listed (async: false)
+  const load = (src) => new Promise((resolve, reject) => document.head.appendChild(Object.assign(document.createElement('script'), { src: GAME + src, async: false, onload: resolve, onerror: reject })))
+  // Shown only once painted and under the old-print look, so it never opens on a bare, modern picture first;
+  // index.html fades the card in when it hears 'ready'.
+  let shown = false
+  const reveal = () => {
+    if (shown) return
+    shown = true
+    document.documentElement.style.visibility = 'visible'
+    if (parent !== window) parent.postMessage('ready', '*')
+  }
   const el = (tag, attrs, parent) => {
     const e = document.createElementNS(SVG, tag)
     for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v)
@@ -74,7 +85,7 @@
 
   async function start() {
     scene()
-    for (const s of ['debug.js', 'layout.js', 'painting.js', 'moleart.js', 'filmlook.js']) await load(s)
+    await Promise.all(['debug.js', 'layout.js', 'painting.js', 'moleart.js', 'filmlook.js'].map(load))
     const svg = document.getElementById('world')
     const ctm = svg.getScreenCTM()
     Painting.paint({
@@ -148,8 +159,9 @@
       requestAnimationFrame(frame)
     }
     requestAnimationFrame(frame)
+    requestAnimationFrame(() => requestAnimationFrame(reveal)) // once the first frame is on screen
   }
-  start()
+  start().catch((e) => { reveal(); throw e }) // a part that won't load: show what there is, rather than nothing
 </script>
 </body>
 </html>

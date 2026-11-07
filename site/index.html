@@ -7,21 +7,31 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="theme-color" content="#1d1914">
-<title>Reksio &amp; Krtek</title>
+<title>Re-Kid</title>
 <link rel="icon" href="data:,">
-<!-- The site's front page: two scenes to pick from, with no words a child
-     must read. Each card is a little page of its own (reksio.html,
+<!-- The site's front page: Re-Kid's name and "pick a world" for the grown-up
+     (the child needs no words: the cards are the choice), then the worlds to
+     pick from. Each card is a little page of its own (reksio.html,
      krtek.html), shown in a frame so each game's scripts stay apart: the
      scene painted by its game's own painting.js, the character drawn by its
-     own code and alive, the games' old-print look over it. A tap on one: he
+     own code and alive, the games' old-print look over it; a card stays dark
+     until its page says it is painted ('ready'), then fades in, so it never
+     shows a bare, modern picture first. A tap on one: he
      cheers, and his scene opens. Published as the site's index.html by
      .github/workflows/pages.yml; opened from disk, it finds the games in
      worlds/. -->
 <style>
   html, body { margin: 0; height: 100%; background: #1d1914; overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-  main { height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); box-sizing: border-box; }
+  body { display: flex; flex-direction: column; height: 100dvh; padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); box-sizing: border-box; }
+  /* the name, in the warm cream and brown of an old title card */
+  header { flex: none; display: flex; align-items: baseline; justify-content: center; gap: 0.6em; flex-wrap: wrap; padding: 2px 0 10px; color: #f1dfb8; font-family: "Cooper Black", "Cooper Std", "Bookman Old Style", "Bookman", Georgia, serif; }
+  h1 { margin: 0; font-size: clamp(26px, 6vmin, 44px); font-weight: 900; letter-spacing: 0.02em; text-shadow: 2px 2px 0 #8a4f1d, 3px 3px 0 #3a2c1c; }
+  header p { margin: 0; font-size: clamp(14px, 3vmin, 20px); font-style: italic; color: #d9b98a; }
+  main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   @media (orientation: portrait) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } }
-  .card { position: relative; overflow: hidden; border-radius: 6px; box-shadow: 0 0 0 3px #3a2c1c, 0 6px 22px rgba(0, 0, 0, 0.5); transition: transform 0.25s cubic-bezier(.3,1.5,.5,1); }
+  .card { position: relative; overflow: hidden; border-radius: 6px; background: #2a2017; box-shadow: 0 0 0 3px #3a2c1c, 0 6px 22px rgba(0, 0, 0, 0.5); transition: transform 0.25s cubic-bezier(.3,1.5,.5,1); }
+  .card iframe { opacity: 0; transition: opacity 0.5s ease-out; }
+  .card.ready iframe { opacity: 1; }
   .card.going { transform: scale(0.97); }
   .card iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
   .card a { position: absolute; inset: 0; cursor: pointer; }
@@ -29,6 +39,7 @@
 </style>
 </head>
 <body>
+<header><h1>Re-Kid</h1><p>pick a world</p></header>
 <main>
   <div class="card"><iframe src="reksio.html" title="Reksio's yard" tabindex="-1"></iframe><a id="reksio" aria-label="Reksio's yard"></a></div>
   <div class="card"><iframe src="krtek.html" title="Krtek's meadow" tabindex="-1"></iframe><a id="krtek" aria-label="Krtek's meadow"></a></div>
@@ -40,6 +51,14 @@
     reksio: LOCAL ? '../worlds/reksio/games/yard/game/index.html' : 'reksio/yard/',
     krtek: LOCAL ? '../worlds/krtek/games/meadow/game/index.html' : 'krtek/meadow/',
   }
+  // A card fades in once its page is painted (or after a while, whatever it has).
+  const READY_LATEST_MS = 4000
+  const cards = [...document.querySelectorAll('.card')]
+  addEventListener('message', (e) => {
+    if (e.data !== 'ready') return
+    for (const c of cards) if (c.querySelector('iframe').contentWindow === e.source) c.classList.add('ready')
+  })
+  setTimeout(() => { for (const c of cards) c.classList.add('ready') }, READY_LATEST_MS)
   // A tap: he cheers (his card hears it), then his scene opens.
   for (const [id, href] of Object.entries(GAMES)) {
     const a = document.getElementById(id)

@@ -567,7 +567,7 @@ const Painting = (() => {
   /**
    * Paint the meadow into its layers: the clouds into the sky, the far
    * trees, the back and the front, the flower bed's mass, and the oak.
-   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element, rocks: Element, oak: Element}} into
+   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element, rocks?: Element, oak?: Element}} into
    * @param {number} pxPerUnit how many screen pixels a scene unit is
    */
   function paint(into, pxPerUnit) {
@@ -577,7 +577,7 @@ const Painting = (() => {
     place(into.far, layer(-60, 380, farW + 120, 290, (ctx) => far(ctx, farW)))
     place(into.back, layer(-60, 140, Layout.WORLD_W + 120, 590, back))
     if (into.rocks) place(into.rocks, layer(Layout.SPRING - 240, 360, 900, 370, rocks))
-    withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(-60, -80, 560, 800, oak), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else
+    if (into.oak) withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(-60, -80, 560, 800, oak), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else (none on the front page's card)
     place(into.front, layer(-60, 690, Layout.WORLD_W + 120, 210, front))
     const { from, to } = Layout.BED
     place(into.bed, layer(from - 30, 610, to - from + 60, 110, (ctx) => bed(ctx, from - 10, to + 10)))
