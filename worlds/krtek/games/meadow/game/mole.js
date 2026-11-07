@@ -410,6 +410,13 @@ const Mole = (() => {
     root.style.transform = rootAt(x)
   }
 
+  /** Where the bump of his tunnel is drawn now, or null when he isn't tunnelling (for whoever it passes under). */
+  function burrowX() {
+    const b = tunnel.lastElementChild
+    const t = b && getComputedStyle(b).transform
+    return t && t !== 'none' ? new DOMMatrixReadOnly(t).e : null
+  }
+
   /** Walk along the grass to x (he is out), in profile, his feet stepping; on a long trip he runs, low. */
   async function walkTo(x) {
     const from = state.x
@@ -468,6 +475,16 @@ const Mole = (() => {
     } finally {
       laugh(false)
     }
+  }
+
+  /** A hop on the spot, `up` high, as he stands and faces (to see over something): a crouch, up, down with a
+   * squash. Only his body moves, so a cut leaves him on the ground. */
+  async function hop(up = 44, ms = 520) {
+    const base = SINK[state.pose]
+    await Promise.all([
+      Motion.endAt(body, [{ transform: `translateY(${base}px)` }, { transform: `translateY(${base - up}px)`, offset: 0.45 }, { transform: `translateY(${base - up}px)`, offset: 0.6 }, { transform: `translateY(${base}px)` }], { duration: ms, easing: 'ease-out' }),
+      Motion.endAt(tilt, [{ transform: 'scale(1.1, 0.88)' }, { transform: 'scale(0.95, 1.08)', offset: 0.3 }, { transform: 'scale(1, 1)', offset: 0.6 }, { transform: 'scale(1.1, 0.9)', offset: 0.88 }, { transform: 'scale(1, 1)' }], { duration: ms }),
+    ])
   }
 
   /** Stretch both arms up, slowly, eyes shut and mouth wide: waking, or bedtime. */
@@ -721,5 +738,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, calm, settle, feel, digIn, scratchHead, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, wearing, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, walkTo, cheer, stretch, ghost, listen }
+  return { SCALE, state, drawnX, face, mood, calm, settle, feel, digIn, scratchHead, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, wearing, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, burrowX, walkTo, cheer, hop, stretch, ghost, listen }
 })()

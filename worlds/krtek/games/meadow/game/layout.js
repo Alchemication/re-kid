@@ -2,8 +2,9 @@
 // is 4000 scene units wide and 900 high, and the view (1600 wide) follows
 // the mole (view.js). From the left: the old oak at the edge of the wood
 // (where the meadow ends: he stops at its arch), the egg's grass, his molehill (home) with the flower bed in front of it as in Krtek
-// a buldozer, the poles' line, the spring and its pool, and the car's grass
-// on the far side.
+// a buldozer, the poles' line, the spring and its pool, the car's grass, and
+// the painter's garden behind its paling fence (where the meadow ends at the
+// right: he stops at its corner).
 //
 // Flags (README): `?day=N` makes the day N seconds long instead of five
 // minutes, for trying the evening and the ending; `?props=egg,poles` says
@@ -34,7 +35,17 @@ const Layout = (() => {
     trunk: 'M-60 716 C-20 708 4 682 14 640 C26 588 8 540 12 480 C16 410 34 350 22 290 C14 246 -14 212 -60 186 L-60 120 C-14 140 32 176 58 214 C70 150 66 86 44 18 C36 -12 30 -50 26 -80 L146 -80 C146 -30 152 20 168 64 C178 100 182 150 176 196 C214 156 262 132 316 120 C370 108 400 76 452 64 C482 58 516 66 544 54 L556 84 C524 100 490 96 462 104 C414 118 384 150 330 166 C300 182 282 214 284 262 C286 330 290 396 298 456 C306 520 314 590 336 646 C352 684 384 704 430 716 Z',
     crown: [[-34, 34, 100], [82, -24, 108], [208, -20, 104], [326, 30, 92], [440, 18, 70], [536, 34, 50], [-46, 168, 58], [140, 82, 62], [276, 100, 52]],
   }
-  const DIG = { from: OAK.x, to: WORLD_W - 140 } // where a tap can send him: at the left, the oak's arch
+  // The painter's garden at the right end (after Krtek malířem: his thatched cottage, a ladder, paint tins,
+  // a paling fence), painted by painting.js; fence.js draws the fence and answers taps on it. The fence
+  // runs along the meadow's back edge from `from`, then at `corner` turns towards us and comes forward to the
+  // picture's foot (`near`): he stops at x, side-on to that corner, all of it on the last screen. `gap`:
+  // where two palings are missing from the back run, and the hen looks through.
+  const FENCE = { x: 3700, from: 3300, corner: 3780, near: 3880, foot: 692, front: 905, tall: 168, every: 22, gap: 3566, cottage: 3540 }
+  // the painter's colours (Krtek malířem): his tins about the garden (painting.js), and the three the hare
+  // and the mouse bring from it for the fox (paint.js), each play three of these: bright, each reading on
+  // the mole's black, the hare's brown and the mouse's grey
+  const PAINTS = ['#e0453a', '#f2c94c', '#5b8fd6', '#f08fa6', '#8e6cc4', '#f2994a', '#5fb36a', '#ffffff']
+  const DIG = { from: OAK.x, to: FENCE.x } // where a tap can send him: at the left, the oak's arch; at the right, the fence's corner
   /** x kept within where he can go. */
   const clampX = (x) => Math.max(DIG.from, Math.min(DIG.to, x))
 
@@ -43,5 +54,5 @@ const Layout = (() => {
   const props = params.has('props') ? params.get('props').split(',').filter(Boolean) : null
   const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind'), eclipse: params.get('eclipse') === 'now' ? 0 : Number(params.get('eclipse')) || null, menace: params.get('menace'), wild: params.get('wild') }
 
-  return { WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, OAK, DIG, clampX, flags, dayMs: flags.day ? flags.day * 1000 : null }
+  return { WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, OAK, FENCE, PAINTS, DIG, clampX, flags, dayMs: flags.day ? flags.day * 1000 : null }
 })()

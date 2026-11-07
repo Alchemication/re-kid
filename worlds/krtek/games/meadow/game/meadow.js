@@ -4,7 +4,8 @@
 // him gets a word and a hop, a tap on the flower bed (behind his molehill)
 // has him sniff a flower, a tap on the spring has him paddle in its pool,
 // a tap on the old oak at the meadow's left end has him peek into its
-// hollow (oak.js), each a different way every time (rounds);
+// hollow (oak.js), a tap on the painter's fence at its right end has him
+// play at it (fence.js), each a different way every time (rounds);
 // watering comes with the rain cloud (rain.js), now and then. The day
 // runs on its own (day.js); at dusk the tulips close and the cricket
 // fiddles, through the last hour the picture closes in a circle round his
@@ -17,7 +18,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Oak, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
+/* global Again, Bed, Oak, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -116,6 +117,7 @@ const meadowGame = (() => {
       bed: document.getElementById('bed'),
       rocks: document.getElementById('rocks'),
       oak: document.getElementById('oak'),
+      garden: document.getElementById('garden'),
     }, (ctm ? ctm.a : 1) * (window.devicePixelRatio || 1))
     hill(HOME, true, false)
     makeBed()
@@ -296,6 +298,8 @@ const meadowGame = (() => {
       Debug.check('a free mole stands on the ground', m.lift === 0, { lift: m.lift })
       Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
       Debug.check('the oak\'s hollow is open once he is free', !Oak.dark, {})
+      Debug.check('the twig is down once he is free', !Fence.holding, {})
+      Debug.check('nobody is left about behind the fence once he is free', Fence.about === 0, { about: Fence.about })
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
     }
   }
@@ -396,11 +400,7 @@ const meadowGame = (() => {
     let last = null
     return () => {
       if (!left.length) {
-        left = [...names]
-        for (let i = left.length - 1; i > 0; i--) {
-          const j = Math.floor(random() * (i + 1))
-          ;[left[i], left[j]] = [left[j], left[i]]
-        }
+        left = Things.shuffle(names, random)
         if (left[0] === last) left.push(left.shift())
       }
       return (last = left.shift())
@@ -575,6 +575,7 @@ const meadowGame = (() => {
     Debug.trace('bedtime')
     cutShort()
     Things.night()
+    Fence.night()
     game.gesture = 'bedtime'
     await Debug.ignoreCut(intoHome(), 'home to bed')
     Mole.put(HOME, 'hill')
@@ -607,6 +608,7 @@ const meadowGame = (() => {
     [/^sniff$/, () => answer('sniff', sniff)],
     [/^paddle$/, () => answer('paddle', paddle)],
     [/^peek$/, () => answer('peek', Oak.peek, Oak.restore)],
+    [/^fence$/, () => answer('fence', Fence.play, Fence.restore)],
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => answer('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
@@ -728,6 +730,9 @@ const meadowGame = (() => {
     return Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) < r.width * CRITTER_MIDDLE ? under : null
   }
 
+  // The places that answer a tap on them: [what was tapped, intent]
+  const PLACE_HITS = [['#bed', 'sniff'], ['#spring', 'paddle'], ['.oak-hit', 'peek'], ['.fence-hit', 'fence']]
+
   /** What a tap at this point means (critter: the little creature tapped, if any). */
   function intentAt(target, p, critter) {
     if (critter) return critterIntent(critter.dataset.critter)
@@ -738,10 +743,9 @@ const meadowGame = (() => {
     // a tap on that encounter (it plays on, not cut short)
     if (target.closest('.mole-carry') && Things.holder()) return `use ${Things.holder()}`
     if (target.closest('.mole')) return game.gesture && Things.get(game.gesture) ? `use ${game.gesture}` : 'tap mole'
-    if (target.closest('#bed')) return 'sniff'
     if (target.closest('#sun') && eclipseCover()) return 'tap sun'
-    if (target.closest('#spring')) return 'paddle'
-    if (target.closest('.oak-hit')) return 'peek'
+    const place = PLACE_HITS.find(([sel]) => target.closest(sel))
+    if (place) return place[1]
     if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`
     return 'tap mole' // the sky: he answers anyway
   }
@@ -756,6 +760,7 @@ const meadowGame = (() => {
     [(x) => Math.abs(x - SPRING) < 300, 'paddle'],
     [(x) => x > BED.from - 120 && x < BED.to + 120, 'sniff'],
     [(x) => x < Layout.OAK.x + Layout.OAK.reach, 'peek'],
+    [(x) => x > Layout.FENCE.x - 200, 'fence'],
   ]
 
   document.addEventListener('keydown', (e) => {
@@ -798,6 +803,7 @@ const meadowGame = (() => {
   Spring.setup(document.getElementById('spring'), () => game.hour)
   Nest.setup(document.getElementById('spring'), () => game.hour)
   Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), document.getElementById('oak-ground'), { goTo, rounds, dropHat })
+  Fence.setup(document.getElementById('fence'), document.getElementById('fence-near'), document.getElementById('garden-life'), { goTo, rounds, el })
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
   Cricket.setup(document.getElementById('crickets'))
   Church.setup(document.getElementById('distant'), () => {
@@ -807,7 +813,7 @@ const meadowGame = (() => {
   })
   // nectar: the tulips in the bed while they are open, the bluebells and the yellow spike (painting.js)
   for (const i of [0, 1, 2, 3, 4]) World.offer(`tulip-${i}`, 'nectar', BED.from + 30 + i * 60, 620, () => Day.tulips(game.hour) > 0.5)
-  for (const [i, [x, y]] of [[380, 545], [HOME - 210, 555], [HOME + 150, 570], [HOME - 128, 480], [2780, 545], [3420, 545]].entries()) World.offer(`flower-${i}`, 'nectar', x, y)
+  for (const [i, [x, y]] of [[380, 545], [HOME - 210, 555], [HOME + 150, 570], [HOME - 128, 480], [2780, 545], [3150, 545]].entries()) World.offer(`flower-${i}`, 'nectar', x, y)
   // the wind: a strong gust's leaves or seeds, and he turns to watch them go by, if he is free
   Weather.setup(document.getElementById('critters'), {
     onWatch: () => {

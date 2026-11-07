@@ -75,11 +75,27 @@ decided and why.
      than he to it (a visitor with something to show him); one where he
      only watches and the child's taps change it; endings drawn per play
      (as the fox's). Then `new-gag` for the chosen ones.
-   - **The meadow's right end** (Adam, 2026-11-06: figure it out). The
-     left end has the oak; the right end still stops him at an invisible
-     line. To design with Adam first, then `new-gag`: what the films put
-     at a meadow's edge, and what he does there (an idea so far: a low
-     fence with a gap and a road towards the church hill).
+   - **Adam judges the painter's fence at the meadow's right end** (built
+     2026-11-07, his choice of the three designs): the painter's thatched
+     cottage and paint tins after Krtek malířem, behind a paling fence that
+     turns towards us at its corner, where he stops (no more invisible
+     line). A tap there, three turns in turn: a twig along the palings, a
+     note each up a scale (the twig left where he stops, so next time down
+     it); the hen's head through a gap, cluck, he starts and giggles; hops
+     to see over the corner, and on the third the hare hops up on the
+     other side, "ahoj!". Judge: the cottage and fence against the film's,
+     whether each turn reads, the twig's notes by ear (`Sound.tock`, made
+     in the browser: a `new-sound` take if it falls flat) and their pace.
+   - **Adam judges the tunnel in the paint story** (built 2026-11-07, his
+     idea): the hare and the mouse come from the painter's garden with the
+     tins, the fox in their way; the mole tunnels over to them under the
+     fox's feet and back, and they come up out of his molehill behind him.
+     Each tunnel draws what the fox does as it bumps by (a jump, a look
+     down, a spin round) and who comes up first; each play draws the tins'
+     colours and the friends' patterns (stripes, zigzags, spots). Judge
+     whether it reads, its length (about 18 s from their coming to the
+     tins down: `COME_MS`, `IDEA_MS`, `ASIDE` in `paint.js`), and the
+     painted ghost in colours other than the film's red.
    - **Small things to tap in the quiet stretches** (Adam, 2026-11-06).
      The meadow tells one story at a time, with quiet between
      (`docs/DECISIONS.md`); those stretches should carry the yard's kind

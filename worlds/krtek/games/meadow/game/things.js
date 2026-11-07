@@ -107,6 +107,16 @@ const Things = (() => {
     all[encounter.name] = { step: 0, out: false, done: false, ...encounter }
   }
 
+  /** A copy of list in an order drawn from rand (pure: the meadow's rounds and the encounters' draws). */
+  function shuffle(list, rand) {
+    const a = [...list]
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1))
+      ;[a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+  }
+
   /**
    * Which encounters come this play, and at what hour: one with a `chance`
    * comes in that share of plays, instead of its `instead`; then one of each
@@ -115,13 +125,6 @@ const Things = (() => {
    * The draws are made either way, so forcing one doesn't shift the rest.
    */
   function choose(encounters, rand, { props = null, soon = false } = {}) {
-    const shuffle = (list) => {
-      for (let i = list.length - 1; i > 0; i--) {
-        const j = Math.floor(rand() * (i + 1))
-        ;[list[i], list[j]] = [list[j], list[i]]
-      }
-      return list
-    }
     let pool = encounters
     for (const e of encounters.filter((c) => c.instead)) {
       const comes = rand() < e.chance // drawn either way
@@ -134,7 +137,7 @@ const Things = (() => {
       return list[Math.floor(rand() * list.length)]
     })
     const rest = pool.map((e) => e.name).filter((n) => !first.includes(n))
-    let names = [...shuffle(first), ...shuffle(rest)]
+    let names = [...shuffle(first, rand), ...shuffle(rest, rand)]
     if (props) names = props.filter((n) => encounters.some((e) => e.name === n))
     return names.slice(0, HOURS.length).map((name, i) => ({ name, at: soon && i === 0 ? SOON_HOUR : HOURS[i] }))
   }
@@ -328,5 +331,5 @@ const Things = (() => {
   const stateOf = (e) => (e.done ? 'done' : !e.out ? null : e.ask && e.step >= e.steps.length ? 'choosing' : `step ${e.step}`)
   const state = () => Object.fromEntries(plan.map((p) => [p.name, stateOf(all[p.name]) || `at ${p.at}`]))
 
-  return { /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, /** The one he went to by himself, if no tap on it since. */ get byHimself() { return byHimself }, names: () => Object.keys(all), add, choose, open, troubled, troubledName, inTrouble, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
+  return { shuffle, /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, /** The one he went to by himself, if no tap on it since. */ get byHimself() { return byHimself }, names: () => Object.keys(all), add, choose, open, troubled, troubledName, inTrouble, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
 })()

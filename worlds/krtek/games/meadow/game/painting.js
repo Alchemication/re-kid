@@ -18,6 +18,7 @@
 const Painting = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const RES = [0.75, 1.5] // canvas pixels per scene unit: as sharp as the screen shows the scene, within this (memory: the back is 4000 units wide)
+  const GARDEN_BOX = [3240, 300, 1100, 420] // what the painter's garden covers (x, y, w, h): his cottage, the tins in front, past the meadow's end for wide screens
   const OAK_BOX = [-60, -80, 640, 800] // what the oak's painting covers (x, y, w, h): its long right limb reaches past x 540
   const KNOT = [58, 330, 11, 24, -0.15] // the knot-hole up the oak's left side: x, y, its radii, its tilt
   const GRAIN = 2 // the oak's bark is worked out on a grid this coarse (scene units): fine enough for its ridges, quick
@@ -400,7 +401,7 @@ const Painting = (() => {
     const S = Layout.SPRING
     for (const [dx, len, lean] of [[40, 230, -0.5], [110, 260, -0.15], [180, 240, 0.25], [250, 200, 0.55], [-30, 170, -0.75]]) fern(ctx, S + 120 + dx, 668, len, lean, pick(['#2f5a3a', '#3d6c46', '#28503a']))
     // bluebells here and there
-    for (const x of [380, 2780, 3420]) bluebell(ctx, x, 690, r(130, 180))
+    for (const x of [380, 2780, 3150]) bluebell(ctx, x, 690, r(130, 180))
   }
 
   /** The spring's rock cliff (spring.js draws the water over it): boulders piled up, sponged in
@@ -650,6 +651,149 @@ const Painting = (() => {
     return { picture, lines }
   }
 
+  /** The painter's cottage at the right end, after Krtek malířem: a thatched roof over plastered walls and
+   * a gable of upright planks, small windows with crossed frames, a chimney, a ladder leaning on the wall,
+   * and his paint tins about the garden in front (they show between the fence's palings). */
+  function garden(ctx) {
+    const { cottage: cx } = Layout.FENCE
+    const [w, base, wall] = [360, 640, 120] // the cottage's width, where it stands, its walls' height
+    const [l, rr] = [cx - w / 2, cx + w / 2]
+    const eave = base - wall
+    const ridge = eave - 150
+    const gable = cx + w * 0.12 // the gable end, towards us on the right, as the film's
+    ctx.lineWidth = 3
+    ctx.strokeStyle = '#2f2a22'
+    // the walls: whitewash, a little pink in the shade, and the gable's planks
+    ctx.fillStyle = '#ead9cf'
+    ctx.fillRect(l, eave, w, wall)
+    for (let i = 0; i < 40; i++) dab(ctx, r(l, rr), r(eave, base), r(6, 16), pick(['#d9c3b8', '#f3e6dc', '#cdb2a8']), r(0.2, 0.45))
+    ctx.strokeRect(l, eave, w, wall)
+    ctx.beginPath()
+    ctx.moveTo(gable, base)
+    ctx.lineTo(gable, eave - 6)
+    ctx.lineTo((gable + rr) / 2, ridge + 30)
+    ctx.lineTo(rr + 4, eave - 6)
+    ctx.lineTo(rr + 4, base)
+    ctx.closePath()
+    ctx.fillStyle = '#9a6a3e'
+    ctx.fill()
+    ctx.stroke()
+    ctx.save()
+    ctx.clip()
+    ctx.lineWidth = 2
+    for (let x = gable + 10; x < rr; x += 13) {
+      ctx.strokeStyle = pick(['#6e4a2a', '#7d5634', '#5e3e22'])
+      ctx.beginPath()
+      ctx.moveTo(x + r(-1, 1), ridge)
+      ctx.lineTo(x + r(-1, 1), base)
+      ctx.stroke()
+    }
+    ctx.restore()
+    // the windows and the door
+    ctx.lineWidth = 3
+    ctx.strokeStyle = '#2f2a22'
+    for (const x of [l + 50, l + 140]) {
+      ctx.fillStyle = '#3c4a52'
+      ctx.fillRect(x, eave + 30, 34, 30)
+      ctx.strokeRect(x, eave + 30, 34, 30)
+      ctx.beginPath()
+      ctx.moveTo(x + 17, eave + 30)
+      ctx.lineTo(x + 17, eave + 60)
+      ctx.moveTo(x, eave + 45)
+      ctx.lineTo(x + 34, eave + 45)
+      ctx.strokeStyle = '#f3e6dc'
+      ctx.stroke()
+      ctx.strokeStyle = '#2f2a22'
+    }
+    ctx.fillStyle = '#3a2a1c'
+    ctx.fillRect(l + 214, eave + 36, 38, wall - 36)
+    ctx.strokeRect(l + 214, eave + 36, 38, wall - 36)
+    roofAndLadder(ctx, l, rr, base, gable)
+    tins(ctx, l, rr, base)
+  }
+
+  /** The cottage's thatched roof (from l to the gable), its chimney, and the ladder leaning on its wall. */
+  function roofAndLadder(ctx, l, rr, base, gable) {
+    const eave = base - 120
+    const ridge = eave - 150
+    // the thatch: a heavy roof of straw, its strokes running down, its edge ragged
+    const roof = new Path2D()
+    roof.moveTo(l - 26, eave + 10)
+    roof.lineTo(l + 40, ridge)
+    roof.lineTo((gable + rr) / 2, ridge)
+    roof.lineTo(gable - 4, eave + 14)
+    roof.closePath()
+    ctx.fillStyle = '#a5864e'
+    ctx.fill(roof)
+    ctx.save()
+    ctx.clip(roof)
+    for (let i = 0; i < 520; i++) {
+      const x = r(l - 30, gable + 10)
+      const y = r(ridge, eave + 14)
+      ctx.strokeStyle = pick(['#8a6c38', '#c2a266', '#76592c', '#b39358', '#d1b57c'])
+      ctx.globalAlpha = r(0.4, 0.8)
+      ctx.lineWidth = r(1.2, 2.4)
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+      ctx.lineTo(x - r(2, 6), y + r(14, 26))
+      ctx.stroke()
+    }
+    ctx.globalAlpha = 1
+    ctx.restore()
+    ctx.lineWidth = 3
+    ctx.strokeStyle = '#2f2a22'
+    ctx.stroke(roof)
+    // the chimney
+    ctx.fillStyle = '#c9b6a6'
+    ctx.fillRect(l + 92, ridge - 34, 26, 52)
+    ctx.strokeRect(l + 92, ridge - 34, 26, 52)
+    // the ladder, leaning on the wall by the door
+    ctx.strokeStyle = '#6e4a2a'
+    ctx.lineWidth = 4
+    const [lx, ly] = [l + 286, base]
+    ctx.beginPath()
+    ctx.moveTo(lx, ly)
+    ctx.lineTo(lx + 26, eave - 40)
+    ctx.moveTo(lx + 26, ly)
+    ctx.lineTo(lx + 52, eave - 40)
+    for (let k = 1; k < 7; k++) {
+      const t = k / 7
+      ctx.moveTo(lx + 26 * t, ly + (eave - 40 - ly) * t)
+      ctx.lineTo(lx + 26 + 26 * t, ly + (eave - 40 - ly) * t)
+    }
+    ctx.stroke()
+  }
+
+  /** The painter's tins about his garden from l to past r, in rows from `base`: lids off, a band of colour, brushes in some. */
+  function tins(ctx, l, rr, base) {
+    grass(ctx, [l - 80, rr + 260, base - 6, 700], 0.02, ['#86b866', '#9bc778', '#78ab5a'], [4, 8])
+    for (let row = 0; row < 3; row++) {
+      for (let x = l - 40 + row * 14; x < rr + 220; x += r(30, 46)) {
+        const y = base + 14 + row * 16
+        const [tw, th] = [r(16, 22), r(16, 22)]
+        ctx.fillStyle = '#c9ccd4'
+        ctx.fillRect(x - tw / 2, y - th, tw, th)
+        ctx.lineWidth = 2
+        ctx.strokeRect(x - tw / 2, y - th, tw, th)
+        ctx.fillStyle = pick(Layout.PAINTS)
+        ctx.beginPath()
+        ctx.ellipse(x, y - th, tw / 2, 4, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.stroke()
+        ctx.fillRect(x - tw / 2 + 2, y - th * 0.6, tw - 4, th * 0.25) // its band of colour
+        if (r() < 0.3) {
+          ctx.strokeStyle = '#6e4a2a'
+          ctx.lineWidth = 3
+          ctx.beginPath()
+          ctx.moveTo(x, y - th)
+          ctx.lineTo(x + r(-8, 8), y - th - 22)
+          ctx.stroke()
+          ctx.strokeStyle = '#2f2a22'
+        }
+      }
+    }
+  }
+
   /** In front: grass strokes, denser and darker towards the bottom, and low clumps of flowers along the edge. */
   function front(ctx) {
     const W = Layout.WORLD_W
@@ -676,8 +820,8 @@ const Painting = (() => {
 
   /**
    * Paint the meadow into its layers: the clouds into the sky, the far
-   * trees, the back and the front, the flower bed's mass, and the oak.
-   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element, rocks?: Element, oak?: Element}} into
+   * trees, the back and the front, the flower bed's mass, the oak, and the painter's garden.
+   * @param {{sky: Element, far: Element, back: Element, front: Element, bed: Element, rocks?: Element, oak?: Element, garden?: Element}} into
    * @param {number} pxPerUnit how many screen pixels a scene unit is
    */
   function paint(into, pxPerUnit) {
@@ -688,6 +832,7 @@ const Painting = (() => {
     place(into.back, layer(-60, 140, Layout.WORLD_W + 120, 590, back))
     if (into.rocks) place(into.rocks, layer(Layout.SPRING - 240, 360, 900, 370, rocks))
     if (into.oak) withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(...OAK_BOX, oak), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else (none on the front page's card)
+    if (into.garden) withStream(Debug.random('meadow-garden-painting'), 1, () => place(into.garden, layer(...GARDEN_BOX, garden))) // its own stream: it shifts nothing else
     place(into.front, layer(-60, 690, Layout.WORLD_W + 120, 210, front))
     const { from, to } = Layout.BED
     place(into.bed, layer(from - 30, 610, to - from + 60, 110, (ctx) => bed(ctx, from - 10, to + 10)))

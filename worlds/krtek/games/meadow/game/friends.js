@@ -157,18 +157,42 @@ const Friends = (() => {
   const NECK = { fox: '-2px -266px' } // where foxart.js's head meets his body
   const MOVES = { fox: FoxArt.moves }
 
-  /** Call one in: drawn at x, facing left (face: 1 turns it right). Nobody appears in view out of
-   * nowhere: it must be out of sight, unless it lives in a hole there (hole: the mouse, who
-   * comes up and goes home down it) or is born there (born: the chick, out of the egg). */
-  function make(kind, x, face = -1, { hole = false, born = false } = {}) {
-    Debug.check('a visitor comes in from out of sight, never appearing in view', hole || born || !inSight(x), { kind, x: Math.round(x), view: Math.round(View.x) })
-    const g = el('g', { class: `friend ${kind}` }, layer)
-    const riser = el('g', {}, g) // up out of a hole, or down into it
-    const inner = el('g', {}, riser) // facing left or right
+  const DOWN = 260 // down a hole this deep, the tallest (the hare, two tins held up) is out of sight under the ground
+  const SHADOWED = new Set(['fox']) // whose shadow falls on the grass in front: never cut at the ground (he never goes down a hole)
+  let clipped = null
+  /** The clip that cuts a visitor off just under its feet, in its own units (made once, in the meadow's drawing). */
+  function aboveGround() {
+    if (!clipped) {
+      clipped = 'friends-above-ground'
+      const defs = el('defs', {}, layer.ownerSVGElement)
+      const clip = el('clipPath', { id: clipped, clipPathUnits: 'userSpaceOnUse' }, defs)
+      el('rect', { x: -600, y: -1200, width: 1200, height: 1214 }, clip)
+    }
+    return clipped
+  }
+
+  /** A visitor's groups, drawn into `parent`: g where it stands, riser (up out of a hole, or down into
+   * it), inner (facing left or right), held (what it carries, in front, not turned: down a hole with it). */
+  function drawn(kind, parent) {
+    const g = el('g', { class: `friend ${kind}` }, parent)
+    if (!SHADOWED.has(kind)) g.setAttribute('clip-path', `url(#${aboveGround()})`) // down a hole, it is out of sight
+    const riser = el('g', {}, g)
+    const inner = el('g', {}, riser)
+    const held = el('g', {}, riser)
     const head = DRAW[kind](inner)
     head.style.transformOrigin = NECK[kind] ?? '0px -60px'
+    return { g, riser, inner, held, head }
+  }
+
+  /** Call one in: drawn at x, facing left (face: 1 turns it right). Nobody appears in view out of
+   * nowhere: it must be out of sight, unless it lives in a hole there (hole: the mouse, who
+   * comes up and goes home down it) or is born there (born: the chick, out of the egg), or is drawn
+   * behind something that hides it (behind: the layer, the garden behind the painter's fence). */
+  function make(kind, x, face = -1, { hole = false, born = false, behind = null } = {}) {
+    Debug.check('a visitor comes in from out of sight, never appearing in view', hole || born || behind || !inSight(x), { kind, x: Math.round(x), view: Math.round(View.x) })
+    const { g, riser, inner, held, head } = drawn(kind, behind || layer)
     const f = {
-      kind, g, x, face,
+      kind, g, x, face, held,
       place(nx) {
         f.x = nx
         g.style.transform = `translate(${nx}px, ${Y}px)`
@@ -208,7 +232,7 @@ const Friends = (() => {
       },
       /** Rise out of a hole in the ground (the mouse), or sink back. */
       async rise(up) {
-        await Motion.endAt(riser, [{ transform: `translateY(${up ? 0 : 110}px)` }], { duration: 420, easing: up ? 'cubic-bezier(.3,1.5,.5,1)' : 'ease-in' })
+        await Motion.endAt(riser, [{ transform: `translateY(${up ? 0 : DOWN}px)` }], { duration: 420, easing: up ? 'cubic-bezier(.3,1.5,.5,1)' : 'ease-in' })
       },
       /** A sneeze: the head jerks back, then forward. */
       async jolt() {
@@ -218,10 +242,12 @@ const Friends = (() => {
       async droop() {
         await Motion.endAt(head, [{ transform: 'rotate(0deg) translateY(0px)' }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.3 }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.7 }, { transform: 'rotate(0deg) translateY(0px)' }], { duration: 1400 })
       },
-      /** Paint on it: 'stripes' (the hare, a tiger) or 'spots' (the mouse), in `colour`. */
+      /** Paint on it, in `colour`: 'stripes' (a tiger), 'zigzags' or 'spots'. */
       daub(pattern, colour) {
         const marks = el('g', { class: 'paint' }, inner)
-        if (pattern === 'stripes') for (let y = -96; y < -6; y += 18) el('path', { d: `M-40 ${y} q40 -10 80 0`, stroke: colour, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round' }, marks)
+        const stroke = { stroke: colour, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }
+        if (pattern === 'stripes') for (let y = -96; y < -6; y += 18) el('path', { d: `M-40 ${y} q40 -10 80 0`, ...stroke }, marks)
+        else if (pattern === 'zigzags') for (let y = -84; y < -6; y += 28) el('path', { d: `M-36 ${y} l12 12 l12 -12 l12 12 l12 -12 l12 12`, ...stroke }, marks)
         else for (const [cx, cy] of [[-14, -36], [10, -22], [16, -42], [-4, -16], [-24, -60], [-2, -66]]) el('circle', { cx, cy, r: 6, fill: colour }, marks)
       },
       /** Up onto someone's shoulders (dy) or back down (0). */
@@ -230,7 +256,7 @@ const Friends = (() => {
       },
       /** Start down in a hole (rise() brings it up). */
       under() {
-        riser.style.transform = 'translateY(110px)'
+        riser.style.transform = `translateY(${DOWN}px)`
       },
       /** Off home, not to be seen vanishing (goHome). */
       leave: (dir = 0) => goHome(f, hole, dir),
@@ -238,8 +264,8 @@ const Friends = (() => {
       gone(bedtime = false) {
         const x = f.drawnX()
         const inView = inSight(x)
-        const down = /translateY\(110px\)/.test(riser.style.transform)
-        Debug.check('a visitor goes home out of sight, never vanishing in view', bedtime || down || !inView || !g.isConnected, { kind, x: Math.round(x), view: Math.round(View.x) })
+        const down = riser.style.transform === `translateY(${DOWN}px)`
+        Debug.check('a visitor goes home out of sight, never vanishing in view', bedtime || down || behind || !inView || !g.isConnected, { kind, x: Math.round(x), view: Math.round(View.x) })
         g.getAnimations({ subtree: true }).forEach((a) => a.cancel())
         g.remove()
       },

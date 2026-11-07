@@ -27,7 +27,7 @@
 /* exported Heron */
 const Heron = (() => {
   const POND = { x: 640, y: 650, rx: 110, ry: 12 } // where it lies this play (setup draws x and rx)
-  const SPOTS = [[420, 700], [2850, 3650]] // its middle in one of these stretches of the far edge: clear of his molehill and flower bed, the poles' hill and the spring's ferns…
+  const SPOTS = [[420, 700], [2850, 3100]] // its middle in one of these stretches of the far edge: clear of his molehill and flower bed, the poles' hill, the spring's ferns and the painter's garden…
   const NEAR_HOME = 0.6 // …in this share of plays the first, near his home, where the child is most
   const SIZE_RX = [85, 130] // how wide (half its width)
   const WADE = [0.5, 0.85] // the heron stands this far out from the middle towards an end (of its half width): in the shallows

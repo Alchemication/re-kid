@@ -339,6 +339,18 @@ const Sound = (() => {
     hiss(0, 0.05, 900, 2, 0.1)
   }
 
+  /** A twig along the fence: one paling's soft wooden tok, `step` notes up a pentatonic scale from G
+   * (a stand-in until takes are picked: new-sound). */
+  function tock(step) {
+    if (!ready()) return
+    const PENTA = [0, 2, 4, 7, 9]
+    const semis = 12 * Math.floor(step / PENTA.length) + PENTA[((step % PENTA.length) + PENTA.length) % PENTA.length]
+    const f = 392 * 2 ** (semis / 12)
+    note(f, 0, 0.14, 0.12, 'triangle', 0.98)
+    note(f * 2, 0, 0.05, 0.03, 'sine')
+    hiss(0, 0.02, 2600, 2, 0.05)
+  }
+
   /** A tug at something stuck: a low strain. */
   function tug() {
     if (!ready()) return
@@ -449,5 +461,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort }
 })()

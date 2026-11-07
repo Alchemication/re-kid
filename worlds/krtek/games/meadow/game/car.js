@@ -24,7 +24,7 @@
   const WHEELS_AT = [2860, 3100] // where its wheels lie
   const ROLLS_TO = 2680 // the second wheel rolls off this far, back towards the spring
   const PARK_AT = 560 // where he parks it, by his molehill
-  const TURN_AT = 3780 // where it turns, at the far end of the meadow
+  const TURN_AT = Layout.DIG.to - 40 // where it turns, at the far end of the meadow: just short of the painter's fence, him in it still in the meadow
   const SEAT = 34 // how far up he sits in it
   const ZOOM_MS_PER_UNIT = 1.6
   const STARTLE_CHANCE = 0.5 // the plays where it jiggles at his knock

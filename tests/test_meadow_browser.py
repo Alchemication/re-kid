@@ -1160,6 +1160,66 @@ class TestMeadowFox:
         assert not m.page.evaluate("Nest.alarmed")
         m.assert_settled()
 
+    def test_his_tunnel_brings_them_past_the_fox(self, meadow: callable) -> None:
+        """Adam, 2026-11-07: the hare and the mouse come from the painter's
+        garden with the tins, the fox in their way; he tunnels over to them
+        under the fox's feet (who feels it each way) and back, and up they
+        come behind him out of his molehill."""
+        m = self.fox_at_the_nest(meadow)
+        m.wait("meadowGame.trace().split(' fox feels ').length === 3", 60_000)
+        # on the way back the friends are down his tunnel, and the tins they carry with them
+        tins_down = m.page.evaluate("""() => {
+            const ground = document.querySelector('.friend.fox').getScreenCTM().f
+            return [...document.querySelectorAll('.tin')].every((t) => t.getBoundingClientRect().top > ground) }""")
+        assert tins_down, "the tins stayed up when their carriers went down the hole"
+        m.wait("meadowGame.trace().includes(' red ')", 60_000)
+        trace = m.page.evaluate("meadowGame.trace()")
+        feels = traced(m, "fox feels")
+        assert len(feels) == 2 and feels[0] != feels[1], feels
+        assert (
+            trace.index(" tunnel ") < trace.index(" fox feels ") < trace.index(" red ")
+        ), "the tins came before the tunnel, or he fell in before they came"
+        assert m.page.evaluate("meadowGame.state().hills") >= 2, (
+            "no molehill at either end"
+        )
+        behind = m.page.evaluate(
+            "['hare', 'mouse'].map((k) => document.querySelector('.friend.' + k).getBoundingClientRect().right)"
+            " .every((r) => r < document.querySelector('.mole-body').getBoundingClientRect().left)"
+        )
+        assert behind, "his friends did not come up behind him"
+        assert (
+            m.page.evaluate("document.querySelectorAll('.tin[data-thing]').length") == 3
+        )
+        m.wait("meadowGame.state().things.paint === 'done'", 90_000)
+        m.wait_free()
+        m.assert_settled()
+
+    def test_each_play_draws_its_own_paints(self, meadow: callable) -> None:
+        plays = []
+        for seed in (1, 2, 3):
+            m = meadow(f"seed={seed}&still&props=paint")
+            d = m.page.evaluate("meadowGame.detail('paint')")
+            assert len(set(d["tins"])) == 3, d
+            assert (
+                d["patterns"]["hare"]["pattern"] != d["patterns"]["mouse"]["pattern"]
+            ), d
+            plays.append((tuple(d["tins"]), d["patterns"]["hare"]["pattern"]))
+        assert len(set(plays)) > 1, "every play paints the same"
+
+    def test_bedtime_in_his_tunnel_leaves_nobody_under(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=paint&day=26")
+        m.wake()
+        arrived(m, "paint")
+        m.do("use paint")
+        m.wait("meadowGame.state().ended", 60_000)
+        trace = m.page.evaluate("meadowGame.trace()")
+        assert trace.index(" tunnel ") < trace.index(" bedtime "), (
+            "bedtime came before the tunnel"
+        )
+        assert " red " not in trace, "bedtime came after the tunnel"
+        m.wait("document.querySelectorAll('.friend').length === 0", 5000)
+        assert not m.errors, m.errors
+
     def test_cut_short_the_chicks_settle(self, meadow: callable) -> None:
         m = self.fox_at_the_nest(meadow)
         m.do("go to 600")
@@ -1632,6 +1692,142 @@ class TestMeadowOak:
             m.assert_settled()
         assert "dark" in traced(m, "peeks")
         assert m.page.evaluate("Mole.wearing()?.id") == "cap"
+
+
+class TestMeadowFence:
+    """The painter's fence at the meadow's right end (fence.js): he stops at its corner,
+    and a tap on it has him play at it, a different way each time."""
+
+    TURNS = ("gap", "hops", "twig")
+
+    def leaves_nothing(self, m: Meadow) -> None:
+        """No twig in his hands, nobody about behind the fence, nothing held up."""
+        left = m.page.evaluate(
+            "({ twig: Fence.holding, about: Fence.about, holds: Mole.state.holdsUp })"
+        )
+        assert left == {"twig": False, "about": 0, "holds": False}, left
+
+    def near(self, meadow: callable) -> Meadow:
+        m = meadow()
+        m.wake()
+        m.do("go to 3000")  # a walk, not a run, from here to the fence
+        m.wait_free()
+        return m
+
+    def test_he_stops_at_its_corner(self, meadow: callable) -> None:
+        m = self.near(meadow)
+        m.do("go to 3990")
+        m.wait_free()
+        assert m.state()["x"] == m.page.evaluate("Layout.FENCE.x")
+        m.assert_settled()
+
+    def test_a_tap_on_it_plays_a_new_way_each_time(self, meadow: callable) -> None:
+        m = self.near(meadow)
+        for _ in range(4):
+            m.do("fence")
+            m.wait_free()
+            m.assert_settled()
+            self.leaves_nothing(m)
+        turns = traced(m, "fence")
+        assert tuple(sorted(turns[:3])) == self.TURNS, turns
+        assert all(a != b for a, b in pairwise(turns)), turns
+
+    def test_the_twig_rings_up_the_scale_and_lies_where_he_left_it(
+        self, meadow: callable
+    ) -> None:
+        m = self.near(meadow)
+        start = m.page.evaluate("Fence.twigX")
+        for _ in range(3):
+            m.do("fence")
+            m.wait_free()
+            if traced(m, "fence")[-1] == "twig":
+                break
+        notes = m.page.evaluate(
+            "meadowGame.trace().split('\\n').filter((l) => l.includes(' twig note ')).map((l) => JSON.parse(l.slice(l.indexOf('{'))).k)"
+        )
+        assert len(notes) > 10 and notes == sorted(notes), (
+            notes
+        )  # along to the right: up
+        assert notes[0] == 0, f"the scale began part way up: {notes}"
+        assert m.page.evaluate("Fence.twigX") > start + 200
+        m.assert_settled()
+
+    def test_cut_short_the_hare_ducks_from_where_he_is(self, meadow: callable) -> None:
+        """Review, 2026-11-07: a cut cancelled his rise over the corner, which
+        jumped him to its end (an animation's end is set on the element)
+        before he ducked."""
+        m = self.near(meadow)
+        m.do("go to 3500")
+        m.wait_free()
+        for n in range(1, 4):
+            m.do("fence")
+            m.wait(f"meadowGame.trace().split(' fence {{').length > {n}", 5_000)
+            if traced(m, "fence")[-1] == "hops":
+                break
+            m.wait_free()
+        # the cut comes from the page, the first frame he is on his way up over the corner
+        before, after = m.run("""new Promise((done) => {
+            const stop = Clock.every(10, () => {
+                const h = document.querySelector('#garden-life .friend.hare')
+                if (!h || !h.getAnimations().some((a) => a.playState === 'running')) return
+                stop()
+                const stands = () => new DOMMatrixReadOnly(getComputedStyle(h).transform).f // how high he stands
+                const y = stands()
+                meadowGame.perform('go to 3300')
+                Clock.wait(1).then(() => done([y, stands()])) // the next frame
+            })
+        })""")
+        assert after >= before - 4, (
+            f"he jumped up before ducking: {before:.0f} to {after:.0f}"
+        )
+        m.wait_free()
+        m.assert_settled()
+
+    @pytest.mark.parametrize("cut_ms", [1200, 2600, 4000, 5400])
+    def test_each_turn_cut_short_leaves_nothing_behind(
+        self, meadow: callable, cut_ms: int
+    ) -> None:
+        m = self.near(meadow)
+        m.do("go to 3500")  # by the fence: each turn starts soon
+        m.wait_free()
+        for _ in range(3):
+            m.do("fence")
+            m.play_for(cut_ms)
+            m.do("go to 3300")
+            m.wait_free()
+            m.assert_settled()
+            self.leaves_nothing(m)
+        assert tuple(sorted(traced(m, "fence"))) == self.TURNS
+        m.play_for(2500)  # the hen off along the garden, out of sight
+        assert (
+            m.page.evaluate("document.getElementById('garden-life').childElementCount")
+            == 0
+        )
+
+    def test_a_real_tap_on_its_palings_and_he_plays(self, meadow: callable) -> None:
+        m = self.near(meadow)
+        m.do("go to 3500")
+        m.wait_free()
+        m.wait("meadowGame.state().view === 2400")  # the view at the meadow's right end
+        # the screen shows 0.8 px a unit: a paling of the back fence, above his head's height
+        m.page.mouse.click((3410 - 2400) * 0.8, 590 * 0.8)
+        m.wait("meadowGame.trace().includes(' fence {')", 5_000)
+        m.wait_free()
+        m.assert_settled()
+
+    def test_bedtime_at_the_fence(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&day=16")
+        m.wake()
+        m.do("go to 3000")
+        m.wait_free()
+        for _ in range(30):
+            if m.state()["ended"]:
+                break
+            m.do("fence")
+            m.play_for(1500)
+        m.wait("meadowGame.state().ended", 30_000)
+        assert m.page.evaluate("Fence.about") == 0
+        assert not m.errors, m.errors
 
 
 class TestMeadowSpring:
