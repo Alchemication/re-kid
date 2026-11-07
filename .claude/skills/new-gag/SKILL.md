@@ -201,7 +201,10 @@ on screen when it happens. How a game lays things out: its map. Where
 something else must move to make room, or a bound moves (where the hero
 can go), write the moved spots relative to what they now stand by, and
 grep for the old numbers: moving the meadow's left end to the oak's arch
-left two hard-coded limits behind in the egg, which a review caught.
+left two hard-coded limits behind in the egg, which a review caught. Grep
+too for what was placed by its distance from the end ("near the far end",
+`S - 300`): the painter's fence at the meadow's right end covered a heron
+pond, a nectar flower and a bluebell that stood there.
 
 ## 4. Where each piece goes
 
@@ -270,6 +273,11 @@ for, and update every caller, no shims.
   on after a cut unless the cut stops it: keep the booked sources and stop
   them in the restore (the oak's echoes answered a mole who had walked
   away).
+- Waiting for something moving to reach a place: wait until it has
+  crossed it, never until it is "near" (within so many units). Near is a
+  window a fast frame steps over, and the wait hangs: the fox waiting for
+  the mole's tunnel bump to come by never saw it at test speed. If it
+  starts out of sight, first wait to see it, then for it to cross.
 - A fallback for a gag nobody plays on (let the next one come, send
   it home) counts from its last progress, never from when it arrived:
   counted from arrival, it fires while the child is still playing (the
@@ -306,6 +314,11 @@ The game's tables and fakes: its file (section 4). For every game:
 - Each bug a review finds gets a test that fails on the old code: put the old
   code back, see it fail, restore. Check the test reaches the bug: one that
   cut the gag at its first move never reached the stray call it was for.
+  If the old code passes, find out why before moving on: the hare's
+  cut-short test at the meadow's fence passed on the buggy code because the
+  move it cut never animated (a shared `Motion.endAt` given only its end
+  jumped there; fixed in debug.js, so a move given only its end now glides
+  from where the thing stands).
 - Tapping a thing by its selector clicks the middle of its box, which may be
   something drawn on top (a clock over a house). Tap a point the thing
   owns (the game's map has the helper).
@@ -321,6 +334,9 @@ The game's tables and fakes: its file (section 4). For every game:
 2. `/code-review` the diff (and `/simplify`) before every commit, one gag
    at a time, never once at the end for several: each review of four
    encounters found four to ten real bugs. Fix them all, with tests (7).
+   Don't take a look-through (6) for a review: screenshots of the
+   paint's tunnel passed while the tins floated above the hole their
+   carriers had gone down, which the review found.
 3. Then once: `uv run ruff check . && uv run pytest`, `npx --yes
    eslint@10.12.0 worlds`, `uv run pytest -m browser -n 4`, `uv run pytest
    -m perf` if something drawn every frame changed, `main.py validate`.

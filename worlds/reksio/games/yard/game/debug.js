@@ -210,13 +210,18 @@ const Motion = (() => {
    * Animate `el` through `keyframes` and leave it where they end: the end is
    * set on the element first (its style), so the animation only covers the
    * move; whether it finishes or is cut short, the element shows the end.
-   * With a delay, it keeps the first keyframe until it starts. Resolves when
-   * it gets there; rejects if cut short (callers that await it decide).
+   * Given only its end, it starts from where the element stands now (read
+   * before the end is set, or there would be nothing to move from). With a
+   * delay, it keeps the first keyframe until it starts. Resolves when it gets
+   * there; rejects if cut short (callers that await it decide).
    */
   function endAt(el, keyframes, opts = {}) {
-    for (const [k, v] of Object.entries(keyframes[keyframes.length - 1])) {
-      if (!NOT_STYLE.has(k)) el.style[k] = v
+    const end = Object.entries(keyframes[keyframes.length - 1]).filter(([k]) => !NOT_STYLE.has(k))
+    if (keyframes.length === 1) {
+      const now = getComputedStyle(el)
+      keyframes = [Object.fromEntries(end.map(([k]) => [k, now[k]])), keyframes[0]]
     }
+    for (const [k, v] of end) el.style[k] = v
     const anim = el.animate(keyframes, { ...opts, fill: opts.delay ? 'backwards' : 'none' })
     const done = anim.finished
     done.catch(() => 'cut short: the element already shows its end') // whoever awaits it hears; nobody else need

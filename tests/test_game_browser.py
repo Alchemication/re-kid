@@ -873,6 +873,28 @@ class TestDebugOverlay:
         assert "busy: false" in text
 
 
+class TestMotion:
+    """Motion.endAt (debug.js), shared by every game."""
+
+    def test_given_only_its_end_it_moves_from_where_it_stands(
+        self, yard: callable
+    ) -> None:
+        y = yard(STILL)
+        y.page.evaluate(
+            """() => {
+              const el = document.body.appendChild(document.createElement('div'))
+              el.id = 'mover'
+              el.style.transform = 'translateX(0px)'
+              Debug.ignoreCut(Motion.endAt(el, [{ transform: 'translateX(100px)' }], { duration: 1000 }), 'test')
+            }"""
+        )
+        y.play_for(500)
+        x = y.page.evaluate(
+            "new DOMMatrixReadOnly(getComputedStyle(mover).transform).e"
+        )
+        assert 10 < x < 90, f"half way it should be on its way, not already there: {x}"
+
+
 DAY = ["house", "tap", "bowl", "dig", "gate", "flowers"]  # six new things
 DAY_PLAY = f"{STILL}&props=bowl,dig,film&flowers=1"
 SUN_X = "Number(document.querySelector('#sun .sun').getAttribute('cx'))"

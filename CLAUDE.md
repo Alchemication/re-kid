@@ -295,7 +295,7 @@ heats the laptop for minutes.
 | `creatures.js` | `"TestCritters"` |
 | `weather.js` / `shower.js` / `wet.js` / `ice.js` | `"drops or shakeOff or puddle or snail or TestIce"` |
 | `day.js` / `sky.js` / `grownup.js` / the end | `"TestWholePlay or TestEvening"` |
-| `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay"` |
+| `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay or TestMotion"` |
 | `input.js`, taps and keys | `"TestRealInput"` |
 | screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
