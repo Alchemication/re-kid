@@ -70,7 +70,13 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
   }
 }
 
-/* the owl in the oak (owl.js): flying to its limb, its wings beat (each from its shoulder, out and up) */
+/* the owl in the oak (owl.js): flying to its limb, its wings beat (each from its shoulder, out and up); dozing in its hole
+   (only while in view), its drooped head nods and its z's drift up */
+.owl-z { opacity: 0; }
+.owl.dozing .owl-head { animation: owl-doze 3.2s ease-in-out infinite alternate; }
+@keyframes owl-doze { from { transform: rotate(-3deg) translateY(0); } to { transform: rotate(4deg) translateY(2px); } }
+.owl.dozing .owl-z { animation: owl-z 3.6s ease-out infinite; }
+@keyframes owl-z { 0% { opacity: 0; transform: translate(0, 0); } 25% { opacity: 0.9; } 100% { opacity: 0; transform: translate(10px, -24px); } }
 .owl.flying .owl-wing { animation: owl-beat 0.42s ease-in-out infinite alternate; }
 @keyframes owl-beat { from { transform: rotate(20deg); } to { transform: rotate(115deg); } }
 

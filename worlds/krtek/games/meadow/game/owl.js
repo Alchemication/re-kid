@@ -1,6 +1,7 @@
 // The owl in the oak (invented, not from the films; Adam's pick, 2026-11-07):
-// on some plays a tawny owl lives in the knot-hole up the oak's trunk. By
-// day it sleeps there, sitting in the hole, eyes shut. When he calls into
+// on some plays an owl lives in the knot-hole up the oak's trunk: round,
+// a big head, small ear tufts, pink cheeks. By day it sleeps there, its
+// head drooped and nodding, a z drifting up now and then. When he calls into
 // the arch below (oak.js, the echo), the first time the hollow answers
 // him; after that, while the owl sleeps, a sleepy "hoo?" comes down
 // instead: he looks up, it opens its eyes at him, blinks, shuts them again,
@@ -20,7 +21,7 @@
 // game.css .owl), and restore() puts it back as it sits at once when a tap
 // cuts a visit short.
 
-/* global Clock, Debug, Layout, Mole, Motion, Music, Sound */
+/* global Clock, CSSAnimation, Debug, Layout, Mole, Motion, Music, Sound, View */
 /* exported Owl */
 const Owl = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -31,10 +32,11 @@ const Owl = (() => {
   const BELLY = '#d4b48a'
   const CHANCE = 0.6 // on this share of plays an owl lives in the oak
   const [KX, KY, , KRY] = Layout.OAK.knot // the knot-hole it sleeps in
-  const IN_HOLE = { x: KX, y: KY + KRY * 0.82, s: 0.7 } // sitting in the hole: its feet on the hole's lip, smaller (further in)
+  const IN_HOLE = { x: KX, y: KY + KRY * 0.82, s: 0.8 } // sitting in the hole: its feet on the hole's lip, smaller (further in)
   const PERCH = { ...Layout.OAK.perch, s: 1 } // on the broken-off limb out of the trunk's right side
   const STAND = PERCH.x - 6 // where he stands to look up at it
-  const NECK = -80 // its neck, in its units: its head turns and tilts about this
+  const NECK = -56 // its neck, in its units: its head turns and tilts about this
+  const DROOP = 'translateY(5px) rotate(-12deg)' // asleep, its head sunk and fallen to one side
   const OUT_AT = 18.5 // the hour it wakes and comes out: the sun low, before the cricket
   const POP_MS = 700 // out of the hole and towards us
   const FLY_MS = 1900 // over onto the limb, wings beating
@@ -42,8 +44,12 @@ const Owl = (() => {
   const HOOT_AFTER_MS = 1200 // into that quiet, it hoots
   const GAZE_MAX = 4 // its pupils, at most this far across (its units)
   const TILT = 70 // its head over this far, tilting at him (degrees)
+  const TUFT = 0.6 // its ear tufts, this much of their drawn size (at full size they read as antlers: Adam, 2026-11-07)
+  const TUFT_ROOT = [26, -50] // ...shrunk towards where they grow from its head
   const ROUND = 26 // its face, turned right round, gone this far to the side as it goes
   const random = Debug.random('meadow-owl') // whether it lives here, how a visit goes: its own stream
+  const blinks = Debug.random('meadow-owl-blink') // when it blinks: looked at every frame, so a stream of its own
+  const BLINK_EVERY = [3000, 7000] // awake on its limb, it blinks once in this many ms
 
   let g = null // the whole, where it sits
   let bob = null // lifts its head as it hoots
@@ -56,6 +62,7 @@ const Owl = (() => {
   let calls = 0 // his calls into the arch below it
   let posing = false // its head over or round (a visit): the rule says never once he is free
   let gazeNow = 0
+  let blinkAt = 0 // when it blinks next, on its limb
   let goTo, next // the meadow's (setup)
 
   const el = (tag, attrs = {}, parent) => {
@@ -67,47 +74,67 @@ const Owl = (() => {
   const line = (w = 2.2) => ({ stroke: INK, 'stroke-width': w, 'stroke-linejoin': 'round' })
   const at = ({ x, y, s }) => `translate(${x}px, ${y}px) scale(${s})`
 
-  /** A wing, its shoulder at 0, 0, hanging down along its side (`dir` -1 its left, 1 its right). */
+  /** A wing, its shoulder at 0, 0, hugging its side (`dir` -1 its left, 1 its right). */
   function wing(dir, parent) {
-    const outer = el('g', { transform: `translate(${dir * 30} -68) scale(${-dir} 1)` }, parent)
+    const outer = el('g', { transform: `translate(${dir * 33} -50) scale(${-dir} 1)` }, parent)
     const w = el('g', { class: 'owl-wing' }, outer)
-    el('path', { d: 'M0 0 C14 16 16 44 -2 64 C-8 42 -8 18 0 0 Z', fill: WING, ...line() }, w)
-    for (const y of [22, 36, 50]) el('path', { d: `M2 ${y} Q6 ${y + 4} 9 ${y - 2}`, fill: 'none', stroke: INK, 'stroke-width': 1.2 }, w)
+    el('path', { d: 'M0 0 C13 12 13 34 -2 46 C-9 30 -9 12 0 0 Z', fill: WING, ...line() }, w)
+    for (const y of [16, 29]) el('path', { d: `M1 ${y} Q5 ${y + 4} 8 ${y - 1}`, fill: 'none', stroke: INK, 'stroke-width': 1.2 }, w)
     return w
   }
 
-  /** The owl, facing us, its feet at 0, 0. */
+  /** An ear tuft (`side` -1 its left, 1 its right): feathers sweeping up and out from above its eye, three
+   * ragged tips, a paler streak up the middle; its root hidden under the head drawn over it. */
+  function earTuft(side, parent) {
+    parent = el('g', { transform: `translate(${side * TUFT_ROOT[0]} ${TUFT_ROOT[1]}) scale(${TUFT}) translate(${-side * TUFT_ROOT[0]} ${-TUFT_ROOT[1]})` }, parent)
+    const p = (pts) => pts.map(([x, y]) => `${side * x} ${y}`)
+    const [a, b, c, d, e, f, g2] = p([[12, -56], [40, -86], [44, -74], [58, -82], [55, -68], [68, -66], [38, -36]])
+    el('path', { d: `M${a} Q${p([[22, -74]])} ${b} L${c} L${d} L${e} L${f} Q${p([[56, -50]])} ${g2} Z`, fill: COAT, ...line(2) }, parent)
+    const [s1, s2, s3] = p([[26, -56], [48, -78], [46, -54]])
+    el('path', { d: `M${s1} Q${p([[36, -70]])} ${s2} Q${p([[50, -64]])} ${s3} Z`, fill: '#d9a868' }, parent)
+  }
+
+  /** The owl, facing us, its feet at 0, 0: round as a ball, its head big on it (a chick's proportions read as
+   * cute), ear tufts, a heart-shaped face, big shiny eyes, pink cheeks. */
   function draw(into) {
     const body = el('g', { class: 'owl-body' }, into)
-    for (const dx of [-11, 11]) el('ellipse', { cx: dx, cy: -2, rx: 7, ry: 4, fill: '#c9a24a', ...line(1.6) }, body)
-    el('ellipse', { cx: 0, cy: -46, rx: 34, ry: 44, fill: COAT, ...line() }, body)
-    el('ellipse', { cx: 0, cy: -40, rx: 22, ry: 31, fill: BELLY }, body)
-    for (const [x, y] of [[-9, -56], [8, -52], [-2, -42], [-11, -32], [9, -30], [0, -20]]) el('path', { d: `M${x - 3} ${y} L${x} ${y + 5} L${x + 3} ${y}`, fill: 'none', stroke: WING, 'stroke-width': 1.6 }, body)
+    for (const side of [-1, 1]) for (const dx of [7, 14]) el('ellipse', { cx: side * dx, cy: -1, rx: 4, ry: 3.5, fill: '#e0b04a', ...line(1.4) }, body)
+    el('ellipse', { cx: 0, cy: -32, rx: 38, ry: 33, fill: COAT, ...line() }, body)
+    el('ellipse', { cx: 0, cy: -28, rx: 26, ry: 25, fill: BELLY }, body)
+    for (const [x, y] of [[-10, -40], [3, -42], [13, -36], [-14, -28], [-1, -29], [11, -24], [-7, -16], [6, -14]]) el('path', { d: `M${x - 3} ${y} Q${x} ${y + 4} ${x + 3} ${y}`, fill: 'none', stroke: WING, 'stroke-width': 1.5 }, body)
     wing(-1, body)
     wing(1, body)
     const neck = el('g', { transform: `translate(0 ${NECK})` }, into)
-    bob = el('g', { class: 'owl-bob' }, neck) // up a little as it hoots: apart from the head's turns, so neither undoes the other
+    bob = el('g', { class: 'owl-bob' }, neck) // its head drooped asleep, lifted as it hoots: apart from the head's turns
     head = el('g', { class: 'owl-head' }, bob)
-    el('circle', { cx: 0, cy: -22, r: 31, fill: COAT, ...line() }, head)
+    for (const side of [-1, 1]) earTuft(side, head)
+    el('ellipse', { cx: 0, cy: -28, rx: 39, ry: 32, fill: COAT, ...line() }, head)
     back = el('g', { class: 'owl-back', opacity: 0 }, head)
-    for (const [x, y] of [[-12, -34], [8, -30], [-2, -18], [14, -14], [-14, -12]]) el('path', { d: `M${x - 5} ${y} Q${x} ${y + 5} ${x + 5} ${y}`, fill: 'none', stroke: WING, 'stroke-width': 1.6 }, back)
+    for (const [x, y] of [[-14, -40], [8, -38], [-3, -26], [16, -20], [-18, -16]]) el('path', { d: `M${x - 5} ${y} Q${x} ${y + 5} ${x + 5} ${y}`, fill: 'none', stroke: WING, 'stroke-width': 1.6 }, back)
     face = el('g', { class: 'owl-face' }, head)
-    for (const dx of [-13, 13]) el('circle', { cx: dx, cy: -22, r: 16, fill: DISC, stroke: '#6a4a2c', 'stroke-width': 1.5 }, face)
-    el('path', { d: 'M-24 -38 Q-13 -34 0 -28 Q13 -34 24 -38', fill: 'none', stroke: WING, 'stroke-width': 2.4 }, face) // its brow
+    for (const dx of [-14, 14]) el('circle', { cx: dx, cy: -28, r: 18, fill: DISC, stroke: '#6a4a2c', 'stroke-width': 1.5 }, face)
+    for (const dx of [-26, 26]) el('ellipse', { cx: dx, cy: -14, rx: 6, ry: 3.5, fill: '#ec9c8c', opacity: 0.7 }, face) // its cheeks
     pupils = el('g', {}, face)
-    for (const dx of [-13, 13]) {
-      el('circle', { cx: dx, cy: -22, r: 9, fill: '#1b1510' }, pupils)
-      el('circle', { cx: dx + 3, cy: -25, r: 2.6, fill: '#fff' }, pupils)
+    for (const dx of [-14, 14]) {
+      el('circle', { cx: dx, cy: -28, r: 11, fill: '#1b1510' }, pupils)
+      el('circle', { cx: dx + 4, cy: -32, r: 3.6, fill: '#fff' }, pupils)
+      el('circle', { cx: dx - 3, cy: -23, r: 1.6, fill: '#fff' }, pupils)
     }
-    for (const dx of [-13, 13]) {
+    for (const dx of [-14, 14]) {
       const lid = el('g', { class: 'owl-lid' }, face)
-      el('circle', { cx: dx, cy: -22, r: 10.5, fill: DISC }, lid)
-      el('path', { d: `M${dx - 10} -20 Q${dx} -14 ${dx + 10} -20`, fill: 'none', stroke: INK, 'stroke-width': 1.8, 'stroke-linecap': 'round' }, lid)
+      el('circle', { cx: dx, cy: -28, r: 12.5, fill: DISC }, lid)
+      el('path', { d: `M${dx - 9} -26 Q${dx} -19 ${dx + 9} -26`, fill: 'none', stroke: INK, 'stroke-width': 2, 'stroke-linecap': 'round' }, lid) // shut: a contented curve
       lid.style.transformBox = 'fill-box'
       lid.style.transformOrigin = 'center top'
       lids.push(lid)
     }
-    el('path', { d: 'M-4 -15 L4 -15 L0 -5 Z', fill: '#d9b44a', ...line(1.2) }, face)
+    el('path', { d: 'M-4 -17 Q0 -19 4 -17 Q2 -10 0 -8 Q-2 -10 -4 -17 Z', fill: '#e0b04a', ...line(1.2) }, face)
+    for (const [i, [x, y]] of [[34, -96], [46, -114]].entries()) { // asleep, its z's drift up out of the hole
+      const z = el('g', { class: 'owl-z' }, into)
+      const d = `M${x} ${y} h13 l-13 14 h13`
+      for (const [colour, w] of [[INK, 6], ['#fbf6e8', 3]]) el('path', { d, fill: 'none', stroke: colour, 'stroke-width': w, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, z) // outlined: it must show on the bark
+      z.style.animationDelay = `${i * 1.8}s`
+    }
   }
 
   /** Its lids: 1 shut, 0 open (each, or [left, right]). */
@@ -152,14 +179,23 @@ const Owl = (() => {
   function sit(where, now) {
     state = now
     g.style.transform = at(where)
+    bob.style.transform = now === 'asleep' ? DROOP : ''
     eyes(now === 'asleep' ? 1 : 0)
   }
 
   /** The hour: at OUT_AT, once he is free (not at it, nor at the oak), it wakes and comes out; out, its eyes
    * follow him. */
   function tick(h, free) {
+    if (state === 'none') return
+    // dozing (its head nodding, its z's drifting up: CSS loops) only while it sleeps with its eyes shut, in view
+    g.classList.toggle('dozing', state === 'asleep' && View.x < PERCH.x && lids[0].style.transform === 'scaleY(1)')
     if (state === 'asleep' && h >= OUT_AT && free) Debug.ignoreCut(comeOut(), 'the owl comes out')
-    if (state === 'perched' && !posing) gaze(Mole.state.x - PERCH.x)
+    if (state !== 'perched' || posing) return
+    gaze(Mole.state.x - PERCH.x)
+    if (Clock.now() >= blinkAt) { // awake on its limb, a slow blink now and then: never frozen
+      blinkAt = Clock.now() + BLINK_EVERY[0] + blinks() * (BLINK_EVERY[1] - BLINK_EVERY[0])
+      Debug.ignoreCut(blink(), 'the owl blinks')
+    }
   }
 
   /** Its pupils towards something dx away across the meadow. */
@@ -174,7 +210,7 @@ const Owl = (() => {
   async function comeOut() {
     state = 'coming'
     Debug.trace('owl', { out: true })
-    await eyes(0, 600)
+    await Promise.all([eyes(0, 600), Motion.endAt(bob, [{ transform: 'translateY(0px) rotate(0deg)' }], { duration: 600, easing: 'ease-out' })]) // its head up
     await blink()
     await Clock.wait(500)
     const hop = { x: KX + 14, y: IN_HOLE.y + 26, s: 0.95 }
@@ -347,7 +383,7 @@ const Owl = (() => {
   function restore() {
     if (state !== 'asleep' && state !== 'perched') return // not here, or coming out on its own: nothing of his to undo
     posing = false
-    for (const e of [head, face, back, ...lids]) e.getAnimations().forEach((a) => a.cancel())
+    for (const e of [head, face, back, ...lids]) e.getAnimations().forEach((a) => a instanceof CSSAnimation || a.cancel()) // its doze is the stylesheet's: it stops with its class
     head.style.transform = ''
     turnFace(0, 0)
     eyes(state === 'asleep' ? 1 : 0)
