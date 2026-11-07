@@ -1861,3 +1861,209 @@ class TestMeadowSpring:
         m.wait("meadowGame.state().ended && !meadowGame.state().busy", 60_000)
         assert "spring" in m.page.evaluate("meadowGame.trace()")
         assert not m.errors, m.errors
+
+
+class TestMeadowOwl:
+    """The owl in the oak (owl.js): on some plays, asleep in the knot-hole by
+    day, woken by his second call into the arch, out on its limb from dusk,
+    playing with him at a tap, hooting only between the cricket's tunes."""
+
+    VISITS = ("tilt", "turn", "wink")
+    LIDS = "[...document.querySelectorAll('.owl-lid')].map((l) => l.style.transform)"
+
+    def sits_as_it_does(self, m: Meadow) -> None:
+        """Its head upright, its face round to us, the back of its head hidden: as drawn, not only as styled."""
+        left = m.page.evaluate(
+            """(() => {
+                 const drawn = (sel) => getComputedStyle(document.querySelector(sel))
+                 const still = (sel) => new DOMMatrixReadOnly(drawn(sel).transform === 'none' ? undefined : drawn(sel).transform).isIdentity
+                 return { posing: Owl.posing, head: still('.owl-head'), face: still('.owl-face') && drawn('.owl-face').opacity === '1',
+                          back: drawn('.owl-back').opacity }
+               })()"""
+        )
+        assert left == {"posing": False, "head": True, "face": True, "back": "0"}, left
+
+    def test_it_lives_in_the_oak_on_some_plays_only(self, meadow: callable) -> None:
+        states = []
+        for seed in (1, 2):  # seed 1 draws one, seed 2 none
+            m = meadow(f"seed={seed}&still")
+            states.append(m.page.evaluate("Owl.state"))
+            m.page.close()
+        assert states == ["asleep", "none"], states
+        m = meadow(f"{STILL}&owl=0")
+        assert m.page.evaluate("Owl.state") == "none"
+        assert not m.page.query_selector(".owl")
+
+    def test_his_second_call_wakes_it_and_it_sleeps_on(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=1")
+        m.wake()
+        while traced(m, "peeks").count("echo") < 2:
+            m.do("peek")
+            m.wait_free()
+        trace = m.page.evaluate("meadowGame.trace()")
+        first, second = (
+            i for i, line in enumerate(trace.split("\n")) if '"how":"echo"' in line
+        )
+        woken = [
+            i for i, line in enumerate(trace.split("\n")) if '"woken":true' in line
+        ]
+        assert len(woken) == 1 and first < second < woken[0], trace
+        assert m.page.evaluate("Owl.state") == "asleep"
+        lids = m.page.evaluate(self.LIDS)
+        assert lids == ["scaleY(1)", "scaleY(1)"], "its eyes shut again"
+        m.assert_settled()
+
+    def test_it_comes_out_onto_its_limb_at_dusk(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=1&day=40&props=")
+        m.wake()
+        m.wait("Owl.state === 'perched'", 60_000)
+        perch = m.page.evaluate("Layout.OAK.perch")
+        at = m.page.evaluate(
+            "(() => { const t = new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.owl')).transform); return { x: t.e, y: t.f } })()"
+        )
+        assert abs(at["x"] - perch["x"]) < 1 and abs(at["y"] - perch["y"]) < 1, at
+        assert not m.errors, m.errors
+
+    def test_a_tap_on_it_out_plays_a_new_way_each_time(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=out")
+        m.wake()
+        for _ in range(4):
+            m.do("owl")
+            m.wait_free()
+            m.assert_settled()
+            self.sits_as_it_does(m)
+        visits = traced(m, "owl visit")
+        assert tuple(sorted(visits[:3])) == self.VISITS, visits
+        assert all(a != b for a, b in pairwise(visits)), visits
+
+    def test_a_tap_by_day_opens_an_eye_and_it_sleeps_on(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=1")
+        m.wake()
+        m.do("owl")
+        m.wait_free()
+        assert m.page.evaluate("Owl.state") == "asleep"
+        lids = m.page.evaluate(self.LIDS)
+        assert lids == ["scaleY(1)", "scaleY(1)"]
+        m.assert_settled()
+
+    def test_cut_short_its_head_comes_upright(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=out")
+        m.wake()
+        for _ in range(3):  # each way, cut in its middle
+            m.do("owl")
+            m.wait(
+                "Owl.posing && document.querySelector('.owl-head').getAnimations().length + document.querySelector('.owl-face').getAnimations().length + [...document.querySelectorAll('.owl-lid')].flatMap((l) => l.getAnimations()).length > 0"
+            )
+            m.do("go to 900")
+            m.wait_free()
+            m.assert_settled()
+            self.sits_as_it_does(m)
+
+    @pytest.mark.realtime  # the music follows sound's own clock
+    def test_it_hoots_into_the_quiet_after_a_tune(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=out&props=")
+        m.wake()
+        m.wait(
+            f"{MUSIC}.includes('morning') && meadowGame.music() === null", 60_000
+        )  # a tune has ended: as the cricket's do
+        assert m.page.evaluate("Owl.rest()") > 0, "the cricket waits for it"
+        m.wait("meadowGame.trace().includes('\"hoots\":true')")
+        assert '"over":null' in m.page.evaluate("meadowGame.trace()")
+        m.do("owl")
+        m.wait("Owl.posing")
+        assert m.page.evaluate("Owl.rest()") > 0
+        m.wait_free()
+        assert not m.errors, m.errors
+
+    def test_it_is_tapped_where_it_sits(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=out")
+        m.wake()
+        box = m.page.query_selector(".owl .owl-body").bounding_box()
+        m.page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+        m.wait("meadowGame.trace().includes(' owl visit ')")
+        m.wait_free()
+        m.assert_settled()
+
+    def test_a_cut_peek_as_it_wakes_lets_it_come_out(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=1&day=40&props=")
+        m.wake()
+        m.do("go to 400")
+        m.wait("Owl.state === 'coming'", 60_000)
+        m.do(
+            "peek"
+        )  # cut at once: the peek's restore must leave the owl's waking alone
+        m.play_for(200)
+        m.do("go to 900")
+        m.wait("Owl.state === 'perched'", 20_000)
+        assert m.page.evaluate(self.LIDS) == ["scaleY(0)", "scaleY(0)"], (
+            "on its limb, eyes open"
+        )
+
+    def test_it_comes_out_only_once_he_has_done(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=1")
+        m.wake()
+        m.do("owl")
+        m.wait(f"{self.LIDS}[0] === 'scaleY(0)'")  # an eye open at him
+        m.page.evaluate("Owl.tick(19, !meadowGame.state().busy)")
+        assert m.page.evaluate("Owl.state") == "asleep", "not out mid-visit"
+        m.wait_free()
+        m.page.evaluate("Owl.tick(19, !meadowGame.state().busy)")
+        m.wait("Owl.state === 'perched'", 20_000)
+        assert m.page.evaluate(self.LIDS) == ["scaleY(0)", "scaleY(0)"], (
+            "on its limb, eyes open"
+        )
+
+    def test_a_second_tap_by_day_keeps_its_eye_open(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=1")
+        m.wake()
+        m.do("owl")
+        m.wait(
+            f"{self.LIDS}[0] === 'scaleY(0)'"
+        )  # its eye opening: then it looks at him 900 ms
+        m.play_for(500)
+        # the first visit cut while it looks: it must not shut the eye the second has opened
+        m.do("owl")
+        m.play_for(
+            900
+        )  # past when the first would have shut it, before the second does
+        assert m.page.evaluate(self.LIDS)[0] == "scaleY(0)"
+        m.wait_free()
+        assert m.page.evaluate(self.LIDS) == ["scaleY(1)", "scaleY(1)"]
+
+    def test_it_keeps_quiet_over_a_tune(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=out&props=")
+        m.wake()
+        m.wait(
+            f"{MUSIC}.includes('morning') && meadowGame.music() === 'morning'", 20_000
+        )
+        m.page.evaluate(
+            "window.hooted = 0; const h = Sound.hoot; Sound.hoot = (...a) => { hooted += 1; return h(...a) }; Owl.rest()"
+        )
+        m.wait("meadowGame.trace().includes(' owl {\"hoots\"')")
+        assert '"over":"morning"' in m.page.evaluate("meadowGame.trace()")
+        assert m.page.evaluate("hooted") == 0, "it hooted over the tune"
+
+    @pytest.mark.realtime  # the music follows sound's own clock
+    def test_its_hoot_leaves_a_tilted_head_tilted(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&owl=out&props=")
+        m.wake()
+        m.wait(f"{MUSIC}.includes('morning') && meadowGame.music() === null", 60_000)
+        while True:
+            m.do("owl")
+            m.wait(
+                "meadowGame.trace().split('\\n').some((l) => l.includes(' owl visit '))"
+            )
+            if traced(m, "owl visit")[-1] == "tilt":
+                break
+            m.do("go to 400")  # not this one: cut it short
+            m.wait_free()
+        m.wait(
+            "Owl.posing && document.querySelector('.owl-head').style.transform.startsWith('rotate') && document.querySelector('.owl-head').style.transform !== 'rotate(0deg)'"
+        )
+        m.page.evaluate("Owl.rest()")
+        m.wait("meadowGame.trace().includes('\"hoots\":true')")
+        assert m.page.evaluate(
+            "document.querySelector('.owl-head').style.transform"
+        ).startswith("rotate"), "the hoot never sets the head upright"
+        m.wait_free()
+        m.assert_settled()

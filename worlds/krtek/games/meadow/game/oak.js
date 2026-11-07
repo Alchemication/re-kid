@@ -4,7 +4,8 @@
 // and what a tap on it does. A tap on the oak and he peeks into the arch
 // between its root legs, a different way each time (rounds):
 // - the echo: he calls "hm?" into the hollow and it answers him, quieter
-//   each time; a start, a giggle, and an "ooh" that echoes too;
+//   each time; a start, a giggle, and an "ooh" that echoes too (on a play
+//   with an owl asleep up the trunk, from his second call it answers: owl.js);
 // - the dark: he goes in and is lost in its shadow, only his eyes blinking
 //   in the dark, looking about; out he comes with an oak leaf on his head,
 //   and shakes it off, and it lies where it falls (they gather over the
@@ -20,7 +21,7 @@
 // the Clock (Motion.endAt), and restore() puts everything back at once when
 // a tap cuts a peek short (what is falling falls on to the grass).
 
-/* global Clock, Debug, DOMMatrixReadOnly, Layout, Mole, Motion, Sound */
+/* global Clock, Debug, DOMMatrixReadOnly, Layout, Mole, Motion, Owl, Sound */
 /* exported Oak */
 const Oak = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -64,7 +65,7 @@ const Oak = (() => {
 
   /** Draw the oak's live parts: the tap target into `back` (#oak, over the painting), the dark into `over` (#oak-front),
    * the leaves he shakes off into `grass` (#oak-ground).
-   * The meadow's side: its `goTo`, `rounds` (a pool to draw the peeks from) and `dropHat` (off his head and down). */
+   * The meadow's side: its `goTo`, `rounds` (a pool to draw the peeks from), and `dropHat` (off his head and down). */
   function setup(back, over, grass, meadow) {
     front = over
     ground = grass
@@ -106,10 +107,11 @@ const Oak = (() => {
     return alive()
   }
 
-  /** A word called into the hollow, leaning in, and its echoes heard out: still his to carry on? */
-  async function call(word, alive) {
-    Sound.say(word, false, ECHOES)
-    await Promise.all([Mole.lean(LEAN_IN, LEAN_MS), Clock.wait(ECHO_MS)])
+  /** A word called into the hollow, leaning in, and its echoes heard out (none: the owl answers instead):
+   * still his to carry on? */
+  async function call(word, alive, echoes = ECHOES) {
+    Sound.say(word, false, echoes)
+    await Promise.all([Mole.lean(LEAN_IN, LEAN_MS), Clock.wait(echoes ? ECHO_MS : 0)])
     return alive()
   }
 
@@ -131,6 +133,10 @@ const Oak = (() => {
     async echo(alive) {
       await goBeside()
       if (!alive()) return
+      if (Owl.called()) { // the owl asleep up the trunk (owl.js) answers him instead of the hollow
+        if (!(await call('hm', alive, 0))) return
+        return Owl.answerCall(alive)
+      }
       if (!(await call('hm', alive))) return
       Mole.perk(1.5) // it answered!
       await Mole.handsToFace(700, 'fright')

@@ -301,6 +301,7 @@ heats the laptop for minutes.
 | `layout.js`, anything shared | the whole suite |
 | the meadow's encounters (`things.js`, `car.js`, `egg.js`, `paint.js`, `poles.js`, `rain.js`, `umbrella.js`, `storm.js`, `afterrain.js`) | `"TestMeadowEncounters and <name>"`, plus its own class where it has one (`"TestMeadowCar"`, `"TestMeadowEgg"`, `"TestMeadowFox"` for the paint, `"TestMeadowBulldozer"` for the poles, `"TestMeadowStorm"`) |
 | the meadow's oak (`oak.js`), its peeks | `"TestMeadowOak"` |
+| the owl in the oak (`owl.js`) | `"TestMeadowOwl or TestMeadowOak"` |
 | the painter's fence at the meadow's right end (`fence.js`) | `"TestMeadowFence"` |
 | the mole (`mole.js`, `moleart.js`), taps on him or the meadow (`meadow.js`) | `"TestMeadowDay or TestMeadowWalking or TestMeadowTapHim or TestMeadowTapsWait"` |
 | the meadow's view or screen (`view.js`, `painting.js`, `game.css`) | `"TestMeadowView or TestMeadowScreens"` |

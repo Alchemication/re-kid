@@ -4,7 +4,8 @@
 // him gets a word and a hop, a tap on the flower bed (behind his molehill)
 // has him sniff a flower, a tap on the spring has him paddle in its pool,
 // a tap on the old oak at the meadow's left end has him peek into its
-// hollow (oak.js), a tap on the painter's fence at its right end has him
+// hollow (oak.js), a tap on the owl in it, on some plays, has him play
+// with it (owl.js), a tap on the painter's fence at its right end has him
 // play at it (fence.js), each a different way every time (rounds);
 // watering comes with the rain cloud (rain.js), now and then. The day
 // runs on its own (day.js); at dusk the tulips close and the cricket
@@ -18,7 +19,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Oak, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
+/* global Again, Bed, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -240,6 +241,7 @@ const meadowGame = (() => {
     }
     if (!game.ended) Things.tick(h)
     Church.tick(h)
+    Owl.tick(h, !game.gesture)
     if (Day.cricket(h) && !game.evening) {
       game.evening = true
       Debug.trace('cricket', { hour: Day.clock(h) })
@@ -285,7 +287,7 @@ const meadowGame = (() => {
 
   function stateNow() {
     const m = Mole.state
-    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), eclipse: Math.round(eclipseCover() * 100) / 100 }
+    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), owl: Owl.state, eclipse: Math.round(eclipseCover() * 100) / 100 }
   }
 
   function checkRules() {
@@ -298,6 +300,7 @@ const meadowGame = (() => {
       Debug.check('a free mole stands on the ground', m.lift === 0, { lift: m.lift })
       Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
       Debug.check('the oak\'s hollow is open once he is free', !Oak.dark, {})
+      Debug.check('the owl sits upright, its face to us, once he is free', !Owl.posing, {})
       Debug.check('the twig is down once he is free', !Fence.holding, {})
       Debug.check('nobody is left about behind the fence once he is free', Fence.about === 0, { about: Fence.about })
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
@@ -607,7 +610,8 @@ const meadowGame = (() => {
     [/^tap mole$/, () => answer('tap mole', tapMole)],
     [/^sniff$/, () => answer('sniff', sniff)],
     [/^paddle$/, () => answer('paddle', paddle)],
-    [/^peek$/, () => answer('peek', Oak.peek, Oak.restore)],
+    [/^peek$/, () => answer('peek', Oak.peek, () => { Oak.restore(); Owl.restore() })], // a call in the arch may have woken the owl
+    [/^owl$/, () => answer('owl', Owl.visit, Owl.restore)],
     [/^fence$/, () => answer('fence', Fence.play, Fence.restore)],
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => answer('go', () => goTo(Number(m[1])))],
@@ -731,7 +735,7 @@ const meadowGame = (() => {
   }
 
   // The places that answer a tap on them: [what was tapped, intent]
-  const PLACE_HITS = [['#bed', 'sniff'], ['#spring', 'paddle'], ['.oak-hit', 'peek'], ['.fence-hit', 'fence']]
+  const PLACE_HITS = [['.owl', 'owl'], ['#bed', 'sniff'], ['#spring', 'paddle'], ['.oak-hit', 'peek'], ['.fence-hit', 'fence']]
 
   /** What a tap at this point means (critter: the little creature tapped, if any). */
   function intentAt(target, p, critter) {
@@ -803,6 +807,7 @@ const meadowGame = (() => {
   Spring.setup(document.getElementById('spring'), () => game.hour)
   Nest.setup(document.getElementById('spring'), () => game.hour)
   Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), document.getElementById('oak-ground'), { goTo, rounds, dropHat })
+  Owl.setup(document.getElementById('oak'), { goTo, rounds })
   Fence.setup(document.getElementById('fence'), document.getElementById('fence-near'), document.getElementById('garden-life'), { goTo, rounds, el })
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
   Cricket.setup(document.getElementById('crickets'))

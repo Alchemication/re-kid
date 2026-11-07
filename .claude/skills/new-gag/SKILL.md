@@ -197,7 +197,9 @@ encounter's spot, mushrooms came up on a hen's nest. Room for everything
 it moves, and anything that appears mid-play (after rain, on a timer)
 takes free ground, never "beside" something, with a browser test over a
 dozen seeds that it never lands on a thing. Keep what the child must see
-on screen when it happens. How a game lays things out: its map. Where
+on screen when it happens; anything high up, check in a screenshot
+against the picture's top (the meadow's owl, first perched in the oak's
+crown, sat at the top edge, where a phone may crop it). How a game lays things out: its map. Where
 something else must move to make room, or a bound moves (where the hero
 can go), write the moved spots relative to what they now stand by, and
 grep for the old numbers: moving the meadow's left end to the oak's arch

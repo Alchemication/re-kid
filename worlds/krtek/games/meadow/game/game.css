@@ -70,6 +70,10 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
   }
 }
 
+/* the owl in the oak (owl.js): flying to its limb, its wings beat (each from its shoulder, out and up) */
+.owl.flying .owl-wing { animation: owl-beat 0.42s ease-in-out infinite alternate; }
+@keyframes owl-beat { from { transform: rotate(20deg); } to { transform: rotate(115deg); } }
+
 /* butterflies (critters.js): the wings beat about the body; slowly, settled on a flower */
 .butterfly .wing { animation: wings 0.2s ease-in-out infinite alternate; }
 .butterfly.resting .wing { animation-duration: 1.1s; }

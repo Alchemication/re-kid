@@ -14,7 +14,8 @@
 // `?critters=fireflies` the fireflies, at once, in daylight too;
 // `?wind=gust` a strong gust that carries something, three seconds after he wakes;
 // `?eclipse=11` an eclipse at 11:00 (and none other), `?eclipse=now` as he wakes
-// (the sun is low then, behind the trees: 11 shows the moon over it).
+// (the sun is low then, behind the trees: 11 shows the moon over it);
+// `?owl=1` an owl in the oak this play, `?owl=0` none, `?owl=out` out on its limb from the start.
 
 /* exported Layout */
 const Layout = (() => {
@@ -33,6 +34,8 @@ const Layout = (() => {
     hit: 640, // a tap on the trunk below this (its foot, at the meadow's edge) walks him there, except in the arch
     arch: 'M95 716 C95 610 118 478 170 444 C222 478 245 610 245 716 Z',
     trunk: 'M-60 716 C-20 708 4 682 14 640 C26 588 8 540 12 480 C16 410 34 350 22 290 C14 246 -14 212 -60 186 L-60 120 C-14 140 32 176 58 214 C70 150 66 86 44 18 C36 -12 30 -50 26 -80 L146 -80 C146 -30 152 20 168 64 C178 100 182 150 176 196 C214 156 262 132 316 120 C370 108 400 76 452 64 C482 58 516 66 544 54 L556 84 C524 100 490 96 462 104 C414 118 384 150 330 166 C300 182 282 214 284 262 C286 330 290 396 298 456 C306 520 314 590 336 646 C352 684 384 704 430 716 Z',
+    knot: [152, 300, 40, 52, -0.06], // the knot-hole up its trunk, where the owl sleeps (owl.js): x, y, its radii, its tilt
+    perch: { x: 336, y: 340 }, // a broken-off limb out of the trunk's right side (painting.js paints it round this), low enough to be in every screen's picture: where the owl sits from dusk (owl.js)
     crown: [[-34, 34, 100], [82, -24, 108], [208, -20, 104], [326, 30, 92], [440, 18, 70], [536, 34, 50], [-46, 168, 58], [140, 82, 62], [276, 100, 52]],
   }
   // The painter's garden at the right end (after Krtek malířem: his thatched cottage, a ladder, paint tins,
@@ -52,7 +55,7 @@ const Layout = (() => {
   const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
   const daySeconds = Number(params.get('day'))
   const props = params.has('props') ? params.get('props').split(',').filter(Boolean) : null
-  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind'), eclipse: params.get('eclipse') === 'now' ? 0 : Number(params.get('eclipse')) || null, menace: params.get('menace'), wild: params.get('wild') }
+  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind'), eclipse: params.get('eclipse') === 'now' ? 0 : Number(params.get('eclipse')) || null, owl: params.get('owl'), menace: params.get('menace'), wild: params.get('wild') }
 
   return { WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, OAK, FENCE, PAINTS, DIG, clampX, flags, dayMs: flags.day ? flags.day * 1000 : null }
 })()

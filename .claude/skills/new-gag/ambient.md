@@ -99,6 +99,13 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
   longer to reach the view, and a test that waited a fixed 1.5 s clicked
   off-screen. Browser tests wait for a state (it is in view), never a time.
 
+- **Its own life and a gesture on the same drawing.** When a creature both
+  goes about its own business (waking, a call) and is drawn into the hero's
+  gestures (a tap on it), start its own moves only while the hero is free,
+  and leave its restore alone while it is busy on its own. A flag kept by
+  hand to keep the two apart needs a write on every path, and one missed
+  left the meadow's owl stuck at its hole all evening.
+
 ## 4. Look, test, review
 
 - **Look:** a Playwright probe (`channel="chrome"`) sampling where it is

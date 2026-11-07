@@ -10,7 +10,7 @@
 //   until the trouble is over, only the uneasy bed (beds.js `unease`,
 //   things.js `trouble`): no glad theme while the threat is still here;
 // - from dusk, the cricket's fiddle, one take after another until the
-//   circle closes; the last plays to its end over him asleep.
+//   circle closes, now and then a longer quiet between for the owl (owl.js); the last plays to its end over him asleep.
 // A mood plays over quiet, or cuts short a weaker one (menace over happy
 // over sad over curious over the morning), never the same or a stronger one.
 // Between takes, a quiet bed (beds.js: harp, flute, birds, violins, in the
@@ -57,6 +57,7 @@ const Music = (() => {
   let ended = false // the circle has closed: nothing more
   let startsAt = 0 // when the take asked for last starts (audio time)
   let random = null
+  let between = () => 0 // after each of the cricket's tunes: how much longer to wait before the next (the owl's hoot)
 
   /** Load the takes (once), on the audio context Sound made at the first tap. */
   function prepare() {
@@ -135,7 +136,7 @@ const Music = (() => {
     bed.stop() // the cricket's alone from dusk
     const wait = takes.playing ? takes.FADE_S + 0.2 : LEAD_S
     takes.fade()
-    const fiddle = (gap) => { if (!ended) play('lullaby', gap, () => fiddle(CRICKET_GAP_S)) }
+    const fiddle = (gap) => { if (!ended) play('lullaby', gap, () => { if (!ended) fiddle(CRICKET_GAP_S + between()) }) }
     fiddle(wait)
   }
 
@@ -160,6 +161,9 @@ const Music = (() => {
 
   return {
     PARTS, prepare, morning, cue, evening, fiddle, quiet,
+    /** Asked after each of the cricket's tunes, `fn` says how many seconds more of quiet before the next (the
+     * owl hoots into it, owl.js). */
+    between(fn) { between = fn },
     /** The bed's moment and how busy the child is (the meadow steers it). */
     setBed(change) { bed?.set(change) },
     /** The bed now, for the overlay and the tests. */

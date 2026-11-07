@@ -311,6 +311,16 @@ const Sound = (() => {
     note(900, 0.3, 0.1, 0.06, 'triangle', 0.6)
   }
 
+  /** The owl: its call, "hooo… hu-hoooo" (a tawny owl's, soft), or, woken (sleepy), one low "hoo?" rising.
+   * Its recorded takes, or a stand-in. */
+  function hoot(sleepy = false) {
+    if (!ready() || recorded(sleepy ? 'hoot-sleepy' : 'hoot')) return
+    if (sleepy) return void note(300, 0, 0.45, 0.05, 'sine', 1.25)
+    note(410, 0, 0.6, 0.06, 'sine', 0.94)
+    note(380, 1.0, 0.14, 0.04, 'sine', 0.97)
+    note(395, 1.2, 0.75, 0.06, 'sine', 0.9)
+  }
+
   /** The chick: a few high peeps. */
   function peep() {
     if (!ready()) return
@@ -461,5 +471,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot }
 })()

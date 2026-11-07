@@ -225,7 +225,8 @@ once, even in a `?still` play (which otherwise has none), and `?critters=snail` 
 under the wild flowers wet from the start, `?critters=fireflies` the dusk's fireflies, at once and in daylight too, `?critters=flock` the birds of the far trees and `?critters=heron` the heron at the far pond, even in a still play; `?wild=deer` (or `boar`, `bison`) that herd at once, `?wild=now` the play's own kind; `?wind=gust` brings a strong gust that carries leaves or
 seeds three seconds after he wakes; `?eclipse=11` an eclipse at 11:00 (with `?day=60`, 15 s in), `?eclipse=now` one as he
 wakes (the sun is still behind the trees then); `?props=storm&soon` brings the storm and the
-umbrella as he wakes; `?menace=notes` plays the bulldozer's motif written note by note on the
+umbrella as he wakes; `?owl=1` puts an owl in the oak this play (`?owl=0` none),
+`?owl=out` has it out on its limb from the start; `?menace=notes` plays the bulldozer's motif written note by note on the
 meadow's samples, instead of its recorded takes, to compare. In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 

@@ -47,9 +47,18 @@ decided and why.
      size), whether each peek reads, the echo by ear (`ECHO_*` in
      sound.js), the bonk's level (his three takes, one raised 14 dB: listen
      for hiss), whether the plink fits the catch and the tuck-in.
-     Next, each with `new-gag`: the owl in the oak (invented, some plays,
-     asleep in the hollow by day, out on a branch from about 18:00,
-     hooting only between the cricket's tunes).
+   - **Adam judges the owl in the oak** (built 2026-11-07, his pick B):
+     on about 60% of plays (`?owl=1` to try it, `?owl=out` out at once).
+     It sleeps in a bigger knot-hole, moved to the middle of the trunk;
+     from his second call into the arch it answers ("hoo?"); from 18:30
+     it flies onto a broken-off limb painted below the hole; a tap on it
+     out, three plays in turn (tilt and his totter, its head turned
+     right round, a wink). Judge: does it read at phone size, the
+     moves' timing (`POP_MS`, `FLY_MS`, `TILT`, owl.js), and whether
+     the closing circle hides it too soon. Its hoots are stand-ins made
+     in the browser (`Sound.hoot`): takes through `new-sound` (a soft
+     tawny call, a sleepy "hoo?") once he has heard them. It hoots once
+     or twice a play, after the cricket's tunes.
    - **Adam judges one story at a time, the fox first, and the variations**
      (built 2026-11-06 overnight, after his two plays where the bulldozer
      came on top of the fox and of the egg, in an eclipse). Encounters and

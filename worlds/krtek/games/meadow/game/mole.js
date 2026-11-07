@@ -673,6 +673,13 @@ const Mole = (() => {
     await Motion.endAt(tilt, [{ transform: 'rotate(0deg)' }, { transform: `rotate(${deg}deg)`, offset: 0.2 }, { transform: `rotate(${deg}deg)`, offset: 0.8 }, { transform: 'rotate(0deg)' }], { duration: ms })
   }
 
+  /** Leaning over further and further (towards dir: copying a head tilted that way), past his balance, a
+   * quick lurch back, and upright again. */
+  async function totter(dir, ms = 1800) {
+    const at = (d, offset) => ({ transform: `rotate(${dir * d}deg)`, offset })
+    await Motion.endAt(tilt, [at(0, 0), at(14, 0.25), at(26, 0.45), at(34, 0.6), at(-10, 0.74), at(5, 0.87), at(0, 1)], { duration: ms, easing: 'ease-in-out' })
+  }
+
   /** Knock twice with his near hand: on an egg, on a pole. */
   async function knock() {
     if (state.pose === 'out') show('three')
@@ -738,5 +745,5 @@ const Mole = (() => {
     await Motion.endAt(root, [{ transform: from }, { transform: rootAt(x, dy) }], { duration: ms, easing })
   }
 
-  return { SCALE, state, drawnX, face, mood, calm, settle, feel, digIn, scratchHead, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, wearing, lean, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, burrowX, walkTo, cheer, hop, stretch, ghost, listen }
+  return { SCALE, state, drawnX, face, mood, calm, settle, feel, digIn, scratchHead, show, lookAt, perk, express, setFree, head, carry, paint, dots, perch, glide, wear, wearing, lean, totter, knock, wobble, ponder, handsToFace, point, wave, peekaboo, laugh, make, put, relax, sway, shakeOff, comeUp, goDown, tunnelTo, burrowX, walkTo, cheer, hop, stretch, ghost, listen }
 })()

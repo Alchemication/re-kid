@@ -20,7 +20,6 @@ const Painting = (() => {
   const RES = [0.75, 1.5] // canvas pixels per scene unit: as sharp as the screen shows the scene, within this (memory: the back is 4000 units wide)
   const GARDEN_BOX = [3240, 300, 1100, 420] // what the painter's garden covers (x, y, w, h): his cottage, the tins in front, past the meadow's end for wide screens
   const OAK_BOX = [-60, -80, 640, 800] // what the oak's painting covers (x, y, w, h): its long right limb reaches past x 540
-  const KNOT = [58, 330, 11, 24, -0.15] // the knot-hole up the oak's left side: x, y, its radii, its tilt
   const GRAIN = 2 // the oak's bark is worked out on a grid this coarse (scene units): fine enough for its ridges, quick
   const RIDGE = 16 // one ridge of its bark to the next, across the wood: near the film's (a tenth of the mole's height); wider, and the ripples break them into blobs
   const OPEN = { from: 1400, to: 2080 } // the poles' hill: open grass, nothing tall where they land far off (poles.js FAR)
@@ -466,6 +465,31 @@ const Painting = (() => {
     ctx.fill()
   }
 
+  /** A broken-off limb out of the oak's right side, round Layout.OAK.perch (the owl's, owl.js), its torn end pale. */
+  function limb(ctx) {
+    const { x: px, y: py } = Layout.OAK.perch
+    const stub = new Path2D(`M${px - 54} ${py + 10} C${px - 28} ${py + 2} ${px - 2} ${py - 6} ${px + 18} ${py - 14} C${px + 26} ${py - 10} ${px + 28} ${py + 4} ${px + 21} ${py + 9} C${px} ${py + 16} ${px - 24} ${py + 26} ${px - 50} ${py + 44} Z`)
+    ctx.fillStyle = '#7d7366'
+    ctx.fill(stub)
+    ctx.strokeStyle = '#4a4239'
+    ctx.lineWidth = 1.6
+    for (const dy of [-4, 6]) {
+      ctx.beginPath()
+      ctx.moveTo(px - 46, py + 22 + dy)
+      ctx.quadraticCurveTo(px - 16, py + 10 + dy, px + 14, py - 3 + dy / 2)
+      ctx.stroke()
+    }
+    ctx.strokeStyle = '#2f2a22'
+    ctx.lineWidth = 3
+    ctx.stroke(stub)
+    ctx.fillStyle = '#c4b393'
+    ctx.beginPath()
+    ctx.ellipse(px + 22, py - 2, 4, 11, -0.3, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.lineWidth = 1.6
+    ctx.stroke()
+  }
+
   /** The old oak at the meadow's left end, after Krtek a hodinářem (1:00-1:24): a huge grey-brown trunk on
    * flared roots, an arch between its root legs, twisting limbs up into clusters of pale lobed leaves, ferns
    * at its foot; and at the picture's edge the wood running on, darker. Its bark as the film paints it: long
@@ -476,7 +500,7 @@ const Painting = (() => {
     const [X0, Y0, W, H] = OAK_BOX
     const body = new Path2D(trunk)
     const knot = new Path2D()
-    knot.ellipse(...KNOT, 0, Math.PI * 2)
+    knot.ellipse(...Layout.OAK.knot, 0, Math.PI * 2)
     ctx.save()
     ctx.clip(body)
     const grain = barkGrain(body, new Path2D(arch), knot)
@@ -518,6 +542,7 @@ const Painting = (() => {
     ctx.fillStyle = '#231c16'
     ctx.fill(knot)
     ctx.stroke(knot)
+    limb(ctx)
     // the crown: clumps of pale lobed leaves, darker underneath
     const tones = ['#2f5548', '#4a7a66', '#6c9c84', '#9dc3a7', '#c3dcc2']
     for (const [x, y, rad] of crown) {
