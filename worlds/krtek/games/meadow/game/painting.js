@@ -18,6 +18,10 @@
 const Painting = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const RES = [0.75, 1.5] // canvas pixels per scene unit: as sharp as the screen shows the scene, within this (memory: the back is 4000 units wide)
+  const OAK_BOX = [-60, -80, 640, 800] // what the oak's painting covers (x, y, w, h): its long right limb reaches past x 540
+  const KNOT = [58, 330, 11, 24, -0.15] // the knot-hole up the oak's left side: x, y, its radii, its tilt
+  const GRAIN = 2 // the oak's bark is worked out on a grid this coarse (scene units): fine enough for its ridges, quick
+  const RIDGE = 16 // one ridge of its bark to the next, across the wood: near the film's (a tenth of the mole's height); wider, and the ripples break them into blobs
   const OPEN = { from: 1400, to: 2080 } // the poles' hill: open grass, nothing tall where they land far off (poles.js FAR)
   let random = Debug.random('meadow-painting') // its own stream: so many draws must not shift the others (tree() lends another)
   const GREENS = [['#244529', '#335c34', '#4a7843', '#6d9a58', '#a2c47e'], ['#33491b', '#476a27', '#62893a', '#86a94f', '#bccd77'], ['#22443a', '#345f4d', '#4f8068', '#76a48a', '#a9cbb2']] // the leaves' tones, dark to light
@@ -461,45 +465,42 @@ const Painting = (() => {
     ctx.fill()
   }
 
-  /** The old oak at the meadow's left end, after Krtek a hodinářem (1:00-1:24): a huge grey-brown trunk
-   * with scalloped bark, an arch between its root legs, limbs up into clusters of pale lobed leaves,
-   * ferns at its foot; and at the picture's edge the wood running on, darker. Layout.OAK says its shape. */
+  /** The old oak at the meadow's left end, after Krtek a hodinářem (1:00-1:24): a huge grey-brown trunk on
+   * flared roots, an arch between its root legs, twisting limbs up into clusters of pale lobed leaves, ferns
+   * at its foot; and at the picture's edge the wood running on, darker. Its bark as the film paints it: long
+   * wavy ridges that follow the wood, up the trunk and out along each limb, wrapping round the arch and the
+   * knot-hole (here: lines of equal distance from its outline, made wavy). Layout.OAK says its shape. */
   function oak(ctx) {
     const { x: archX, trunk, arch, crown } = Layout.OAK
+    const [X0, Y0, W, H] = OAK_BOX
     const body = new Path2D(trunk)
+    const knot = new Path2D()
+    knot.ellipse(...KNOT, 0, Math.PI * 2)
     ctx.save()
     ctx.clip(body)
-    const g = ctx.createLinearGradient(-20, 0, 440, 0) // lit from the top left, as the meadow
-    g.addColorStop(0, '#9a9083')
-    g.addColorStop(0.45, '#7d7368')
-    g.addColorStop(1, '#5a5149')
-    ctx.fillStyle = g
-    ctx.fillRect(-60, 0, 520, 720)
-    for (let i = 0; i < 260; i++) dab(ctx, r(-30, 440), r(20, 716), r(10, 30), pick(['#8a7f72', '#6b6259', '#a39889', '#776b5e', '#8d8494', '#9a90a0']), r(0.15, 0.35)) // grey-brown, a little lavender in places, as the film's
-    // the bark: rows of scallops, a dark curve with a light one over it (the film's swirling bark)
-    ctx.lineWidth = 2.6
-    for (let row = 0, y = 24; y < 720; row++, y += r(15, 20)) {
-      for (let x = -40 + (row % 2) * 14 + r(-4, 4); x < 450; x += r(24, 32)) {
-        const w = r(9, 14)
-        ctx.globalAlpha = r(0.35, 0.55)
-        ctx.strokeStyle = '#3e362f'
-        ctx.beginPath()
-        ctx.arc(x, y, w, Math.PI * 0.12, Math.PI * 0.88)
-        ctx.stroke()
-        ctx.globalAlpha = r(0.15, 0.3)
-        ctx.strokeStyle = '#c4baa9'
-        ctx.beginPath()
-        ctx.arc(x, y - 3, w, Math.PI * 0.2, Math.PI * 0.8)
-        ctx.stroke()
-      }
+    const grain = barkGrain(body, new Path2D(arch), knot)
+    ctx.imageSmoothingEnabled = true
+    ctx.drawImage(grain.picture, X0, Y0, W, H) // the ridges, soft, as painted
+    for (let i = 0; i < 140; i++) dab(ctx, r(-40, 540), r(-60, 716), r(10, 34), pick(['#8a7f72', '#6b6259', '#a39889', '#8d8494', '#9a90a0', '#7f8a78']), r(0.06, 0.16)) // grey-brown, lavender and moss in places, as the film's
+    // each ridge's groove, dark, and the light catching its edge
+    for (const [at, colour, width, alpha] of [[0.78, '#352d26', 3.2, 0.34], [0.32, '#ddd3c0', 2.2, 0.26]]) {
+      ctx.strokeStyle = colour
+      ctx.lineWidth = width
+      ctx.globalAlpha = alpha
+      ctx.stroke(grain.lines(at))
     }
     ctx.globalAlpha = 1
-    // shadow round the arch and down the trunk's right
-    const shade = ctx.createRadialGradient(archX, 600, 40, archX, 600, 200)
-    shade.addColorStop(0, 'rgba(40, 32, 26, 0.55)')
+    // shadow round the arch, and down the trunk's right, away from the light
+    const shade = ctx.createRadialGradient(archX, 600, 40, archX, 600, 210)
+    shade.addColorStop(0, 'rgba(40, 32, 26, 0.5)')
     shade.addColorStop(1, 'rgba(40, 32, 26, 0)')
     ctx.fillStyle = shade
-    ctx.fillRect(-60, 380, 520, 340)
+    ctx.fillRect(-60, 380, 560, 340)
+    const side = ctx.createLinearGradient(140, 0, 420, 0)
+    side.addColorStop(0, 'rgba(40, 32, 26, 0)')
+    side.addColorStop(1, 'rgba(40, 32, 26, 0.3)')
+    ctx.fillStyle = side
+    ctx.fillRect(140, 180, 300, 540)
     ctx.restore()
     ctx.strokeStyle = '#2f2a22'
     ctx.lineWidth = 3
@@ -512,12 +513,10 @@ const Painting = (() => {
     ctx.fillStyle = dark
     ctx.fill(hollow)
     ctx.stroke(hollow)
-    // a knot-hole up on the right limb
+    // the knot-hole up on the left, the ridges wrapping round it
     ctx.fillStyle = '#231c16'
-    ctx.beginPath()
-    ctx.ellipse(276, 300, 13, 20, -0.3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    ctx.fill(knot)
+    ctx.stroke(knot)
     // the crown: clumps of pale lobed leaves, darker underneath
     const tones = ['#2f5548', '#4a7a66', '#6c9c84', '#9dc3a7', '#c3dcc2']
     for (const [x, y, rad] of crown) {
@@ -531,13 +530,124 @@ const Painting = (() => {
       }
     }
     // ferns at its feet, either side of the arch
-    for (const [x, len, lean] of [[-6, 170, -0.5], [44, 140, -0.25], [296, 130, 0.3], [350, 170, 0.6], [400, 120, 0.8]]) fern(ctx, x, 718, len, lean, pick(['#2f5a3a', '#3d6c46', '#28503a']))
+    for (const [x, len, lean] of [[-6, 170, -0.5], [44, 140, -0.25], [300, 130, 0.3], [360, 170, 0.6], [420, 120, 0.8]]) fern(ctx, x, 718, len, lean, pick(['#2f5a3a', '#3d6c46', '#28503a']))
     // the wood running on past the picture's edge: darker towards it
     const deep = ctx.createLinearGradient(-60, 0, 70, 0)
     deep.addColorStop(0, 'rgba(24, 34, 26, 0.55)')
     deep.addColorStop(1, 'rgba(24, 34, 26, 0)')
     ctx.fillStyle = deep
     ctx.fillRect(-60, -80, 130, 800)
+  }
+
+  /** How far each cell of a mask (RGBA, `cols` by `rows`) is inside it, in cells, by a two-pass chamfer.
+   * Past the grid's edge counts as inside, so only the mask's own edges count. */
+  function inside(alpha, cols, rows) {
+    const d = new Float32Array(cols * rows)
+    for (let i = 0; i < d.length; i++) d[i] = alpha[i * 4 + 3] > 127 ? 1e6 : 0
+    const D = Math.SQRT2
+    const at = (c, rr) => (c < 0 || rr < 0 || c >= cols || rr >= rows ? 1e6 : d[rr * cols + c])
+    for (let rr = 0; rr < rows; rr++) {
+      for (let c = 0; c < cols; c++) {
+        const i = rr * cols + c
+        if (d[i]) d[i] = Math.min(d[i], at(c - 1, rr) + 1, at(c, rr - 1) + 1, at(c - 1, rr - 1) + D, at(c + 1, rr - 1) + D)
+      }
+    }
+    for (let rr = rows - 1; rr >= 0; rr--) {
+      for (let c = cols - 1; c >= 0; c--) {
+        const i = rr * cols + c
+        if (d[i]) d[i] = Math.min(d[i], at(c + 1, rr) + 1, at(c, rr + 1) + 1, at(c + 1, rr + 1) + D, at(c - 1, rr + 1) + D)
+      }
+    }
+    return d
+  }
+
+  /** Where level 0 crosses a grid cell whose corners (top left, top right, bottom right, bottom left) are
+   * a, b, c, d over it, the cell's top left at x, y: the line's ends, in pairs. */
+  function crossings(a, b, c, d, x, y) {
+    const cut = (p, q) => p / (p - q)
+    const pts = []
+    if (a < 0 !== b < 0) pts.push([x + cut(a, b) * GRAIN, y])
+    if (b < 0 !== c < 0) pts.push([x + GRAIN, y + cut(b, c) * GRAIN])
+    if (d < 0 !== c < 0) pts.push([x + cut(d, c) * GRAIN, y + GRAIN])
+    if (a < 0 !== d < 0) pts.push([x, y + cut(a, d) * GRAIN])
+    return pts
+  }
+
+  /** The oak's bark, worked out on a coarse grid over OAK_BOX: how far each point is inside the wood (from
+   * its outline, the arch and the knot-hole; not from the ground or the picture's edges, where the wood runs
+   * on), made wavy. `picture`: a small canvas of the ridges' light and shade, to be drawn smoothed over the
+   * box; `lines(at)`: a path along every ridge at `at` (0 to 1) across it. */
+  function barkGrain(body, hole, knot) {
+    const [X0, Y0, W, H] = OAK_BOX
+    const [cols, rows] = [Math.ceil(W / GRAIN), Math.ceil(H / GRAIN)]
+    const mask = document.createElement('canvas')
+    mask.width = cols
+    mask.height = rows
+    const m = mask.getContext('2d')
+    m.setTransform(1 / GRAIN, 0, 0, 1 / GRAIN, -X0 / GRAIN, -Y0 / GRAIN)
+    m.fill(body)
+    m.globalCompositeOperation = 'destination-out'
+    m.fill(hole)
+    m.fill(knot)
+    const d = inside(m.getImageData(0, 0, cols, rows).data, cols, rows)
+    // made wavy, as the film's ridges are: more so away from the outline, which stays clean
+    const [p1, p2, p3] = [r(Math.PI * 2), r(Math.PI * 2), r(Math.PI * 2)]
+    const f = new Float32Array(cols * rows)
+    for (let rr = 0; rr < rows; rr++) {
+      for (let c = 0; c < cols; c++) {
+        const [x, y] = [X0 + c * GRAIN, Y0 + rr * GRAIN]
+        const i = rr * cols + c
+        // ripples along each ridge, as the film's: gentle enough (its slope well under the wood's) not to break the ridges into loops
+        const wave = 3.4 * Math.sin(y * 0.15 + 2.2 * Math.sin(x * 0.03 + p1)) + 2.6 * Math.sin(x * 0.14 + 2.2 * Math.sin(y * 0.028 + p2)) + 1.6 * Math.sin((x - y) * 0.05 + p3)
+        f[i] = d[i] * GRAIN + wave * Math.min(1, (d[i] * GRAIN) / 12)
+      }
+    }
+    // the ridges' light and shade: lit from the top left, each ridge rounded, a little lavender and moss
+    const picture = document.createElement('canvas')
+    picture.width = cols
+    picture.height = rows
+    const pc = picture.getContext('2d')
+    const img = pc.createImageData(cols, rows)
+    const [light, darkTone] = [[166, 157, 144], [84, 76, 70]]
+    for (let rr = 0; rr < rows; rr++) {
+      for (let c = 0; c < cols; c++) {
+        const [x, y] = [X0 + c * GRAIN, Y0 + rr * GRAIN]
+        const i = rr * cols + c
+        const t = Math.max(0, Math.min(1, ((x + 40) / 480) * 0.75 + (y / 720) * 0.25))
+        const ridge = 0.88 + 0.16 * Math.sin((f[i] / RIDGE) * Math.PI * 2)
+        const tint = Math.sin(x * 0.011 + y * 0.007 + p3)
+        const k = [tint * 6, -tint * 2, tint * 8] // lavender one way, moss the other
+        for (let ch = 0; ch < 3; ch++) img.data[i * 4 + ch] = Math.max(0, Math.min(255, (light[ch] + (darkTone[ch] - light[ch]) * t + k[ch]) * ridge))
+        img.data[i * 4 + 3] = 255
+      }
+    }
+    pc.putImageData(img, 0, 0)
+
+    /** Marching squares: the ridge lines at `at` across each, through the grid. */
+    function lines(at) {
+      const path = new Path2D()
+      const levels = []
+      for (let k = 0; (k + at) * RIDGE < 400; k++) levels.push((k + at) * RIDGE)
+      for (let rr = 0; rr < rows - 1; rr++) {
+        for (let c = 0; c < cols - 1; c++) {
+          const i = rr * cols + c
+          const [a, b, cc, dd] = [f[i], f[i + 1], f[i + cols + 1], f[i + cols]] // round the cell: top left, top right, bottom right, bottom left
+          if (!d[i] || !d[i + 1] || !d[i + cols] || !d[i + cols + 1]) continue // the outline is drawn on its own
+          const lo = Math.min(a, b, cc, dd)
+          const hi = Math.max(a, b, cc, dd)
+          for (const v of levels) {
+            if (v < lo || v > hi) continue
+            const pts = crossings(a - v, b - v, cc - v, dd - v, X0 + c * GRAIN, Y0 + rr * GRAIN)
+            for (let q = 0; q + 1 < pts.length; q += 2) {
+              path.moveTo(...pts[q])
+              path.lineTo(...pts[q + 1])
+            }
+          }
+        }
+      }
+      return path
+    }
+    return { picture, lines }
   }
 
   /** In front: grass strokes, denser and darker towards the bottom, and low clumps of flowers along the edge. */
@@ -577,7 +687,7 @@ const Painting = (() => {
     place(into.far, layer(-60, 380, farW + 120, 290, (ctx) => far(ctx, farW)))
     place(into.back, layer(-60, 140, Layout.WORLD_W + 120, 590, back))
     if (into.rocks) place(into.rocks, layer(Layout.SPRING - 240, 360, 900, 370, rocks))
-    if (into.oak) withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(-60, -80, 560, 800, oak), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else (none on the front page's card)
+    if (into.oak) withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(...OAK_BOX, oak), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else (none on the front page's card)
     place(into.front, layer(-60, 690, Layout.WORLD_W + 120, 210, front))
     const { from, to } = Layout.BED
     place(into.bed, layer(from - 30, 610, to - from + 60, 110, (ctx) => bed(ctx, from - 10, to + 10)))

@@ -7,13 +7,15 @@
 //   each time; a start, a giggle, and an "ooh" that echoes too;
 // - the dark: he goes in and is lost in its shadow, only his eyes blinking
 //   in the dark, looking about; out he comes with an oak leaf on his head,
-//   and shakes it off;
+//   and shakes it off, and it lies where it falls (they gather over the
+//   play, as the acorns do);
 // - the acorns: one drops on his head, bonk; he rubs it and looks up; the
 //   next he catches, and tucks it into the hollow, where they pile up over
 //   the play (a few, then no more show).
 //
 // Its drawing: the tap target over its trunk and crown, and the acorns kept
-// in the hollow (#oak, behind him); the hollow's dark, his eyes in it and
+// in the hollow (#oak, behind him); the leaves on the grass (#oak-ground, in
+// front of the grass, behind him); the hollow's dark, his eyes in it and
 // the falling acorns in front of him (#oak-front). All of it moves only on
 // the Clock (Motion.endAt), and restore() puts everything back at once when
 // a tap cuts a peek short (what is falling falls on to the grass).
@@ -40,8 +42,12 @@ const Oak = (() => {
   const DROP_FROM = 210 // ...from this high (in among the leaves)
   const KEPT = [[140, 706], [168, 709], [196, 706], [154, 688], [182, 688], [168, 670]] // where the acorns he tucks in lie, in turn
   const random = Debug.random('meadow-oak') // which way first, where an acorn bounces: its own stream
+  const strew = Debug.random('meadow-oak-leaves') // where a leaf lies and how it is turned: its own, so leaves shift nothing else
+  const LIE = [-0.6, 0.6] // a leaf on the grass lies turned this much (radians), either way…
+  const LIE_FLAT = 0.5 // …and seen this flat, lying down
 
   let front = null // #oak-front
+  let ground = null // #oak-ground: the leaves he has shaken off
   let veil = null // the hollow's dark, in front of him
   let store = null // the acorns kept in the hollow
   let kept = 0
@@ -56,10 +62,12 @@ const Oak = (() => {
     return e
   }
 
-  /** Draw the oak's live parts: the tap target into `back` (#oak, over the painting), the dark into `over` (#oak-front).
+  /** Draw the oak's live parts: the tap target into `back` (#oak, over the painting), the dark into `over` (#oak-front),
+   * the leaves he shakes off into `grass` (#oak-ground).
    * The meadow's side: its `goTo`, `rounds` (a pool to draw the peeks from) and `dropHat` (off his head and down). */
-  function setup(back, over, meadow) {
+  function setup(back, over, grass, meadow) {
     front = over
+    ground = grass
     goTo = meadow.goTo
     dropHat = meadow.dropHat
     next = meadow.rounds(Object.keys(PEEKS), random)
@@ -266,16 +274,34 @@ const Oak = (() => {
     ], { duration: 2600, easing: 'ease-out' }), 'the acorn bounces off')
   }
 
-  /** The leaf shaken off his head: it see-saws down to the grass and is lost there (the meadow's dropHat). */
+  /** The leaf shaken off his head: it see-saws down to the grass (the meadow's dropHat) and lies there, the
+   * play long, with any he shook off before. */
   function shakeLeaf() {
     if (!leaf) return
     leaf = null
-    dropHat((x, y, s) => [
-      { transform: `translate(${x}px, ${y}px) rotate(0deg) ${s}`, opacity: 1 },
-      { transform: `translate(${x + 40}px, ${y + 80}px) rotate(30deg) ${s}`, opacity: 1, offset: 0.3 },
-      { transform: `translate(${x - 10}px, ${y + 150}px) rotate(-25deg) ${s}`, opacity: 1, offset: 0.6 },
-      { transform: `translate(${x + 30}px, ${Y}px) rotate(15deg) ${s}`, opacity: 0 },
-    ], 2200, front) // in front of him: behind, his body hid it
+    const dx = strew() * 40 - 10 // where it lands, beside him
+    const turn = LIE[0] + strew() * (LIE[1] - LIE[0])
+    let at = null
+    const landed = dropHat((x, y, s) => {
+      at = x + dx
+      return [
+        { transform: `translate(${x}px, ${y}px) rotate(0deg) ${s}` },
+        { transform: `translate(${x + 40}px, ${y + 80}px) rotate(30deg) ${s}`, offset: 0.3 },
+        { transform: `translate(${x - 10}px, ${y + 150}px) rotate(-25deg) ${s}`, offset: 0.6 },
+        { transform: `translate(${at}px, ${Y + 6}px) rotate(${turn}rad) ${s} scale(1, ${LIE_FLAT})` },
+      ]
+    }, 2200, front) // in front of him as it falls: behind, his body hid it
+    if (!landed) return
+    landed.then(() => lie(at, turn))
+  }
+
+  /** A leaf lying in the grass at x, turned `turn`: where the one that fell lands, behind him now. */
+  function lie(x, turn) {
+    const g = oakLeaf()
+    g.setAttribute('class', 'oak-fallen')
+    g.setAttribute('transform', `translate(${x} ${Y + 6}) rotate(${(turn * 180) / Math.PI}) scale(${Mole.SCALE}) scale(1 ${LIE_FLAT})`)
+    ground.appendChild(g)
+    Debug.trace('leaf lies', { x: Math.round(x), leaves: ground.childElementCount })
   }
 
   /** The acorn in his hands into the hollow: it lies with the others there (a few show; past those it goes in behind). */
@@ -320,5 +346,7 @@ const Oak = (() => {
     /** Is the hollow's dark over him (for the rules: never once he is free)? */
     get dark() { return Number(veil?.style.opacity || 0) > 0 },
     get kept() { return kept },
+    /** How many leaves lie in the grass. */
+    get fallen() { return ground?.childElementCount || 0 },
   }
 })()

@@ -1535,6 +1535,10 @@ class TestMeadowOak:
         assert m.page.evaluate("Oak.kept") == peeks.count("acorns")
         m.wait(self.GONE)  # what fell or flew off has landed and gone
         self.leaves_nothing(m)
+        # the leaves he shook off lie in the grass, in front of the oak, and stay
+        assert m.page.evaluate("Oak.fallen") == peeks.count("dark")
+        m.play_for(5_000)
+        assert m.page.evaluate("Oak.fallen") == peeks.count("dark")
 
     @pytest.mark.parametrize("cut_ms", [1800, 3200, 4600, 6000])
     def test_each_peek_cut_short_leaves_nothing_behind(

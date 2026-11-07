@@ -382,7 +382,8 @@ const meadowGame = (() => {
     const { x, y } = Mole.head()
     const g = el('g', {}, layer)
     g.appendChild(hat)
-    Motion.endAt(g, fall(x, y, `scale(${Mole.SCALE})`), { duration: ms }).then(() => g.remove(), () => g.remove())
+    const gone = () => g.remove()
+    return Motion.endAt(g, fall(x, y, `scale(${Mole.SCALE})`), { duration: ms }).then(gone, gone) // landed (or cut short) and gone
   }
 
   /** Off his head, down to the grass beside him, where it lies a moment and fades. */
@@ -795,7 +796,7 @@ const meadowGame = (() => {
   Friends.setup(document.getElementById('friends'))
   Spring.setup(document.getElementById('spring'), () => game.hour)
   Nest.setup(document.getElementById('spring'), () => game.hour)
-  Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), { goTo, rounds, dropHat })
+  Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), document.getElementById('oak-ground'), { goTo, rounds, dropHat })
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
   Cricket.setup(document.getElementById('crickets'))
   Church.setup(document.getElementById('distant'), () => {
