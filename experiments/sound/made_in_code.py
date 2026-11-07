@@ -21,7 +21,7 @@ GAMES = {
     "reksio": ROOT / "worlds/reksio/games/yard/game/sound.js",
 }
 # a doc comment, then the function it is for: `function name(` (the meadow) or `name(` (the yard's object)
-DOC = re.compile(r"/\*\*(.*?)\*/\s*(?:function\s+)?(\w+)\s*\(", re.S)
+DOC = re.compile(r"/\*\*(.*?)\*/\s*(?:function\s+)?(\w+)\s*\(", re.DOTALL)
 
 
 def docs(path: Path) -> dict[str, str]:
@@ -37,7 +37,9 @@ def main() -> None:
     out = HERE / "out"
     out.mkdir(exist_ok=True)
     data = {world: docs(path) for world, path in GAMES.items()}
-    (out / "made_in_code.js").write_text(f"window.MADE_IN_CODE_DOCS = {json.dumps(data, indent=1, ensure_ascii=False)}\n")
+    (out / "made_in_code.js").write_text(
+        f"window.MADE_IN_CODE_DOCS = {json.dumps(data, indent=1, ensure_ascii=False)}\n"
+    )
     print(f"{sum(map(len, data.values()))} descriptions -> out/made_in_code.js")
 
 
