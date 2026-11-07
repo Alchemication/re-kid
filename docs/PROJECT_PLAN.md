@@ -479,9 +479,13 @@ scene:
   the yard, as tall as the doghouse's roof (Adam, 2026-10-18: check his
   size against the films). Then one look at each gag as a contact sheet,
   and acting: reactions in each gag, starting with Eliot's favourites.
-- **Code:** the perf budget's slack is thin: walking measures 24–25% busy
-  of 25% (2026-10-22, the bed about one point of it). Before adding more
-  drawn every frame, win some back (the sky and painting are the biggest).
+- **Code:** the perf budget's slack is thin: 20–24% busy of 25% in every
+  case, yard and meadow (2026-11-07, after the meadow's off-screen
+  animation stopped and nothing reads styles every frame; it had sat at
+  26–27%). Before adding more drawn every frame, win some back: the
+  butterflies' flutter and the birds' wings still animate everywhere.
+  Adam measures the meadow on his iPhone (Safari's Web Inspector), and
+  the meadow's own budget follows from that.
   The browser tests that failed now and then under `-n 8` (the wind's
   gust, taps mid-step, the hurried encounters, the egg, the critters, the
   storm, the herd, the phone turned) were the tests seeing a different
@@ -493,6 +497,11 @@ scene:
   alone. The meadow: "free" holds for a frame before a tap that waited
   for a step goes (`stepped()`, `Clock.after(0)`); harmless for a child,
   a trap for a test (CLAUDE.md says to wait for what the tap does).
+  `test_meadow_browser.py::TestMeadowEncounters::test_runs_to_its_end[poles]`
+  failed once in the whole suite under load (2026-11-07, on fed9b9a's
+  changes) and passed alone 3 times and in its slice under `-n 4` 4 times,
+  on that code and the commit before. Whether it is older is unknown; if
+  it comes back, read its trace for the step it stopped at.
   Fixed 2026-10-31 (the tools and tests, not the games): look and replay
   photograph in held game time, a replay starts `?held`, the key tap and
   the corner sun tests.
