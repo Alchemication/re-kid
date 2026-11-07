@@ -47,6 +47,13 @@ decided and why.
      size), whether each peek reads, the echo by ear (`ECHO_*` in
      sound.js), the bonk's level (his three takes, one raised 14 dB: listen
      for hiss), whether the plink fits the catch and the tuck-in.
+   - **Adam judges his den** (redrawn 2026-11-07 after Krtek a autíčko
+     0:50, den.js): the paved room, him on his front with his head on his
+     hands, breathing; on plays the car was mended, he pats it goodnight
+     and sleeps hugging it (15:04). Judge: is the stone pattern too busy
+     for the calm end. Other keepsakes were considered and left for now
+     (Adam: the car is probably enough): the eggshell cap still on, an
+     acorn kept in his hand, a feather the owl drops.
    - **Adam judges the owl in the oak** (built 2026-11-07, his pick B):
      on about 60% of plays (`?owl=1` to try it, `?owl=out` out at once).
      It sleeps in a bigger knot-hole, moved to the middle of the trunk;

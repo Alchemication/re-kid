@@ -335,6 +335,32 @@ class TestMeadowCar:
         m.assert_settled()
         assert not m.page.evaluate("meadowGame.detail('car').riding")
 
+    def test_mended_and_parked_he_takes_it_to_bed(self, meadow: callable) -> None:
+        """As Krtek a autíčko ends: parked by his molehill, then in his arms in the den."""
+        m = meadow(f"{STILL}&soon&props=car&day=60")
+        m.wake()
+        arrived(m, "car")
+        m.do("use car")
+        m.wait("meadowGame.state().things.car === 'done'", 60_000)
+        assert m.page.evaluate("meadowGame.detail('car').parked")
+        m.wait("meadowGame.trace().includes(' end')", 90_000)
+        assert "car to bed" in m.page.evaluate("meadowGame.trace()")
+        assert m.page.evaluate("document.querySelector('.den-car').style.display") == ""
+        assert m.page.evaluate(
+            "[...document.querySelectorAll('.car')].every((c) => c.style.display === 'none')"
+        )
+        assert not m.errors, m.errors
+
+    def test_not_mended_it_stays_out(self, meadow: callable) -> None:
+        m = meadow(f"{STILL}&soon&props=car&day=12")
+        m.wake()
+        m.wait("meadowGame.trace().includes(' end')", 60_000)
+        assert (
+            m.page.evaluate("document.querySelector('.den-car').style.display")
+            == "none"
+        )
+        assert not m.errors, m.errors
+
     def test_a_cut_mid_ride_leaves_him_in_the_meadow(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&soon&props=car")
         m.wake()

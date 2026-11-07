@@ -194,6 +194,12 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   perking towards it) was considered and dropped: every repeat already
   does, so it would point at everything, and a marker nudges a child to
   keep playing.
+- **Code review from time to time, not per commit** (Adam, 2026-11-07).
+  `/code-review` and `/simplify` run over a stretch of work now and then,
+  and on every outside contribution once those begin; a gag's commit
+  needs its tests, its interleavings walked against the code, and a look
+  at it, not a review. Reviews of one gag at a time had found real bugs,
+  but cost more time than they saved on a one-person project.
 - **Procedures become skills, improved by every run** (2026-10-07), so
   someone other than Adam can run them. `new-world` is drafted
   thin, before its first run (Krecik), and shaped by that run's retro.

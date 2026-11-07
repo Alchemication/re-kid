@@ -139,7 +139,7 @@ characters:
   kind: mole
   role: protagonist
   description:
-    text: A small mole who lives under a molehill. In the films sampled he digs up into a meadow, a park or a forest edge, and in Autíčko sleeps in an oval den underground, curled on a white pillow (0:44, 15:00). He makes and fixes things, tends a flower bed by his molehill in Buldozer (0:40–1:04).
+    text: A small mole who lives under a molehill. In the films sampled he digs up into a meadow, a park or a forest edge, and in Autíčko sleeps in a den underground, on his front on a white pillow (0:44, 15:00). He makes and fixes things, tends a flower bed by his molehill in Buldozer (0:40–1:04).
     status: observed
     sources:
     - krtek-youtube
@@ -203,7 +203,7 @@ characters:
       observed_by: claude-frames
   - id: asleep-in-den
     claim:
-      text: Sleeps on his front, curled on a white pillow in an oval chamber underground, then sits up and stretches both arms (Autíčko 0:44–1:08).
+      text: 'Sleeps on his front, his rump up in a hump and his feet out behind, his head down on his crossed hands with his nose pressed into them, eyes shut, the grey-teal of his front showing at his side, on a long white pillow with a striped curl at one end; then sits up and stretches both arms (Autíčko 0:44–1:08). At the end he sleeps the same way hugging the toy car (15:04). The chamber is a rounded square, not an oval as first written here: ochre, paved with a mosaic of dark angular stones, a sparse fringe of small spikes round its edge, pale triangular flecks scattered in the black earth about it (0:50).'
       status: observed
       sources:
       - krtek-youtube

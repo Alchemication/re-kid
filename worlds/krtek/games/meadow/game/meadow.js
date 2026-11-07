@@ -19,7 +19,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
+/* global Again, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -65,6 +65,7 @@ const meadowGame = (() => {
   const moon = document.getElementById('moon')
   const stops = [...document.querySelectorAll('#sky-grad stop')]
   const den = layers.den
+  Den.draw(den)
 
   const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3, eclipse: null, evening: false, dim: false, watching: null } // eclipse: when it began (Clock); evening: the cricket's dusk has come; watching: the butterfly he follows with his eyes
   let tulipHeads = []
@@ -580,6 +581,14 @@ const meadowGame = (() => {
     Things.night()
     Fence.night()
     game.gesture = 'bedtime'
+    const car = Things.get('car')
+    const toy = car?.toBed?.() // the toy car, mended and parked by his molehill: he takes it to bed, as the film ends
+    if (toy) {
+      await Debug.ignoreCut(goTo(toy.x - 150), 'to the car') // from its far side: the cricket plays on its near side
+      Mole.show('three', 1)
+      Sound.say('giggle')
+      await Debug.ignoreCut(Mole.knock(), 'a goodnight pat')
+    }
     await Debug.ignoreCut(intoHome(), 'home to bed')
     Mole.put(HOME, 'hill')
     Sound.say('achJo')
@@ -594,6 +603,8 @@ const meadowGame = (() => {
     }
     irisCircle.setAttribute('r', '0')
     Music.quiet()
+    if (toy) car.takeIn()
+    Den.hug(!!toy)
     den.style.display = ''
     den.classList.remove('waking')
     den.classList.add('night')

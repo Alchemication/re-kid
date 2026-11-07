@@ -74,34 +74,8 @@
       <g id="glow-view"><g id="glows"></g></g><!-- the fireflies (critters.js): over the night, so they shine in it; it scrolls with the ground (view.js) -->
     </g>
 
-    <!-- His den under the molehill, where the day begins and ends: an oval of
-         earth in the dark, as Krtek a autíčko opens and closes -->
-    <g id="den">
-      <rect x="-200" y="-200" width="2000" height="1300" fill="#000" />
-      <g class="specks" fill="#b36a2a">
-        <circle cx="560" cy="250" r="3" /><circle cx="1040" cy="300" r="2.5" /><circle cx="480" cy="640" r="3" /><circle cx="1130" cy="620" r="2" />
-        <circle cx="420" cy="420" r="2" /><circle cx="1190" cy="460" r="3" /><circle cx="700" cy="190" r="2" /><circle cx="900" cy="720" r="2.5" />
-      </g>
-      <ellipse cx="800" cy="450" rx="320" ry="230" fill="#c47a35" stroke="#7a4518" stroke-width="10" />
-      <ellipse cx="800" cy="450" rx="290" ry="200" fill="#d78f45" />
-      <g fill="#8a4f1c" opacity="0.6">
-        <circle cx="620" cy="360" r="6" /><circle cx="700" cy="300" r="4" /><circle cx="980" cy="330" r="7" /><circle cx="1010" cy="520" r="5" />
-        <circle cx="610" cy="540" r="5" /><circle cx="880" cy="290" r="4" /><circle cx="760" cy="600" r="6" /><circle cx="930" cy="610" r="4" />
-      </g>
-      <path d="M600 560 q-10 -60 60 -64 h300 q70 4 60 64 q-4 30 -60 30 h-300 q-56 0 -60 -30z" fill="#fbf8ef" stroke="#15140f" stroke-width="3" />
-      <g class="sleeper">
-        <path d="M640 540 c0 -70 70 -110 160 -110 c90 0 150 40 150 100 c0 30 -40 40 -150 40 c-110 0 -160 0 -160 -30z" fill="#15140f" />
-        <path d="M690 488 q14 10 28 0 M738 484 q14 10 28 0" stroke="#fbf8ef" stroke-width="4" fill="none" stroke-linecap="round" />
-        <circle cx="734" cy="512" r="15" fill="#d8322b" stroke="#15140f" stroke-width="2" />
-        <path d="M800 432 q-4 -20 4 -34 M790 434 q-14 -14 -16 -28" stroke="#15140f" stroke-width="3.5" fill="none" stroke-linecap="round" />
-        <ellipse cx="660" cy="552" rx="18" ry="10" fill="#eda88f" stroke="#8c4f3c" stroke-width="1.5" />
-      </g>
-      <g class="zees" fill="none" stroke="#fbf8ef" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-        <path class="z z1" d="M880 380 h22 l-22 24 h22" />
-        <path class="z z2" d="M920 340 h28 l-28 30 h28" />
-        <path class="z z3" d="M966 292 h34 l-34 36 h34" />
-      </g>
-    </g>
+    <!-- His den under the molehill, where the day begins and ends, as Krtek a autíčko opens and closes -->
+    <g id="den"></g><!-- drawn by den.js -->
   </svg>
   <canvas id="rain" aria-hidden="true"></canvas><!-- a storm's rain, over the picture (storm.js) -->
 
@@ -173,6 +147,7 @@
   <script src="flock.js"></script>
   <script src="heron.js"></script>
   <script src="moleart.js"></script>
+  <script src="den.js"></script>
   <script src="mole.js"></script>
   <script src="foxart.js"></script>
   <script src="friends.js"></script>

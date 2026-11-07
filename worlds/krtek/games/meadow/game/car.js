@@ -12,6 +12,7 @@
 // zooms to the far end of the meadow, turns, and brings him all the way back
 // to park by his molehill, where it stays, as the film ends with the car parked by
 // the molehill at night. Tapped again once it's mended, it gives him a ride.
+// Parked there at bedtime, he pats it goodnight and takes it to bed (den.js).
 //
 // A tap on the car or on him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
 // (things.js): a wheel in his hands goes down by him, and if he was riding,
@@ -31,7 +32,7 @@
   const random = Debug.random('meadow-car') // its own stream
   const startles = random() < STARTLE_CHANCE // this play's: it jiggles at his knock
 
-  const car = { x: LIES_AT, wheels: 0, wound: false, riding: false, face: 1, back: null, front: null, loose: [] }
+  const car = { x: LIES_AT, wheels: 0, wound: false, riding: false, parked: false, face: 1, back: null, front: null, loose: [] } // parked: mended and by his molehill
   const m = () => Things.meadow
   const el = (...args) => m().el(...args)
 
@@ -213,6 +214,7 @@
 
   /** In he climbs; it shoots off backwards, then zooms across the meadow, turns, and comes back. */
   async function ride(alive, first = true) {
+    car.parked = false
     if (car.face !== 1) place(car.x, 1, 0) // it always sets off facing the spring
     await m().goTo(car.x - 150) // up beside it (never a molehill under the car)...
     if (!alive()) return
@@ -241,6 +243,7 @@
   /** Parked by his molehill: out he climbs, delighted. */
   async function park(alive) {
     car.riding = false
+    car.parked = true
     await Mole.perch(0, 400)
     if (!alive()) return
     await m().goTo(car.x + 150)
@@ -284,6 +287,14 @@
     },
     restore,
     night: restore,
-    detail: () => ({ x: Math.round(car.x), wheels: car.wheels, wound: car.wound, riding: car.riding, startles, cast: [] }),
+    /** Bedtime: where it stands if it is mended and parked by his molehill (he takes it to bed, as Krtek a autíčko
+     * ends: parked by the molehill at 14:40, in his arms in the den at 15:04), or null. */
+    toBed: () => (car.parked ? { x: car.x } : null),
+    /** Taken in with him, once the circle has closed: gone from the meadow. */
+    takeIn() {
+      for (const g of [car.back, car.front]) g.style.display = 'none'
+      Debug.trace('car to bed')
+    },
+    detail: () => ({ x: Math.round(car.x), parked: car.parked, wheels: car.wheels, wound: car.wound, riding: car.riding, startles, cast: [] }),
   })
 })()

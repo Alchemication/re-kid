@@ -312,8 +312,10 @@ heats the laptop for minutes.
 
 **Adding a gag:** run the `new-gag` skill; it has the steps and where each
 piece goes. Every gag gets its rows in the `test_game_browser.py` tables, a
-`main.py look` at it, then `/code-review` (taps mid-gag, rain, evening) and
-`/simplify`. No tool checks judgement; these reviews are the step for it.
+`main.py look` at it, and its interleavings (taps mid-gag, rain, evening)
+walked against the code. `/code-review` and `/simplify` run from time to
+time over a stretch of work, not per commit, and on every outside
+contribution once those begin (`docs/DECISIONS.md`).
 
 **Bugs Adam reports:** he saves a report in the game (Ctrl+Shift+B, with a
 description). `main.py replay` replays it and photographs the run-up; read the

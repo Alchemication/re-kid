@@ -1,11 +1,11 @@
 ---
 name: new-gag
-description: Add or rework a gag, encounter or ambient creature in any game (each game's map is a file beside this one) — design its beats (or, for ambient life on the world model, what brings it and what it answers to), how the child gets to see it and what taps do, put each piece where it belongs, look at it frame by frame, test it against taps and interleavings, review, verify once. Use when asked to add, build, improve or fix a gag, encounter, creature behaviour or left-alone move, e.g. "the bird's twig to fetch", "his tail caught in the bramble", "the fox after the nest" or "a hedgehog at dusk".
+description: Add or rework a gag, encounter or ambient creature in any game (each game's map is a file beside this one) — design its beats (or, for ambient life on the world model, what brings it and what it answers to), how the child gets to see it and what taps do, put each piece where it belongs, look at it frame by frame, test it against taps and interleavings, verify once. Use when asked to add, build, improve or fix a gag, encounter, creature behaviour or left-alone move, e.g. "the bird's twig to fetch", "his tail caught in the bramble", "the fox after the nest" or "a hedgehog at dusk".
 ---
 
 # New gag
 
-The procedure for one gag in a game, from idea to a reviewed, tested commit.
+The procedure for one gag in a game, from idea to a tested commit.
 The rules it relies on are in `CLAUDE.md` ("Code Style", game debuggability,
 "Testing"); this skill is the order to do things in, where each piece goes,
 and the traps already found. It holds for every game; what is particular
@@ -329,16 +329,17 @@ The game's tables and fakes: its file (section 4). For every game:
   tell an old timing bug from a new one; either way it's a real bug, noted
   in `docs/PROJECT_PLAN.md` if not fixed then.
 
-## 8. Review, then verify once
+## 8. Check, then verify once
 
 1. While working: unit tests, eslint, and the browser slice for what changed
    (`CLAUDE.md` table).
-2. `/code-review` the diff (and `/simplify`) before every commit, one gag
-   at a time, never once at the end for several: each review of four
-   encounters found four to ten real bugs. Fix them all, with tests (7).
-   Don't take a look-through (6) for a review: screenshots of the
-   paint's tunnel passed while the tins floated above the hole their
-   carriers had gone down, which the review found.
+2. No `/code-review` per commit (`docs/DECISIONS.md`): it runs from time
+   to time over a stretch of work. So walk the gag's interleavings
+   (section 3: a tap at each beat, rain, dusk, bedtime, a cut at every
+   await) against the code yourself before committing; each review of
+   four encounters had found four to ten real bugs there. A look-through
+   (6) is not enough alone: screenshots of the paint's tunnel passed
+   while the tins floated above the hole their carriers had gone down.
 3. Then once: `uv run ruff check . && uv run pytest`, `npx --yes
    eslint@10.12.0 worlds`, `uv run pytest -m browser -n 4`, `uv run pytest
    -m perf` if something drawn every frame changed, `main.py validate`.

@@ -106,7 +106,7 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
   hand to keep the two apart needs a write on every path, and one missed
   left the meadow's owl stuck at its hole all evening.
 
-## 4. Look, test, review
+## 4. Look, test, check
 
 - **Look:** a Playwright probe (`channel="chrome"`) sampling where it is
   every second, the trace (`Ambient` notes each goal), and photos cropped
@@ -115,5 +115,5 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
 - **Browser:** a class in `test_meadow_browser.py`: it comes when asked, a
   tap answers and the hero ends free and settled; it doesn't come without
   its cause (no rain, no snail); one reaction through the world (the frog at
-  his paddle). Then `SKILL.md` sections 8–9: review, the whole suite once,
+  his paddle). Then `SKILL.md` sections 8–9: its interleavings walked, the whole suite once,
   perf (it runs every frame), report and retro.

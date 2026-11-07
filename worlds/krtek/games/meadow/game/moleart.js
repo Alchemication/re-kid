@@ -256,5 +256,5 @@ const MoleArt = (() => {
     return { front: front(parent, skin), three: three(parent, skin), side: side(parent, skin) }
   }
 
-  return { draw }
+  return { draw, INK, BODY, BIB, PINK, SKIN_LINE, NOSE, BROW }
 })()
