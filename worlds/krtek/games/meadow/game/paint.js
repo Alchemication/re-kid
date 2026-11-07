@@ -1,24 +1,26 @@
 // The paint and the fox (someone helps him), after Krtek malířem, told as a
 // story that grows each time the tins are tapped again (Adam, 2026-11-01).
-// The hare and the mouse carry three paint tins in and set them down in the
-// open grass between his flowers and the spring, and go off. He comes to
-// them, curious, and knocks on the red one. Then the fox: first his long
-// shadow slides in, then he comes sneaking in from the edge of the meadow,
-// big, for the bullfinch's nest on the spring's rocks (nest.js; in the film
-// he raids a nest), while the chicks huddle up trembling and peeping the
-// alarm. He snickers, rubbing his paws, licks his lips; the mole gasps and
-// points (tam!), and the fox rears up over the nest, bigger still, paws up,
-// teeth bared, and growls. The mole gets a fright, backs away, and tumbles
-// into the red tin: out he comes, all red (as the film: the fox first, the
-// paint by accident). All red, he has an idea: a ghost, arms up, "uuuu!".
-// The first time the fox jumps, then peers closer and laughs: he sees
-// through it. Along come the hare and the mouse with brushes: they paint
-// each other (tiger stripes, spots) and dab spots on him, and the three
-// climb onto each other's shoulders, a big striped spotted monster with its
-// arms up; the fox, shocked, shrinks small and hunched, his ruff on end,
-// yelps and runs (the surprise, as the stacked monster in the film), and
-// the chicks settle. His friends wave and go, and he jumps in the spring to
-// wash the paint off. The tins stay.
+// The fox comes first, as in the film, and the paint after (Adam,
+// 2026-11-06: friends carrying tins in before anything had happened made no
+// sense). It begins with a sly snicker from off the meadow's edge: a
+// threat, so, like the bulldozer, he stops what he is doing and hurries
+// over towards the spring, and the fox comes sneaking in, big, for the
+// bullfinch's nest on its rocks (nest.js; in the film he raids a nest),
+// while the chicks huddle up, trembling and peeping the alarm. He snickers, rubbing his paws, licks his lips; the mole
+// gasps and points, and the fox rears up over the nest, bigger still, paws
+// up, teeth bared, and growls. The mole claps his hands to his face. The
+// hare and the mouse have seen it all: they hurry in with three paint tins
+// (they have a plan), set them down behind him and nod. But backing away
+// from the fox, the mole tumbles into the red tin before anything comes of
+// it: out he comes, all red (the paint by accident, as the film). All red,
+// he has an idea of his own: a ghost, arms up, "uuuu!". The first time the
+// fox jumps, then peers closer and laughs: he sees through it. Now the
+// friends' plan: brushes out, they paint each other (tiger stripes, spots)
+// and dab spots on him, and the three climb onto each other's shoulders, a
+// big striped spotted monster with its arms up; the fox, shocked, shrinks
+// small and hunched, his ruff on end, yelps and runs (the surprise, as the
+// stacked monster in the film), and the chicks settle. His friends wave and
+// go, and he jumps in the spring to wash the paint off. The tins stay.
 //
 // The tins tapped again, the story again, warier and quicker (again): the
 // fox sneaks back, the mole tumbles in again, and this time the hare and
@@ -33,10 +35,11 @@
 // ghost acts (swaying, or bobbing). If bedtime comes first, he goes to bed
 // washed.
 //
-// A tap on a tin or on him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
+// A tap on the nest (till the tins are down), a tin or him hurries it on; a tap elsewhere waits for the step to end, then cuts it short
 // (things.js): the friends and the fox go home, and the next tap carries
-// on from the step it stopped at (the fox comes back first, quicker); he
-// stays red until he washes.
+// on from the step it stopped at (the fox comes back first, quicker); the
+// tins, once brought, stay where they were set down; he stays red until he
+// washes.
 
 /* global Debug, Friends, Layout, Mole, Motion, Nest, Sound, Things */
 ;(() => {
@@ -69,14 +72,17 @@
   const WASH_AT = Layout.SPRING - 40
   const CARRY_Y = 66 // a tin is carried this high, in front of whoever carries it…
   const STACK_Y = 50 // …the second on top of the first
-  const CARRY_MS = 3200 // bringing them in, or carrying them off
+  const CARRY_MS = 3200 // carrying them off at the end
+  const HURRY_MS = 2600 // bringing them in: hurrying, the fox is there
   const LOADS = [['mouse', [0]], ['hare', [RED, 1]]] // who carries which tins (the hare two, stacked)
+  const WAIT_X = { hare: TINS[0].x - 70, mouse: TINS[0].x - 140 } // where they stand by once the tins are down, behind them
 
   const random = Debug.random('meadow-fox') // its own stream: how he sneaks, the ghost's act, the ending
   const tins = []
   const cast = Friends.troupe()
-  const porters = Friends.troupe() // the hare and the mouse bringing the tins and fetching them: not the chain's cast
+  const porters = Friends.troupe() // the hare and the mouse fetching the tins once the story is told: not the chain's cast
   let fox = null
+  let brought = false // the tins are down (or on their way, so a cut sets them down where they were going)
   let friends = { hare: null, mouse: null }
   let red = false // he fell in the tin
   let cutShort = false // picked up after a cut: the fox comes back and it carries on at once
@@ -114,34 +120,48 @@
     g.style.transform = `translate(${k ? 6 : -4}px, ${-CARRY_Y - k * STACK_Y}px)`
   }
 
-  /** The hare and the mouse carry the tins in, set each down at its place, and go off. */
-  async function bring() {
+  /** They have seen the fox: the hare and the mouse hurry in with the tins (a plan), set each down
+   * behind him, and stand by. */
+  async function bring(alive) {
+    if (!fox) await foxComes(alive) // picked up after a cut: the fox comes back first
+    if (!alive()) return
+    if (brought) return // brought before a cut: the tins stand where they were set down
+    brought = true
+    Nest.mark(null) // the tins are the thing to tap now
     const from = offLeft()
-    try {
-      await Promise.all(LOADS.map(async ([kind, which], n) => {
-        const f = porters.call(kind, from - n * 90, 1)
-        which.forEach((i, k) => pickUp(i, f, k))
-        for (const i of which) {
-          await f.go(TINS[i].x - 30, which[0] === i ? CARRY_MS : 500)
-          setDown(i)
-          Sound.plink()
-        }
-      }))
-    } catch {
-      // bedtime came first (porters gone at once): the tins stand at their places all the same
-    } finally {
-      tins.forEach((g, i) => { if (g.parentNode !== document.getElementById('things')) setDown(i) }) // any still carried
-      porters.dismissAll(false, -1) // off they go, back the way they came (for brushes, it turns out)
-    }
+    await Promise.all(LOADS.map(async ([kind, which], n) => {
+      const f = (friends[kind] = cast.call(kind, from - n * 90, 1))
+      which.forEach((i, k) => pickUp(i, f, k))
+      for (const i of which) {
+        await f.go(TINS[i].x - 30, which[0] === i ? pace(HURRY_MS) : 500, kind === 'hare' ? 36 : 0)
+        if (!alive()) return
+        setDown(i)
+        Sound.plink()
+      }
+      await f.go(WAIT_X[kind], 700, kind === 'hare' ? 36 : 0)
+      if (!alive()) return
+      f.turn(1) // towards the fox
+    }))
+    if (!alive()) return
+    Mole.lookAt(TINS[1].x) // he glances back: tins?
+    Sound.say('hm')
+    await Promise.all([friends.hare.bob(1), friends.mouse.bob(1)]) // a nod: we have a plan
   }
 
+  /** Every tin not down yet set down at its place (a cut while they were carried: they stay). */
+  function setAllDown() {
+    tins.forEach((g, i) => { if (g.parentNode !== document.getElementById('things')) setDown(i) })
+  }
+
+  /** It begins: a sly snicker from off the meadow's edge; the nest is the thing to tap till the tins are down. */
   function appear() {
     TINS.forEach((t) => {
       const g = el('g', { class: 'thing tin' })
       g.appendChild(drawTin(t.colour))
       tins.push(g)
     })
-    bring()
+    Sound.snicker()
+    Nest.mark('paint')
   }
 
   const pace = (ms) => (cutShort || told ? ms * QUICK : ms) // after a cut, or told again, everyone hurries
@@ -246,19 +266,21 @@
 
   // ------------------------------------------------------------ the chain
 
-  /** He comes to the tins, curious, and knocks on the red one. */
-  async function curious(alive) {
+  /** He hurries over towards the spring, and the fox comes sneaking in for the nest. */
+  async function seen(alive) {
     await m().goTo(PEER_X)
     if (!alive()) return
-    Sound.say('hm')
-    Sound.knock()
-    await Mole.knock()
+    Mole.lookAt(Nest.AT.x)
+    Sound.say('ooh')
+    await foxComes(alive)
   }
 
   /** Frightened, he backs away from the fox into the red tin, and topples in head first: out he comes, all red. */
   async function tumble(alive) {
     if (!fox) await foxComes(alive) // picked up after a cut: the fox comes back first
     if (!alive() || red) return
+    if (!brought) await bring(alive) // never brought (bring cut before it began): they come now
+    if (!alive()) return
     await m().goTo(PEER_X)
     if (!alive()) return
     Mole.lookAt(FOX_AT)
@@ -306,9 +328,13 @@
     if (!alive()) return
     await m().goTo(STACK_X)
     if (!alive()) return
-    friends.hare = cast.call('hare', offLeft(), 1)
-    friends.mouse = cast.call('mouse', offLeft() - 90, 1)
-    await Promise.all([friends.hare.go(STACK_X - 130, pace(3600), 36), friends.mouse.go(STACK_X - 210, pace(3600))])
+    const near = !!friends.hare // standing by since they brought the tins; after a cut, they come again
+    if (!near) {
+      friends.hare = cast.call('hare', offLeft(), 1)
+      friends.mouse = cast.call('mouse', offLeft() - 90, 1)
+    }
+    const walk = pace(near ? 1800 : 3600)
+    await Promise.all([friends.hare.go(STACK_X - 130, walk, 36), friends.mouse.go(STACK_X - 210, walk)])
     if (!alive()) return
     Sound.swish()
     await friends.hare.bob(2)
@@ -433,6 +459,7 @@
 
   /** Cut short: the fox and the friends go home (they'll come again, quicker); he stays as painted as he is. */
   function restore() {
+    if (brought) setAllDown() // carried in when the cut came: down where they were going
     cast.dismissAll() // home on their own feet (friends.js leave)
     fox = null
     Nest.fear(false)
@@ -445,6 +472,7 @@
     restore()
     cast.dismissAll(true) // bedtime, under the closing circle: home at once
     porters.dismissAll(true)
+    Nest.mark(null)
     Mole.paint(null)
     red = false
   }
@@ -452,10 +480,12 @@
   Things.add({
     name: 'paint',
     offer: 'helped',
-    trouble: [1, 5], // from the fox's coming till the monster sends it off: the bed uneasy (things.js)
-    music: { 1: 'fox' }, // the fox: his sly motif (Music MOTIFS), then the effects lead; the monster sends it off (happy as the trouble lifts: things.js)
+    urgent: true, // a threat won't wait for a tap: he goes to see at once, as for the bulldozer (things.js)
+    engageMs: 3000, // when it can't break off his play (still waking), he goes to see soon
+    trouble: [0, 5], // from the chicks' alarm and the fox's coming till the monster sends it off: the bed uneasy (things.js)
+    music: { 0: 'fox' }, // the fox: his sly motif (Music MOTIFS), then the effects lead; the monster sends it off (happy as the trouble lifts: things.js)
     appear,
-    steps: [curious, foxComes, tumble, ghost, friendsPaint, monster, wash],
+    steps: [seen, bring, tumble, ghost, friendsPaint, monster, wash],
     again: retold,
     restore,
     night,

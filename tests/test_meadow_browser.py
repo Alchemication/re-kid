@@ -168,20 +168,27 @@ class TestMeadowDay:
             m.wait_free()
             m.assert_settled()
 
-    def test_one_encounter_at_a_time(self, meadow: callable) -> None:
-        # a long enough day that the quiet spell after the egg ends before the last hour
-        # (none arrives then)
-        m = meadow(f"{STILL}&day=180&props=egg,poles")
+    # Adam, 2026-11-06: the bulldozer rolled in while he held the egg up, in an eclipse
+    def test_one_happening_at_a_time(self, meadow: callable) -> None:
+        """However long one waits (here 75 s, past the minute that once let the next
+        come too), neither the next encounter nor a due eclipse arrives on top of it.
+        Once it is done and a quiet spell has passed, the eclipse (due first) has its
+        turn, and the poles still wait for it."""
+        m = meadow(f"{STILL}&props=egg,poles&eclipse=11")
         m.wake()
-        m.wait("meadowGame.state().hour >= '11:00'", 60_000)
-        things = m.state()["things"]
-        assert things["egg"].startswith("step"), things
-        assert things["poles"].startswith("at"), (
+        m.wait("meadowGame.state().hour >= '12:00'", 60_000)
+        state = m.state()
+        assert state["things"]["egg"].startswith("step"), state["things"]
+        assert state["things"]["poles"].startswith("at"), (
             "the poles came while the egg still waited"
         )
+        assert state["eclipse"] == 0, "the eclipse came while the egg still waited"
         finish(m, "egg")
-        # a quiet spell first (REST_HOURS: about 18 s of a 180 s day)
-        m.wait("meadowGame.state().things.poles.startsWith('step')", 40_000)
+        # a quiet spell first (REST_HOURS: about 45 s of a five-minute day)
+        m.wait("meadowGame.state().eclipse > 0", 40_000)
+        assert m.state()["things"]["poles"].startswith("at"), (
+            "the poles came during the eclipse"
+        )
         assert not m.errors, m.errors
 
     def test_the_day_ends_asleep_in_the_den(self, meadow: callable) -> None:
@@ -299,6 +306,19 @@ class TestMeadowEncounters:
 
 
 class TestMeadowCar:
+    def test_some_plays_it_jiggles_at_his_knock(self, meadow: callable) -> None:
+        """Seed 1 (every other car test) has it jiggle; seed 3 doesn't."""
+        for seed, startles in ((1, True), (3, False)):
+            m = meadow(f"seed={seed}&still&soon&props=car")
+            assert m.page.evaluate("meadowGame.detail('car').startles") is startles
+            m.wake()
+            arrived(m, "car")
+            m.do("use car")
+            m.wait("meadowGame.state().things.car === 'step 1'")
+            m.do("go to 2000")
+            m.wait_free()
+            m.assert_settled()
+
     def test_once_mended_a_tap_gives_another_ride(self, meadow: callable) -> None:
         m = meadow(f"{STILL}&soon&props=car")
         m.wake()
@@ -448,6 +468,28 @@ class TestMeadowWalking:
         m.assert_settled()
 
 
+class TestMeadowRain:
+    def test_some_plays_the_hen_comes_by_under_the_cloud(
+        self, meadow: callable
+    ) -> None:
+        """Seed 1 (every other rain test) has the hare; seed 2 the hen: cut short as she
+        comes, picked up, and on to the end."""
+        m = meadow("seed=2&still&soon&props=rain")
+        assert m.page.evaluate("meadowGame.detail('rain').passer") == "hen"
+        m.wake()
+        arrived(m, "rain")
+        m.do("use rain")
+        m.wait("meadowGame.state().things.rain === 'step 2'")
+        m.wait("document.querySelector('.friend.hen')", 10_000)
+        m.do("go to 1200")
+        m.wait_free()
+        m.assert_settled()
+        assert m.page.evaluate("meadowGame.detail('rain').cast") == []
+        finish(m, "rain")
+        assert m.page.evaluate("meadowGame.detail('rain').hare"), "she came by"
+        m.assert_settled()
+
+
 class TestMeadowEgg:
     """The egg is the child's choice: whom to show it to."""
 
@@ -467,11 +509,16 @@ class TestMeadowEgg:
         assert m.page.evaluate("meadowGame.detail('egg').where") == "carried", (
             "he holds it up, waiting"
         )
-        for who in ("mouse", "hare", "mouse"):  # a wrong guess can be had again
+        # a wrong guess can be had again, the other joke the second time (a nibble, a leap back)
+        for who in ("mouse", "hare", "mouse", "hare"):
             m.do(f"use egg {who}")
             m.wait_free()
             assert m.state()["things"]["egg"] == "choosing", who
             assert m.page.evaluate("meadowGame.detail('egg').cast") == []
+        assert m.page.evaluate("meadowGame.detail('egg').asked") == {
+            "mouse": 2,
+            "hare": 2,
+        }
         m.do("use egg hen")
         m.wait("meadowGame.state().things.egg === 'done'")
         m.wait_free()

@@ -6,15 +6,17 @@
 // this encounter's hour comes, the sun beats down and they droop, and a small
 // lonely cloud drifts in from off the right and stops just past them. He goes to the flowers, sighs,
 // and looks up at the cloud. He blows at it: it drifts the wrong way, over
-// him, and rains on him (the laugh). He tries from the other side just as the
-// hare hops by: it rains on the hare, who shakes the drops off all over him.
+// him, and rains on him (the laugh). He tries from the other side just as
+// someone comes by, the hare hopping or, some plays (HEN_CHANCE), the hen
+// pecking along: it rains on them, and they shake the drops off all over
+// him (the hen then clucks at him, cross, with a shake of her head).
 // Then he gets right under it and pushes it along with both hands over the
 // flowers, and it rains on them: they stand up one after another. A rainbow
 // arches over the meadow (the surprise), the cloud drifts off, and the
 // flowers stay up for the rest of the day.
 //
 // A tap on the cloud or the flowers hurries it on; a tap elsewhere waits for
-// the step to end, then cuts it short (things.js): the hare goes home, the
+// the step to end, then cuts it short (things.js): the passer-by goes home, the
 // cloud stays where it is, and the next tap carries on from the next step.
 // Nothing comes from nowhere: the flowers were always there, the cloud and
 // the hare come in from out of sight and go off again, the rainbow fades.
@@ -30,10 +32,13 @@
   const DRIFT_MS = 6000
   const RAIN_MS = 1800
   const QUICK = 0.5 // picked up after a cut: everyone hurries
+  const HEN_CHANCE = 0.5 // the plays where the hen comes by under the cloud, not the hare (Adam, 2026-11-06: the encounters felt all alike)
   const WET_AFTER_MS = 45000 // the grass under it stays wet this long after it rains: long enough for the snail's outing
 
   const flowers = [] // { g, head, x }
   const cast = Friends.troupe()
+  const random = Debug.random('meadow-rain') // its own stream: who comes by
+  const passer = random() < HEN_CHANCE ? 'hen' : 'hare' // this play's passer-by
   const state = { cloud: null, x: CLOUD_WAITS, drooped: false, wet: false, hare: false, watered: false, again: false }
   const m = () => Things.meadow
   /** Its own drawing helper: the flowers are planted as the page loads, before the meadow lends its. */
@@ -171,13 +176,15 @@
     Sound.say('giggle')
   }
 
-  /** From the other side, just as the hare hops by: it rains on the hare, who shakes it all over him. */
+  /** From the other side, just as someone comes by (the hare hopping, or the hen): it rains on them,
+   * and they shake it all over him (the hen clucks at him after, cross). */
   async function hare(alive) {
     if (state.hare) return
-    const h = cast.call('hare', Friends.offscreen(1, state.x + 700), -1)
+    const hen = passer === 'hen'
+    const h = cast.call(passer, Friends.offscreen(1, state.x + 700), -1)
     await m().goTo(state.x - 150)
     if (!alive()) return
-    await h.go(state.x + 40, pace(2000), 30)
+    await h.go(state.x + 40, pace(hen ? 2600 : 2000), hen ? 0 : 30)
     if (!alive()) return
     Sound.whoosh()
     await Promise.all([Mole.lean(18, 600), drift(state.x + 40, pace(900))])
@@ -187,6 +194,12 @@
     Sound.splash()
     AfterRain.shake(h.x, Y - 90)
     await Promise.all([h.jolt(), shake(alive)])
+    if (!alive()) return
+    if (hen) {
+      Sound.cluck()
+      await h.no() // cross, a shake of the head at him
+      if (!alive()) return
+    }
     if (!alive()) return
     state.hare = true
     cast.dismiss(h) // off he hops, dripping
@@ -267,6 +280,6 @@
     steps: [notice, blow, hare, push, rainbow],
     restore,
     night,
-    detail: () => ({ cloud: Math.round(state.x), wet: state.wet, hare: state.hare, watered: state.watered, cast: cast.kinds() }),
+    detail: () => ({ cloud: Math.round(state.x), wet: state.wet, hare: state.hare, passer, watered: state.watered, cast: cast.kinds() }),
   })
 })()

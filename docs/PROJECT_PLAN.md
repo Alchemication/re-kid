@@ -49,8 +49,44 @@ decided and why.
      for hiss), whether the plink fits the catch and the tuck-in.
      Next, each with `new-gag`: the owl in the oak (invented, some plays,
      asleep in the hollow by day, out on a branch from about 18:00,
-     hooting only between the cricket's tunes), then the right end, a low
-     fence with a gap and a road towards the church hill.
+     hooting only between the cricket's tunes).
+   - **Adam judges one story at a time, the fox first, and the variations**
+     (built 2026-11-06 overnight, after his two plays where the bulldozer
+     came on top of the fox and of the egg, in an eclipse). Encounters and
+     the eclipse share one slot: none arrives while another is out, a
+     quiet spell of about 45 s after each, at most four planned (two or
+     three come when each is played out); the eclipse waits its turn, and
+     past 16:00 doesn't come. The paint now opens on the fox: a snicker off
+     the edge, he hurries over (the threat won't wait, as the bulldozer),
+     the fox at the nest, then the hare and the mouse hurry in with the
+     tins, and he backs into the red one. Variations, a first answer to
+     "the encounters all feel very similar": the rain's passer-by is the
+     hare or the hen; the car jiggles at his knock some plays and he hops
+     back; asked again, the mouse tries a nibble at the egg and the hare
+     leaps back at a peep. Judge: do the days feel calmer or empty, does
+     the fox-first order read, and are the variations enough.
+   - **The encounters' shapes** (Adam, 2026-11-06: they all feel very
+     similar). The variations above change details; the deeper sameness
+     is the shape: each arrives, he walks over and knocks on it, a wrong
+     try or two, visitors walk in from the edge, it comes right, a
+     surprise, all leave, with the same music arc and about the same
+     length. Ideas to choose from with Adam: a short one (10-15 s, a
+     single surprise, like the yard's gags); one that comes to him rather
+     than he to it (a visitor with something to show him); one where he
+     only watches and the child's taps change it; endings drawn per play
+     (as the fox's). Then `new-gag` for the chosen ones.
+   - **The meadow's right end** (Adam, 2026-11-06: figure it out). The
+     left end has the oak; the right end still stops him at an invisible
+     line. To design with Adam first, then `new-gag`: what the films put
+     at a meadow's edge, and what he does there (an idea so far: a low
+     fence with a gap and a road towards the church hill).
+   - **Small things to tap in the quiet stretches** (Adam, 2026-11-06).
+     The meadow tells one story at a time, with quiet between
+     (`docs/DECISIONS.md`); those stretches should carry the yard's kind
+     of play: small things that answer a tap at once, vary and can be
+     repeated (the butterflies, the snail and the heron so far). Watch
+     first whether testers tap more and watch less now that fewer
+     encounters come; then add small things rather than encounters.
    - **Adam judges the rain cloud, the bed and the spring** (2026-10-25,
      not yet seen by him): watering is now the rain cloud encounter (five
      encounters a day, a little closer together); the flower bed stands
@@ -147,7 +183,7 @@ decided and why.
       rain cloud comes; the trees stand up again slowly. An uneasy bed
       holds while it is here, the glad theme only once it is gone (the
       fox the same, till the monster). About 50 s: judge whether it is
-      too long, whether the rule reads, and the uneasy bed by ear. A quiet spell (`REST_HOURS`, about 30 s) after each encounter,
+      too long, whether the rule reads, and the uneasy bed by ear. A quiet spell (`REST_HOURS`, about 45 s) after each encounter or the eclipse, never two at once,
       and 12 s before he goes to a new one himself. Judge: does it read as
       harm, is it too loud or big for calm, is the pit funny, do the rests
       feel restful or empty, and are there still enough encounters a day.

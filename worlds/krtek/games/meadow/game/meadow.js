@@ -175,7 +175,7 @@ const meadowGame = (() => {
     if (!game.awake) return
     const h = (game.hour = Day.hour(Clock.now() - game.dayStart, Layout.dayMs || Day.DAY_MS))
     World.set({ hour: h })
-    if (eclipseAt !== null && game.eclipse === null && h >= eclipseAt) startEclipse()
+    if (eclipseAt !== null && game.eclipse === null && h >= eclipseAt && h <= Eclipse.LATEST && Things.open(h)) startEclipse() // it waits for the stage to be free (things.js), or comes not at all
     drawSky(h, eclipseCover())
     drawMeadow(h)
     watchButterflies()
@@ -828,6 +828,8 @@ const meadowGame = (() => {
     canBreakOff: () => game.awake && !game.ended && game.gesture !== 'wake', // whatever he is doing, but not still coming up in the morning
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
+    /** The eclipse is on: it holds the stage, so no encounter arrives (one story at a time). */
+    elsewhere: () => game.eclipse !== null && !Eclipse.over(eclipseMs()),
     music: (part) => Music.cue(part),
     /** His tulips, left to right: { x, base, bend } (bend: turned about its foot, to knock one over). */
     tulips: () => tulipHeads.map(({ x, base, bend }) => ({ x, base, bend })),

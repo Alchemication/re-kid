@@ -57,6 +57,10 @@ then cuts it short to be picked up at the next step later. Keep each step
   holds, not on its turn in a rotation (`rounds`): by its turn, other taps
   have usually changed the state, and it almost never shows. Check it in
   the first few taps of a seeded play.
+- One story on screen at a time (`things.js` `open`): a world event that
+  takes the stage (the eclipse) asks `Things.open(hour)` before it
+  starts and tells things.js it is on (`elsewhere`), so no encounter
+  arrives under it and the quiet spell runs from its end.
 
 ## Look at it
 

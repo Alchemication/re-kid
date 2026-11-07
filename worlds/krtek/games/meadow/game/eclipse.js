@@ -9,7 +9,8 @@
 /* exported Eclipse */
 const Eclipse = (() => {
   const CHANCE = 0.25 // of plays that have one
-  const HOURS = [11, 15] // it starts at an hour between these
+  const HOURS = [11, 15] // it is due at an hour between these
+  const LATEST = 16 // if an encounter holds the stage till after this, none this play: it lasts about 2.6 of the day's hours and must be over well before sunset (19)
   const IN_MS = 15000 // the moon slides over the sun...
   const HOLD_MS = 35000 // ...stays over it this long...
   const OUT_MS = 15000 // ...and slides off
@@ -51,5 +52,5 @@ const Eclipse = (() => {
   /** Is it over, `ms` after it began? */
   const over = (ms) => ms >= IN_MS + HOLD_MS + OUT_MS
 
-  return { plan, cover, across, skyHour, light, over, IN_MS, HOLD_MS, OUT_MS }
+  return { LATEST, plan, cover, across, skyHour, light, over, IN_MS, HOLD_MS, OUT_MS }
 })()

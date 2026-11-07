@@ -29,12 +29,13 @@ const Nest = (() => {
     return e
   }
   let chicks = null
+  let nest = null // the nest's group: tappable while an encounter is about it (mark)
   let alarmed = false
   let alarm = null // the alarm peeps' timer
   let hourNow = () => 12
 
   function draw(into) {
-    const g = el('g', { class: 'nest', transform: `translate(${AT.x} ${AT.y}) scale(${SIZE}) translate(${-AT.x} ${-AT.y})` }, into)
+    const g = (nest = el('g', { class: 'nest', transform: `translate(${AT.x} ${AT.y}) scale(${SIZE}) translate(${-AT.x} ${-AT.y})` }, into))
     // the chicks first, behind the nest's front rim
     chicks = el('g', { class: 'chicks' }, g)
     for (const [dx, tilt] of [[-18, -10], [0, 0], [18, 10]]) {
@@ -90,5 +91,11 @@ const Nest = (() => {
     Clock.after(PEEP_EVERY_MS[0] * random(), chirp)
   }
 
-  return { AT, setup, fear, get alarmed() { return alarmed } }
+  /** A tap on the nest is a tap on this encounter (its name), or on nothing (null): the paint's, until its tins are down. */
+  function mark(name) {
+    if (name) nest.setAttribute('data-thing', name)
+    else nest.removeAttribute('data-thing')
+  }
+
+  return { AT, setup, fear, mark, get alarmed() { return alarmed } }
 })()

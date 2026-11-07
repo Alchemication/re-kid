@@ -86,6 +86,20 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   guarantees one of each. Each helped gag gets a different helper and a
   different way out, and a surprise. (The meadow's world-model spike,
   under Scope, has a director for its ambient life only.)
+- **The yard is pulled, the meadow is told: one story at a time**
+  (Adam, 2026-11-06). The two homes grew apart without anyone choosing
+  to. In the yard the things stand there from the start and nothing
+  happens until the child taps: short gags, repeated with variations, at
+  the child's pace. In the meadow, encounters arrive on the day's clock
+  and play as stories of several steps, as Krtek's films happen to the
+  mole. Adam kept that difference, but it needs what an episode has: in
+  one play, the fox came and the bulldozer rolled in 5 s later; in
+  another, the bulldozer came while he held the egg up, during an
+  eclipse. So the meadow's encounters and its eclipse share one slot:
+  one happening at a time, never one arriving while another is out, a
+  quiet spell after each, and fewer of them a day ("it's ok if fewer
+  encounters happen"). The quiet stretches are for the yard's kind of
+  play, small things that answer a tap.
 - **The day runs on a clock** (2026-10-13). Before, six things done or 10
   minutes set the sun, so a curious child got an earlier bedtime and nobody
   could tell when the day would end. Now 08:00–20:00 takes 5 minutes of

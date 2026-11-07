@@ -2,7 +2,10 @@
 // rolling in backwards from off the far end of the meadow, bumps, loses one
 // wheel and then the other, and comes to rest broken in the grass beyond the
 // spring, its two wheels beside it (nothing appears from nowhere: Adam,
-// 2026-10-23). He knocks on it ("ooh"), fetches
+// 2026-10-23). He knocks on it ("ooh"); some plays (STARTLE_CHANCE) a last
+// turn of its spring whirrs it and it jiggles at him, and he hops back
+// with a fright, then giggles (Adam, 2026-11-06: the encounters felt all
+// alike). He fetches
 // a wheel and pops it on; the second slips out of his hands and rolls off
 // back towards the spring, and he chases it (the laugh). He winds the key
 // on its back, climbs in, and it shoots off backwards (the surprise), then
@@ -24,6 +27,9 @@
   const TURN_AT = 3780 // where it turns, at the far end of the meadow
   const SEAT = 34 // how far up he sits in it
   const ZOOM_MS_PER_UNIT = 1.6
+  const STARTLE_CHANCE = 0.5 // the plays where it jiggles at his knock
+  const random = Debug.random('meadow-car') // its own stream
+  const startles = random() < STARTLE_CHANCE // this play's: it jiggles at his knock
 
   const car = { x: LIES_AT, wheels: 0, wound: false, riding: false, face: 1, back: null, front: null, loose: [] }
   const m = () => Things.meadow
@@ -127,13 +133,24 @@
 
   // ------------------------------------------------------------ the chain
 
-  /** He finds it: knock knock on the bonnet, "ooh". */
+  /** He finds it: knock knock on the bonnet, "ooh". Some plays it jiggles at him, and he hops back. */
   async function find(alive) {
     await m().goTo(car.x + 150)
     if (!alive()) return
     Sound.knock()
     await Mole.knock()
     if (!alive()) return
+    if (startles) {
+      Sound.crank()
+      const lying = (dy = 0) => carAt(car.x, car.face, car.wheels < 2 ? 6 : 0, dy) // tilted as it lies, wheels off
+      const jiggle = move([lying(), lying(6), lying(), lying(6), lying()], { duration: 500 })
+      Sound.say(['gasp', 'fright'])
+      await Promise.all([jiggle, m().goTo(car.x + 230)])
+      if (!alive()) return
+      Sound.say('giggle')
+      await m().goTo(car.x + 150)
+      if (!alive()) return
+    }
     Sound.say('ooh')
     await Mole.lean(-12, 800)
   }
@@ -267,6 +284,6 @@
     },
     restore,
     night: restore,
-    detail: () => ({ x: Math.round(car.x), wheels: car.wheels, wound: car.wound, riding: car.riding, cast: [] }),
+    detail: () => ({ x: Math.round(car.x), wheels: car.wheels, wound: car.wound, riding: car.riding, startles, cast: [] }),
   })
 })()

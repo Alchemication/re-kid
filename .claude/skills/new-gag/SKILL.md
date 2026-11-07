@@ -63,7 +63,9 @@ beat many):
   paint before the fox came, so his scaring the fox had no reason. In the
   film the fox frightens him first and the paint is an accident. A repeat
   should move the story on, not only vary it (the fox, told again, may end
-  a friend).
+  a friend). The opening shows the trouble before anything brought to
+  answer it: the friends once carried the tins in before the fox came
+  (Adam, 2026-11-06), so the help had no reason yet.
 - **Fun to repeat.** The core stays the same each time (small children love
   exact repetition); something small is added on top now and then.
 - **A story over uses, where the thing allows it.** If it holds an amount
@@ -268,6 +270,10 @@ for, and update every caller, no shims.
   on after a cut unless the cut stops it: keep the booked sources and stop
   them in the restore (the oak's echoes answered a mole who had walked
   away).
+- A fallback for a gag nobody plays on (let the next one come, send
+  it home) counts from its last progress, never from when it arrived:
+  counted from arrival, it fires while the child is still playing (the
+  meadow's next encounter came 60 s after the egg arrived, mid-game).
 
 ## 6. Look at it
 

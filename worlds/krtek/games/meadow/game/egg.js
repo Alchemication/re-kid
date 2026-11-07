@@ -12,7 +12,10 @@
 //   hands, a chick, and the top of the shell lands on his head like a hat
 //   (the surprise). The chick runs to her and they go off together.
 // Left alone, he tries them himself: the mouse, the hare, then the hen.
-// Each wrong guess is its own little joke, and can be had again.
+// Each wrong guess is its own little joke, and can be had again, a
+// different one the second time and then in turn (Adam, 2026-11-06: the
+// encounters felt all alike): the mouse tries a nibble and he snatches it
+// up out of reach; the hare puts his ear to it, it peeps, and he leaps back.
 //
 // A tap on someone else while he goes to one sends him to them instead; a
 // tap on the meadow cuts it short: the mouse ducks home, the egg goes down
@@ -146,7 +149,10 @@
 
   // ------------------------------------------------------------ whom he asks
 
-  /** The mouse pops out of her hole, sniffs, and sneezes: not hers. */
+  const asked = { mouse: 0, hare: 0 } // how often each has been asked: the first time as built, then the other joke, in turn
+
+  /** The mouse pops out of her hole, sniffs, and sneezes: not hers. Asked again, she tries a nibble,
+   * and he snatches it up out of reach. */
   async function askMouse(alive) {
     await m().goTo(HOLE_X + 100)
     if (!alive()) return
@@ -157,8 +163,18 @@
     if (!alive()) return
     await mouse.bob(2) // a sniff, a sniff...
     if (!alive()) return
-    Sound.sneeze()
-    await Promise.all([mouse.jolt(), Mole.wobble(700)]) // ...atchoo, and the egg wobbles in his hands
+    if (asked.mouse++ % 2 === 0) {
+      Sound.sneeze()
+      await Promise.all([mouse.jolt(), Mole.wobble(700)]) // ...atchoo, and the egg wobbles in his hands
+    } else {
+      Sound.squeak() // ...mm, a nibble?
+      await mouse.bob(1)
+      if (!alive()) return
+      Sound.say(['gasp', 'fright'])
+      await Mole.lean(-14, 400) // he snatches it up out of reach
+      if (!alive()) return
+      await Mole.lean(0, 500)
+    }
     if (!alive()) return
     await mouse.no()
     if (!alive()) return
@@ -168,13 +184,22 @@
     await Mole.lean(8, 700) // a little glum
   }
 
-  /** The hare looks, his ears droop, he shakes his head: not his. */
+  /** The hare looks, his ears droop, he shakes his head: not his. Asked again, a peep from inside makes him leap back first. */
   async function askHare(alive) {
     await m().goTo(HARE_AT + 110)
     if (!alive()) return
     hare.turn(1)
     await hare.bob(1)
     if (!alive()) return
+    if (asked.hare++ % 2 === 1) { // asked again: his ear to it, a peep from inside, and he leaps back
+      Sound.peep()
+      await Promise.all([hare.jolt(), Mole.wobble(500)])
+      if (!alive()) return
+      await hare.go(HARE_AT - 70, 500, 40)
+      if (!alive()) return
+      await hare.go(HARE_AT, 700, 20)
+      if (!alive()) return
+    }
     await hare.droop() // his ears sink...
     if (!alive()) return
     await hare.no() // ...and a shake of the head
@@ -310,6 +335,6 @@
     holds: () => egg.where === 'carried',
     restore,
     night,
-    detail: () => ({ where: egg.where, x: Math.round(egg.x), chick: !!egg.chick, tried: [...tried], cast: cast.kinds() }),
+    detail: () => ({ where: egg.where, x: Math.round(egg.x), chick: !!egg.chick, tried: [...tried], asked: { ...asked }, cast: cast.kinds() }),
   })
 })()

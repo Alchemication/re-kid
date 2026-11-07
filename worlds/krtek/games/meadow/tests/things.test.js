@@ -24,13 +24,13 @@ test('one of each offer comes first, then the rest, each at its own hour', () =>
   const offers = [...plan.slice(0, 3).map((p) => ENCOUNTERS.find((e) => e.name === p.name).offer)].sort()
   assert.deepEqual(offers, ['discover', 'help', 'helped'])
   assert.deepEqual([...plan.map((p) => p.name)].sort(), ['car', 'egg', 'paint', 'poles'])
-  assert.deepEqual([...plan.map((p) => p.at)], [9, 10.7, 12.4, 14.1])
+  assert.deepEqual([...plan.map((p) => p.at)], [9, 11, 13, 15])
 })
 
 test('?props forces which come, in that order; ?soon brings the first now', () => {
   const plan = Things.choose(ENCOUNTERS, seq(0.5), { props: ['car', 'egg', 'nope'], soon: true })
   assert.deepEqual([...plan.map((p) => p.name)], ['car', 'egg'])
-  assert.deepEqual([...plan.map((p) => p.at)], [8, 10.7])
+  assert.deepEqual([...plan.map((p) => p.at)], [8, 11])
 })
 
 test('forcing them makes the same draws, so the rest of the play is unchanged', () => {
@@ -59,7 +59,8 @@ test('one with a chance comes in that share of plays, instead of the one it repl
 test('a quiet spell after one is done, and none in the last hour before sunset', () => {
   assert.equal(Things.quiet(9, null, 18.8), false) // none done yet: any time
   assert.equal(Things.quiet(10.5, 10, 18.8), true) // just done: rest
-  assert.equal(Things.quiet(11.3, 10, 18.8), false) // rested
+  assert.equal(Things.quiet(11.5, 10, 18.8), true) // still resting
+  assert.equal(Things.quiet(11.9, 10, 18.8), false) // rested
   assert.equal(Things.quiet(18, null, 18.8), true) // too near sunset
 })
 
