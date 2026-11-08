@@ -34,7 +34,16 @@ No beats. Instead, in a few lines each, checked with Adam as a gag would be:
 - **What a tap does.** An answer at once (it flees, freezes, plops in), and
   the hero looks at it if he is free.
 - **How often, how many.** Quiet by default (`docs/DESIGN_PRINCIPLES.md`:
-  never busy).
+  never busy). Count what else lives in the scene first: a new creature
+  joins a per-play draw rather than adding to everything on at once, so a
+  play shows some of the wildlife and the next play something new (the
+  meadow, 2026-11-08: with every creature in every play it was too busy,
+  Adam; now one far-edge kind a play, `Layout.lives`).
+- **Heard from where it is.** Its calls and splashes play quieter off
+  screen, silent far off, from its side (the meadow's `Sound.from(x,
+  Sound.croak)`): the frog at the spring was loud with the hero far off at
+  the oak (Adam, 2026-11-08). Not for the hero's sounds, the weather, or
+  what is meant to be heard everywhere (a far bell).
 - **As in nature** (Adam, 2026-11-02: make it look real). Read how the
   animal really goes about it before animating (a heron stands still,
   stalks with its neck out, freezes, strikes, and swallows bill up), and
