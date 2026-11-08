@@ -82,7 +82,9 @@ def meadow(browser: object, game_time: str) -> Iterator[callable]:
 
     def open_(query: str = STILL) -> Meadow:
         if "season=" not in query:
-            query += "&season=spring"  # the tests were written for spring; autumn's say so
+            query += (
+                "&season=spring"  # the tests were written for spring; autumn's say so
+            )
         opened.append(Meadow(browser, query + game_time))
         return opened[-1]
 
@@ -2114,5 +2116,133 @@ class TestMeadowOwl:
         assert m.page.evaluate(
             "document.querySelector('.owl-head').style.transform"
         ).startswith("rotate"), "the hoot never sets the head upright"
+        m.wait_free()
+        m.assert_settled()
+
+
+class TestMeadowAutumn:
+    """Autumn (autumn.js, layout.js): half the plays; the painting turned,
+    the tree a chestnut dropping its leaves, the egg and the owl spring's,
+    and the woodpecker in the tree's hole (woodpecker.js)."""
+
+    AUTUMN = f"{STILL}&season=autumn"
+    VISITS = ("echo", "roll", "three")
+    HEAD_STILL = "new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.woodpecker-head')).transform === 'none' ? undefined : getComputedStyle(document.querySelector('.woodpecker-head')).transform).isIdentity"
+
+    def where(self, m: Meadow) -> dict:
+        return m.page.evaluate(
+            "(() => { const t = new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.woodpecker')).transform); return { x: Math.round(t.e), y: Math.round(t.f) } })()"
+        )
+
+    def test_a_play_is_spring_or_autumn(self, meadow: callable) -> None:
+        seasons = set()
+        for seed in range(1, 7):
+            m = meadow(
+                f"seed={seed}&still&season=drawn"
+            )  # not a season: the play's own draw
+            seasons.add(m.page.evaluate("Layout.season"))
+            m.page.close()
+        assert seasons == {"spring", "autumn"}, seasons
+
+    def test_autumn_has_its_own_and_not_springs(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=egg,car&owl=1")
+        plan = m.page.evaluate(
+            "meadowGame.trace().split('\\n').find((l) => l.includes(' things '))"
+        )
+        assert '"car@' in plan and "egg" not in plan, f"the egg is spring's: {plan}"
+        assert m.page.evaluate("Owl.state") == "none", "the owl is spring's"
+        assert m.page.evaluate("Woodpecker.state") == "in"
+        assert m.page.evaluate(
+            "document.getElementById('world').classList.contains('season-autumn') && World.state.season === 'autumn'"
+        )
+        spring = meadow(f"{STILL}&woodpecker=1")
+        assert spring.page.evaluate("Woodpecker.state") == "in", (
+            "forced, it comes in spring too"
+        )
+        spring = meadow(STILL)
+        assert spring.page.evaluate("Woodpecker.state") == "none"
+        assert not m.errors, m.errors
+
+    def test_leaves_drop_from_the_chestnut_and_lie_at_its_foot(
+        self, meadow: callable
+    ) -> None:
+        m = meadow("seed=1&season=autumn&props=")
+        m.wake()
+        m.wait("Autumn.lying >= 2", 60_000)
+        xs = m.page.evaluate(
+            "[...document.querySelectorAll('#oak-ground .dropped')].map((g) => new DOMMatrixReadOnly(getComputedStyle(g).transform).e)"
+        )
+        assert all(-40 < x < 600 for x in xs), xs
+        assert not m.errors, m.errors
+
+    def test_the_woodpecker_comes_out_to_drum_and_goes_back_in(
+        self, meadow: callable
+    ) -> None:
+        m = meadow("seed=1&season=autumn&props=")
+        m.wake()
+        m.wait("meadowGame.trace().includes('\"drums\"')", 120_000)
+        m.wait(
+            "Woodpecker.state === 'in' && !document.querySelector('.woodpecker').getAnimations().length",
+            60_000,
+        )
+        hole = m.page.evaluate("Layout.OAK.knot")
+        assert abs(self.where(m)["x"] - hole[0]) < 20, self.where(m)
+        assert not m.errors, m.errors
+
+    def test_it_goes_in_for_the_night(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&woodpecker=out&day=40&props=")
+        m.wake()
+        m.wait("Woodpecker.state === 'night'", 60_000)
+        m.do("woodpecker")
+        m.wait_free()
+        assert m.page.evaluate("Woodpecker.state") == "night", (
+            "a tap at night leaves it in"
+        )
+        m.assert_settled()
+
+    def test_a_tap_plays_a_new_way_each_time(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&woodpecker=out")
+        m.wake()
+        for _ in range(4):
+            m.do("woodpecker")
+            m.wait_free()
+            m.assert_settled()
+            assert m.page.evaluate(self.HEAD_STILL)
+        visits = traced(m, "woodpecker visit")
+        assert tuple(sorted(visits[:3])) == self.VISITS, visits
+        assert all(a != b for a, b in pairwise(visits)), visits
+
+    def test_a_tap_brings_it_out_of_its_hole(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=")
+        m.wake()
+        m.do("woodpecker")
+        m.wait_free()
+        assert m.page.evaluate("Woodpecker.state") == "out"
+        assert len(traced(m, "woodpecker visit")) == 1
+        m.assert_settled()
+
+    def test_cut_short_it_is_back_where_it_was(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=")
+        m.wake()
+        for _ in range(3):  # each way, cut in its middle
+            m.do("woodpecker")
+            m.wait(
+                "Woodpecker.posing && (document.querySelector('.woodpecker-head').getAnimations().length + document.querySelector('.woodpecker').getAnimations().length) > 0"
+            )
+            m.do("go to 900")
+            m.wait_free()
+            m.assert_settled()
+            assert m.page.evaluate(self.HEAD_STILL)
+            state = m.page.evaluate("Woodpecker.state")
+            hole = m.page.evaluate("Layout.OAK.knot")
+            near_hole = abs(self.where(m)["x"] - hole[0]) < 20
+            assert near_hole == (state == "in"), (state, self.where(m))
+
+    def test_it_is_tapped_where_it_sits(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&woodpecker=out")
+        m.wake()
+        box = m.page.query_selector(".woodpecker-head").bounding_box()
+        m.page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+        m.wait("meadowGame.trace().includes(' woodpecker visit ')")
         m.wait_free()
         m.assert_settled()

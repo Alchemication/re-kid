@@ -19,7 +19,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
+/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, Woodpecker, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -243,6 +243,7 @@ const meadowGame = (() => {
     if (!game.ended) Things.tick(h)
     Church.tick(h)
     Owl.tick(h, !game.gesture)
+    Woodpecker.tick(h)
     if (Day.cricket(h) && !game.evening) {
       game.evening = true
       Debug.trace('cricket', { hour: Day.clock(h) })
@@ -288,7 +289,7 @@ const meadowGame = (() => {
 
   function stateNow() {
     const m = Mole.state
-    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), owl: Owl.state, eclipse: Math.round(eclipseCover() * 100) / 100 }
+    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), owl: Owl.state, woodpecker: Woodpecker.state, eclipse: Math.round(eclipseCover() * 100) / 100 }
   }
 
   function checkRules() {
@@ -302,6 +303,7 @@ const meadowGame = (() => {
       Debug.check('no visitor is left about', Things.cast().length === 0, { cast: Things.cast().map((c) => c.kind) })
       Debug.check('the oak\'s hollow is open once he is free', !Oak.dark, {})
       Debug.check('the owl sits upright, its face to us, once he is free', !Owl.posing, {})
+      Debug.check('the woodpecker is done knocking once he is free', !Woodpecker.posing, {})
       Debug.check('the twig is down once he is free', !Fence.holding, {})
       Debug.check('nobody is left about behind the fence once he is free', Fence.about === 0, { about: Fence.about })
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
@@ -623,6 +625,7 @@ const meadowGame = (() => {
     [/^paddle$/, () => answer('paddle', paddle)],
     [/^peek$/, () => answer('peek', Oak.peek, () => { Oak.restore(); Owl.restore() })], // a call in the arch may have woken the owl
     [/^owl$/, () => answer('owl', Owl.visit, Owl.restore)],
+    [/^woodpecker$/, () => answer('woodpecker', Woodpecker.visit, Woodpecker.restore)],
     [/^fence$/, () => answer('fence', Fence.play, Fence.restore)],
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => answer('go', () => goTo(Number(m[1])))],
@@ -746,7 +749,7 @@ const meadowGame = (() => {
   }
 
   // The places that answer a tap on them: [what was tapped, intent]
-  const PLACE_HITS = [['.owl', 'owl'], ['#bed', 'sniff'], ['#spring', 'paddle'], ['.oak-hit', 'peek'], ['.fence-hit', 'fence']]
+  const PLACE_HITS = [['.owl', 'owl'], ['.woodpecker', 'woodpecker'], ['#bed', 'sniff'], ['#spring', 'paddle'], ['.oak-hit', 'peek'], ['.fence-hit', 'fence']]
 
   /** What a tap at this point means (critter: the little creature tapped, if any). */
   function intentAt(target, p, critter) {
@@ -821,6 +824,15 @@ const meadowGame = (() => {
   Nest.setup(document.getElementById('spring'), () => game.hour)
   Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), document.getElementById('oak-ground'), { goTo, rounds, dropHat })
   Owl.setup(document.getElementById('oak'), { goTo, rounds })
+  Woodpecker.setup(document.getElementById('oak'), { // in autumn the woodpecker has the tree's hole
+    goTo,
+    rounds,
+    heard: (x) => { // it drummed: if he's free, his hairs spring up and he looks up at it (as at the church bell)
+      if (!(game.awake && !game.ended && !game.gesture)) return
+      Mole.perk(1.2)
+      Mole.lookAt(x)
+    },
+  })
   if (Layout.season === 'autumn') Autumn.setup(document.getElementById('oak-ground')) // leaves drop from the chestnut
   Fence.setup(document.getElementById('fence'), document.getElementById('fence-near'), document.getElementById('garden-life'), { goTo, rounds, el })
   View.offstage(document.querySelectorAll('#cam .sway, #cam .fall, #cam .foam')) // what sways and pours stops while out of sight

@@ -207,7 +207,7 @@ const Autumn = (() => {
     const spin = between([-1, 1], drops()) * 540
     const lie = between([-70, 70], drops())
     const g = el('g', { class: 'dropped' }, layer)
-    piece(el('g', { transform: 'scale(1.6)' }, g), drops)
+    piece(el('g', { transform: 'scale(2.6)' }, g), drops) // big enough to see come down from across the meadow
     const frames = [0, 0.2, 0.4, 0.6, 0.8, 1].map((k) => ({
       transform: `translate(${(from.x + (to.x - from.x) * k + Math.sin(k * Math.PI * 4) * 36).toFixed(0)}px, ${(from.y + (to.y - from.y) * k).toFixed(0)}px) rotate(${(k < 1 ? spin * k : lie).toFixed(0)}deg) scaleY(${(k < 1 ? Math.cos(k * Math.PI * 5) * 0.6 + 0.4 : 0.55).toFixed(2)})`,
     }))

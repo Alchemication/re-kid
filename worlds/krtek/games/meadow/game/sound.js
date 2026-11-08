@@ -291,6 +291,22 @@ const Sound = (() => {
     }
   }
 
+  /** The woodpecker's roll on the bark: quick dry taps, fading. */
+  function drum() {
+    if (!ready() || recorded('drum')) return
+    for (let i = 0; i < 14; i++) {
+      note(1150, i * 0.055, 0.03, 0.14 * (1 - i / 18), 'triangle', 0.7)
+      hiss(i * 0.055, 0.02, 2600, 2, 0.06 * (1 - i / 18))
+    }
+  }
+
+  /** One peck of the woodpecker's beak on the bark: a small dry tok. */
+  function peck() {
+    if (!ready() || recorded('peck')) return
+    note(1250, 0, 0.04, 0.2, 'triangle', 0.65)
+    hiss(0, 0.025, 2800, 2, 0.08)
+  }
+
   /** An acorn on his head: a small hollow wooden tok. */
   function bonk() {
     if (!ready() || recorded('bonk')) return
@@ -479,5 +495,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy, drum, peck }
 })()
