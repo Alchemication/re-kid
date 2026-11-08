@@ -132,3 +132,12 @@ by ear.
   hour, and arrival and the poles' trouble cued the flute theme. Now a
   threat holds an uneasy bed from its coming till it is gone
   (`things.js` `trouble`, `beds.js` `unease`). Not yet heard.
+- **2026-11-08, autumn (built while Adam was away).** Half the meadow's
+  plays are autumn now; a season's own takes of a part play in its plays
+  (`music.js`, tunes.yaml `season`). The theme can't be grown from
+  `meadow-theme/01` (its song id 404s), so its four moods were worded fresh
+  from the kept morning's wording, turned to a misty golden autumn, flute
+  over strings, a clarinet (`pieces.py` `meadow-autumn`, board folder
+  "krtek autumn", 8 takes). Measured: morning 02 the calmest (about a note
+  a second; the kept spring morning plays about 2 at 103), 01 and sad 05
+  busy (4-5 a second); sad 06 is in a major key. Not yet heard.

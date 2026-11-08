@@ -229,7 +229,9 @@ under the wild flowers wet from the start, `?critters=fireflies` the dusk's fire
 seeds three seconds after he wakes; `?eclipse=11` an eclipse at 11:00 (with `?day=60`, 15 s in), `?eclipse=now` one as he
 wakes (the sun is still behind the trees then); `?props=storm&soon` brings the storm and the
 umbrella as he wakes; `?owl=1` puts an owl in the oak this play (`?owl=0` none),
-`?owl=out` has it out on its limb from the start; `?menace=notes` plays the bulldozer's motif written note by note on the
+`?owl=out` has it out on its limb from the start; `?season=autumn` (or `spring`) sets the play's season (half are autumn: the
+chestnut, the woodpecker, the hedgehog), `?woodpecker=out` has the autumn woodpecker out on the trunk from the start (`?woodpecker=0`
+none), `?critters=geese` sends autumn's geese over at once; `?menace=notes` plays the bulldozer's motif written note by note on the
 meadow's samples, instead of its recorded takes, to compare. In the console, `meadowGame.state()`,
 `meadowGame.trace()`, `meadowGame.perform('water')`.
 

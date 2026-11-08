@@ -109,6 +109,16 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   side Reksio was 98 px tall. A short screen now cuts the top of the sky
   instead of zooming on each encounter; upright, a phone shows a wordless
   "turn me" picture rather than a portrait yard.
+- **Seasons give a world its variety; a season changes what is there, not
+  only its colours** (2026-11-08). The yard's winter showed it; the meadow
+  felt like spring only (Adam). Each play is one season, drawn at the start
+  (the meadow: spring or autumn, half each). A season brings its own: in the
+  meadow's autumn, after Krtek a zápalky, the oak is a horse chestnut
+  (Adam's call), the owl's place is a woodpecker's (his pick over a squirrel,
+  which the yard has) and the egg's a hedgehog's encounter, so an autumn play
+  is never a thinner spring one. Its look is the painting recoloured at load,
+  not a second painting, and its music a season's own takes of each part,
+  falling back to the part's own.
 
 ## Making them
 

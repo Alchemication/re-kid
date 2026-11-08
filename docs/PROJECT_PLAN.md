@@ -10,16 +10,37 @@ Both worlds are parked (Adam, 2026-11-08) but for the meadow's autumn: what
 2 and 3 list waits for his judging in play, not for new work, and the
 sounds he has judged are in.
 
-1. **Krtek's meadow in autumn** (Adam, 2026-11-08: the meadow feels like
-   spring, and the yard's winter gives it a variety the meadow lacks; no
-   rush, and autumn gags are worth thinking about). First, the films:
-   which show autumn (its colours, leaves, fruit, mushrooms, the weather),
-   recorded in `world.yaml` as observed. Then a first cut, with Adam: the
-   meadow's autumn colours and light, leaves on the wind and from the oak,
-   each encounter marked for the seasons it belongs to (some, as the egg,
-   are spring's), one autumn encounter of its own so an autumn play is not
-   a thinner one, and autumn takes of the theme and a bed. The season is
-   in the shared world state already (`world.js`, from the yard's winter).
+1. **Adam judges the meadow's autumn** (built 2026-11-08 while he was away;
+   his ideas, the designs mine, none checked with him). Half the plays are
+   autumn (`?season=autumn`), after Krtek a zápalky (`world.yaml` `autumn`):
+   - **The look:** the painting's greens turned yellow to rust in patches,
+     an ochre ground, a haze (`autumn.js` `recolour`); the oak a horse
+     chestnut, golden, conkers in its crown, its leaves dropping to lie at
+     its foot; chestnut leaves on the wind; a morning mist that lifts by
+     mid-morning; geese going over once or twice (`?critters=geese`).
+     Judge: is it too brown or muddy anywhere, does the mist show enough, do
+     the far pines staying green look right.
+   - **The woodpecker** in the chestnut's hole (`?woodpecker=out`): out to
+     drum now and then by day; tapped, they knock to each other three ways.
+     Judge: its size and look at phone size, how often it drums
+     (`DRUM_EVERY_MS`), whether the knocking reads.
+   - **The conker** (the tree's third peek in autumn) and **the leaves**
+     at the chestnut's foot to kick or toss.
+   - **The hedgehog's winter bed** (autumn's encounter, in the egg's place;
+     `?props=hedgehog&soon&season=autumn`): drawn from Krtek a ježek. Judge
+     the story (does the roll through the leaves land as the laugh), its
+     length (about 25 s left alone), the heap.
+   - **Sounds and music to pick:** the sound board's folder
+     `krtek-autumn-2026-11-08` (drum, peck, snuffle, honk; synth stand-ins
+     play till then); the music board's "krtek autumn" (the theme's four
+     moods; `MUSIC_DIRECTION.md` has the measures). Then `adopt.py` for each.
+   - Autumn opens about 0.5 s slower on a phone than spring (the recolour);
+     measure on the iPhone.
+   - Not built, ideas still open: the swing under the chestnut with the
+     mouse (the film's 2:30), an autumn bed for the music, a winter.
+   - `TestMeadowOak::test_a_tap_on_it_peeks_a_new_way_each_time` failed once
+     under load (2026-11-08) with one other, and not in four runs after:
+     like the poles' below, a timing bug to find.
 2. **Krecik (Krtek), the second cartoon** (Adam, 2026-10-15: Eliot is a
    big fan), with its own home scene (`docs/DECISIONS.md`: one scene per
    cartoon, not a game per episode). Track Adam's build hours from day one:

@@ -47,7 +47,7 @@ everything else the bee would do.
 | `hour` | 08–20, moves only with the day | `meadow.js` tick |
 | `light` | 1 broad day to 0 night; in an eclipse down to 0.3, under a storm to 0.55, while the hour goes on (`eclipse.js`, `storm.js`) | `meadow.js` sky; the yard's `sky.js` (falling the half hour before sunset) |
 | `overcast` | 0 to 1: rain coming. A creature that minds the wet goes home from 0.5 | the yard's `weather.js` (its shower's clouds) |
-| `season` | the play's season, from start to bed (`summer`, `winter`); what is out depends on it (the yard's `layout.js` `IN_SEASON`: each prop and creature lists the seasons it belongs to) | the yard's `weather.js`, from `layout.js` |
+| `season` | the play's season, from start to bed (the yard's `summer`, `winter`; the meadow's `spring`, `autumn`); what is out depends on it (each game's `layout.js` `IN_SEASON`: each prop, encounter and creature lists the seasons it belongs to) | the yard's `weather.js`, the meadow's `meadow.js`, from `layout.js` |
 | `cold` | 0 warm to 1 winter. From 0.5 the shower falls as snow, the puddles are ice (no drink, nothing to splash in), nothing soaks; read as cold, not as the season, so a frost could freeze in any season | the yard's `weather.js` (`COLD` per season) |
 | `fog` | 0 to 1: creatures keep closer in it (their wanders shorter) | the yard's `weather.js` (`fog.js`: some mornings, lifting by 10:30) |
 | `hero` | `{x, nose}`: where the hero is, and his nose (a shy creature darts from it) | the yard's `creatures.js` |

@@ -130,6 +130,38 @@ scenes:
   sound:
     text: A tawny owl's soft call between the cricket's tunes, and a sleepy "hoo?" when he wakes it; his "hm", gasp and giggle.
     origin: invented
+- id: autumn
+  action:
+    text: Nothing; half the plays are autumn (?season=autumn). Tap the chestnut, or the leaves lying at its foot.
+    origin: invented
+  result:
+    text: Half the plays are autumn (Adam, 2026-11-08. the meadow felt like spring only, and the yard's winter gives it a variety the meadow lacked). The meadow turns as in Krtek a zápalky - its greens gone yellow, amber, orange and rust in patches, the ground pale ochre, a little haze over it all - and the old tree at the left end is a horse chestnut (Adam's call), its crown golden with conkers hanging in it. Its leaves let go now and then and spiral down to lie at its foot, and the wind carries chestnut leaves, not seeds. A morning mist lies over the far meadow and lifts by mid-morning; once or twice a day geese go over high, south, honking far off, and he looks up. The egg and the owl are spring's; the woodpecker and the hedgehog are autumn's. Tapped, the chestnut's peeks are the oak's, but a chestnut leaf lands on his head, and instead of acorns a spiky husk drops in front of him - he pokes it and pricks his hand, it splits, the shiny conker rolls off, he runs after it and tucks it into the hollow (Krtek a zápalky 0:56, the conker split open). Tapped, the leaves at its foot - he kicks through them and they fly up and settle round him, or he throws an armful up over himself and they flutter down. Built while Adam was away (2026-11-08), his to judge.
+    origin: inspired
+    refs: ['episode:krtek-a-zapalky']
+  sound:
+    text: The wind in the leaves, a swish as he kicks them, the conker's bonk, crack and roll, geese honking far off (made in the browser until Adam picks takes).
+    origin: invented
+- id: woodpecker
+  action:
+    text: Nothing, or tap the woodpecker in the chestnut (autumn).
+    origin: invented
+  result:
+    text: In autumn a woodpecker lives in the chestnut's knot-hole, as the owl does in spring (Adam's pick of three, 2026-11-08. something more unique than a squirrel, which the yard has) - a great spotted woodpecker as a cartoon, black and white with a red cap, a red patch under its tail and a big eye. Every so often by day it hops out onto the trunk's edge, drums a roll on the bark, looks about and hops back in; if he is free, he looks up at the noise. At dusk it goes in for the night. Tapped, he goes to the trunk's foot and they knock to each other, a different way each time - he knocks twice and it knocks twice back, and he giggles; he knocks three and it answers three, then drums a long roll that makes him jump; or it drums first, and he tries a roll of his own on the bark and stings his paw. Our own; the design was not checked with Adam (he was away).
+    origin: invented
+  sound:
+    text: The woodpecker's drum and its single pecks, his knocks, his gasp, "ach jo" and giggle.
+    origin: invented
+- id: hedgehog
+  action:
+    text: Nothing, or tap the hedgehog or the leaves by him (autumn's encounter, in the egg's place).
+    origin: invented
+  result:
+    text: Fallen leaves lie in the grass between the chestnut and his molehill all day. At its hour the hedgehog trots in from the wood - black spines standing out all round, a pale pink face with a big round nose, as in Krtek a ježek - sniffs at the leaves and shivers; winter is coming and he has no bed, and a leaf he takes blows away. The mole scoops up an armful for him and a gust blows them off his arms all over the grass. Then the idea - the hedgehog curls up into a ball, the mole gives him a push, and he rolls through the leaves, picking them all up on his spines, and uncurls a walking heap of leaves with a nose (in the film he trots about with fruit stuck on his spines, 1:14). He shakes them off into a heap, turns round twice, burrows in and falls asleep; the heap rises and falls with his breath for the rest of the day, his nose poking out, and the mole tiptoes off. Tapped after, the nose sniffs and goes back in. He helps someone. The story is ours; the design was not checked with Adam (he was away).
+    origin: inspired
+    refs: ['episode:krtek-a-jezek']
+  sound:
+    text: The hedgehog's snuffles, a whoosh of wind, the roll through the grass; his "ooh", "ach jo" and giggle.
+    origin: invented
 - id: fence
   action:
     text: Tap the painter's fence at the meadow's right end, or walk him there.
