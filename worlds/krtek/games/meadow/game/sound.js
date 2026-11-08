@@ -300,6 +300,12 @@ const Sound = (() => {
     }
   }
 
+  /** The hedgehog snuffling: quick little sniffs through his nose. */
+  function snuffle() {
+    if (!ready() || recorded('snuffle')) return
+    for (let i = 0; i < 4; i++) hiss(i * 0.09, 0.06, 1800 + i * 150, 3, 0.07)
+  }
+
   /** One peck of the woodpecker's beak on the bark: a small dry tok. */
   function peck() {
     if (!ready() || recorded('peck')) return
@@ -495,5 +501,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy, drum, peck }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy, drum, peck, snuffle }
 })()

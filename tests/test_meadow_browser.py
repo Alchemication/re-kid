@@ -34,7 +34,17 @@ CUT_MS = 350  # into a step, the cut comes this soon
 
 # Each encounter and how many steps its chain has (for a choice encounter,
 # the steps before the child chooses).
-ENCOUNTERS = {"car": 6, "egg": 1, "paint": 7, "poles": 9, "rain": 5, "storm": 2}
+ENCOUNTERS = {
+    "car": 6,
+    "egg": 1,
+    "hedgehog": 4,
+    "paint": 7,
+    "poles": 9,
+    "rain": 5,
+    "storm": 2,
+}
+# The season an encounter belongs to, where it is one season's only (layout.js IN_SEASON).
+SEASON = {"hedgehog": "&season=autumn"}
 # What finishes a choice encounter once it waits for a choice: the taps, in
 # order (the egg: the mouse and the hare say no, the hen is its mother).
 SOLVE = {
@@ -235,7 +245,7 @@ class TestMeadowDay:
 @pytest.mark.parametrize("name", sorted(ENCOUNTERS))
 class TestMeadowEncounters:
     def test_runs_to_its_end(self, meadow: callable, name: str) -> None:
-        m = meadow(f"{STILL}&soon&props={name}")
+        m = meadow(f"{STILL}{SEASON.get(name, '')}&soon&props={name}")
         m.wake()
         arrived(m, name)
         finish(m, name)
@@ -248,7 +258,7 @@ class TestMeadowEncounters:
     ) -> None:
         if step >= ENCOUNTERS[name]:
             pytest.skip("fewer steps")
-        m = meadow(f"{STILL}&soon&props={name}")
+        m = meadow(f"{STILL}{SEASON.get(name, '')}&soon&props={name}")
         m.wake()
         arrived(m, name)
         m.do(f"use {name}")
@@ -264,7 +274,7 @@ class TestMeadowEncounters:
         m.assert_settled()
 
     def test_hurried_by_taps(self, meadow: callable, name: str) -> None:
-        m = meadow(f"{STILL}&soon&props={name}")
+        m = meadow(f"{STILL}{SEASON.get(name, '')}&soon&props={name}")
         m.wake()
         arrived(m, name)
         last = SOLVE.get(name, [f"use {name}"])[
@@ -284,7 +294,7 @@ class TestMeadowEncounters:
     ) -> None:
         if name in SOLVE:
             pytest.skip("a choice encounter: TestMeadowEgg taps him mid-choice")
-        m = meadow(f"{STILL}&soon&props={name}")
+        m = meadow(f"{STILL}{SEASON.get(name, '')}&soon&props={name}")
         m.wake()
         arrived(m, name)
         m.do(f"use {name}")
@@ -300,7 +310,7 @@ class TestMeadowEncounters:
         m.assert_settled()
 
     def test_bedtime_in_the_middle(self, meadow: callable, name: str) -> None:
-        m = meadow(f"{STILL}&soon&props={name}&day=16")
+        m = meadow(f"{STILL}{SEASON.get(name, '')}&soon&props={name}&day=16")
         m.wake()
         arrived(m, name)
         m.do(f"use {name}")

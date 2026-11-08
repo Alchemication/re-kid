@@ -196,3 +196,12 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 .season-autumn [stroke="#4d6d1f"] { stroke: #8a6a28; }
 .season-autumn [fill="#a7c4ad"] { fill: #d6c597; }
 .season-autumn [stroke="#a7c4ad"] { stroke: #d6c597; }
+
+/* the hedgehog asleep in his heap of leaves (hedgehog.js): it rises and falls with his breath, a z drifting up */
+.hedgehog-heap .heap { transform-box: fill-box; transform-origin: center bottom; }
+.hedgehog-heap.asleep .heap { animation: heap-breathe 3.4s ease-in-out infinite alternate; }
+@keyframes heap-breathe { from { transform: scale(1, 1); } to { transform: scale(1.03, 1.07); } }
+.hedgehog-heap .heap-nose { opacity: 0; }
+.hedgehog-heap.asleep .heap-nose { opacity: 1; }
+.heap-z { opacity: 0; }
+.hedgehog-heap.asleep .heap-z { animation: owl-z 3.6s ease-out infinite; }

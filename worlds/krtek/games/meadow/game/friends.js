@@ -1,13 +1,13 @@
 // The meadow's other animals, drawn in code the series' way (flat, outlined,
 // a few round shapes): the mouse, the hare, the hen with her spotted head
-// (Krtek a vejce) and her chick, the fox. An encounter calls one in, moves it
+// (Krtek a vejce) and her chick, the fox, the hedgehog (autumn's). An encounter calls one in, moves it
 // with Motion.endAt on the Clock, and sends it home when it is done, or in
 // its restore() when it is cut short (things.js), so nobody is left standing
 // about. Nobody vanishes in view: sent home, one walks or hops off the
 // nearer edge of the screen (the mouse ducks into her hole) and only then is
 // gone (leave()); gone() at once is for bedtime, under the closing circle.
 
-/* global Debug, FoxArt, Layout, Motion, View */
+/* global Debug, FoxArt, HedgeArt, Layout, Motion, View */
 /* exported Friends */
 const Friends = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -91,6 +91,7 @@ const Friends = (() => {
       return head
     },
     fox: (g) => FoxArt.draw(g, { el, fluffy }), // foxart.js
+    hedgehog: (g) => HedgeArt.draw(g, { el }), // hedgeart.js
     bullfinch(g) {
       // the films' bird (Krtek a buldozer's opening): grey back, red-orange breast and cheeks, a black cap,
       // black wings with a white bar and a black tail. Drawn round its body, facing left; its wings beat in flight (game.css)
@@ -154,8 +155,8 @@ const Friends = (() => {
 
   // what turns a kind's head (a bob nods it, a shake shakes it), where it isn't the usual: the tall
   // fox's neck, so a bob nods his head, not his whole body; and a kind's own moves
-  const NECK = { fox: '-2px -266px' } // where foxart.js's head meets his body
-  const MOVES = { fox: FoxArt.moves }
+  const NECK = { fox: '-2px -266px', hedgehog: '-12px -28px' } // where foxart.js's head meets his body
+  const MOVES = { fox: FoxArt.moves, hedgehog: HedgeArt.moves }
 
   const DOWN = 260 // down a hole this deep, the tallest (the hare, two tins held up) is out of sight under the ground
   const SHADOWED = new Set(['fox']) // whose shadow falls on the grass in front: never cut at the ground (he never goes down a hole)
