@@ -39,9 +39,9 @@ const Autumn = (() => {
   const MIST = [6.5, 10.5] // the morning mist is thickest at the first hour, gone by the second
   const GEESE_AT = [[9, 12], [13, 16.5]] // a skein of geese goes over once in each of these spans (hours)...
   const GEESE_CHANCE = 0.7 // ...this often
-  const GEESE = 7 // in a V
+  const GEESE = 5 // in a V: small enough to fit the sky a wide phone shows
   const GEESE_MS = 24000 // across the sky, right to left (south, as the meadow is drawn)
-  const GEESE_Y = [120, 210] // high in the sky
+  const GEESE_Y = [180, 200] // the leader: the V spans 32 above and below, so it stays under the sky a wide screen cuts (view.js TOP_CUT, 140) and over the treetops
   const paintRandom = Debug.random('meadow-autumn-painting')
   const air = Debug.random('meadow-autumn-air') // the geese: whether and when, their own stream
   const drops = Debug.random('meadow-autumn-leaves')
@@ -270,21 +270,34 @@ const Autumn = (() => {
     Motion.endAt(g, frames, { duration: ms, easing: 'linear' }).then(() => lie(g), () => g.remove())
   }
 
+  /** One goose, side-on, flying left: the long neck stretched forward and the small head are what make
+   * it a goose far off (Adam, 2026-11-08: the first, a front-on "m" of wings, read as squiggles); its near
+   * wing beats from the shoulder (game.css .goose-wing: a flip, as Safari can't animate a path's shape). */
+  function goose(b, i) {
+    const ink = '#3b352e'
+    el('path', { d: 'M-3 -0.5 C-8 -2 -12 -3.5 -16 -3.6', fill: 'none', stroke: ink, 'stroke-width': 2.4, 'stroke-linecap': 'round' }, b)
+    el('ellipse', { cx: -17, cy: -3.6, rx: 2.6, ry: 1.9, fill: ink }, b)
+    el('path', { d: 'M-19.2 -3.4 L-21.6 -2.9', stroke: ink, 'stroke-width': 1.4, 'stroke-linecap': 'round' }, b)
+    el('ellipse', { cx: 4, cy: 0, rx: 9.5, ry: 3.4, fill: '#4a433a' }, b)
+    el('path', { d: 'M12 -0.6 L16 -1.6 L15.5 1 Z', fill: '#4a433a' }, b)
+    el('ellipse', { cx: 12.5, cy: 1.2, rx: 2, ry: 1.1, fill: '#e8e2d6' }, b) // the pale rump
+    const wing = el('path', { class: 'goose-wing', d: 'M0 -1 Q3 -12 13 -17 Q9 -8 8 -1 Z', fill: '#2f2a24' }, b)
+    wing.style.animationDelay = `${(i * 0.13).toFixed(2)}s`
+  }
+
   /** A skein of geese across the sky, right to left, honking far off now and then. */
   function geese() {
     const y = between(GEESE_Y, air())
     const g = el('g', { class: 'geese' }, sky)
     for (let i = 0; i < GEESE; i++) {
       const row = Math.ceil(i / 2) * (i % 2 ? 1 : -1) // the V: the leader, then its two arms
-      const b = el('g', { transform: `translate(${Math.abs(row) * 34} ${row * 16}) scale(1.4)` }, g)
-      const wings = el('path', { class: 'goose-wings', d: 'M-10 -2 Q-4 -9 0 0 Q4 -9 10 -2', fill: 'none', stroke: '#3a3530', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, b)
-      wings.style.animationDelay = `${(i * 0.13).toFixed(2)}s`
-      el('path', { d: 'M-7 0 L0 0', stroke: '#3a3530', 'stroke-width': 3, 'stroke-linecap': 'round' }, b)
+      const b = el('g', { transform: `translate(${Math.abs(row) * 44} ${row * 16}) scale(1.5)` }, g)
+      goose(b, i)
     }
     Debug.trace('geese', { y: Math.round(y) })
     heard()
     for (const at of [0.15, 0.4, 0.65]) Clock.after(GEESE_MS * at, () => Sound.honk())
-    Motion.endAt(g, [{ transform: `translate(1800px, ${y}px)` }, { transform: `translate(-400px, ${y - 30}px)` }], { duration: GEESE_MS, easing: 'linear' }).then(() => g.remove(), () => g.remove())
+    Motion.endAt(g, [{ transform: `translate(1800px, ${y}px)` }, { transform: `translate(-400px, ${y}px)` }], { duration: GEESE_MS, easing: 'linear' }).then(() => g.remove(), () => g.remove())
   }
 
   // ------------------------------------------------------------ a tap on the leaves under the chestnut
