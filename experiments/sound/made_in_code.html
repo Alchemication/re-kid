@@ -79,7 +79,7 @@
     const items = names.flatMap((n) => (CALLS[n] || [[]]).map((args, i) => ({
       id: `${world}:${n}${i ? `:${i}` : ''}`, sound: n, args, label: CALL_NAMES[n]?.[i] || n,
     })))
-    const picks = load(KEY, {})
+    let picks = load(KEY, {}) // re-read before every write and save: another tab (the other world) writes here too
     const saved = load(`${KEY}-saved`, { changed: 0, saved: 0 })
     const view = { unmarked: false, ...load(`${KEY}-view`, {}) }
 
@@ -168,13 +168,15 @@
       card.querySelector('.verdict .takes').onclick = () => mark(item, 'takes')
       const note = card.querySelector('textarea')
       note.value = picks[item.id]?.note || ''
-      note.oninput = () => record(item, { ...picks[item.id], note: note.value })
+      note.oninput = () => record(item, { note: note.value })
       card.onfocus = () => focus(card)
       grid.append(card)
       return { item, card }
     })
 
-    function record(item, p) {
+    function record(item, change) { // change: the verdict or the note, merged into what is stored now
+      picks = load(KEY, picks)
+      const p = { ...picks[item.id], ...change }
       picks[item.id] = { world, sound: item.sound, args: item.args, verdict: p.verdict, note: p.note }
       keep(KEY, picks)
       saved.changed = Date.now()
@@ -182,8 +184,8 @@
       show()
     }
     function mark(item, v) {
-      const mine = picks[item.id] || {}
-      record(item, { ...mine, verdict: mine.verdict === v ? undefined : v })
+      picks = load(KEY, picks)
+      record(item, { verdict: picks[item.id]?.verdict === v ? undefined : v })
     }
     let focused = null
     function focus(card, scroll) {
@@ -224,6 +226,7 @@
     }
     document.getElementById('next').onclick = nextUnmarked
     document.getElementById('save').onclick = () => {
+      picks = load(KEY, picks)
       const out = { saved: new Date().toISOString(), picks: Object.values(picks).filter((p) => p.verdict || p.note) }
       const a = document.createElement('a')
       a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }))
@@ -233,6 +236,12 @@
       keep(`${KEY}-saved`, saved)
       show()
     }
+    addEventListener('storage', (e) => { // marked in another tab: show it here too
+      if (e.key !== KEY) return
+      picks = load(KEY, {})
+      for (const { item, card } of cards) { const t = card.querySelector('textarea'); if (t !== document.activeElement) t.value = picks[item.id]?.note || '' }
+      show()
+    })
     addEventListener('keydown', (e) => {
       if (e.target.tagName === 'TEXTAREA') { if (e.key === 'Escape') e.target.blur(); return }
       const at = cards.findIndex((c) => c.card === focused)
