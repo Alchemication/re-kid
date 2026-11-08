@@ -81,6 +81,8 @@ def meadow(browser: object, game_time: str) -> Iterator[callable]:
     opened: list[Meadow] = []
 
     def open_(query: str = STILL) -> Meadow:
+        if "season=" not in query:
+            query += "&season=spring"  # the tests were written for spring; autumn's say so
         opened.append(Meadow(browser, query + game_time))
         return opened[-1]
 

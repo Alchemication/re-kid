@@ -80,3 +80,18 @@ test('trouble holds from its first step to its last, and lifts once it is done',
   assert.equal(Things.inTrouble(dozer(6, { gone: () => false })), true)
   assert.equal(Things.inTrouble({ out: true, done: false, step: 2, steps }), false) // no trouble at all
 })
+
+test('an encounter out of season never comes, forced or not, and the draws are the same', () => {
+  const autumn = (n) => n !== 'egg'
+  for (const first of [0.1, 0.4, 0.6, 0.9]) {
+    const names = [...Things.choose(ENCOUNTERS, seq(first, 0.5, 0.2), {}, autumn).map((p) => p.name)]
+    assert.ok(!names.includes('egg'), `the egg came in autumn: ${names}`)
+    assert.ok(names.includes('paint') && names.includes('poles') && names.includes('car'), names.join())
+  }
+  assert.deepEqual([...Things.choose(ENCOUNTERS, seq(0.5), { props: ['egg', 'car'] }, autumn).map((p) => p.name)], ['car'])
+  let spring = 0
+  let fall = 0
+  Things.choose(ENCOUNTERS, () => { spring++; return 0.5 })
+  Things.choose(ENCOUNTERS, () => { fall++; return 0.5 }, {}, autumn)
+  assert.ok(fall <= spring, 'the season added draws')
+})

@@ -15,8 +15,10 @@
 // `?wind=gust` a strong gust that carries something, three seconds after he wakes;
 // `?eclipse=11` an eclipse at 11:00 (and none other), `?eclipse=now` as he wakes
 // (the sun is low then, behind the trees: 11 shows the moon over it);
-// `?owl=1` an owl in the oak this play, `?owl=0` none, `?owl=out` out on its limb from the start.
+// `?owl=1` an owl in the oak this play, `?owl=0` none, `?owl=out` out on its limb from the start;
+// `?season=autumn` (or `spring`) this play's season.
 
+/* global Debug */
 /* exported Layout */
 const Layout = (() => {
   const WORLD_W = 4000 // the whole meadow: about two and a half screens, room to go somewhere
@@ -52,10 +54,26 @@ const Layout = (() => {
   /** x kept within where he can go. */
   const clampX = (x) => Math.max(DIG.from, Math.min(DIG.to, x))
 
+  // The seasons (Adam, 2026-11-08: the meadow felt like spring only, the yard's winter gives it a variety the
+  // meadow lacked). Each play is one season from start to bed, drawn from its own stream (drawn either way, so
+  // ?season shifts nothing else), at these shares: autumn after Krtek a zápalky (world.yaml `autumn`), its oak
+  // a horse chestnut. What belongs to one season only is listed in IN_SEASON (anything not listed is in both):
+  // the egg and the owl are spring's; the hedgehog's leaves and the woodpecker are autumn's.
+  const SEASONS = { spring: 0.5, autumn: 0.5 }
+  const IN_SEASON = { egg: ['spring'], owl: ['spring'], hedgehog: ['autumn'], woodpecker: ['autumn'] }
+  const inSeason = (name, season) => !IN_SEASON[name] || IN_SEASON[name].includes(season)
+
   const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
   const daySeconds = Number(params.get('day'))
   const props = params.has('props') ? params.get('props').split(',').filter(Boolean) : null
   const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind'), eclipse: params.get('eclipse') === 'now' ? 0 : Number(params.get('eclipse')) || null, owl: params.get('owl'), menace: params.get('menace'), wild: params.get('wild') }
 
-  return { WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, OAK, FENCE, PAINTS, DIG, clampX, flags, dayMs: flags.day ? flags.day * 1000 : null }
+  const drawn = (() => { // drawn whether or not ?season forces it
+    let left = Debug.random('meadow-season')()
+    const names = Object.keys(SEASONS)
+    return names.find((n) => (left -= SEASONS[n]) < 0) ?? names[names.length - 1]
+  })()
+  const season = SEASONS[params.get('season')] !== undefined ? params.get('season') : drawn
+
+  return { SEASONS, season, inSeason: (name) => inSeason(name, season), WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, OAK, FENCE, PAINTS, DIG, clampX, flags, dayMs: flags.day ? flags.day * 1000 : null }
 })()

@@ -163,3 +163,36 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
   50%, 85% { transform: rotate(-90deg); }
   100% { transform: rotate(0); }
 }
+
+/* autumn (autumn.js, Adam 2026-11-08): the ground's plain fills under the painting, ochre as Krtek a zápalky's */
+.season-autumn #back-ground path { fill: #cdb67a; }
+.season-autumn #front-ground path { fill: #b99a55; }
+/* the greens drawn in code (stems, tufts, the church's hill and bushes) in autumn's colours */
+.season-autumn [fill="#4f8a2e"] { fill: #a37d32; }
+.season-autumn [stroke="#4f8a2e"] { stroke: #a37d32; }
+.season-autumn [fill="#6fae4c"] { fill: #c39a45; }
+.season-autumn [stroke="#6fae4c"] { stroke: #c39a45; }
+.season-autumn [fill="#4f8a3a"] { fill: #a3803a; }
+.season-autumn [stroke="#4f8a3a"] { stroke: #a3803a; }
+.season-autumn [fill="#4f7a33"] { fill: #8f6c30; }
+.season-autumn [stroke="#4f7a33"] { stroke: #8f6c30; }
+.season-autumn [fill="#4f6b2e"] { fill: #7d6230; }
+.season-autumn [stroke="#4f6b2e"] { stroke: #7d6230; }
+.season-autumn [fill="#3f7d22"] { fill: #8d6f2c; }
+.season-autumn [stroke="#3f7d22"] { stroke: #8d6f2c; }
+.season-autumn [fill="#2f5548"] { fill: #5e4a30; }
+.season-autumn [stroke="#2f5548"] { stroke: #5e4a30; }
+.season-autumn [fill="#2a4a17"] { fill: #5a4422; }
+.season-autumn [stroke="#2a4a17"] { stroke: #5a4422; }
+.season-autumn [fill="#93b39a"] { fill: #cdbb8c; }
+.season-autumn [stroke="#93b39a"] { stroke: #cdbb8c; }
+.season-autumn [fill="#7fae95"] { fill: #c0ad7e; }
+.season-autumn [stroke="#7fae95"] { stroke: #c0ad7e; }
+.season-autumn [fill="#7a8f5a"] { fill: #a08a55; }
+.season-autumn [stroke="#7a8f5a"] { stroke: #a08a55; }
+.season-autumn [fill="#6f9372"] { fill: #b98d52; }
+.season-autumn [stroke="#6f9372"] { stroke: #b98d52; }
+.season-autumn [fill="#4d6d1f"] { fill: #8a6a28; }
+.season-autumn [stroke="#4d6d1f"] { stroke: #8a6a28; }
+.season-autumn [fill="#a7c4ad"] { fill: #d6c597; }
+.season-autumn [stroke="#a7c4ad"] { stroke: #d6c597; }

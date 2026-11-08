@@ -14,7 +14,7 @@
 // a tick at a time. `?wind=gust` (layout.js) brings a strong gust that
 // carries something three seconds after he wakes, for trying it.
 
-/* global Clock, Debug, Motion, Sound, Storm, Wind, World */
+/* global Autumn, Clock, Debug, Layout, Motion, Sound, Storm, Wind, World */
 /* exported Weather */
 const Weather = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -23,7 +23,7 @@ const Weather = (() => {
   const FLUTTER_DEG = [1, 16] // his hairs' flutter, still and in a full gust
   const SHOWN_STEP = 0.5 // the lean is set on the page only when it changes by this much (degrees): each change restyles the whole page (perf: 0.1 cost a storm about 5% of a phone's main thread)
   const CARRY_FROM = 0.75 // a gust this strong may carry something...
-  const CARRY_CHANCE = 0.5 // ...this often
+  const CARRY_CHANCE = { spring: 0.5, autumn: 0.85 } // ...this often (in autumn the chestnut's leaves are loose)
   const CARRY_COUNT = [3, 6] // how many leaves or seeds
   const CARRY_MS = [3000, 4500] // across the view in this long
   const CARRY_Y = [440, 650] // how high they go: low, against the trees and the grass, where they show (white seeds were lost in the sky)
@@ -64,6 +64,7 @@ const Weather = (() => {
       }
       return
     }
+    if (Layout.season === 'autumn') return Autumn.piece(g, tumble) // a chestnut leaf
     el('path', { d: 'M-10 0 Q0 -9 10 0 Q0 9 -10 0 Z M-10 0 H12', fill: LEAVES[Math.floor(tumble() * LEAVES.length)], stroke: '#2f4a17', 'stroke-width': 1.4 }, g)
   }
 
@@ -112,8 +113,8 @@ const Weather = (() => {
     else if (!strong && level >= CARRY_FROM) {
       strong = true
       const r = carries() // both drawn either way, forced or not: the stream stays put
-      const kind = carries() < 0.5 ? 'leaves' : 'seeds'
-      if (forced || r < CARRY_CHANCE) carry(kind)
+      const kind = carries() < 0.5 || Layout.season === 'autumn' ? 'leaves' : 'seeds' // no dandelion seeds in autumn
+      if (forced || r < (CARRY_CHANCE[Layout.season] ?? CARRY_CHANCE.spring)) carry(kind)
       forced = false
     }
   }

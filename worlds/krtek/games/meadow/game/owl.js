@@ -166,7 +166,7 @@ const Owl = (() => {
     goTo = meadow.goTo
     const forced = Layout.flags.owl // '1' always, '0' never, 'out' out on its limb from the start
     const here = random() < CHANCE // drawn either way, so a flag shifts nothing else
-    if (forced === '0' || (!forced && !here)) return
+    if (forced === '0' || (!forced && !here) || !Layout.inSeason('owl')) return // spring's: in autumn the woodpecker has the tree
     g = el('g', { class: 'owl' }, layer)
     draw(g)
     el('circle', { cx: 0, cy: -60, r: 72, fill: 'none', 'pointer-events': 'all' }, g) // the tap target: the owl and a little round it

@@ -13,7 +13,7 @@
 // thousands of shapes. Nothing here moves or changes after it is painted,
 // except the clouds' wash fading at night (cloudsAt).
 
-/* global Debug, Layout, Path2D */
+/* global Autumn, Debug, Layout, Path2D */
 /* exported Painting */
 const Painting = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -543,9 +543,10 @@ const Painting = (() => {
     ctx.fill(knot)
     ctx.stroke(knot)
     limb(ctx)
-    // the crown: clumps of pale lobed leaves, darker underneath
+    // the crown: clumps of pale lobed leaves, darker underneath; in autumn a horse chestnut's (autumn.js)
     const tones = ['#2f5548', '#4a7a66', '#6c9c84', '#9dc3a7', '#c3dcc2']
-    for (const [x, y, rad] of crown) {
+    if (autumn()) Autumn.crown(ctx, crown, dab)
+    else for (const [x, y, rad] of crown) {
       dab(ctx, x, y + rad * 0.1, rad * 0.9, tones[0], 1)
       for (let i = 0, n = Math.round(rad * rad / 30); i < n; i++) {
         const a = r(Math.PI * 2)
@@ -853,14 +854,14 @@ const Painting = (() => {
     res = Math.max(RES[0], Math.min(RES[1], pxPerUnit))
     const farW = Layout.WORLD_W / 2 + Layout.VIEW_W // the far trees scroll at half speed (view.js)
     cloudImg = place(into.sky, layer(-200, -100, 2000, 740, clouds))
-    place(into.far, layer(-60, 380, farW + 120, 290, (ctx) => far(ctx, farW)))
-    place(into.back, layer(-60, 140, Layout.WORLD_W + 120, 590, back))
-    if (into.rocks) place(into.rocks, layer(Layout.SPRING - 240, 360, 900, 370, rocks))
-    if (into.oak) withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(...OAK_BOX, oak), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else (none on the front page's card)
-    if (into.garden) withStream(Debug.random('meadow-garden-painting'), 1, () => place(into.garden, layer(...GARDEN_BOX, garden))) // its own stream: it shifts nothing else
-    place(into.front, layer(-60, 690, Layout.WORLD_W + 120, 210, front))
+    place(into.far, layer(-60, 380, farW + 120, 290, fall((ctx) => far(ctx, farW), 0.7, 0.16))) // the far pines keep some green
+    place(into.back, layer(-60, 140, Layout.WORLD_W + 120, 590, fall(back)))
+    if (into.rocks) place(into.rocks, layer(Layout.SPRING - 240, 360, 900, 370, fall(rocks, 0.8)))
+    if (into.oak) withStream(Debug.random('meadow-oak-painting'), 1, () => place(into.oak, layer(...OAK_BOX, fall(oak, 1, 0.05)), into.oak.firstChild)) // its own stream: painted last, it shifts nothing else (none on the front page's card)
+    if (into.garden) withStream(Debug.random('meadow-garden-painting'), 1, () => place(into.garden, layer(...GARDEN_BOX, fall(garden, 0.8)))) // its own stream: it shifts nothing else
+    place(into.front, layer(-60, 690, Layout.WORLD_W + 120, 210, fall(front, 1, 0.06)))
     const { from, to } = Layout.BED
-    place(into.bed, layer(from - 30, 610, to - from + 60, 110, (ctx) => bed(ctx, from - 10, to + 10)))
+    place(into.bed, layer(from - 30, 610, to - from + 60, 110, fall((ctx) => bed(ctx, from - 10, to + 10))))
     Debug.trace('painted', { res: Math.round(res * 100) / 100 })
   }
 
@@ -876,9 +877,14 @@ const Painting = (() => {
   function tree(parent, [w, h], trunk, stream, sharp = 1) {
     return withStream(stream, sharp, () => {
       const tones = pick(GREENS)
-      return place(parent, layer(-w / 2 - 20, -(trunk + h) - 20, w + 40, trunk + h + 40, (ctx) => leafy(ctx, 0, 0, [w, h], tones, trunk)))
+      return place(parent, layer(-w / 2 - 20, -(trunk + h) - 20, w + 40, trunk + h + 40, fall((ctx) => leafy(ctx, 0, 0, [w, h], tones, trunk))))
     })
   }
+
+  const autumn = () => Layout.season === 'autumn'
+  /** A layer's painting, turned autumnal once painted on an autumn play (autumn.js: `strength` of its greens
+   * turned, `haze` of the film's misty paper over it); as it is in spring. */
+  const fall = (draw, strength = 1, haze = 0.1) => (autumn() ? (ctx) => { draw(ctx); Autumn.recolour(ctx, res, strength, haze) } : draw)
 
   /** Paint with `stream` lent for the painting's draws, `sharp` times finer, so it shifts nothing else. */
   function withStream(stream, sharp, paintIt) {

@@ -121,15 +121,17 @@ const Things = (() => {
    * Which encounters come this play, and at what hour: one with a `chance`
    * comes in that share of plays, instead of its `instead`; then one of each
    * offer there is, then the others, chosen from `rand` (pure: the unit tests call it). `props`
-   * (the ?props flag) forces a list instead; `soon` brings the first now.
+   * (the ?props flag) forces a list instead; `soon` brings the first now; `inSeason(name)` leaves
+   * out one not of this play's season (the egg in autumn).
    * The draws are made either way, so forcing one doesn't shift the rest.
    */
-  function choose(encounters, rand, { props = null, soon = false } = {}) {
+  function choose(encounters, rand, { props = null, soon = false } = {}, inSeason = () => true) {
     let pool = encounters
     for (const e of encounters.filter((c) => c.instead)) {
       const comes = rand() < e.chance // drawn either way
       pool = pool.filter((c) => c.name !== (comes ? e.instead : e.name))
     }
+    pool = pool.filter((c) => inSeason(c.name))
     const byOffer = {}
     for (const e of pool) (byOffer[e.offer] ||= []).push(e.name)
     const first = Object.keys(byOffer).sort().map((offer) => {
@@ -138,7 +140,7 @@ const Things = (() => {
     })
     const rest = pool.map((e) => e.name).filter((n) => !first.includes(n))
     let names = [...shuffle(first, rand), ...shuffle(rest, rand)]
-    if (props) names = props.filter((n) => encounters.some((e) => e.name === n))
+    if (props) names = props.filter((n) => encounters.some((e) => e.name === n) && inSeason(n))
     return names.slice(0, HOURS.length).map((name, i) => ({ name, at: soon && i === 0 ? SOON_HOUR : HOURS[i] }))
   }
 
@@ -155,7 +157,7 @@ const Things = (() => {
    * it holds the stage). */
   function setup(meadow) {
     api = meadow
-    plan = choose(Object.values(all), Debug.random('things'), Layout.flags)
+    plan = choose(Object.values(all), Debug.random('things'), Layout.flags, Layout.inSeason)
     for (const p of plan) all[p.name].plant?.()
     Debug.trace('things', { plan: plan.map((p) => `${p.name}@${p.at}`).join(' ') })
     return plan.map((p) => p.name)

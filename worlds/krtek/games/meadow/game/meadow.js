@@ -19,7 +19,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
+/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Turn, View, Weather, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -796,6 +796,8 @@ const meadowGame = (() => {
   // ------------------------------------------------------------ start
 
   World.setup(Clock.now)
+  World.set({ season: Layout.season })
+  svg.classList.add(`season-${Layout.season}`) // the season's look (game.css .season-autumn)
   View.fit(svg) // the screen's shape first: the painting's detail follows its scale
   makeScene()
   Storm.setup({ sky: layers.sky, picture: svg, rain: document.getElementById('rain'), over: night.parentNode })
@@ -819,6 +821,7 @@ const meadowGame = (() => {
   Nest.setup(document.getElementById('spring'), () => game.hour)
   Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), document.getElementById('oak-ground'), { goTo, rounds, dropHat })
   Owl.setup(document.getElementById('oak'), { goTo, rounds })
+  if (Layout.season === 'autumn') Autumn.setup(document.getElementById('oak-ground')) // leaves drop from the chestnut
   Fence.setup(document.getElementById('fence'), document.getElementById('fence-near'), document.getElementById('garden-life'), { goTo, rounds, el })
   View.offstage(document.querySelectorAll('#cam .sway, #cam .fall, #cam .foam')) // what sways and pours stops while out of sight
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
