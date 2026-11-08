@@ -105,6 +105,10 @@ const Autumn = (() => {
     return out
   }
 
+  /** The painting is done: let the tables go (about 0.8 MB each); a later layer (a tree the bulldozer
+   * fells) makes its own again. */
+  const forget = () => tables.clear()
+
   /**
    * Turn a painted layer autumnal, in place: its greens to the patch's autumn colour, and a haze over all.
    * Each colour's turn comes from a table, each patch's colour is read once per block of pixels: a phone
@@ -315,7 +319,6 @@ const Autumn = (() => {
         }))
         if (!alive()) return
       }
-      Mole.lean(0, 300)
       Sound.say('giggle')
       await Mole.handsToFace(600)
     },
@@ -323,7 +326,6 @@ const Autumn = (() => {
     async toss(alive) {
       await Mole.lean(12, 400) // down to scoop
       if (!alive()) return
-      Mole.lean(0, 300)
       Sound.whoosh()
       Mole.feel('delighted', 2000)
       const x = Mole.state.x
@@ -365,6 +367,7 @@ const Autumn = (() => {
   let nextPlay = null
   /** A tap on the leaves: he goes over and plays in them (PLAYS, a different way each time). */
   async function play(alive) {
+    if (!goTo) return // not an autumn play: no leaves here
     await goTo(PLAY_AT)
     if (!alive()) return
     Mole.show('front')
@@ -418,5 +421,5 @@ const Autumn = (() => {
     next()
   }
 
-  return { recolour, crown, piece, setup, tick, play, drop, burst, LEAF_TONES, /** Leaves lying under the chestnut now. */ get lying() { return lying.length } }
+  return { recolour, forget, crown, piece, setup, tick, play, drop, burst, LEAF_TONES, /** Leaves lying under the chestnut now. */ get lying() { return lying.length } }
 })()

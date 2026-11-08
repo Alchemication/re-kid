@@ -58,8 +58,6 @@ const HedgeArt = (() => {
           p.leaves.appendChild(g)
         }
       },
-      /** How many leaves he has on him. */
-      get stuck() { return p.leaves.childElementCount },
       /** The leaves off his spines (into his bed): gone from him. */
       shed() { p.leaves.replaceChildren() },
       /** Curl up into a ball (his face and feet tucked in), or uncurl. */

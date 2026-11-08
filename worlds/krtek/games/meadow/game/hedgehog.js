@@ -78,7 +78,7 @@
   async function notice(alive) {
     const h = await bring(alive)
     if (!h) return
-    m().goTo(SPOT + 170)
+    const coming = m().goTo(SPOT + 170) // he comes over while the hedgehog sniffs about
     await h.bob(3) // sniffing at the leaves
     if (!alive()) return
     Sound.snuffle()
@@ -88,6 +88,8 @@
     await h.no() // a shiver
     if (!alive()) return
     await h.droop()
+    if (!alive()) return
+    await coming
     if (!alive()) return
     Mole.lookAt(h.drawnX())
     Mole.feel('worried', 1400)
@@ -130,7 +132,8 @@
     const h = await bring(alive)
     if (!h) return
     if (!state.stuck) {
-      await m().goTo(h.drawnX() + 80)
+      const start = Math.min(SPOT + 240, Math.max(h.drawnX(), ...state.lying.map((l) => l.x)) + 40) // beyond the last leaf: he rolls through them all
+      await Promise.all([h.go(start, Math.abs(start - h.drawnX()) * 8 + 200), m().goTo(start + 90)])
       if (!alive()) return
       Mole.perk(1.5)
       Sound.say('ooh') // the idea
@@ -145,13 +148,11 @@
       const to = BED - 10
       const rolling = Promise.all([h.go(to, ROLL_MS), h.roll(-4, ROLL_MS)])
       for (const l of [...state.lying].sort((a, b) => b.x - a.x)) { // as he passes each, it sticks to him
-        if (l.x < to || l.x > from) continue
-        Clock.after(((from - l.x) / (from - to)) * ROLL_MS * 0.9, () => pickUp(l, h))
+        const k = Math.max(0, Math.min(1, (from - l.x) / (from - to))) // where along his roll he passes it
+        Clock.after(k * ROLL_MS * 0.9, () => pickUp(l, h))
       }
       await rolling
       if (!alive()) return
-      Mole.lean(0, 300)
-      state.stuck = Math.max(state.stuck, 1)
       h.stick(6) // a ball of leaves
       state.stuck = 6
       await h.curl(false)
@@ -194,7 +195,7 @@
 
   /** A leaf blown off along the grass (dir -1 left, 1 right) and lying again further on. */
   function blowAway(l, dir, far = 160, up = false) {
-    const to = Math.max(BED - 60, Math.min(SPOT + 220, l.x + dir * far))
+    const to = Math.max(BED + 10, Math.min(SPOT + 220, l.x + dir * far)) // never past his heap's place: he rolls up all of them
     const turn = l.turn + dir * 300
     const from = l.g.style.transform
     const mid = (l.x + to) / 2
@@ -264,11 +265,10 @@
     hog = null
   }
 
-  if (Layout.inSeason('hedgehog')) plant()
-
   Things.add({
     name: 'hedgehog',
     offer: 'help',
+    plant, // the leaves lie there only on a play it comes
     music: { 0: 'sad', 2: 'happy' }, // cold, no bed; the laugh as he rolls up the leaves
     appear,
     steps: [notice, gather, roll, bed],

@@ -2373,3 +2373,42 @@ class TestMeadowAutumn:
             "new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.swing')).transform).isIdentity || getComputedStyle(document.querySelector('.swing')).transform === 'none'"
         )
         assert still, "the swing swings itself still"
+
+    def test_the_hedgehog_rolls_up_every_leaf(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&soon&props=hedgehog&woodpecker=0")
+        m.wake()
+        arrived(m, "hedgehog")
+        finish(m, "hedgehog")
+        assert m.page.evaluate("meadowGame.detail('hedgehog').lying") == 0, (
+            "a leaf left in the grass"
+        )
+        assert not m.page.query_selector(".hedgehog-leaf")
+
+    def test_his_leaves_lie_there_only_on_a_play_he_comes(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(f"{self.AUTUMN}&props=car")
+        assert not m.page.query_selector(".hedgehog-leaf")
+        m = meadow(f"{self.AUTUMN}&props=hedgehog")
+        assert m.page.query_selector(".hedgehog-leaf")
+
+    def test_a_spring_play_has_no_leaves_to_play_in(self, meadow: callable) -> None:
+        m = meadow(STILL)
+        m.wake()
+        m.do("leaves")
+        m.wait_free()
+        assert not m.errors, m.errors
+
+    def test_a_cut_ends_the_woodpeckers_own_drumming(self, meadow: callable) -> None:
+        m = meadow("seed=1&season=autumn&props=")
+        m.wake()
+        m.wait(
+            "meadowGame.trace().includes('\"drums\":12')", 120_000
+        )  # out on its own, drumming
+        m.do("woodpecker")
+        m.do("go to 900")  # cut while it is still about its own doing
+        m.wait_free()
+        cut = len(m.page.evaluate("meadowGame.trace()").split("\n"))
+        m.play_for(2500)
+        after = "\n".join(m.page.evaluate("meadowGame.trace()").split("\n")[cut:])
+        assert "woodpecker {" not in after.replace("woodpecker visit", ""), after

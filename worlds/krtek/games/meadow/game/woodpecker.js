@@ -137,31 +137,42 @@ const Woodpecker = (() => {
     else if (state === 'out' && now >= backAt) Debug.ignoreCut(goIn(false), 'the woodpecker goes in')
   }
 
+  let routine = 0 // its own doings, counted: a cut (restore) ends the one under way, waits and all
+
   async function outToDrum() {
+    const mine = ++routine
+    const on = () => mine === routine
     busy = true
     try {
       await hopTo(EDGE, 'out')
+      if (!on()) return
       await Clock.wait(400)
+      if (!on()) return
       await drum()
+      if (!on()) return
       heard(EDGE.x)
       await Clock.wait(900)
+      if (!on()) return
       await Motion.endAt(head, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(14deg)', offset: 0.3 }, { transform: 'rotate(14deg)', offset: 0.7 }, { transform: 'rotate(0deg)' }], { duration: 1400 }) // a look about
+      if (!on()) return
       if (timing() < 0.5) await drum(9)
-      backAt = Clock.now() + between(OUT_MS, timing())
+      if (on()) backAt = Clock.now() + between(OUT_MS, timing())
     } finally {
-      busy = false
+      if (on()) busy = false
     }
   }
 
   async function goIn(forTheNight) {
+    const mine = ++routine
     busy = true
     try {
       if (state === 'out') await hopTo(IN_HOLE, 'in')
+      if (mine !== routine) return
       if (forTheNight) state = 'night'
       outAt = Clock.now() + between(DRUM_EVERY_MS, timing())
       Debug.trace('woodpecker', { in: true, night: forTheNight })
     } finally {
-      busy = false
+      if (mine === routine) busy = false
     }
   }
 
@@ -258,7 +269,9 @@ const Woodpecker = (() => {
     for (const e of [g, head]) e.getAnimations().forEach((a) => a.cancel())
     head.style.transform = ''
     g.style.transform = at(state === 'out' ? EDGE : IN_HOLE)
+    routine += 1 // its own doing, if one was under way, ends here
     busy = false
+    backAt = Math.max(backAt, Clock.now() + OUT_MS[0]) // out: a while yet before it goes in
   }
 
   return {

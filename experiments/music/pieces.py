@@ -329,5 +329,26 @@ PIECES: dict[str, dict] = {
             "A warm, happy instrumental tune for a sunny autumn afternoon in a meadow in a 1970s Eastern European children's animated film: flute and strings together, fuller and brighter, cosy and joyful, as friends finish a soft bed of golden leaves together.",
         ],
     },
+    # Round 2 (2026-11-08, Adam away again): he kept morning 01 ("amazing, a bit nostalgic and sad -
+    # truly beautiful"), curious 03 and happy 08 ("nice false notes"), no sad. More takes of the three
+    # wordings he kept, so a part doesn't repeat every play, and the sad worded after the morning he
+    # loved: nostalgic and tender rather than minor-key gloom.
+    "meadow-autumn-2": {
+        "world": "krtek",
+        "for": "Autumn, round 2: more of the three you kept (morning, curious, happy), and the sad worded after the morning you loved (nostalgic, tender). Listen for: the same feel as your keeps; a sad that is wistful, never gloomy.",
+        "parts": ["morning", "curious", "sad", "sad", "happy"],  # by wording
+        "season": "autumn",
+        "seconds": 20,
+        "style": False,
+        "models": ["music_v1"],
+        "takes": 2,
+        "prompts": [
+            "A calm, beautiful instrumental theme for a misty golden autumn morning in a meadow in a 1970s Eastern European children's animated film: a gentle, slightly wistful flute melody over warm soft strings and a mellow clarinet, chestnut leaves drifting down, tender and cosy, as a small creature comes out into the cool morning.",
+            "A curious, gently inquisitive instrumental tune for an autumn meadow in a 1970s Eastern European children's animated film: a questioning flute and plucked strings, light and a little playful, as a small creature finds something new among the fallen leaves. Calm, warm, simple.",
+            "A tender, nostalgic instrumental tune for a grey autumn afternoon in a meadow in a 1970s Eastern European children's animated film: a slow, wistful flute over soft warm strings, a little sad and very gentle, as a small hedgehog shivers with nowhere to sleep for the winter. Beautiful and simple, never gloomy.",
+            "A quiet, wistful instrumental melody from a 1970s Eastern European children's animated film: a lonely clarinet and a soft flute over hushed strings, slow and tender, like the last leaves falling in a cold meadow while a small friend needs help. Gentle, a little sad, warm underneath.",
+            "A warm, happy instrumental tune for a sunny autumn afternoon in a meadow in a 1970s Eastern European children's animated film: flute and strings together, fuller and brighter, cosy and joyful, as friends finish a soft bed of golden leaves together.",
+        ],
+    },
 
 }

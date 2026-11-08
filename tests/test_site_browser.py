@@ -56,3 +56,20 @@ class TestFrontPage:
             assert errors == []
         finally:
             page.close()
+
+    def test_the_meadow_card_paints_whatever_its_season(self, browser: object) -> None:
+        """The card loads no autumn.js: an autumn draw (half its loads) still paints it, as spring."""
+        page = browser.new_page(viewport={"width": 844, "height": 390})
+        errors: list[str] = []
+        page.on("pageerror", lambda e: errors.append(str(e)))
+        try:
+            page.goto((SITE / "krtek.html").as_uri() + "?season=autumn")
+            page.wait_for_function(
+                "document.documentElement.style.visibility === 'visible'", timeout=5000
+            )
+            assert page.evaluate(
+                "document.getElementById('front-ground').querySelector('image') !== null"
+            )
+            assert errors == []
+        finally:
+            page.close()

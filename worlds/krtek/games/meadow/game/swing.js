@@ -10,7 +10,7 @@
 // Drawn into the tree's layer (#oak), behind him: he sits on its seat. It moves only on the Clock
 // (Motion.endAt).
 
-/* global Autumn, Clock, Debug, Layout, Mole, Motion, Sound */
+/* global Autumn, Debug, Layout, Mole, Motion, Sound */
 /* exported Swing */
 const Swing = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -52,8 +52,7 @@ const Swing = (() => {
   async function swing(from, to, ms = SWING_MS) {
     await Promise.all([
       Motion.endAt(g, [{ transform: swung(from) }, { transform: swung(to) }], { duration: ms, easing: 'ease-in-out' }),
-      Mole.glide(along(to), ms, SIT, 'ease-in-out'),
-      Mole.lean(to * 0.8, ms), // tilted with the ropes
+      Mole.glide(along(to), ms, SIT, 'ease-in-out'), // upright on the seat: Mole.lean dips and comes back, it can't hold a tilt with the ropes
     ])
   }
 
@@ -93,7 +92,6 @@ const Swing = (() => {
       if (!alive()) return
       await Mole.perch(0, 400)
       swinging = false
-      await Mole.lean(0, 200)
       await Mole.cheer()
     },
 
@@ -110,9 +108,9 @@ const Swing = (() => {
       swinging = false
       const land = Layout.clampX(along(at) - 130) // out, towards the tree's foot
       settle(at)
-      await Promise.all([Mole.glide(land, 700, SIT + 60, 'ease-out'), Mole.lean(-20, 700)])
+      await Promise.all([Mole.glide(land, 700, SIT + 60, 'ease-out'), Mole.lean(-20, 1000)]) // flung out, a dip and back
       if (!alive()) return
-      await Promise.all([Mole.glide(land, 300, 0, 'ease-in'), Mole.lean(0, 300)])
+      await Mole.glide(land, 300, 0, 'ease-in')
       Sound.swish()
       Autumn.burst(land) // the leaves fly up round him
       if (!alive()) return
@@ -151,7 +149,6 @@ const Swing = (() => {
       Mole.put(Layout.clampX(X + 70), 'out')
     }
     if (Math.abs(deg) > 1) settle(deg)
-    Clock.after(0, () => Debug.ignoreCut(Mole.lean(0, 200), 'he straightens up'))
   }
 
   return {
