@@ -569,6 +569,17 @@ SOUNDS: dict[str, dict] = {
             "a tiny animal snuffling in a pile of leaves, little huffs and a soft snort",
         ],
     },
+    "krtek-honk": {
+        "world": "krtek",
+        "id": "honk",
+        "for": "Geese going south high over the meadow in autumn: one honk, far off, soft (three come as they cross, 6 s apart).",
+        "seconds": 1.0,
+        "prompts": [
+            "wild geese honking far away high in the sky, one or two soft honks, distant, calm autumn day",
+            "a flock of geese flying overhead in the distance, faint honking",
+            "a single goose honk heard far off across fields, soft and distant",
+        ],
+    },
     # Reksio's yard (2026-11-08): the sounds made in code Adam judged bad,
     # "not great" or "so so" on made_in_code.html (his notes in each "for").
     "cluck": {
