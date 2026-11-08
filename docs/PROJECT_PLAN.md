@@ -26,6 +26,9 @@ sounds he has judged are in.
      (`DRUM_EVERY_MS`), whether the knocking reads.
    - **The conker** (the tree's third peek in autumn) and **the leaves**
      at the chestnut's foot to kick or toss.
+   - **The swing** from the chestnut's limb (after the film's, 2:30):
+     higher and higher, or a jump into the leaves. Judge: does standing on
+     the seat read (he has no sitting pose), the swing's pace (`SWING_MS`).
    - **The hedgehog's winter bed** (autumn's encounter, in the egg's place;
      `?props=hedgehog&soon&season=autumn`): drawn from Krtek a ježek. Judge
      the story (does the roll through the leaves land as the laugh), its
@@ -36,8 +39,8 @@ sounds he has judged are in.
      moods; `MUSIC_DIRECTION.md` has the measures). Then `adopt.py` for each.
    - Autumn opens about 0.5 s slower on a phone than spring (the recolour);
      measure on the iPhone.
-   - Not built, ideas still open: the swing under the chestnut with the
-     mouse (the film's 2:30), an autumn bed for the music, a winter.
+   - Not built, ideas still open: the mouse on the swing with him (the
+     film's), an autumn bed for the music, a winter.
    - `TestMeadowOak::test_a_tap_on_it_peeks_a_new_way_each_time` failed once
      under load (2026-11-08) with one other, and not in four runs after:
      like the poles' below, a timing bug to find.

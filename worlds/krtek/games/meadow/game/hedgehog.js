@@ -22,7 +22,7 @@
 ;(() => {
   const Y = Layout.GROUND
   const SPOT = 640 // where he comes to, in the grass left of the molehill (the egg's, in spring)
-  const BED = 470 // where his heap goes, nearer the chestnut
+  const BED = 530 // where his heap goes, nearer the chestnut (clear of the swing, swing.js)
   const LEAVES = 9 // lying in the grass, from BED to SPOT + 120
   const ARMFUL = 4 // the leaves the mole scoops up
   const TROT_MS = 3200

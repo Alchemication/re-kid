@@ -349,6 +349,19 @@ const Autumn = (() => {
     }
   }
 
+  /** Leaves fly up round x (he landed in them): those lying near, and a few more from under him. */
+  function burst(x) {
+    for (const [i, g] of lying.filter((l) => Math.abs(where(l).e - x) < 150).entries()) {
+      const { e, f } = where(g)
+      Debug.ignoreCut(flutter(g, e, f, (e < x ? -1 : 1) * (50 + i * 20), 1500 + i * 80), 'a leaf flies up')
+    }
+    for (let i = 0; i < 4; i++) {
+      const g = el('g', { class: 'dropped' }, layer)
+      piece(el('g', { transform: 'scale(2.6)' }, g), drops)
+      Debug.ignoreCut(flutter(g, x, Layout.GROUND - 20, (i - 1.5) * 50, 1600 + i * 100).then(() => lie(g)), 'a leaf flies up')
+    }
+  }
+
   let nextPlay = null
   /** A tap on the leaves: he goes over and plays in them (PLAYS, a different way each time). */
   async function play(alive) {
@@ -405,5 +418,5 @@ const Autumn = (() => {
     next()
   }
 
-  return { recolour, crown, piece, setup, tick, play, LEAF_TONES, /** Leaves lying under the chestnut now. */ get lying() { return lying.length } }
+  return { recolour, crown, piece, setup, tick, play, drop, burst, LEAF_TONES, /** Leaves lying under the chestnut now. */ get lying() { return lying.length } }
 })()

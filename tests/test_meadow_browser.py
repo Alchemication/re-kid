@@ -2343,3 +2343,33 @@ class TestMeadowAutumn:
         spring.wake()
         spring.wait("meadowGame.trace().includes(' music ')", 30_000)
         assert '"season"' not in spring.page.evaluate("meadowGame.trace()")
+
+    def test_the_swing_under_the_chestnut(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=&woodpecker=0")
+        m.wake()
+        for _ in range(3):
+            m.do("swing")
+            m.wait_free()
+            m.assert_settled()
+            assert not m.page.evaluate("Swing.on")
+        assert sorted(traced(m, "swing")[:2]) == ["higher", "jump"]
+        spring = meadow(STILL)
+        assert not spring.page.query_selector(".swing"), "the swing is autumn's"
+
+    def test_the_swing_cut_short_puts_him_down(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=&woodpecker=0")
+        m.wake()
+        for _ in range(2):
+            m.do("swing")
+            m.wait(
+                "Swing.on && document.querySelector('.swing').getAnimations().length > 0"
+            )
+            m.do("go to 900")
+            m.wait_free()
+            m.assert_settled()
+            assert not m.page.evaluate("Swing.on")
+        m.wait("!document.querySelector('.swing').getAnimations().length", 20_000)
+        still = m.page.evaluate(
+            "new DOMMatrixReadOnly(getComputedStyle(document.querySelector('.swing')).transform).isIdentity || getComputedStyle(document.querySelector('.swing')).transform === 'none'"
+        )
+        assert still, "the swing swings itself still"

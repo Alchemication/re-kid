@@ -58,9 +58,9 @@ const Layout = (() => {
   // meadow lacked). Each play is one season from start to bed, drawn from its own stream (drawn either way, so
   // ?season shifts nothing else), at these shares: autumn after Krtek a zápalky (world.yaml `autumn`), its oak
   // a horse chestnut. What belongs to one season only is listed in IN_SEASON (anything not listed is in both):
-  // the egg and the owl are spring's; the hedgehog's leaves and the woodpecker are autumn's.
+  // the egg and the owl are spring's; the hedgehog's leaves, the woodpecker and the swing are autumn's.
   const SEASONS = { spring: 0.5, autumn: 0.5 }
-  const IN_SEASON = { egg: ['spring'], owl: ['spring'], hedgehog: ['autumn'], woodpecker: ['autumn'] }
+  const IN_SEASON = { egg: ['spring'], owl: ['spring'], hedgehog: ['autumn'], woodpecker: ['autumn'], swing: ['autumn'] }
   const inSeason = (name, season) => !IN_SEASON[name] || IN_SEASON[name].includes(season)
 
   const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
