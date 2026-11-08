@@ -184,7 +184,7 @@ const Hen = (() => {
     await flutter(x, WALL_TOP)
     cluck(3)
     await wait(900)
-    hear(x, () => Sound.cluck(1, true)) // the big "ko-DAK"
+    hear(x, () => Sound.cackle()) // the big "ko-DAK"
     eggUp = { el: makeEgg(scene(x + 4, WALL_TOP - 15)), x }
     eggUp.el.animate([{ transform: 'scale(0.4)' }, { transform: 'scale(1)' }], { duration: 250 }) // about its own middle (game.css .egg)
     await wait(400)

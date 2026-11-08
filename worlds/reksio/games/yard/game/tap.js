@@ -187,7 +187,7 @@ const Tap = (() => {
       Debug.trace('tap', { stage, iced })
       const handle = $('tap-handle')
       const water = $('water')
-      Sound.squeak()
+      Sound.creak()
       Motion.endAt(handle, [{ transform: 'rotate(0)' }, { transform: 'rotate(90deg)' }], { duration: 300 })
       let flow = null
       let open = true

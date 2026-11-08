@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-07T22:31:46.519Z",
+ "saved": "2026-11-08T09:58:24.644Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -2493,6 +2493,336 @@
    "folder": "29 Oct: the dry tap",
    "made": "2026-10-29",
    "sound": "huff",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cluck/07.mp3",
+   "source": "eleven",
+   "prompt": "a farmyard hen's low murmuring cluck, short and calm",
+   "wording": 3,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "cluck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cluck/04.mp3",
+   "source": "eleven",
+   "prompt": "a hen clucking softly to herself in a farmyard, two or three quiet clucks, close up",
+   "wording": 1,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "cluck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cluck/03.mp3",
+   "source": "eleven",
+   "prompt": "a hen clucking softly to herself in a farmyard, two or three quiet clucks, close up",
+   "wording": 1,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "cluck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cackle/03.mp3",
+   "source": "eleven",
+   "prompt": "a hen cackling proudly after laying an egg, buk-buk-buk-ba-GAWK, farmyard, close up",
+   "wording": 1,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "cackle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cackle/04.mp3",
+   "source": "eleven",
+   "prompt": "a chicken's loud triumphant cackle, ba-KAWK, once, in a barnyard",
+   "wording": 2,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "cackle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/cackle/09.mp3",
+   "source": "eleven",
+   "prompt": "a proud hen announcing her egg, a few quick clucks rising into one loud squawk",
+   "wording": 3,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "cackle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rattle/08.mp3",
+   "source": "eleven",
+   "prompt": "a rickety wooden gate jiggled on its hinges, a brief clattery rattle",
+   "wording": 3,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "rattle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rattle/03.mp3",
+   "source": "eleven",
+   "prompt": "an old wooden garden gate rattling on its loose metal latch, a short shake",
+   "wording": 1,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "rattle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rattle/05.mp3",
+   "source": "eleven",
+   "prompt": "a loose old metal drainpipe rattling against a wall after a knock, short",
+   "wording": 2,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "rattle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/shake/05.mp3",
+   "source": "eleven",
+   "prompt": "a little dog giving a quick vigorous full-body shake, floppy ears flapping",
+   "wording": 2,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "shake",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/shake/03.mp3",
+   "source": "eleven",
+   "prompt": "a small wet dog shaking himself dry, ears and collar flapping, water flicking off, close up",
+   "wording": 1,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "shake",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/shake/09.mp3",
+   "source": "eleven",
+   "prompt": "a puppy shaking water out of its fur, a short flappy shake",
+   "wording": 3,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "shake",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/creak/03.mp3",
+   "source": "eleven",
+   "prompt": "a stiff old metal garden tap handle being turned, a short rusty squeak",
+   "wording": 1,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "creak",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/creak/06.mp3",
+   "source": "eleven",
+   "prompt": "an old outdoor water faucet valve turning with a little metallic squeal",
+   "wording": 2,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "creak",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/creak/08.mp3",
+   "source": "eleven",
+   "prompt": "a rusty iron tap wheel turned a quarter round, one short creak",
+   "wording": 3,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "creak",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/squeak/05.mp3",
+   "source": "eleven",
+   "prompt": "a tiny rubber squeak toy squeezed once, short and cute",
+   "wording": 1,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "squeak",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/squeak/04.mp3",
+   "source": "eleven",
+   "prompt": "one small high squeak of a rubber duck pressed quickly",
+   "wording": 2,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "squeak",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/squeaks/06.mp3",
+   "source": "eleven",
+   "prompt": "a double squeak of a small rubber toy, squee-squee, rising",
+   "wording": 2,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "squeaks",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/squeaks/04.mp3",
+   "source": "eleven",
+   "prompt": "a double squeak of a small rubber toy, squee-squee, rising",
+   "wording": 2,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "squeaks",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rain/01.mp3",
+   "source": "eleven",
+   "prompt": "gentle steady summer rain falling on a garden lawn and leaves, soft even patter, no thunder",
+   "wording": 1,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "rain",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/rain/09.mp3",
+   "source": "eleven",
+   "prompt": "a soft rain shower in a quiet countryside yard, even hiss and patter, no wind",
+   "wording": 3,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "rain",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/tok/03.mp3",
+   "source": "eleven",
+   "prompt": "a bird's beak tapping once on wood, a light dry tok",
+   "wording": 2,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "tok",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/tok/04.mp3",
+   "source": "eleven",
+   "prompt": "a bird's beak tapping once on wood, a light dry tok",
+   "wording": 2,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "tok",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/tok/06.mp3",
+   "source": "eleven",
+   "prompt": "a bird's beak tapping once on wood, a light dry tok",
+   "wording": 2,
+   "seed": 3,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "tok",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/trap/03.mp3",
+   "source": "eleven",
+   "prompt": "a spring-loaded mousetrap going off on a wooden floor, snap and boing",
+   "wording": 2,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "trap",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/trap/07.mp3",
+   "source": "eleven",
+   "prompt": "a small metal spring trap clacking shut, followed by a short springy twang",
+   "wording": 3,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "trap",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/trap/02.mp3",
+   "source": "eleven",
+   "prompt": "a wooden mouse trap snapping shut, a sharp snap with a twangy spring wobble",
+   "wording": 1,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "trap",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/schlup/01.mp3",
+   "source": "eleven",
+   "prompt": "a soft wet little slurp of something slipping into a shell, schlup, close up",
+   "wording": 1,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "schlup",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/schlup/07.mp3",
+   "source": "eleven",
+   "prompt": "a tiny wet slip, like a finger pulled out of jelly, quiet",
+   "wording": 3,
+   "seed": 1,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "schlup",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/schlup/05.mp3",
+   "source": "eleven",
+   "prompt": "a small squelchy suction pop, gentle and wet",
+   "wording": 2,
+   "seed": 2,
+   "folder": "yard-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "schlup",
    "verdict": "keep"
   }
  ]

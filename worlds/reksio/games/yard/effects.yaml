@@ -225,3 +225,87 @@ effects:
     prompt: 'a small dog breathing out a long warm huff, close up'
   - file: huff/07.mp3
     prompt: 'a long breathy exhale, warming cold hands, soft and close'
+- id: cluck
+  takes:
+  - file: cluck/03.mp3
+    prompt: 'a hen clucking softly to herself in a farmyard, two or three quiet clucks, close up'
+  - file: cluck/04.mp3
+    prompt: 'a hen clucking softly to herself in a farmyard, two or three quiet clucks, close up'
+  - file: cluck/07.mp3
+    prompt: 'a farmyard hen''s low murmuring cluck, short and calm'
+- id: cackle
+  takes:
+  - file: cackle/03.mp3
+    prompt: 'a hen cackling proudly after laying an egg, buk-buk-buk-ba-GAWK, farmyard, close up'
+  - file: cackle/04.mp3
+    prompt: 'a chicken''s loud triumphant cackle, ba-KAWK, once, in a barnyard'
+  - file: cackle/09.mp3
+    prompt: 'a proud hen announcing her egg, a few quick clucks rising into one loud squawk'
+- id: rattle
+  takes:
+  - file: rattle/03.mp3
+    prompt: 'an old wooden garden gate rattling on its loose metal latch, a short shake'
+  - file: rattle/05.mp3
+    prompt: 'a loose old metal drainpipe rattling against a wall after a knock, short'
+  - file: rattle/08.mp3
+    prompt: 'a rickety wooden gate jiggled on its hinges, a brief clattery rattle'
+- id: shake
+  takes:
+  - file: shake/03.mp3
+    prompt: 'a small wet dog shaking himself dry, ears and collar flapping, water flicking off, close up'
+  - file: shake/05.mp3
+    prompt: 'a little dog giving a quick vigorous full-body shake, floppy ears flapping'
+  - file: shake/09.mp3
+    prompt: 'a puppy shaking water out of its fur, a short flappy shake'
+- id: creak
+  takes:
+  - file: creak/03.mp3
+    prompt: 'a stiff old metal garden tap handle being turned, a short rusty squeak'
+  - file: creak/06.mp3
+    prompt: 'an old outdoor water faucet valve turning with a little metallic squeal'
+  - file: creak/08.mp3
+    prompt: 'a rusty iron tap wheel turned a quarter round, one short creak'
+- id: squeak
+  overlaps: true # the five footprints squeak 0.22 s apart, quicker than a take lasts
+  takes:
+  - file: squeak/04.mp3
+    prompt: 'one small high squeak of a rubber duck pressed quickly'
+  - file: squeak/05.mp3
+    prompt: 'a tiny rubber squeak toy squeezed once, short and cute'
+- id: squeaks
+  takes:
+  - file: squeaks/04.mp3
+    prompt: 'a double squeak of a small rubber toy, squee-squee, rising'
+  - file: squeaks/06.mp3
+    prompt: 'a double squeak of a small rubber toy, squee-squee, rising'
+- id: rain
+  gain: 0.3 # a hush under everything, as the synth rain was; Adam to set by ear
+  takes:
+  - file: rain/01.mp3
+    prompt: 'gentle steady summer rain falling on a garden lawn and leaves, soft even patter, no thunder'
+  - file: rain/09.mp3
+    prompt: 'a soft rain shower in a quiet countryside yard, even hiss and patter, no wind'
+- id: tok
+  takes:
+  - file: tok/03.mp3
+    prompt: 'a bird''s beak tapping once on wood, a light dry tok'
+  - file: tok/04.mp3
+    prompt: 'a bird''s beak tapping once on wood, a light dry tok'
+  - file: tok/06.mp3
+    prompt: 'a bird''s beak tapping once on wood, a light dry tok'
+- id: trap
+  takes:
+  - file: trap/02.mp3
+    prompt: 'a wooden mouse trap snapping shut, a sharp snap with a twangy spring wobble'
+  - file: trap/03.mp3
+    prompt: 'a spring-loaded mousetrap going off on a wooden floor, snap and boing'
+  - file: trap/07.mp3
+    prompt: 'a small metal spring trap clacking shut, followed by a short springy twang'
+- id: schlup
+  takes:
+  - file: schlup/01.mp3
+    prompt: 'a soft wet little slurp of something slipping into a shell, schlup, close up'
+  - file: schlup/05.mp3
+    prompt: 'a small squelchy suction pop, gentle and wet'
+  - file: schlup/07.mp3
+    prompt: 'a tiny wet slip, like a finger pulled out of jelly, quiet'

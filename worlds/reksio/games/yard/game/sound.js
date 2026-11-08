@@ -102,6 +102,31 @@ const Sound = (() => {
     return true
   }
 
+  /** A sound that lasts as long as it is wanted (the rain): one of its
+   * recorded takes looped, rising over `rise` seconds. Returns what fades it
+   * away, or null if it has no takes decoded (the synth plays). */
+  function loopTake(name, rise) {
+    const e = effects[name]
+    if (!e || !e.buffers.length) return null
+    const c = ensure()
+    const src = c.createBufferSource()
+    src.buffer = e.buffers[Math.floor(Math.random() * e.buffers.length)]
+    src.loop = true
+    const g = c.createGain()
+    const t = c.currentTime
+    g.gain.setValueAtTime(0.0001, t)
+    g.gain.exponentialRampToValueAtTime(EFFECT_VOLUME * e.gain * scale, t + rise)
+    src.connect(g).connect(master)
+    src.start(t)
+    return () => {
+      const now = c.currentTime
+      g.gain.cancelScheduledValues(now)
+      g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), now)
+      g.gain.exponentialRampToValueAtTime(0.0001, now + rise)
+      src.stop(now + rise + 0.1)
+    }
+  }
+
   function env(gain, t, peak, attack, decay) {
     gain.gain.setValueAtTime(0.0001, t)
     gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak * scale), t + attack)
@@ -296,7 +321,7 @@ const Sound = (() => {
       tone('triangle', BOWL_RING[0], BOWL_RING[0] * 0.98, at, 0.22 * loud, 0.003, 0.7)
       tone('sine', BOWL_RING[1], BOWL_RING[1] * 0.99, at, 0.06 * loud, 0.002, 0.45)
     },
-    step() { hiss(0, 0.05, 0.002, 0.04, 'bandpass', 2400, 2) },
+    step() { hiss(0, 0.12, 0.002, 0.04, 'bandpass', 2400, 2) }, // 0.05 was 'quiet' (Adam, 2026-11-08)
     knock() { tone('sine', 220, 160, 0, 0.3, 0.003, 0.12); tone('sine', 220, 160, 0.14, 0.25, 0.003, 0.12) },
     munch() { hiss(0, 0.22, 0.004, 0.07, 'bandpass', 1100, 1.5) },
     slurp() {
@@ -310,7 +335,7 @@ const Sound = (() => {
       f.frequency.setValueAtTime(500, t)
       f.frequency.exponentialRampToValueAtTime(2200, t + 0.35)
       const g = c.createGain()
-      env(g, t, 0.35, 0.03, 0.35)
+      env(g, t, 0.9, 0.03, 0.35) // 0.35: 'can't hear it' (Adam, 2026-11-08)
       src.connect(f).connect(g).connect(master)
       src.start(t)
       src.stop(t + 0.45)
@@ -428,7 +453,7 @@ const Sound = (() => {
       bp.Q.value = 1.5
       const g = c.createGain()
       g.gain.setValueAtTime(0.0001, t)
-      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, 0.03 * scale), t + seconds * 0.4)
+      g.gain.exponentialRampToValueAtTime(Math.max(0.0002, 0.07 * scale), t + seconds * 0.4) // 0.03: 'very quiet' (Adam, 2026-11-08)
       g.gain.exponentialRampToValueAtTime(0.0001, t + seconds)
       o.connect(bp).connect(g).connect(master)
       o.start(t)
@@ -472,6 +497,8 @@ const Sound = (() => {
     },
     /** Steady, soft rain. Returns a function that lets it fade away. */
     rain() {
+      const takes = loopTake('rain', 3)
+      if (takes) return takes
       const c = ensure()
       const t = c.currentTime
       const src = c.createBufferSource()
@@ -570,7 +597,10 @@ const Sound = (() => {
     },
     /** The rattle of a film reel winding up. */
     reel() { for (let i = 0; i < 14; i++) tone('square', 1300, 1200, i * 0.06, 0.035, 0.002, 0.025) },
+    /** A little footprint on the film popping up. */
     squeak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },
+    /** The old tap's handle turned. */
+    creak() { tone('sine', 900, 1500, 0, 0.12, 0.02, 0.18) },
     /** A mouse: two tiny high peeps. */
     mouse() { tone('sine', 2400, 3300, 0, 0.07, 0.008, 0.06); tone('sine', 2600, 3500, 0.09, 0.06, 0.008, 0.05) },
     nibble() { hiss(0, 0.05, 0.002, 0.03, 'highpass', 4200) },
@@ -603,13 +633,17 @@ const Sound = (() => {
       src.stop(t + seconds + 0.05)
     },
     shake() { for (let i = 0; i < 5; i++) hiss(i * 0.07, 0.12, 0.004, 0.05, 'highpass', 3000) },
-    /** A hen: a cluck (or a few), and big: the loud "ko-DAK" after laying. */
-    cluck(times = 1, big = false) {
+    /** A hen: a cluck (or a few; a take is a few of its own). */
+    cluck(times = 1) {
       for (let i = 0; i < times; i++) {
-        const at = i * 0.17
-        tone('square', big ? 520 : 430, big ? 300 : 330, at, big ? 0.09 : 0.06, 0.006, big ? 0.22 : 0.07)
-        hiss(at, 0.05, 0.003, 0.04, 'bandpass', 1200, 2)
+        tone('square', 430, 330, i * 0.17, 0.06, 0.006, 0.07)
+        hiss(i * 0.17, 0.05, 0.003, 0.04, 'bandpass', 1200, 2)
       }
+    },
+    /** The hen's loud proud "ko-DAK" after laying. */
+    cackle() {
+      tone('square', 520, 300, 0, 0.09, 0.006, 0.22)
+      hiss(0, 0.05, 0.003, 0.04, 'bandpass', 1200, 2)
     },
     /** A chick: one thin high cheep. */
     cheep() { tone('sine', 3300, 4100, 0, 0.09, 0.008, 0.09) },
@@ -644,7 +678,7 @@ const Sound = (() => {
   // (until they're decoded, after the first tap, the synth plays)
   // (the bark keeps its own order: the originals, then takes, then the synth)
   for (const name of Object.keys(typeof EFFECTS !== 'undefined' ? EFFECTS : {})) {
-    if (name === 'bark') continue
+    if (name === 'bark' || name === 'rain') continue // they play their takes themselves
     const synth = sounds[name] || (() => {})
     sounds[name] = (...args) => {
       if (!recorded(name)) synth(...args)

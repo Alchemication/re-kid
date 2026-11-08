@@ -534,6 +534,107 @@ SOUNDS: dict[str, dict] = {
             "a little tin can set down on soft ground, a small dull clunk",
         ],
     },
+    # Reksio's yard (2026-11-08): the sounds made in code Adam judged bad,
+    # "not great" or "so so" on made_in_code.html (his notes in each "for").
+    "cluck": {
+        "for": "The hen about the yard, clucking to herself as she pecks (hen.js). 'very bad' as made in code.",
+        "seconds": 0.8,
+        "prompts": [
+            "a hen clucking softly to herself in a farmyard, two or three quiet clucks, close up",
+            "a contented chicken going buk-buk-buk while pecking at grain",
+            "a farmyard hen's low murmuring cluck, short and calm",
+        ],
+    },
+    "cackle": {
+        "for": "The hen has just laid an egg in the nest: her proud loud 'ko-DAK' (hen.js).",
+        "seconds": 1.5,
+        "prompts": [
+            "a hen cackling proudly after laying an egg, buk-buk-buk-ba-GAWK, farmyard, close up",
+            "a chicken's loud triumphant cackle, ba-KAWK, once, in a barnyard",
+            "a proud hen announcing her egg, a few quick clucks rising into one loud squawk",
+        ],
+    },
+    "rattle": {
+        "for": "The wooden garden gate shaken on its latch (things.js), and the old metal water pipe rattling after his hard knock (tap.js). 'bad' as made in code.",
+        "seconds": 0.7,
+        "prompts": [
+            "an old wooden garden gate rattling on its loose metal latch, a short shake",
+            "a loose old metal drainpipe rattling against a wall after a knock, short",
+            "a rickety wooden gate jiggled on its hinges, a brief clattery rattle",
+        ],
+    },
+    "shake": {
+        "for": "A small dog shaking himself all over, ears flapping: off the rain, off what fell on his head (yard.js, things.js, tap.js, tree.js). 'bad' as made in code.",
+        "seconds": 1.0,
+        "prompts": [
+            "a small wet dog shaking himself dry, ears and collar flapping, water flicking off, close up",
+            "a little dog giving a quick vigorous full-body shake, floppy ears flapping",
+            "a puppy shaking water out of its fur, a short flappy shake",
+        ],
+    },
+    "creak": {
+        "for": "The old garden tap's handle turned on (tap.js). Was 'squeak', shared with the film's little footprints; 'bad' as made in code.",
+        "seconds": 0.5,
+        "prompts": [
+            "a stiff old metal garden tap handle being turned, a short rusty squeak",
+            "an old outdoor water faucet valve turning with a little metallic squeal",
+            "a rusty iron tap wheel turned a quarter round, one short creak",
+        ],
+    },
+    "squeak": {
+        "for": "The little Reksio footprints on the film strip popping up one after another, a squeak each, every 0.22 s (film.js). 'bad' as made in code.",
+        "seconds": 0.3,
+        "prompts": [
+            "a tiny rubber squeak toy squeezed once, short and cute",
+            "one small high squeak of a rubber duck pressed quickly",
+            "a short playful squeak, like a little balloon rubbed once",
+        ],
+    },
+    "squeaks": {
+        "for": "The little footprints squeak back together after his stamping: a double squeak sliding up ('thump, thump … double squeak', Adam's mark on the film; film.js). 'bad' as made in code.",
+        "seconds": 0.6,
+        "prompts": [
+            "two quick rubber squeak toy squeezes, the second a little higher, cute and playful",
+            "a double squeak of a small rubber toy, squee-squee, rising",
+            "two tiny squeaky honks one after the other, like a little rubber duck answering",
+        ],
+    },
+    "rain": {
+        "for": "The summer shower over the yard: steady soft rain, looped for as long as it rains, faded out as it clears (weather.js). 'not great' as made in code.",
+        "seconds": 5.0,
+        "prompts": [
+            "gentle steady summer rain falling on a garden lawn and leaves, soft even patter, no thunder",
+            "light rain pattering on a wooden fence and a doghouse roof, calm and steady",
+            "a soft rain shower in a quiet countryside yard, even hiss and patter, no wind",
+        ],
+    },
+    "tok": {
+        "for": "A hazelnut landing, a bird pecking, the cuckoo clock's little door (bird.js, cuckoo.js): a little wooden tock. 'not great' as made in code.",
+        "seconds": 0.3,
+        "prompts": [
+            "a hazelnut dropping onto a wooden plank, one small hollow tock",
+            "a bird's beak tapping once on wood, a light dry tok",
+            "a small wooden bead knocked on a wooden table, one short click",
+        ],
+    },
+    "trap": {
+        "for": "A mouse trap snapping shut on nothing as the mouse gets away: a sharp snap and a twangy spring (mouse.js). 'not great' as made in code.",
+        "seconds": 0.8,
+        "prompts": [
+            "a wooden mouse trap snapping shut, a sharp snap with a twangy spring wobble",
+            "a spring-loaded mousetrap going off on a wooden floor, snap and boing",
+            "a small metal spring trap clacking shut, followed by a short springy twang",
+        ],
+    },
+    "schlup": {
+        "for": "The snail pulling into its shell when he sniffs it: a soft wet 'schlup' (creatures.js). 'so so' as made in code.",
+        "seconds": 0.5,
+        "prompts": [
+            "a soft wet little slurp of something slipping into a shell, schlup, close up",
+            "a small squelchy suction pop, gentle and wet",
+            "a tiny wet slip, like a finger pulled out of jelly, quiet",
+        ],
+    },
 }
 
 # Krtek's voice (worlds/krtek), to judge against the films by ear before
