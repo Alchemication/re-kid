@@ -35,16 +35,18 @@ class TuneTake(Model):
 class Tune(Model):
     """One part of the day's music, and the takes it plays from."""
 
-    id: Literal["morning", "phrase", "curious", "sad", "happy", "menace", "lullaby"] = Field(
-        description=(
-            "The part in the game's music.js (its PARTS): 'morning' as he "
-            "wakes; 'phrase' now and then through the day (the yard); the "
-            "theme's moods in an encounter, 'curious' as it arrives, 'sad' "
-            "at its trouble, 'happy' as it comes right (the meadow); "
-            "'lullaby' at evening."
+    id: Literal["morning", "phrase", "curious", "sad", "happy", "menace", "lullaby"] = (
+        Field(
+            description=(
+                "The part in the game's music.js (its PARTS): 'morning' as he "
+                "wakes; 'phrase' now and then through the day (the yard); the "
+                "theme's moods in an encounter, 'curious' as it arrives, 'sad' "
+                "at its trouble, 'happy' as it comes right (the meadow); "
+                "'lullaby' at evening."
+            )
         )
     )
-    season: Literal["winter"] | None = Field(
+    season: Literal["winter", "spring", "autumn"] | None = Field(
         default=None,
         description=(
             "The season whose plays it belongs to (Adam, 2026-10-27: each "

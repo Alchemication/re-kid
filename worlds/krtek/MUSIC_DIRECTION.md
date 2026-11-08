@@ -141,3 +141,8 @@ by ear.
   "krtek autumn", 8 takes). Measured: morning 02 the calmest (about a note
   a second; the kept spring morning plays about 2 at 103), 01 and sad 05
   busy (4-5 a second); sad 06 is in a major key. Not yet heard.
+- **2026-11-08, autumn picked (board, "krtek autumn").** Kept 3 of 8, one
+  each: morning 01 ("amazing, a bit nostalgic and sad - truly beautiful"),
+  curious 03 ("awesome - much more positive mood than above"), happy 08
+  ("really fitting the world, nice false notes as well ;)"). No sad take
+  kept (05, 06): autumn's sad moments fall back to spring's.

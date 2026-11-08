@@ -2332,3 +2332,14 @@ class TestMeadowAutumn:
         m.do("go to 900")  # cut short
         m.wait_free()
         m.assert_settled()
+
+    @pytest.mark.realtime  # the music follows sound's own clock
+    def test_its_morning_plays_autumns_own_take(self, meadow: callable) -> None:
+        m = meadow("seed=1&props=&season=autumn")
+        m.wake()
+        m.wait("meadowGame.trace().includes(' music ')", 30_000)
+        assert '"season":"autumn"' in m.page.evaluate("meadowGame.trace()")
+        spring = meadow("seed=1&props=")
+        spring.wake()
+        spring.wait("meadowGame.trace().includes(' music ')", 30_000)
+        assert '"season"' not in spring.page.evaluate("meadowGame.trace()")

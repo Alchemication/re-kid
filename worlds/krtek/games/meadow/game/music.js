@@ -82,9 +82,10 @@ const Music = (() => {
   /** A take of `part` after `wait` seconds; then(): once it has played to its end. */
   function play(part, wait = LEAD_S, then = null) {
     const own = `${part}.${Layout.season}` // a season's own takes of a part (tunes.yaml `season`: autumn's), where it has them
-    if (!takes.play(takes.has(own) ? own : part, random, ctx.currentTime + wait, then)) return
+    const seasons = takes.has(own)
+    if (!takes.play(seasons ? own : part, random, ctx.currentTime + wait, then)) return
     startsAt = ctx.currentTime + wait
-    Debug.trace('music', { part })
+    Debug.trace('music', seasons ? { part, season: Layout.season } : { part })
   }
 
   /** The morning: the theme, as he comes up (if nothing plays yet). */
