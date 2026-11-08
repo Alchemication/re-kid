@@ -106,6 +106,7 @@ effects:
   - file: lap/08.mp3
     prompt: 'a puppy lapping food from a metal bowl'
 - id: sniff
+  gain: 0.5 # as loud as a bark at 1, and played a few in a row: always a bit too loud (Adam, 2026-11-08)
   takes:
   - file: sniff/03.mp3
     prompt: 'a small dog sniffing the ground, quick short sniffs'
