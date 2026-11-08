@@ -74,6 +74,13 @@ const Layout = (() => {
     return names.find((n) => (left -= SEASONS[n]) < 0) ?? names[names.length - 1]
   })()
   const season = SEASONS[params.get('season')] !== undefined ? params.get('season') : drawn
+  // The far edge's wildlife: one kind a play, so not everything is going on at once and the next play shows
+  // something new (Adam, 2026-11-08: too much wildlife at the same time; calmer with less). Drawn either way;
+  // ?critters=flock or heron, or ?wild=, asks for that one too.
+  const FAR_LIFE = ['flock', 'herd', 'heron']
+  const far = FAR_LIFE[Math.floor(Debug.random('meadow-far-life')() * FAR_LIFE.length)]
+  const asked = { flock: flags.critters === 'flock', heron: flags.critters === 'heron', herd: !!flags.wild }
+  const lives = (name) => name === far || asked[name]
 
-  return { SEASONS, season, inSeason: (name) => inSeason(name, season), WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, OAK, FENCE, PAINTS, DIG, clampX, flags, dayMs: flags.day ? flags.day * 1000 : null }
+  return { SEASONS, season, FAR_LIFE, far, lives, inSeason: (name) => inSeason(name, season), WORLD_W, VIEW_W, GROUND, HOME, BED, SPRING, OAK, FENCE, PAINTS, DIG, clampX, flags, dayMs: flags.day ? flags.day * 1000 : null }
 })()

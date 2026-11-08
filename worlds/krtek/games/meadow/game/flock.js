@@ -60,7 +60,7 @@ const Flock = (() => {
     out.set(id, { c, g })
     Ambient.add(c, {
       name: 'flock', id, rnd: flits,
-      arrived: (b, kind) => { if (kind === 'feed' && flits() < CHIRPS) Sound.chirp() }, // landed in a crown: now and then a chirp
+      arrived: (b, kind) => { if (kind === 'feed' && flits() < CHIRPS) Sound.from(b.x, Sound.chirp) }, // landed in a crown: now and then a chirp
       draw: (b) => {
         const perched = b.goal?.kind === 'feed' && Math.hypot(b.vx, b.vy) < 8
         if (g.flying !== !perched) g.classList.toggle('flying', (g.flying = !perched))

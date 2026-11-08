@@ -21,11 +21,16 @@ const Sound = (() => {
   const ECHO_GAP_S = 0.42 // a word given back by the oak's hollow: this long after, each time
   const ECHO_FALL = 0.4 // ...each this much as loud as the last
   const ECHO_DULL_HZ = 2400 // ...and duller: the first cut above this, the next above half of it
+  const HEARD_FAR = 700 // a creature's sound this far off the screen's edge (meadow units) is not heard: about half a screen…
+  const HEARD_MIN = 0.03 // …nor one quieter than this
+  const HEARD_PAN = 0.6 // and from its side, at most this far left or right
   const FADE_S = 0.05 // a fade's floor: how quiet "gone" is, as a share of the level
   const WATER_FADE_S = 0.3 // rain (its takes looped): faded out over this long as it stops
   const SOFT_RAIN = 0.35 // the storm's rain over the whole meadow, under everything: this much of the cloud's rain on the flowers
   let ctx = null
   let master = null
+  let out = null // what a sound plays into: the master, or, heard from a place (from), that place's gain
+  let view = () => null // the game's hook: what is on screen now, { left, right } in the meadow
   let noise = null
   const takes = {} // decoded takes, by sound: {gain, overlaps, inTurn, buffers (in the order listed), last, until}
   const echoing = new Set() // echoes started ahead on the audio clock, not yet heard out
@@ -47,6 +52,7 @@ const Sound = (() => {
       master = ctx.createGain()
       master.gain.value = VOLUME
       master.connect(ctx.destination)
+      out = master
       noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate)
       const data = noise.getChannelData(0)
       for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1
@@ -63,6 +69,41 @@ const Sound = (() => {
 
   const bytes = (b64) => Uint8Array.from(atob(b64), (ch) => ch.charCodeAt(0)).buffer
   const ready = () => ctx && ctx.state !== 'closed'
+
+  /** How a sound at x in the meadow is heard: full on screen, quieter the further off it is, gone a
+   * screen-half away (HEARD_FAR), and from its side (Adam, 2026-11-08: the frog croaking and splashing
+   * at the spring was loud with him over at the oak). */
+  function hearing(x) {
+    const v = view()
+    if (!v) return { level: 1, pan: 0 }
+    const off = Math.max(0, v.left - x, x - v.right)
+    const level = off ? Math.max(0, 1 - off / HEARD_FAR) ** 2 : 1
+    const half = (v.right - v.left) / 2
+    const pan = Math.max(-1, Math.min(1, (x - (v.left + half)) / half)) * HEARD_PAN
+    return { level, pan }
+  }
+
+  /** Play a creature's sound (play: () => Sound.splash()) as heard from x in the meadow: quieter off
+   * screen, silent far off, from its side. Not for his own sounds (he is always on screen), the weather
+   * (everywhere) or the far bell and the geese (meant far off, over everything). */
+  function from(x, play) {
+    if (!ready()) return play()
+    const { level, pan } = hearing(x)
+    if (level <= HEARD_MIN) return
+    const g = ctx.createGain()
+    g.gain.value = level
+    if (ctx.createStereoPanner) {
+      const p = ctx.createStereoPanner()
+      p.pan.value = pan
+      g.connect(p).connect(master)
+    } else g.connect(master)
+    out = g
+    try {
+      play()
+    } finally {
+      out = master
+    }
+  }
 
   /** One of the mole's words or noises ('giggle', 'ahoj', 'achJo', 'ooh', 'fright', 'gasp', 'hm',
    * 'tam', 'ghost'), if it has takes; given several (['gasp', 'fright']), one of them at random.
@@ -84,7 +125,7 @@ const Sound = (() => {
     src.playbackRate.value = VOICE_RATE[0] + Math.random() * (VOICE_RATE[1] - VOICE_RATE[0])
     const g = ctx.createGain()
     g.gain.value = VOICE_VOLUME * e.gain
-    src.connect(g).connect(master)
+    src.connect(g).connect(out)
     src.start()
     for (let k = 1; k <= echoes; k++) echoing.add(echo(src, g.gain.value, k))
     return true
@@ -100,7 +141,7 @@ const Sound = (() => {
     f.frequency.value = ECHO_DULL_HZ / k
     const g = ctx.createGain()
     g.gain.value = level * ECHO_FALL ** k
-    src.connect(f).connect(g).connect(master)
+    src.connect(f).connect(g).connect(out)
     src.start(ctx.currentTime + k * ECHO_GAP_S)
     src.onended = () => echoing.delete(src)
     return src
@@ -159,7 +200,7 @@ const Sound = (() => {
     const t = ctx.currentTime
     envelope(g.gain, level, t, fade, swell)
     src.loop = loop && !!fade // only with an end to it
-    src.connect(g).connect(master)
+    src.connect(g).connect(out)
     src.start()
     if (fade) src.stop(t + fade[0] + fade[1])
     const length = src.loop ? Infinity : src.buffer.duration / src.playbackRate.value
@@ -180,7 +221,7 @@ const Sound = (() => {
     g.gain.setValueAtTime(0.0001, t)
     g.gain.exponentialRampToValueAtTime(peak, t + 0.02)
     g.gain.exponentialRampToValueAtTime(0.0001, t + length)
-    src.connect(f).connect(g).connect(master)
+    src.connect(f).connect(g).connect(out)
     src.start(t, Math.random() * 0.5)
     src.stop(t + length + 0.05)
   }
@@ -195,7 +236,7 @@ const Sound = (() => {
     g.gain.setValueAtTime(0.0001, t)
     g.gain.exponentialRampToValueAtTime(peak, t + Math.min(0.04, length / 3))
     g.gain.exponentialRampToValueAtTime(0.0001, t + length)
-    o.connect(g).connect(master)
+    o.connect(g).connect(out)
     o.start(t)
     o.stop(t + length + 0.05)
     return o
@@ -239,7 +280,7 @@ const Sound = (() => {
     const far = ctx.createBiquadFilter() // far off: the top dulled
     far.type = 'lowpass'
     far.frequency.value = 2400
-    far.connect(master)
+    far.connect(out)
     const t = ctx.currentTime
     for (const [ratio, loud, secs] of BELL_PARTIALS) {
       const o = ctx.createOscillator()
@@ -484,7 +525,7 @@ const Sound = (() => {
     bp.Q.value = 0.7
     const g = c.createGain()
     g.gain.value = 0.0001
-    src.connect(bp).connect(g).connect(master)
+    src.connect(bp).connect(g).connect(out)
     src.start()
     return (level) => {
       const now = c.currentTime
@@ -504,6 +545,9 @@ const Sound = (() => {
     ensure,
     /** The audio context and the master gain, for the music. */
     bus() { ensure(); return { ctx, master } },
+    /** The game's hook: fn() says what is on screen now, { left, right } in the meadow (from). */
+    hearFrom(fn) { view = fn },
+    from,
     /** The game's hook: fn(word) as he says each word. */
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */

@@ -125,3 +125,11 @@ while it feeds.
   the gag. Encounters stay hand-made.
 - A thing that should matter to creatures offers it, or makes its noise,
   from its own file.
+- Its sounds are heard from where it is: in the meadow, `Sound.from(x,
+  Sound.croak)` plays one quieter off screen, silent half a screen away,
+  and from its side. Only its own calls and splashes: the hero's sounds,
+  the weather and things meant to be heard everywhere (a far bell) play
+  as they are.
+- A play shows some of a world's wildlife, not all (the meadow: one far
+  kind a play, `Layout.lives`): a new creature joins a draw like that
+  rather than adding to what is on at once.

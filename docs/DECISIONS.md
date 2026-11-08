@@ -120,6 +120,16 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   not a second painting, and its music a season's own takes of each part,
   falling back to the part's own.
 
+- **Less at once: a play shows some of the wildlife, not all; a creature is
+  heard from where it is** (2026-11-08). With every creature in every play
+  there was too much going on at once (Adam); fewer is calmer, and the next
+  play shows something new. The meadow's far edge has one kind a play (the
+  finches, a herd or the heron), and the spring's small life comes about
+  half as often. A creature's sound is full on screen, quieter off it,
+  silent half a screen away, and from its side (`Sound.from`): the frog at
+  the spring was loud with him over at the oak. His own sounds, the weather,
+  the far bell and the geese are heard everywhere.
+
 ## Making them
 
 - **Inspire, don't copy.** Drawings, sounds and music are new, in the spirit

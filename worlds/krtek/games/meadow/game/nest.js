@@ -12,7 +12,7 @@ const Nest = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const INK = '#2f2a22'
   const AT = { x: Layout.SPRING + 290, y: 398 } // on top of the round stone over the cliff (painting.js rocks): just above a tall fox's reach
-  const PEEP_EVERY_MS = [14000, 28000] // by day, now and then the chicks bob up and peep: quietly, not often
+  const PEEP_EVERY_MS = [25000, 50000] // by day, now and then the chicks bob up and peep: quietly, not often (14-28 s was busy)
   const DAY = [8.5, 18.8] // they peep only in these hours
   const BOB = 6 // how far up they bob as they peep
   const SIZE = 1.4 // drawn this much bigger than its units: small, it read as a lump of moss
@@ -38,11 +38,15 @@ const Nest = (() => {
     const g = (nest = el('g', { class: 'nest', transform: `translate(${AT.x} ${AT.y}) scale(${SIZE}) translate(${-AT.x} ${-AT.y})` }, into))
     // the chicks first, behind the nest's front rim
     chicks = el('g', { class: 'chicks' }, g)
-    for (const [dx, tilt] of [[-18, -10], [0, 0], [18, 10]]) {
-      const c = el('g', { transform: `translate(${AT.x + dx} ${AT.y - 14}) rotate(${tilt})` }, chicks)
+    for (const [i, [dx, tilt]] of [[-18, -10], [0, 0], [18, 10]].entries()) {
+      const at = el('g', { transform: `translate(${AT.x + dx} ${AT.y - 14}) rotate(${tilt})` }, chicks)
+      const c = el('g', { class: `chick chick-${i}` }, at) // scared, it huddles in and leans away (game.css .chicks.scared)
       el('circle', { cx: 0, cy: 0, r: 9, fill: '#8d8478', stroke: INK, 'stroke-width': 2 }, c)
-      el('path', { d: 'M-4 -9 l-2 -6 M1 -9 l1 -7 M5 -8 l3 -5', stroke: INK, 'stroke-width': 1.5 }, c) // fluff
-      el('circle', { cx: -3, cy: -2, r: 1.8, fill: INK }, c)
+      el('path', { class: 'chick-fluff', d: 'M-4 -9 l-2 -6 M1 -9 l1 -7 M5 -8 l3 -5', stroke: INK, 'stroke-width': 1.5 }, c)
+      el('circle', { class: 'chick-calm', cx: -3, cy: -2, r: 1.8, fill: INK }, c)
+      const wide = el('g', { class: 'chick-scared' }, c) // scared: a wide eye, its pupil on the fox (off to the right)
+      el('circle', { cx: -2.5, cy: -2.5, r: 4.4, fill: '#fff', stroke: INK, 'stroke-width': 1.4 }, wide)
+      el('circle', { cx: -0.6, cy: -2.5, r: 2, fill: INK }, wide)
       el('path', { d: 'M1 1 l9 -2 l-8 6 z', fill: '#f2a83a', stroke: INK, 'stroke-width': 1.2 }, c) // an open beak
     }
     el('path', { d: `M${AT.x - 34} ${AT.y - 8} Q${AT.x} ${AT.y + 16} ${AT.x + 34} ${AT.y - 8} Q${AT.x} ${AT.y - 2} ${AT.x - 34} ${AT.y - 8} Z`, fill: '#7a5532', stroke: INK, 'stroke-width': 2.5 }, g)
@@ -55,7 +59,7 @@ const Nest = (() => {
   function chirp() {
     const h = hourNow()
     if (!alarmed && h >= DAY[0] && h < DAY[1] && World.state.light >= DIM) {
-      Sound.peep()
+      Sound.from(AT.x, Sound.peep) // heard from the spring's rocks
       Debug.ignoreCut(lift(-BOB, 180).then(() => (alarmed ? null : lift(0, 260))), 'chicks peep')
     }
     Clock.after(PEEP_EVERY_MS[0] + random() * (PEEP_EVERY_MS[1] - PEEP_EVERY_MS[0]), chirp)
@@ -65,6 +69,7 @@ const Nest = (() => {
   function fear(on) {
     if (on === alarmed) return
     alarmed = on
+    chicks.classList.toggle('scared', on) // wide eyes on him, fluff on end, huddled together
     Debug.trace('chicks', { alarmed: on })
     if (alarm) alarm()
     alarm = null
@@ -74,7 +79,7 @@ const Nest = (() => {
     let peeps = 0
     const shiver = () => {
       still()
-      if (peeps++ < ALARM_PEEPS) Sound.peep()
+      if (peeps++ < ALARM_PEEPS) Sound.from(AT.x, Sound.peep)
       const frames = [{ transform: `translate(0px, ${-BOB}px)` }]
       for (let i = 0; i < 4; i++) frames.push({ transform: `translate(-2px, ${-BOB}px)` }, { transform: `translate(2px, ${-BOB}px)` })
       frames.push({ transform: `translate(0px, ${-BOB}px)` })

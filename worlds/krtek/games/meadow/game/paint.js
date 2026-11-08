@@ -66,7 +66,7 @@
   const BACK_X = TINS[DIP].x + 40 // backing off from the fox, he reaches the red tin's rim
   const GHOST_X = S + 150 // where he plays the ghost, towards the fox
   const FOX_FROM = PEER_X + 950 // the fox sneaks in from off to the right...
-  const FOX_AT = Nest.AT.x + 110 // ...to the spring's rocks, the nest beside his head: under it, his head hid it
+  const FOX_AT = Nest.AT.x + 240 // ...to the spring's rocks, the nest a little way off his snout (Adam, 2026-11-08: nearer, he looked to be eating the chicks)
   const SNEAK_MS = 3600 // tiptoeing in, slowly…
   const TIPTOE = 12 // …each step up high
   const CREEP = 0.8 // or creeping in this low, small steps
@@ -81,7 +81,7 @@
   const FRIENDS_CHANCE = 0.5 // after the first story, how often the fox ends up a friend rather than running
   const STACK_X = S + 40 // where the monster stands, between the tins and the fox
   const FRIENDS_FROM = FOX_FROM // the friends come from off to the right, from the painter's garden: the fox's side
-  const STUCK_X = FOX_AT + 330 // where they stop, the fox in their way (the mouse; the hare beyond her), clear of his tail
+  const STUCK_X = FOX_AT + 290 // where they stop, the fox in their way (the mouse; the hare beyond her), clear of his tail
   const DOOR_FAR = FOX_AT + 220 // his tunnel comes up here, between the fox and them…
   const DOOR_NEAR = TINS[0].x - 125 // …and back here, left of the tins, behind him
   const COME_MS = 2600 // the friends coming from the garden

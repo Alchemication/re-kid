@@ -811,6 +811,7 @@ const meadowGame = (() => {
   Again.watch(document.getElementById('again'), HOLD_NEW_DAY_MS)
   Mole.setFree(() => game.awake && !game.ended && !game.gesture)
   Mole.calm(() => (Things.troubled() ? 'uneasy' : 'content')) // a threat about: no smile till it's gone (Adam, 2026-11-02)
+  Sound.hearFrom(() => ({ left: View.left, right: View.right })) // a creature's sound is heard from where it is (Sound.from)
   Sound.listen((word) => {
     if (word === 'ahoj') helloAt = Clock.now()
     Mole.express(word) // each word he says comes with its face
@@ -871,9 +872,9 @@ const meadowGame = (() => {
     },
   })
   const farThings = document.getElementById('far-things')
-  Heron.setup(farThings, { still: Debug.still, now: Layout.flags.critters === 'heron' }) // the far pond first: on the ground, under the rest
-  Flock.setup(farThings, { still: Debug.still, now: Layout.flags.critters === 'flock' })
-  Wildlife.setup(farThings, { wild: Layout.flags.wild, still: Debug.still })
+  Heron.setup(farThings, { still: Debug.still || !Layout.lives('heron'), now: Layout.flags.critters === 'heron' }) // the far pond first: on the ground, under the rest
+  Flock.setup(farThings, { still: Debug.still || !Layout.lives('flock'), now: Layout.flags.critters === 'flock' })
+  Wildlife.setup(farThings, { wild: Layout.flags.wild, still: Debug.still || !Layout.lives('herd') }) // the far edge: one of these three a play (Layout.lives)
   Critters.setup(document.getElementById('critters'), document.getElementById('low-critters'), document.getElementById('glows'), { now: Layout.flags.critters === 'now', snail: Layout.flags.critters === 'snail', fireflies: Layout.flags.critters === 'fireflies', still: Debug.still })
   const things = Things.setup({
     run,

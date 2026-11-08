@@ -36,7 +36,7 @@ const Spring = (() => {
   const POOL = { x: S + 40, y: 708, rx: 220, ry: 36 }
   const FALL = { x: S + 205, top: 482, bottom: 700, w: 30 } // the waterfall: over the ledge, down the wet stone into the pool
   const PAD = { x: S - 60, y: 712 } // the frog's lily pad
-  const EVERY_MS = [9000, 20000] // between one bit of life and the next
+  const EVERY_MS = [20000, 45000] // between one bit of life and the next (Adam, 2026-11-08: too much going on at once; 9-20 s before)
   const NIGHT_FROM = 18.8 // they all go quiet by sunset
   const DIM = 0.5 // none of it comes in a light this low (an eclipse)
   const FROG_HEARS = ['splash', 'vroom'] // what has the frog plop in: a splash near it, the car going by
@@ -148,7 +148,7 @@ const Spring = (() => {
     Debug.trace('frog', { plop: true, tapped })
     const to = PAD.x + 50
     await Debug.ignoreCut(Motion.endAt(frog.g, [{ transform: `translate(${PAD.x}px, ${PAD.y}px)` }, { transform: `translate(${PAD.x + 25}px, ${PAD.y - 50}px)`, offset: 0.5 }, { transform: `translate(${to}px, ${PAD.y + 10}px) scale(0.4)`, opacity: 0 }], { duration: 520, easing: 'ease-in' }), 'the frog plops in')
-    Sound.splash()
+    Sound.from(to, Sound.splash) // heard from the spring: faint or not at all from far off
     World.noise('splash', to, 250)
     rings(to)
     Clock.after(between([6000, 12000]), () => {
@@ -180,7 +180,7 @@ const Spring = (() => {
     el('path', { d: 'M-16 0 Q0 -10 16 0 Q0 10 -16 0 Z M16 0 l10 -7 v14 z', fill: '#e2873a', ...line, 'stroke-width': 2 }, g)
     const x0 = POOL.x - 60 + life() * 80
     rings(x0)
-    Sound.splash()
+    Sound.from(x0, Sound.splash)
     World.noise('splash', x0, 250)
     await Debug.ignoreCut(Motion.endAt(g, [
       { transform: `translate(${x0}px, ${POOL.y}px) rotate(-40deg)` },
@@ -189,7 +189,7 @@ const Spring = (() => {
     ], { duration: 900, easing: 'ease-in-out' }), 'the fish leaps')
     g.remove()
     rings(x0 + 80)
-    Sound.splash()
+    Sound.from(x0 + 80, Sound.splash)
   }
 
   /** A bullfinch flies down to the pool's edge, dips its head to drink twice, and flies off. */
@@ -238,7 +238,7 @@ const Spring = (() => {
       if (Ambient.count('dragonfly') < 2) can.push('dragonfly')
       const what = pick(can)
       Debug.trace('spring', { what })
-      if (what === 'frog') { Sound.croak(); Clock.after(900, () => plop()) }
+      if (what === 'frog') { Sound.from(PAD.x, Sound.croak); Clock.after(900, () => plop()) }
       else if (what === 'fish') leap()
       else if (what === 'dragonfly') dragonfly()
       else if (!Ambient.count('bullfinch')) bullfinch()
@@ -253,8 +253,8 @@ const Spring = (() => {
     // a drink at either edge of the pool: what brings the birds down
     for (const side of [-1, 1]) World.offer(`pool-${side < 0 ? 'left' : 'right'}`, 'drink', POOL.x + side * (POOL.rx - 10), DRINK_Y)
     // this play's life (drawn either way, so the stream stays put)
-    const hasFrog = life() < 0.75
-    fish = life() < 0.6
+    const hasFrog = life() < 0.5 // some plays
+    fish = life() < 0.4
     if (hasFrog) {
       frog = drawFrog()
       listen()

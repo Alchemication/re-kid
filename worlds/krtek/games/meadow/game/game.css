@@ -208,3 +208,15 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 /* geese going south (autumn.js): their wings beat */
 .goose-wing { animation: goose-beat 0.6s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
 @keyframes goose-beat { from { transform: scaleY(1); } to { transform: scaleY(-0.7); } }
+
+/* The nest's chicks, scared of the fox (nest.js fear): wide eyes on him, fluff on end, huddled
+   together and leaning away from him (he comes from the right). */
+.chick { transition: transform 0.3s ease-out; transform-box: fill-box; transform-origin: center bottom; }
+.chick-fluff { transition: transform 0.2s; transform-box: fill-box; transform-origin: center bottom; }
+.chick-scared { display: none; }
+.chicks.scared .chick-scared { display: inline; }
+.chicks.scared .chick-calm { display: none; }
+.chicks.scared .chick-fluff { transform: scaleY(1.5); }
+.chicks.scared .chick-0 { transform: translate(3px, 1px) rotate(-14deg); }
+.chicks.scared .chick-1 { transform: translate(-1px, 1px) rotate(-10deg); }
+.chicks.scared .chick-2 { transform: translate(-5px, 1px) rotate(-8deg); }

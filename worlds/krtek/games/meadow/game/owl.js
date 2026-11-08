@@ -238,7 +238,7 @@ const Owl = (() => {
     const over = Music.part
     Debug.trace('owl', { hoots: !over, over })
     if (over) return
-    Sound.hoot()
+    Sound.from(Layout.OAK.x, Sound.hoot) // heard from the oak
     Debug.ignoreCut(Motion.endAt(bob, [{ transform: 'translateY(0px)' }, { transform: 'translateY(-6px)', offset: 0.3 }, { transform: 'translateY(0px)' }], { duration: 900 }), 'the owl hoots')
   }
 

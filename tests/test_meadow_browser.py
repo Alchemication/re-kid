@@ -915,6 +915,31 @@ class TestMeadowWildlife:
 
     OUT = "Wildlife.out"
 
+    def test_one_far_kind_a_play(self, meadow: callable) -> None:
+        # Adam, 2026-11-08: too much wildlife at once; one far kind a play, another next play
+        seen = set()
+        for seed in range(1, 9):
+            m = meadow(f"seed={seed}&props=")
+            living = m.page.evaluate("Layout.FAR_LIFE.filter((k) => Layout.lives(k))")
+            assert len(living) == 1, (seed, living)
+            seen.add(living[0])
+        assert len(seen) > 1, f"every play drew {seen}"
+
+    def test_a_creatures_sound_is_not_heard_far_off(self, meadow: callable) -> None:
+        # Adam, 2026-11-08: the frog at the spring was loud with him over at the oak
+        m = meadow(f"{STILL}&props=")
+        m.wake()
+        heard = m.page.evaluate(
+            """() => {
+              const heard = []
+              const mid = (View.left + View.right) / 2
+              for (const [name, x] of [['here', mid], ['near', View.right + 150], ['far', View.right + 2000]])
+                Sound.from(x, () => heard.push(name))
+              return heard
+            }"""
+        )
+        assert heard == ["here", "near"], heard
+
     @pytest.mark.parametrize("kind", ["deer", "boar", "bison"])
     def test_a_herd_comes_grazes_and_answers_a_tap(
         self, meadow: callable, kind: str
@@ -1917,9 +1942,9 @@ class TestMeadowSpring:
         m.assert_settled()
 
     def test_its_life_comes_and_goes_all_day(self, meadow: callable) -> None:
-        m = meadow("seed=3&props=&day=45")
+        m = meadow("seed=3&props=&day=120")  # its life comes every 20-45 s: a day long enough for some
         m.wake()
-        m.wait("meadowGame.state().ended && !meadowGame.state().busy", 60_000)
+        m.wait("meadowGame.state().ended && !meadowGame.state().busy", 150_000)
         assert "spring" in m.page.evaluate("meadowGame.trace()")
         assert not m.errors, m.errors
 
