@@ -33,10 +33,10 @@ sounds he has judged are in.
      `?props=hedgehog&soon&season=autumn`): drawn from Krtek a ježek. Judge
      the story (does the roll through the leaves land as the laugh), its
      length (about 25 s left alone), the heap.
-   - **Sounds and music to pick:** the sound board's folder
-     `krtek-autumn-2026-11-08` (drum, peck, snuffle, honk; synth stand-ins
-     play till then); the music board's "krtek autumn" (the theme's four
-     moods; `MUSIC_DIRECTION.md` has the measures). Then `adopt.py` for each.
+   - **Sounds and music by ear in play:** the autumn sounds (drum, peck,
+     snuffle, honk) and music (two takes of each mood; one round-2 morning
+     plays as the sad, `MUSIC_DIRECTION.md`) are in. Judge their levels,
+     and whether each mood's two takes feel like one mood.
    - Autumn opens about 0.5 s slower on a phone than spring (the recolour);
      measure on the iPhone.
    - Not built, ideas still open: the mouse on the swing with him (the

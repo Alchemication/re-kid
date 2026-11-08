@@ -337,6 +337,11 @@ PIECES: dict[str, dict] = {
         "world": "krtek",
         "for": "Autumn, round 2: more of the three you kept (morning, curious, happy), and the sad worded after the morning you loved (nostalgic, tender). Listen for: the same feel as your keeps; a sad that is wistful, never gloomy.",
         "parts": ["morning", "curious", "sad", "sad", "happy"],  # by wording
+        # A keep played as another part than its wording's (adopt.py): morning 01 came out in a
+        # minor key, wistful like round 1's morning, so with two minor mornings a morning would
+        # open sad one play and bright the next; it plays as the sad instead (2026-11-08, Eliot's
+        # keeps, Adam's call to follow the measures).
+        "heard_as": {"01.mp3": "sad"},
         "season": "autumn",
         "seconds": 20,
         "style": False,

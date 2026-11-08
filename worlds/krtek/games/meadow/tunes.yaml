@@ -19,6 +19,10 @@ tunes:
     prompt: 'A calm, beautiful instrumental theme for a misty golden autumn morning in a meadow in a 1970s Eastern European children''s animated film: a gentle, slightly wistful flute melody over warm soft strings and a mellow clarinet, chestnut leaves drifting down, tender and cosy, as a small creature comes out into the cool morning.'
     model: music_v1
     song: AGwdO3Sel6DBqS5lFRls
+  - file: morning-autumn/02.mp3
+    prompt: 'A calm, beautiful instrumental theme for a misty golden autumn morning in a meadow in a 1970s Eastern European children''s animated film: a gentle, slightly wistful flute melody over warm soft strings and a mellow clarinet, chestnut leaves drifting down, tender and cosy, as a small creature comes out into the cool morning.'
+    model: music_v1
+    song: EZnUc4c2mfdvOylBLsur
 - id: curious
   takes:
   - file: curious/01.mp3
@@ -36,6 +40,10 @@ tunes:
     prompt: 'A curious, gently inquisitive instrumental tune for an autumn meadow in a 1970s Eastern European children''s animated film: a questioning flute and plucked strings, light and a little playful, as a small creature finds something new among the fallen leaves. Calm, warm, simple.'
     model: music_v1
     song: keg9zrC67Du5it6DplUp
+  - file: curious-autumn/02.mp3
+    prompt: 'A curious, gently inquisitive instrumental tune for an autumn meadow in a 1970s Eastern European children''s animated film: a questioning flute and plucked strings, light and a little playful, as a small creature finds something new among the fallen leaves. Calm, warm, simple.'
+    model: music_v1
+    song: tfloBF50hjExlOW7jv4x
 - id: sad
   takes:
   - file: sad/01.mp3
@@ -46,6 +54,17 @@ tunes:
     prompt: 'Composition plan conditioned on experiments/music meadow-theme/01 (medium): the same gentle meadow theme, now sad and tender: slower, in a minor key, a lonely flute over soft strings, as a small creature finds a friend in trouble, never frightening'
     model: music_v2_5
     song: wnwMswUTj0dC0erEiO7k
+- id: sad
+  season: autumn
+  takes:
+  - file: sad-autumn/01.mp3
+    prompt: 'A calm, beautiful instrumental theme for a misty golden autumn morning in a meadow in a 1970s Eastern European children''s animated film: a gentle, slightly wistful flute melody over warm soft strings and a mellow clarinet, chestnut leaves drifting down, tender and cosy, as a small creature comes out into the cool morning.'
+    model: music_v1
+    song: apg0SxlBLUygcjurP0ip
+  - file: sad-autumn/02.mp3
+    prompt: 'A quiet, wistful instrumental melody from a 1970s Eastern European children''s animated film: a lonely clarinet and a soft flute over hushed strings, slow and tender, like the last leaves falling in a cold meadow while a small friend needs help. Gentle, a little sad, warm underneath.'
+    model: music_v1
+    song: 3L3D5mtb73WXZhfjoqlK
 - id: happy
   takes:
   - file: happy/01.mp3
@@ -63,6 +82,10 @@ tunes:
     prompt: 'A warm, happy instrumental tune for a sunny autumn afternoon in a meadow in a 1970s Eastern European children''s animated film: flute and strings together, fuller and brighter, cosy and joyful, as friends finish a soft bed of golden leaves together.'
     model: music_v1
     song: zKRrHoxugOyEPaSQc0im
+  - file: happy-autumn/02.mp3
+    prompt: 'A warm, happy instrumental tune for a sunny autumn afternoon in a meadow in a 1970s Eastern European children''s animated film: flute and strings together, fuller and brighter, cosy and joyful, as friends finish a soft bed of golden leaves together.'
+    model: music_v1
+    song: CN1tFAlaofvtj5lzkTDh
 - id: menace
   takes:
   - file: menace/01.mp3

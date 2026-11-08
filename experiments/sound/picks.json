@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-08T09:58:24.644Z",
+ "saved": "2026-11-08T17:58:48.912Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -2823,6 +2823,138 @@
    "folder": "yard-2026-11-08",
    "made": "2026-11-08",
    "sound": "schlup",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-drum/05.mp3",
+   "source": "eleven",
+   "prompt": "a great spotted woodpecker hammering a quick burst on dry wood, one short roll",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-drum",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-drum/04.mp3",
+   "source": "eleven",
+   "prompt": "a woodpecker drumming a fast roll on a tree trunk, close, in a quiet autumn wood",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-drum",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-drum/06.mp3",
+   "source": "eleven",
+   "prompt": "a great spotted woodpecker hammering a quick burst on dry wood, one short roll",
+   "wording": 2,
+   "seed": 3,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-drum",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-peck/07.mp3",
+   "source": "eleven",
+   "prompt": "a knuckle knocking once on a hollow log, short",
+   "wording": 3,
+   "seed": 1,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-peck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-peck/08.mp3",
+   "source": "eleven",
+   "prompt": "a knuckle knocking once on a hollow log, short",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-peck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-peck/09.mp3",
+   "source": "eleven",
+   "prompt": "a knuckle knocking once on a hollow log, short",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-peck",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snuffle/03.mp3",
+   "source": "eleven",
+   "prompt": "a hedgehog snuffling and sniffing through dry autumn leaves, close up, cute little snorts",
+   "wording": 1,
+   "seed": 3,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-snuffle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snuffle/08.mp3",
+   "source": "eleven",
+   "prompt": "a tiny animal snuffling in a pile of leaves, little huffs and a soft snort",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-snuffle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-snuffle/05.mp3",
+   "source": "eleven",
+   "prompt": "a small hedgehog sniffing busily, quick soft snuffles through its nose",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-snuffle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-honk/05.mp3",
+   "source": "eleven",
+   "prompt": "a flock of geese flying overhead in the distance, faint honking",
+   "wording": 2,
+   "seed": 2,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-honk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-honk/02.mp3",
+   "source": "eleven",
+   "prompt": "wild geese honking far away high in the sky, one or two soft honks, distant, calm autumn day",
+   "wording": 1,
+   "seed": 2,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-honk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-honk/04.mp3",
+   "source": "eleven",
+   "prompt": "wild geese honking far away high in the sky, one or two soft honks, distant, calm autumn day",
+   "wording": 1,
+   "seed": 3,
+   "folder": "krtek-autumn-2026-11-08",
+   "made": "2026-11-08",
+   "sound": "krtek-honk",
    "verdict": "keep"
   }
  ]

@@ -146,3 +146,13 @@ by ear.
   curious 03 ("awesome - much more positive mood than above"), happy 08
   ("really fitting the world, nice false notes as well ;)"). No sad take
   kept (05, 06): autumn's sad moments fall back to spring's.
+- **2026-11-08, autumn round 2 picked (board, "krtek autumn 2"; picked
+  by Eliot; Adam: "Keep all he liked").** Kept 5 of 10: morning
+  01 and 02, curious 03, sad 08, happy 09; not 04, 05, 06, 07; 10 not
+  marked. Adam: "some are sad, some happy, so would not use all of them
+  interchangably". By measure (leads), morning 01 is in A minor like round
+  1's morning, 02 in F major and slow; sad 08 is in A major but very slow
+  (1.4 notes a second). On my suggestion, which Adam took, morning 01 plays
+  as autumn's sad (`heard_as` in `pieces.py`), so the mornings are one
+  minor and one major and the sad has two takes. Autumn now: morning 2,
+  curious 2, sad 2, happy 2.

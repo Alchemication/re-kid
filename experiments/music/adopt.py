@@ -73,7 +73,14 @@ def flag(args: list[str], name: str) -> list[str]:
 
 
 def part_of(piece: dict, c: dict) -> str:
-    """Which part of the game's music a take of this piece becomes."""
+    """Which part of the game's music a take of this piece becomes.
+
+    A take heard as another part than its wording's says so in the piece
+    (`heard_as`, by its file name in the piece's folder).
+    """
+    heard = piece.get("heard_as", {}).get(c["file"].rsplit("/", 1)[-1])
+    if heard:
+        return heard
     if "parts" in piece:
         return piece["parts"][c["wording"] - 1]
     return piece.get("part") or piece["now"][0]

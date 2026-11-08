@@ -263,3 +263,36 @@ effects:
     prompt: 'an acorn dropped into a small wooden bowl, one light knock'
   - file: plink/08.mp3
     prompt: 'a little tin can set down on soft ground, a small dull clunk'
+- id: drum
+  takes:
+  - file: drum/04.mp3
+    prompt: 'a woodpecker drumming a fast roll on a tree trunk, close, in a quiet autumn wood'
+  - file: drum/05.mp3
+    prompt: 'a great spotted woodpecker hammering a quick burst on dry wood, one short roll'
+  - file: drum/06.mp3
+    prompt: 'a great spotted woodpecker hammering a quick burst on dry wood, one short roll'
+- id: peck
+  overlaps: true # its knocks come every 0.4 s (woodpecker.js knocks), quicker than a take lasts
+  takes:
+  - file: peck/07.mp3
+    prompt: 'a knuckle knocking once on a hollow log, short'
+  - file: peck/08.mp3
+    prompt: 'a knuckle knocking once on a hollow log, short'
+  - file: peck/09.mp3
+    prompt: 'a knuckle knocking once on a hollow log, short'
+- id: snuffle
+  takes:
+  - file: snuffle/03.mp3
+    prompt: 'a hedgehog snuffling and sniffing through dry autumn leaves, close up, cute little snorts'
+  - file: snuffle/05.mp3
+    prompt: 'a small hedgehog sniffing busily, quick soft snuffles through its nose'
+  - file: snuffle/08.mp3
+    prompt: 'a tiny animal snuffling in a pile of leaves, little huffs and a soft snort'
+- id: honk
+  takes:
+  - file: honk/02.mp3
+    prompt: 'wild geese honking far away high in the sky, one or two soft honks, distant, calm autumn day'
+  - file: honk/04.mp3
+    prompt: 'wild geese honking far away high in the sky, one or two soft honks, distant, calm autumn day'
+  - file: honk/05.mp3
+    prompt: 'a flock of geese flying overhead in the distance, faint honking'
