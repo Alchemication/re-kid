@@ -32,7 +32,10 @@ sounds he has judged are in.
    - **The hedgehog's winter bed** (autumn's encounter, in the egg's place;
      `?props=hedgehog&soon&season=autumn`): drawn from Krtek a ježek. Judge
      the story (does the roll through the leaves land as the laugh), its
-     length (about 25 s left alone), the heap.
+     length (about 30 s left alone), the heap. After Adam's first play
+     ("it didn't feel alive", a tap on him did nothing): tappable now, he
+     potters about while he waits (`POTTER_MS`), and curls into a ball as
+     the mole comes up. Judge whether he feels alive now.
    - **Sounds and music by ear in play:** the autumn sounds (drum, peck,
      snuffle, honk) and music (two takes of each mood; one round-2 morning
      plays as the sad, `MUSIC_DIRECTION.md`) are in. Judge their levels,

@@ -3,11 +3,13 @@
 // (2026-11-08), his to judge.
 //
 // Fallen leaves lie in the grass between the chestnut and his molehill all day. When this encounter's
-// hour comes, the hedgehog trots in from the wood, sniffs at the leaves and shivers: winter is coming and
-// he has no bed, and a leaf he takes in his mouth blows away. The mole goes and scoops up an armful for
+// hour comes, the hedgehog trots in from the wood and potters about the leaves, sniffing, shivering,
+// glancing round (his own life while he waits, never frozen). As the mole comes up, he curls up into a
+// spiky ball in fright, then peeks out and uncurls (a hedgehog's own thing, and where the mole's idea
+// will come from). He shivers: winter is coming and he has no bed, and a leaf he takes blows away. The mole goes and scoops up an armful for
 // him, and a gust blows them off his arms all over the grass (and the hedgehog). Then the idea: the
 // hedgehog curls up, the mole gives him a push, and he rolls through the leaves, picking them all up on
-// his spines, and uncurls a walking heap of leaves with a nose (the laugh). He shakes them off into a
+// his spines (the ball the mole saw him curl into), and uncurls a walking heap of leaves with a nose (the laugh). He shakes them off into a
 // heap, turns round twice, burrows in, and falls asleep: the heap rises and falls with his breath the rest
 // of the day, and the mole tiptoes off. A tap on the heap after: his nose pokes out and sniffs, and goes
 // back in.
@@ -27,9 +29,12 @@
   const ARMFUL = 4 // the leaves the mole scoops up
   const TROT_MS = 3200
   const ROLL_MS = 2400
+  const POTTER_MS = [2600, 5200] // while he waits, a small thing of his own this often (calm: one at a time, a rest between)
   const random = Debug.random('meadow-hedgehog') // where the leaves lie, how they blow: its own stream
+  const pottering = Debug.random('meadow-hedgehog-life') // what he does while he waits: its own stream, so a long wait doesn't shift the leaves
   const state = { lying: [], stuck: 0, heap: null, asleep: false, carried: null }
   let hog = null // the hedgehog, while he is out
+  let acting = 0 // a step is moving him: he doesn't potter about meanwhile
   const m = () => Things.meadow
   const el = (tag, attrs = {}, parent) => {
     const e = document.createElementNS('http://www.w3.org/2000/svg', tag)
@@ -61,11 +66,43 @@
     let h = hog
     if (!h) {
       hog = h = Friends.make('hedgehog', Friends.offscreen(-1, -200), 1)
+      h.g.dataset.thing = 'hedgehog' // a tap on him is a tap on his encounter
       h.stick(state.stuck)
       await h.go(SPOT, TROT_MS)
+      if (hog === h) Debug.ignoreCut(potter(h), 'he potters about')
       if (!alive()) return null
     }
     return h
+  }
+
+  /** While he is out and no step is moving him: now and then a small thing of his own (a sniff at the
+   * grass, a look round, a shiver), so he is never a statue. Ends once he is gone or asleep. */
+  async function potter(h) {
+    while (hog === h && !state.asleep) {
+      await Clock.wait(POTTER_MS[0] + pottering() * (POTTER_MS[1] - POTTER_MS[0]))
+      if (hog !== h || state.asleep || acting) continue
+      const what = pottering()
+      Debug.trace('hedgehog', { potters: what < 0.45 ? 'sniff' : what < 0.75 ? 'looks round' : 'shiver' })
+      if (what < 0.45) {
+        Sound.snuffle()
+        await h.bob(2)
+      } else if (what < 0.75) {
+        const face = h.face
+        h.turn(-face) // a look round, back the way he came
+        await Clock.wait(1200)
+        if (hog === h && !acting) h.turn(face)
+      } else await h.no() // a shiver
+    }
+  }
+
+  /** A step that moves him: he stops pottering while it plays. */
+  const acts = (step) => async (alive) => {
+    acting++
+    try {
+      await step(alive)
+    } finally {
+      acting--
+    }
   }
 
   // ------------------------------------------------------------ the chain
@@ -74,12 +111,34 @@
     Debug.ignoreCut(bring(() => true), 'the hedgehog trots in')
   }
 
-  /** He sniffs at the leaves and shivers; one he takes in his mouth blows away. The mole comes over. */
+  /** The mole comes over; the hedgehog curls up into a ball in fright, peeks out and uncurls. Then he
+   * shivers; a leaf he takes in his mouth blows away. */
   async function notice(alive) {
     const h = await bring(alive)
     if (!h) return
     const coming = m().goTo(SPOT + 170) // he comes over while the hedgehog sniffs about
-    await h.bob(3) // sniffing at the leaves
+    await h.bob(2) // sniffing at the leaves
+    if (!alive()) return
+    await coming
+    if (!alive()) return
+    h.turn(1) // he turns to him
+    Sound.snuffle() // a huff
+    Debug.trace('hedgehog', { startled: true })
+    await h.curl(true, 220) // a ball of spines, at once
+    if (!alive()) return
+    Mole.lookAt(h.drawnX())
+    Sound.say('gasp')
+    Mole.feel('fright', 900)
+    await Mole.lean(-8, 400) // back from the spines
+    if (!alive()) return
+    await Clock.wait(700)
+    if (!alive()) return
+    await h.curl(false, 900) // slowly, a peek first
+    if (!alive()) return
+    Sound.say('giggle', true)
+    await Mole.handsToFace(600)
+    if (!alive()) return
+    await h.bob(1)
     if (!alive()) return
     Sound.snuffle()
     const l = state.lying[state.lying.length - 1]
@@ -88,8 +147,6 @@
     await h.no() // a shiver
     if (!alive()) return
     await h.droop()
-    if (!alive()) return
-    await coming
     if (!alive()) return
     Mole.lookAt(h.drawnX())
     Mole.feel('worried', 1400)
@@ -136,7 +193,7 @@
       await Promise.all([h.go(start, Math.abs(start - h.drawnX()) * 8 + 200), m().goTo(start + 90)])
       if (!alive()) return
       Mole.perk(1.5)
-      Sound.say('ooh') // the idea
+      Sound.say('ooh') // the idea: the ball he curled into
       await Mole.ponder(600)
       if (!alive()) return
       await h.curl(true)
@@ -271,7 +328,7 @@
     plant, // the leaves lie there only on a play it comes
     music: { 0: 'sad', 2: 'happy' }, // cold, no bed; the laugh as he rolls up the leaves
     appear,
-    steps: [notice, gather, roll, bed],
+    steps: [notice, gather, roll, bed].map(acts),
     again,
     restore,
     night,

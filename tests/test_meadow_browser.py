@@ -2384,6 +2384,31 @@ class TestMeadowAutumn:
         )
         assert not m.page.query_selector(".hedgehog-leaf")
 
+    def test_a_tap_on_him_is_a_tap_on_his_encounter(self, meadow: callable) -> None:
+        # Eliot tapped him and nothing happened: he had no data-thing, so the tap was the meadow's
+        m = meadow(f"{self.AUTUMN}&soon&props=hedgehog&woodpecker=0")
+        m.wake()
+        arrived(m, "hedgehog")
+        m.wait(  # in view: the page is held in this frame, so his box is where he is
+            "(() => { const b = document.querySelector('.hedgehog-ball')?.getBoundingClientRect(); return b && b.left > 0 && b.right < innerWidth })()"
+        )
+        box = m.page.query_selector(".hedgehog-ball").bounding_box()
+        m.page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+        assert m.page.evaluate("Debug.inputs.at(-1).intent") == "use hedgehog"
+
+    def test_he_potters_about_while_he_waits_and_curls_up_as_the_mole_comes(
+        self, meadow: callable
+    ) -> None:
+        # "it didn't feel alive" (Adam, 2026-11-08): he stood frozen till the mole came
+        m = meadow(f"{self.AUTUMN}&soon&props=hedgehog&woodpecker=0&still")
+        m.wake()
+        arrived(m, "hedgehog")
+        m.wait("meadowGame.trace().includes('potters')", 20_000)
+        m.do("use hedgehog")
+        m.wait("meadowGame.trace().includes('startled')", 20_000)
+        finish(m, "hedgehog")
+        m.assert_settled()
+
     def test_his_leaves_lie_there_only_on_a_play_he_comes(
         self, meadow: callable
     ) -> None:
