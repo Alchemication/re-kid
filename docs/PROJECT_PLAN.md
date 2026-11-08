@@ -6,7 +6,21 @@ decided and why.
 
 ## Now
 
-1. **Krecik (Krtek), the second cartoon** (Adam, 2026-10-15: Eliot is a
+Both worlds are parked (Adam, 2026-11-08) but for the meadow's autumn: what
+2 and 3 list waits for his judging in play, not for new work, and the
+sounds he has judged are in.
+
+1. **Krtek's meadow in autumn** (Adam, 2026-11-08: the meadow feels like
+   spring, and the yard's winter gives it a variety the meadow lacks; no
+   rush, and autumn gags are worth thinking about). First, the films:
+   which show autumn (its colours, leaves, fruit, mushrooms, the weather),
+   recorded in `world.yaml` as observed. Then a first cut, with Adam: the
+   meadow's autumn colours and light, leaves on the wind and from the oak,
+   each encounter marked for the seasons it belongs to (some, as the egg,
+   are spring's), one autumn encounter of its own so an autumn play is not
+   a thinner one, and autumn takes of the theme and a bed. The season is
+   in the shared world state already (`world.js`, from the yard's winter).
+2. **Krecik (Krtek), the second cartoon** (Adam, 2026-10-15: Eliot is a
    big fan), with its own home scene (`docs/DECISIONS.md`: one scene per
    cartoon, not a game per episode). Track Adam's build hours from day one:
    how long a new world takes is the collection's real question
@@ -147,7 +161,7 @@ decided and why.
    - Once both scenes play: a plain page to pick one (two pictures), which
      loads the scene in place, so the tap that picks it also lets sound
      play. Not a platform.
-2. **The world-model spike, in the meadow** (`docs/DECISIONS.md`, Scope),
+3. **The world-model spike, in the meadow** (`docs/DECISIONS.md`, Scope),
    each step judged in play before the next:
    1. **Adam watches the meadow's small life** (built 2026-10-25, on the
       world model, `docs/WORLD_MODEL.md`). The butterflies go to flowers
@@ -376,7 +390,7 @@ decided and why.
       ear on the bed board. Autumn and spring get theirs with their plays.
       Krtek's meadow gets the same (6 and 7) once the yard's way of doing
       it has settled.
-3. **A third cartoon, and the platform with it:** two worlds will have
+4. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how
    scenes are found, picked and shared). Keep the platform as small as the

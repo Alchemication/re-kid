@@ -264,7 +264,10 @@ Krtek's paddle at the spring:
 Episode video, frames and generated audio are gitignored
 (`worlds/*/media/`, `worlds/*/frames/`, `worlds/*/audio/`). To recreate them
 on a new machine (`brew install yt-dlp ffmpeg`; builds without a JavaScript
-runtime, e.g. `uvx yt-dlp`, get "This video is not available" from YouTube):
+runtime, e.g. `uvx yt-dlp`, get "This video is not available" from YouTube;
+so, since November 2026, does every client but the mobile one after a first
+download: add `--extractor-args "youtube:player_client=mweb" -f 18` for
+360p, and a few seconds between films):
 
 ```sh
 mkdir -p worlds/reksio/media/intro worlds/reksio/frames/intro

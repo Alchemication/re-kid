@@ -379,6 +379,22 @@ places:
     sources:
     - krtek-youtube
     observed_by: claude-frames
+- id: autumn
+  name: Autumn under the horse chestnut
+  description:
+    text: 'Krtek a zápalky (1974) is set in autumn throughout: the mole and the mouse play on pale, misty ochre ground strewn with big horse-chestnut leaves turned yellow, orange and brown, some still half green (0:04–1:14); conkers hang in their spiky green husks among the leaves (0:14), and on the ground he splits a husk open to the brown conker inside (0:56). A swing hangs from the chestnut (2:30); dry grasses stand faded in a pale haze behind (0:30); the night is deep blue with a crescent moon under dark trees (5:14). Colours are soft and washed, like watercolour on paper, not the saturated greens of the summer films. Some scenes away from the tree are greener, with yellow flowers on a grassy hill (2:45, 4:40). The story turns on matches (the mice make fire with them), which a game for small children would leave out.'
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+- id: seasons
+  name: Which films show autumn
+  description:
+    text: Of the 26 films still on the YouTube channel on 2026-11-08 (1957–1986; the five of 1987–1994 listed there before had gone), a scan of every film for autumn colours, then a reading of the frames it flagged, found one set in autumn, Krtek a zápalky. Most flagged frames were wood, sand, interiors or the desert of Krtek na poušti. The first film (1957) has a wood of fly agarics and other mushrooms (8:46–9:30), without autumn leaves. Krtek a houby (1997, the mushrooms) is not on the channel and was not seen; whether it is autumnal is unknown.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
 - id: human-world
   name: The human world
   description:
