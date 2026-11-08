@@ -78,8 +78,37 @@ const Autumn = (() => {
     return [f(5), f(3), f(1)]
   }
 
+  /** What each colour becomes, worked out once per layer (5 bits a channel: 32768 colours): for a green,
+   * its colour in each patch (HUES, then OLIVE), packed 0xRRGGBB; -1 for a colour that stays. */
+  const tables = new Map() // by strength: each layer of a strength shares one
+  function table(strength) {
+    if (tables.has(strength)) return tables.get(strength)
+    const targets = [...HUES, OLIVE]
+    const out = new Int32Array(32768 * targets.length).fill(-1)
+    for (let i = 0; i < 32768; i++) {
+      const [r, g, b] = [((i >> 10) & 31) * 8 + 4, ((i >> 5) & 31) * 8 + 4, (i & 31) * 8 + 4]
+      const max = Math.max(r, g, b)
+      const d = max - Math.min(r, g, b)
+      if (!max || d / max <= 0.1) continue
+      let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
+      h = (h * 60 + 360) % 360
+      if (h < GREEN[0] || h > GREEN[1]) continue
+      const s0 = d / max
+      const s = s0 + (Math.min(SAT[1], Math.max(SAT[0], s0)) - s0) * strength
+      const v = Math.min(1, (max / 255) * (1 + 0.25 * strength)) // a little lighter: the film's autumn is pale and sunny
+      targets.forEach((to, t) => {
+        const [nr, ng, nb] = rgb(h + (to - h) * strength, s, v)
+        out[i * targets.length + t] = (nr << 16) | (ng << 8) | nb
+      })
+    }
+    tables.set(strength, out)
+    return out
+  }
+
   /**
    * Turn a painted layer autumnal, in place: its greens to the patch's autumn colour, and a haze over all.
+   * Each colour's turn comes from a table, each patch's colour is read once per block of pixels: a phone
+   * paints autumn about as quickly as spring.
    * @param {CanvasRenderingContext2D} ctx the layer's, as painting.js made it
    * @param {number} res its canvas pixels per scene unit
    * @param {number} strength 0 leaves it as it is, 1 turns every green (the far pines keep some)
@@ -89,33 +118,39 @@ const Autumn = (() => {
     const { width, height } = ctx.canvas
     const img = ctx.getImageData(0, 0, width, height)
     const px = img.data
+    const turned = table(strength)
+    const n = HUES.length + 1
     const cell = PATCH * res
     const hueAt = noise(Math.ceil(width / cell), Math.ceil(height / cell))
     const keepAt = noise(Math.ceil(width / cell), Math.ceil(height / cell))
+    const BLOCK = 8 // pixels: a patch's colour is read once per block this big (a patch is many blocks across)
+    const cols = Math.ceil(width / BLOCK)
+    const patch = new Uint8Array(cols * Math.ceil(height / BLOCK))
+    for (let by = 0; by * BLOCK < height; by++) {
+      for (let bx = 0; bx < cols; bx++) {
+        const [x, y] = [(bx + 0.5) * BLOCK / cell, (by + 0.5) * BLOCK / cell]
+        patch[by * cols + bx] = keepAt(x, y) < OLIVE_SHARE ? HUES.length : Math.min(HUES.length - 1, Math.floor(hueAt(x, y) * HUES.length))
+      }
+    }
+    const [hr, hg, hb] = HAZE.map((c) => c * haze)
+    const keep = 1 - haze
+    const px32 = new Uint32Array(px.buffer) // a pixel at a time: 0xAABBGGRR (little-endian, as every phone is)
     for (let y = 0; y < height; y++) {
+      const row = (y / BLOCK | 0) * cols
+      const at = y * width
       for (let x = 0; x < width; x++) {
-        const i = (y * width + x) * 4
-        if (!px[i + 3]) continue
-        let [r, g, b] = [px[i], px[i + 1], px[i + 2]]
-        const max = Math.max(r, g, b)
-        const min = Math.min(r, g, b)
-        const d = max - min
-        if (max && d / max > 0.1) {
-          let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4
-          h = (h * 60 + 360) % 360
-          if (h >= GREEN[0] && h <= GREEN[1]) {
-            const k = hueAt(x / cell, y / cell)
-            const olive = keepAt(x / cell, y / cell) < OLIVE_SHARE
-            const to = olive ? OLIVE : HUES[Math.min(HUES.length - 1, Math.floor(k * HUES.length))]
-            const s = Math.min(SAT[1], Math.max(SAT[0], d / max))
-            const v = Math.min(1, (max / 255) * (1 + 0.25 * strength)) // a little lighter: the film's autumn is pale and sunny
-            const [nr, ng, nb] = rgb(h + (to - h) * strength, (d / max) + (s - d / max) * strength, v)
-            ;[r, g, b] = [nr, ng, nb]
-          }
+        const v = px32[at + x]
+        if (!(v >>> 24)) continue
+        let r = v & 255
+        let g = (v >> 8) & 255
+        let b = (v >> 16) & 255
+        const c = turned[(((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3)) * n + patch[row + (x / BLOCK | 0)]]
+        if (c >= 0) {
+          r = c >> 16
+          g = (c >> 8) & 255
+          b = c & 255
         }
-        px[i] = r + (HAZE[0] - r) * haze
-        px[i + 1] = g + (HAZE[1] - g) * haze
-        px[i + 2] = b + (HAZE[2] - b) * haze
+        px32[at + x] = (v & 0xff000000) | ((b * keep + hb) << 16) | ((g * keep + hg) << 8) | (r * keep + hr)
       }
     }
     ctx.putImageData(img, 0, 0)

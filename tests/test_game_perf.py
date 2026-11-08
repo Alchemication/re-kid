@@ -57,18 +57,24 @@ SCENARIOS = {
         "yardGame.walk(Snowman.spotX() - 250); setTimeout(() => yardGame.tap('snowman'), 1500)",
     ),
     # the meadow: its painted layers, the far trees at half speed (view.js)
-    "meadow-idle": (MEADOW, "props=", None),
+    "meadow-idle": (MEADOW, "props=&season=spring", None),
     "meadow-walking": (
         MEADOW,
-        "props=",
+        "props=&season=spring",
         "setInterval(() => meadowGame.perform(meadowGame.state().x < 2000 ? 'go to 3400' : 'go to 600'), 5000); meadowGame.perform('go to 3400')",
     ),
     # the far life all out at once: a sow and her piglets, the heron, the far trees' birds (wildlife.js)
-    "meadow-wildlife": (MEADOW, "props=&wild=boar&critters=heron", None),
+    "meadow-wildlife": (MEADOW, "props=&season=spring&wild=boar&critters=heron", None),
+    # autumn by the chestnut: its leaves dropping, the woodpecker out drumming, geese going over (autumn.js)
+    "meadow-autumn": (
+        MEADOW,
+        "props=&season=autumn&woodpecker=out&critters=geese",
+        None,
+    ),
     # the storm's rain over the whole view (storm.js, a canvas), measured once it rains
     "meadow-storm": (
         MEADOW,
-        "props=",
+        "props=&season=spring",
         "new Promise((done) => { Storm.gather(); const t = setInterval(() => { if (Storm.phase === 'raining') { clearInterval(t); done() } }, 200) })",
     ),
 }
