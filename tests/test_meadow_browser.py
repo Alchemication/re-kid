@@ -2246,3 +2246,39 @@ class TestMeadowAutumn:
         m.wait("meadowGame.trace().includes(' woodpecker visit ')")
         m.wait_free()
         m.assert_settled()
+
+    def test_a_tap_on_the_chestnut_brings_a_conker_down(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=&woodpecker=0")
+        m.wake()
+        for _ in range(3):
+            m.do("peek")
+            m.wait_free()
+            m.assert_settled()
+        assert sorted(traced(m, "peeks")) == ["conkers", "dark", "echo"]
+        assert m.page.evaluate("Oak.kept") == 1, "the conker tucked into the hollow"
+        assert (
+            m.page.evaluate("document.querySelectorAll('.oak-acorns .conker').length")
+            == 1
+        )
+        assert (
+            m.page.evaluate("document.querySelectorAll('#oak-front .husk').length") == 1
+        ), "its husk lies split in the grass"
+
+    def test_the_conker_cut_short_lies_where_it_rolled(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=&woodpecker=0")
+        m.wake()
+        while "conkers" not in traced(m, "peeks"):
+            m.do("peek")
+            m.play_for(300)
+            if traced(m, "peeks")[-1:] != ["conkers"]:
+                m.wait_free()
+        m.wait(
+            "meadowGame.trace().includes('\"thing\":\"roll\"') || document.querySelector('#oak-front > .conker')"
+        )
+        m.do("go to 900")
+        m.wait_free()
+        m.assert_settled()
+        assert m.page.evaluate("Oak.kept") == 0
+        assert not m.page.evaluate(
+            "document.querySelector('#mole .conker, #mole-out .conker')"
+        ), "nothing left in his hands"

@@ -13,6 +13,11 @@
 // - the acorns: one drops on his head, bonk; he rubs it and looks up; the
 //   next he catches, and tucks it into the hollow, where they pile up over
 //   the play (a few, then no more show).
+// In autumn (autumn.js) the tree is a horse chestnut: the leaf on his head is
+// a chestnut leaf, and the acorns are conkers (after Krtek a zápalky 0:56): a
+// spiky husk drops in front of him, he pokes it and pricks his hand, it
+// splits, the shiny conker rolls off and he runs after it, and tucks it into
+// the hollow.
 //
 // Its drawing: the tap target over its trunk and crown, and the acorns kept
 // in the hollow (#oak, behind him); the leaves on the grass (#oak-ground, in
@@ -21,7 +26,7 @@
 // the Clock (Motion.endAt), and restore() puts everything back at once when
 // a tap cuts a peek short (what is falling falls on to the grass).
 
-/* global Clock, Debug, Layout, Mole, Motion, Owl, Sound */
+/* global Autumn, Clock, Debug, Layout, Mole, Motion, Owl, Sound */
 /* exported Oak */
 const Oak = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -46,6 +51,10 @@ const Oak = (() => {
   const strew = Debug.random('meadow-oak-leaves') // where a leaf lies and how it is turned: its own, so leaves shift nothing else
   const LIE = [-0.6, 0.6] // a leaf on the grass lies turned this much (radians), either way…
   const LIE_FLAT = 0.5 // …and seen this flat, lying down
+  const AUTUMN = Layout.season === 'autumn' // the tree a horse chestnut: conkers, not acorns
+  const CONKER = 2.1 // a conker and its husk, this much bigger than true: they must read at phone size
+  const ROLL = [150, 230] // the conker rolls this far off, out of its husk
+  const HUSKS = 3 // split husks lying in the grass at most: the oldest goes as a new one lands
 
   let front = null // #oak-front
   let ground = null // #oak-ground: the leaves he has shaken off
@@ -54,6 +63,7 @@ const Oak = (() => {
   let kept = 0
   let held = null // the acorn in his hands
   let leaf = null // the leaf on his head
+  const husks = [] // split husks lying in front of the tree
   const dropping = new Set() // acorns falling at him just now: a cut lets them fall on into the grass
 
   const el = (tag, attrs = {}, parent) => {
@@ -83,6 +93,39 @@ const Oak = (() => {
     veil.style.pointerEvents = 'none'
   }
 
+  /** A conker drawn round 0,0: shiny brown, its pale eye. */
+  function conker(s = CONKER) {
+    const g = el('g', { class: 'conker' })
+    const k = el('g', { transform: `scale(${s})` }, g)
+    el('ellipse', { cx: 0, cy: 0, rx: 8.5, ry: 8, fill: '#7a3e1c', stroke: INK, 'stroke-width': 1.6 }, k)
+    el('ellipse', { cx: 1, cy: 3, rx: 4.5, ry: 3, fill: '#c8a878' }, k)
+    el('ellipse', { cx: -3, cy: -3.5, rx: 2.4, ry: 1.4, fill: '#f6e2c8', opacity: 0.8 }, k)
+    return g
+  }
+
+  /** A conker's husk round 0,0: two spiky green halves (to split), the conker inside them. */
+  function husk(s = CONKER) {
+    const g = el('g', { class: 'husk' })
+    const k = el('g', { transform: `scale(${s})` }, g)
+    const nut = conker(1)
+    k.appendChild(nut)
+    const halves = [-1, 1].map((side) => {
+      const half = el('g', {}, k)
+      el('path', { d: `M0 -11 A11 11 0 0 ${side < 0 ? 0 : 1} 0 11 Z`, fill: '#7d9a3c', stroke: '#3e5420', 'stroke-width': 1.6 }, half)
+      for (const a of [-1.2, -0.6, 0, 0.6, 1.2]) {
+        const [c, d] = [Math.cos(a) * side, Math.sin(a)]
+        el('path', { d: `M${(c * 10).toFixed(1)} ${(d * 10).toFixed(1)} L${(c * 16).toFixed(1)} ${(d * 16).toFixed(1)}`, stroke: '#3e5420', 'stroke-width': 1.6, 'stroke-linecap': 'round' }, half)
+      }
+      half.style.transformBox = 'fill-box'
+      half.style.transformOrigin = side < 0 ? 'right bottom' : 'left bottom'
+      return half
+    })
+    return { g, nut, halves }
+  }
+
+  /** What he keeps in the hollow: an acorn, or in autumn a conker. */
+  const keepsake = (s = ACORN) => (AUTUMN ? conker(s * CONKER / ACORN) : acorn(s))
+
   /** An acorn drawn round 0,0, about as big as his hand (s: how much bigger). */
   function acorn(s = ACORN) {
     const g = el('g', {})
@@ -97,6 +140,10 @@ const Oak = (() => {
   function oakLeaf() {
     const g = el('g', { class: 'oak-leaf' })
     const k = el('g', { transform: `scale(${LEAF})` }, g)
+    if (AUTUMN) { // a chestnut leaf
+      Autumn.piece(el('g', { transform: 'rotate(180) translate(0 -4)' }, k), strew, 12)
+      return g
+    }
     el('path', { d: 'M0 14 C-4 10 -12 10 -10 4 C-16 2 -14 -6 -8 -5 C-12 -12 -4 -16 0 -11 C4 -16 12 -12 8 -5 C14 -6 16 2 10 4 C12 10 4 10 0 14 Z', fill: '#7fae95', stroke: INK, 'stroke-width': 1.4 }, k)
     el('path', { d: 'M0 16 L0 -8', stroke: '#2f5548', 'stroke-width': 1.2 }, k)
     return g
@@ -210,7 +257,7 @@ const Oak = (() => {
       const above = Mole.head().y - 60 // where his hands are, holding up (mole.js: what he carries)
       await drop(acorn(), Mole.state.x, above)
       if (!alive()) return
-      hands.appendChild(acorn(ACORN / Mole.SCALE)) // caught: drawn in his own units
+      hands.appendChild(keepsake(ACORN / Mole.SCALE)) // caught: drawn in his own units
       Sound.plink()
       Sound.say('ooh')
       if (!(await wait(800, alive))) return
@@ -224,6 +271,73 @@ const Oak = (() => {
       Sound.say('giggle')
       await Mole.cheer()
     },
+  }
+
+  /** Autumn's: a husk drops in front of him; he pokes it and pricks his hand; it splits, the conker rolls off,
+   * he runs after it, and tucks it into the hollow. */
+  async function conkers(alive) {
+    await goBeside()
+    if (!alive()) return
+    const at = Mole.state.x - 120 // in front of him, towards the tree, clear of his feet
+    const h = husk()
+    front.appendChild(h.g)
+    lieDown(h.g)
+    await Motion.endAt(h.g, [{ transform: `translate(${at}px, ${DROP_FROM}px)` }, { transform: `translate(${at}px, ${Y - 8}px)` }], { duration: DROP_MS, easing: 'ease-in' })
+    Sound.bonk()
+    Mole.perk(1.4)
+    Mole.feel('ooh', 1000)
+    if (!(await wait(800, alive))) return
+    await Mole.lean(LEAN_IN, 500) // a poke at it
+    if (!alive()) return
+    Sound.say('fright') // ow: it's prickly
+    await Mole.handsToFace(600, 'fright')
+    if (!alive()) return
+    Sound.crack() // it splits...
+    await Promise.all(h.halves.map((half, i) => Motion.endAt(half, [{ transform: `rotate(${i ? 50 : -50}deg) translateY(4px)` }], { duration: 300, easing: 'ease-out' })))
+    if (!alive()) return
+    const to = at + ROLL[0] + random() * (ROLL[1] - ROLL[0]) // ...and out it rolls, past him
+    const nut = conker()
+    front.appendChild(nut)
+    lieDown(nut) // cut short before he has it, it lies where it stopped
+    h.nut.remove()
+    Sound.roll(1.2)
+    const rolled = Motion.endAt(nut, [{ transform: `translate(${at}px, ${Y - 8}px) rotate(0deg)` }, { transform: `translate(${to}px, ${Y - 8}px) rotate(720deg)` }], { duration: 1200, easing: 'ease-out' })
+    Mole.lookAt(to)
+    await rolled
+    if (!alive()) return
+    Sound.say('ooh')
+    await goTo(to - 30)
+    if (!alive()) return
+    husks.splice(husks.indexOf(nut), 1)
+    nut.remove() // picked up
+    const hands = el('g', {})
+    Mole.carry(hands)
+    held = hands
+    hands.appendChild(conker(CONKER / Mole.SCALE))
+    Sound.plink()
+    if (!(await wait(600, alive))) return
+    await goTo(ARCH + 50)
+    if (!alive()) return
+    Mole.show('three', -1)
+    await Mole.lean(LEAN_IN, 700)
+    if (!alive()) return
+    putAway()
+    Sound.plink()
+    Sound.say('giggle')
+    await Mole.cheer()
+  }
+  if (AUTUMN) {
+    delete PEEKS.acorns
+    PEEKS.conkers = conkers
+  }
+
+  /** A split husk lies on in the grass: the oldest of them goes once there are more than HUSKS. */
+  function lieDown(g) {
+    husks.push(g)
+    if (husks.length > HUSKS) {
+      const old = husks.shift()
+      Debug.ignoreCut(Motion.endAt(old, [{ opacity: 0 }], { duration: 1500 }).then(() => old.remove()), 'an old husk goes')
+    }
   }
 
   /** Beside the arch, turned to it. */
@@ -315,7 +429,7 @@ const Oak = (() => {
     if (!held) return
     Mole.carry(null)
     held = null
-    if (kept < KEPT.length) el('g', { transform: `translate(${KEPT[kept].join(', ')})` }, store).appendChild(acorn())
+    if (kept < KEPT.length) el('g', { transform: `translate(${KEPT[kept].join(', ')})` }, store).appendChild(keepsake())
     kept += 1
     Debug.trace('acorns kept', { kept })
   }
@@ -353,6 +467,6 @@ const Oak = (() => {
     get dark() { return Number(veil?.style.opacity || 0) > 0 },
     get kept() { return kept },
     /** How many leaves lie in the grass. */
-    get fallen() { return ground?.childElementCount || 0 },
+    get fallen() { return ground?.querySelectorAll('.oak-fallen').length || 0 },
   }
 })()
