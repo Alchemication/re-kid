@@ -205,3 +205,6 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 .hedgehog-heap.asleep .heap-nose { opacity: 1; }
 .heap-z { opacity: 0; }
 .hedgehog-heap.asleep .heap-z { animation: owl-z 3.6s ease-out infinite; }
+/* geese going south (autumn.js): their wings beat */
+.goose-wings { animation: goose-beat 0.5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center bottom; }
+@keyframes goose-beat { from { transform: scaleY(1); } to { transform: scaleY(-0.6); } }

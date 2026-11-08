@@ -309,5 +309,25 @@ PIECES: dict[str, dict] = {
             "A brief, slightly menacing musical hint for a small animal's meadow in a children's film: deep slow strings and a low muted horn, a big machine rumbling closer, suspenseful but not scary, then fading.",
         ],
     },
+    # Autumn (2026-11-08, built while Adam was away; the meadow's autumn after Krtek a zápalky): the
+    # meadow's theme takes can't be grown from meadow-theme/01 any more (its song id 404s), so each mood is
+    # worded fresh from the kept morning's wording, its middle turned to a misty golden autumn. Same
+    # instruments (flute over strings, a clarinet), calm; a season's own takes, played in its plays.
+    "meadow-autumn": {
+        "world": "krtek",
+        "for": "The meadow in autumn (half the plays): its theme's moods for a misty golden autumn day, falling chestnut leaves, a woodpecker, a hedgehog making his winter bed. Listen for: the meadow's music (calm, flute over strings), autumnal, never Reksio's cheeky.",
+        "parts": ["morning", "curious", "sad", "happy"],  # by wording
+        "season": "autumn",
+        "seconds": 20,
+        "style": False,
+        "models": ["music_v1"],
+        "takes": 2,
+        "prompts": [
+            "A calm, beautiful instrumental theme for a misty golden autumn morning in a meadow in a 1970s Eastern European children's animated film: a gentle, slightly wistful flute melody over warm soft strings and a mellow clarinet, chestnut leaves drifting down, tender and cosy, as a small creature comes out into the cool morning.",
+            "A curious, gently inquisitive instrumental tune for an autumn meadow in a 1970s Eastern European children's animated film: a questioning flute and plucked strings, light and a little playful, as a small creature finds something new among the fallen leaves. Calm, warm, simple.",
+            "A tender, slightly sad instrumental tune for a cold autumn day in a meadow in a 1970s Eastern European children's animated film: a lonely flute over soft low strings, in a minor key, as a little hedgehog shivers with no bed for the winter. Gentle and never frightening.",
+            "A warm, happy instrumental tune for a sunny autumn afternoon in a meadow in a 1970s Eastern European children's animated film: flute and strings together, fuller and brighter, cosy and joyful, as friends finish a soft bed of golden leaves together.",
+        ],
+    },
 
 }

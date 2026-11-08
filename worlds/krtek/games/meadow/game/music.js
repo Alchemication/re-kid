@@ -18,7 +18,7 @@
 // and comes back after; the game says the moment and how busy the child is
 // (bed.set). It stops at dusk, for the cricket.
 
-/* global Clock, Debug, Ensemble, MeadowBeds, SAMPLES, Sound, Takes, TUNES */
+/* global Clock, Debug, Ensemble, Layout, MeadowBeds, SAMPLES, Sound, Takes, TUNES */
 /* exported Music */
 const Music = (() => {
   const VOLUME = 0.45 // the music under his voice and the effects
@@ -76,9 +76,13 @@ const Music = (() => {
     return loading
   }
 
+  /** The part playing now, whichever season's take it is ('happy', not 'happy.autumn'), or null. */
+  const partNow = () => takes?.part?.split('.')[0] ?? null
+
   /** A take of `part` after `wait` seconds; then(): once it has played to its end. */
   function play(part, wait = LEAD_S, then = null) {
-    if (!takes.play(part, random, ctx.currentTime + wait, then)) return
+    const own = `${part}.${Layout.season}` // a season's own takes of a part (tunes.yaml `season`: autumn's), where it has them
+    if (!takes.play(takes.has(own) ? own : part, random, ctx.currentTime + wait, then)) return
     startsAt = ctx.currentTime + wait
     Debug.trace('music', { part })
   }
@@ -106,7 +110,7 @@ const Music = (() => {
       takes.fade()
       return
     }
-    const now = takes.part
+    const now = partNow()
     if (now && RANK[now] >= RANK[part]) return
     const wait = now ? takes.FADE_S + 0.2 : LEAD_S // once the weaker one has faded
     takes.fade()
@@ -169,6 +173,6 @@ const Music = (() => {
     /** The bed now, for the overlay and the tests. */
     get bed() { return bed ? { on: bed.on, style: bed.style, mood: bed.mood } : null },
     /** The part playing now, or null (for the overlay and the tests). */
-    get part() { return takes?.part ?? null },
+    get part() { return partNow() },
   }
 })()

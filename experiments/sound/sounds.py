@@ -534,6 +534,41 @@ SOUNDS: dict[str, dict] = {
             "a little tin can set down on soft ground, a small dull clunk",
         ],
     },
+    # Krtek's meadow in autumn (2026-11-08, built while Adam was away): the woodpecker in the chestnut
+    # (woodpecker.js) and the hedgehog's winter bed (hedgehog.js). Calm first: nothing loud.
+    "krtek-drum": {
+        "world": "krtek",
+        "id": "drum",
+        "for": "The woodpecker drums a roll on the chestnut's trunk, now and then by day, and in answer to the mole's knocks: a quick dry rattle, about a second.",
+        "seconds": 1.0,
+        "prompts": [
+            "a woodpecker drumming a fast roll on a tree trunk, close, in a quiet autumn wood",
+            "a great spotted woodpecker hammering a quick burst on dry wood, one short roll",
+            "a quick wooden rattle of a beak on hollow bark, rapid taps fading",
+        ],
+    },
+    "krtek-peck": {
+        "world": "krtek",
+        "id": "peck",
+        "for": "One slow knock of the woodpecker's beak on the trunk, knocking back to the mole: knock, knock (each a call of its own, 0.4 s apart).",
+        "seconds": 0.4,
+        "prompts": [
+            "a single knock of a bird's beak on a tree trunk, one dry wooden tok",
+            "one tap of a woodpecker's beak on bark, close up",
+            "a knuckle knocking once on a hollow log, short",
+        ],
+    },
+    "krtek-snuffle": {
+        "world": "krtek",
+        "id": "snuffle",
+        "for": "The hedgehog snuffling at the fallen leaves, and going into his heap to sleep: quick little sniffs and a snort, cute, about a second.",
+        "seconds": 1.2,
+        "prompts": [
+            "a hedgehog snuffling and sniffing through dry autumn leaves, close up, cute little snorts",
+            "a small hedgehog sniffing busily, quick soft snuffles through its nose",
+            "a tiny animal snuffling in a pile of leaves, little huffs and a soft snort",
+        ],
+    },
     # Reksio's yard (2026-11-08): the sounds made in code Adam judged bad,
     # "not great" or "so so" on made_in_code.html (his notes in each "for").
     "cluck": {

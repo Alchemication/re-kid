@@ -8,12 +8,16 @@
 // everything. `crown` paints the old tree's crown as a horse chestnut's (the tree stands where the oak
 // does: in autumn it is a chestnut, Adam's call), with conkers hanging in it. `setup` lets a leaf drop from
 // it now and then, spiralling down to lie at its foot (the oldest fade as new ones land), and gives the
-// wind (weather.js) chestnut leaves to carry. Only autumn plays call any of this.
+// wind (weather.js) chestnut leaves to carry. And two things of autumn's air: a morning mist over the far
+// meadow (the film's pale haze, 0:30) that lifts by mid-morning, and once or twice a day a skein of geese
+// going south high over the meadow, honking far off (invented). A tap on the leaves lying under the chestnut:
+// he plays in them, a different way each time (rounds): he kicks through them and they fly up and settle
+// round him, or he throws an armful up over himself and they flutter down. Only autumn plays call any of this.
 //
 // Draws: the painting's from its own stream (so the season shifts nothing painted after it), the falling
 // leaves from another. Time is the Clock's.
 
-/* global Clock, Debug, Layout, Motion */
+/* global Clock, Debug, Layout, Mole, Motion, Sound */
 /* exported Autumn */
 const Autumn = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -32,9 +36,21 @@ const Autumn = (() => {
   const LYING = 14 // leaves lying at its foot at most: the oldest fades as a new one lands
   const FOOT = [-20, 560] // where they come down (x), round the tree's foot
   const GROUND_Y = [722, 760] // and lie, on the grass in front of it
+  const MIST = [6.5, 10.5] // the morning mist is thickest at the first hour, gone by the second
+  const GEESE_AT = [[9, 12], [13, 16.5]] // a skein of geese goes over once in each of these spans (hours)...
+  const GEESE_CHANCE = 0.7 // ...this often
+  const GEESE = 7 // in a V
+  const GEESE_MS = 24000 // across the sky, right to left (south, as the meadow is drawn)
+  const GEESE_Y = [120, 210] // high in the sky
   const paintRandom = Debug.random('meadow-autumn-painting')
+  const air = Debug.random('meadow-autumn-air') // the geese: whether and when, their own stream
   const drops = Debug.random('meadow-autumn-leaves')
   let layer = null
+  let mist = null
+  let sky = null
+  let mistShown = -1
+  let geeseAt = [] // the hours a skein goes over this play
+  let heard = () => {}
   const lying = []
 
   const between = ([a, b], k) => a + (b - a) * k
@@ -205,25 +221,148 @@ const Autumn = (() => {
     const to = { x: between(FOOT, drops()), y: between(GROUND_Y, drops()) }
     const ms = between(DROP_MS, drops())
     const spin = between([-1, 1], drops()) * 540
-    const lie = between([-70, 70], drops())
+    const flat = between([-70, 70], drops()) // how it lies, come down
     const g = el('g', { class: 'dropped' }, layer)
     piece(el('g', { transform: 'scale(2.6)' }, g), drops) // big enough to see come down from across the meadow
     const frames = [0, 0.2, 0.4, 0.6, 0.8, 1].map((k) => ({
-      transform: `translate(${(from.x + (to.x - from.x) * k + Math.sin(k * Math.PI * 4) * 36).toFixed(0)}px, ${(from.y + (to.y - from.y) * k).toFixed(0)}px) rotate(${(k < 1 ? spin * k : lie).toFixed(0)}deg) scaleY(${(k < 1 ? Math.cos(k * Math.PI * 5) * 0.6 + 0.4 : 0.55).toFixed(2)})`,
+      transform: `translate(${(from.x + (to.x - from.x) * k + Math.sin(k * Math.PI * 4) * 36).toFixed(0)}px, ${(from.y + (to.y - from.y) * k).toFixed(0)}px) rotate(${(k < 1 ? spin * k : flat).toFixed(0)}deg) scaleY(${(k < 1 ? Math.cos(k * Math.PI * 5) * 0.6 + 0.4 : 0.55).toFixed(2)})`,
     }))
     Debug.trace('leaf', { x: Math.round(to.x) })
-    Motion.endAt(g, frames, { duration: ms, easing: 'linear' }).then(() => {
-      lying.push(g)
-      if (lying.length > LYING) {
-        const old = lying.shift()
-        Motion.endAt(old, [{ opacity: 0 }], { duration: 2000 }).then(() => old.remove(), () => old.remove())
-      }
-    }, () => g.remove())
+    Motion.endAt(g, frames, { duration: ms, easing: 'linear' }).then(() => lie(g), () => g.remove())
   }
 
-  /** Leaves drop from the chestnut into `into` now and then, all day (autumn plays only). */
-  function setup(into) {
+  /** A skein of geese across the sky, right to left, honking far off now and then. */
+  function geese() {
+    const y = between(GEESE_Y, air())
+    const g = el('g', { class: 'geese' }, sky)
+    for (let i = 0; i < GEESE; i++) {
+      const row = Math.ceil(i / 2) * (i % 2 ? 1 : -1) // the V: the leader, then its two arms
+      const b = el('g', { transform: `translate(${Math.abs(row) * 34} ${row * 16}) scale(1.4)` }, g)
+      const wings = el('path', { class: 'goose-wings', d: 'M-10 -2 Q-4 -9 0 0 Q4 -9 10 -2', fill: 'none', stroke: '#3a3530', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, b)
+      wings.style.animationDelay = `${(i * 0.13).toFixed(2)}s`
+      el('path', { d: 'M-7 0 L0 0', stroke: '#3a3530', 'stroke-width': 3, 'stroke-linecap': 'round' }, b)
+    }
+    Debug.trace('geese', { y: Math.round(y) })
+    heard()
+    for (const at of [0.15, 0.4, 0.65]) Clock.after(GEESE_MS * at, () => Sound.honk())
+    Motion.endAt(g, [{ transform: `translate(1800px, ${y}px)` }, { transform: `translate(-400px, ${y - 30}px)` }], { duration: GEESE_MS, easing: 'linear' }).then(() => g.remove(), () => g.remove())
+  }
+
+  // ------------------------------------------------------------ a tap on the leaves under the chestnut
+
+  const PLAY_AT = 330 // where he plays in them: at the chestnut's foot (left of the hedgehog's leaves, which take their own taps)
+  const where = (g) => new DOMMatrixReadOnly(getComputedStyle(g).transform)
+
+  /** A leaf from (x, y) up into the air and down to lie at x + dx. */
+  function flutter(g, x, y, dx, ms) {
+    const to = { x: Math.max(FOOT[0], Math.min(FOOT[1], x + dx)), y: between(GROUND_Y, drops()) }
+    const up = y - 120 - drops() * 80
+    const flat = between([-70, 70], drops())
+    return Motion.endAt(g, [
+      { transform: `translate(${x}px, ${y}px) rotate(0deg) scaleY(0.55)` },
+      { transform: `translate(${x + dx * 0.4}px, ${up}px) rotate(${dx * 2}deg) scaleY(1)`, offset: 0.3 },
+      { transform: `translate(${x + dx * 0.8}px, ${(up + to.y) / 2}px) rotate(${-dx}deg) scaleY(-0.6)`, offset: 0.65 },
+      { transform: `translate(${to.x}px, ${to.y}px) rotate(${flat}deg) scaleY(0.55)` },
+    ], { duration: ms, easing: 'ease-out' })
+  }
+
+  const PLAYS = {
+    /** He kicks through them: the ones near him fly up and settle round him. */
+    async kick(alive) {
+      for (const dir of [1, -1]) {
+        Sound.swish()
+        await Mole.lean(dir * 10, 300)
+        if (!alive()) return
+        const near = lying.filter((g) => Math.abs(where(g).e - Mole.state.x) < 140)
+        await Promise.all(near.map((g, i) => {
+          const { e, f } = where(g)
+          return flutter(g, e, f, dir * (60 + ((i * 37) % 90)), 1600 + i * 60)
+        }))
+        if (!alive()) return
+      }
+      Mole.lean(0, 300)
+      Sound.say('giggle')
+      await Mole.handsToFace(600)
+    },
+    /** He scoops up an armful and throws it up over himself; down they flutter, round him. */
+    async toss(alive) {
+      await Mole.lean(12, 400) // down to scoop
+      if (!alive()) return
+      Mole.lean(0, 300)
+      Sound.whoosh()
+      Mole.feel('delighted', 2000)
+      const x = Mole.state.x
+      const flying = []
+      for (let i = 0; i < 6; i++) {
+        const g = el('g', { class: 'dropped' }, layer)
+        piece(el('g', { transform: 'scale(2.6)' }, g), drops)
+        flying.push(flutter(g, x, Layout.GROUND - 60, (i - 2.5) * 40, 2200 + i * 120).then(() => lie(g)))
+      }
+      await Mole.cheer()
+      await Promise.all(flying)
+      if (!alive()) return
+      Sound.say('giggle')
+    },
+  }
+
+  /** A leaf come to rest: it lies with the others (the oldest fades past LYING). */
+  function lie(g) {
+    lying.push(g)
+    if (lying.length > LYING) {
+      const old = lying.shift()
+      Motion.endAt(old, [{ opacity: 0 }], { duration: 2000 }).then(() => old.remove(), () => old.remove())
+    }
+  }
+
+  let nextPlay = null
+  /** A tap on the leaves: he goes over and plays in them (PLAYS, a different way each time). */
+  async function play(alive) {
+    await goTo(PLAY_AT)
+    if (!alive()) return
+    Mole.show('front')
+    const how = nextPlay()
+    Debug.trace('leaves', { how })
+    await PLAYS[how](alive)
+  }
+  let goTo = null
+
+  /** The hour: the morning mist lifts; a skein of geese at its hour. */
+  function tick(h) {
+    if (mist) {
+      const k = Math.round(Math.max(0, Math.min(1, (MIST[1] - h) / (MIST[1] - MIST[0]))) * 50) / 50
+      if (k !== mistShown) {
+        mistShown = k
+        mist.setAttribute('opacity', String(k))
+      }
+    }
+    while (geeseAt.length && h >= geeseAt[0]) {
+      geeseAt.shift()
+      if (!Debug.still) geese()
+    }
+  }
+
+  /** Leaves drop from the chestnut into `into` now and then, all day; the mist in `haze` (over the far
+   * meadow, before the scene's camera); the geese in the `high` sky; onGeese(): they're going over (the
+   * meadow has him look up, if free). Autumn plays only. */
+  function setup(into, { haze = null, high = null, onGeese = () => {}, meadow = null } = {}) {
     layer = into
+    if (meadow) {
+      goTo = meadow.goTo
+      nextPlay = meadow.rounds(Object.keys(PLAYS), drops)
+      const hit = el('rect', { class: 'leaf-hit', x: 200, y: 700, width: 260, height: 90, fill: 'none', 'pointer-events': 'all' }, into) // the leaves at the chestnut's foot take taps
+      hit.style.cursor = 'pointer'
+    }
+    sky = high
+    heard = onGeese
+    for (const [a, b] of GEESE_AT) { // drawn either way, so ?still shifts nothing
+      const when = between([a, b], air())
+      if (air() < GEESE_CHANCE) geeseAt.push(when)
+    }
+    if (Layout.flags.critters === 'geese') geeseAt.unshift(0) // ?critters=geese: one at once
+    if (haze) {
+      mist = el('rect', { class: 'mist', x: -200, y: 380, width: 2000, height: 380, fill: 'url(#mist-grad)', opacity: 1 }, haze)
+      mist.style.pointerEvents = 'none'
+    }
     const next = () => Clock.after(between(DROP_EVERY_MS, drops()), () => {
       if (!Debug.still) drop()
       next()
@@ -231,5 +370,5 @@ const Autumn = (() => {
     next()
   }
 
-  return { recolour, crown, piece, setup, LEAF_TONES, /** Leaves lying under the chestnut now. */ get lying() { return lying.length } }
+  return { recolour, crown, piece, setup, tick, play, LEAF_TONES, /** Leaves lying under the chestnut now. */ get lying() { return lying.length } }
 })()

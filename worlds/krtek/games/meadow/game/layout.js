@@ -11,7 +11,7 @@
 // which encounters come (things.js), and `?soon` brings the first at once;
 // `?critters=now` brings a butterfly at once (critters.js), even in a still play;
 // `?critters=snail` the snail, its shelter under the wild flowers wet from the start;
-// `?critters=fireflies` the fireflies, at once, in daylight too;
+// `?critters=fireflies` the fireflies, at once, in daylight too; `?critters=geese` (autumn) geese going over at once;
 // `?wind=gust` a strong gust that carries something, three seconds after he wakes;
 // `?eclipse=11` an eclipse at 11:00 (and none other), `?eclipse=now` as he wakes
 // (the sun is low then, behind the trees: 11 shows the moon over it);

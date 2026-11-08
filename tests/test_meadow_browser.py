@@ -2292,3 +2292,43 @@ class TestMeadowAutumn:
         assert not m.page.evaluate(
             "document.querySelector('#mole .conker, #mole-out .conker')"
         ), "nothing left in his hands"
+
+    def test_geese_go_over_and_the_mist_lifts(self, meadow: callable) -> None:
+        m = meadow("seed=1&season=autumn&props=&critters=geese")
+        m.wake()
+        early = float(
+            m.page.evaluate(
+                "document.querySelector('#haze .mist').getAttribute('opacity')"
+            )
+        )
+        m.wait("meadowGame.trace().includes(' geese ')", 30_000)
+        m.wait(
+            "!document.querySelector('.geese')", 60_000
+        )  # across and gone, out of sight
+        late = meadow("seed=1&season=autumn&props=&day=40")
+        late.wake()
+        late.wait(
+            "Number(document.querySelector('#haze .mist').getAttribute('opacity')) === 0",
+            60_000,
+        )
+        assert early > 0.3, early
+        assert not m.errors and not late.errors, (m.errors, late.errors)
+
+    def test_a_tap_on_the_fallen_leaves_plays_in_them(self, meadow: callable) -> None:
+        m = meadow(f"{self.AUTUMN}&props=&woodpecker=0")
+        m.wake()
+        for _ in range(3):
+            m.do("leaves")
+            m.wait_free()
+            m.assert_settled()
+        hows = traced(m, "leaves")
+        assert sorted(hows[:2]) == ["kick", "toss"], hows
+        assert m.page.evaluate("Autumn.lying") >= 6, (
+            "the tossed leaves lie in the grass"
+        )
+        box = m.page.query_selector(".leaf-hit").bounding_box()
+        m.page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+        m.wait("meadowGame.trace().split(' leaves ').length > 4")
+        m.do("go to 900")  # cut short
+        m.wait_free()
+        m.assert_settled()

@@ -244,6 +244,7 @@ const meadowGame = (() => {
     Church.tick(h)
     Owl.tick(h, !game.gesture)
     Woodpecker.tick(h)
+    if (Layout.season === 'autumn') Autumn.tick(h)
     if (Day.cricket(h) && !game.evening) {
       game.evening = true
       Debug.trace('cricket', { hour: Day.clock(h) })
@@ -626,6 +627,7 @@ const meadowGame = (() => {
     [/^peek$/, () => answer('peek', Oak.peek, () => { Oak.restore(); Owl.restore() })], // a call in the arch may have woken the owl
     [/^owl$/, () => answer('owl', Owl.visit, Owl.restore)],
     [/^woodpecker$/, () => answer('woodpecker', Woodpecker.visit, Woodpecker.restore)],
+    [/^leaves$/, () => answer('leaves', Autumn.play)], // autumn's: what flies up lands where it was going
     [/^fence$/, () => answer('fence', Fence.play, Fence.restore)],
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => answer('go', () => goTo(Number(m[1])))],
@@ -749,7 +751,7 @@ const meadowGame = (() => {
   }
 
   // The places that answer a tap on them: [what was tapped, intent]
-  const PLACE_HITS = [['.owl', 'owl'], ['.woodpecker', 'woodpecker'], ['#bed', 'sniff'], ['#spring', 'paddle'], ['.oak-hit', 'peek'], ['.fence-hit', 'fence']]
+  const PLACE_HITS = [['.owl', 'owl'], ['.woodpecker', 'woodpecker'], ['.leaf-hit', 'leaves'], ['#bed', 'sniff'], ['#spring', 'paddle'], ['.oak-hit', 'peek'], ['.fence-hit', 'fence']]
 
   /** What a tap at this point means (critter: the little creature tapped, if any). */
   function intentAt(target, p, critter) {
@@ -833,7 +835,18 @@ const meadowGame = (() => {
       Mole.lookAt(x)
     },
   })
-  if (Layout.season === 'autumn') Autumn.setup(document.getElementById('oak-ground')) // leaves drop from the chestnut
+  if (Layout.season === 'autumn') { // leaves drop from the chestnut; the morning mist; geese going south
+    Autumn.setup(document.getElementById('oak-ground'), {
+      meadow: { goTo, rounds },
+      haze: document.getElementById('haze'),
+      high: document.getElementById('sky'),
+      onGeese: () => Clock.after(4000, () => { // he hears them, and looks up
+        if (!(game.awake && !game.ended && !game.gesture)) return
+        Mole.perk(1.2)
+        Mole.lookAt(Mole.state.x - 300)
+      }),
+    })
+  }
   Fence.setup(document.getElementById('fence'), document.getElementById('fence-near'), document.getElementById('garden-life'), { goTo, rounds, el })
   View.offstage(document.querySelectorAll('#cam .sway, #cam .fall, #cam .foam')) // what sways and pours stops while out of sight
   // the church bell on the hour: if he's free, his hairs spring up and he looks up at it (as Reksio at the cuckoo)
