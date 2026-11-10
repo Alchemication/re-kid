@@ -303,6 +303,7 @@ effects:
   - file: howl/08.mp3
     prompt: 'one long soft wolf howl very far in the distance, peaceful night, crickets faint'
 - id: puddle
+  gain: 0.6 # Adam, 2026-11-10: a little quieter
   takes:
   - file: puddle/03.mp3
     prompt: 'a little jump into a puddle, a wet slap and a splash of water'
@@ -313,6 +314,7 @@ effects:
   - file: puddle/08.mp3
     prompt: 'small feet landing in a shallow puddle, a playful splash'
 - id: drips
+  gain: 0.6 # Adam, 2026-11-10: a little quieter
   takes:
   - file: drips/03.mp3
     prompt: 'a tree branch shaken after rain, a short shower of water drops falling on leaves and grass'
