@@ -255,11 +255,11 @@ const Sound = (() => {
     note(330, 0.05, 0.14, 0.18, 'sine', 2.2)
   }
 
-  /** Water: filling the can at the spring, or sprinkling it on the flowers. */
-  function water(seconds = 0.8, { soft = false } = {}) {
-    if (!ready() || recorded('water', [Math.max(0.2, seconds - WATER_FADE_S), WATER_FADE_S], { loop: true, swell: soft ? [SOFT_RAIN, SOFT_RAIN] : null })) return
+  /** Water: filling the can at the spring, or sprinkling it on the flowers; `soft` (a share, 1 the storm's): rain on the whole meadow. */
+  function water(seconds = 0.8, { soft = 0 } = {}) {
+    if (!ready() || recorded('water', [Math.max(0.2, seconds - WATER_FADE_S), WATER_FADE_S], { loop: true, swell: soft ? [SOFT_RAIN * soft, SOFT_RAIN * soft] : null })) return
     // soft: rain on the whole meadow, a high patter under everything (storm.js plays it again and again)
-    const [step, length, low, spread, q, peak] = soft ? [0.12, 0.2, 3000, 2500, 1.5, 0.02] : [0.07, 0.1, 2600, 1800, 3, 0.08]
+    const [step, length, low, spread, q, peak] = soft ? [0.12, 0.2, 3000, 2500, 1.5, 0.02 * soft] : [0.07, 0.1, 2600, 1800, 3, 0.08]
     for (let t = 0; t < seconds; t += step) hiss(t, length, low + Math.random() * spread, q, peak)
   }
 
@@ -346,6 +346,13 @@ const Sound = (() => {
     if (!ready() || recorded('honk')) return
     note(330, 0, 0.16, 0.05, 'sawtooth', 0.92)
     note(310, 0.22, 0.14, 0.04, 'sawtooth', 0.9)
+  }
+
+  /** A wolf far off on a full moon's evening, once: a long, soft howl, rising and falling away (dulled by distance). */
+  function howl() {
+    if (!ready() || recorded('howl')) return
+    note(300, 0, 0.6, 0.025, 'triangle', 1.45)
+    note(436, 0.55, 1.9, 0.03, 'triangle', 0.72)
   }
 
   /** The hedgehog snuffling: quick little sniffs through his nose. */
@@ -552,5 +559,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy, drum, peck, snuffle, honk }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy, drum, peck, snuffle, honk, howl }
 })()

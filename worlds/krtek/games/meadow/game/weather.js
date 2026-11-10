@@ -29,8 +29,7 @@ const Weather = (() => {
   const CARRY_Y = [440, 650] // how high they go: low, against the trees and the grass, where they show (white seeds were lost in the sky)
   const CARRY_SIZE = 2 // drawn this much bigger than their shapes: a toddler sees them go by
   const CALM_FROM = 18.6 // the wind drops as the sun goes down
-  const HUSH = 0.5 // in a dim light (an eclipse) the wind eases, by this much at no light...
-  const STORMY = 0.45 // ...but under a storm it gets up, by this much in the full storm
+  const HUSH = 0.5 // in a dim light (an eclipse) the wind eases, by this much at no light; under rain clouds it gets up instead (storm.js STRENGTHS wind)
   const FORCED_AFTER_MS = 3000 // ?wind=gust: this long after he wakes
   const LEAVES = ['#6a9a3a', '#8bb24a', '#b88a2e'] // green, and the odd brown one
   const random = Debug.random('meadow-wind')
@@ -103,7 +102,7 @@ const Weather = (() => {
 
   function tick() {
     if (World.state.hour >= CALM_FROM && !air.calm) Wind.calm(air)
-    const extra = Storm.cover > 0 ? STORMY * Storm.cover : -HUSH * (1 - World.state.light)
+    const extra = Storm.cover > 0 ? Storm.windUp : -HUSH * (1 - World.state.light)
     const level = Wind.step(air, TICK_MS / 1000, extra)
     World.set({ wind: level })
     show(level)

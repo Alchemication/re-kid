@@ -16,7 +16,9 @@
 // `?eclipse=11` an eclipse at 11:00 (and none other), `?eclipse=now` as he wakes
 // (the sun is low then, behind the trees: 11 shows the moon over it);
 // `?owl=1` an owl in the oak this play, `?owl=0` none, `?owl=out` out on its limb from the start;
-// `?season=autumn` (or `spring`) this play's season; `?woodpecker=out` the autumn woodpecker out on the trunk from the start (`0` none).
+// `?season=autumn` (or `spring`) this play's season; `?woodpecker=out` the autumn woodpecker out on the trunk from the start (`0` none);
+// `?rain=drizzle` (or `shower`, `downpour`) that rain soon after he wakes, in any season (showers.js);
+// `?moon=full` (or `half`, `crescent`) this evening's moon (moons.js; a full one brings the wolf's howl).
 
 /* global Debug */
 /* exported Layout */
@@ -66,7 +68,7 @@ const Layout = (() => {
   const params = new URLSearchParams(typeof location !== 'undefined' ? location.search : '')
   const daySeconds = Number(params.get('day'))
   const props = params.has('props') ? params.get('props').split(',').filter(Boolean) : null
-  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind'), eclipse: params.get('eclipse') === 'now' ? 0 : Number(params.get('eclipse')) || null, owl: params.get('owl'), woodpecker: params.get('woodpecker'), menace: params.get('menace'), wild: params.get('wild') }
+  const flags = { day: daySeconds > 0 ? daySeconds : null, props, soon: params.has('soon'), critters: params.get('critters'), wind: params.get('wind'), eclipse: params.get('eclipse') === 'now' ? 0 : Number(params.get('eclipse')) || null, owl: params.get('owl'), woodpecker: params.get('woodpecker'), rain: params.get('rain'), moon: params.get('moon'), menace: params.get('menace'), wild: params.get('wild') }
 
   const drawn = (() => { // drawn whether or not ?season forces it
     let left = Debug.random('meadow-season')()

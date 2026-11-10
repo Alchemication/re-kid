@@ -39,7 +39,7 @@
       <g id="sky">
         <rect x="-200" y="-200" width="2000" height="1000" fill="url(#sky-grad)" />
         <g id="sun"><circle r="58" fill="#f08a2c" /><circle r="58" fill="none" stroke="#f6b25a" stroke-width="6" opacity="0.6" /><clipPath id="sun-disc"><circle r="58" /></clipPath><circle id="eclipse-moon" r="58" fill="#2e3150" clip-path="url(#sun-disc)" visibility="hidden" /></g><!-- the moon slides over it in an eclipse (eclipse.js) -->
-        <g id="moon"><path d="M0 -42 A42 42 0 1 0 0 42 A32 32 0 1 1 0 -42 Z" fill="#f4f1d8" /></g>
+        <g id="moon"></g><!-- this evening's moon (moons.js), drawn by meadow.js -->
       </g>
       <g id="distant-view"><g id="distant"></g></g>
       <g id="far-view"><g id="far"></g></g>
@@ -83,7 +83,7 @@
     <!-- His den under the molehill, where the day begins and ends, as Krtek a autíčko opens and closes -->
     <g id="den"></g><!-- drawn by den.js -->
   </svg>
-  <canvas id="rain" aria-hidden="true"></canvas><!-- a storm's rain, over the picture (storm.js) -->
+  <canvas id="rain" aria-hidden="true"></canvas><!-- the rain, a storm's or a shower's, over the picture (storm.js) -->
 
   <!-- A phone held upright shows the meadow too small to play: instead, a
        picture asks (without words) to turn it on its side, and the game
@@ -147,6 +147,8 @@
   <script src="swing.js"></script>
   <script src="oak.js"></script>
   <script src="fence.js"></script>
+  <script src="showers.js"></script>
+  <script src="moons.js"></script>
   <script src="storm.js"></script>
   <script src="weather.js"></script>
   <script src="critters.js"></script>

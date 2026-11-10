@@ -23,7 +23,7 @@
 // friends stay where they are, waiting or sheltering (like the egg's hare
 // and hen, they are the meadow's, not a visiting cast), a furled umbrella in
 // his hands is put down in the grass, and the next tap carries on from
-// there. The rain stops in its own time (storm.js RAIN_MAX_MS) even if it is
+// there. The rain stops in its own time (storm.js STRENGTHS rainMs) even if it is
 // never finished: then nobody new comes running, and he just closes up.
 
 /* global AfterRain, Clock, Debug, Friends, Layout, Mole, Motion, Sound, Storm, Things */

@@ -19,7 +19,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Swing, Turn, View, Weather, Woodpecker, World */
+/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Moons, Showers, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Swing, Turn, View, Weather, Woodpecker, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -50,6 +50,11 @@ const meadowGame = (() => {
   const splashes = Debug.random('meadow-splashes') // drops off his face at the spring: their own, so nothing else shifts
   const planned = Eclipse.plan(Debug.random('meadow-eclipse')) // drawn either way, so ?eclipse= shifts nothing
   let eclipseAt = Layout.flags.eclipse ?? planned // the hour this play's eclipse starts, or null (none in a storm's play: start)
+  const rainPlan = Showers.plan(Debug.random('meadow-showers'), Layout.season, { asked: Layout.flags.rain, start: Day.START }) // drawn either way, so ?rain= shifts nothing
+  let shower = Debug.still && !Layout.flags.rain ? null : rainPlan // this play's rain, until it starts: { at, kind } or null (none in a storm's play or an eclipse's: start)
+  const tonight = Moons.plan(Debug.random('meadow-moon'), Layout.flags.moon) // this evening's moon: drawn either way, so ?moon= shifts nothing
+  let howled = false // a full moon's wolf, once
+  const SHOWER_LOOK_MS = 4000 // the clouds coming in, this long: he notices, and looks up
   const DAY_PACE = Day.DAY_MS / (Layout.dayMs || Day.DAY_MS) // an eclipse lasts as long in the day's hours whatever the day's length (?day=)
   const tufts = Debug.random('meadow-tufts') // where the front's tufts stand: its own, so the tulips stay put
 
@@ -76,6 +81,7 @@ const meadowGame = (() => {
     if (parent) parent.appendChild(e)
     return e
   }
+  drawMoon()
 
   // ------------------------------------------------------------ the scene
 
@@ -180,6 +186,7 @@ const meadowGame = (() => {
     const h = (game.hour = Day.hour(Clock.now() - game.dayStart, Layout.dayMs || Day.DAY_MS))
     World.set({ hour: h })
     if (eclipseAt !== null && game.eclipse === null && h >= eclipseAt && h <= Eclipse.LATEST && Things.open(h)) startEclipse() // it waits for the stage to be free (things.js), or comes not at all
+    if (Showers.due(shower, h, { raining: !!Storm.phase, held: encounterOut() })) startShower()
     drawSky(h, eclipseCover())
     drawMeadow(h)
     watchButterflies()
@@ -201,6 +208,47 @@ const meadowGame = (() => {
     })
   }
 
+  /** This evening's moon (moons.js), drawn once: a full moon's glow and seas, then its lit shape, tilted. */
+  function drawMoon() {
+    const r = tonight.r
+    moon.replaceChildren()
+    const body = el('g', { transform: `rotate(${tonight.tilt.toFixed(1)})` }, moon)
+    if (tonight.kind === 'full') for (const [size, opacity] of Moons.GLOW) el('circle', { r: (r * size).toFixed(1), fill: tonight.tint, opacity, class: 'moon-glow' }, moon)
+    el('path', { d: Moons.shape(tonight), fill: tonight.tint }, body)
+    if (tonight.kind === 'full') for (const [x, y, size] of tonight.seas) el('ellipse', { cx: (x * r).toFixed(1), cy: (y * r).toFixed(1), rx: (size * r).toFixed(1), ry: (size * r * 0.75).toFixed(1), fill: '#d8d0ad', opacity: 0.55 }, body)
+    moon.dataset.kind = tonight.kind
+  }
+
+  /** A full moon well up: far off, a wolf howls, once; he hears it, if he is free, and looks up. */
+  function wolf(m) {
+    if (howled || tonight.kind !== 'full' || Debug.still || !m || m.up < tonight.howlAt) return
+    howled = true
+    Debug.trace('wolf', { up: Math.round(m.up * 100) / 100 })
+    Sound.howl()
+    Clock.after(900, () => {
+      if (!(game.awake && !game.ended && !game.gesture)) return
+      Mole.perk(1.2)
+      Mole.lookAt(View.x + tonight.x)
+    })
+  }
+
+  /** Is an encounter out now? A shower waits for it (one thing at a time; the rain cloud's flowers droop in the sun). */
+  const encounterOut = () => Things.names().some((name) => Things.get(name).out && !Things.get(name).done)
+
+  /** Autumn's rain begins (showers.js): the clouds come in at its strength, and a little later he looks up. */
+  function startShower() {
+    const { kind } = shower
+    shower = null
+    Debug.trace('shower', { how: kind, at: Day.clock(game.hour) })
+    Storm.gather(kind)
+    Clock.after(SHOWER_LOOK_MS, () => {
+      if (!(game.awake && !game.ended && !game.gesture)) return
+      Mole.perk(kind === 'drizzle' ? 0.8 : 1.3)
+      Mole.lookAt(View.x + 800)
+      if (kind === 'downpour') Sound.say('ooh', true)
+    })
+  }
+
   /** How far the moon covers the sun now: 0 with no eclipse on. */
   const eclipseCover = () => (game.eclipse === null ? 0 : Eclipse.cover(eclipseMs()))
 
@@ -217,7 +265,7 @@ const meadowGame = (() => {
     const light = Math.min(Eclipse.light(k), Storm.light, Math.max(0, Math.min(1, (0.3 * cr + 0.59 * cg + 0.11 * cb - 0.2) / 0.4))) // 1 by day, 0 at night
     World.set({ light })
     Painting.cloudsAt(light) // the wash of cloud fades as the sky darkens
-    night.setAttribute('opacity', String(NIGHT_TINT * (1 - light))) // and the painted meadow darkens with it
+    night.setAttribute('opacity', String(NIGHT_TINT * (1 - light) * (tonight.kind === 'full' ? 1 - Moons.BRIGHT : 1))) // and the painted meadow darkens with it (less under a full moon)
     const pos = Day.sun(h)
     sun.style.visibility = pos ? 'visible' : 'hidden'
     if (pos) sunX = pos.across * 1600
@@ -227,7 +275,8 @@ const meadowGame = (() => {
     if (on) eclipseMoon.setAttribute('cx', (Eclipse.across(eclipseMs()) * 124).toFixed(1))
     const m = Day.moon(h)
     moon.style.visibility = m ? 'visible' : 'hidden'
-    if (m) moon.style.transform = `translate(1180px, ${600 - m.up * 380}px)`
+    if (m) moon.style.transform = `translate(${tonight.x.toFixed(0)}px, ${(600 - m.up * tonight.rise).toFixed(0)}px)`
+    if (!game.ended) wolf(m)
   }
 
   /** The tulips opening or closing, and the cricket coming out at dusk: by the hour and the light, so in an
@@ -290,7 +339,7 @@ const meadowGame = (() => {
 
   function stateNow() {
     const m = Mole.state
-    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), owl: Owl.state, woodpecker: Woodpecker.state, eclipse: Math.round(eclipseCover() * 100) / 100 }
+    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), owl: Owl.state, woodpecker: Woodpecker.state, eclipse: Math.round(eclipseCover() * 100) / 100, rain: Storm.phase ? Storm.kind : null, moon: tonight.kind }
   }
 
   function checkRules() {
@@ -583,6 +632,7 @@ const meadowGame = (() => {
     Debug.trace('bedtime')
     cutShort()
     Things.night()
+    Storm.night() // a shower's too: gone under the closing circle
     Fence.night()
     game.gesture = 'bedtime'
     const car = Things.get('car')
@@ -886,7 +936,7 @@ const meadowGame = (() => {
     alone: () => Clock.now() - game.lastInput,
     busyWith: () => game.gesture,
     /** The eclipse is on: it holds the stage, so no encounter arrives (one story at a time). */
-    elsewhere: () => game.eclipse !== null && !Eclipse.over(eclipseMs()),
+    elsewhere: () => (game.eclipse !== null && !Eclipse.over(eclipseMs())) || (!!Storm.phase && Storm.kind !== 'storm'), // the eclipse on, or a shower: no encounter comes in it
     music: (part) => Music.cue(part),
     /** His tulips, left to right: { x, base, bend } (bend: turned about its foot, to knock one over). */
     tulips: () => tulipHeads.map(({ x, base, bend }) => ({ x, base, bend })),
@@ -895,7 +945,9 @@ const meadowGame = (() => {
     notice: noticeArrival,
     stepped,
   })
-  if (things.includes('storm') && !Layout.flags.eclipse) eclipseAt = null // one big weather a day: the storm or the eclipse
+  if (things.includes('storm') && !Layout.flags.eclipse) eclipseAt = null // one big weather a day: the storm, the eclipse or a shower
+  if ((things.includes('storm') || eclipseAt !== null) && !Layout.flags.rain) shower = null
+  if (shower && Layout.flags.rain && !Layout.flags.eclipse) eclipseAt = null
   Debug.pin({ flags: { ...(Layout.flags.day ? { day: Layout.flags.day } : {}), props: things.join(',') }, layout: { home: HOME, spring: SPRING, things } })
   Debug.record(stateNow)
   FilmLook.mount(document.body) // the old print over the whole page

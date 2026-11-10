@@ -239,7 +239,7 @@ the edge cases that would let bad data pass silently.
 - *Unit* (`worlds/<id>/games/<game>/tests/*.test.js`, `node:test`, run by
   `uv run pytest`): logic, loaded into a sandbox by `tests/load.js`. Rules
   live in pure modules with no drawing or clock of their own (`day.js`,
-  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js` and each game's `beds.js`, `world.js`, `creature.js`, `wind.js`, the meadow's `eclipse.js`): the part that draws tells them what
+  `shower.js`, `idle.js`, `input.js`, `layout.js`, `life.js`, `gait.js`, `bed.js` and each game's `beds.js`, `world.js`, `creature.js`, `wind.js`, the meadow's `eclipse.js`, `showers.js` and `moons.js`): the part that draws tells them what
   happened and does what they say. Drawing parts are tested here too, on a
   pretend page and clock: `load(…, { dom: true, globals })`, then
   `await page.advance(ms)` runs the timers and animation frames due (all
@@ -299,7 +299,7 @@ heats the laptop for minutes.
 | `input.js`, taps and keys | `"TestRealInput"` |
 | screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
-| the meadow's encounters (`things.js`, `car.js`, `egg.js`, `paint.js`, `poles.js`, `rain.js`, `umbrella.js`, `storm.js`, `afterrain.js`) | `"TestMeadowEncounters and <name>"`, plus its own class where it has one (`"TestMeadowCar"`, `"TestMeadowEgg"`, `"TestMeadowFox"` for the paint, `"TestMeadowBulldozer"` for the poles, `"TestMeadowStorm"`) |
+| the meadow's encounters (`things.js`, `car.js`, `egg.js`, `paint.js`, `poles.js`, `rain.js`, `umbrella.js`, `storm.js`, `afterrain.js`) and autumn's showers (`showers.js`, `storm.js`) | `"TestMeadowEncounters and <name>"`, plus its own class where it has one (`"TestMeadowCar"`, `"TestMeadowEgg"`, `"TestMeadowFox"` for the paint, `"TestMeadowBulldozer"` for the poles, `"TestMeadowStorm"`, `"TestMeadowShowers"`) |
 | the meadow's oak (`oak.js`), its peeks | `"TestMeadowOak"` |
 | the owl in the oak (`owl.js`) | `"TestMeadowOwl or TestMeadowOak"` |
 | the meadow's autumn (`autumn.js`, the woodpecker `woodpecker.js`, the hedgehog `hedgehog.js`, `hedgeart.js`) | `"TestMeadowAutumn"`, the hedgehog also `"TestMeadowEncounters and hedgehog"` |
@@ -308,7 +308,7 @@ heats the laptop for minutes.
 | the meadow's view or screen (`view.js`, `painting.js`, `game.css`) | `"TestMeadowView or TestMeadowScreens"` |
 | the meadow's small life and wildlife (`critters.js`, `flock.js`, `wildlife.js`, `wildart.js`, `heron.js`, `nest.js`, `friends.js`, `foxart.js`) | `"TestMeadowCritters or TestMeadowFireflies or TestMeadowSnail or TestMeadowWildlife"` |
 | the meadow's music, the cricket (`music.js`, `beds.js`, `cricket.js`) | `"TestMeadowMusic"` |
-| the meadow's wind, eclipse, church, spring (`weather.js`, `eclipse.js`, `church.js`, `spring.js`) | `"TestMeadowWind"`, `"TestMeadowEclipse"`, `"TestMeadowChurch"`, `"TestMeadowSpring"` |
+| the meadow's wind, eclipse, church, spring, moon (`weather.js`, `eclipse.js`, `church.js`, `spring.js`, `moons.js`) | `"TestMeadowWind"`, `"TestMeadowEclipse"`, `"TestMeadowChurch"`, `"TestMeadowSpring"`, `"TestMeadowMoon"` |
 | the meadow's `day.js`, `layout.js`, or anything shared | the whole meadow file, `"Meadow"` |
 
 **Adding a gag:** run the `new-gag` skill; it has the steps and where each

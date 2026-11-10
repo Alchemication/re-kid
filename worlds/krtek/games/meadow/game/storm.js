@@ -6,7 +6,11 @@
 // thunder far off behind the hill and soft (a bolt of lightning behind the
 // hill, a faint flash, a low rumble a moment later: never a crack overhead),
 // and then the clouds roll on and
-// it clears. It rains at most RAIN_MAX_MS, whatever the encounter does.
+// it clears. It rains at most its strength's rainMs, whatever the encounter does.
+//
+// The same weather, lighter, is autumn's rain now and then (showers.js): a
+// drizzle, a shower or a downpour (STRENGTHS), paler clouds, fewer drops,
+// less dim, no thunder, and it clears by itself after its while.
 //
 // The world hears it (world.js): the whole meadow is wet while it rains and
 // for a while after (so the butterflies and birds go home, and the snail comes
@@ -23,11 +27,17 @@
 const Storm = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
   const TICK_MS = 100
-  const GATHER_MS = 12000 // the clouds roll in over this long
   const CLEAR_MS = 9000 // ...and roll on over this long
-  const RAIN_MAX_MS = 80000 // it rains at most this long
-  const DIM = 0.45 // the light falls by this much under the full storm: to 0.55, short of dusk
-  const HAZE = 0.45 // how grey the sky goes
+  // How hard it rains. Each: the clouds roll in over gatherMs, it rains for rainMs (at most: the storm's
+  // umbrella clears it sooner), so many drops at once, drawn so thick (width) and long (len); the light falls by
+  // dim and the sky greys by haze under it; the clouds drawn so dark (clouds: their opacity, pale for a drizzle);
+  // the wind gets up by wind (weather.js); the patter this loud (patter, of the storm's); thunder or not.
+  const STRENGTHS = {
+    drizzle: { gatherMs: 9000, rainMs: [30000, 45000], drops: 110, width: 1.6, len: 0.65, dim: 0.1, haze: 0.14, clouds: 0.45, wind: 0.05, patter: 0.35, thunder: false }, // fine and soft: you see it more than hear it
+    shower: { gatherMs: 10000, rainMs: [30000, 50000], drops: 160, width: 1.8, len: 0.85, dim: 0.22, haze: 0.28, clouds: 0.75, wind: 0.2, patter: 0.7, thunder: false },
+    downpour: { gatherMs: 11000, rainMs: [30000, 45000], drops: 230, width: 2, len: 1, dim: 0.32, haze: 0.38, clouds: 0.9, wind: 0.35, patter: 0.9, thunder: false }, // hard, but not a storm: no thunder (that is the umbrella's)
+    storm: { gatherMs: 12000, rainMs: [80000, 80000], drops: 260, width: 2, len: 1, dim: 0.45, haze: 0.45, clouds: 1, wind: 0.45, patter: 1, thunder: true }, // the umbrella's (umbrella.js): the light to 0.55, short of dusk
+  }
   const THUNDER_MS = [8000, 14000] // between one far thunder and the next, while it rains
   const FLASH = 0.16 // how bright a far flash is, over the picture: faint
   const RUMBLE_AFTER_MS = 1200 // the rumble comes this long after its flash: it is far off
@@ -38,15 +48,16 @@ const Storm = (() => {
   const RUMBLE_S = 1.4
   const RAIN_SOUND_S = 3 // the rain's patter, played this long at a time, again and again
   const WET_AFTER_MS = 45000 // the grass stays wet this long after: the snail's outing
-  const DROPS = 260 // drops falling at once, across the view
   const DROP_SPEED = [900, 1300] // scene units a second
   const GROUND = [700, 880] // where a drop lands, near the back to the front
   const CLOUDS = [[150, 120, 260], [560, 80, 320], [1000, 130, 280], [1420, 90, 300], [1800, 120, 260]] // where each cloud sits once in: x, y, half its width
   const where = Debug.random('meadow-rain') // where each drop falls
   const thunderTimes = Debug.random('meadow-thunder')
+  const howLong = Debug.random('meadow-rain-length') // how long a shower rains: its own, so the drops and thunder don't shift
   const between = ([a, b], r) => a + r * (b - a)
 
-  const state = { phase: null, cover: 0, since: 0, nextThunder: 0, nextPatter: 0 } // phase: 'gathering', 'raining', 'clearing' or null
+  const state = { phase: null, kind: null, cover: 0, since: 0, rainMs: 0, nextThunder: 0, nextPatter: 0 } // phase: 'gathering', 'raining', 'clearing' or null; kind: a STRENGTHS name
+  const strength = () => STRENGTHS[state.kind || 'storm']
   let clouds = null
   let bolts = null // behind the far hills: a bolt never comes down onto the meadow
   let haze = null
@@ -92,7 +103,7 @@ const Storm = (() => {
   }
 
   function newDrop(top = false) {
-    return { x: between([-200, 1800], where()), y: top ? between([-300, -100], where()) : between([-300, 880], where()), v: between(DROP_SPEED, where()), len: between([18, 30], where()), lands: between(GROUND, where()) }
+    return { x: between([-200, 1800], where()), y: top ? between([-300, -100], where()) : between([-300, 880], where()), v: between(DROP_SPEED, where()), len: between([18, 30], where()) * strength().len, lands: between(GROUND, where()) }
   }
 
   /** Is (x, y), on the screen in the meadow's units, under a shelter? */
@@ -105,7 +116,7 @@ const Storm = (() => {
     if (!raining) return
     ctx.setTransform(...scale) // the meadow's units, as the picture is scaled
     ctx.strokeStyle = 'rgba(214, 230, 245, 0.7)'
-    ctx.lineWidth = 2
+    ctx.lineWidth = strength().width
     ctx.lineCap = 'round'
     ctx.beginPath()
     for (const d of drops) {
@@ -135,7 +146,7 @@ const Storm = (() => {
 
   function startRain() {
     raining = true
-    drops = Array.from({ length: DROPS }, () => newDrop())
+    drops = Array.from({ length: strength().drops }, () => newDrop())
     canvas.style.display = 'block'
     sizeCanvas()
     lastFrame = Clock.now()
@@ -179,33 +190,34 @@ const Storm = (() => {
     drawn.cover = k
     drawn.phase = state.phase
     clouds.style.visibility = k > 0 ? 'visible' : 'hidden'
+    clouds.style.opacity = strength().clouds
     const off = state.phase === 'clearing' ? (1 - k) * 2000 : -(1 - k) * 2000
     clouds.style.transform = `translateX(${off.toFixed(0)}px)`
-    haze.setAttribute('opacity', (HAZE * k).toFixed(3))
+    haze.setAttribute('opacity', (strength().haze * k).toFixed(3))
   }
 
   function tick() {
     if (!state.phase) return
     const t = Clock.now()
     if (state.phase === 'gathering') {
-      state.cover = Math.min(1, state.cover + TICK_MS / GATHER_MS)
+      state.cover = Math.min(1, state.cover + TICK_MS / strength().gatherMs)
       if (state.cover >= 1) begin()
     } else if (state.phase === 'raining') {
       World.wet(-500, 4500, TICK_MS * 3) // the whole meadow, while it rains
-      if (t >= state.nextThunder) {
+      if (strength().thunder && t >= state.nextThunder) {
         thunder()
         state.nextThunder = t + between(THUNDER_MS, thunderTimes())
       }
       if (t >= state.nextPatter) {
-        Sound.water(RAIN_SOUND_S + 0.4, { soft: true })
+        Sound.water(RAIN_SOUND_S + 0.4, { soft: strength().patter })
         state.nextPatter = t + RAIN_SOUND_S * 1000
       }
-      if (t - state.since >= RAIN_MAX_MS) clear()
+      if (t - state.since >= state.rainMs) clear()
     } else {
       state.cover = Math.max(0, state.cover - TICK_MS / CLEAR_MS)
       if (state.cover <= 0) {
         state.phase = null
-        Debug.trace('storm', { over: true })
+        Debug.trace('storm', { over: true, how: state.kind })
       }
     }
     drawSky()
@@ -215,19 +227,22 @@ const Storm = (() => {
   function begin() {
     state.phase = 'raining'
     state.since = Clock.now()
+    state.rainMs = between(strength().rainMs, howLong())
     state.nextThunder = Clock.now() + 1500
     state.nextPatter = 0
     World.wet(-500, 4500, TICK_MS * 3) // wet with the first drop
-    Debug.trace('storm', { rain: true })
+    Debug.trace('storm', { rain: true, how: state.kind })
     startRain()
   }
 
-  /** The clouds roll in: the storm comes (umbrella.js). */
-  function gather() {
+  /** The clouds roll in: the storm comes (umbrella.js), or, `kind` lighter, autumn's rain (showers.js). */
+  function gather(kind = 'storm') {
     if (state.phase) return
     state.phase = 'gathering'
-    Debug.trace('storm', { gathers: true })
-    firstRumble = Clock.after(GATHER_MS / 3, () => Sound.rumble(RUMBLE_S)) // the first, far off, as they come
+    state.kind = kind
+    drawn.cover = -1 // its own clouds' darkness
+    Debug.trace('storm', { gathers: true, how: kind })
+    if (strength().thunder) firstRumble = Clock.after(strength().gatherMs / 3, () => Sound.rumble(RUMBLE_S)) // the first, far off, as they come
   }
 
   /** The rain stops and the clouds roll on; the grass stays wet a while. */
@@ -267,11 +282,16 @@ const Storm = (() => {
     setup, gather, clear, night,
     /** A place no rain falls (the umbrella): x and half its width in the meadow's units, top its canopy; null removes it. */
     shelter(s) { shelters = s ? [s] : [] },
+    STRENGTHS,
     /** 'gathering', 'raining', 'clearing' or null. */
     get phase() { return state.phase },
+    /** How hard it rains now, or last rained: a STRENGTHS name. */
+    get kind() { return state.kind },
+    /** How much it gets the wind up now (weather.js): 0 clear to its strength's wind under full cover. */
+    get windUp() { return state.phase ? strength().wind * state.cover : 0 },
     /** How far the storm is in: 0 none to 1 the full storm (the wind and the light read it). */
     get cover() { return state.cover },
     /** The light, at most, under the storm now. */
-    get light() { return 1 - DIM * state.cover },
+    get light() { return 1 - strength().dim * state.cover },
   }
 })()

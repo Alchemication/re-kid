@@ -42,6 +42,17 @@ sounds he has judged are in.
      and whether each mood's two takes feel like one mood.
    - Autumn opens about 0.5 s slower on a phone than spring (the recolour);
      measure on the iPhone.
+   - **Rain now and then** (Adam, 2026-11-10; `showers.js`, `?rain=drizzle`,
+     `shower` or `downpour`): about one autumn play in three, a drizzle
+     most often, a shower sometimes, a downpour rarely; no thunder; no
+     encounter comes while it rains. Judge how often (`CHANCE`), how long
+     (storm.js `STRENGTHS` `rainMs`), whether the drizzle shows at phone
+     size, and the patter's level at each strength.
+   - **The evening's moon** (Adam, 2026-11-10; `moons.js`, `?moon=full&day=40`):
+     a crescent, a half or a full moon each play, each varied; on a full
+     moon a wolf howls once, far off (a stand-in made in code until Adam
+     picks takes: nine on the sound board, folder `krtek-howl`). Judge the
+     moons, the full moon's glow, and whether the howl is calm enough.
    - Not built, ideas still open: the mouse on the swing with him (the
      film's), an autumn bed for the music, a winter.
    - `TestMeadowOak::test_a_tap_on_it_peeks_a_new_way_each_time` failed once

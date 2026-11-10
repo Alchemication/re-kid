@@ -580,6 +580,17 @@ SOUNDS: dict[str, dict] = {
             "a single goose honk heard far off across fields, soft and distant",
         ],
     },
+    "krtek-howl": {
+        "world": "krtek",
+        "id": "howl",
+        "for": "A full moon's evening in the meadow (moons.js): a wolf howls once, far off behind the hills, as the mole settles for the night. Calm and a little wistful, never scary: the children are going to bed. About three seconds.",
+        "seconds": 3.5,
+        "prompts": [
+            "a single lone wolf howling far away across hills on a quiet moonlit night, distant, soft, calm",
+            "a distant wolf howl echoing faintly over a valley at night, gentle and long, heard from far off",
+            "one long soft wolf howl very far in the distance, peaceful night, crickets faint",
+        ],
+    },
     # Reksio's yard (2026-11-08): the sounds made in code Adam judged bad,
     # "not great" or "so so" on made_in_code.html (his notes in each "for").
     "cluck": {

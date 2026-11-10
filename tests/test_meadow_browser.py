@@ -1472,6 +1472,63 @@ class TestMeadowBulldozer:
         assert went - came < 0.5, f"he went to see {went - came:.1f} s after it came"
 
 
+class TestMeadowShowers:
+    """Autumn's rain now and then (showers.js, storm.js STRENGTHS): a drizzle,
+    a shower or a downpour, no thunder; it clears by itself, and no encounter
+    comes while it rains."""
+
+    def test_a_shower_comes_and_clears_by_itself_with_no_thunder(
+        self, meadow: callable
+    ) -> None:
+        m = meadow("seed=1&season=autumn&props=&rain=shower")
+        m.wake()
+        m.wait("Storm.phase === 'raining'", 40_000)
+        assert m.state()["rain"] == "shower"
+        assert m.page.evaluate("World.isWet(900)"), "the meadow wet under it"
+        m.wait("Storm.phase === null", 120_000)
+        trace = m.page.evaluate("meadowGame.trace()")
+        assert traced(m, "shower") == ["shower"]
+        assert " thunder " not in trace, "thunder is the storm's alone"
+        m.wait_free()
+        m.assert_settled()
+
+    def test_no_encounter_comes_while_it_rains(self, meadow: callable) -> None:
+        m = meadow("seed=1&season=autumn&props=hedgehog&rain=downpour")
+        m.wake()
+        m.wait("Storm.phase === 'raining'", 40_000)
+        m.wait("World.state.hour >= 9.5", 60_000)
+        assert m.state()["things"]["hedgehog"].startswith("at "), (
+            "the hedgehog waits for the rain to clear"
+        )
+        m.wait("Storm.phase === null", 120_000)
+        arrived(m, "hedgehog")
+
+
+class TestMeadowMoon:
+    """The evening's moon (moons.js): drawn each play, a crescent, a half or a
+    full moon; on a full moon's evening a wolf howls once, far off."""
+
+    def test_a_full_moon_brings_one_howl_and_another_moon_none(
+        self, meadow: callable
+    ) -> None:
+        for kind, howls in (("full", 1), ("crescent", 0)):
+            m = meadow(f"seed=2&props=&day=40&moon={kind}")
+            m.wake()
+            m.wait("World.state.hour >= 19.95", 90_000)
+            assert m.page.evaluate("document.getElementById('moon').dataset.kind") == kind
+            wolves = m.page.evaluate(
+                "meadowGame.trace().split('\\n').filter((l) => l.includes(' wolf ')).length"
+            )
+            assert wolves == howls, (kind, wolves)
+
+    def test_plays_draw_different_moons(self, meadow: callable) -> None:
+        kinds = set()
+        for seed in range(1, 9):
+            m = meadow(f"seed={seed}&still")
+            kinds.add(m.page.evaluate("meadowGame.state().moon"))
+        assert kinds == {"crescent", "half", "full"}, kinds
+
+
 class TestMeadowStorm:
     """The storm and the umbrella (umbrella.js, storm.js): the child picks
     whom he waves in; the last in squeezes him out into the rain, and he pops

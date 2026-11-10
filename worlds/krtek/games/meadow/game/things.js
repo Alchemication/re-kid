@@ -149,7 +149,7 @@ const Things = (() => {
   const quiet = (hour, lastDone, sunset) => (lastDone !== null && hour < lastDone + REST_HOURS) || hour > sunset - LAST_HOURS
 
   /** Whether the stage is free at this hour for something to happen (the next encounter, or the eclipse):
-   * none out and not done, nothing else on (the eclipse: api.elsewhere), and not in a quiet spell. */
+   * none out and not done, nothing else on (the eclipse, a shower: api.elsewhere), and not in a quiet spell. */
   const open = (hour) => !Object.values(all).some((e) => e.out && !e.done) && !api?.elsewhere?.() && !quiet(hour, lastDone, Day.SUNSET)
 
   /** Decide this play's encounters; `meadow` lends its run(), free(), alone(), music(), notice(),
@@ -169,7 +169,7 @@ const Things = (() => {
     // (or the eclipse is over), whichever is later
     hourNow = hour
     for (const e of Object.values(all)) relief(e)
-    if (api.elsewhere?.()) lastDone = hour // the eclipse on: its quiet spell runs from its end
+    if (api.elsewhere?.()) lastDone = hour // the eclipse or a shower on: its quiet spell runs from its end
     const next = plan.map((p) => ({ e: all[p.name], at: p.at })).find(({ e }) => !e.out)
     if (next && hour >= next.at && open(hour)) arrive(next.e)
     // left alone, he goes to a waiting thing himself (or tries its next choice); not after sunset,
