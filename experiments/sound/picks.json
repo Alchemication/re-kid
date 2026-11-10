@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-10T17:43:26.546Z",
+ "saved": "2026-11-10T18:33:34.873Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -2977,6 +2977,83 @@
    "folder": "krtek-howl",
    "made": "2026-11-10",
    "sound": "krtek-howl",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-drips/09.mp3",
+   "source": "eleven",
+   "prompt": "a brief patter of drops falling from a tree onto leaves after a rain shower",
+   "wording": 3,
+   "seed": 3,
+   "folder": "krtek-rain",
+   "made": "2026-11-10",
+   "sound": "krtek-drips",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-drips/03.mp3",
+   "source": "eleven",
+   "prompt": "a tree branch shaken after rain, a short shower of water drops falling on leaves and grass",
+   "wording": 1,
+   "seed": 3,
+   "folder": "krtek-rain",
+   "made": "2026-11-10",
+   "sound": "krtek-drips",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-drips/06.mp3",
+   "source": "eleven",
+   "prompt": "raindrops pattering down from wet leaves for a moment, soft, close",
+   "wording": 2,
+   "seed": 3,
+   "folder": "krtek-rain",
+   "made": "2026-11-10",
+   "sound": "krtek-drips",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-puddle/04.mp3",
+   "source": "eleven",
+   "prompt": "a child's small boots stomping into a shallow rain puddle, one splash, close up",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek-rain",
+   "made": "2026-11-10",
+   "sound": "krtek-puddle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-puddle/06.mp3",
+   "source": "eleven",
+   "prompt": "a little jump into a puddle, a wet slap and a splash of water",
+   "wording": 2,
+   "seed": 3,
+   "folder": "krtek-rain",
+   "made": "2026-11-10",
+   "sound": "krtek-puddle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-puddle/03.mp3",
+   "source": "eleven",
+   "prompt": "a little jump into a puddle, a wet slap and a splash of water",
+   "wording": 2,
+   "seed": 1,
+   "folder": "krtek-rain",
+   "made": "2026-11-10",
+   "sound": "krtek-puddle",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-puddle/08.mp3",
+   "source": "eleven",
+   "prompt": "small feet landing in a shallow puddle, a playful splash",
+   "wording": 3,
+   "seed": 2,
+   "folder": "krtek-rain",
+   "made": "2026-11-10",
+   "sound": "krtek-puddle",
    "verdict": "keep"
   }
  ]
