@@ -48,11 +48,18 @@ sounds he has judged are in.
      encounter comes while it rains. Judge how often (`CHANCE`), how long
      (storm.js `STRENGTHS` `rainMs`), whether the drizzle shows at phone
      size, and the patter's level at each strength.
+   - **What he does with the rain** (Adam, 2026-11-10, his ideas, the
+     designs mine; `rainplay.js`, try `?season=autumn&rain=downpour`): a
+     tap on him in a shower, a leaf lands on his head as an umbrella (a
+     downpour tips it down his back); puddles to stomp dry; the
+     chestnut's drips after; rings on the pool, the frog after; a
+     rainbow after a downpour, and a shower one time in four. Judge the leaf at phone size, the
+     stomps, how long the puddles last (`DRY_MS`), and the new sounds
+     (puddle, drips: takes on the sound board, folder `krtek-rain`).
    - **The evening's moon** (Adam, 2026-11-10; `moons.js`, `?moon=full&day=40`):
      a crescent, a half or a full moon each play, each varied; on a full
-     moon a wolf howls once, far off (a stand-in made in code until Adam
-     picks takes: nine on the sound board, folder `krtek-howl`). Judge the
-     moons, the full moon's glow, and whether the howl is calm enough.
+     moon a wolf howls once, far off (two takes Adam picked). Judge the
+     moons, the full moon's glow, and the howl's level in play.
    - Not built, ideas still open: the mouse on the swing with him (the
      film's), an autumn bed for the music, a winter.
    - `TestMeadowOak::test_a_tap_on_it_peeks_a_new_way_each_time` failed once

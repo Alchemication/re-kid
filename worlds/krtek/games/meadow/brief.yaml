@@ -322,6 +322,16 @@ scenes:
   sound:
     text: The rain's patter, soft for a drizzle, louder as it rains harder.
     origin: invented
+- id: rain-play
+  action:
+    text: In or after a shower, tap him, a puddle, or the chestnut.
+    origin: invented
+  result:
+    text: In a shower, a tap on him and he hunches, hands over his head, as a big leaf comes see-sawing down on the breeze and lands on his head, a little umbrella; he peeks up at it, pleased. Taps after - he tips it and the water runs off on to his nose (a sneeze), or twirls it, drops flying. In a downpour it fills and tips its water down his back. When the rain is over he takes it off and it lies in the grass. While it rains, puddles fill on free ground (one small one in a drizzle, two in a shower or downpour) and dry away after; a tap on one and he stomps in it, a different way each time - a hop, a careful toe then a hop, a big jump that soaks him - each stomp splashing some out, until it is gone and he looks down for it, puzzled. For a minute after the rain, a tap on the chestnut has him pat its trunk and its drops come pattering down on him (under his leaf he stays dry, and is proud of it). Rings spread on the pool where the drops land, the frog croaks a few times once it is over, and after a downpour (and some showers) a rainbow. Not from the films (Adam, 2026-11-10).
+    origin: invented
+  sound:
+    text: The splash of a puddle stomped, the patter of the chestnut's drips, a sneeze, his giggle, "ooh" and "hm".
+    origin: invented
 - id: moon
   action:
     text: Nothing; the evening comes.

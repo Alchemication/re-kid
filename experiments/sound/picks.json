@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-08T17:58:48.912Z",
+ "saved": "2026-11-10T17:43:26.546Z",
  "picks": [
   {
    "file": "moss/buzz/08.wav",
@@ -2955,6 +2955,28 @@
    "folder": "krtek-autumn-2026-11-08",
    "made": "2026-11-08",
    "sound": "krtek-honk",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-howl/08.mp3",
+   "source": "eleven",
+   "prompt": "one long soft wolf howl very far in the distance, peaceful night, crickets faint",
+   "wording": 3,
+   "seed": 1,
+   "folder": "krtek-howl",
+   "made": "2026-11-10",
+   "sound": "krtek-howl",
+   "verdict": "keep"
+  },
+  {
+   "file": "eleven/krtek-howl/01.mp3",
+   "source": "eleven",
+   "prompt": "a single lone wolf howling far away across hills on a quiet moonlit night, distant, soft, calm",
+   "wording": 1,
+   "seed": 1,
+   "folder": "krtek-howl",
+   "made": "2026-11-10",
+   "sound": "krtek-howl",
    "verdict": "keep"
   }
  ]

@@ -19,7 +19,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Moons, Showers, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Swing, Turn, View, Weather, Woodpecker, World */
+/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Moons, RainPlay, Showers, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Swing, Turn, View, Weather, Woodpecker, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -355,6 +355,7 @@ const meadowGame = (() => {
       Debug.check('the owl sits upright, its face to us, once he is free', !Owl.posing, {})
       Debug.check('the woodpecker is done knocking once he is free', !Woodpecker.posing, {})
       Debug.check('a free mole is off the swing', !Swing.on, {})
+      Debug.check('no drop or leaf of the rain\'s is in the air once he is free', !RainPlay.posing, {})
       Debug.check('the twig is down once he is free', !Fence.holding, {})
       Debug.check('nobody is left about behind the fence once he is free', Fence.about === 0, { about: Fence.about })
       Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
@@ -484,7 +485,8 @@ const meadowGame = (() => {
     return trouble ? Things.use(trouble) : run(name, play, onCut)
   }
 
-  async function tapMole() {
+  async function tapMole(alive) {
+    if (RainPlay.wants) return RainPlay.tapHim(alive) // in a shower: a leaf for an umbrella, and his ways under it
     let how = nextAnswer()
     if (ANSWERS[how][0] === 'ahoj' && Clock.now() - helloAt < HELLO_AGAIN_MS) how = nextAnswer() // he has just said hello: another answer, the wave in a later round
     const [said, act] = ANSWERS[how]
@@ -633,6 +635,7 @@ const meadowGame = (() => {
     cutShort()
     Things.night()
     Storm.night() // a shower's too: gone under the closing circle
+    RainPlay.night()
     Fence.night()
     game.gesture = 'bedtime'
     const car = Things.get('car')
@@ -672,10 +675,11 @@ const meadowGame = (() => {
 
   const INTENTS = [
     [/^wake$/, () => wake()],
-    [/^tap mole$/, () => answer('tap mole', tapMole)],
+    [/^tap mole$/, () => answer('tap mole', tapMole, RainPlay.restore)],
     [/^sniff$/, () => answer('sniff', sniff)],
     [/^paddle$/, () => answer('paddle', paddle)],
-    [/^peek$/, () => answer('peek', Oak.peek, () => { Oak.restore(); Owl.restore() })], // a call in the arch may have woken the owl
+    [/^peek$/, () => answer('peek', RainPlay.dripping ? RainPlay.drips : Oak.peek, () => { Oak.restore(); Owl.restore(); RainPlay.restore() })], // a call in the arch may have woken the owl; just after rain the chestnut drips
+    [/^puddle (\d)$/, (m) => answer('puddle', (alive) => RainPlay.stomp(Number(m[1]), alive), RainPlay.restore)],
     [/^owl$/, () => answer('owl', Owl.visit, Owl.restore)],
     [/^woodpecker$/, () => answer('woodpecker', Woodpecker.visit, Woodpecker.restore)],
     [/^swing$/, () => answer('swing', Swing.ride, Swing.restore)],
@@ -816,6 +820,7 @@ const meadowGame = (() => {
     if (target.closest('.mole-carry') && Things.holder()) return `use ${Things.holder()}`
     if (target.closest('.mole')) return game.gesture && Things.get(game.gesture) ? `use ${game.gesture}` : 'tap mole'
     if (target.closest('#sun') && eclipseCover()) return 'tap sun'
+    if (target.closest('.puddle-hit')) return `puddle ${target.closest('.puddle-hit').dataset.puddle}`
     const place = PLACE_HITS.find(([sel]) => target.closest(sel))
     if (place) return place[1]
     if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`
@@ -877,6 +882,7 @@ const meadowGame = (() => {
   Friends.setup(document.getElementById('friends'))
   Spring.setup(document.getElementById('spring'), () => game.hour)
   Nest.setup(document.getElementById('spring'), () => game.hour)
+  RainPlay.setup({ things: document.getElementById('things'), front: document.getElementById('oak-front'), sky: document.getElementById('far-things'), ground: document.getElementById('oak-ground') }, { goTo, rounds, run, free: () => game.awake && !game.ended && !game.gesture })
   Oak.setup(document.getElementById('oak'), document.getElementById('oak-front'), document.getElementById('oak-ground'), { goTo, rounds, dropHat })
   Owl.setup(document.getElementById('oak'), { goTo, rounds })
   Swing.setup(document.getElementById('oak'), { goTo, rounds }) // autumn's swing under the chestnut

@@ -296,3 +296,9 @@ effects:
     prompt: 'wild geese honking far away high in the sky, one or two soft honks, distant, calm autumn day'
   - file: honk/05.mp3
     prompt: 'a flock of geese flying overhead in the distance, faint honking'
+- id: howl
+  takes:
+  - file: howl/01.mp3
+    prompt: 'a single lone wolf howling far away across hills on a quiet moonlit night, distant, soft, calm'
+  - file: howl/08.mp3
+    prompt: 'one long soft wolf howl very far in the distance, peaceful night, crickets faint'

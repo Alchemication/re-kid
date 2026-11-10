@@ -493,6 +493,19 @@ const Sound = (() => {
     hiss(0.05, 0.25, 2400, 1.5, 0.15)
   }
 
+  /** His feet stomping into a puddle: a wet slap and a splash. */
+  function puddle() {
+    if (!ready() || recorded('puddle')) return
+    hiss(0, 0.08, 500, 1.2, 0.25)
+    hiss(0.03, 0.3, 1500, 1, 0.18)
+  }
+
+  /** Drops shaken down from a tree after rain: a short patter on the leaves and on him. */
+  function drips() {
+    if (!ready() || recorded('drips')) return
+    for (let t = 0; t < 0.9; t += 0.05 + Math.random() * 0.06) hiss(t, 0.03, 2500 + Math.random() * 2000, 4, 0.04)
+  }
+
   /** A brush, swished. */
   function swish() {
     if (!ready() || recorded('swish')) return
@@ -559,5 +572,5 @@ const Sound = (() => {
     listen(fn) { heard = fn },
     /** Is sound on (after the first tap, and not held)? */
     get running() { return ready() && ctx.state === 'running' },
-    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy, drum, peck, snuffle, honk, howl }
+    say, hushEchoes, ECHO_GAP_S, dig, pop, bonk, water, bell, snicker, growl, croak, roll, knock, tock, squeak, sneeze, peep, crack, cluck, plink, tug, whoosh, rumble, splash, swish, clunk, boo, yelp, crank, vroom, wind, chirp, heron, grunt, snort, hoot, hootSleepy, drum, peck, snuffle, honk, howl, puddle, drips }
 })()

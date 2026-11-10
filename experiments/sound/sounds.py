@@ -591,6 +591,28 @@ SOUNDS: dict[str, dict] = {
             "one long soft wolf howl very far in the distance, peaceful night, crickets faint",
         ],
     },
+    "krtek-puddle": {
+        "world": "krtek",
+        "id": "puddle",
+        "for": "After autumn rain in the meadow (rainplay.js): the little mole hops into a puddle with both feet, splash. Playful, small, close up. Under a second.",
+        "seconds": 0.8,
+        "prompts": [
+            "a child's small boots stomping into a shallow rain puddle, one splash, close up",
+            "a little jump into a puddle, a wet slap and a splash of water",
+            "small feet landing in a shallow puddle, a playful splash",
+        ],
+    },
+    "krtek-drips": {
+        "world": "krtek",
+        "id": "drips",
+        "for": "After the rain the mole pats the chestnut's trunk and its drops come pattering down on him (rainplay.js): a short shower of drops on leaves, about a second, soft.",
+        "seconds": 1.2,
+        "prompts": [
+            "a tree branch shaken after rain, a short shower of water drops falling on leaves and grass",
+            "raindrops pattering down from wet leaves for a moment, soft, close",
+            "a brief patter of drops falling from a tree onto leaves after a rain shower",
+        ],
+    },
     # Reksio's yard (2026-11-08): the sounds made in code Adam judged bad,
     # "not great" or "so so" on made_in_code.html (his notes in each "for").
     "cluck": {

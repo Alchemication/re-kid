@@ -299,7 +299,7 @@ heats the laptop for minutes.
 | `input.js`, taps and keys | `"TestRealInput"` |
 | screen size, `painting.js`, `game.css` stage | `"TestScreens"` |
 | `layout.js`, anything shared | the whole suite |
-| the meadow's encounters (`things.js`, `car.js`, `egg.js`, `paint.js`, `poles.js`, `rain.js`, `umbrella.js`, `storm.js`, `afterrain.js`) and autumn's showers (`showers.js`, `storm.js`) | `"TestMeadowEncounters and <name>"`, plus its own class where it has one (`"TestMeadowCar"`, `"TestMeadowEgg"`, `"TestMeadowFox"` for the paint, `"TestMeadowBulldozer"` for the poles, `"TestMeadowStorm"`, `"TestMeadowShowers"`) |
+| the meadow's encounters (`things.js`, `car.js`, `egg.js`, `paint.js`, `poles.js`, `rain.js`, `umbrella.js`, `storm.js`, `afterrain.js`) and autumn's showers (`showers.js`, `storm.js`, `rainplay.js`) | `"TestMeadowEncounters and <name>"`, plus its own class where it has one (`"TestMeadowCar"`, `"TestMeadowEgg"`, `"TestMeadowFox"` for the paint, `"TestMeadowBulldozer"` for the poles, `"TestMeadowStorm"`, `"TestMeadowShowers"`, `"TestMeadowRainPlay"`) |
 | the meadow's oak (`oak.js`), its peeks | `"TestMeadowOak"` |
 | the owl in the oak (`owl.js`) | `"TestMeadowOwl or TestMeadowOak"` |
 | the meadow's autumn (`autumn.js`, the woodpecker `woodpecker.js`, the hedgehog `hedgehog.js`, `hedgeart.js`) | `"TestMeadowAutumn"`, the hedgehog also `"TestMeadowEncounters and hedgehog"` |

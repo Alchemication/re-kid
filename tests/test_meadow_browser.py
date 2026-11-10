@@ -1504,6 +1504,88 @@ class TestMeadowShowers:
         arrived(m, "hedgehog")
 
 
+class TestMeadowRainPlay:
+    """What he does with autumn's rain (rainplay.js): a leaf for an umbrella,
+    puddles to stomp in, the chestnut's drips after, rings on the pool."""
+
+    SHOWER = "seed=1&season=autumn&props=&rain=shower"
+
+    def test_a_tap_in_the_rain_brings_a_leaf_he_takes_off_after(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(self.SHOWER)
+        m.wake()
+        m.wait("Storm.phase === 'raining'", 40_000)
+        m.wait_free()
+        m.do("tap mole")
+        m.wait("RainPlay.leaf", 20_000)
+        m.wait_free()
+        m.do("tap mole")  # under it now: one of his ways
+        m.wait_free()
+        assert traced(m, "under the leaf"), "a tap with the leaf on: a way under it"
+        m.wait("Storm.phase === null && !RainPlay.leaf", 120_000)
+        m.wait_free()
+        assert m.page.locator(".rain-leaf-lying").count() == 1, "it lies in the grass"
+        m.assert_settled()
+
+    def test_puddles_fill_and_he_stomps_one_dry(self, meadow: callable) -> None:
+        m = meadow(self.SHOWER)
+        m.wake()
+        m.wait("Storm.phase === null && RainPlay.puddles[0] > 0.5", 120_000)
+        m.wait_free()
+        m.do("go to 1800")  # the puddle in view
+        m.wait_free()
+        box = m.page.locator(".puddle-hit[data-puddle='0']").bounding_box()
+        m.page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] * 0.7)
+        assert m.page.evaluate("Debug.inputs.at(-1).intent") == "puddle 0"
+        for _ in range(4):
+            m.wait_free()
+            if m.page.evaluate("RainPlay.puddles[0]") <= 0.02:
+                break
+            m.do("puddle 0")
+        m.wait_free()
+        assert m.page.evaluate("RainPlay.puddles[0]") <= 0.02
+        assert '"gone":0' in m.page.evaluate("meadowGame.trace()")
+        assert len(set(traced(m, "puddle")) - {None}) >= 2, "a different stomp each time"
+        m.assert_settled()
+
+    def test_after_rain_the_chestnut_drips_once_then_peeks_again(
+        self, meadow: callable
+    ) -> None:
+        m = meadow(self.SHOWER)
+        m.wake()
+        m.wait("Storm.phase === null && RainPlay.dripping", 120_000)
+        m.wait_free()
+        m.do("peek")
+        m.wait("RainPlay.posing", 20_000)
+        m.wait_free()
+        assert "drips" in m.page.evaluate("meadowGame.trace()")
+        m.do("peek")
+        m.wait_free()
+        assert traced(m, "peeks"), "the next tap is a peek again"
+        m.assert_settled()
+
+    def test_a_cut_lands_the_falling_leaf_and_drops(self, meadow: callable) -> None:
+        m = meadow(self.SHOWER)
+        m.wake()
+        m.wait("Storm.phase === 'raining'", 40_000)
+        m.wait_free()
+        m.do("tap mole")
+        m.wait("RainPlay.posing", 10_000)
+        m.do("go to 1200")
+        m.wait_free()
+        assert not m.page.evaluate("RainPlay.posing")
+        assert not m.page.evaluate("RainPlay.leaf")
+        m.assert_settled()
+
+    def test_rings_on_the_pool_while_it_rains(self, meadow: callable) -> None:
+        m = meadow(self.SHOWER)
+        m.wake()
+        m.do("go to 2300")
+        m.wait("Storm.phase === 'raining'", 40_000)
+        m.wait("document.querySelectorAll('#spring .water ellipse').length > 0", 10_000)
+
+
 class TestMeadowMoon:
     """The evening's moon (moons.js): drawn each play, a crescent, a half or a
     full moon; on a full moon's evening a wolf howls once, far off."""

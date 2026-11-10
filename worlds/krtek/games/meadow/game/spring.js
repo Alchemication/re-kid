@@ -14,7 +14,9 @@
 // - a fish, some plays: now and then it leaps out of the pool and back in;
 // - a bullfinch, now and then: it flies down to the pool's edge, drinks and
 //   flies off;
-// and rings spread on the water where anything touches it.
+// and rings spread on the water where anything touches it: in the rain, a
+// ring for each drop that lands, more the harder it rains; and once the rain
+// is over, the frog (if it is on its pad) croaks a few times, glad of it.
 //
 // They live on the world model (docs/WORLD_MODEL.md): the pool offers a
 // drink at its edges, which is what brings the bullfinch down; the finch is
@@ -27,7 +29,7 @@
 // the fish, ambient.js for the flyers), with its own random stream, so it
 // doesn't shift the rest of the play. Nothing at night.
 
-/* global Ambient, Clock, Creature, Debug, Friends, Layout, Motion, Sound, World */
+/* global Ambient, Clock, Creature, Debug, Friends, Layout, Motion, Sound, Storm, View, World */
 /* exported Spring */
 const Spring = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -60,7 +62,10 @@ const Spring = (() => {
     haunt: [POOL.x - POOL.rx * 0.8, POOL.x + POOL.rx * 0.8],
     pauseMs: [500, 1300], // hovering
   }
+  const RAIN_RINGS_MS = { drizzle: 700, shower: 320, downpour: 180, storm: 180 } // in the rain, a drop's rings this often (storm.js STRENGTHS)
+  const AFTER_RAIN_CROAKS_MS = [2500, 8000, 15000] // the rain over: the frog croaks at these times after
   const life = Debug.random('spring-life')
+  const drops = Debug.random('spring-rain') // where the rain's drops land on the pool: its own, so the life stays put
   const pick = (list) => list[Math.floor(life() * list.length)]
   const between = ([a, b]) => a + life() * (b - a)
   let layer = null
@@ -245,6 +250,35 @@ const Spring = (() => {
     })
   }
 
+  /** In the rain, rings where drops land (only while the pool is in view: they cost); after it, the frog croaks. */
+  function rain() {
+    let wasRaining = false
+    let lastRing = 0
+    Clock.every(90, () => {
+      const raining = Storm.phase === 'raining'
+      if (raining && Clock.now() - lastRing >= RAIN_RINGS_MS[Storm.kind] && Math.abs(POOL.x - (View.x + Layout.VIEW_W / 2)) < Layout.VIEW_W / 2 + POOL.rx) {
+        lastRing = Clock.now()
+        const a = drops() * Math.PI * 2
+        const d = Math.sqrt(drops())
+        ring(POOL.x + Math.cos(a) * d * (POOL.rx - 20), POOL.y + Math.sin(a) * d * (POOL.ry - 8))
+      }
+      if (wasRaining && !raining && Storm.phase === 'clearing') {
+        for (const ms of AFTER_RAIN_CROAKS_MS) Clock.after(ms, () => { if (frog && !frog.in && hourNow() < NIGHT_FROM) Sound.from(PAD.x, Sound.croak) })
+        Debug.trace('spring', { what: 'frog after rain', frog: !!frog })
+      }
+      wasRaining = raining
+    })
+  }
+
+  /** One small ring, where a drop lands. */
+  function ring(x, y) {
+    const r = el('ellipse', { cx: x.toFixed(0), cy: y.toFixed(0), rx: 5, ry: 1.8, fill: 'none', stroke: '#dde8ff', 'stroke-width': 1.6 }, water)
+    r.style.transformBox = 'fill-box'
+    r.style.transformOrigin = 'center'
+    Motion.endAt(r, [{ transform: 'scale(1)', opacity: 0.85 }, { transform: 'scale(3.5)', opacity: 0 }], { duration: 900, easing: 'ease-out' })
+      .then(() => r.remove(), () => r.remove())
+  }
+
   /** Draw it into `into` (the spring's group); hour() the meadow's hour. */
   function setup(into, hour) {
     layer = into
@@ -259,6 +293,7 @@ const Spring = (() => {
       frog = drawFrog()
       listen()
     }
+    rain()
     next()
   }
 
