@@ -1546,7 +1546,9 @@ class TestMeadowRainPlay:
         m.wait_free()
         assert m.page.evaluate("RainPlay.puddles[0]") <= 0.02
         assert '"gone":0' in m.page.evaluate("meadowGame.trace()")
-        assert len(set(traced(m, "puddle")) - {None}) >= 2, "a different stomp each time"
+        assert len(set(traced(m, "puddle")) - {None}) >= 2, (
+            "a different stomp each time"
+        )
         m.assert_settled()
 
     def test_after_rain_the_chestnut_drips_once_then_peeks_again(
@@ -1597,7 +1599,9 @@ class TestMeadowMoon:
             m = meadow(f"seed=2&props=&day=40&moon={kind}")
             m.wake()
             m.wait("World.state.hour >= 19.95", 90_000)
-            assert m.page.evaluate("document.getElementById('moon').dataset.kind") == kind
+            assert (
+                m.page.evaluate("document.getElementById('moon').dataset.kind") == kind
+            )
             wolves = m.page.evaluate(
                 "meadowGame.trace().split('\\n').filter((l) => l.includes(' wolf ')).length"
             )
@@ -2081,7 +2085,9 @@ class TestMeadowSpring:
         m.assert_settled()
 
     def test_its_life_comes_and_goes_all_day(self, meadow: callable) -> None:
-        m = meadow("seed=3&props=&day=120")  # its life comes every 20-45 s: a day long enough for some
+        m = meadow(
+            "seed=3&props=&day=120"
+        )  # its life comes every 20-45 s: a day long enough for some
         m.wake()
         m.wait("meadowGame.state().ended && !meadowGame.state().busy", 150_000)
         assert "spring" in m.page.evaluate("meadowGame.trace()")
@@ -2519,6 +2525,25 @@ class TestMeadowAutumn:
         assert sorted(traced(m, "swing")[:2]) == ["higher", "jump"]
         spring = meadow(STILL)
         assert not spring.page.query_selector(".swing"), "the swing is autumn's"
+
+    def test_the_swing_is_easy_to_hit_and_glows_under_the_mouse(
+        self, meadow: callable
+    ) -> None:
+        """A tap well off the seat and the ropes, about them, is a tap on the
+        swing (Adam, 2026-11-10: too hard to hit); under the mouse it glows."""
+        m = meadow(f"{self.AUTUMN}&props=&woodpecker=0")
+        m.wake()
+        seat = m.page.locator(".swing rect").first.bounding_box()
+        x, y = seat["x"] + seat["width"] / 2 + 25, seat["y"] - seat["height"] * 6
+        m.page.mouse.move(x, y)
+        glow = m.page.evaluate(
+            "getComputedStyle(document.querySelector('.swing')).filter"
+        )
+        assert "drop-shadow" in glow, glow
+        m.page.mouse.click(x, y)
+        assert m.page.evaluate("Debug.inputs.at(-1).intent") == "swing"
+        m.wait_free()
+        m.assert_settled()
 
     def test_the_swing_cut_short_puts_him_down(self, meadow: callable) -> None:
         m = meadow(f"{self.AUTUMN}&props=&woodpecker=0")

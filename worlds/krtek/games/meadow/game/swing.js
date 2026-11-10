@@ -43,9 +43,10 @@ const Swing = (() => {
     g.style.transformOrigin = `${PIVOT[0]}px ${PIVOT[1]}px`
     for (const dx of [-30, 30]) {
       el('path', { d: `M${X + dx} ${PIVOT[1]} L${X + dx} ${SEAT_Y}`, stroke: '#6b5434', 'stroke-width': 3.5 }, g)
-      el('path', { d: `M${X + dx} ${PIVOT[1]} L${X + dx} ${SEAT_Y}`, stroke: 'transparent', 'stroke-width': 26, 'pointer-events': 'stroke' }, g) // a rope is thin: a wider band takes the tap
+      el('path', { d: `M${X + dx} ${PIVOT[1]} L${X + dx} ${SEAT_Y}`, stroke: 'transparent', 'stroke-width': 40, 'pointer-events': 'stroke' }, g) // a rope is thin: a wider band takes the tap
     }
     el('rect', { x: X - 44, y: SEAT_Y, width: 88, height: 11, rx: 3, fill: '#9a6a3c', stroke: INK, 'stroke-width': 2.4 }, g)
+    el('rect', { class: 'swing-hit', x: X - 80, y: SEAT_Y - 230, width: 160, height: 290, fill: 'transparent' }, g) // a toddler's tap anywhere about the seat and the ropes over it (Adam, 2026-11-10: too hard to hit)
   }
 
   /** Swing from `from` degrees to `to`, him on it (lifted, gliding with the seat). */
