@@ -17,7 +17,7 @@ principles:
   origin: invented
 - text: Nothing is a goal, and the end never comes as a surprise. The day is the same length whatever the child does. It runs on things that are always in the meadow, never on a thing that may not be out this play (a prop such as the cuckoo clock), so no encounter is ever needed to reach the ending.
   origin: invented
-- text: The meadow is wider than the screen, and the view follows him, so going somewhere is part of the fun and there is something to come across on the way. He waddles on the grass; tunnelling is a gag of its own, not his way of getting about (Adam, 2026-10-16) - a tap on a molehill will send him down it and up another, far along.
+- text: The meadow is wider than the screen, and the view follows him, so going somewhere is part of the fun and there is something to come across on the way. He waddles on the grass; tunnelling is a gag of its own, not his way of getting about (Adam, 2026-10-16) - a tap on a molehill sends him to it under the grass. Out on the grass he digs himself in first, step by step, and leaves a molehill there, so the meadow gathers a few he can be sent between; tapped in the one he is in, he comes up in another.
   origin: inspired
   refs: ['world:characters[krtek].moves[pops-up-from-molehill].claim', 'world:design_notes[2]']
 - text: Encounters are chains of tries, longer than the yard's (Eliot found those too short), as in the films. He finds a thing, tries it wrong once or twice, then uses it right to help someone; each tap moves the chain on a step, and any tap still cuts it short cleanly. Built one at a time with new-gag, after the day feels right.
@@ -28,7 +28,7 @@ principles:
   origin: invented
 
 controls:
-  text: 'Tap or click: on the meadow, he waddles there; on the mole, an answer with a word (a jump of joy, a wave, peekaboo, a think, a laugh behind his hands); on a butterfly, it flutters off and he looks up after it; on the flower bed, he goes and sniffs a flower; on the spring, he paddles in its pool; on the frog, it plops into the water; on a thing that has come, he goes to it. Keyboard for the grown-up: arrows walk a little way left or right, space does whatever is nearest, any other key gets a word from him.'
+  text: 'Tap or click: on the meadow, he waddles there; on the mole, an answer with a word (a jump of joy, a wave, peekaboo, a think, a laugh behind his hands); on a butterfly, it flutters off and he looks up after it; on a molehill, he tunnels to it, the bump of earth running under the grass; on the flower bed, he goes and sniffs a flower; on the spring, he paddles in its pool; on the frog, it plops into the water; on a thing that has come, he goes to it. Keyboard for the grown-up: arrows walk a little way left or right, space does whatever is nearest, any other key gets a word from him.'
   origin: invented
 
 look:

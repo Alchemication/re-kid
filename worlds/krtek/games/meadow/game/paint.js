@@ -92,7 +92,7 @@
   const HARE_TALL = 150 // how high he stands on the hare's shoulders...
   const MOLE_TALL = 190 // ...and the mouse on his
   const WASH_AT = Layout.SPRING - 40
-  const CARRY_Y = 66 // a tin is carried this high, in front of whoever carries it…
+  const GRIP = 14 // a tin is held this far up its side, in the hands of whoever carries it (friends.js HANDS)…
   const STACK_Y = 50 // …the second on top of the first
   const CARRY_MS = 3200 // carrying them off at the end
   const LOADS = [['mouse', [0]], ['hare', [1, DIP]]] // who carries which tins, in the order they come to them from the left (the hare two, stacked)
@@ -144,7 +144,7 @@
     const g = tins[i]
     g.removeAttribute('data-thing')
     f.held.appendChild(g) // in its hands: down a hole with it
-    g.style.transform = `translate(${k ? 6 : -4}px, ${-CARRY_Y - k * STACK_Y}px)`
+    g.style.transform = `translate(${k ? 6 : -4}px, ${GRIP - k * STACK_Y}px)`
   }
 
   /** They have seen the fox: the hare and the mouse come from the painter's garden with his tins (a
@@ -484,7 +484,7 @@
   async function wash(alive) {
     const pack = [friends.hare, friends.mouse, fox].filter(Boolean)
     for (const f of pack) f.turn(-1) // to him
-    await Promise.all(pack.map((f) => f.bob(2)))
+    await Promise.all(pack.map((f) => f.glad(f.bob(2))))
     if (!alive()) return
     for (const f of pack) f.turn(1) // home, the painter's garden's way
     await Promise.all([...pack.map((f, i) => f.go(offRight() + i * 60, 3600, f.kind === 'hare' ? 36 : 0)), m().goTo(WASH_AT)])

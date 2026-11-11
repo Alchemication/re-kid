@@ -241,7 +241,7 @@ const Fence = (() => {
       Sound.say('ooh', true)
       if (!(await wait(500, alive))) return
       Sound.say('ahoj')
-      await Promise.all([Mole.wave(), hare.bob(2)])
+      await Promise.all([Mole.wave(), hare.glad(hare.bob(2))])
       if (!alive()) return
       out.delete(hare)
       await duck(hare)

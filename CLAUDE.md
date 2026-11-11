@@ -293,6 +293,7 @@ heats the laptop for minutes.
 | left-alone moves (`yard.js` ACTS, `idle.js`) | `"TestActs or TestLeftAlone"` |
 | the dachshund stretch (`stretch.js`, the stretch in `reksio.js`) | `"TestStretch or stretch"` |
 | `creatures.js` | `"TestCritters"` |
+| who answers his bark (`barkback.js`) | `"TestBarkBack"` (and `barkback.test.js`) |
 | `weather.js` / `shower.js` / `wet.js` / `ice.js` | `"drops or shakeOff or puddle or snail or TestIce"` |
 | `day.js` / `sky.js` / `grownup.js` / the end | `"TestWholePlay or TestEvening"` |
 | `debug.js`, recorder, replay | `"TestRecorder or TestDebugOverlay or TestMotion"` |
@@ -304,9 +305,10 @@ heats the laptop for minutes.
 | the owl in the oak (`owl.js`) | `"TestMeadowOwl or TestMeadowOak"` |
 | the meadow's autumn (`autumn.js`, the woodpecker `woodpecker.js`, the hedgehog `hedgehog.js`, `hedgeart.js`) | `"TestMeadowAutumn"`, the hedgehog also `"TestMeadowEncounters and hedgehog"` |
 | the painter's fence at the meadow's right end (`fence.js`) | `"TestMeadowFence"` |
-| the mole (`mole.js`, `moleart.js`), taps on him or the meadow (`meadow.js`) | `"TestMeadowDay or TestMeadowWalking or TestMeadowTapHim or TestMeadowTapsWait"` |
+| the mole (`mole.js`, `moleart.js`), his molehills (`hills.js`), taps on him or the meadow (`meadow.js`) | `"TestMeadowDay or TestMeadowWalking or TestMeadowMolehills or TestMeadowTapHim or TestMeadowTapsWait"` |
 | the meadow's view or screen (`view.js`, `painting.js`, `game.css`) | `"TestMeadowView or TestMeadowScreens"` |
-| the meadow's small life and wildlife (`critters.js`, `flock.js`, `wildlife.js`, `wildart.js`, `heron.js`, `nest.js`, `friends.js`, `foxart.js`) | `"TestMeadowCritters or TestMeadowFireflies or TestMeadowSnail or TestMeadowWildlife"` |
+| the meadow's friends, their drawings and faces (`friends.js`, `friendart.js`) | `"TestMeadowFriendFaces or TestMeadowEncounters or TestMeadowEgg or TestMeadowFox or TestMeadowFence"` |
+| the meadow's small life and wildlife (`critters.js`, `flock.js`, `wildlife.js`, `wildart.js`, `heron.js`, `nest.js`, `foxart.js`) | `"TestMeadowCritters or TestMeadowFireflies or TestMeadowSnail or TestMeadowWildlife"` |
 | the meadow's music, the cricket (`music.js`, `beds.js`, `cricket.js`) | `"TestMeadowMusic"` |
 | the meadow's wind, eclipse, church, spring, moon (`weather.js`, `eclipse.js`, `church.js`, `spring.js`, `moons.js`) | `"TestMeadowWind"`, `"TestMeadowEclipse"`, `"TestMeadowChurch"`, `"TestMeadowSpring"`, `"TestMeadowMoon"` |
 | the meadow's `day.js`, `layout.js`, or anything shared | the whole meadow file, `"Meadow"` |

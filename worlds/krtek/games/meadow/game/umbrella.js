@@ -301,7 +301,7 @@
       if (!alive()) return
     }
     for (const f of Object.values(state.friends)) {
-      await Debug.ignoreCut(f.bob(1), `the ${f.kind} nods`)
+      await Debug.ignoreCut(f.glad(f.bob(1)), `the ${f.kind} nods`)
       if (!alive()) return
     }
     home()

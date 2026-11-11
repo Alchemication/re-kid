@@ -37,6 +37,16 @@ makes the scene busier, louder or more urgent loses it, however funny.
   enough to know when to hold back.
 - **Beautiful to look at, never loud or busy.** Avoid effects that only
   distract.
+- **Almost like watching the cartoon, and what only play can do** (Adam,
+  2026-11-10). Check a gag, a left-alone move or a feature two ways. Would
+  it pass as a moment from the film: staged, acted, a setup and a payoff,
+  held long enough to read? And could the film not have done it: it
+  happens because of the child, or differently because of them? Failing
+  the first gives a toy (a fidget, a one-beat answer); failing the second,
+  a cartoon to watch (a chain that plays on by itself). What play has that
+  a film lacks: the child picks what is tried, the same again on demand,
+  their own pace, the hero noticing them, the world answering a touch,
+  and what was done staying for the day.
 
 ## A little world, not a game to finish
 

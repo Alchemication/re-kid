@@ -2,7 +2,9 @@
 // sleep (brief.yaml). He wakes in his den under the molehill; a tap on the
 // meadow sends him waddling there (the view follows him, view.js), a tap on
 // him gets a word and a hop, a tap on the flower bed (behind his molehill)
-// has him sniff a flower, a tap on the spring has him paddle in its pool,
+// has him sniff a flower, a tap on a molehill has him tunnel to it (and out
+// on the grass he digs himself in first, leaving one more: hills.js), a tap on the
+// spring has him paddle in its pool,
 // a tap on the old oak at the meadow's left end has him peek into its
 // hollow (oak.js), a tap on the owl in it, on some plays, has him play
 // with it (owl.js), a tap on the painter's fence at its right end has him
@@ -19,7 +21,7 @@
 // gesture under way short (Mole.relax), and he is settled where it left
 // him, so he always ends free and standing.
 
-/* global Again, Autumn, Bed, Den, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Moons, RainPlay, Showers, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Swing, Turn, View, Weather, Woodpecker, World */
+/* global Again, Autumn, Bed, Den, Hills, Oak, Owl, Fence, Church, Clock, Cricket, Critters, Flock, Heron, Wildlife, Eclipse, Moons, RainPlay, Showers, Spring, Day, Debug, FilmLook, Friends, Layout, MeadowBeds, Mole, Nest, Motion, Music, Painting, Sound, Storm, Things, Swing, Turn, View, Weather, Woodpecker, World */
 /* exported meadowGame */
 const meadowGame = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -33,7 +35,6 @@ const meadowGame = (() => {
   const HELLO_AGAIN_MS = 30000 // after an "ahoj!", this long before a tap on him is waved hello again: two hellos running felt false (Adam, 2026-10-31)
   const MORNING_AFTER_MS = 2000 // the morning theme starts this long after he pops up: after his "ahoj!" (about 0.9 s up, 1.2 s long)
   const HOLD_NEW_DAY_MS = 2000 // after the end, the corner sun held this long starts a new day (as in Reksio's yard)
-  const MAX_HILLS = 6 // molehills he has left about the meadow; the oldest sinks back
   const TULIPS = 9
   const TUFTS = 22 // tufts of long grass along the front, across the whole meadow
   const TICK_MS = 100
@@ -72,7 +73,7 @@ const meadowGame = (() => {
   const den = layers.den
   Den.draw(den)
 
-  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, hills: [], busy: 0.3, eclipse: null, evening: false, dim: false, watching: null } // eclipse: when it began (Clock); evening: the cricket's dusk has come; watching: the butterfly he follows with his eyes
+  const game = { awake: false, ended: false, dayStart: 0, hour: Day.START, lastInput: 0, gesture: null, queued: null, busy: 0.3, eclipse: null, evening: false, dim: false, watching: null } // eclipse: when it began (Clock); evening: the cricket's dusk has come; watching: the butterfly he follows with his eyes
   let tulipHeads = []
 
   const el = (tag, attrs = {}, parent) => {
@@ -84,36 +85,6 @@ const meadowGame = (() => {
   drawMoon()
 
   // ------------------------------------------------------------ the scene
-
-  function hillPath(w, h) {
-    return `M${-w / 2} 6 C${-w * 0.42} ${-h * 0.7} ${-w * 0.22} ${-h} 0 ${-h} C${w * 0.22} ${-h} ${w * 0.42} ${-h * 0.7} ${w / 2} 6 Z`
-  }
-
-  /** A molehill at x: a heap of earth with clods. */
-  function hill(x, big = false, grow = true) {
-    const [w, h] = big ? [240, 64] : [180, 50]
-    const g = el('g', { class: 'hill' })
-    layers.front.insertBefore(g, frontGround) // the grass in front stays in front of every molehill
-    g.style.transform = `translate(${x}px, ${GROUND}px)`
-    const inner = el('g', {}, g)
-    el('path', { d: hillPath(w, h), fill: '#6e4a24', stroke: '#2b1b0b', 'stroke-width': 3 }, inner)
-    for (let i = 0; i < (big ? 16 : 10); i++) {
-      el('circle', { cx: (paint() - 0.5) * w * 0.75, cy: -paint() * h * 0.8, r: 4 + paint() * 7, fill: paint() < 0.5 ? '#38250a' : '#8a5d2e' }, inner)
-    }
-    if (grow) Debug.ignoreCut(Motion.endAt(inner, [{ transform: 'scaleY(0.05)' }, { transform: 'scaleY(1)' }], { duration: 320, easing: 'cubic-bezier(.3,1.5,.5,1)' }), 'hill grows')
-    const mine = { x, g, home: big }
-    if (!big) {
-      game.hills.push(mine)
-      if (game.hills.length > MAX_HILLS) sinkHill(game.hills.shift())
-    }
-    return mine
-  }
-
-  function sinkHill(h) {
-    Motion.endAt(h.g, [{ transform: `translate(${h.x}px, ${GROUND + 80}px)` }], { duration: 900, easing: 'ease-in' }).then(() => h.g.remove(), () => h.g.remove())
-  }
-
-  const hillAt = (x) => Math.abs(x - HOME) < 70 || game.hills.some((h) => Math.abs(h.x - x) < 70)
 
   function makeScene() {
     const ctm = svg.getScreenCTM()
@@ -127,7 +98,8 @@ const meadowGame = (() => {
       oak: document.getElementById('oak'),
       garden: document.getElementById('garden'),
     }, (ctm ? ctm.a : 1) * (window.devicePixelRatio || 1))
-    hill(HOME, true, false)
+    Hills.setup({ layer: layers.front, grass: frontGround, random: paint, dropHat })
+    Hills.make(HOME, true, false)
     makeBed()
     makeTufts()
     Mole.make(layers.mole, document.getElementById('mole-out'), document.getElementById('tunnels'))
@@ -339,7 +311,7 @@ const meadowGame = (() => {
 
   function stateNow() {
     const m = Mole.state
-    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: game.hills.length, things: Things.state(), owl: Owl.state, woodpecker: Woodpecker.state, eclipse: Math.round(eclipseCover() * 100) / 100, rain: Storm.phase ? Storm.kind : null, moon: tonight.kind }
+    return { hour: Day.clock(game.hour), awake: game.awake, ended: game.ended, x: Math.round(m.x), view: Math.round(View.x), pose: m.pose, busy: game.gesture, carrying: m.carrying, hills: Hills.count, things: Things.state(), owl: Owl.state, woodpecker: Woodpecker.state, eclipse: Math.round(eclipseCover() * 100) / 100, rain: Storm.phase ? Storm.kind : null, moon: tonight.kind }
   }
 
   function checkRules() {
@@ -358,7 +330,7 @@ const meadowGame = (() => {
       Debug.check('no drop or leaf of the rain\'s is in the air once he is free', !RainPlay.posing, {})
       Debug.check('the twig is down once he is free', !Fence.holding, {})
       Debug.check('nobody is left about behind the fence once he is free', Fence.about === 0, { about: Fence.about })
-      Debug.check('a mole in the ground has a molehill', m.pose === 'out' || hillAt(m.x), { x: m.x, pose: m.pose })
+      Debug.check('a mole in the ground has a molehill', m.pose === 'out' || Hills.at(m.x), { x: m.x, pose: m.pose })
     }
   }
 
@@ -417,7 +389,7 @@ const meadowGame = (() => {
   function settle() {
     const m = Mole.state
     if (m.pose === 'out') return Mole.put(m.x, 'out')
-    if (!hillAt(m.x)) hill(m.x, false, false)
+    if (!Hills.at(m.x)) Hills.make(m.x, false, false)
     Mole.put(m.x, m.pose === 'listen' ? 'listen' : 'hill')
   }
 
@@ -426,12 +398,12 @@ const meadowGame = (() => {
     x = clampX(x)
     const m = Mole.state
     if (Math.abs(x - m.x) < 50 && m.pose !== 'out') return Mole.cheer()
-    if (m.pose === 'out' && !hillAt(m.x)) hill(m.x)
+    if (m.pose === 'out' && !Hills.at(m.x)) Hills.make(m.x)
     dropHat()
     Sound.dig()
     await Mole.goDown()
     await Mole.tunnelTo(x)
-    if (!hillAt(x)) hill(x)
+    if (!Hills.at(x)) Hills.make(x)
     Sound.pop()
     await Mole.comeUp('hill')
   }
@@ -688,7 +660,7 @@ const meadowGame = (() => {
     [/^use ([a-z]+)(?: ([a-z]+))?$/, (m) => Things.use(m[1], true, m[2] || null) || answer('tap mole', tapMole)],
     [/^go to (\d+)$/, (m) => answer('go', () => goTo(Number(m[1])))],
     [/^stop$/, () => run('stop', async () => {})],
-    [/^dig to (\d+)$/, (m) => run('dig', () => digTo(Number(m[1])))],
+    [/^dig to (\d+)$/, (m) => answer('dig', (alive) => Hills.burrow(Number(m[1]), alive))], // a tap on a molehill
     [/^tap butterfly (\d+)$/, (m) => tapButterfly(Number(m[1]))],
     [/^tap firefly (\d+)$/, (m) => lookAfter(Critters.tapFirefly(Number(m[1])))],
     [/^tap frog$/, () => Spring.tapFrog()],
@@ -822,6 +794,8 @@ const meadowGame = (() => {
     if (target.closest('#sun') && eclipseCover()) return 'tap sun'
     if (target.closest('.puddle-hit')) return `puddle ${target.closest('.puddle-hit').dataset.puddle}`
     const place = PLACE_HITS.find(([sel]) => target.closest(sel))
+    const mound = Hills.under(View.toWorld(p.x), p.y)
+    if (mound !== null && (!place || place[1] === 'sniff')) return `dig to ${Math.round(mound)}` // a molehill: he tunnels to it (his own stands in front of his flowers)
     if (place) return place[1]
     if (p.y > 560) return `go to ${Math.round(clampX(View.toWorld(p.x)))}`
     return 'tap mole' // the sky: he answers anyway

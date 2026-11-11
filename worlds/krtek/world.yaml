@@ -302,7 +302,7 @@ characters:
     sources:
     - cs-wikipedia-seznam-dilu
   visual_signature:
-    text: Round ears with pink insides, a pointed snout, a thin tail longer than her body.
+    text: Stands upright like a little person on a pear of a body, with thin arms and small hands. Round ears with pink insides (Autíčko 2:10, Malířem 2:38), a long pointed snout with a dark nose at its tip, two big white eyes close together high on the head, a thin tail longer than her body that curls on the ground (Vejce 0:58–1:02, the mother mouse, whose ears are plain).
     status: observed
     sources:
     - krtek-youtube
@@ -331,7 +331,30 @@ characters:
     status: unknown
     sources: []
   visual_signature:
-    text: Long upright ears, a white ruff around the face, buck teeth.
+    text: Sits up on a big haunch and long feet, in three-quarter view. Long upright ears, dark brown inside; a spiky white ruff of fur round his cheeks and chin; a pale muzzle with a dark nose, two front teeth in a wide smile and long whiskers (Malířem 4:16–4:18).
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  relationships: []
+  moves: []
+- id: slepice
+  name: Slepice
+  name_en: the hen
+  kind: hen
+  role: guest
+  description:
+    text: The mother of the egg the mole finds in Krtek a vejce. She appears at the end, when he brings her the hatched chick (4:56–5:08), and tucks it under her wing against her neck (5:08). Not seen in the other four films sampled.
+    status: observed
+    sources:
+    - krtek-youtube
+    observed_by: claude-frames
+  personality:
+    text: Seen in one short scene only; not enough to say.
+    status: unknown
+    sources: []
+  visual_signature:
+    text: A plump black body on long thin yellow legs with big three-toed feet, a tall rounded fan of a tail, a grey-brown wing with a slate-blue edge under it, and a white neck and head in one piece, covered in black dots. A big pale eye with rings in it, a small red comb, a long red wattle under an orange beak. She stands about twice the mole's height (Vejce 4:56, 5:02).
     status: observed
     sources:
     - krtek-youtube

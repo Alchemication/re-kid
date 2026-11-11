@@ -278,6 +278,15 @@ const Bird = (() => {
     await scold(2)
   }
 
+  /** His bark answered from its perch (barkback.js): it hops round to face him, two hops, a chirp with each. */
+  function chirpBack() {
+    if (flying) return
+    const p = PERCHES[perch]
+    at(p, Reksio.x < p.x ? -1 : 1)
+    body.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(-14px)' }, { transform: 'translateY(0)' }], { duration: 300, iterations: 2 })
+    for (const ms of [0, 300]) Clock.after(ms, () => Sound.from(Math.abs(p.x - Reksio.x), Sound.chirp))
+  }
+
   /** His friend now, it comes down to him: a hop and a chirp, his play-bow,
    * and back up to its perch. */
   async function visit() {
@@ -317,7 +326,9 @@ const Bird = (() => {
   }
 
   return {
-    PERCHES, flyAway, hunt, rescue, visit, onHead, watch, toFruit, shooed, tut, home, init,
+    PERCHES, flyAway, hunt, rescue, visit, onHead, watch, toFruit, shooed, tut, chirpBack, home, init,
+    /** On its perch, at ease: it can answer his bark. */
+    get canChirpBack() { return !flying && !isEnded() },
     get perch() { return PERCHES[perch] },
     get flying() { return flying },
     get friend() { return friend },

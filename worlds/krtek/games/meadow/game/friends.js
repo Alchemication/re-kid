@@ -1,13 +1,14 @@
-// The meadow's other animals, drawn in code the series' way (flat, outlined,
-// a few round shapes): the mouse, the hare, the hen with her spotted head
-// (Krtek a vejce) and her chick, the fox, the hedgehog (autumn's). An encounter calls one in, moves it
+// The meadow's other animals, drawn in code the series' way (flat, outlined):
+// the mouse, the hare, the hen and her chick (friendart.js: their faces act,
+// glum at a shake of the head, eyes squeezed at a sneeze, glad()), the fox
+// (foxart.js), the hedgehog (hedgeart.js, autumn's), the bullfinch. An encounter calls one in, moves it
 // with Motion.endAt on the Clock, and sends it home when it is done, or in
 // its restore() when it is cut short (things.js), so nobody is left standing
 // about. Nobody vanishes in view: sent home, one walks or hops off the
 // nearer edge of the screen (the mouse ducks into her hole) and only then is
 // gone (leave()); gone() at once is for bedtime, under the closing circle.
 
-/* global Debug, FoxArt, HedgeArt, Layout, Motion, View */
+/* global Debug, FoxArt, FriendArt, HedgeArt, Layout, Motion, View */
 /* exported Friends */
 const Friends = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -35,61 +36,9 @@ const Friends = (() => {
   }
 
   const DRAW = {
-    mouse(g) {
-      el('path', { d: 'M24 -10 q30 6 44 -14', fill: 'none', stroke: INK, 'stroke-width': 3, 'stroke-linecap': 'round' }, g)
-      el('path', { d: fluffy(0, -26, 29, 23, 14, 0.07), fill: '#8e8577', ...line }, g)
-      el('ellipse', { cx: -6, cy: -22, rx: 14, ry: 13, fill: '#c9c0b2' }, g)
-      const head = el('g', { class: 'head' }, g)
-      for (const cx of [-26, 6]) {
-        el('circle', { cx, cy: -78, r: 17, fill: '#8e8577', ...line }, head)
-        el('circle', { cx, cy: -78, r: 9.5, fill: '#f2a0a6' }, head)
-      }
-      // a pointed snout, a pink nose at its tip, whiskers: a mouse's face as in Krtek a vejce
-      el('path', { d: 'M8 -60 C6 -74 -16 -76 -26 -64 L-46 -52 C-30 -40 4 -40 8 -60 Z', fill: '#8e8577', ...line }, head)
-      el('circle', { cx: -47, cy: -52, r: 5, fill: '#f2a0a6', ...line, 'stroke-width': 1.5 }, head)
-      el('ellipse', { cx: -16, cy: -62, rx: 5, ry: 6.5, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
-      el('circle', { cx: -17, cy: -61, r: 2.8, fill: INK }, head)
-      el('path', { d: 'M-40 -52 l-18 -6 M-40 -50 l-19 2 M-40 -48 l-16 8', stroke: INK, 'stroke-width': 1.2, fill: 'none' }, head)
-      return head
-    },
-    hare(g) {
-      // sitting up, brown, with a white belly, big feet and a white ruff round his face (Krtek malířem)
-      for (const x of [-26, 20]) el('ellipse', { cx: x, cy: -6, rx: 24, ry: 9, fill: '#8a5c32', ...line }, g)
-      el('path', { d: fluffy(0, -50, 40, 46, 16, 0.07), fill: '#9a6a3c', ...line }, g)
-      el('ellipse', { cx: -2, cy: -40, rx: 22, ry: 30, fill: '#f3ead8' }, g)
-      for (const x of [-16, 10]) el('ellipse', { cx: x, cy: -66, rx: 9, ry: 7, fill: '#9a6a3c', ...line, 'stroke-width': 2 }, g)
-      const head = el('g', { class: 'head' }, g)
-      for (const [cx, r] of [[-18, -12], [14, 10]]) {
-        const ear = el('g', { transform: `rotate(${r} ${cx} -132)` }, head)
-        el('ellipse', { cx, cy: -172, rx: 13, ry: 42, fill: '#9a6a3c', ...line }, ear)
-        el('ellipse', { cx, cy: -168, rx: 6, ry: 32, fill: '#d9b08a' }, ear)
-      }
-      el('path', { d: fluffy(-2, -108, 38, 30, 18, 0.16), fill: '#f6f1e4', ...line, 'stroke-width': 2 }, head)
-      el('circle', { cx: -2, cy: -118, r: 25, fill: '#9a6a3c' }, head)
-      for (const x of [-12, 8]) {
-        el('ellipse', { cx: x, cy: -124, rx: 6.5, ry: 8, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
-        el('circle', { cx: x - 1, cy: -122, r: 3.4, fill: INK }, head)
-      }
-      for (const x of [-10, 6]) el('circle', { cx: x, cy: -104, r: 9, fill: '#fbf8ef' }, head)
-      el('ellipse', { cx: -2, cy: -110, rx: 5.5, ry: 4, fill: '#d98a8a', ...line, 'stroke-width': 1.5 }, head)
-      el('rect', { x: -7, y: -100, width: 10, height: 8, fill: '#fff', ...line, 'stroke-width': 1.5 }, head)
-      return head
-    },
-    hen(g) {
-      el('path', { d: 'M30 -60 q40 -40 30 -80 q-20 30 -40 40 z', fill: INK }, g)
-      el('ellipse', { cx: 0, cy: -48, rx: 48, ry: 40, fill: INK }, g)
-      el('path', { d: 'M-20 -50 q20 -14 44 0 q-20 18 -44 0 z', fill: '#5e5a66' }, g)
-      for (const x of [-12, 12]) el('path', { d: `M${x} -10 v12 h-8 M${x} 2 h8`, stroke: '#e0a020', 'stroke-width': 4, fill: 'none' }, g)
-      const head = el('g', { class: 'head' }, g)
-      el('ellipse', { cx: -40, cy: -98, rx: 20, ry: 30, fill: '#fff', ...line }, head)
-      for (const [cx, cy] of [[-46, -110], [-34, -100], [-44, -88], [-36, -116], [-32, -84]]) el('circle', { cx, cy, r: 3, fill: INK }, head)
-      el('path', { d: 'M-48 -128 q4 -12 10 -2 q4 -12 10 0 q4 -8 6 4 z', fill: '#d8322b', ...line, 'stroke-width': 2 }, head)
-      el('path', { d: 'M-60 -100 l-14 5 l14 4 z', fill: '#e0a020', ...line, 'stroke-width': 2 }, head)
-      el('circle', { cx: -48, cy: -104, r: 4, fill: '#fff' }, head)
-      el('circle', { cx: -49, cy: -104, r: 2.2, fill: INK }, head)
-      el('path', { d: 'M-56 -88 q4 10 10 2', fill: '#d8322b' }, head)
-      return head
-    },
+    mouse: (g) => FriendArt.mouse(g, { el }), // friendart.js
+    hare: (g) => FriendArt.hare(g, { el, fluffy }),
+    hen: (g) => FriendArt.hen(g, { el }),
     fox: (g) => FoxArt.draw(g, { el, fluffy }), // foxart.js
     hedgehog: (g) => HedgeArt.draw(g, { el }), // hedgeart.js
     bullfinch(g) {
@@ -108,15 +57,7 @@ const Friends = (() => {
       el('path', { d: 'M8 -30 C16 -32 24 -30 28 -27', stroke: '#fbf8ef', 'stroke-width': 3, fill: 'none' }, wing)
       return head
     },
-    chick(g) {
-      el('ellipse', { cx: 0, cy: -20, rx: 20, ry: 18, fill: '#f6d23b', ...line, 'stroke-width': 2.5 }, g)
-      const head = el('g', { class: 'head' }, g)
-      el('circle', { cx: -10, cy: -42, r: 13, fill: '#f6d23b', ...line, 'stroke-width': 2.5 }, head)
-      el('circle', { cx: -14, cy: -45, r: 2.6, fill: INK }, head)
-      el('path', { d: 'M-22 -42 l-9 3 l9 3 z', fill: '#e08a20' }, head)
-      for (const x of [-6, 6]) el('path', { d: `M${x} -3 v5`, stroke: '#e08a20', 'stroke-width': 3 }, g)
-      return head
-    },
+    chick: (g) => FriendArt.chick(g, { el }),
   }
 
   /** Set the layer they walk on (in front of the molehills). */
@@ -155,8 +96,10 @@ const Friends = (() => {
 
   // what turns a kind's head (a bob nods it, a shake shakes it), where it isn't the usual: the tall
   // fox's neck, so a bob nods his head, not his whole body; and a kind's own moves
-  const NECK = { fox: '-2px -266px', hedgehog: '-12px -28px' } // where foxart.js's head meets his body
-  const MOVES = { fox: FoxArt.moves, hedgehog: HedgeArt.moves }
+  const NECK = { fox: '-2px -266px', hedgehog: '-12px -28px', hen: '-14px -92px', hare: '0px -104px', mouse: '4px -56px', chick: '-2px -34px' } // where each one's head meets its body
+  const BODY = { mouse: [-18, 20, -54, -10], hare: [-26, 36, -92, -14] } // where paint goes on each: left, right, top, bottom of its body
+  const HANDS = { mouse: [46, 30], hare: [56, 54] } // where each holds what it carries: ahead of it (the way it faces) and up, clear of its face
+  const MOVES = { fox: FoxArt.moves, hedgehog: HedgeArt.moves, mouse: FriendArt.moves, hare: FriendArt.moves, hen: FriendArt.moves }
 
   const DOWN = 260 // down a hole this deep, the tallest (the hare, two tins held up) is out of sight under the ground
   const SHADOWED = new Set(['fox']) // whose shadow falls on the grass in front: never cut at the ground (he never goes down a hole)
@@ -173,7 +116,7 @@ const Friends = (() => {
   }
 
   /** A visitor's groups, drawn into `parent`: g where it stands, riser (up out of a hole, or down into
-   * it), inner (facing left or right), held (what it carries, in front, not turned: down a hole with it). */
+   * it), inner (facing left or right), held (what it carries, at its hands, not turned: down a hole with it). */
   function drawn(kind, parent) {
     const g = el('g', { class: `friend ${kind}` }, parent)
     if (!SHADOWED.has(kind)) g.setAttribute('clip-path', `url(#${aboveGround()})`) // down a hole, it is out of sight
@@ -192,8 +135,13 @@ const Friends = (() => {
   function make(kind, x, face = -1, { hole = false, born = false, behind = null } = {}) {
     Debug.check('a visitor comes in from out of sight, never appearing in view', hole || born || behind || !inSight(x), { kind, x: Math.round(x), view: Math.round(View.x) })
     const { g, riser, inner, held, head } = drawn(kind, behind || layer)
+    const hands = HANDS[kind] ?? [0, 0]
+    // a face for as long as a move lasts, for those who have faces (friendart.js): the others just move
+    const acted = (name, move) => (f.during ? f.during(name, move) : move)
     const f = {
       kind, g, x, face, held,
+      /** A move done gladly: eyes shut in a smile while it lasts (a nod to a friend, a hen with her chick back). */
+      glad: (move) => acted('glad', move),
       place(nx) {
         f.x = nx
         g.style.transform = `translate(${nx}px, ${Y}px)`
@@ -201,6 +149,7 @@ const Friends = (() => {
       turn(dir) {
         f.face = dir
         inner.style.transform = dir > 0 ? 'scaleX(-1)' : ''
+        held.style.transform = `translate(${dir * hands[0]}px, ${-hands[1]}px)` // what it carries stays in its hands
       },
       /** Where it is drawn now, mid-walk (f.x is where it is going). */
       drawnX() {
@@ -222,7 +171,7 @@ const Friends = (() => {
       },
       /** "Not mine": a shake of the head. */
       async no() {
-        await Motion.endAt(head, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-14deg)', offset: 0.2 }, { transform: 'rotate(14deg)', offset: 0.45 }, { transform: 'rotate(-14deg)', offset: 0.7 }, { transform: 'rotate(0deg)' }], { duration: 1000 })
+        await acted('glum', Motion.endAt(head, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-14deg)', offset: 0.2 }, { transform: 'rotate(14deg)', offset: 0.45 }, { transform: 'rotate(-14deg)', offset: 0.7 }, { transform: 'rotate(0deg)' }], { duration: 1000 }))
       },
       /** A bob of the head: a peck, a sniff, a nod. */
       async bob(times = 2) {
@@ -236,19 +185,21 @@ const Friends = (() => {
       },
       /** A sneeze: the head jerks back, then forward. */
       async jolt() {
-        await Motion.endAt(head, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(16deg) translateY(-6px)', offset: 0.35 }, { transform: 'rotate(-12deg) translateY(4px)', offset: 0.6 }, { transform: 'rotate(0deg)' }], { duration: 700 })
+        await acted('shut', Motion.endAt(head, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(16deg) translateY(-6px)', offset: 0.35 }, { transform: 'rotate(-12deg) translateY(4px)', offset: 0.6 }, { transform: 'rotate(0deg)' }], { duration: 700 }))
       },
       /** Disappointed: the head sinks, and comes slowly back up. */
       async droop() {
-        await Motion.endAt(head, [{ transform: 'rotate(0deg) translateY(0px)' }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.3 }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.7 }, { transform: 'rotate(0deg) translateY(0px)' }], { duration: 1400 })
+        await acted('glum', Motion.endAt(head, [{ transform: 'rotate(0deg) translateY(0px)' }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.3 }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.7 }, { transform: 'rotate(0deg) translateY(0px)' }], { duration: 1400 }))
       },
       /** Paint on it, in `colour`: 'stripes' (a tiger), 'zigzags' or 'spots'. */
       daub(pattern, colour) {
         const marks = el('g', { class: 'paint' }, inner)
         const stroke = { stroke: colour, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }
-        if (pattern === 'stripes') for (let y = -96; y < -6; y += 18) el('path', { d: `M-40 ${y} q40 -10 80 0`, ...stroke }, marks)
-        else if (pattern === 'zigzags') for (let y = -84; y < -6; y += 28) el('path', { d: `M-36 ${y} l12 12 l12 -12 l12 12 l12 -12 l12 12`, ...stroke }, marks)
-        else for (const [cx, cy] of [[-14, -36], [10, -22], [16, -42], [-4, -16], [-24, -60], [-2, -66]]) el('circle', { cx, cy, r: 6, fill: colour }, marks)
+        const [x0, x1, y0, y1] = BODY[kind] ?? [-40, 40, -96, -6] // on its body, never across its face
+        const w = x1 - x0
+        if (pattern === 'stripes') for (let y = y0 + 8; y < y1; y += 16) el('path', { d: `M${x0} ${y} q${w / 2} -8 ${w} 0`, ...stroke }, marks)
+        else if (pattern === 'zigzags') for (let y = y0 + 2; y < y1 - 10; y += 24) el('path', { d: `M${x0} ${y}${` l${w / 6} 10 l${w / 6} -10`.repeat(3)}`, ...stroke }, marks)
+        else for (const [fx, fy] of [[0.3, 0.6], [0.7, 0.8], [0.8, 0.45], [0.45, 0.9], [0.2, 0.25], [0.6, 0.15]]) el('circle', { cx: x0 + fx * w, cy: y0 + fy * (y1 - y0), r: 6, fill: colour }, marks)
       },
       /** Up onto someone's shoulders (dy) or back down (0). */
       async lift(dy, ms = 600) {

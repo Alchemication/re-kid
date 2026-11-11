@@ -56,6 +56,11 @@ uv run python main.py look <world> --flags props=bowl --close \
   --before "yardGame.use('bowl')" --watch "yardGame.use('bowl', true)"
 ```
 
+`look` photographs until what `--watch` returns has ended, so something
+that doesn't make him busy, or returns no promise (a bark and who answers
+it), comes out as 0 frames: give it a wait to hold the camera,
+`--watch "(yardGame.perform('bark'), Clock.wait(1800))"`.
+
 For a pose, a walk or a face rather than a gag, `look` is too slow (about
 one frame per quarter second, so a stride is missed): draw the poses
 straight from `figure.js` (and `Gait.stride` for a step) onto a scratch

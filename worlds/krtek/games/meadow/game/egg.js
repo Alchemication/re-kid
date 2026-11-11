@@ -260,7 +260,7 @@
     chick.turn(1)
     await chick.go(hen.x - 50, 700, 14)
     if (!alive()) return
-    await hen.bob(2)
+    await hen.glad(hen.bob(2)) // her chick is back
     if (!alive()) return
     Sound.say('giggle')
     hen.turn(1)

@@ -11,7 +11,7 @@
 // No text, no score; every tap gets an answer. What each thing does, and its
 // variation on a repeat, is in things.js.
 
-/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds, Tap, Stretch, Turn */
+/* global Clock, Debug, Layout, Painting, Sky, Day, World, Cuckoo, GrownUp, Idle, Input, Sound, Music, Reksio, Creatures, Weather, Things, Wet, Bird, Sparrows, BarkBack, Snowman, SnowPlay, FilmLook, Nap, Spots, Bed, YardBeds, Tap, Stretch, Turn */
 (() => {
   const WISH_SHOW_MS = 4000 // how long a thought bubble stays up
   const WISH_GAP_MS = 12000 // at least this long between bubbles
@@ -51,6 +51,7 @@
   // tapped: that first tap is his wake-up call and nothing else.
   Reksio.keepBetween(Layout.MIN_X, Layout.MAX_X) // from the house wall to the fence
   Reksio.listen((what, at) => Creatures.notice(what, at.x, at.y)) // a bark, a snap: the creatures hear
+  Reksio.listen((what, at) => { if (what === 'bark') BarkBack.heard(at.x, busy || !!Things.holding) }) // …and the bird, the hen, the mouse or a far dog answers a bark of his own (barkback.js)
   FilmLook.mount($('stage'))
   let asleep = Layout.morning
   if (asleep) Reksio.sleepIn(Things.DOOR.x)
@@ -882,6 +883,7 @@
   YardBeds.forSeason(Layout.season)
 
   Things.init({ ended: () => day.ended })
+  BarkBack.init({ free: () => free(), ended: () => day.ended })
   Spots.init()
   Sky.init()
   Cuckoo.init({ hourAt: () => day.hour(Clock.now()), onHour: glanceAtCuckoo, inView: () => camX < Cuckoo.X + 150, hushed: () => day.hurrying(Clock.now()) })

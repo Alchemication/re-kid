@@ -221,6 +221,7 @@ const Mouse = (() => {
     await Reksio.sniff(2)
     if (visiting) return
     visiting = true
+    Debug.trace('mouse hello', { v })
     try {
       await hello(v)
     } finally {
@@ -317,6 +318,19 @@ const Mouse = (() => {
     await scurry(front.x, front.y)
   }
 
+  /** His bark answered (barkback.js): out by the trap she squeaks back; once fed, she peeps out of her hole to
+   * squeak, and is gone again. A visit begun meanwhile keeps her out. */
+  async function peepBack() {
+    if (mouse === 'wanting') return squeak(1, true)
+    if (mouse !== 'fed' || visiting) return
+    mouseAt(HOLE.x, HOLE.y, -1)
+    await peekOut()
+    await squeak(1, true)
+    if (visiting) return
+    await mouseEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250 }).finished
+    if (!visiting) mouseEl.style.opacity = '0'
+  }
+
   function startMouse() {
     if (Layout.hidden.includes('trap')) return
     $('trap').classList.add('not-yet')
@@ -347,5 +361,10 @@ const Mouse = (() => {
     thing,
     init,
     get state() { return mouse },
+    /** Where she is, in the scene. */
+    get x() { return mousePos.x + X('trap') },
+    /** Out wanting the cheese, or fed and in her hole, and not on a visit: she can answer his bark. */
+    get canPeepBack() { return (mouse === 'wanting' || (mouse === 'fed' && !visiting)) && !isEnded() },
+    peepBack: () => Debug.ignoreCut(peepBack(), 'mouse peeps back'),
   }
 })()

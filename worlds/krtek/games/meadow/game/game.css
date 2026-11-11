@@ -65,12 +65,12 @@ body { touch-action: manipulation; -webkit-user-select: none; user-select: none;
 /* On a computer, what can be tapped glows warm under the mouse, as in the yard
    (people there found the things hard to find): a thing of an encounter, a
    visitor to choose, the mole, the flower bed and the spring (watering), the
-   swing, a puddle, the leaves at the chestnut's foot, the woodpecker and the
-   owl. Not the oak or the fence: a whole tree or fence glowing is too much.
+   swing, a puddle, the leaves at the chestnut's foot, the woodpecker, the
+   owl and his molehills. Not the oak or the fence: a whole tree or fence glowing is too much.
    Not on a phone, where nothing hovers. */
 @media (any-hover: hover) {
-  #world [data-thing], #world [data-choice], #world .mole, #bed, #spring, #world .swing, #world .puddle, #world .leaf-hit, #world .woodpecker, #world .owl { cursor: pointer; }
-  #world [data-thing]:hover, #world [data-choice]:hover, #world .mole:hover, #bed:hover, #spring:hover, #world .swing:hover, #world .puddle:hover, #oak-ground:has(.leaf-hit:hover), #world .woodpecker:hover, #world .owl:hover {
+  #world [data-thing], #world [data-choice], #world .mole, #bed, #spring, #world .swing, #world .puddle, #world .leaf-hit, #world .woodpecker, #world .owl, #front .hill { cursor: pointer; }
+  #world [data-thing]:hover, #world [data-choice]:hover, #world .mole:hover, #bed:hover, #spring:hover, #world .swing:hover, #world .puddle:hover, #oak-ground:has(.leaf-hit:hover), #world .woodpecker:hover, #world .owl:hover, #front .hill:hover {
     filter: brightness(1.06) drop-shadow(0 0 3px #fffaf0) drop-shadow(0 0 12px rgba(255, 214, 110, 0.95));
   }
 }

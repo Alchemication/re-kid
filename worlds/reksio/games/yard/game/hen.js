@@ -422,5 +422,11 @@ const Hen = (() => {
     /** Can she be helped? Once she has laid her first egg up on the wall. */
     get ready() { return state !== 'away' && !$('hen').classList.contains('not-yet') },
     get state() { return state },
+    /** Where she is, in the scene. */
+    get x() { return hen ? hen.x + X() : 0 },
+    /** By her nest or clucking up at her egg, not in the middle of anything: she can answer his bark. */
+    get canCluckBack() { return !!hen && (state === 'nesting' || state === 'worried') && !isEnded() },
+    /** His bark answered (barkback.js): a cluck, her head bobbing. */
+    cluckBack: () => cluck(2),
   }
 })()

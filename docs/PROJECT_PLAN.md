@@ -62,6 +62,27 @@ sounds he has judged are in.
      moons, the full moon's glow, and the howl's level in play.
    - Not built, ideas still open: the mouse on the swing with him (the
      film's), an autumn bed for the music, a winter.
+   - **Adam judges the meadow's mouse, hare and hen** (redrawn 2026-11-11
+     after Vejce and Malířem, then made cuter at his word; `friendart.js`):
+     big heads and eyes, rosy cheeks, the hare's bent ear and tuft (those
+     three are ours, not the films'). Their faces act: glum at a shake of
+     the head or a droop, eyes squeezed at a sneeze, glad when the hen has
+     her chick back, under the umbrella, over the fence and at the paint's
+     goodbye. Paint now goes on their bodies only, and tins are carried in
+     their hands ahead of the face (`friends.js` `BODY`, `HANDS`). Judge in
+     play: the faces at the size they are seen, the hare's striped body
+     (the film stripes his ears and face too), and the mole stood on the
+     hare's shoulders in the paint's totem (`HARE_TALL`, not looked at).
+     The hen has no entry in the dossier yet.
+   - **Adam judges the molehill tap** (built 2026-11-10, from a look over
+     both games for cause and effect; `meadow.js` `burrow`): a tap on a
+     molehill and he tunnels to it; out on the grass he digs himself in
+     first and leaves a molehill there, so there are soon a few to send
+     him between; tapped in his own, he comes up in another. Judge: how
+     fast the bump runs (`TUNNEL_MS_PER_UNIT` in mole.js: 600 units in
+     about half a second, quick for a toddler to follow; the storm and the
+     paint use it too), and whether six molehills (`MAX_HILLS`) clutter
+     the meadow.
    - `TestMeadowOak::test_a_tap_on_it_peeks_a_new_way_each_time` failed once
      under load (2026-11-08) with one other, and not in four runs after:
      like the poles' below, a timing bug to find.
@@ -459,6 +480,14 @@ scene:
   phrases come (`PHRASE_GAP_MS` in idle.js), whether five phrases is
   enough variety, the morning (two takes: more through `new-music`), the
   touches now heard only between takes.
+- **Adam judges the bark answered** (built 2026-11-10, his yes to the
+  idea, the design mine; `barkback.js`): a bark of his own, and the bird,
+  the hen or the mouse near him answers a moment later, or now and then a
+  far dog. Judge: whether the bird's answer shows (it is small: two hops
+  and a turn, mostly heard), the pause before the answer (`AFTER_MS`), how
+  often a row of barks is answered (`GAP_MS`) and how often the far dog
+  comes (`FAR_DOG`). Not in it: the boy (his moves run in the snowman's
+  queue; he already glances at Reksio).
 - **Eliot plays the yard:** the bowl, the bramble, the new sounds, the new
   ending. First Adam tunes the bowl and bramble timing (`BEE_COMES_MS`,
   `LEAP` in bramble.js; `STEP_OFF`, `STRAIN` in antics.js; the `boing`).

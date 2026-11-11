@@ -34,7 +34,7 @@ child taking over, and goes at once. Keep each step
 | Something big the child must see (the bulldozer) | `Things.meadow.frame(x)` keeps x in sight with him (the view between them); `frame(null)` in its `restore`, and when it goes. Weather-like arrivals that won't wait for a tap: `urgent: true` |
 | What it does once done | an optional `again` (the car's ride; the paint retells its story, quicker, and may end it differently). Keep its things tappable (`data-thing`) while there is an `again` to play |
 | Variety | the play's own stream, `Debug.random('meadow-<name>')`, drawn in the encounter's file: a detail per play (how the fox sneaks in) or per retelling (how the story ends) |
-| A visitor who acts | its drawing, faces (`feel`) and own moves in a file of its own (`foxart.js`), plugged in through `friends.js` `DRAW`, `NECK` (the point its head turns about) and `MOVES` |
+| A visitor who acts | its drawing, faces (`feel`) and own moves in a file of its own (`foxart.js`; the mouse, hare and hen share `friendart.js`, whose faces also follow their moves: glum at `no()` and `droop()`, eyes shut at `jolt()`, `glad(move)`), plugged in through `friends.js` `DRAW`, `NECK` (the point its head turns about) and `MOVES` |
 | What ambient life should answer | its offers, wet places and noises, from its own file (`ambient.md`) |
 | Sounds | `sound.js` (the meadow's); reuse first |
 | What must always hold | a `Debug.check` in `meadow.js` `checkRules` |
@@ -71,6 +71,10 @@ child taking over, and goes at once. Keep each step
   takes the stage (the eclipse) asks `Things.open(hour)` before it
   starts and tells things.js it is on (`elsewhere`), so no encounter
   arrives under it and the quiet spell runs from its end.
+- Before styling or selecting by a class, grep for who else has it, and
+  scope to the layer: the church's far hill shares the class `hill` with
+  the molehills, so a hover glow and a test's tap first hit it
+  (`#front .hill` is the molehills).
 
 ## Look at it
 

@@ -573,6 +573,140 @@ class TestMeadowWalking:
         finish(m, "car")  # and it is still there to play
 
 
+class TestMeadowFriendFaces:
+    """The mouse's, the hare's and the hen's faces act with their moves
+    (friendart.js, friends.js)."""
+
+    def call_in(self, m: Meadow, kind: str) -> None:
+        m.page.evaluate(
+            "(kind) => { window.friend = Friends.make(kind, View.left + 300, 1, { born: true }) }",
+            kind,
+        )
+
+    def wears(self, m: Meadow, face: str) -> bool:
+        """Whether every part of the face showing belongs to `face`."""
+        shown = m.page.evaluate(
+            "() => [...friend.g.querySelectorAll('[data-face]')]"
+            ".filter((g) => g.style.display !== 'none').map((g) => g.dataset.face)"
+        )
+        return bool(shown) and all(face in parts.split(" ") for parts in shown)
+
+    @pytest.mark.parametrize("kind", ["mouse", "hare", "hen"])
+    def test_glum_at_a_shake_of_the_head_then_as_before(
+        self, meadow: callable, kind: str
+    ) -> None:
+        m = meadow()
+        m.wake()
+        self.call_in(m, kind)
+        assert self.wears(m, "calm")
+        m.page.evaluate("() => { friend.no() }")
+        m.play_for(400)
+        assert self.wears(m, "glum"), "its face did not change as it shook its head"
+        m.play_for(1000)
+        assert self.wears(m, "calm"), "the glum face stayed after the shake"
+        m.page.evaluate("() => { friend.gone(true) }")
+        m.assert_settled()
+
+    def test_a_move_cut_short_leaves_the_face_it_wore(self, meadow: callable) -> None:
+        m = meadow()
+        m.wake()
+        self.call_in(m, "hare")
+        m.page.evaluate("() => { friend.feel('glad'); friend.droop().catch(() => {}) }")
+        m.play_for(400)
+        assert self.wears(m, "glum")
+        m.page.evaluate(
+            "() => { friend.g.getAnimations({ subtree: true }).forEach((a) => a.cancel()) }"
+        )
+        m.play_for(100)
+        assert self.wears(m, "glad"), "a cut droop left him glum"
+        m.page.evaluate("() => { friend.gone(true) }")
+        m.assert_settled()
+
+    def test_a_sneeze_squeezes_the_eyes_and_glad_lasts_the_move(
+        self, meadow: callable
+    ) -> None:
+        m = meadow()
+        m.wake()
+        self.call_in(m, "mouse")
+        m.page.evaluate("() => { friend.jolt() }")
+        m.play_for(300)
+        assert self.wears(m, "shut")
+        m.play_for(600)
+        assert self.wears(m, "calm")
+        m.page.evaluate("() => { friend.glad(friend.bob(2)) }")
+        m.play_for(300)
+        assert self.wears(m, "glad")
+        m.play_for(700)
+        assert self.wears(m, "calm")
+        m.page.evaluate("() => { friend.gone(true) }")
+        m.assert_settled()
+
+
+class TestMeadowMolehills:
+    """A tap on a molehill: he tunnels to it (meadow.js burrow)."""
+
+    def tap_hill(self, m: Meadow, nth: int) -> None:
+        """A real tap on the top of the nth molehill drawn (0: his home's)."""
+        box = m.page.evaluate(
+            "(n) => { const r = document.querySelectorAll('#front .hill')[n].getBoundingClientRect();"
+            " return { x: r.x + r.width / 2, y: r.y + r.height * 0.3 } }",
+            nth,
+        )
+        m.page.mouse.click(box["x"], box["y"])
+
+    def test_out_on_the_grass_he_digs_in_and_comes_up_in_it(
+        self, meadow: callable
+    ) -> None:
+        m = meadow()
+        m.wake()
+        m.do("go to 1500")
+        m.wait_free()
+        self.tap_hill(m, 0)  # his home's, from afar
+        m.wait("meadowGame.trace().includes(' burrows ')")
+        m.wait_free()
+        s = m.state()
+        assert (s["x"], s["pose"], s["hills"]) == (900, "hill", 1), s
+        assert m.page.evaluate("meadowGame.trace().includes(' dig in ')"), (
+            "he went down without digging himself in"
+        )
+        self.tap_hill(m, 1)  # the one he left where he dug in: back he goes
+        m.wait("meadowGame.state().x === 1500")
+        m.wait_free()
+        s = m.state()
+        assert (s["pose"], s["hills"]) == ("hill", 1), s
+        m.assert_settled()
+
+    def test_tapped_in_his_own_he_comes_up_in_another(self, meadow: callable) -> None:
+        m = meadow()
+        m.wake()
+        m.do("dig to 900")  # no other yet: a jump of joy where he is
+        m.wait_free()
+        assert m.state()["x"] == 900 and m.state()["hills"] == 0, m.state()
+        m.do("go to 1500")
+        m.wait_free()
+        m.do("dig to 900")
+        m.wait_free()
+        m.do("dig to 900")  # in it now, and one left at 1500
+        m.wait_free()
+        assert m.state()["x"] == 1500, m.state()
+        m.assert_settled()
+
+    @pytest.mark.parametrize("cut_ms", [150, 700, 1300, 2000, 2400])
+    def test_cut_short_anywhere_he_ends_standing(
+        self, meadow: callable, cut_ms: int
+    ) -> None:
+        m = meadow()
+        m.wake()
+        m.do("go to 1500")
+        m.wait_free()
+        m.do("dig to 900")  # digging in (about 1.9 s), the tunnel, coming up
+        m.play_for(cut_ms)
+        m.do("go to 1200")
+        m.wait_free()
+        assert m.state()["x"] == 1200, m.state()
+        m.assert_settled()
+
+
 class TestMeadowRain:
     def test_some_plays_the_hen_comes_by_under_the_cloud(
         self, meadow: callable

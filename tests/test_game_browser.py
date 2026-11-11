@@ -853,6 +853,69 @@ class TestBramble:
         self.freed(y)
 
 
+class TestBarkBack:
+    """His bark is answered by whoever is near and at ease (barkback.js)."""
+
+    def bark_by(self, y: Yard, x_js: str) -> None:
+        """He walks to near `x_js` (a scene x) and barks, as a tap on him does."""
+        y.run(f"Reksio.walkTo({x_js} - 250)")
+        y.settled()
+        y.page.evaluate("yardGame.perform('bark')")
+
+    def test_the_bird_chirps_back_from_its_perch(self, yard: callable) -> None:
+        y = yard()
+        self.bark_by(y, "Bird.perch.x")
+        y.wait("yardGame.events().some((e) => e.kind === 'bark back')")
+        assert y.events("bark back")[0]["who"] == "bird"
+        y.settled()
+
+    def test_a_gags_own_bark_gets_no_answer(self, yard: callable) -> None:
+        y = open_for_thing(yard, "bird")
+        y.run("yardGame.use('bird', false)")  # he barks up at it, and off it flies
+        y.play_for(1500)
+        assert not y.events("bark back"), y.events("bark back")
+        y.settled()
+
+    def fed_mouse(self, yard: callable) -> Yard:
+        y = open_for_thing(yard, "trap")
+        y.run(
+            "yardGame.use('trap', false)"
+        )  # he springs the trap: she is fed, in her hole
+        y.settled()
+        y.page.evaluate("() => { Bird.flyAway() }")  # the bird out of it
+        y.play_for(200)
+        return y
+
+    def test_the_fed_mouse_peeps_out_of_her_hole_and_is_gone_again(
+        self, yard: callable
+    ) -> None:
+        y = self.fed_mouse(yard)
+        y.page.evaluate("yardGame.perform('bark')")
+        y.wait("yardGame.events().some((e) => e.kind === 'bark back')")
+        assert y.events("bark back")[0]["who"] == "mouse"
+        y.wait("document.getElementById('mouse').style.opacity === '1'")
+        y.wait("document.getElementById('mouse').style.opacity === '0'")
+        y.settled()
+
+    def test_a_visit_begun_as_she_peeps_keeps_her_out(self, yard: callable) -> None:
+        y = self.fed_mouse(yard)
+        y.page.evaluate("yardGame.tap('trap')")
+        y.wait(
+            "yardGame.state().busy"
+        )  # at her hole, sniffing: her hello comes about 1.9 s on
+        y.play_for(1500)  # so her peep (about 0.8 s) is under way as it begins
+        y.page.evaluate("() => { Mouse.peepBack() }")
+        y.wait("yardGame.events().some((e) => e.kind === 'mouse hello')")
+        y.play_for(
+            1100
+        )  # past the end of her peep (about 0.8 s), in the middle of her hello
+        assert (
+            y.page.evaluate("document.getElementById('mouse').style.opacity") == "1"
+        ), "the end of her peep hid her in the middle of a visit"
+        y.settled()
+        assert y.page.evaluate("document.getElementById('mouse').style.opacity") == "0"
+
+
 class TestCritters:
     @pytest.mark.parametrize("name", [*CRITTERS, *CRITTER_NEEDS])
     def test_chase_runs_to_the_end(self, yard: callable, name: str) -> None:
