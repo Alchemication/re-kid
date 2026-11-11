@@ -203,7 +203,10 @@ def check_front_page(site_dir: Path = SITE_DIR) -> None:
         SiteError: A world has no card, or there are too many.
     """
     front = (site_dir / "index.html").read_text()
-    if len(SITE_WORLDS) > SITE_MAX_WORLDS or len(_CARD.findall(front)) > SITE_MAX_WORLDS:
+    if (
+        len(SITE_WORLDS) > SITE_MAX_WORLDS
+        or len(_CARD.findall(front)) > SITE_MAX_WORLDS
+    ):
         raise SiteError(
             f"The front page holds at most {SITE_MAX_WORLDS} worlds, on one "
             "screen with nothing to scroll. Take one out before adding another."

@@ -6,40 +6,65 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Little Kino">
 <meta name="theme-color" content="#1d1914">
-<title>Re-Kid</title>
-<link rel="icon" href="data:,">
-<!-- The site's front page: Re-Kid's name and "pick a world" for the grown-up
-     (the child needs no words: the cards are the choice), then the worlds to
-     pick from. Each card is a little page of its own (reksio.html,
-     krtek.html), shown in a frame so each game's scripts stay apart: the
-     scene painted by its game's own painting.js, the character drawn by its
-     own code and alive, the games' old-print look over it; a card stays dark
-     until its page says it is painted ('ready'), then fades in, so it never
-     shows a bare, modern picture first. A tap on one: he
-     cheers, and his scene opens. Published as the site's index.html by
-     .github/workflows/pages.yml; opened from disk, it finds the games in
-     worlds/. -->
+<title>Little Kino</title>
+<meta name="description" content="Not a cartoon, not a game: little worlds from old cartoons to visit together, a few minutes at a time.">
+<meta property="og:title" content="Little Kino">
+<meta property="og:description" content="Not a cartoon. Not a game. A little world to visit together, a few minutes at a time.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{SITE_URL}}">
+<meta property="og:image" content="{{SITE_URL}}assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/base.css">
+<!-- The site's front page, the screen: Little Kino's name, what it is in a
+     line, and the way to the grown-ups' page (the child needs no words: the
+     cards are the choice), then the worlds to pick from, all on one screen
+     with nothing to scroll, however many there are (up to six: the grid
+     below). Each card is a little page of its own (reksio.html, krtek.html),
+     shown in a frame so each game's scripts stay apart: the scene painted by
+     its game's own painting.js, the character drawn by its own code and
+     alive, the games' old-print look over it; a card stays dark until its
+     page says it is painted ('ready'), then fades in, so it never shows a
+     bare, modern picture first. A tap on one: he cheers, and his scene
+     opens. `main.py site` publishes it (the {{…}} in the head are filled in
+     then: only link previews read them); opened from disk, it finds the
+     games in worlds/. Colours and lettering: assets/base.css. -->
 <style>
-  html, body { margin: 0; height: 100%; background: #1d1914; overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
-  body { display: flex; flex-direction: column; height: 100dvh; padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); box-sizing: border-box; }
-  /* the name, in the warm cream and brown of an old title card */
-  header { flex: none; display: flex; align-items: baseline; justify-content: center; gap: 0.6em; flex-wrap: wrap; padding: 2px 0 10px; color: #f1dfb8; font-family: "Cooper Black", "Cooper Std", "Bookman Old Style", "Bookman", Georgia, serif; }
-  h1 { margin: 0; font-size: clamp(26px, 6vmin, 44px); font-weight: 900; letter-spacing: 0.02em; text-shadow: 2px 2px 0 #8a4f1d, 3px 3px 0 #3a2c1c; }
-  header p { margin: 0; font-size: clamp(14px, 3vmin, 20px); font-style: italic; color: #d9b98a; }
-  main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (orientation: portrait) { main { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } }
-  .card { position: relative; overflow: hidden; border-radius: 6px; background: #2a2017; box-shadow: 0 0 0 3px #3a2c1c, 0 6px 22px rgba(0, 0, 0, 0.5); transition: transform 0.25s cubic-bezier(.3,1.5,.5,1); }
-  .card iframe { opacity: 0; transition: opacity 0.5s ease-out; }
+  html, body { margin: 0; height: 100%; background: var(--screen); overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  body { display: flex; flex-direction: column; height: 100dvh; padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); font-family: var(--face); }
+  header { flex: none; display: flex; align-items: baseline; justify-content: center; gap: 4px 0.9em; flex-wrap: wrap; padding: 2px 0 10px; }
+  h1 { font-size: clamp(26px, 6vmin, 44px); }
+  header p { margin: 0; font-size: clamp(13px, 2.8vmin, 19px); font-style: italic; color: var(--cream-dim); }
+  /* the grown-ups' door: words, so only someone who reads goes through */
+  header a { font-size: clamp(12px, 2.4vmin, 16px); color: var(--cream-dim); text-decoration-color: var(--rust); text-underline-offset: 3px; white-space: nowrap; }
+  header a:hover { color: var(--cream); }
+  /* The worlds, always on one screen: two side by side, three or four in two
+     rows, five or six in three columns; upright, in one column, or two from
+     four on. */
+  main { flex: 1; min-height: 0; display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; }
+  main:has(.card:nth-child(5)) { grid-template-columns: repeat(3, 1fr); }
+  @media (orientation: portrait) {
+    main { grid-template-columns: 1fr; }
+    main:has(.card:nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
+  }
+  .card { position: relative; overflow: hidden; border-radius: 6px; background: var(--screen-2); box-shadow: 0 0 0 3px var(--edge), 0 6px 22px rgba(0, 0, 0, 0.5); transition: transform 0.25s cubic-bezier(.3,1.5,.5,1); }
+  .card iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s ease-out; }
   .card.ready iframe { opacity: 1; }
   .card.going { transform: scale(0.97); }
-  .card iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
   .card a { position: absolute; inset: 0; cursor: pointer; }
   @media (any-hover: hover) { .card:hover { transform: scale(1.012); } }
 </style>
 </head>
 <body>
-<header><h1>Re-Kid</h1><p>pick a world</p></header>
+<header>
+  <h1 class="lettering on-screen" aria-label="Little Kino"><span>L</span><span>i</span><span>t</span><span>t</span><span>l</span><span>e</span><span class="gap"> </span><span>K</span><span>i</span><span>n</span><span>o</span></h1>
+  <p>not a cartoon, not a game: a little world to visit</p>
+  <a href="grown-ups.html">for grown-ups</a>
+</header>
 <main>
   <div class="card"><iframe src="reksio.html" title="Reksio's yard" tabindex="-1"></iframe><a id="reksio" aria-label="Reksio's yard"></a></div>
   <div class="card"><iframe src="krtek.html" title="Krtek's meadow" tabindex="-1"></iframe><a id="krtek" aria-label="Krtek's meadow"></a></div>

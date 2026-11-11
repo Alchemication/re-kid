@@ -104,7 +104,7 @@ and fix what you find before reporting done.
 | `docs/DECISIONS.md` | What has been decided and why, and the original brief. Read before reopening a settled question. |
 | `docs/DESIGN_PRINCIPLES.md` | How the games should feel and what they must never do, with the research on short play for toddlers. Check a new gag, ending or feature against it. |
 | `docs/WORLD_MODEL.md` | The world state and creature rules (`shared/world.js`, `creature.js`, `ambient.js`) that ambient life runs on, and how to add a creature. |
-| `README.md` | Layout, commands, the site, performance, debugging the yard, a note for parents. |
+| `README.md` | Layout, commands, the site (its pages, build and look), performance, debugging the yard, a note for parents. |
 | `CLAUDE.md` / `AGENTS.md` | Working rules (this file). |
 | `.claude/skills/*/SKILL.md` | Procedures: `new-world`, `new-episode`, `new-character`, `new-gag`, `new-sound`, `new-music`. A branch not every run needs is a file beside it, read when needed (`new-gag`: `yard.md`, `meadow.md`, `ambient.md`; `new-music`: `listening.md`). |
 | `experiments/sound/README.md` | The sound-generation experiment and its board. |
@@ -161,6 +161,25 @@ file layout update `README.md` and the `main.py` docstring in the same change.
   - Every push to `main` that touches a game folder publishes it to GitHub
     Pages (`.github/workflows/pages.yml`, `<site>/<world>/<game>/`): only
     what is committed in `game/` goes out.
+- **The public site (`site/`, built by `main.py site`, `src/website.py`):**
+  published as Little Kino. Three pages (the front page, the grown-ups'
+  page, the research page) and no more; the front page never scrolls and
+  holds at most `SITE_MAX_WORLDS` worlds.
+  - A page states no fact it doesn't own: a figure from a game's code or
+    anything about a cartoon is a `{{TOKEN}}` the build fills (`SITE_FACTS`,
+    the dossier's typed fields; a credit only when `verified` or
+    `sourced`). The build fails on one it can't fill; never type the value
+    in. The research page is `docs/DESIGN_PRINCIPLES.md` rendered: edit the
+    doc.
+  - `site/assets/base.css` is the only place the site's colours, typeface
+    and lettering are defined. Never redeclare a colour in a page.
+  - No page loads anything from another site (fonts, scripts, analytics):
+    keep a copy under `site/assets/`. The build checks.
+  - It calls itself a little world to visit, not a cartoon and not a game,
+    and keeps the games' rules: calm, plain words, no marketing tone, no
+    claim about a child that the research doesn't make.
+  - After changing the name, the tagline or the palette, re-render the link
+    preview and icons (`main.py site --art`) and commit them.
 - **Shared parts:** what every game of a world will use (its characters,
   `debug.js`, sound and music) says so in its header (`// Shared by every
   game`) and uses only other shared parts. It never holds a game's things,

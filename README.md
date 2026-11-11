@@ -1,5 +1,8 @@
 # re-kid
 
+Published as **Little Kino**: https://alchemication.github.io/re-kid/ (the
+repository keeps its working name for now).
+
 Small, faithful games made from nostalgic childhood cartoons — starting with
 one Polish world, Reksio, and one short game for a parent and a young child.
 
@@ -78,9 +81,15 @@ experiments/music/      the same for the games' music, against what the game pla
 experiments/board/      what both boards share: the page, its look (Krtek's meadow) and keys
 .claude/skills/         procedures for Claude Code sessions (new-world, new-episode, new-character, new-gag, new-sound, new-music)
 tests/                  pytest; test_game_browser.py drives the games in Chrome
-site/                   the site's front page (index.html): Re-Kid, pick a world; each card (reksio.html,
-                        krtek.html) is its game's own painting, character and old-print look, alive
-.github/workflows/pages.yml  publishes the games and the front page to GitHub Pages
+site/                   the public site, Little Kino, as written: the front page (index.html: pick a
+                        world; each card, reksio.html and krtek.html, is its game's own painting,
+                        character and old-print look, alive), the grown-ups' page (grown-ups.html),
+                        the research page's frame (research.html), the manifest
+  assets/               base.css (the site's colours, typeface and lettering), fonts/, the icons
+                        and the link preview (rendered)
+  art/                  what the icons and the link preview are rendered from (not published)
+_site/                  the site as built by `main.py site` (gitignored)
+.github/workflows/pages.yml  builds the site with `main.py site` and publishes it to GitHub Pages
 eslint.config.mjs       lint for the game scripts (run with npx, no npm project)
 ```
 
@@ -136,6 +145,8 @@ uv run python main.py effects WORLD [GAME]    # rebuilds the game's effects.js
 uv run python main.py tunes WORLD [GAME]      # rebuilds the game's tunes.js
 uv run python main.py barks WORLD             # packs the marked barks into barks.js
 uv run python main.py shared                  # copies shared/ scripts into the games
+uv run python main.py site                    # builds the public site into _site/
+uv run python main.py site --art              # renders the link preview and icons from site/art/
 uv run python main.py schema world|sources|episodes|intro|brief
 ```
 
@@ -145,16 +156,51 @@ Development: `uv run ruff check . && uv run ruff format . && uv run pytest`,
 
 ## The site
 
-Every push to `main` that changes a game or `site/` publishes it to GitHub Pages
+The site is published as **Little Kino** (Adam, 2026-11-11), and says what
+it is by what it is not: not a cartoon, not a game, a little world to visit.
+Every push to `main` that changes a game, `site/` or what its pages quote
+builds it (`main.py site`, `src/website.py`) and publishes it to GitHub Pages
 (`.github/workflows/pages.yml`): https://alchemication.github.io/re-kid/
-opens on Re-Kid's front page (`site/index.html`): its name and "pick a world"
-for the grown-up, then the worlds, with nothing a child must read:
-Reksio in his yard and the mole in his meadow, alive, each card a page of its
-own in a frame (`site/reksio.html`, `site/krtek.html`) built from its game's
-parts (its painting, the character's drawing, the old-print look), doing
-things at random; a card shows only once it is painted and under the old
-look, so it never opens on a bare picture first (`tests/test_site_browser.py`
-checks both cards); a tap on one and he cheers, and his scene opens. It opens from disk too, finding the games in `worlds/`. Each game is
+
+Three pages, and no more:
+
+- **The front page** (`site/index.html`), the screen: the name, one line and
+  the way to the grown-ups' page, then the worlds, with nothing a child must
+  read and nothing to scroll: Reksio in his yard and the mole in his meadow,
+  alive, each card a page of its own in a frame (`site/reksio.html`,
+  `site/krtek.html`) built from its game's parts (its painting, the
+  character's drawing, the old-print look), doing things at random; a card
+  shows only once it is painted and under the old look, so it never opens on
+  a bare picture first; a tap on one and he cheers, and his scene opens. It
+  holds at most six worlds (`SITE_MAX_WORLDS`), all on one screen: two side
+  by side, up to four in two rows, up to six in three columns; the build
+  refuses a seventh. It opens from disk too, finding the games in `worlds/`.
+- **The grown-ups' page** (`site/grown-ups.html`), the printed programme: a
+  cartoon and a game crossed out and "a little world" left standing, Reksio
+  to tap so it is shown, a visit as a listing, how to play, what it never
+  does, the worlds, where it comes from, the fan-work notice, and the films'
+  end card.
+- **The research page** (`site/research.html`): `docs/DESIGN_PRINCIPLES.md`,
+  rendered, never a second copy.
+
+A page states no fact it doesn't own: the day's length, its hours and the
+hold for a grown-up come from the games' scripts (`SITE_FACTS`), a cartoon's
+title, years and creator from its dossier (typed fields, and a credit only
+when its claim is `verified` or `sourced`), written in the pages as
+`{{TOKENS}}`. The build fails, publishing nothing, on a token it can't fill,
+a page that loads anything from another site, or a world without a card.
+`site/assets/base.css` is the one place the colours, the typeface (Fraunces,
+kept in `assets/fonts/`, OFL) and the lettering are defined; a page links it
+and never redeclares a colour. The look is an evening's television of about
+1975: the front page is the screen, the grown-ups' pages the programme that
+lay beside the set. The icons and the link preview are rendered from
+`site/art/` (`main.py site --art`) after a change to the name or palette.
+To read the built site: `uv run python -m http.server -d _site`
+(`tests/test_site.py` checks the build, `tests/test_site_browser.py` the
+pages in Chrome). Adding a world: its card page, its card in `index.html`,
+its entry in `grown-ups.html`, and `SITE_WORLDS`.
+
+Each game is
 at `<site>/<world>/<game>/`; add the front page to the home screen and both
 are a tap away. Only the game folders and `site/` go out, the original barks with them (`barks.js`); on an iPhone or iPad the sound plays even with the ringer
 switch on silent (Safari 17+). The game pauses, sound and all, while its page is hidden (another tab, a

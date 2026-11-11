@@ -38,6 +38,8 @@ from config import (
     SAMPLE_CACHE_DIR,
     SAMPLES_JS,
     SAMPLES_NAME,
+    SITE_DIR,
+    SITE_OUT,
     TUNES_DIR,
     TUNES_JS,
     TUNES_NAME,
@@ -590,4 +592,27 @@ def cmd_shared(args: argparse.Namespace) -> int:
     for c in written:
         print(f"  {c.path.relative_to(REPO_ROOT)}")
     print(f"{len(written)} copies updated." if written else "All copies up to date.")
+    return 0
+
+
+def cmd_site(args: argparse.Namespace) -> int:
+    """Build the public site, or photograph its link preview and icon."""
+    from website import SiteError, build, render_art
+
+    if args.art:
+        for path in render_art():
+            print(f"  {path.relative_to(REPO_ROOT)}")
+        print(
+            f"Pictures rendered into {(SITE_DIR / 'assets').relative_to(REPO_ROOT)}/."
+        )
+        return 0
+    out = Path(args.out) if args.out else SITE_OUT
+    try:
+        pages = build(out)
+    except SiteError as exc:
+        logger.error("%s", exc)
+        return 1
+    for path in pages:
+        print(f"  {path.name}")
+    print(f"Site built in {out}. To read it: uv run python -m http.server -d {out}")
     return 0

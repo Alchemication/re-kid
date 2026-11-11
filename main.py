@@ -14,6 +14,7 @@ Subcommands:
     tunes     Level and pack a game's picked music takes into tunes.js.
     barks     Cut the marked original barks into barks.js for the games.
     shared    Copy the shared game scripts (shared/) into the games that load them.
+    site      Build the public site (the games, the front page, the grown-ups' pages).
     schema    Print the JSON Schema for a research file type.
 
 Examples:
@@ -104,6 +105,13 @@ Examples:
         game whose page loads it, with a header saying to edit shared/
         instead. Run it after changing anything in shared/.
 
+    uv run python main.py site
+        Builds the public site into _site/: every game folder, the front
+        page, and the grown-ups' pages with their facts filled in from the
+        games' code and the worlds' dossiers. Fails, publishing nothing, on
+        a fact it can't fill. --art renders the link preview and the icons
+        from site/art/ instead (after changing the name or the palette).
+
     uv run python main.py schema world
         JSON Schema for world.yaml (also: sources, episodes, intro, brief).
 """
@@ -130,6 +138,7 @@ from commands import (
     cmd_schema,
     cmd_shared,
     cmd_show,
+    cmd_site,
     cmd_tunes,
     cmd_validate,
 )
@@ -314,6 +323,16 @@ def main() -> int:
 
     sub.add_parser("shared", help="Copy shared game scripts into the games")
 
+    p_site = sub.add_parser("site", help="Build the public site")
+    p_site.add_argument(
+        "--out", metavar="DIR", help="Folder to build into (default: _site/)"
+    )
+    p_site.add_argument(
+        "--art",
+        action="store_true",
+        help="Instead, render the link preview and the icons from site/art/",
+    )
+
     p_schema = sub.add_parser("schema", help="Print JSON Schema")
     p_schema.add_argument(
         "kind", choices=["world", "sources", "episodes", "intro", "brief"]
@@ -334,6 +353,7 @@ def main() -> int:
         "tunes": cmd_tunes,
         "barks": cmd_barks,
         "shared": cmd_shared,
+        "site": cmd_site,
         "schema": cmd_schema,
     }
     return dispatch[args.cmd](args)

@@ -10,8 +10,8 @@
      flower bed as the game draws them, and the mole drawn by the game's
      moleart.js, under the games' old-print look (filmlook.js). He pops up
      out of his molehill and, every few seconds, does one of a few things
-     chosen at random. index.html asks him to cheer (postMessage 'cheer')
-     when he is tapped. -->
+     chosen at random. The page showing him asks him to cheer
+     (postMessage 'cheer') when he is tapped. -->
 <style>
   html { visibility: hidden; } /* until painted (reveal) */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #94b8ea; }
@@ -37,6 +37,7 @@
   const SVG = 'http://www.w3.org/2000/svg'
   const ACTS = ['wave', 'look', 'perk', 'duck', 'wave', 'look'] // what he does now and then, one at random
   const ACT_MS = [2400, 5200] // between them
+  const CHEER_MS = 1500 // a cheer held this long
   const DOWN = 240 // down in his molehill, this far below his place up to his middle
   const between = ([a, b]) => a + Math.random() * (b - a)
   const ease = (t) => 1 - (1 - t) ** 3
@@ -147,6 +148,7 @@
         for (const w of Object.values(views)) w.lids.style.transform = `scaleY(${t < 1 ? Math.sin(t * Math.PI) : 0})`
         if (t >= 1) blinkAt = now + between([1800, 5000])
       }
+      if (cheer && now > cheer + CHEER_MS) { cheer = 0; mouth('smile') } // held a moment, then as he was
       if (cheer) {
         const k = ease(Math.min(1, (now - cheer) / 180))
         show('front')

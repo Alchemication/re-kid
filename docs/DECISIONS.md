@@ -23,6 +23,26 @@ how the games should feel is in `docs/DESIGN_PRINCIPLES.md`.
   scene; later, perhaps a mish-mash scene with characters from several.
 - **No platform yet.** One scene per cartoon and a short parent card. No catalogue,
   country map or memory sharing. One exception, the world model below.
+- **The public name is Little Kino** (Adam, 2026-11-11), in place of
+  Re-Kid, which spoke only to the parent and read like a startup. "Kino" is
+  cinema in Polish and Czech and is understood in English. "Baja time",
+  what Eliot calls it, was the other candidate: English readers say "baja"
+  wrong, and "-time" names a slot a child asks for more of, so it is told
+  as the story on the grown-ups' page instead. A quick web search found no
+  app or game of that name; no trademark register was searched. The
+  repository keeps `re-kid` until it is renamed.
+- **It is presented as neither a cartoon nor a game** (Adam, 2026-11-11):
+  "a little world to visit". The site shows it by crossing the two out and
+  by letting a visitor tap Reksio; whether that reads clearly is Adam's to
+  judge. The code and these docs still say "game".
+- **A small public site, in English, with a fan-work notice** (Adam,
+  2026-11-11). Three pages and no more; the front page stays one screen
+  that never scrolls, with at most six worlds, so the collection can grow
+  a little and never become a feed. The notice says it is unaffiliated and
+  that a rights holder's request will be acted on. This is Adam's call
+  with the rights open: Reksio's dossier still records the holder as
+  unknown and "to be resolved before any public release". Eliot is named
+  on the site.
 - **A world model, tried in the meadow** (Adam, 2026-10-25: the more
   cartoons and gags, the more each creature hand-wired to the others and
   the weather "screams for generalisation, just like in nature"; he wants

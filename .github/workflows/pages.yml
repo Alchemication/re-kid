@@ -8,6 +8,10 @@ on:
       - ".github/workflows/pages.yml"
       - "worlds/*/games/*/game/**"
       - "site/**"
+      - "src/website.py"
+      - "src/config.py"
+      - "docs/DESIGN_PRINCIPLES.md"
+      - "worlds/*/world.yaml"
   workflow_dispatch:
 
 permissions:
@@ -24,23 +28,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --locked --no-dev
+
       - name: Build site
-        # The games are plain static pages, so "building" is copying each
+        # main.py site (src/website.py) copies each
         # worlds/<world>/games/<game>/game/ to _site/<world>/<game>/ (main.py
-        # replay maps a report saved on the site back to that folder), and
-        # site/ (the front page, where a child picks a scene) to the top.
-        # Only those go out: no research or media. The one original
-        # recording is the bark (game/barks.js), Adam's call for the POC.
+        # replay maps a report saved on the site back to that folder) and
+        # site/ to the top, filling the pages' facts from the games' code and
+        # the worlds' dossiers; it fails, publishing nothing, on a fact it
+        # can't fill. Only those go out: no research files or media. The one
+        # original recording is the bark (game/barks.js), Adam's call for the
+        # POC.
         run: |
-          mkdir -p _site
-          for game in worlds/*/games/*/game; do
-            world=$(echo "$game" | cut -d/ -f2)
-            name=$(echo "$game" | cut -d/ -f4)
-            mkdir -p "_site/$world"
-            cp -R "$game" "_site/$world/$name"
-          done
-          cp -R site/. _site/
-          touch _site/.nojekyll
+          uv run --no-dev python main.py site --out _site
           find _site -type f | sort
 
       - name: Configure GitHub Pages

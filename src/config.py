@@ -325,3 +325,69 @@ LOOK_CLOSE = (480, 320)
 """With ``--close``, each frame is cut to this much around the hero (CSS px, at
 the default size): Reksio, the bird on his head and what he holds or eyes fill
 it, as a zoomed-in still would; 640x400 left him small on the sheet."""
+
+SITE_NAME = "Little Kino"
+"""The public name (Adam, 2026-11-11), as every page of the site titles itself.
+The repository and its folders keep ``re-kid`` until they are renamed."""
+
+SITE_DIR = REPO_ROOT / "site"
+"""The site's own pages and assets, as written: the front page, the world
+cards, the grown-ups' page, the research page's frame, ``assets/``."""
+
+SITE_OUT = REPO_ROOT / "_site"
+"""Where ``main.py site`` builds the site (gitignored); what
+``.github/workflows/pages.yml`` uploads to GitHub Pages."""
+
+SITE_URL = "https://alchemication.github.io/re-kid/"
+"""The published site's address, with its closing slash. Only link previews
+need it (a preview's picture must be a full address); every link between the
+pages is relative, so a move to another address changes this line alone."""
+
+REPO_URL = "https://github.com/Alchemication/re-kid"
+"""The public repository the grown-ups' page points to, for the code, the
+research and a rights holder's request."""
+
+SITE_WORLDS = {"reksio": "yard", "krtek": "meadow"}
+"""The worlds the front page shows, in its order, each with the game its card
+opens. The front page needs a card (``site/<world>.html``) for each."""
+
+SITE_MAX_WORLDS = 6
+"""The most worlds the front page may show: what fits on one phone screen
+with nothing to scroll (three columns of two). A seventh takes another's
+place; the build refuses it."""
+
+SITE_ART_DIR = "art"
+"""Folder in ``site/`` holding what the pictures are rendered from (the link
+preview, the icon). Sources only: never published."""
+
+SITE_ICON_SIZES = (512, 192, 180)
+"""The icon's sizes in pixels: 512 and 192 for the web manifest (Android's
+home screen and splash), 180 for an iPhone's home screen."""
+
+SITE_PREVIEW_SIZE = (1200, 630)
+"""The link preview's size in pixels: the 1.91:1 picture chat apps and social
+sites show beside a shared link."""
+
+SITE_PRINCIPLES_DOC = REPO_ROOT / "docs" / "DESIGN_PRINCIPLES.md"
+"""The doc the site's research page is rendered from, so the page parents
+read is the rules the work follows, never a second copy."""
+
+SITE_COUNTRIES = {"PL": "Polish", "CZ": "Czech"}
+"""A dossier's country code, as the site says where a cartoon is from ("the
+Polish cartoon Reksio"). A new world's country goes here; the build fails
+on a code it doesn't know."""
+
+SITE_FACTS = {
+    "DAY_MINUTES": ("reksio/games/yard/game/day.js", r"const LENGTH_S = (\d+)", 60),
+    "DAY_FROM": ("reksio/games/yard/game/day.js", r"const FROM = (\d+)", 1),
+    "DAY_TO": ("reksio/games/yard/game/day.js", r"const TO = (\d+)", 1),
+    "HOLD_SECONDS": (
+        "reksio/games/yard/game/grownup.js",
+        r"const HOLD_MS = (\d+)",
+        1000,
+    ),
+}
+"""Figures the grown-ups' page quotes from a game's code: the token, the
+script under ``worlds/`` that owns the number, the pattern that finds it, and
+what to divide it by for the page's unit (seconds to minutes, milliseconds to
+seconds). The build fails when a pattern no longer matches."""

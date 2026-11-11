@@ -9,8 +9,8 @@
      paints it (its painting.js), his doghouse, and Reksio drawn by the
      game's figure.js, under the games' old-print look (filmlook.js). Left
      to himself he breathes, wags and blinks, and every few seconds does one
-     of a few things, chosen at random. index.html asks him to cheer
-     (postMessage 'cheer') when he is tapped. -->
+     of a few things, chosen at random. The page showing him asks him
+     to cheer (postMessage 'cheer') when he is tapped. -->
 <style>
   html { visibility: hidden; } /* until painted (reveal) */
   html, body { margin: 0; height: 100%; overflow: hidden; background: #e7a464; }
@@ -39,6 +39,7 @@
   const ACTS = ['perk', 'idea', 'look', 'ponder', 'scratch'] // what he does now and then, one at random
   const ACT_MS = [2600, 5600] // between them
   const HOLD_MS = [900, 1800] // each held this long
+  const CHEER_MS = 1500 // a cheer held this long
   const between = ([a, b]) => a + Math.random() * (b - a)
   const ease = (t) => 1 - (1 - t) ** 3
   // fetched side by side, run in the order listed (async: false)
@@ -105,7 +106,11 @@
         p = vary(p, { face: { blink: t < 1 ? Math.sin(t * Math.PI) : 0 } })
         if (t >= 1) blinkAt = now + between([1800, 5200])
       }
-      if (cheer) p = mix(p, POSES.armsWide, ease(Math.min(1, (now - cheer) / 180)))
+      if (cheer) { // arms wide, held a moment, then down again (the front page has opened his yard by then)
+        const down = ease(Math.max(0, Math.min(1, (now - cheer - CHEER_MS) / 260)))
+        p = mix(p, POSES.armsWide, ease(Math.min(1, (now - cheer) / 180)) * (1 - down))
+        if (down >= 1) cheer = 0
+      }
       draw(p)
       requestAnimationFrame(frame)
     }

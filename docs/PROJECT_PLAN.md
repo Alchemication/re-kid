@@ -456,7 +456,37 @@ sounds he has judged are in.
       ear on the bed board. Autumn and spring get theirs with their plays.
       Krtek's meadow gets the same (6 and 7) once the yard's way of doing
       it has settled.
-4. **A third cartoon, and the platform with it:** two worlds will have
+4. **Adam judges the public site, Little Kino** (built 2026-11-11; the
+   plan agreed with him, the pages, words and look mine; `main.py site`,
+   then `uv run python -m http.server -d _site`):
+   - **Does "not a cartoon, not a game" read?** The front page's line, the
+     grown-ups' page's three boxes (two crossed out, "a little world"
+     left), and Reksio to tap. His ask (2026-11-11); he didn't yet know how
+     to show it.
+   - **The words on the grown-ups' page,** all of them: "made by a dad for
+     his son Eliot, who is three"; that a rights holder's request "we will
+     do"; "no analytics" (true of the pages; GitHub, the host, keeps its
+     own logs); the worlds' one-line descriptions.
+   - **The look:** the lettering (Fraunces, each letter a little off the
+     line) on the screen and on paper, the paper's colours, the icon (a
+     sun over a hill on the set's screen: no character), the link preview.
+   - **The research page** is the whole of `docs/DESIGN_PRINCIPLES.md`,
+     file names and all, under a note saying so. Judge whether a parent
+     should get only the research section instead.
+   - **The grown-ups' link is plain words on the front page,** not behind
+     a hold as first proposed: a visitor at a desk has to find it. Watch
+     whether Eliot taps it.
+   - Not done: the repository's rename and a domain (`SITE_URL`,
+     `REPO_URL` in `src/config.py` are the two lines to change); a
+     trademark register search for the name; a nod to the song the name
+     reminded Adam of (which one, he hasn't said). From a third world on:
+     cards as stills with one alive at a time (each live card runs a
+     game's painting), and the cards and entries generated from
+     `SITE_WORLDS` instead of written by hand in four places.
+   - The front page threw "Cannot read properties of undefined (reading
+     'style')" once, on its first load over HTTP (2026-11-11), from one
+     of the cards; not seen in 40 loads after, from disk or over HTTP.
+5. **A third cartoon, and the platform with it:** two worlds will have
    shown what every scene shares, so the third is built on the platform as
    it takes shape (the world model among it), and its needs shape it (how
    scenes are found, picked and shared). Keep the platform as small as the
