@@ -1,0 +1,136 @@
+/* Shared by every page of the site (the front page, the grown-ups' page, the
+ * research page): the one place its colours, its typeface and its lettering
+ * are defined. Pages link it and add only their own layout; none redeclares
+ * a colour. The world cards (reksio.html, krtek.html) don't use it: they are
+ * drawn by their games.
+ *
+ * The look is an evening's television, about 1975, in two halves. The front
+ * page is the screen: a dark room, cream lettering, the picture in the
+ * middle. The pages for grown-ups are the printed programme that lay beside
+ * the set: cream paper, gouache colours a little off register, a listing
+ * that ends. Fonts sit beside this file (fonts/), so no page asks another
+ * site for anything.
+ */
+
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/fraunces-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* the Polish and Czech letters (ł, ě, ř): fetched only by a page that has them */
+@font-face {
+  font-family: "Fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/fraunces-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  /* the screen: a dark room and an old title card's cream and brown */
+  --screen: #1d1914;
+  --screen-2: #2a2017;
+  --edge: #3a2c1c;
+  --cream: #f1dfb8;
+  --cream-dim: #d9b98a;
+  --rust: #8a4f1d;
+  /* the programme: paper, ink, and four pots of gouache */
+  --paper: #efe2c2;
+  --paper-2: #e3d2a6;
+  --ink: #2b2118;
+  --ink-soft: #6a5642;
+  --mustard: #d99f1c;
+  --tomato: #c5472c;
+  --bottle: #2e6b50;
+  --sky: #6f9dbb;
+  --line: rgba(43, 33, 24, 0.28);
+  /* one typeface, soft and a little wonky for lettering, plain for reading */
+  --face: "Fraunces", "Cooper Black", "Bookman Old Style", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+
+/* The name, lettered by hand: each letter sits a little off the line, and the
+ * brown plate printed a little off the cream one. Each letter is a <span>. */
+.lettering {
+  margin: 0;
+  font-family: var(--face);
+  font-weight: 900;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+}
+.lettering span { display: inline-block; }
+.lettering span:nth-child(4n + 1) { transform: rotate(-3deg) translateY(0.02em); }
+.lettering span:nth-child(4n + 2) { transform: rotate(2deg) translateY(-0.03em); }
+.lettering span:nth-child(4n + 3) { transform: rotate(-1.5deg) translateY(0.035em); }
+.lettering span:nth-child(4n) { transform: rotate(3deg) translateY(-0.01em); }
+.lettering .gap { width: 0.26em; }
+
+/* on the screen */
+.lettering.on-screen { color: var(--cream); text-shadow: 0.05em 0.05em 0 var(--rust), 0.08em 0.08em 0 var(--edge); }
+/* on paper */
+.lettering.on-paper { color: var(--ink); text-shadow: 0.045em 0.04em 0 var(--mustard); }
+
+/* A printed page: paper with a faint grain, ink, the reading size. */
+body.paper {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(rgba(43, 33, 24, 0.05) 1px, transparent 1.2px) 0 0 / 5px 5px,
+    var(--paper);
+  font-family: var(--face);
+  font-variation-settings: "SOFT" 50, "WONK" 0;
+  font-size: 18px;
+  line-height: 1.55;
+  -webkit-text-size-adjust: 100%;
+}
+body.paper a { color: inherit; text-decoration-color: var(--tomato); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+body.paper a:hover { color: var(--tomato); }
+
+.sheet { max-width: 760px; margin: 0 auto; padding: 28px 20px 56px; }
+
+/* a section's heading, with the small label a programme prints above it */
+.sheet h2 {
+  margin: 0 0 12px;
+  font-weight: 800;
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 72;
+  font-size: clamp(26px, 5vw, 34px);
+  line-height: 1.12;
+}
+.sheet h3 { margin: 26px 0 6px; font-weight: 750; font-size: 20px; line-height: 1.25; }
+.label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tomato);
+}
+.sheet section { margin-top: 52px; padding-top: 22px; border-top: 3px double var(--line); }
+.sheet p { margin: 0 0 14px; }
+.sheet ul { margin: 0 0 14px; padding-left: 1.15em; }
+.sheet li { margin-bottom: 8px; }
+.small { font-size: 15px; color: var(--ink-soft); }
+
+/* the way back to the screen, at a page's top */
+.back { display: inline-block; margin-bottom: 26px; font-size: 15px; font-weight: 600; }
+
+/* the last thing on a printed page: the films' end card */
+.koniec {
+  margin: 64px auto 0;
+  width: fit-content;
+  padding: 18px 34px 20px;
+  border-radius: 10px;
+  background: var(--screen);
+  text-align: center;
+}
+.koniec .lettering { font-size: 40px; }
+.koniec p { margin: 8px 0 0; font-size: 13px; color: var(--cream-dim); }

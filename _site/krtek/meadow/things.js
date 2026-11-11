@@ -1,0 +1,337 @@
+// The meadow's encounters, and when they come. The meadow is one screen, so
+// its things don't all stand about from the start: each arrives at its own
+// hour (an egg rolls in, poles get planted...), one at a time, and
+// waits. Never two at once: the next comes only once the one before is
+// done and a quiet spell has passed, and not while the eclipse is on (it
+// shares their slot): one story at a time, as in an episode (Adam,
+// 2026-11-06: the fox, then a bulldozer 5 s later, "super confusing"). A tap on it sets the mole going; left alone a while, he goes by
+// himself. Each is a chain of steps that then plays on like a little
+// cartoon; a tap on the thing hurries it to its next step, a tap anywhere
+// else waits for the step he is in to end (as in the yard) and then cuts it
+// short, and next time it picks up at the next step.
+//
+// Which encounters come is decided once, from the page's seed: first one
+// where he helps someone, one where someone helps him, and one to discover,
+// as in the yard (docs/DECISIONS.md, "Helping is the yard's theme"), then
+// the rest, as many as there are hours for, with a quiet spell after
+// each, so the child gets a moment to relax (Adam, 2026-11-01). Fewer
+// come in a day than are planned when the child plays each out: that's
+// fine (Adam, 2026-11-06). None is needed for the day to end.
+//
+// An encounter registers itself (Things.add) with:
+//   name, offer ('help', 'helped' or 'discover'),
+//   appear(): it arrives (drawn, with its entrance),
+//   plant (optional): () => …, what stands there all day before it comes,
+//     drawn as the play starts if it comes this play (the bulldozer's young
+//     trees on the road it will make: nothing from nowhere),
+//   steps: async functions (alive) => …, each one beat of the chain; they
+//     return early once alive() is false (cut short),
+//   restore(): after a cut, put everything it moved back in a state the
+//     next step can start from, and send its visitors home,
+//   night(): the day is over (bedtime): tidy up, nobody left out,
+//   again (optional): async (alive) => …, what a tap on it does once it is
+//     done (the car: another ride),
+//   ask (optional), for a try-and-see encounter where the child picks
+//     what he tries (docs/DESIGN_PRINCIPLES.md: a tap is a choice, not a
+//     skip): after its steps, it waits for a choice instead of ending.
+//     ask(who, alive): try `who` (a tap on something carrying
+//       data-choice="who" inside the thing's data-thing, the intent
+//       "use egg hen"); next(): what he tries himself when left alone;
+//       resolved(): it is over (a tap on the thing itself while it waits
+//       is a try too: next()'s); holds(): he
+//       holds it up as he waits (the egg), which a free mole otherwise
+//       never does (checkRules).
+//   urgent (optional): weather that won't wait for a tap (the storm): as
+//     it arrives he drops whatever he is doing and sees to it at once,
+//     unless he is still waking, or in a ?still play (Adam, 2026-10-31),
+//   music (optional): { [step]: 'sad' | 'happy' | 'menace' | 'hush' }, the music's
+//     moment as that step starts (music.js: the theme sad at its trouble,
+//     happy as it comes right, stepping back at a fright). The theme comes
+//     curious as any encounter arrives (unless its trouble starts as it
+//     does), and happy as it is done unless a step has had it already.
+//   trouble (optional): [from, until], the steps a threat is about (the
+//     bulldozer, the fox looming; until left out: to the end). From the
+//     start of step `from` to the start of step `until` the bed is uneasy
+//     (beds.js), between cues too: no glad music while it is still here
+//     (Adam, 2026-11-01); the moment it lifts, the theme comes happy
+//     (Adam, 2026-11-02: once it's gone, the glad music back), so its
+//     `music` needn't cue it. A tap doesn't cut it short, as it would another
+//     encounter: any tap carries the story on (meadow.js), so a busy child
+//     never holds a bulldozer at the meadow's edge. While it is about he
+//     rests on an uneasy face, not his smile (mole.js `calm`),
+//   gone (optional): () => true once the threat has left, before its
+//     trouble's last step is over (the bulldozer out of sight, his cheer
+//     at it): the trouble ends there,
+//   engageMs (optional): left alone this long, he goes to it, or tries its
+//     next choice, himself (default ENGAGE_MS; the storm's friends stand in
+//     the rain, so he doesn't keep them waiting);
+//   instead, chance (optional): it comes in this share of plays, and in
+//     those its `instead` doesn't (the storm, instead of the rain cloud);
+//   detail(): its own state, for the overlay and the tests; `cast`, the
+//     visitors it has out now (none once the mole is free: checkRules).
+// It draws on the meadow's helpers (Things.meadow: goTo) for the mole's
+// trips, tells the meadow the music's moments (Things.meadow.music), and
+// asks it to keep something big in sight with him (Things.meadow.frame).
+
+/* global Clock, Day, Debug, Layout */
+/* exported Things */
+const Things = (() => {
+  const HOURS = [9, 11, 13, 15] // the soonest each of the chosen ones may arrive, in their (seeded) order; each waits for the one before to be done and rested after, so a play that plays them out sees two or three
+  const SOON_HOUR = 8 // ?soon: the first arrives as he wakes, for trying it
+  const ENGAGE_MS = 12000 // a thing out and the mole left alone this long: he goes to it himself (a while, so the child can look first)
+  const REST_HOURS = 1.8 // after one is done (or the eclipse is over), a quiet spell before the next may arrive: about 45 s of a five-minute day, for the child to relax and play with the small things (Adam, 2026-11-01; 30 s felt crowded, 2026-11-06)
+  const LAST_HOURS = 1 // and none arrives in the last hour before sunset: too late to play it out
+  const BETWEEN_MS = 1300 // a breath between steps, so each reads (a tap on the thing skips it)
+
+  const all = {} // by name
+  let api = null // the meadow's: run, alone, free
+  let plan = [] // [{ name, at }], the order they come
+  let skip = null // resolves the breath between steps early
+  let lastDone = null // the hour the last one was done
+  let hourNow = 0
+  let stepping = null // the encounter whose step (or try) is playing now: a tap elsewhere waits for it (meadow.js)
+  let byHimself = null // the encounter he went to by himself, left alone, until the child taps it: a tap elsewhere is the child taking over, and goes at once
+
+  /** Play one step (or try) of `e`, saying so while it plays, and telling the meadow once it is over. */
+  async function oneStep(e, play) {
+    stepping = e.name
+    try {
+      await play()
+    } finally {
+      stepping = null
+      api.stepped?.()
+    }
+  }
+
+  function add(encounter) {
+    all[encounter.name] = { step: 0, out: false, done: false, ...encounter }
+  }
+
+  /** A copy of list in an order drawn from rand (pure: the meadow's rounds and the encounters' draws). */
+  function shuffle(list, rand) {
+    const a = [...list]
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1))
+      ;[a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+  }
+
+  /**
+   * Which encounters come this play, and at what hour: one with a `chance`
+   * comes in that share of plays, instead of its `instead`; then one of each
+   * offer there is, then the others, chosen from `rand` (pure: the unit tests call it). `props`
+   * (the ?props flag) forces a list instead; `soon` brings the first now; `inSeason(name)` leaves
+   * out one not of this play's season (the egg in autumn).
+   * The draws are made either way, so forcing one doesn't shift the rest.
+   */
+  function choose(encounters, rand, { props = null, soon = false } = {}, inSeason = () => true) {
+    let pool = encounters
+    for (const e of encounters.filter((c) => c.instead)) {
+      const comes = rand() < e.chance // drawn either way
+      pool = pool.filter((c) => c.name !== (comes ? e.instead : e.name))
+    }
+    pool = pool.filter((c) => inSeason(c.name))
+    const byOffer = {}
+    for (const e of pool) (byOffer[e.offer] ||= []).push(e.name)
+    const first = Object.keys(byOffer).sort().map((offer) => {
+      const list = byOffer[offer]
+      return list[Math.floor(rand() * list.length)]
+    })
+    const rest = pool.map((e) => e.name).filter((n) => !first.includes(n))
+    let names = [...shuffle(first, rand), ...shuffle(rest, rand)]
+    if (props) names = props.filter((n) => encounters.some((e) => e.name === n) && inSeason(n))
+    return names.slice(0, HOURS.length).map((name, i) => ({ name, at: soon && i === 0 ? SOON_HOUR : HOURS[i] }))
+  }
+
+  /** Whether it is too soon for one to arrive at this hour: the quiet spell after the last one was
+   * done (lastDone, an hour, or null), or the last hour before sunset. */
+  const quiet = (hour, lastDone, sunset) => (lastDone !== null && hour < lastDone + REST_HOURS) || hour > sunset - LAST_HOURS
+
+  /** Whether the stage is free at this hour for something to happen (the next encounter, or the eclipse):
+   * none out and not done, nothing else on (the eclipse, a shower: api.elsewhere), and not in a quiet spell. */
+  const open = (hour) => !Object.values(all).some((e) => e.out && !e.done) && !api?.elsewhere?.() && !quiet(hour, lastDone, Day.SUNSET)
+
+  /** Decide this play's encounters; `meadow` lends its run(), free(), alone(), music(), notice(),
+   * stepped() (a step is over: a tap that waited for it may go) and elsewhere() (the eclipse is on:
+   * it holds the stage). */
+  function setup(meadow) {
+    api = meadow
+    plan = choose(Object.values(all), Debug.random('things'), Layout.flags, Layout.inSeason)
+    for (const p of plan) all[p.name].plant?.()
+    Debug.trace('things', { plan: plan.map((p) => `${p.name}@${p.at}`).join(' ') })
+    return plan.map((p) => p.name)
+  }
+
+  /** The meadow's tick: things arrive on time; a waiting one draws the mole to it when he's left alone. */
+  function tick(hour) {
+    // one at a time: the next arrives at its hour, or a quiet spell after the one before is done
+    // (or the eclipse is over), whichever is later
+    hourNow = hour
+    for (const e of Object.values(all)) relief(e)
+    if (api.elsewhere?.()) lastDone = hour // the eclipse or a shower on: its quiet spell runs from its end
+    const next = plan.map((p) => ({ e: all[p.name], at: p.at })).find(({ e }) => !e.out)
+    if (next && hour >= next.at && open(hour)) arrive(next.e)
+    // left alone, he goes to a waiting thing himself (or tries its next choice); not after sunset,
+    // when he goes home to listen
+    const waiting = plan.map((p) => all[p.name]).find((e) => e.out && !e.done)
+    const waited = waiting && Math.min(api.alone(), Clock.now() - Math.max(waiting.arrived, waiting.tried || 0))
+    if (waiting && hour < Day.SUNSET && !Debug.still && api.free() && waited > (waiting.engageMs ?? ENGAGE_MS)) use(waiting.name, false)
+  }
+
+  /** It arrives: drawn with its entrance, the music curious; weather (urgent) has him see to it at
+   * once, anything else he notices. */
+  function arrive(e) {
+    e.out = true
+    e.arrived = Clock.now()
+    Debug.trace('arrives', { thing: e.name })
+    e.appear()
+    api.music?.(e.trouble?.[0] === 0 ? 'hush' : 'curious') // a threat: the music steps back, and it opens with its own (the bulldozer's menace)
+    if (e.urgent && !Debug.still && api.canBreakOff()) use(e.name, false)
+    else api.notice?.(e.name)
+  }
+
+  /** Its steps, from where they stopped; true once they are all done. */
+  async function stepsOn(e, alive) {
+    while (e.step < e.steps.length) {
+      Debug.trace('step', { thing: e.name, step: e.step })
+      if (e.music?.[e.step]) api.music?.(e.music[e.step])
+      await oneStep(e, () => e.steps[e.step](alive))
+      if (!alive()) return false
+      e.step++
+      if (e.step < e.steps.length && !e.hurry) await breath()
+      e.hurry = false
+      if (!alive()) return false
+    }
+    return true
+  }
+
+  function finish(e) {
+    e.done = true
+    lastDone = hourNow
+    Debug.trace('done', { thing: e.name })
+    if (!e.relieved && !Object.values(e.music || {}).includes('happy')) api.music?.('happy')
+  }
+
+  /** The moment an encounter's trouble lifts (the threat gone), the theme comes happy: once. */
+  function relief(e) {
+    const now = inTrouble(e)
+    if (e.troubling && !now && !e.done && !e.relieved) {
+      e.relieved = true
+      Debug.trace('relieved', { thing: e.name })
+      api.music?.('happy')
+    }
+    e.troubling = now
+  }
+
+  /**
+   * A tap on `name` (or, with `who`, on one of its choices), or, not tapped, the mole going by
+   * himself. Its steps play on from where they stopped; a tap while they play hurries them on;
+   * then a choice encounter waits for the child to pick what he tries.
+   */
+  function use(name, tapped = true, who = null) {
+    const e = all[name]
+    if (!e || !e.out) return false
+    byHimself = tapped || e.urgent ? null : name // weather and threats (urgent) won't wait for the child, so they keep the wait
+    if (e.done) return again(e)
+    if (api.busyWith() === name && whileBusy(e, tapped, who)) return true
+    if (e.ask) tryChoice(e, who || (tapped || e.step < e.steps.length ? null : e.next()))
+    else api.run(name, async (alive) => { if ((await stepsOn(e, alive)) && !e.ask) finish(e) }, () => e.restore())
+    return true
+  }
+
+  /** A tap on it while it plays: true if that's taken care of; false if it should start afresh
+   * (another choice than the one being tried: he goes to that one instead). */
+  function whileBusy(e, tapped, who) {
+    if (who && e.step < e.steps.length) e.pending = who // a choice tapped while its steps play: tried after them, not a restart
+    else if (who && who !== e.trying) return false
+    else hurry(e, tapped)
+    return true
+  }
+
+  /** A done thing tapped: its `again` (the car's ride), if it has one; a tap while that plays is part of it. */
+  function again(e) {
+    if (!e.again) return false
+    if (api.busyWith() !== e.name) api.run(e.name, e.again, () => e.restore())
+    return true
+  }
+
+  /** A tap on it while it plays hurries it on: the breath before the next step is skipped. */
+  function hurry(e, tapped) {
+    if (tapped && skip) skip()
+    else if (tapped && e.step < e.steps.length) e.hurry = true // a choice under way plays on as it is
+  }
+
+  /** Its steps if any are left, then `pick` tried (none: a tap on the thing itself, and he looks at it again). */
+  function tryChoice(e, pick) {
+    e.trying = pick
+    e.pending = null
+    const finding = e.step < e.steps.length // its steps are still to play (he finds the egg first)
+    api.run(e.name, async (alive) => {
+      if (!(await stepsOn(e, alive))) return
+      const who = e.pending || pick // a choice tapped while the steps played
+      e.pending = null
+      e.trying = who
+      // found: it waits for a choice. Already found, a tap on the thing itself is a try too: the next he
+      // would try himself (a child taps the egg, not the hen: in a filmed day, 2026-10-23, a busy
+      // child kept tapping the egg and it waited all day)
+      if (!who && finding) return
+      const tryWho = who || e.next()
+      e.trying = tryWho
+      Debug.trace('try', { thing: e.name, who: tryWho })
+      try {
+        await oneStep(e, () => e.ask(tryWho, alive))
+      } finally {
+        e.trying = null
+        if (e.resolved()) finish(e) // resolved even if a tap cut its aftermath short
+      }
+      if (alive()) e.tried = Clock.now()
+    }, () => {
+      e.trying = null
+      e.restore()
+      if (e.resolved() && !e.done) finish(e)
+    })
+  }
+
+  /** Put down whatever an encounter has him holding up as he waits (the egg): another gesture is starting. */
+  function putDown() {
+    for (const e of Object.values(all)) if (e.out && !e.done && e.holds && e.holds()) e.restore()
+  }
+
+  /** The encounter whose thing he is holding up as he waits, if any: a tap on it is a tap on that encounter. */
+  const holder = () => Object.values(all).find((e) => e.out && !e.done && e.holds && e.holds())?.name ?? null
+
+  /** Whether an encounter waiting for a choice has him holding something up (the egg): allowed while free. */
+  const holding = () => Object.values(all).some((e) => e.out && !e.done && e.holds && e.holds())
+
+  function breath() {
+    return new Promise((resolve) => {
+      const timer = Clock.after(BETWEEN_MS, done)
+      function done() {
+        Clock.cancel(timer)
+        skip = null
+        resolve()
+      }
+      skip = done
+    })
+  }
+
+  /** Bedtime: every thing tidies up. */
+  function night() {
+    for (const e of Object.values(all)) if (e.out) e.night()
+  }
+
+  /** Whether an encounter out now is in its trouble (`trouble`: the steps a threat is about). */
+  const inTrouble = (e) => e.out && !e.done && !!e.trouble && e.step >= e.trouble[0] && e.step < (e.trouble[1] ?? e.steps.length) && !e.gone?.()
+  /** The encounter in its trouble now, if any (its name). */
+  const troubledName = () => Object.values(all).find(inTrouble)?.name ?? null
+  const troubled = () => !!troubledName()
+
+  /** Every visitor out now, from every encounter. */
+  const cast = () => Object.values(all).filter((e) => e.out).flatMap((e) => e.detail().cast)
+
+  const stateOf = (e) => (e.done ? 'done' : !e.out ? null : e.ask && e.step >= e.steps.length ? 'choosing' : `step ${e.step}`)
+  const state = () => Object.fromEntries(plan.map((p) => [p.name, stateOf(all[p.name]) || `at ${p.at}`]))
+
+  return { shuffle, /** The encounter whose step is playing now, or null. */ get stepping() { return stepping }, /** The one he went to by himself, if no tap on it since. */ get byHimself() { return byHimself }, names: () => Object.keys(all), add, choose, open, troubled, troubledName, inTrouble, quiet, setup, tick, use, night, state, cast, holding, holder, putDown, get: (name) => all[name], /** The meadow's helpers (goTo, el), for the encounters. */ get meadow() { return api } }
+})()

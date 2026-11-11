@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Little Kino's icon</title>
+<link rel="stylesheet" href="../assets/base.css">
+<!-- The icon, as a home screen shows it: the set's rounded screen in a dark
+     room, and on it a morning, the sun coming up over a hill, which is how
+     every visit starts. No character on it: the worlds change, and they
+     aren't ours. Photographed at each size by `main.py site --art`
+     (src/website.py render_art) into assets/icon-<size>.png; drawn in
+     hundredths of the window, so every size is the same picture. -->
+<style>
+  html, body { margin: 0; height: 100%; background: var(--screen); overflow: hidden; }
+  svg { display: block; width: 100vw; height: 100vh; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 100 100" aria-hidden="true">
+  <defs><clipPath id="glass"><rect x="13" y="17" width="74" height="66" rx="17" ry="19" /></clipPath></defs>
+  <rect x="9" y="13" width="82" height="74" rx="21" ry="23" fill="#8a4f1d" />
+  <g clip-path="url(#glass)">
+    <rect x="13" y="17" width="74" height="66" fill="#f1dfb8" />
+    <circle cx="50" cy="62" r="19" fill="#d99f1c" />
+    <circle cx="50" cy="62" r="13" fill="#c5472c" />
+    <path d="M5 70 C28 52 48 60 62 66 S90 60 97 56 V90 H5 Z" fill="#2e6b50" />
+  </g>
+  <rect x="13" y="17" width="74" height="66" rx="17" ry="19" fill="none" stroke="#1d1914" stroke-width="2.4" />
+</svg>
+</body>
+</html>

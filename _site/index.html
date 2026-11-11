@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Little Kino">
+<meta name="theme-color" content="#1d1914">
+<title>Little Kino</title>
+<meta name="description" content="Not a cartoon, not a game: little worlds from old cartoons to visit together, a few minutes at a time.">
+<meta property="og:title" content="Little Kino">
+<meta property="og:description" content="Not a cartoon. Not a game. A little world to visit together, a few minutes at a time.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alchemication.github.io/re-kid/">
+<meta property="og:image" content="https://alchemication.github.io/re-kid/assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="assets/base.css">
+<!-- The site's front page, the screen: Little Kino's name, what it is in a
+     line, and the way to the grown-ups' page (the child needs no words: the
+     cards are the choice), then the worlds to pick from, all on one screen
+     with nothing to scroll, however many there are (up to six: the grid
+     below). Each card is a little page of its own (reksio.html, krtek.html),
+     shown in a frame so each game's scripts stay apart: the scene painted by
+     its game's own painting.js, the character drawn by its own code and
+     alive, the games' old-print look over it; a card stays dark until its
+     page says it is painted ('ready'), then fades in, so it never shows a
+     bare, modern picture first. A tap on one: he cheers, and his scene
+     opens. `main.py site` publishes it (the {{…}} in the head are filled in
+     then: only link previews read them); opened from disk, it finds the
+     games in worlds/. Colours and lettering: assets/base.css. -->
+<style>
+  html, body { margin: 0; height: 100%; background: var(--screen); overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  body { display: flex; flex-direction: column; height: 100dvh; padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); font-family: var(--face); }
+  header { flex: none; display: flex; align-items: baseline; justify-content: center; gap: 4px 0.9em; flex-wrap: wrap; padding: 2px 0 10px; }
+  h1 { font-size: clamp(26px, 6vmin, 44px); }
+  header p { margin: 0; font-size: clamp(13px, 2.8vmin, 19px); font-style: italic; color: var(--cream-dim); }
+  /* the grown-ups' door: words, so only someone who reads goes through */
+  header a { font-size: clamp(12px, 2.4vmin, 16px); color: var(--cream-dim); text-decoration-color: var(--rust); text-underline-offset: 3px; white-space: nowrap; }
+  header a:hover { color: var(--cream); }
+  /* The worlds, always on one screen: two side by side, three or four in two
+     rows, five or six in three columns; upright, in one column, or two from
+     four on. */
+  main { flex: 1; min-height: 0; display: grid; gap: 12px; grid-template-columns: repeat(2, 1fr); grid-auto-rows: 1fr; }
+  main:has(.card:nth-child(5)) { grid-template-columns: repeat(3, 1fr); }
+  @media (orientation: portrait) {
+    main { grid-template-columns: 1fr; }
+    main:has(.card:nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
+  }
+  .card { position: relative; overflow: hidden; border-radius: 6px; background: var(--screen-2); box-shadow: 0 0 0 3px var(--edge), 0 6px 22px rgba(0, 0, 0, 0.5); transition: transform 0.25s cubic-bezier(.3,1.5,.5,1); }
+  .card iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s ease-out; }
+  .card.ready iframe { opacity: 1; }
+  .card.going { transform: scale(0.97); }
+  .card a { position: absolute; inset: 0; cursor: pointer; }
+  @media (any-hover: hover) { .card:hover { transform: scale(1.012); } }
+</style>
+</head>
+<body>
+<header>
+  <h1 class="lettering on-screen" aria-label="Little Kino"><span>L</span><span>i</span><span>t</span><span>t</span><span>l</span><span>e</span><span class="gap"> </span><span>K</span><span>i</span><span>n</span><span>o</span></h1>
+  <p>not a cartoon, not a game: a little world to visit</p>
+  <a href="grown-ups.html">for grown-ups</a>
+</header>
+<main>
+  <div class="card"><iframe src="reksio.html" title="Reksio's yard" tabindex="-1"></iframe><a id="reksio" aria-label="Reksio's yard"></a></div>
+  <div class="card"><iframe src="krtek.html" title="Krtek's meadow" tabindex="-1"></iframe><a id="krtek" aria-label="Krtek's meadow"></a></div>
+</main>
+<script>
+  // Where the games are: on the site, <world>/<game>/; opened from disk, in the repo.
+  const LOCAL = location.protocol === 'file:'
+  const GAMES = {
+    reksio: LOCAL ? '../worlds/reksio/games/yard/game/index.html' : 'reksio/yard/',
+    krtek: LOCAL ? '../worlds/krtek/games/meadow/game/index.html' : 'krtek/meadow/',
+  }
+  // A card fades in once its page is painted (or after a while, whatever it has).
+  const READY_LATEST_MS = 4000
+  const cards = [...document.querySelectorAll('.card')]
+  addEventListener('message', (e) => {
+    if (e.data !== 'ready') return
+    for (const c of cards) if (c.querySelector('iframe').contentWindow === e.source) c.classList.add('ready')
+  })
+  setTimeout(() => { for (const c of cards) c.classList.add('ready') }, READY_LATEST_MS)
+  // A tap: he cheers (his card hears it), then his scene opens.
+  for (const [id, href] of Object.entries(GAMES)) {
+    const a = document.getElementById(id)
+    a.href = href
+    a.addEventListener('click', (e) => {
+      e.preventDefault()
+      a.parentElement.classList.add('going')
+      a.parentElement.querySelector('iframe').contentWindow.postMessage('cheer', '*')
+      setTimeout(() => { location.href = href }, 450)
+    })
+  }
+</script>
+</body>
+</html>

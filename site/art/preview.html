@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Little Kino's link preview</title>
+<link rel="stylesheet" href="../assets/base.css">
+<!-- The picture a shared link shows (1200 x 630): the name as the front page
+     letters it, and what it is by what it is not. Photographed by
+     `main.py site --art` (src/website.py render_art) into
+     assets/og-image.png; run it again when the name, the line or the
+     palette changes. -->
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--screen); font-family: var(--face); }
+  .set { position: absolute; inset: 44px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; border-radius: 70px / 80px; background: var(--screen-2); box-shadow: 0 0 0 8px var(--rust), inset 0 0 120px rgba(0, 0, 0, 0.55); }
+  .lettering { font-size: 190px; }
+  p { margin: 0; font-size: 46px; font-weight: 600; font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--cream-dim); }
+  s { text-decoration-color: var(--tomato); text-decoration-thickness: 6px; }
+  b { color: var(--mustard); font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="set">
+  <h1 class="lettering on-screen"><span>L</span><span>i</span><span>t</span><span>t</span><span>l</span><span>e</span><span class="gap"> </span><span>K</span><span>i</span><span>n</span><span>o</span></h1>
+  <p><s>a cartoon</s> &nbsp; <s>a game</s> &nbsp; <b>a little world to visit</b></p>
+</div>
+</body>
+</html>

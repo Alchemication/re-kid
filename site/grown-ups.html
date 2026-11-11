@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#efe2c2">
+<title>Little Kino, for grown-ups</title>
+<meta name="description" content="What Little Kino is (not a cartoon, not a game), how to play it with a small child, what it never does, and where it comes from.">
+<meta property="og:title" content="Little Kino, for grown-ups">
+<meta property="og:description" content="Not a cartoon. Not a game. A little world to visit together, a few minutes at a time.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{SITE_URL}}grown-ups.html">
+<meta property="og:image" content="{{SITE_URL}}assets/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="stylesheet" href="assets/base.css">
+<!-- The page for grown-ups, the printed programme beside the set: what
+     Little Kino is by what it is not (a cartoon, a game), Reksio to tap so
+     it is shown and not only said, how a visit goes, how to play, what it
+     never does, the worlds, where it comes from, the fan-work notice, and
+     the films' end card. Every {{…}} is a fact the page doesn't own, filled
+     in by `main.py site` (src/website.py) from the game's code or the world's
+     dossier, so the page can't say what they no longer do; the build fails
+     on one it can't fill. Read it built (_site/), not from here. Colours,
+     type and lettering: assets/base.css. -->
+<style>
+  .masthead { text-align: center; }
+  .masthead .lettering { font-size: clamp(48px, 13vw, 96px); }
+  .masthead .label { margin-top: 14px; }
+
+  /* what it is, by what it is not: two crossed out, one left standing */
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 34px 0 0; padding: 0; list-style: none; }
+  .three li { margin: 0; padding: 16px 16px 6px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper-2); }
+  .three h3 { margin: 0 0 8px; font-size: 22px; font-weight: 850; font-variation-settings: "SOFT" 100, "WONK" 1; }
+  .three .not h3 span { text-decoration: line-through; text-decoration-color: var(--tomato); text-decoration-thickness: 4px; }
+  .three .not { color: var(--ink-soft); border-color: var(--line); background: none; }
+  .three .is { background: var(--mustard); box-shadow: 5px 5px 0 var(--ink); }
+  .three p { font-size: 16px; line-height: 1.45; }
+  @media (max-width: 640px) { .three { grid-template-columns: 1fr; } }
+
+  /* the set: Reksio's card, alive, to tap */
+  .set { position: relative; margin: 22px 0 10px; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 22px / 26px; background: var(--screen); box-shadow: 0 0 0 5px var(--screen), 0 0 0 8px var(--rust), 6px 12px 0 8px var(--line); }
+  .set iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .set button { position: absolute; inset: 0; width: 100%; border: 0; background: none; cursor: pointer; }
+  .set button:focus-visible { outline: 4px solid var(--mustard); outline-offset: -8px; }
+  .heard { min-height: 1.6em; font-weight: 650; }
+
+  /* a visit, as a programme lists an evening */
+  .listing { margin: 18px 0; padding: 0; list-style: none; border-top: 2px solid var(--ink); }
+  .listing li { display: grid; grid-template-columns: 5.2em 1fr; gap: 12px; margin: 0; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .listing b { font-weight: 850; font-variant-numeric: tabular-nums; color: var(--bottle); }
+
+  .never { columns: 2; column-gap: 28px; }
+  @media (max-width: 640px) { .never { columns: 1; } }
+  .never li { break-inside: avoid; }
+
+  /* a world's entry */
+  .world { display: grid; grid-template-columns: 1fr auto; gap: 4px 18px; align-items: end; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .world h3 { margin: 0; font-size: 24px; font-weight: 850; font-variation-settings: "SOFT" 100, "WONK" 1; }
+  .world .small { margin: 2px 0 8px; }
+  .world p { margin: 0; grid-column: 1; }
+  .open { grid-column: 2; grid-row: 1 / span 3; align-self: center; padding: 10px 18px 11px; border: 2px solid var(--ink); border-radius: 999px; background: var(--bottle); color: var(--paper) !important; font-weight: 750; text-decoration: none; box-shadow: 3px 3px 0 var(--ink); white-space: nowrap; }
+  .open:hover { background: var(--tomato); }
+  @media (max-width: 520px) { .world { grid-template-columns: 1fr; } .open { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 10px; } }
+</style>
+</head>
+<body class="paper">
+<div class="sheet">
+  <a class="back" href="index.html">← back to the screen</a>
+
+  <header class="masthead">
+    <h1 class="lettering on-paper" aria-label="Little Kino"><span>L</span><span>i</span><span>t</span><span>t</span><span>l</span><span>e</span><span class="gap"> </span><span>K</span><span>i</span><span>n</span><span>o</span></h1>
+    <span class="label">The programme, for grown-ups</span>
+  </header>
+
+  <ul class="three">
+    <li class="not">
+      <h3><span>A cartoon</span></h3>
+      <p>You sit and watch. It runs the same way every time, whether anyone is looking or not.</p>
+    </li>
+    <li class="not">
+      <h3><span>A game</span></h3>
+      <p>You play to win. There are points and levels, something to lose, and a reason to come back tomorrow.</p>
+    </li>
+    <li class="is">
+      <h3>A little world</h3>
+      <p>You visit. A dog in his yard, a mole in his meadow, one short day. Touch something and he does something with it. Nothing to win, and it ends when he goes to sleep.</p>
+    </li>
+  </ul>
+
+  <section>
+    <span class="label">See for yourself</span>
+    <h2>This is Reksio. Tap him.</h2>
+    <div class="set">
+      <iframe src="reksio.html" title="Reksio in his yard" tabindex="-1"></iframe>
+      <button type="button" id="tap" aria-label="Tap Reksio"></button>
+    </div>
+    <p class="heard" id="heard" aria-live="polite"></p>
+    <p>That is all a visit is made of. A child touches the bowl, the tree, the bird or the dog himself, and he answers, a little differently each time. A child who would rather watch can watch: he gets on with his day by himself.</p>
+  </section>
+
+  <section>
+    <span class="label">A visit</span>
+    <h2>One day, about {{DAY_MINUTES}} minutes.</h2>
+    <ul class="listing">
+      <li><b>{{DAY_FROM}}:00</b><span>He wakes up and comes out.</span></li>
+      <li><b>All day</b><span>Tap a place and he goes there. Tap a thing and he tries it. The weather turns, visitors come and go, the sun crosses the sky.</span></li>
+      <li><b>{{DAY_TO}}:00</b><span>He is tired and goes to bed. That is the end.</span></li>
+    </ul>
+    <p>The day is the same length for everyone. A child who watches a snail the whole time gets as long as one who tries everything, and nothing is lost when it ends.</p>
+  </section>
+
+  <section>
+    <span class="label">How to play</span>
+    <h2>Together, in the daytime.</h2>
+    <ul>
+      <li><strong>Sit beside your child.</strong> There are no words on the screen, so the talking is yours: point, ask, laugh.</li>
+      <li><strong>Not before bed.</strong> His bedtime is the end of his day, not a way to settle a child. Doctors advise no screens in the hour before sleep.</li>
+      <li><strong>Turn the phone on its side.</strong> On an iPhone, add the front page to the Home Screen (Share, then Add to Home Screen) and it opens without the browser's bars.</li>
+      <li><strong>When it is over, it is over.</strong> After he falls asleep, taps do nothing. To start a new morning, hold the small sun in the bottom-left corner for {{HOLD_SECONDS}} seconds. That is a grown-up's job: a toddler's tap can't do it.</li>
+      <li><strong>Need to go?</strong> In Reksio's yard, hold his doghouse for {{HOLD_SECONDS}} seconds and the evening comes at once.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="label">House rules</span>
+    <h2>What it never does.</h2>
+    <ul class="never">
+      <li>No ads, no purchases, no accounts.</li>
+      <li>No analytics: nothing about your child's play is collected.</li>
+      <li>No scores, no losing, nothing to collect.</li>
+      <li>No streaks, and no reward for playing longer or coming back.</li>
+      <li>No countdowns and no hurry.</li>
+      <li>No "play again". It doesn't start over by itself.</li>
+      <li>No words to read.</li>
+      <li>No claim that it teaches anything.</li>
+    </ul>
+    <p>We read what doctors and researchers say about short screen play for toddlers before making this, and wrote down what follows from it. <a href="research.html">Read the research and our rules</a>.</p>
+  </section>
+
+  <section>
+    <span class="label">Now showing</span>
+    <h2>The worlds.</h2>
+    <div class="world">
+      <h3>Reksio's yard</h3>
+      <p class="small">After the {{reksio.country}} cartoon {{reksio.title}}, {{reksio.years}}, created by {{reksio.creator}}.</p>
+      <p>A dog, his doghouse, a bowl, a tree, the hens next door, and whatever the weather brings.</p>
+      <a class="open" href="reksio/yard/">Open the yard</a>
+    </div>
+    <div class="world">
+      <h3>Krtek's meadow</h3>
+      <p class="small">After the {{krtek.country}} cartoon {{krtek.title}} ({{krtek.title_en}}), {{krtek.years}}, created by {{krtek.creator}}.</p>
+      <p>A mole, his molehill, a spring and an old tree, and the friends and things that turn up.</p>
+      <a class="open" href="krtek/meadow/">Open the meadow</a>
+    </div>
+    <p class="small" style="margin-top:14px">There will be a few more, slowly. Never more than fit on one screen.</p>
+  </section>
+
+  <section>
+    <span class="label">Where it comes from</span>
+    <h2>Baja time.</h2>
+    <p>Little Kino is made by a dad for his son Eliot, who is three and calls it <em>baja time</em>. <em>Bajka</em> is what a Polish child calls a cartoon. These are the ones his dad grew up with, from the years when a cartoon was a few minutes long and then it was over.</p>
+    <p>Each world is researched first: what the films show, who made them, how they sound, with a source for every claim. Then one home scene is built from it. The characters are drawn in code after the films, not traced from them. The sounds and music are new, made with a generative model and picked by ear. The one exception is Reksio's bark, which is his own, from the films.</p>
+    <p>The code and the research are open: <a href="{{REPO_URL}}">{{REPO_URL}}</a>.</p>
+  </section>
+
+  <section>
+    <span class="label">Notice</span>
+    <h2>A fan's work.</h2>
+    <p>Little Kino is a fan project, made for love and not for money. It is not affiliated with or endorsed by the studios, the creators' families, or anyone else who holds rights in these cartoons.</p>
+    <p>{{reksio.title}} was created by {{reksio.creator}}; {{krtek.title}} by {{krtek.creator}}. The characters and the films belong to them and to those who hold their rights today. Nothing here is taken from the films except Reksio's bark.</p>
+    <p>If you hold rights in either and want something changed or taken down, <a href="{{REPO_URL}}/issues">open an issue</a> and we will do it.</p>
+  </section>
+
+  <div class="koniec">
+    <p class="lettering on-screen" aria-label="Koniec"><span>K</span><span>o</span><span>n</span><span>i</span><span>e</span><span>c</span></p>
+    <p>the end, as Reksio's films say it</p>
+  </div>
+</div>
+<script>
+  // A tap on the set: he cheers (his card hears it), and the page says what happened.
+  const HEARD = ['He heard you.', 'And again, he heard you.', 'Every tap gets an answer.']
+  let taps = 0
+  document.getElementById('tap').addEventListener('click', () => {
+    document.querySelector('.set iframe').contentWindow.postMessage('cheer', '*')
+    document.getElementById('heard').textContent = HEARD[Math.min(taps++, HEARD.length - 1)]
+  })
+</script>
+</body>
+</html>

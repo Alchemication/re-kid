@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#efe2c2">
+<title>Little Kino: our rules and the research</title>
+<meta name="description" content="How Little Kino's worlds should feel, what they must never do, and what doctors and researchers say about a few minutes of screen play for a toddler.">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="stylesheet" href="assets/base.css">
+<!-- The research page: the frame only. Its body is docs/DESIGN_PRINCIPLES.md,
+     rendered by `main.py site` (src/website.py) where {{RESEARCH_BODY}}
+     stands, so what a parent reads here is the rules the work follows, never
+     a second copy. Edit the doc, not this. Colours and type: assets/base.css. -->
+<style>
+  .note { padding: 12px 16px; border: 2px solid var(--ink); border-radius: 8px; background: var(--paper-2); font-size: 16px; }
+  .doc h1 { margin: 26px 0 10px; font-weight: 850; font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 144; font-size: clamp(34px, 7vw, 48px); line-height: 1.05; }
+  .doc h2 { margin: 44px 0 12px; padding-top: 20px; border-top: 3px double var(--line); }
+  .doc code { font-size: 0.85em; padding: 1px 4px; border-radius: 3px; background: var(--paper-2); overflow-wrap: anywhere; }
+  .doc a { overflow-wrap: anywhere; }
+</style>
+</head>
+<body class="paper">
+<div class="sheet">
+  <a class="back" href="grown-ups.html">← back to the programme</a>
+  <p class="note">This is the working document the worlds are built by, as it stands today. It says "game" where the site says "world", and names a few files; the rules and the research are what matter here.</p>
+  <article class="doc">
+{{RESEARCH_BODY}}
+  </article>
+  <div class="koniec">
+    <p class="lettering on-screen" aria-label="Koniec"><span>K</span><span>o</span><span>n</span><span>i</span><span>e</span><span>c</span></p>
+    <p>the end, as Reksio's films say it</p>
+  </div>
+</div>
+</body>
+</html>
