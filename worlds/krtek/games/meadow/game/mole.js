@@ -13,7 +13,7 @@
 // hands, eyes half shut: the cricket is playing). Which way: `view` ('front',
 // 'three' or 'side') and `facing` (1 right, -1 left).
 
-/* global Clock, Debug, Layout, MoleArt, Motion */
+/* global Clock, Debug, Layout, MoleArt, Motion, TunnelArt */
 /* exported Mole */
 const Mole = (() => {
   const SVG = 'http://www.w3.org/2000/svg'
@@ -25,7 +25,9 @@ const Mole = (() => {
   const DIG_IN = { depths: [55, 110, 160], strokes: 3, strokeMs: 95, jerkMs: 170 } // digging himself in out on the grass: sunk this far at each jerk (his waist, his shoulders, just his hairs), his hands paddling this many strokes before each
   const SCRATCH = { rubs: 3, rubMs: 150 } // scratching his head: rubs to and fro, each this long
   const SNAP_MS = 90 // pose to pose: how quickly he moves from one held pose to the next
-  const TUNNEL_MS_PER_UNIT = 0.9 // the bump of earth running under the grass
+  const TUNNEL_MS_PER_UNIT = 2.2 // tunnelling: slow enough to watch him crawl along it in the cutaway (tunnelart.js; Adam, 2026-11-11)
+  const TUNNEL_MIN_MS = 800 // the shortest tunnel takes this long
+  const TUNNEL_SHUT_MS = 250 // the ground closing over it again
   // His gaits, in scene units and ms: a walk with short quick steps, a bob and an arm swinging, and
   // on a long trip a run, longer and quicker, leaning forward (the films: he walks, sometimes runs low)
   const WALK = { step: 38, stepMs: 210, reach: 9, lift: 7, bounce: 5, swing: 22, lean: 0 }
@@ -72,6 +74,7 @@ const Mole = (() => {
   let views = null // moleart.js's three views
   let free = () => false // the meadow says when he is free to look about by himself
   let root, body, tilt, tunnel, inLayer, outLayer, carrySlot, hatSlot
+  let bump = null // the bump of earth over him as he tunnels
 
   const el = (tag, attrs = {}, parent) => {
     const e = document.createElementNS(SVG, tag)
@@ -395,24 +398,36 @@ const Mole = (() => {
     }
   }
 
-  /** Bumps of earth running under the grass from where he is to x, as he tunnels. */
-  async function tunnelTo(x) {
+  /** He tunnels from where he is to x: a bump of earth runs under the grass, and under it the ground
+   * opens to show him crawling along the tunnel as he digs it (tunnelart.js), `followers`
+   * ([{ draw(g), scale }]) coming behind him. */
+  async function tunnelTo(x, followers = []) {
     const from = state.x
-    const ms = Math.max(300, Math.abs(x - from) * TUNNEL_MS_PER_UNIT)
-    const bump = el('ellipse', { cx: 0, cy: 0, rx: 30, ry: 12, fill: '#6e4a24' }, tunnel)
+    const ms = Math.max(TUNNEL_MIN_MS, Math.abs(x - from) * TUNNEL_MS_PER_UNIT)
+    const cut = TunnelArt.cut(tunnel, from, x, followers)
+    bump = el('ellipse', { cx: 0, cy: 0, rx: 30, ry: 12, fill: '#6e4a24' }, tunnel)
     bump.style.transform = `translate(${from}px, ${Y + 14}px)`
     state.x = x // he is on his way there: a cut leaves him there
+    const along = { duration: ms, easing: 'ease-in-out' }
     try {
-      await Motion.endAt(bump, [{ transform: `translate(${from}px, ${Y + 14}px)` }, { transform: `translate(${x}px, ${Y + 14}px)` }], { duration: ms, easing: 'ease-in-out' })
+      await Promise.all([
+        Motion.endAt(bump, [{ transform: `translate(${from}px, ${Y + 14}px)` }, { transform: `translate(${x}px, ${Y + 14}px)` }], along),
+        Motion.endAt(cut.run, [{ transform: 'translateX(0px)' }, { transform: `translateX(${x - from}px)` }], along),
+        ...cut.dug.map((path) => Motion.endAt(path, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], along)),
+        Motion.endAt(cut.el, [{ opacity: 0 }, { opacity: 1 }], { duration: Math.min(300, ms / 3) }),
+      ])
+      await Motion.endAt(cut.el, [{ opacity: 1 }, { opacity: 0 }], { duration: TUNNEL_SHUT_MS })
     } finally {
       bump.remove()
+      bump = null
+      cut.el.remove()
     }
     root.style.transform = rootAt(x)
   }
 
   /** Where the bump of his tunnel is drawn now, or null when he isn't tunnelling (for whoever it passes under). */
   function burrowX() {
-    const b = tunnel.lastElementChild
+    const b = bump
     const t = b && getComputedStyle(b).transform
     return t && t !== 'none' ? new DOMMatrixReadOnly(t).e : null
   }

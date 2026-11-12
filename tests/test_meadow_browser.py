@@ -663,9 +663,11 @@ class TestMeadowMolehills:
         m.wait_free()
         self.tap_hill(m, 0)  # his home's, from afar
         m.wait("meadowGame.trace().includes(' burrows ')")
+        m.wait("document.querySelector('.cutaway .crawler')")  # his tunnel, seen
         m.wait_free()
         s = m.state()
         assert (s["x"], s["pose"], s["hills"]) == (900, "hill", 1), s
+        assert m.page.evaluate("!document.querySelector('.cutaway')")
         assert m.page.evaluate("meadowGame.trace().includes(' dig in ')"), (
             "he went down without digging himself in"
         )
@@ -1317,6 +1319,67 @@ class TestMeadowFox:
         m.do("use paint")
         m.wait("document.querySelector('.friend.fox') && Nest.alarmed", 40_000)
         return m
+
+    def test_the_friends_paint_each_other_stroke_by_stroke_with_a_brush(
+        self, meadow: callable
+    ) -> None:
+        """Adam, 2026-11-11: the paint appeared on them all at once, "super
+        rushed". A brush in the painter's hand, and the marks come with its
+        strokes; when the story is done nobody holds a brush and no mark is
+        left hidden."""
+        m = self.fox_at_the_nest(meadow)
+        for _ in range(8):  # on through the story, to the brushes
+            if m.page.evaluate("!!document.querySelector('.friend .brush')"):
+                break
+            m.wait(
+                "document.querySelector('.friend .brush') || !meadowGame.state().busy",
+                60_000,
+            )
+            if not m.page.evaluate("!!document.querySelector('.friend .brush')"):
+                m.do("use paint")
+        hidden = "[...document.querySelectorAll('.friend .paint *')].filter((e) => e.style.display === 'none').length"
+        m.wait("document.querySelector('.friend .brush')", 60_000)
+        m.wait(
+            f"document.querySelectorAll('.friend .paint path, .friend .paint circle').length && {hidden} > 0"
+        )
+        assert m.page.evaluate(
+            "[...document.querySelectorAll('.friend')].some((f) => f.querySelector('[data-face~=shut]')?.style.display === '')"
+        ), "the one being painted keeps a straight face"
+        m.wait("meadowGame.state().things.paint === 'done'", 90_000)
+        assert m.page.evaluate("!document.querySelector('.brush')"), "a brush was left"
+        assert m.page.evaluate(hidden) == 0, "some paint never showed"
+        m.wait_free()
+        m.assert_settled()
+
+    def test_the_glad_theme_waits_until_the_fox_cowers(self, meadow: callable) -> None:
+        """Adam, 2026-11-11: the happy theme began while the fox still stood
+        tall, as the friends climbed up; the trouble lifts once he cowers."""
+        m = self.fox_at_the_nest(meadow)
+        m.wait("meadowGame.state().things.paint === 'done'", 90_000)
+        trace = m.page.evaluate("meadowGame.trace()")
+        assert " fox cowed" in trace and " relieved " in trace, trace[-600:]
+        assert trace.index(" fox cowed") < trace.index(" relieved "), (
+            "the trouble was over before the fox was frightened"
+        )
+
+    def test_his_tunnel_is_seen_and_his_friends_follow_him_along_it(
+        self, meadow: callable
+    ) -> None:
+        """Adam, 2026-11-11: they went into the ground in one place and came
+        out in another. The ground opens on his tunnel, him crawling along
+        it, the hare and the mouse behind him on the way back."""
+        m = self.fox_at_the_nest(meadow)
+        m.wait("document.querySelector('.cutaway .crawler')", 60_000)
+        m.wait(
+            "document.querySelectorAll('.cutaway .tunnellers .head').length === 2",
+            60_000,
+        )
+        m.wait("meadowGame.state().things.paint === 'done'", 90_000)
+        assert m.page.evaluate("!document.querySelector('.cutaway')"), (
+            "the ground stayed open"
+        )
+        m.wait_free()
+        m.assert_settled()
 
     def test_tall_and_after_the_nest_until_the_monster_sends_him_off(
         self, meadow: callable

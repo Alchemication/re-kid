@@ -89,10 +89,13 @@ const MeadowBeds = (() => {
     unease: {
       bpm: BPM,
       bar(m, e, n, random) {
-        const low = TONIC - 12
+        // from E3 up, where a phone's or a laptop's speaker still sounds: an octave lower (E2, 82 Hz, under
+        // the bed's own 120 Hz cut) it played, but nobody heard it, and a tunnel dug under the fox was
+        // dead silent (Adam, 2026-11-11). As quiet as it was: only higher
+        const low = TONIC
         const out = [{ inst: 'harp', midi: low, at: 0, vol: 0.26 }, { inst: 'harp', midi: low - 1, at: 2, vol: 0.2 }]
-        if (n % 2 === 0) out.push({ inst: 'strings', midi: TONIC, at: 0, vol: 0.09 }, { inst: 'strings', midi: TONIC - 5, at: 0, vol: 0.06 }) // a bare fifth: no third, neither glad nor sad
-        if (n % 4 === 3 && random() < 0.5) out.push({ inst: 'clarinet', midi: TONIC, at: 1, vol: 0.09 }, { inst: 'clarinet', midi: TONIC - 1, at: 2.5, vol: 0.08 })
+        if (n % 2 === 0) out.push({ inst: 'strings', midi: TONIC + 12, at: 0, vol: 0.09 }, { inst: 'strings', midi: TONIC + 7, at: 0, vol: 0.06 }) // a bare fifth: no third, neither glad nor sad
+        if (n % 4 === 3 && random() < 0.5) out.push({ inst: 'clarinet', midi: TONIC + 12, at: 1, vol: 0.09 }, { inst: 'clarinet', midi: TONIC + 11, at: 2.5, vol: 0.08 })
         if (random() < e * 0.5) out.push({ inst: 'harp', midi: low + 7, at: 3, vol: 0.12 }) // a busy child: a little more
         return out
       },

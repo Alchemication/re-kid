@@ -70,18 +70,33 @@ sounds he has judged are in.
      her chick back, under the umbrella, over the fence and at the paint's
      goodbye. Paint now goes on their bodies only, and tins are carried in
      their hands ahead of the face (`friends.js` `BODY`, `HANDS`). Judge in
-     play: the faces at the size they are seen, the hare's striped body
-     (the film stripes his ears and face too), and the mole stood on the
-     hare's shoulders in the paint's totem (`HARE_TALL`, not looked at).
-     The hen has no entry in the dossier yet.
+     play: the faces at the size they are seen, the hare's stripes (body
+     and ears; the film stripes his face too), and the paint's totem, the
+     mole stood on the hare's head between his ears (`HARE_TALL`). How
+     the paint goes on (Adam, 2026-11-11: it looked rushed): the painter
+     holds a brush, the marks come with three strokes (`friends.js`
+     `STROKES`), the painted one squirms with eyes shut, and the hare
+     dabs the mole's spots. Judge the pace, and the mouse standing among
+     the tins while she is painted (`paint.js` `friendsPaint`).
+   - **Adam judges the tunnel seen, and the fox's music** (2026-11-11, from
+     his play of the paint story). Whenever he tunnels, the ground opens in
+     a cutaway and he crawls along the tunnel as he digs it, the hare and
+     the mouse behind him on the way back under the fox (`tunnelart.js`,
+     `mole.js` `tunnelTo`). It is slower so it can be watched
+     (`TUNNEL_MS_PER_UNIT` 0.9 to 2.2): judge the pace, the crawlers'
+     size (`paint.js` `CRAWL`), and how it looks under the umbrella, the
+     molehill tap and the bulldozer's pit, which use it too. Music, for
+     his ears: the glad theme now waits until the fox cowers (`paint.js`
+     `gone`); the uneasy bed plays an octave higher, as quiet as before
+     (`beds.js` `unease`: at E2 it was under what small speakers play, so
+     the tunnel was silent). The bulldozer has the same bed. If it is
+     still too quiet under the tunnel, it needs more notes or a sound for
+     the digging, which is his call.
    - **Adam judges the molehill tap** (built 2026-11-10, from a look over
      both games for cause and effect; `meadow.js` `burrow`): a tap on a
      molehill and he tunnels to it; out on the grass he digs himself in
      first and leaves a molehill there, so there are soon a few to send
-     him between; tapped in his own, he comes up in another. Judge: how
-     fast the bump runs (`TUNNEL_MS_PER_UNIT` in mole.js: 600 units in
-     about half a second, quick for a toddler to follow; the storm and the
-     paint use it too), and whether six molehills (`MAX_HILLS`) clutter
+     him between; tapped in his own, he comes up in another. Judge: the tunnel's pace (the item above), and whether six molehills (`MAX_HILLS`) clutter
      the meadow.
    - `TestMeadowOak::test_a_tap_on_it_peeks_a_new_way_each_time` failed once
      under load (2026-11-08) with one other, and not in four runs after:

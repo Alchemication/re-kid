@@ -61,3 +61,10 @@ test('trouble\'s bed: no flute and no birds, and quieter than the day\'s', () =>
   }
   assert.ok(loud('unease', 'trouble') < loud('meadow', 'day'))
 })
+
+test('trouble\'s bed can be heard on a small speaker: nothing under the D sharp below the takes\' E3', () => {
+  const random = seq(7)
+  for (let n = 0; n < 32; n++) {
+    for (const note of Beds.bar('unease', 'trouble', n % 2, n, random).notes) assert.ok(note.midi >= Beds.TONIC - 1, `${note.inst} at ${note.midi}`)
+  }
+})

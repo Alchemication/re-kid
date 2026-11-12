@@ -82,7 +82,7 @@ const FriendArt = (() => {
     el('path', { d: 'M14 -10 C40 -2 70 0 76 -16 C80 -30 62 -34 60 -22 C59 -16 66 -14 68 -19', fill: 'none', stroke: INK, 'stroke-width': 6, 'stroke-linecap': 'round' }, g)
     el('path', { d: 'M14 -10 C40 -2 70 0 76 -16 C80 -30 62 -34 60 -22 C59 -16 66 -14 68 -19', fill: 'none', stroke: c.dark, 'stroke-width': 3, 'stroke-linecap': 'round' }, g)
     el('ellipse', { cx: 10, cy: -3, rx: 13, ry: 5, fill: c.pink, ...thin }, g) // the far foot
-    el('path', { d: 'M-18 -6 C-30 -30 -20 -56 -4 -60 C14 -62 27 -40 24 -10 C22 2 -12 4 -18 -6 Z', fill: c.fur, ...line }, g)
+    el('path', { class: 'body', d: 'M-18 -6 C-30 -30 -20 -56 -4 -60 C14 -62 27 -40 24 -10 C22 2 -12 4 -18 -6 Z', fill: c.fur, ...line }, g) // .body: where paint can go (friends.js daub)
     el('path', { d: 'M-17 -12 C-24 -30 -17 -48 -7 -52 C0 -40 0 -14 -6 -3 C-11 -3 -15 -6 -17 -12 Z', fill: c.belly }, g)
     el('ellipse', { cx: -8, cy: -3, rx: 14, ry: 5.5, fill: c.pink, ...thin }, g)
     // an arm, held in front, a small pink hand
@@ -114,9 +114,9 @@ const FriendArt = (() => {
     el('path', { d: fluffy(40, -24, 13, 12, 9, 0.22), fill: c.pale, ...thin }, g) // his tail, a white puff
     el('ellipse', { cx: 22, cy: -7, rx: 24, ry: 8, fill: c.foot, ...line }, g) // the far foot
     // his back and chest, sitting up
-    el('path', { d: 'M-22 -12 C-36 -44 -30 -84 -12 -98 C6 -106 28 -96 36 -66 C44 -40 44 -14 30 -6 C14 0 -14 0 -22 -12 Z', fill: c.fur, ...line }, g)
+    el('path', { class: 'body', d: 'M-22 -12 C-36 -44 -30 -84 -12 -98 C6 -106 28 -96 36 -66 C44 -40 44 -14 30 -6 C14 0 -14 0 -22 -12 Z', fill: c.fur, ...line }, g)
     el('path', { d: 'M-24 -22 C-32 -46 -27 -76 -14 -90 C0 -84 6 -52 0 -24 C-4 -12 -18 -10 -24 -22 Z', fill: c.pale }, g)
-    el('path', { d: 'M4 -10 C-2 -34 12 -56 30 -52 C44 -48 48 -26 42 -12 C36 -2 10 -2 4 -10 Z', fill: c.fur, ...line }, g) // the haunch
+    el('path', { class: 'body', d: 'M4 -10 C-2 -34 12 -56 30 -52 C44 -48 48 -26 42 -12 C36 -2 10 -2 4 -10 Z', fill: c.fur, ...line }, g) // the haunch
     el('ellipse', { cx: -12, cy: -7, rx: 30, ry: 9, fill: c.foot, ...line }, g)
     el('path', { d: 'M-34 -9 l-6 0 M-32 -4 l-6 1', ...hair, 'stroke-width': 1.6 }, g) // toes
     // his arms, paws hanging at his chest
@@ -127,11 +127,11 @@ const FriendArt = (() => {
     const head = el('g', { class: 'head' }, g)
     const h = el('g', { transform: big(0, -104, 1.13) }, head) // a big head for the body, as the films draw their small animals
     // the far ear, bent over at its tip; the near one straight up
-    const far = el('g', { transform: 'rotate(16 16 -140)' }, h)
+    const far = el('g', { class: 'ear', 'data-stripes': '16 11 -156 -176', transform: 'rotate(16 16 -140)' }, h)
     el('path', { d: 'M4 -140 C0 -166 2 -188 8 -200 L26 -198 C30 -180 30 -160 28 -140 Z', fill: c.fur, ...line }, far)
     el('path', { d: 'M11 -146 C9 -166 11 -182 14 -192 L22 -191 C24 -176 23 -160 21 -146 Z', fill: c.dark }, far)
     el('path', { d: 'M8 -200 L26 -198 C40 -192 48 -178 46 -164 C32 -168 16 -184 8 -200 Z', fill: c.fur, ...line }, far)
-    const near = el('g', { transform: 'rotate(-8 -14 -140)' }, h)
+    const near = el('g', { class: 'ear', 'data-stripes': '-14 11 -160 -180 -200', transform: 'rotate(-8 -14 -140)' }, h)
     el('path', { d: 'M-27 -140 C-33 -180 -20 -224 -12 -226 C-4 -224 3 -180 -1 -140 Z', fill: c.fur, ...line }, near)
     el('path', { d: 'M-20 -146 C-22 -176 -16 -208 -12 -210 C-8 -206 -6 -176 -8 -146 Z', fill: c.dark }, near)
     el('path', { d: fluffy(-2, -108, 40, 31, 13, 0.24), fill: c.pale, ...thin }, h) // the ruff round his cheeks and chin
@@ -223,6 +223,18 @@ const FriendArt = (() => {
       feel(name) {
         wears = name
         show(name)
+      },
+      /** Stripes of `colour` across its ears too, given back (the hare, a tiger to his ear tips: Malířem 4:28): on the ears, so they nod with his head. */
+      stripeEars(el, colour) {
+        const made = []
+        for (const ear of inner.querySelectorAll('.ear')) {
+          const [cx, w, ...ys] = ear.dataset.stripes.split(' ').map(Number) // the ear's middle, its half-width at the bottom, where the stripes go
+          for (const [i, y] of ys.entries()) {
+            const half = w - i * 2.5
+            made.push(el('path', { class: 'paint', d: `M${cx - half} ${y} q${half} -5 ${half * 2} 0`, stroke: colour, 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' }, ear))
+          }
+        }
+        return made
       },
       /** A face for as long as `move` lasts (a shake of the head, glum), then the one worn before; also if a tap cuts the move short. */
       async during(name, move) {

@@ -89,10 +89,11 @@
   const ASIDE = 110 // back up, he steps this far aside from his molehill to let them out
   const REACTS = ['jump', 'peer', 'spin'] // what the fox does as the earth bumps along under his feet: each tunnel draws two
   const QUICK = 0.45 // coming back after a cut, or again, everyone hurries
-  const HARE_TALL = 150 // how high he stands on the hare's shoulders...
+  const HARE_TALL = 160 // how high he stands on the hare's head, between his ears...
   const MOLE_TALL = 190 // ...and the mouse on his
   const WASH_AT = Layout.SPRING - 40
   const GRIP = 14 // a tin is held this far up its side, in the hands of whoever carries it (friends.js HANDS)…
+  const CRAWL = { hare: 0.42, mouse: 0.78 } // how small each is drawn following him along his tunnel (tunnelart.js)
   const STACK_Y = 50 // …the second on top of the first
   const CARRY_MS = 3200 // carrying them off at the end
   const LOADS = [['mouse', [0]], ['hare', [1, DIP]]] // who carries which tins, in the order they come to them from the left (the hare two, stacked)
@@ -106,6 +107,7 @@
   let brought = false // the tins are down (or on their way, so a cut sets them down where they were going)
   let friends = { hare: null, mouse: null }
   let red = false // he fell in the tin
+  let cowed = false // the monster has frightened the fox small: the trouble is over
   let cutShort = false // picked up after a cut: the fox comes back and it carries on at once
   let told = 0 // how many times the story has ended
   let ending = null // how the last one ended: 'ran' or 'friends'
@@ -128,8 +130,45 @@
   /** One of the friends, from the painter's garden off to the right (n: how far behind). */
   const callIn = (kind, n) => cast.call(kind, offRight() + n * 90, -1)
 
-  /** Paint on one of the friends, as this play draws it. */
+  /** Paint on one of the friends at once, as this play draws it (they come painted, retold). */
   const daub = (f) => f.daub(PAINTED[f.kind].pattern, PAINTED[f.kind].colour)
+
+  /** A brush for `f`'s hand, its tip in `colour`, pointing the way it faces. */
+  function drawBrush(f, colour) {
+    const g = el('g', { class: 'brush', transform: `scale(${-f.face} 1)` })
+    el('path', { d: 'M8 8 L-22 -10', stroke: '#15140f', 'stroke-width': 6.5, 'stroke-linecap': 'round' }, g)
+    el('path', { d: 'M8 8 L-22 -10', stroke: '#b98a4e', 'stroke-width': 3.5, 'stroke-linecap': 'round' }, g)
+    el('path', { d: 'M-20 -15 L-36 -19 L-25 -6 Z', fill: colour, stroke: '#15140f', 'stroke-width': 2, 'stroke-linejoin': 'round' }, g)
+    return g
+  }
+
+  /** `f` with a brush in its hand for as long as `doing` lasts (also if a tap cuts it short). */
+  async function brushed(f, colour, doing) {
+    const brush = drawBrush(f, colour)
+    f.held.appendChild(brush)
+    try {
+      await doing()
+    } finally {
+      brush.remove()
+    }
+  }
+
+  /** One paints the other, as this play draws it: they turn to each other, and with each stroke of the
+   * brush some of the paint is on. The painted one squirms, eyes shut (it tickles), then is glad of it. */
+  async function paints(painter, other) {
+    const { pattern, colour } = PAINTED[other.kind]
+    painter.turn(other.x < painter.x ? -1 : 1)
+    other.turn(-painter.face)
+    other.feel('shut')
+    try {
+      await brushed(painter, colour, () => other.daub(pattern, colour, async () => {
+        Sound.swish()
+        await painter.bob(1)
+      }))
+    } finally {
+      other.feel('glad')
+    }
+  }
 
   /** A tin down in the grass at its place, to be tapped. */
   function setDown(i) {
@@ -223,7 +262,8 @@
       f.place(DOOR_NEAR) // along the tunnel, out of sight
     }
     if (!alive()) return
-    await Promise.all([Mole.tunnelTo(DOOR_NEAR), feels(back, alive)])
+    const behind = order.map((kind) => ({ draw: (g) => Friends.sketch(kind, g), scale: CRAWL[kind] })) // after him along the tunnel, in the order they went in
+    await Promise.all([Mole.tunnelTo(DOOR_NEAR, behind), feels(back, alive)])
     if (!alive()) return
     Sound.pop()
     await Mole.comeUp('hill')
@@ -327,9 +367,11 @@
     const { mouse } = friends
     await mouse.go(FOX_AT - 50, 1000)
     if (!alive()) return
-    Sound.swish()
-    fox.daub('spots', PAINTED.mouse.colour)
-    await mouse.bob(1)
+    await brushed(mouse, PAINTED.mouse.colour, async () => {
+      Sound.swish()
+      await mouse.bob(1)
+      fox.daub('spots', PAINTED.mouse.colour)
+    })
     if (!alive()) return
     fox.feel('laugh')
     Sound.say('giggle')
@@ -342,6 +384,7 @@
   /** The fox sneaks in for the nest, his shadow first: snickering and rubbing his paws, licking his lips,
    * then rearing up over it with a growl. The mole gasps, points, and gets a fright. */
   async function foxComes(alive) {
+    cowed = false
     Nest.fear(true) // the chicks see him coming
     if (!fox) {
       fox = cast.call('fox', Friends.offscreen(1, FOX_FROM), -1)
@@ -437,20 +480,24 @@
     if (!alive()) return
     if (!friends.hare) await tunnel(alive) // standing by since they brought the tins; after a cut, he fetches them again
     if (!alive()) return
-    await Promise.all([m().goTo(STACK_X), friends.hare.go(STACK_X - 130, pace(1800), 36), friends.mouse.go(STACK_X - 210, pace(1800))])
+    await Promise.all([m().goTo(STACK_X), friends.hare.go(STACK_X - 130, pace(1800), 36), friends.mouse.go(STACK_X - 250, pace(1800))]) // apart: room for a brush between them
     if (!alive()) return
-    friends.hare.turn(1) // towards the fox
-    friends.mouse.turn(1)
-    Sound.swish()
-    await friends.hare.bob(2)
+    const { hare, mouse } = friends
+    await paints(hare, mouse) // the hare first: he has the plan
     if (!alive()) return
-    daub(friends.mouse)
-    Sound.swish()
-    await friends.mouse.bob(2)
+    await paints(mouse, hare)
     if (!alive()) return
-    daub(friends.hare)
-    Sound.swish()
-    Mole.dots(PAINTED.mouse.colour)
+    hare.turn(1) // and him: a dab from the hare, who stands by him, and he is spotted
+    await brushed(hare, PAINTED.mouse.colour, async () => {
+      Sound.swish()
+      await hare.bob(1)
+      Mole.dots(PAINTED.mouse.colour)
+    })
+    if (!alive()) return
+    for (const f of [hare, mouse]) {
+      f.turn(1) // towards the fox
+      f.feel('calm')
+    }
     Sound.say('giggle')
   }
 
@@ -474,6 +521,8 @@
     if (!alive()) return
     await foxScared(alive)
     if (!alive()) return
+    cowed = true
+    Debug.trace('fox cowed')
     await foxRuns(alive)
     if (!alive()) return
     Sound.say('giggle')
@@ -587,7 +636,8 @@
     offer: 'helped',
     urgent: true, // a threat won't wait for a tap: he goes to see at once, as for the bulldozer (things.js)
     engageMs: 3000, // when it can't break off his play (still waking), he goes to see soon
-    trouble: [0, 5], // from the chicks' alarm and the fox's coming till the monster sends it off: the bed uneasy (things.js)
+    trouble: [0, 6], // from the chicks' alarm and the fox's coming till the monster has frightened him small: the bed uneasy (things.js)
+    gone: () => cowed, // the moment he cowers, the trouble is over: the glad theme then, not while he still looms (Adam, 2026-11-11)
     music: { 0: 'fox' }, // the fox: his sly motif (Music MOTIFS), then the effects lead; the monster sends it off (happy as the trouble lifts: things.js)
     appear,
     steps: [seen, bring, tumble, ghost, friendsPaint, monster, wash],

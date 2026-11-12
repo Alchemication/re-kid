@@ -97,7 +97,48 @@ const Friends = (() => {
   // what turns a kind's head (a bob nods it, a shake shakes it), where it isn't the usual: the tall
   // fox's neck, so a bob nods his head, not his whole body; and a kind's own moves
   const NECK = { fox: '-2px -266px', hedgehog: '-12px -28px', hen: '-14px -92px', hare: '0px -104px', mouse: '4px -56px', chick: '-2px -34px' } // where each one's head meets its body
-  const BODY = { mouse: [-18, 20, -54, -10], hare: [-26, 36, -92, -14] } // where paint goes on each: left, right, top, bottom of its body
+  const BODY = { mouse: [-30, 28, -56, -8], hare: [-36, 48, -94, -10] } // where paint goes on each: left, right, top, bottom of its body (cut at its outline, friendart.js `.body`)
+  const STROKES = 3 // a painter's strokes to paint someone: some of the marks come with each
+  let clips = 0 // how many have been painted, for each one's own clip
+
+  /** The marks of a pattern in `colour` for a kind's body, drawn into `marks`: the list of them, in the order they go on. */
+  function markOut(f, marks, { pattern, colour }) {
+    const line = { stroke: colour, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }
+    const [x0, x1, y0, y1] = BODY[f.kind] ?? [-40, 40, -96, -6]
+    const w = x1 - x0
+    const made = []
+    if (pattern === 'stripes') {
+      for (let y = y0 + 8; y < y1; y += 16) made.push(el('path', { d: `M${x0} ${y} q${w / 2} -8 ${w} 0`, ...line }, marks))
+      made.push(...(f.stripeEars?.(el, colour) ?? [])) // a tiger to his ear tips (the hare)
+    } else if (pattern === 'zigzags') for (let y = y0 + 4; y < y1 - 10; y += 22) made.push(el('path', { d: `M${x0} ${y}${` l${w / 8} 10 l${w / 8} -10`.repeat(4)}`, ...line }, marks))
+    else for (const [fx, fy] of [[0.3, 0.6], [0.7, 0.8], [0.75, 0.45], [0.45, 0.9], [0.3, 0.25], [0.55, 0.15]]) made.push(el('circle', { cx: x0 + fx * w, cy: y0 + fy * (y1 - y0), r: 6, fill: colour }, marks))
+    return made
+  }
+
+  /** Paint on a visitor: on its body up to its outline (friendart.js `.body`) and under its head. At
+   * once; or, given `stroke`, some of the marks after each of STROKES strokes. Cut short, it is painted
+   * all the same. */
+  async function painted(f, inner, head, paint, stroke) {
+    const marks = el('g', { class: 'paint' })
+    inner.insertBefore(marks, head.parentNode === inner ? head : null)
+    const shapes = [...inner.querySelectorAll('.body')]
+    if (shapes.length) {
+      const clip = el('clipPath', { id: `painted-${++clips}` }, marks)
+      for (const shape of shapes) clip.appendChild(shape.cloneNode())
+      marks.setAttribute('clip-path', `url(#${clip.id})`)
+    }
+    const made = markOut(f, marks, paint)
+    if (!stroke) return
+    for (const mark of made) mark.style.display = 'none'
+    try {
+      for (let i = 0; i < STROKES; i++) {
+        await stroke()
+        for (const mark of made.slice(Math.ceil((i * made.length) / STROKES), Math.ceil(((i + 1) * made.length) / STROKES))) mark.style.display = ''
+      }
+    } finally {
+      for (const mark of made) mark.style.display = ''
+    }
+  }
   const HANDS = { mouse: [46, 30], hare: [56, 54] } // where each holds what it carries: ahead of it (the way it faces) and up, clear of its face
   const MOVES = { fox: FoxArt.moves, hedgehog: HedgeArt.moves, mouse: FriendArt.moves, hare: FriendArt.moves, hen: FriendArt.moves }
 
@@ -191,16 +232,9 @@ const Friends = (() => {
       async droop() {
         await acted('glum', Motion.endAt(head, [{ transform: 'rotate(0deg) translateY(0px)' }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.3 }, { transform: 'rotate(10deg) translateY(16px)', offset: 0.7 }, { transform: 'rotate(0deg) translateY(0px)' }], { duration: 1400 }))
       },
-      /** Paint on it, in `colour`: 'stripes' (a tiger), 'zigzags' or 'spots'. */
-      daub(pattern, colour) {
-        const marks = el('g', { class: 'paint' }, inner)
-        const stroke = { stroke: colour, 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }
-        const [x0, x1, y0, y1] = BODY[kind] ?? [-40, 40, -96, -6] // on its body, never across its face
-        const w = x1 - x0
-        if (pattern === 'stripes') for (let y = y0 + 8; y < y1; y += 16) el('path', { d: `M${x0} ${y} q${w / 2} -8 ${w} 0`, ...stroke }, marks)
-        else if (pattern === 'zigzags') for (let y = y0 + 2; y < y1 - 10; y += 24) el('path', { d: `M${x0} ${y}${` l${w / 6} 10 l${w / 6} -10`.repeat(3)}`, ...stroke }, marks)
-        else for (const [fx, fy] of [[0.3, 0.6], [0.7, 0.8], [0.8, 0.45], [0.45, 0.9], [0.2, 0.25], [0.6, 0.15]]) el('circle', { cx: x0 + fx * w, cy: y0 + fy * (y1 - y0), r: 6, fill: colour }, marks)
-      },
+      /** Paint on it, in `colour`: 'stripes' (a tiger), 'zigzags' or 'spots'. At once; or, given `stroke`
+       * (the painter's move with the brush), a few marks after each of its strokes (painted, below). */
+      daub: (pattern, colour, stroke = null) => painted(f, inner, head, { pattern, colour }, stroke),
       /** Up onto someone's shoulders (dy) or back down (0). */
       async lift(dy, ms = 600) {
         await Motion.endAt(g, [{ transform: `translate(${f.x}px, ${Y - dy}px)` }], { duration: ms, easing: 'cubic-bezier(.3,1.4,.5,1)' })
@@ -256,5 +290,8 @@ const Friends = (() => {
     }
   }
 
-  return { setup, make, troupe, offscreen }
+  /** One of them drawn into `parent`, not a visitor: a small figure of it for a picture (crawling along his tunnel behind him). */
+  const sketch = (kind, parent) => void DRAW[kind](parent)
+
+  return { setup, make, troupe, offscreen, sketch }
 })()
